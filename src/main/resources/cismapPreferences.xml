@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : cismapPreferences.xml
+    Created on : 17. August 2005, 10:02
+    Author     : hell
+    Description:
+    Purpose of the document follows.
+-->
+
+<cismapPreferences>
+    <cismapGlobalPreferences 
+           animationDuration="750" 
+            errorRememberingTime="1000"
+            snappingEnabled="true" 
+            snappingPreviewEnabled="true" 
+            snappingRectSize="20" 
+            startMode="ZOOM"
+            panPerformanceBooster="true"
+            errorAbolitionTime="0"        
+            initial_x1="0"
+            initial_y1="0"
+            initial_x2="180"
+            initial_y2="83.6333923339844">
+    </cismapGlobalPreferences>
+    <cismapLayersPreferences>
+        <appFeatureLayer enabled="true" translucency="0.9" name="Ausgew\u00E4hltes Kassenzeichen"/>
+        <rasterLayers enabled="true">
+            <ogcWMS layerPosition="1" skip="false" enabled="true" translucency="1.0" name="Lala">
+                <![CDATA[
+                    http://www2.demis.nl/WMS/wms.asp?WMS=WorldMap&WMTVER=1.0.0&request=capabilities
+               ]]>
+               <layers>
+                    <layer name="Bathymetry" enabled="true"/>
+                    <layer name="Countries" enabled="false"/>
+                    <layer name="Topography" enabled="true"/>
+                    <layer name="Hillshading" enabled="true"/>
+                    <layer name="Waterbodies" enabled="true"/>
+               </layers>
+            </ogcWMS>
+            
+        </rasterLayers>
+        <featureLayers>
+        </featureLayers>
+    </cismapLayersPreferences>
+</cismapPreferences>

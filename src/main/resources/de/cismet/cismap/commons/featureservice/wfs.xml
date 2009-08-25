@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CismapWebFeatureService>
+    <CismapGetCapabilities>
+        <wfs:GetCapabilities service="WFS" xmlns:wfs="http://www.opengis.net/wfs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"/>
+    </CismapGetCapabilities>
+    
+    <CismapDescribeFeatureType>
+        <wfs:DescribeFeatureType version="1.1.0" service="WFS" xmlns:wfs="http://www.opengis.net/wfs" xmlns:app="http://www.deegree.org/app" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
+            <wfs:TypeName>$TYPENAME$</wfs:TypeName>
+        </wfs:DescribeFeatureType>
+    </CismapDescribeFeatureType>
+    
+    <CismapQuery><wfs:GetFeature version="1.1.0" outputFormat="text/xml; subtype=gml/3.1.1" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc"><wfs:Query xmlns:app="http://www.deegree.org/app" typeName="$TYPENAME$"><ogc:Filter><ogc:BBOX><ogc:PropertyName>$GMLPROPERTY$</ogc:PropertyName><cismapBoundingBoxAsGmlPlaceholder /></ogc:BBOX></ogc:Filter></wfs:Query></wfs:GetFeature></CismapQuery>
+</CismapWebFeatureService>

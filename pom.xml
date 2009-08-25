@@ -1,0 +1,64 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+     <parent>
+        <groupId>de.cismet.maven</groupId>
+        <artifactId>cismetParent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <groupId>de.cismet.commons</groupId>
+    <artifactId>cismapCommons</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>cismapCommons</name>    
+    <dependencies>       
+        <dependency>
+            <groupId>de.cismet.commons</groupId>
+            <artifactId>cismetGuiCommons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.umd</groupId>
+            <artifactId>piccolo</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.umd</groupId>
+            <artifactId>piccolox</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>de.cismet.custom</groupId>
+            <artifactId>cismetDeegree</artifactId>
+            <version>unknown</version>
+        </dependency>
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree</artifactId>
+            <version>unknown</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jgoodies</groupId>
+            <artifactId>looks</artifactId>
+            <version>2.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>calpa.html</groupId>
+            <artifactId>calpahtml</artifactId>
+            <version>2_04</version>
+        </dependency>
+        <dependency>
+            <groupId>bounce</groupId>
+            <artifactId>bounce</artifactId>
+            <version>0.14</version>
+        </dependency>
+    </dependencies>
+</project>
+
+
