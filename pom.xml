@@ -17,6 +17,12 @@
             <groupId>de.cismet.commons</groupId>
             <artifactId>cismetGuiCommons</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jdom</artifactId>
+                    <groupId>jdom</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>edu.umd</groupId>
@@ -58,7 +64,14 @@
             <artifactId>bounce</artifactId>
             <version>0.14</version>
         </dependency>
+        <dependency>
+            <groupId>de.cismet.todo</groupId>
+            <artifactId>jdom</artifactId>
+            <version>unknown</version>
+        </dependency>
     </dependencies>
 </project>
+
+
 
 
