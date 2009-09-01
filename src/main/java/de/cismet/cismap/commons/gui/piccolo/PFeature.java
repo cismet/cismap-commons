@@ -86,6 +86,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private static final String DIALOG_TEXT = "Aktion r\u00FCckg\u00E4ngig machen?";
     private static final String DIALOG_TITLE = "\u00DCberschneidung entdeckt";
+    private static final Color TRANSPARENT = new Color(255, 255, 255, 0);
     private Feature feature;
     private WorldToScreenTransform wtst;
     private double x_offset = 0.0d;
@@ -353,7 +354,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
 
         if (geom instanceof Point) {
-            setPathToPolyline(new float[]{xp[0],xp[0]},new float[]{yp[0],yp[0]});
+            setPathToPolyline(new float[]{xp[0], xp[0]}, new float[]{yp[0], yp[0]});
         } else if (geom instanceof LineString) {
             setPathToPolyline(xp, yp);
         }
@@ -1027,7 +1028,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     if (getViewer().isInGlueIdenticalPointsMode()) {
                         //Features suchen die identische Punkte haben
                         glueCoordinates = checkforGlueCoords(positionInArray);
-                        log.info("checkforGlueCoords() aufgerufen und "+glueCoordinates.keySet().size()+" gefunden" );
+                        log.info("checkforGlueCoords() aufgerufen und " + glueCoordinates.keySet().size() + " gefunden");
                     }
                     vetoPoint = aLocalPoint;
                     startX = getXp()[positionInArray];
@@ -2185,58 +2186,48 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             }
             if (p != null) {
-                if (selected) {
-                    Image sel = null;
-                    if (feature instanceof StyledFeature && ((StyledFeature) getFeature()).getPointAnnotationSymbol() != null) {
-                        //pi.setImage(((XStyledFeature)getFeature()).getSelectedPointAnnotationSymbol().getImage());
-                        final FeatureAnnotationSymbol symbolization = ((StyledFeature) getFeature()).getPointAnnotationSymbol();
-                        sel = symbolization.getImage();
-//                        if (sel==null){
-//                            sel=pushpinIco.getImage();
-//                        }
-                        final Image selectedImage = symbolization.getSelectedFeatureAnnotationSymbol();
-                        if (selectedImage != null) {
-                            sel = selectedImage;
-                        } else if (sel != null) {
-                            final Image old = sel;
-                            int inset = 10;
-                            sel = highlightImageAsSelected(sel, new Color(0.3f, 0.3f, 1.0f, 0.4f), new Color(0.2f, 0.2f, 1.0f, 0.8f), inset);
-                            if (sweetSelX < 0f) {
-                                sweetSelX = (sweetPureX * old.getWidth(null) + inset) / sel.getWidth(null);
-                                sweetSelY = (sweetPureY * old.getHeight(null) + inset) / sel.getHeight(null);
-                            }
-                            pi.setSweetSpotX(sweetSelX);
-                            pi.setSweetSpotY(sweetSelY);
-
-
-
-                            //p.addChild(new PImage(selectedImage));
-//                            this.addChild(new PImage(selectedImage));
-                            //ToDo don't draw the alpha chanel blue
-//                            BufferedImage tint = new BufferedImage(sel.getWidth(null), sel.getHeight(null), BufferedImage.TYPE_INT_RGB);
-//                            ((Graphics2D) tint.getGraphics()).drawImage(sel, 0, 0, null);
-//                            tinter.filter(tint, tint);
-//                            sel = tint;
+                Image iconImage = null;
+                if (feature instanceof StyledFeature && ((StyledFeature) getFeature()).getPointAnnotationSymbol() != null) {
+                    final FeatureAnnotationSymbol symbolization = ((StyledFeature) getFeature()).getPointAnnotationSymbol();
+                    //assign pure unselected image
+                    iconImage = symbolization.getImage();
+                    final Image selectedImage = symbolization.getSelectedFeatureAnnotationSymbol();
+                    if (selectedImage != null) {
+                        if (selected) {
+                            //assign pure selected image
+                            iconImage = selectedImage;
                         }
+                    } else if (iconImage != null) {
+                        final Image old = iconImage;
+                        int inset = 10;
+                        if (selected) {
+                            //assign unselected image with selection frame
+                            iconImage = highlightImageAsSelected(iconImage, new Color(0.3f, 0.3f, 1.0f, 0.4f), new Color(0.2f, 0.2f, 1.0f, 0.8f), inset);
+                        } else {
+                            //assign unselected image with invisible offset with size of the selection frame
+                            iconImage = highlightImageAsSelected(iconImage, TRANSPARENT, TRANSPARENT, inset);
+                        }
+                        //adjust sweetspot if necessary
+                        if (sweetSelX < 0f) {
+                            sweetSelX = (sweetPureX * old.getWidth(null) + inset) / iconImage.getWidth(null);
+                            sweetSelY = (sweetPureY * old.getHeight(null) + inset) / iconImage.getHeight(null);
+                        }
+                        pi.setSweetSpotX(sweetSelX);
+                        pi.setSweetSpotY(sweetSelY);
                     }
-                    if (sel == null) {
-                        sel = pushpinSelectedIco.getImage();
-                    }
-                    p.setImage(sel);
-                } else {
-                    Image im = null;
-                    if (feature instanceof StyledFeature && ((StyledFeature) getFeature()).getPointAnnotationSymbol() != null) {
-                        im = ((StyledFeature) getFeature()).getPointAnnotationSymbol().getImage();
-                        pi.setSweetSpotX(sweetPureX);
-                        pi.setSweetSpotY(sweetPureY);
-                    }
-                    if (im == null) {
-                        im = pushpinIco.getImage();
-                    }
-                    p.setImage(im);
                 }
+                //Fallback case: Pushpin icons
+                if (iconImage == null) {
+                    if (selected) {
+                        iconImage = pushpinSelectedIco.getImage();
+                    } else {
+                        iconImage = pushpinIco.getImage();
+                    }
+                }
+                p.setImage(iconImage);
+                //Necessary "evil" to refresh sweetspot
                 p.setScale(p.getScale());
-                
+
             }
 
 
@@ -2297,8 +2288,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         return selected;
     }
 
-    private Image highlightImageAsSelected(final Image toSelect, final Color colFill, final Color colEdge, final int insetSize) {
-        if (toSelect != null && colFill != null) {
+    private Image highlightImageAsSelected(final Image toSelect, Color colFill, Color colEdge, final int insetSize) {
+        if (colFill == null) {
+            colFill = TRANSPARENT;
+        }
+        if (colEdge == null) {
+            colEdge = TRANSPARENT;
+        }
+        if (toSelect != null) {
             final int doubleInset = 2 * insetSize;
             final BufferedImage tint = new BufferedImage(toSelect.getWidth(null) + doubleInset, toSelect.getHeight(null) + doubleInset, BufferedImage.TYPE_INT_ARGB);
             final Graphics2D g2d = (Graphics2D) tint.getGraphics();
