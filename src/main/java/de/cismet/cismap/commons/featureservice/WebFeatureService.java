@@ -179,7 +179,7 @@ public class WebFeatureService extends AbstractRetrievalService implements MapSe
         s.hostname = "http://zoidberg.cismet-intra.de:8081/deegree2/ogcwebservice";
         s.enabled = true;
         s.name = "ExampleSimpleWebfeatureLayer";
-        s.maxFeatureCount = 4000;
+        s.maxFeatureCount = 2900;
         s.setRenderingFeature(designer);
 
 
@@ -256,7 +256,7 @@ public class WebFeatureService extends AbstractRetrievalService implements MapSe
         setHostname(host);
         setAttributes(attributes);
         setEnabled(true);
-        maxFeatureCount = 3000;
+        maxFeatureCount = 2900;
         setRenderingFeature(createDefaultStyleFeature());
     }
 
