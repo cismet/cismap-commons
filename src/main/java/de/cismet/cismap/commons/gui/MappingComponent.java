@@ -3676,61 +3676,68 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                             }
                         }
 
-                        // after all features are computed do stuff on the EDT
-                        EventQueue.invokeLater(new Runnable() {
+                        if (requestIdentifier == e.getRequestIdentifier() && !isInterrupted()) {
+                            // after all features are computed do stuff on the EDT
+                            EventQueue.invokeLater(new Runnable() {
 
-                            public void run() {
-                                try {
-                                    log.debug("MappingComponentFeaturelistener.retrievalComplete()");
+                                public void run() {
+                                    try {
+                                        log.debug("MappingComponentFeaturelistener.retrievalComplete()");
 
-                                    // if it's a refresh, delete all previous features
-                                    if (e.isRefreshExisting()) {
-                                        parent.removeAllChildren();
-                                    }
-                                    Vector deleteFeatures = new Vector();
-                                    for (Object o : newFeatures) {
-                                        parent.addChild((PNode) o);
-                                    }
+                                        // if it's a refresh, delete all previous features
+                                        if (e.isRefreshExisting()) {
+                                            parent.removeAllChildren();
+                                        }
+                                        Vector deleteFeatures = new Vector();
+                                        for (Object o : newFeatures) {
+                                            parent.addChild((PNode) o);
+                                        }
 //                                    for (Object o : twins) { // TODO only nesseccary if style has changed
 //                                        ((PFeature) o).refreshDesign();
 //                                        log.debug("twin refresh");
 //                                    }
 
-                                    // set the prograssbar to full
-                                    ((RetrievalServiceLayer) featureService).setProgress(100);
-                                    fireActivityChanged();
+                                        // set the prograssbar to full
+                                        ((RetrievalServiceLayer) featureService).setProgress(100);
+                                        fireActivityChanged();
 
-                                    // repaint the featurelayer
-                                    parent.repaint();
+                                        // repaint the featurelayer
+                                        parent.repaint();
 
-                                    // remove stickyNode from all deletionCandidates and add
-                                    // each to the new deletefeature-collection
-                                    for (Object o : deletionCandidates) {
-                                        if (o instanceof PFeature) {
-                                            PNode p = ((PFeature) o).getPrimaryAnnotationNode();
-                                            if (p != null) {
-                                                removeStickyNode(p);
+                                        // remove stickyNode from all deletionCandidates and add
+                                        // each to the new deletefeature-collection
+                                        for (Object o : deletionCandidates) {
+                                            if (o instanceof PFeature) {
+                                                PNode p = ((PFeature) o).getPrimaryAnnotationNode();
+                                                if (p != null) {
+                                                    removeStickyNode(p);
+                                                }
+                                                deleteFeatures.add(o);
                                             }
-                                            deleteFeatures.add(o);
                                         }
+                                        log.debug("parentCount before:" + parent.getChildrenCount());
+                                        log.debug("deleteFeatures=" + deleteFeatures.size() + " :" + deleteFeatures);
+
+                                        // delete the features marked for deletion
+                                        parent.removeChildren(deleteFeatures);
+                                        log.debug("parentCount after:" + parent.getChildrenCount());
+                                        rescaleStickyNodes();
+
+                                    } catch (Exception exception) {
+                                        log.warn("Fehler beim Aufr\u00E4umen", exception);
                                     }
-                                    log.debug("parentCount before:" + parent.getChildrenCount());
-                                    log.debug("deleteFeatures=" + deleteFeatures.size() + " :" + deleteFeatures);
-
-                                    // delete the features marked for deletion
-                                    parent.removeChildren(deleteFeatures);
-                                    log.debug("parentCount after:" + parent.getChildrenCount());
-                                    rescaleStickyNodes();
-
-                                } catch (Exception exception) {
-                                    log.warn("Fehler beim Aufr\u00E4umen", exception);
                                 }
-                            }
-                        });
+                            });
+                        }
+                        else {
+                            log.info("parallel call");
+                        }
                     }
                 };
                 completionThread.setPriority(Thread.NORM_PRIORITY);
-                completionThread.start();
+                if (requestIdentifier == e.getRequestIdentifier()){
+                    completionThread.start();
+                }
             }
             fireActivityChanged();
         }
