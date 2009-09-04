@@ -10,5 +10,5 @@
         </wfs:DescribeFeatureType>
     </CismapDescribeFeatureType>
     
-    <CismapQuery><wfs:GetFeature version="1.1.0" outputFormat="text/xml; subtype=gml/3.1.1" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc"><wfs:Query xmlns:app="http://www.deegree.org/app" typeName="$TYPENAME$"><ogc:Filter><ogc:BBOX><ogc:PropertyName>$GMLPROPERTY$</ogc:PropertyName><cismapBoundingBoxAsGmlPlaceholder /></ogc:BBOX></ogc:Filter></wfs:Query></wfs:GetFeature></CismapQuery>
+    <CismapQuery><wfs:GetFeature version="1.1.0" outputFormat="text/xml; subtype=gml/3.1.1" xmlns:wfs="http://www.opengis.net/wfs" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" maxFeatures="3000"><wfs:Query xmlns:app="http://www.deegree.org/app" typeName="$TYPENAME$"><ogc:Filter><ogc:BBOX><ogc:PropertyName>$GMLPROPERTY$</ogc:PropertyName><cismapBoundingBoxAsGmlPlaceholder /></ogc:BBOX></ogc:Filter></wfs:Query></wfs:GetFeature></CismapQuery>
 </CismapWebFeatureService>
