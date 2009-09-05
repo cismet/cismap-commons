@@ -1,22 +1,33 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-     <parent>
-        <groupId>de.cismet.maven</groupId>
-        <artifactId>cismetParent</artifactId>
+
+    <parent>
+        <groupId>de.cismet</groupId>
+        <artifactId>cismet-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
+
     <groupId>de.cismet.commons</groupId>
-    <artifactId>cismapCommons</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>cismap-commons</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>cismapCommons</name>    
-    <dependencies>       
+    <packaging>jar</packaging>
+
+    <name>cismap Commons</name>
+    <description>This project contains various tools to enable geo-specific within Java applications</description>
+
+    <dependencies>
         <dependency>
             <groupId>de.cismet.commons</groupId>
-            <artifactId>cismetGuiCommons</artifactId>
-            <version>1.0-SNAPSHOT</version>           
+            <artifactId>cismet-gui-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jdom</artifactId>
+                    <groupId>jdom</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>edu.umd</groupId>
@@ -30,8 +41,8 @@
         </dependency>
         <dependency>
             <groupId>de.cismet.custom</groupId>
-            <artifactId>cismetDeegree</artifactId>
-            <version>unknown</version>
+            <artifactId>cismet-deegree</artifactId>
+            <version>0.unknown</version>
         </dependency>
         <dependency>
             <groupId>org.deegree</groupId>
@@ -59,6 +70,10 @@
             <version>0.14</version>
         </dependency>       
     </dependencies>
+
+    <build>
+        <finalName>cismapCommons</finalName>
+    </build>
 </project>
 
 
