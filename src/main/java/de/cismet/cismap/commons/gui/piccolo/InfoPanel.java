@@ -5,6 +5,7 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
+import de.cismet.tools.CismetThreadPool;
 import edu.umd.cs.piccolo.PNode;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -54,13 +55,14 @@ public class InfoPanel extends JPanel {
                     }
 
                     public void componentResized(ComponentEvent e) {
-                        Thread t = new Thread(new Runnable() {
+                        //TODO: calling revalidate outside the EDT looks like an error!
+                        Runnable t = new Runnable() {
 
                             public void run() {
                                 revalidate();
                             }
-                        });
-                        t.start();
+                        };
+                        CismetThreadPool.execute(t);
                         pSwing.reshape();
                     //pNodeParent.repaint();
                     //pfeature.ensureFullVisibility();

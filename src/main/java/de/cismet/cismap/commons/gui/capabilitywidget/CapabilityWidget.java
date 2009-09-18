@@ -53,6 +53,7 @@ import de.cismet.security.WSSPasswordDialog;
 import de.cismet.security.WebAccessManager;
 import de.cismet.security.exceptions.RequestFailedException;
 import de.cismet.security.handler.WSSAccessHandler;
+import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.gui.StaticSwingTools;
 
@@ -684,7 +685,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
      */
     private void addOGCWMSCapabilitiesTree(final String link, final JComponent comp, final boolean interactive, final String subparent) {
         log.debug("addOGCWMSCapabilitiesTree()");
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
 
             @Override
             public void run() {
@@ -772,13 +773,12 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 
     public void addOGCCapabilitiesTree(final String link, final JComponent comp, final boolean interactive) {
         log.debug("addOGCCapabilitiesTree()");
-        Thread t = new Thread() {
+        Runnable r = new Runnable() {
 
             @Override
             public void run() {
@@ -964,9 +964,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
             }
         };
 
-        t.setPriority(Thread.NORM_PRIORITY);
-
-        t.start();
+        CismetThreadPool.execute(r);
     }
 
     /**
@@ -980,7 +978,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
             final JComponent comp,
             final boolean interactive) {
         log.debug("addOGCWFSCapabilitiesTree()");
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
 
             @Override
             public void run() {
@@ -1079,8 +1077,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
     /**
      * Invoked when the target of the listener has changed its state.

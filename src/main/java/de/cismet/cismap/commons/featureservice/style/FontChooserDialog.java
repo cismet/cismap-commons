@@ -6,6 +6,7 @@
 
 package de.cismet.cismap.commons.featureservice.style;
 
+import de.cismet.tools.CismetThreadPool;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -56,7 +57,7 @@ public class FontChooserDialog extends JDialog {
      * set it.
      */
     protected void previewFont() {
-        Thread t = new Thread(new Runnable() {
+        Runnable t = new Runnable() {
             public void run() {
                 resultName = (String) lstFontName.getSelectedValue();
                 String resultSizeName = (String) lstFontSize.getSelectedValue();
@@ -77,8 +78,8 @@ public class FontChooserDialog extends JDialog {
                     }
                 });
             }
-        });
-        t.start();
+        };
+        CismetThreadPool.execute(t);
     }
 
     /** Retrieve the selected font name. */

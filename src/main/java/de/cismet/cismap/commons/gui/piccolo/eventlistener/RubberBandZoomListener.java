@@ -7,6 +7,7 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.CismetThreadPool;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
 
@@ -103,8 +104,7 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
                         ((MappingComponent) e.getComponent()).queryServices();
                     }
                 };
-                zoomThread.setPriority(Thread.NORM_PRIORITY);
-                zoomThread.start();
+                CismetThreadPool.execute(zoomThread);
             }
         //log.fatal("Breite src:"+((MappingComponent)e.getComponent()).getWtst().getSourceRect().getWidth());
         }

@@ -61,6 +61,7 @@ import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupp
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.security.AccessHandler;
 import de.cismet.security.WebAccessManager;
+import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.StaticXMLTools;
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
@@ -719,7 +720,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 //Zuerst werden alle Capabilities geladen und in eine HashMap gesteckt
                 //Ist das Laden beednet wird das dem Barrier durch ein await() gesagt
                 for (final String link : links) {
-                    Thread retrieval = new Thread() {
+                    Runnable retrieval = new Runnable() {
 
                         @Override
                         public void run() {
@@ -798,8 +799,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                             }
                         }
                     };
-                    retrieval.setPriority(Thread.NORM_PRIORITY);
-                    retrieval.start();
+                    CismetThreadPool.execute(retrieval);
                 }
 //</editor-fold>
             } else {

@@ -39,6 +39,7 @@ import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
 
 import edu.umd.cs.piccolo.PNode;
@@ -375,7 +376,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
     }
     
     public void retrievalError(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        Thread t=new Thread(new Runnable(){
+        Runnable t=new Runnable(){
             public void run() {
                 if (getLayer().isEnabled()) {
                     if (e.getRetrievedObject() instanceof Image) {
@@ -456,9 +457,8 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
                 }
             }
             
-        });
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        };
+        CismetThreadPool.execute(t);
         //prbLayer.setForeground(new Color(255,0,0));
     }
     

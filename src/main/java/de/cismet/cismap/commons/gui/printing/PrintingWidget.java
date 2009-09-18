@@ -12,6 +12,7 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
+import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.gui.Static2DTools;
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
@@ -77,15 +78,14 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     /** Creates new form PrintingWidget */
     public PrintingWidget(final boolean modal, final MappingComponent mappingComponent) {
         super(StaticSwingTools.getParentFrame(mappingComponent), modal);
-        Thread t = new Thread() {
+        Runnable run  = new Runnable() {
 
             @Override
             public void run() {
                 pdfWait = new PDFCreatingWaitDialog(StaticSwingTools.getParentFrame(mappingComponent), true);
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(run);
         this.mappingComponent = mappingComponent;
         initComponents();
         panDesc.setBackground(new Color(216, 228, 248));
@@ -400,7 +400,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     }//GEN-LAST:event_cmdCancelActionPerformed
 
     private void cmdOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
-        Thread t = new Thread() {
+        Runnable run = new Runnable(){
 
             @Override
             public void run() {
@@ -498,8 +498,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(run);
         dispose();
     }//GEN-LAST:event_cmdOkActionPerformed
     

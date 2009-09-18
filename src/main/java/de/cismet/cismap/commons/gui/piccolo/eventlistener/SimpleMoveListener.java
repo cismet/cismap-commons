@@ -17,6 +17,7 @@ import de.cismet.cismap.commons.gui.piccolo.PHandle;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 import de.cismet.math.geometry.StaticGeometryFunctions;
+import de.cismet.tools.CismetThreadPool;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
@@ -70,7 +71,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
 
     @Override
     public void mouseMoved(final PInputEvent event) {
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
             
             @Override
             public void run() {
@@ -159,8 +160,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                 handleHighlightingStuff(event);
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 
     /**

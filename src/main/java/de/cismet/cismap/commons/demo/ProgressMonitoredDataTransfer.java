@@ -1,4 +1,5 @@
 package de.cismet.cismap.commons.demo;
+import de.cismet.tools.CismetThreadPool;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -57,7 +58,7 @@ public class ProgressMonitoredDataTransfer
         done = false;
         closeWhenDone = close;
         current = 0;
-        mythread.start();
+        CismetThreadPool.execute(mythread);
         mytimer.start();
     }
 

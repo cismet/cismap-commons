@@ -101,6 +101,7 @@ import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDebuggingTools;
 import de.cismet.tools.collections.MultiMap;
@@ -1098,7 +1099,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         log.info("setMappingModel");
         mappingModel = mm;
         currentBoundingBox = mm.getInitialBoundingBox();
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
 
             @Override
             public void run() {
@@ -1161,8 +1162,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 log.debug("Set Mapping Modell done");
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+       CismetThreadPool.execute(t);
     }
 
     /**
@@ -1354,13 +1354,13 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      */
     private void queryServicesWithoutHistory(final boolean forced) {
         if (!locked) {
-            Thread t = new Thread() {
+            Runnable t = new Runnable() {
 
                 @Override
                 public void run() {
                     while (getAnimating()) {
                         try {
-                            sleep(50);
+                            Thread.sleep(50);
                         } catch (Exception doNothing) {
                         }
                     }
@@ -1389,8 +1389,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     }
                 }
             };
-            t.setPriority(Thread.NORM_PRIORITY);
-            t.start();
+            CismetThreadPool.execute(t);
         }
     }
 
@@ -1402,13 +1401,13 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * @param rl
      */
     public void queryServicesIndependentFromMap(final int width, final int height, final BoundingBox bb, final RetrievalListener rl) {
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
 
             @Override
             public void run() {
                 while (getAnimating()) {
                     try {
-                        sleep(50);
+                        Thread.sleep(50);
                     } catch (Exception doNothing) {
                     }
                 }
@@ -1455,8 +1454,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 
     /**
@@ -1510,13 +1508,13 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             //log.debug("this.currentBoundingBox:"+this.currentBoundingBox);
             //If the PCanvas is in animation state, there should be a pre information about the
             //aimed new bounds
-            Thread handle = new Thread() {
+            Runnable handle = new Runnable() {
 
                 @Override
                 public void run() {
                     while (getAnimating()) {
                         try {
-                            sleep(50);
+                            Thread.sleep(50);
                         } catch (Exception e) {
                         }
                     }
@@ -1527,8 +1525,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     rs.retrieve(forced);
                 }
             };
-            handle.setPriority(Thread.NORM_PRIORITY);
-            handle.start();
+            CismetThreadPool.execute(handle);
         }
     }
 //former synchronized method
@@ -1893,7 +1890,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * @param features array with features to add
      */
     public void addFeaturesToMap(final Feature[] features) {
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
 
             @Override
             public void run() {
@@ -1945,7 +1942,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 });
             }
         };
-        t.start();
+        CismetThreadPool.execute(t);
 
         //check whether the feature has a rasterSupportLayer or not
         for (Feature f : features) {
@@ -2263,7 +2260,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         // are there features selected?
         if (featureCollection.getSelectedFeatures().size() > 0) {
             // DANGER Mehrfachzeichnen von Handles durch parallelen Aufruf
-            Thread handle = new Thread() {
+            Runnable handle = new Runnable() {
 
                 @Override
                 public void run() {
@@ -2276,7 +2273,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     });
                     while (getAnimating() && waitTillAllAnimationsAreComplete) {
                         try {
-                            sleep(10);
+                            Thread.sleep(10);
                         } catch (Exception e) {
                             log.warn("Unterbrechung bei getAnimating()", e);
                         }
@@ -2316,9 +2313,8 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     }
                 }
             };
-            handle.setPriority(Thread.NORM_PRIORITY);
             log.debug("showHandles", new CurrentStackTrace());
-            handle.start();
+            CismetThreadPool.execute(handle);
         } else {
             // alle bisherigen Handles entfernen
             EventQueue.invokeLater(new Runnable() {
@@ -3144,13 +3140,13 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 log.fatal("gotoBoundingBox: Problem :-( mit getViewTransform");
             }
             showHandles(true);
-            Thread handle = new Thread() {
+            Runnable handle = new Runnable() {
 
                 @Override
                 public void run() {
                     while (getAnimating()) {
                         try {
-                            sleep(10);
+                            Thread.sleep(10);
                         } catch (Exception e) {
                             log.warn("Unterbrechung bei getAnimating()", e);
                         }
@@ -3172,8 +3168,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
                 }
             };
-            handle.setPriority(Thread.NORM_PRIORITY);
-            handle.start();
+            CismetThreadPool.execute(handle);
         } else {
             log.warn("Seltsam: die BoundingBox war null", new CurrentStackTrace());
         }
@@ -3736,7 +3731,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 };
                 completionThread.setPriority(Thread.NORM_PRIORITY);
                 if (requestIdentifier == e.getRequestIdentifier()){
-                    completionThread.start();
+                    CismetThreadPool.execute(completionThread);
                 }
             }
             fireActivityChanged();

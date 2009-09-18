@@ -44,6 +44,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.gui.StaticSwingTools;
 import edu.umd.cs.piccolo.PNode;
 import java.awt.BasicStroke;
@@ -249,7 +250,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2) {
-                    Thread t = new Thread(new Runnable() {
+                    Runnable t = new Runnable() {
 
                         @Override
                         public void run() {
@@ -292,8 +293,8 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                                 }
                             }
                         }
-                    });
-                    t.start();
+                    };
+                    CismetThreadPool.execute(t);
                 }
             }
 

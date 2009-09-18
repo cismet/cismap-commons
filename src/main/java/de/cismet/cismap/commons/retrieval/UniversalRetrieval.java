@@ -34,6 +34,7 @@
 
 package de.cismet.cismap.commons.retrieval;
 
+import de.cismet.tools.CismetThreadPool;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.ImageObserver;
@@ -67,8 +68,7 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
     
     public void retrieve(boolean forced) {
         RetrievalThread rt=new RetrievalThread();
-        rt.setPriority(Thread.NORM_PRIORITY);
-        rt.start();
+        CismetThreadPool.execute(rt);
     }
 
     public void retrievalStarted(RetrievalEvent e) {

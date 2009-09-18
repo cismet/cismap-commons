@@ -37,6 +37,7 @@ import de.cismet.cismap.commons.features.InputEventAwareFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+import de.cismet.tools.CismetThreadPool;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import java.util.LinkedList;
@@ -137,7 +138,7 @@ public class CustomFeatureActionListener extends PBasicInputEventHandler {
     @Override
     public void mouseClicked(final PInputEvent event) {
         super.mouseClicked(event);
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
             public void run() {
                 LinkedList l = PFeatureTools.getAllValidObjectsUnderPointer(event, validClasses);
                 for (Object o : l) {
@@ -150,14 +151,13 @@ public class CustomFeatureActionListener extends PBasicInputEventHandler {
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 
     @Override
     public void mouseDragged(final PInputEvent event) {
         super.mouseDragged(event);
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
             public void run() {
                 LinkedList l = PFeatureTools.getAllValidObjectsUnderPointer(event, validClasses);
                 for (Object o : l) {
@@ -170,14 +170,13 @@ public class CustomFeatureActionListener extends PBasicInputEventHandler {
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 
     @Override
     public void mouseEntered(final PInputEvent event) {
         super.mouseEntered(event);
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
             public void run() {
                 LinkedList l = PFeatureTools.getAllValidObjectsUnderPointer(event, validClasses);
                 for (Object o : l) {
@@ -190,14 +189,13 @@ public class CustomFeatureActionListener extends PBasicInputEventHandler {
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 
     @Override
     public void mouseExited(final PInputEvent event) {
         super.mouseExited(event);
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
             public void run() {
                 LinkedList l = PFeatureTools.getAllValidObjectsUnderPointer(event, validClasses);
                 for (Object o : l) {
@@ -210,14 +208,13 @@ public class CustomFeatureActionListener extends PBasicInputEventHandler {
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 
     @Override
     public void mouseMoved(final PInputEvent event) {
         super.mouseMoved(event);
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
             public void run() {
                 LinkedList l = PFeatureTools.getAllValidObjectsUnderPointer(event, validClasses);
                 for (Object o : l) {
@@ -230,14 +227,13 @@ public class CustomFeatureActionListener extends PBasicInputEventHandler {
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 
     @Override
     public void mousePressed(final PInputEvent event) {
         super.mousePressed(event);
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
             public void run() {
                 LinkedList l = PFeatureTools.getAllValidObjectsUnderPointer(event, validClasses);
                 for (Object o : l) {
@@ -250,14 +246,13 @@ public class CustomFeatureActionListener extends PBasicInputEventHandler {
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 
     @Override
     public void mouseReleased(final PInputEvent event) {
         super.mouseReleased(event);
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
             public void run() {
                 LinkedList l = PFeatureTools.getAllValidObjectsUnderPointer(event, validClasses);
                 for (Object o : l) {
@@ -270,14 +265,13 @@ public class CustomFeatureActionListener extends PBasicInputEventHandler {
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 
     @Override
     public void mouseWheelRotated(final PInputEvent event) {
         super.mouseWheelRotated(event);
-        Thread t = new Thread() {
+        Runnable t = new Runnable() {
             public void run() {
                 LinkedList l = PFeatureTools.getAllValidObjectsUnderPointer(event, validClasses);
                 for (Object o : l) {
@@ -290,7 +284,6 @@ public class CustomFeatureActionListener extends PBasicInputEventHandler {
                 }
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
 }

@@ -10,6 +10,7 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.CismetThreadPool;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
@@ -88,8 +89,7 @@ public class KeyboardListener extends PBasicInputEventHandler {
                         viewer.queryServices();
                     }
                 };
-                refreshThread.setPriority(Thread.NORM_PRIORITY);
-                refreshThread.start();
+                CismetThreadPool.execute(refreshThread);
             //log.fatal("Breite src:"+((MappingComponent)e.getComponent()).getWtst().getSourceRect().getWidth());
             }
         } catch (Exception ex) {
@@ -144,7 +144,7 @@ public class KeyboardListener extends PBasicInputEventHandler {
                     }
                 };
                 refreshThread.setPriority(Thread.NORM_PRIORITY);
-                refreshThread.start();
+                CismetThreadPool.execute(refreshThread);
             //log.fatal("Breite src:"+((MappingComponent)e.getComponent()).getWtst().getSourceRect().getWidth());
             }
         } catch (Exception ex) {

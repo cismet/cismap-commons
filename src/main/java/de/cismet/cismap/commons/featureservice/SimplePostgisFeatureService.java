@@ -43,6 +43,7 @@ import de.cismet.cismap.commons.rasterservice.FeatureMapService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.ConnectionInfo;
 import edu.umd.cs.piccolo.PNode;
 import java.awt.Color;
@@ -215,7 +216,7 @@ public class SimplePostgisFeatureService extends AbstractRetrievalService implem
         }
         fr=new FeatureRetrieval();
         fr.setPriority(Thread.NORM_PRIORITY);
-        fr.start();
+        CismetThreadPool.execute(fr);
     }
     
     public boolean isEnabled() {

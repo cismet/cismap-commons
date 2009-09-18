@@ -13,6 +13,7 @@ import de.cismet.cismap.commons.features.FeatureWithId;
 import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.featureservice.WFSOperator;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 import org.bounce.text.LineNumberMargin;
 import java.awt.Color;
@@ -436,7 +437,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      */
     private void writeHistory(final File f, final boolean onClose) {
         log.debug("writeHistory(" + f + ")");
-        Thread write = new Thread(new Runnable() {
+        Runnable write = new Runnable() {
             public void run() {
                 FileWriter writer = null;
                 try {
@@ -475,8 +476,8 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     } catch (Exception skip) {}
                 }
             }
-        });
-        write.start();
+        };
+        CismetThreadPool.execute(write);
     }
 
     /**
@@ -485,7 +486,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      */
     private void loadHistory(final File f) {
         log.debug("loadHistory(" + f + ")");
-        Thread load = new Thread(new Runnable() {
+        Runnable load = new Runnable() {
             public void run() {
                 try {
                     final StyleHistoryListModel model = new StyleHistoryListModel(f);
@@ -504,8 +505,8 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                             "Fehler", JOptionPane.ERROR_MESSAGE);
                 }
             }
-        });
-        load.start();
+        };
+        CismetThreadPool.execute(load);
     }
 
     /**
@@ -2507,7 +2508,7 @@ cmdFill.setEnabled(chkFill.isSelected());
      * @param evt ListSelectionEvent
      */
     public void valueChanged(final ListSelectionEvent evt) {
-        Thread t = new Thread(new Runnable() {
+        Runnable t = new Runnable() {
             public void run() {
                 try {
                     final BasicStyle s = (BasicStyle) lstHistory.getSelectedValue();
@@ -2549,8 +2550,8 @@ cmdFill.setEnabled(chkFill.isSelected());
                     log.error("Fehler beim Auslesen der Attribute", ex);
                 }
             }
-        });
-        t.start();
+        };
+        CismetThreadPool.execute(t);
     }
     // </editor-fold>
     

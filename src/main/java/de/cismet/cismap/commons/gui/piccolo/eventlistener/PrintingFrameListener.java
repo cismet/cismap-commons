@@ -38,6 +38,7 @@ import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.printing.PrintingToolTip;
 
+import de.cismet.tools.CismetThreadPool;
 import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
@@ -339,7 +340,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
                 }
             };
             zoomThread.setPriority(Thread.NORM_PRIORITY);
-            zoomThread.start();
+            CismetThreadPool.execute(zoomThread);
         }
     }
     Thread zoomThread;

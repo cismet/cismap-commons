@@ -35,6 +35,7 @@
 package de.cismet.cismap.commons.wfsforms;
 
 
+import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.StaticHtmlTools;
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -95,13 +96,12 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
         this.comp=comp;
         this.query=query;
         
-        Thread t=new Thread() {
+        Runnable t=new Runnable() {
             public void run() {
                 refresh(replacingValues);
             }
         };
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
+        CismetThreadPool.execute(t);
     }
     
     public void refresh(HashMap replacingValues)  {
