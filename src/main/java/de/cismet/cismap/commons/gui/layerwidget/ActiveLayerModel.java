@@ -85,6 +85,7 @@ import javax.swing.tree.TreePath;
 import org.deegree.services.wms.capabilities.WMSCapabilities;
 import org.deegree_impl.services.wms.capabilities.OGCWMSCapabilitiesFactory;
 import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
 
 /**
  *
@@ -619,7 +620,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     }
 
     protected void fireMapServiceAdded(MapService rasterService) {
-        Iterator it = mappingModelListeners.iterator();
+        Vector v = new Vector(mappingModelListeners);
+        Iterator it = v.iterator();
         while (it.hasNext()) {
             Object o = it.next();
             if (o instanceof MappingModelListener) {
@@ -684,14 +686,17 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         return conf;
     }
 
+    @Override
     public void masterConfigure(Element e) {
         //wird alles lokal gespeichert und auch wieder abgerufen
     }
 
-    synchronized public void configure(Element e) {
-        log.debug("ActiveLayerModel configure(" + e + ")");
+    @Override
+    synchronized public void configure(final Element e) {
+
         try {
             final Element conf = e.getChild("cismapActiveLayerConfiguration");
+            log.fatal(Thread.currentThread().getName() + "ActiveLayerModel configure" + new XMLOutputter().outputString(conf));
             final Vector<String> links = LayerWidget.getCapabilities(conf, new Vector<String>());
             log.debug("Capabilties links: " + links);
             //Laden der Capabilities vom Server und Speichern in einer HashMap<String url,Capabilities>;
@@ -699,20 +704,22 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
             log.debug("vor CyclicBarrier");
 
-            if (links.size() > 0) {                
+            if (links.size() > 0) {
                 //Das Runnable Objekt wird ausgef\u00FChrt wenn alle Capabilities geladen worden sind oder ein Fehler aufgetreten ist
                 if (currentBarrier != null) {
                     log.debug("reseting cyclicBarrier");
                     currentBarrier.reset();
-                } else {
-                    log.debug("currentBarrier == null creating new Barrier");
-                    currentBarrier = new CyclicBarrier(links.size(), new Runnable() {
-                        
-                        public void run() {
-                            createLayers(conf, capabilities);
-                        }
-                    });
                 }
+                log.debug("currentBarrier == null creating new Barrier");
+                currentBarrier = new CyclicBarrier(links.size(), new Runnable() {
+
+                    @Override
+                    public void run() {
+                        log.fatal(Thread.currentThread().getName() + "vor createLayers configure" + new XMLOutputter().outputString(conf));
+                        createLayers(conf, capabilities);
+                    }
+                });
+
 
 
                 // <editor-fold defaultstate="collapsed" desc="Laden der Capabilities">
@@ -726,6 +733,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                         public void run() {
                             URL getCapURL = null;
                             try {
+                                log.fatal(Thread.currentThread().getName() + "getCap retrieval Thread(1)" + new XMLOutputter().outputString(conf));
 //                                InputStreamReader reader = null;
                                 getCapURL = new URL(link);
                                 URL finalPostUrl = new URL(link.substring(0, link.indexOf('?')));
@@ -786,6 +794,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 //                                    broker.addProperty(getCapURL.toString(), cap.getCapability().getLayer().getTitle());
 //                                }
                                 capabilities.put(link, cap);
+                                log.fatal(Thread.currentThread().getName() + "getCap retrieval Thread (Ende)" + new XMLOutputter().outputString(conf));
                             } catch (Exception ex) {
                                 log.debug("Exception für URL: " + link, ex);
                                 log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.RetrievingCapabilitiesExceptions") + ":", ex);
@@ -813,7 +822,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
     }
 
-    private void createLayers(Element conf, HashMap<String, WMSCapabilities> capabilities) {
+    private void createLayers(final Element conf, final HashMap<String, WMSCapabilities> capabilities) {
         log.debug("Trigger started");
         log.debug("removing all existing layers");
         removeAllLayers();
@@ -824,7 +833,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             // wenn == null, dann Exception ? 
             log.debug("OK");
         }
-
+        log.fatal("createLayers " + new XMLOutputter().outputString(layerElement));
         Iterator<Element> layerIt = layerElement.getChildren().iterator();
         log.debug("Es gibt " + layerElement.getChildren().size() + " Layer");
         while (layerIt.hasNext()) {
