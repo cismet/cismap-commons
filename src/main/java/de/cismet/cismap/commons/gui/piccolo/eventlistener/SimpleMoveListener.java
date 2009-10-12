@@ -109,12 +109,12 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                 }
                             }
                             if (!found) {
-                                EventQueue.invokeLater(new Runnable() {
-                                    public void run() {
+//                                EventQueue.invokeLater(new Runnable() {
+//                                    public void run() {
                                         mc.getHandleLayer().addChild(newPointHandle);
                                         log.info("tempor\u00E4res Handle eingef\u00FCgt");
-                                    }
-                                });
+//                                    }
+//                                });
                             }
                             newPointHandle.relocateHandle();
                         }
@@ -160,7 +160,11 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                 handleHighlightingStuff(event);
             }
         };
-        CismetThreadPool.execute(t);
+        //t.setPriority(Thread.NORM_PRIORITY);
+        //t.start();
+        //CismetThreadPool.execute(t);
+        //Workaround für Issue 0001202 (http://bugs.cismet.de/mantis/view.php?id=1202)
+        EventQueue.invokeLater(t);
     }
 
     /**
