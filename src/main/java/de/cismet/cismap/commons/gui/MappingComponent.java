@@ -874,7 +874,15 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         try {
             log.debug("setInteractionMode(" + interactionMode + ")\nAlter InteractionMode:" + this.interactionMode + "");
 
-            handleLayer.removeAllChildren();
+            
+            try {
+                handleLayer.removeAllChildren();
+            }
+            catch (Exception e){
+                log.warn("Fehler bei removeAllCHildren",e);
+
+            }
+            
             setPointerAnnotationVisibility(false);
             if (getPrintingFrameLayer().getChildrenCount() > 1) {
                 getPrintingFrameLayer().removeAllChildren();
@@ -2727,7 +2735,12 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * @param rasterService the removing mapservice
      */
     public void mapServiceRemoved(MapService rasterService) {
+        try {
         mapServicelayer.removeChild(rasterService.getPNode());
+        }
+        catch (Exception e) {
+            log.warn("erro rin mapServiceRemoved ",e );
+        }
     }
 
     /**
