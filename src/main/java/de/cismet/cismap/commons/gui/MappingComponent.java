@@ -2069,7 +2069,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         for (Object f : featureCollection.getAllFeatures()) {
             ((Feature) f).setEditable(!readOnly);
         }
-        this.readOnly = readOnly;
+        this.readOnly = readOnly;        
         handleLayer.removeAllChildren();
         handleLayer.repaint();
 
@@ -2308,7 +2308,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                             for (Object selectedFeature : copy) {
                                 if (selectedFeature instanceof Feature && ((Feature) selectedFeature).isEditable()) {
                                     if (pFeatureHM.get(selectedFeature) != null) {
+                                        try{
                                         ((PFeature) pFeatureHM.get(selectedFeature)).addHandles(handleLayer);
+                                        }catch(Exception ex){
+                                            log.error("Error bei addHandles: ",ex);
+                                        }
                                     } else {
                                         log.warn("pFeatureHM.get(" + selectedFeature + ")==null");
                                     }
@@ -2321,8 +2325,8 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     }
                 }
             };
-            log.debug("showHandles", new CurrentStackTrace());
-            CismetThreadPool.execute(handle);
+            log.debug("showHandles");
+            CismetThreadPool.execute(handle);            
         } else {
             // alle bisherigen Handles entfernen
             EventQueue.invokeLater(new Runnable() {

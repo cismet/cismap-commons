@@ -820,12 +820,22 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final int positionInArray = position;
         PLocator l = new PLocator() {
 
-            public double locateX() {
+           public double locateX() {
+                try{
                 return getXp()[positionInArray];
+                }catch(Exception ex){
+                    log.error("Fehler in  locateX():");
+                    return -1;
+                }
             }
 
             public double locateY() {
+                  try{
                 return getYp()[positionInArray];
+                }catch(Exception ex){
+                    log.error("Fehler in  locateY():");
+                    return -1;
+                }
             }
         };
 
