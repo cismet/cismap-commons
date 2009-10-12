@@ -135,8 +135,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     Constructor c = geometryFeatureClass.getConstructor(Point2D.class, WorldToScreenTransform.class);
                     PureNewFeature newPNF = (PureNewFeature) c.newInstance(point, mc.getWtst());
                     newPNF.setEditable(true);
-                    mc.getFeatureCollection().addFeature(newPNF);
-                    mc.getFeatureCollection().holdFeature(newPNF);                    
+                    finishGeometry(newPNF);
                 } catch (Throwable t) {
                     log.error("Fehler beim Erzeugen der Geometrie", t);
                 }
@@ -179,8 +178,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                         pnf = (PureNewFeature) c.newInstance(p, mc.getWtst());
 
                         pnf.setEditable(true);
-                        mc.getFeatureCollection().addFeature(pnf);
-                        mc.getFeatureCollection().holdFeature(pnf);                        
+                       finishGeometry(pnf);
                     } catch (Throwable t) {
                         log.error("Fehler beim Erzeugen der Geometrie", t);
                     }
@@ -373,5 +371,10 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
 
     public void featuresRemoved(FeatureCollectionEvent fce) {
         
+    }
+
+    protected void finishGeometry(final PureNewFeature newFeature) {
+        mc.getFeatureCollection().addFeature(newFeature);
+        mc.getFeatureCollection().holdFeature(newFeature);
     }
 }
