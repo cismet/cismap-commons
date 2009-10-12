@@ -696,7 +696,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
         try {
             final Element conf = e.getChild("cismapActiveLayerConfiguration");
-            log.fatal(Thread.currentThread().getName() + "ActiveLayerModel configure" + new XMLOutputter().outputString(conf));
             final Vector<String> links = LayerWidget.getCapabilities(conf, new Vector<String>());
             log.debug("Capabilties links: " + links);
             //Laden der Capabilities vom Server und Speichern in einer HashMap<String url,Capabilities>;
@@ -715,7 +714,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
                     @Override
                     public void run() {
-                        log.fatal(Thread.currentThread().getName() + "vor createLayers configure" + new XMLOutputter().outputString(conf));
                         createLayers(conf, capabilities);
                     }
                 });
@@ -733,7 +731,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                         public void run() {
                             URL getCapURL = null;
                             try {
-                                log.fatal(Thread.currentThread().getName() + "getCap retrieval Thread(1)" + new XMLOutputter().outputString(conf));
 //                                InputStreamReader reader = null;
                                 getCapURL = new URL(link);
                                 URL finalPostUrl = new URL(link.substring(0, link.indexOf('?')));
@@ -794,7 +791,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 //                                    broker.addProperty(getCapURL.toString(), cap.getCapability().getLayer().getTitle());
 //                                }
                                 capabilities.put(link, cap);
-                                log.fatal(Thread.currentThread().getName() + "getCap retrieval Thread (Ende)" + new XMLOutputter().outputString(conf));
                             } catch (Exception ex) {
                                 log.debug("Exception für URL: " + link, ex);
                                 log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.RetrievingCapabilitiesExceptions") + ":", ex);
@@ -817,7 +813,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             }
 
 
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             log.error("Fehler beim Konfigurieren des ActiveLayerModells", ex);
         }
     }
@@ -833,7 +829,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             // wenn == null, dann Exception ? 
             log.debug("OK");
         }
-        log.fatal("createLayers " + new XMLOutputter().outputString(layerElement));
+
         Iterator<Element> layerIt = layerElement.getChildren().iterator();
         log.debug("Es gibt " + layerElement.getChildren().size() + " Layer");
         while (layerIt.hasNext()) {
