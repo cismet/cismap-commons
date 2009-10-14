@@ -826,6 +826,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }catch(Exception ex){
                     log.error("Fehler in  locateX():");
                     return -1;
+                    
                 }
             }
 
