@@ -102,7 +102,8 @@ public class WMSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                     // setTooltip("Im momentanen Ma\u00DFstab nicht darstellbar");
                 }
             } catch (Exception e) {
-                log.debug("Fehler bei der ScaleHint Verarbeitung.Kein Problem",e);
+                //TODO logging last
+                //log.debug("Fehler bei der ScaleHint Verarbeitung.Kein Problem",e);
             }
             setText(tmpLayer.getTitle());
             if (tmpLayer.isQueryable()) {

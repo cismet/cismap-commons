@@ -48,7 +48,7 @@ import java.awt.Image;
  * @author thorsten.hell@cismet.de
  */
 public abstract class AbstractWMS extends AbstractRetrievalService implements MapService,RetrievalListener,ServiceLayer{
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
     protected BoundingBox bb;
     protected boolean enabled=true;
     private boolean visible=true;
@@ -62,41 +62,50 @@ public abstract class AbstractWMS extends AbstractRetrievalService implements Ma
     /** Creates a new instance of AbstractWMS */
     public AbstractWMS() {
     }
-    
+
+    @Override
     public void setBoundingBox(de.cismet.cismap.commons.BoundingBox bb) {
         this.bb=bb;
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         this.enabled=enabled;
     }
 
+    @Override
     public void setSize(int height, int width) {
         this.height=height;
         this.width=width;
     }
 
-
+    @Override
     public boolean isEnabled() {
         return enabled;
     }
 
+    @Override
     public boolean canBeDisabled() {
         return true;
     }
 
+    @Override
     public void retrievalStarted(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
         this.fireRetrievalStarted(e);
     }
+
+    @Override
     public void retrievalProgress(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
         this.fireRetrievalProgress(e);
     }
+
+    @Override
     public void retrievalError(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        log.warn("retrievalError",new CurrentStackTrace());
+        logger.warn("retrievalError",new CurrentStackTrace());
         this.fireRetrievalError(e);
     }
 
-    
+    @Override
     public void retrievalComplete(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
         //Test ob Bild bez\u00FCglich der Gr\u00F6\u00DFe auch dem angeforderten entspricht
         //ansonsten ist es sehr wahrscheinlich dass es sich um ein Fehlerbild handelt
@@ -119,39 +128,42 @@ public abstract class AbstractWMS extends AbstractRetrievalService implements Ma
         }
     }
 
-    
-    
-    
-    
+    @Override
     public void retrievalAborted(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
         this.fireRetrievalAborted(e);
     }
 
-
+    @Override
     public int getLayerPosition() {
         return layerPosition;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public void setLayerPosition(int layerPosition) {
         this.layerPosition = layerPosition;
     }
 
+    @Override
     public void setName(String name) {
         this.name = name;
     }
 
+    @Override
     public float getTranslucency() {
         return translucency;
     }
 
+    @Override
     public void setTranslucency(float translucency) {
         this.translucency = translucency;
     }
 
+  @Override
     public boolean isVisible() {
         return visible;
     }

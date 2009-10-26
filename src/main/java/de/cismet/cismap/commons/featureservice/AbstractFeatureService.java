@@ -4,906 +4,1423 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Polygon;
+import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
+import de.cismet.cismap.commons.featureservice.factory.CachingFeatureFactory;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.ConvertableToXML;
-import de.cismet.cismap.commons.PropertyContainer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
-import de.cismet.cismap.commons.features.AnnotatedByPropertyFeature;
-import de.cismet.cismap.commons.features.AnnotatedFeature;
-import de.cismet.cismap.commons.features.CloneableFeature;
-import de.cismet.cismap.commons.features.DefaultWFSFeature;
-import de.cismet.cismap.commons.features.FeatureWithId;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.cismap.commons.XMLObjectFactory;
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.rasterservice.FeatureMapService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticXMLTools;
-import de.cismet.tools.gui.PointSymbolCreator;
 import edu.umd.cs.piccolo.PNode;
-import groovy.lang.GroovyShell;
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.Font;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
-import java.util.concurrent.Semaphore;
 import javax.swing.Icon;
 import javax.swing.SwingWorker;
-import org.apache.log4j.Priority;
-import org.deegree2.model.feature.Feature;
-import org.deegree2.model.feature.FeatureProperty;
-import org.deegree2.model.feature.schema.FeatureType;
-import org.deegree2.model.feature.schema.PropertyType;
-import org.deegree2.model.spatialschema.JTSAdapter;
 import org.jdom.Element;
 
 /**
  *
- * @author spuhl
+ * @author Pascal Dihé
  */
-public abstract class AbstractFeatureService extends AbstractRetrievalService implements MapService, ServiceLayer, RetrievalServiceLayer, FeatureMapService {
+public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, QT> extends AbstractRetrievalService implements MapService, ServiceLayer, RetrievalServiceLayer, FeatureMapService, ConvertableToXML, Cloneable
+{
+  /* determines either the layer is enabled or not */
+  protected boolean enabled = true;
+  /* the bounding box which indicates the features of interest */
+  protected BoundingBox bb = null;
+  /* the position of this layer in the layer hierachy */
+  protected int layerPosition;
+  /* the name of this layer */
+  protected String name;
+  /* determines the transparency of this layer */
+  protected float translucency = 0.2f;
+  /* the linecolor which will be used to draw the features of this layer */
+  //private Color lineColor = Color.BLACK;
+  /* the area color of the geometries */
+  //private Color fillingColor = new Color(0.2f, 0.2f, 0.2f, 0.7f);
+  /* the encoding of the xml documents */
+  protected String encoding;
+  /* maximal allowed amount of features, default is 1000 */
+  protected int maxFeatureCount = 1000;
+  /* the list that holds all the featureServiceAttributes of the FeatureService */
+  protected Map<String, FeatureServiceAttribute> featureServiceAttributes;
+  /* the Pnode that holds all the features */
+  protected PNode pNode;
+  /* the visibility of this layer */
+  protected boolean visible = true;
+  /* Feature to render the Geometry */
+  //private CloneableFeature renderingFeature;
+  /* defaulttype-constant */
+  public static final String DEFAULT_TYPE = "default";
+  /* resulting featurearraylist of the retrievalWorker */
+  //private final Vector<CloneableFeature> retrievedResults = new Vector<CloneableFeature>();
+  /* SwingWorker that retrieves the features in the desired area */
+  protected FeatureRetrievalWorker featureRetrievalWorker;
+  /* part of the XML-configurationfile to customize a featureservice */
+  //private Element layerConf = null;
+  /* featurearray */
+  //private Feature[] features = null;
+  /* is the featurelayer already initialized or not */
+  protected Boolean initialized = false;
+  /* worker that retrieves to define the correct geometry */
+  protected LayerInitWorker layerInitWorker = null;
+  protected LayerProperties layerProperties = null;
+  protected FeatureFactory featureFactory = null;
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    /* determines either the layer is enabled or not */
-    private boolean enabled = true;
-    /* the bounding box which indicates the features of interest */
-    private BoundingBox bb = null;
-    /* the position of this layer in the layer hierachy */
-    private int layerPosition;
-    /* the name of this layer */
-    private String name;
-    /* determines the transparency of this layer */
-    private float translucency = 0.2f;
-    /* the linecolor which will be used to draw the features of this layer */
-    private Color lineColor = Color.BLACK;
-    /* the area color of the geometries */
-    private Color fillingColor = new Color(0.2f, 0.2f, 0.2f, 0.7f);
-    /* the encoding of the xml documents */
-    private String encoding;
-    /* maximal allowed amount of features */
-    private int maxFeatureCount = 3000;
-    /* the list that holds all the attributes of the FeatureService */
-    private Vector<FeatureServiceAttribute> attributes = new Vector<FeatureServiceAttribute>();
-    /* the Pnode that holds all the features */
-    private PNode pNode;
-    /* the visibility of this layer */
-    private boolean visible = true;
-    /* Feature to render the Geometry */
-    private CloneableFeature renderingFeature;
-    /* defaulttype-constant */
-    public static final String DEFAULT_TYPE = "default";
-    /* XML-constant of the querypart that should be replaced by a boundingbox */
-    public static final String CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER = "<cismapBoundingBoxAsGmlPlaceholder />";
-    /* resulting featurearraylist of the retrievalWorker */
-    private final ArrayList<CloneableFeature> retrievedResults = new ArrayList<CloneableFeature>();
-    /* SwingWorker that retrieves the features in the desired area */
-    private FeatureRetrievalWorker frw;
-    /* part of the XML-configurationfile to customize a featureservice */
-    private Element layerConf = null;
-    /* featurearray */
-    private Feature[] features = null;
-    /* is the featurelayer already initialized or not */
-    private Boolean isInitialized = false;
-    /* worker that retrieves to define the correct geometry */
-    private LayerInitWorker layerInitWorker = null;
+ /**
+   * Creates a new <b>uninitilaised</b> instance of a feature service with layer
+   * properties set. The Service is fully initialised upon the first call to the
+   * {@code retrieve()} operation.
+   *
+   * @throws Exception
+   */
+  public AbstractFeatureService()
+  {
+    this.setLayerProperties(this.createLayerProperties());
+  }
 
-    /**
-     * Creates a new AbstractFeatureService from a XML-element.
-     * @param e XML-element with FeatureService-configuration
-     * @throws java.lang.Exception
-     */
-    public AbstractFeatureService(Element e) throws Exception {
-        if (e.getName().contains("FeatureServiceLayer")) {
-            setLayerConf(e);
-        } else {
-            if (e.getChild("WebFeatureServiceLayer") != null) {
-                setLayerConf(e.getChild("WebFeatureServiceLayer"));
-            } else if (e.getChild("DocumentFeatureServiceLayer") != null) {
-                setLayerConf(e.getChild("DocumentFeatureServiceLayer"));
-            }
-        }
-
-        if (layerConf != null) {
-            setName(layerConf.getAttributeValue("name"));
-            setVisible(new Boolean(layerConf.getAttributeValue("visible")));
-            setEnabled(new Boolean(layerConf.getAttributeValue("enabled")));
-            setTranslucency(layerConf.getAttribute("translucency").getFloatValue());
-
-            Element xmlAttributes = layerConf.getChild("Attributes");
-            attributes = FeatureServiceUtilities.getFeatureServiceAttributes(xmlAttributes);
-            setAttributes(attributes);
-
-            DefaultWFSFeature wfsFeature = new DefaultWFSFeature();
-            Element fe = layerConf.getChild("renderingFeature").getChild("DefaultWFSFeature");
-//                            f.setId(Integer.parseInt(fe.getAttributeValue("id")));
-            wfsFeature.setIdExpression(fe.getAttributeValue("idExpression"));
-            int lineWidth = Integer.parseInt(fe.getAttributeValue("lineWidth"));
-            wfsFeature.setLineWidth(lineWidth);
-            wfsFeature.setTransparency(Float.parseFloat(fe.getAttributeValue("transparency")));
-            wfsFeature.setPrimaryAnnotation(fe.getAttributeValue("primaryAnnotation"));
-            wfsFeature.setSecondaryAnnotation(fe.getAttributeValue("secondaryAnnotation"));
-            wfsFeature.setPrimaryAnnotationScaling(Double.parseDouble(fe.getAttributeValue("primaryAnnotationScaling")));
-            wfsFeature.setPrimaryAnnotationJustification(Float.parseFloat(fe.getAttributeValue("primaryAnnotationJustification")));
-            wfsFeature.setMaxScaleDenominator(Integer.parseInt(fe.getAttributeValue("maxScaleDenominator")));
-            wfsFeature.setMinScaleDenominator(Integer.parseInt(fe.getAttributeValue("minScaleDenominator")));
-            wfsFeature.setAutoScale(Boolean.parseBoolean(fe.getAttributeValue("autoscale")));
-            Color fill = StaticXMLTools.convertXMLElementToColor(fe.getChild("fillingColor").getChild("Color"));
-            wfsFeature.setFillingPaint(fill);
-            Color line = StaticXMLTools.convertXMLElementToColor(fe.getChild("lineColor").getChild("Color"));
-            wfsFeature.setLinePaint(line);
-            wfsFeature.setPrimaryAnnotationFont(StaticXMLTools.convertXMLElementToFont(fe.getChild("primaryAnnotationFont").getChild("Font")));
-            wfsFeature.setPrimaryAnnotationPaint(StaticXMLTools.convertXMLElementToColor(fe.getChild("primaryAnnotationColor").getChild("Color")));
-            wfsFeature.setHighlightingEnabled(Boolean.parseBoolean(fe.getAttributeValue("highlightingEnabled")));
-            FeatureAnnotationSymbol fas = new FeatureAnnotationSymbol(PointSymbolCreator.createPointSymbol((line != null), (fill != null), 10, lineWidth, fill, line));
-            fas.setSweetSpotX(0.5d);
-            fas.setSweetSpotY(0.5d);
-            wfsFeature.setPointAnnotationSymbol(fas);
-            setRenderingFeature(wfsFeature);
-        } else {
-            setVisible(true);
-            setEnabled(true);
-        }
+  /**
+   * Creates a new AbstractFeatureService from a XML-element. Sets all properties
+   * of the XML Element but does <b>not</b> initialise. Since the initialisation
+   * may take some time, it is perfomed upon the first call to the
+   * {@code retrieve()} operation which is rum from separate thread.
+   *
+   * @param e XML-element with FeatureService-configuration
+   * @throws java.lang.Exception if something went wrong
+   * @see isInitialised()
+   */
+  public AbstractFeatureService(Element e) throws Exception
+  {
+    //this();
+    logger.info("creating new FeatureService instance from xml element '" + e.getName() + "'");
+    if (e.getName().equals(this.getFeatureLayerType()))
+    {
+      this.initFromElement(e);
+    } else if (e.getChild(this.getFeatureLayerType()) != null)
+    {
+      this.initFromElement(e.getChild(this.getFeatureLayerType()));
+    } else
+    {
+      logger.error("FeatureService could not be initailised from xml: unsupported element '" + e.getName() + "'");
+      throw new ClassNotFoundException("FeatureService could not be initailised from xml: unsupported element '" + e.getName() + "'");
     }
 
-    public AbstractFeatureService(int layerPosition, String name, String encoding, Vector<FeatureServiceAttribute> attributes, PNode pNode, CloneableFeature renderingFeature, FeatureRetrievalWorker frw) throws Exception {
-        setLayerPosition(layerPosition);
-        setName(name);
-        setEncoding(encoding);
-        setAttributes(attributes);
-        setPNode(pNode);
-        setRenderingFeature(renderingFeature);
+    if (this.getLayerProperties() == null)
+    {
+      logger.warn("LayerProperties not properly initialised from XML Element, creating new Properties upon next retrieval");
+      this.layerProperties = this.createLayerProperties();
     }
 
-    /**
-     * Constructor that clones the delivered AbstractFeatureService.
-     * @param afs FeatureService that should be cloned
-     */
-    protected AbstractFeatureService(AbstractFeatureService afs) {
-        setLayerPosition(afs.getLayerPosition());
-        setName(afs.getName());
-        setEncoding(afs.getEncoding());
-        setPNode(afs.getPNode());
-        setAttributes(afs.getAttributes());
-        setTranslucency(afs.getTranslucency());
-        setEncoding(afs.getEncoding());
-        setEnabled(true);
+    if (this.getFeatureServiceAttributes() == null || this.getFeatureServiceAttributes().size() == 0)
+    {
+      logger.warn("FeatureServiceAttributes not properly initialised from XML Element, creating new Attributes upon next retrieval");
+    }
+  }
 
-        if (afs.getRenderingFeature() != null) {
-            setRenderingFeature(afs.getRenderingFeature());
-        } else {
-            setRenderingFeature(createDefaultStyleFeature());
-        }
-        if (afs.getAttributes() != null) {
-            Collections.copy(this.attributes, afs.getAttributes());
-        } else {
-            setAttributes(new Vector<FeatureServiceAttribute>());
-        }
+  /**
+   * Protected Constructor that clones (shallow) the delivered AbstractFeatureService.
+   * Attributes, layer properties and feature factories are not cloned deeply.
+   * The FeatureService to be cloned should be initilaised.
+   *
+   * @param afs FeatureService that should be cloned
+   */
+  protected AbstractFeatureService(AbstractFeatureService afs)
+  {
+    //this();
+    // initilaisation updates also the cloned object!
+    if (!afs.isInitialized())
+    {
+      logger.warn("creating copy of uninitialised feature service");
     }
 
-    /**
-     * Create a new AbstractFeatureService with defaultvalues but the name and attributes.
-     * @param name the name of this FeatureService
-     * @param attributes vector with all FeatureServiceAttributes of the FeatureService
-     * @throws java.lang.Exception
-     */
-    public AbstractFeatureService(String name, Vector<FeatureServiceAttribute> attributes) throws Exception {
-        setName(name);
-        setAttributes(attributes);
+    this.setLayerPosition(afs.getLayerPosition());
+    this.setName(afs.getName());
+    this.setEncoding(afs.getEncoding());
+    this.setPNode(afs.getPNode() != null ? (PNode) afs.getPNode().clone() : null);
+    this.setTranslucency(afs.getTranslucency());
+    this.setEncoding(afs.getEncoding());
+    this.setEnabled(afs.isEnabled());
+
+    this.layerProperties = afs.getLayerProperties() != null ? afs.getLayerProperties().clone() : null;
+    this.featureFactory = afs.getFeatureFactory() != null ? afs.getFeatureFactory().clone() : null;
+    
+    TreeMap<String, FeatureServiceAttribute> attriuteMap = new TreeMap();
+    attriuteMap.putAll(afs.getFeatureServiceAttributes());       
+    this.setFeatureServiceAttributes(attriuteMap);
+
+    this.setInitialized(afs.isInitialized());
+  }
+
+  /**
+   * Create a new <b>uninitialised</b> AbstractFeatureService except for the
+   * name and featureServiceAttributes.
+   *
+   * @param name the name of this FeatureService
+   * @param featureServiceAttributes vector with all FeatureServiceAttributes of the FeatureService
+   */
+  public AbstractFeatureService(String name, Vector<FeatureServiceAttribute> attributes)
+  {
+    //this();
+    this.setName(name);
+    this.setFeatureServiceAttributes(attributes);
+  }
+
+  /**
+   * Initialises the FeatureService instance. If the service has already been
+   * initialised, the operation clears the layerProperties, the featureFactory
+   * and the featureServiceAttributes and forces a complete re-initialisation.
+   *
+   * @throws java.lang.Exception if somethin went wrong
+   */
+  protected void init() throws Exception
+  {
+    // *should* never happen ....
+    if (layerInitWorker == null || layerInitWorker.isDone())
+    {
+      logger.error("strange synchronisation problem in Layer Initialisation Thread");
+      throw new Exception("strange synchronisation problem in Layer Initialisation Thread");
     }
 
-    /**
-     * Modifies the FeatureService if there is a XML-layerconfiguration available,
-     * else sets visible and enabled. Calls initConcreteInstance().
-     * @throws java.lang.Exception
-     */
-    private void initLayer() throws Exception {
-        if (getRenderingFeature() == null) {
-            setRenderingFeature(createDefaultStyleFeature());
-        }
+    // check if canceled .......................................................
+    if (layerInitWorker.isCancelled())
+    {
+      logger.warn("LIW[" + layerInitWorker.getId() + "]: init is canceled");
+      return;
+    }
+    //..........................................................................
 
-        if (attributes == null) {
-        }
-
-        if (getFeatures() == null) {
-            setFeatures(retrieveFeatures());
-        }
-
-        if (getAttributes() == null || getAttributes().size() == 0) {
-            log.debug("Keine Feature Attribute vorhanden --> werden erstellt");
-            createFeatureAttributes();
-        } else {
-            //TODO gleichheit abprüfen ? 
-            log.debug("Attribute sind bereits vorhanden und müssen nicht erstellt werden");
-        }
-
-        initConcreteInstance();
+    if (this.isInitialized() || this.isRefreshNeeded())
+    {
+      logger.warn("layer already initialised, forcing complete re-initialisation");
+      this.setInitialized(false);
+      //this.layerProperties = null;
+      //this.featureFactory = null;
+      //this.featureServiceAttributes = null;
     }
 
-    /**
-     * Creates a CloneableFeature with defaultvalues.
-     * @return CloneableFeature
-     */
-    private CloneableFeature createDefaultStyleFeature() {
-        DefaultWFSFeature designer = new DefaultWFSFeature();
-        designer.setCanBeSelected(false);
-        Color defColor = new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
-        designer.setFillingPaint(defColor);
-        designer.setLinePaint(defColor.darker());
-        designer.setTransparency(1.0f);
-        designer.setPrimaryAnnotation("");
-        designer.setPrimaryAnnotationScaling(1d);
-        designer.setPrimaryAnnotationFont(new Font("sansserif", Font.PLAIN, 12));
-        FeatureAnnotationSymbol fas = new FeatureAnnotationSymbol(PointSymbolCreator.createPointSymbol(true, true, 10, 1, defColor, defColor.darker()));
-        fas.setSweetSpotX(0.5d);
-        fas.setSweetSpotY(0.5d);
-        designer.setPointAnnotationSymbol(fas);
-        designer.setLineWidth(1);
-        designer.setMaxScaleDenominator(2500);
-        designer.setMinScaleDenominator(0);
-        designer.setAutoScale(true);
-        designer.setHighlightingEnabled(false);
-        designer.setIdExpression("app:gid");
-        return designer;
+    if (this.getLayerProperties() == null)
+    {
+      if(DEBUG)logger.debug("init(): LayerProperties not yet set, creating new LayerProperties instance");
+      this.layerProperties = this.createLayerProperties();
+    } else
+    {
+      if(DEBUG)logger.debug("init(): Layer Properties already created");
     }
 
-    /**
-     * Processes the annotation of a feature with groovy and sets an id if available.
-     * TODO clear out log-messages because causes lots of them
-     * @param cloneableFeature the feature that will be customized
-     */
-    protected void customizeFeature(CloneableFeature cloneableFeature) {
-        //log.debug("customizeFeature"); // TODO delete because causes lots of log-messages
-        GroovyShell groovyShell = new GroovyShell();
-        if (cloneableFeature instanceof PropertyContainer) {
-            PropertyContainer propertyContainerFeature = (PropertyContainer) cloneableFeature;
-            for (Object key : propertyContainerFeature.getProperties().keySet()) {
-                Object property = propertyContainerFeature.getProperty(key.toString());
-                groovyShell.setVariable(key.toString().replaceAll(":", "_"), property);
-            }
-        // log.debug(propertyContainerFeature.getProperties());
-        }
+    // check if canceled .......................................................
+    if (layerInitWorker.isCancelled())
+    {
+      logger.warn("LIW[" + layerInitWorker.getId() + "]: init is canceled");
+      return;
+    }
+    //..........................................................................
 
-        if ((cloneableFeature instanceof AnnotatedFeature && cloneableFeature instanceof PropertyContainer && cloneableFeature instanceof AnnotatedByPropertyFeature)) {
-            AnnotatedFeature af = (AnnotatedFeature) cloneableFeature;
-            String expression = af.getPrimaryAnnotation();
-            if (expression != null && expression.length() > 0) {
-                expression = expression.replaceAll(":", "_");
-//                        String val=propertyContainerFeature.getProperty(key).toString();
-//                        if (val!=null) {
-//                            af.setPrimaryAnnotation(val);
-//                        }
-                try {
-                    af.setPrimaryAnnotation(groovyShell.evaluate(expression).toString());
-                } catch (Throwable t) {
-                    log.warn("Fehler beim Auswerten der Expression " + expression, t);
-                    af.setPrimaryAnnotation(expression);
-                }
-            } else {
-                //log.info("keine PrimaryAnnotation gesetzt");
-            }
-            expression = af.getSecondaryAnnotation();
-            if (expression != null && expression.length() > 0) {
-                expression = expression.replaceAll(":", "_");
-                try {
-                    af.setSecondaryAnnotation(groovyShell.evaluate(expression).toString());
-                } catch (Throwable t) {
-                    log.warn("Fehler beim Auswerten der Expression " + expression, t);
-                    af.setSecondaryAnnotation(expression);
-                }
-            } else {
-                //log.info("keine SecondaryAnnotation gesetzt");
-            }
-        }
-
-        if ((cloneableFeature instanceof PropertyContainer && cloneableFeature instanceof FeatureWithId)) {
-            FeatureWithId fwid = (FeatureWithId) cloneableFeature;
-            try {
-                PropertyContainer propertyContainerFeature = (PropertyContainer) cloneableFeature;
-                fwid.setId(new Integer(propertyContainerFeature.getProperty(fwid.getIdExpression()).toString()).intValue());
-            } catch (Exception e) {
-                fwid.setId(-1);
-                log.warn("Fehler beim Zuordnen der Id", e);
-            }
-        }
+    if (this.featureFactory == null)
+    {
+      if(DEBUG)logger.debug("init(): Feature Factory not yet set, creating new Feature Factory instance");
+      // create the feature Factory
+      // all variables required by the concrete FeatureFactory constructor must
+      // have been initialised!
+      this.featureFactory = this.createFeatureFactory();
+    } else
+    {
+      if(DEBUG)logger.debug("init(): Feature Factory already created");
     }
 
-    /**
-     * Refreshs all features by replacing their style with the one of the RenderingFeature.
-     */
-    public void refreshFeatures() {
-        ArrayList<CloneableFeature> newRetrievedResults = new ArrayList<CloneableFeature>();
-        for (CloneableFeature cf : getRetrievedResults()) {
-            CloneableFeature newCf = (CloneableFeature) getRenderingFeature().clone();
-            newCf.setGeometry(cf.getGeometry());
+    // set common properties of the factory
+    // implemntation specific properties must be set in the createFeatureFactory()
+    this.featureFactory.setMaxFeatureCount(this.getMaxFeatureCount());
+    this.featureFactory.setLayerProperties(layerProperties);
+    
 
-            if (cf instanceof PropertyContainer && newCf instanceof PropertyContainer) {
-                ((PropertyContainer) newCf).setProperties(((PropertyContainer) cf).getProperties());
-            }
-            customizeFeature(newCf);
-            newRetrievedResults.add(newCf);
+    // check if canceled .......................................................
+    if (layerInitWorker.isCancelled())
+    {
+      logger.warn("LIW[" + layerInitWorker.getId() + "]: init is canceled");
+      return;
+    }
+    //..........................................................................
+
+    if (this.getFeatureServiceAttributes() == null || this.getFeatureServiceAttributes().size() == 0)
+    {
+      if(DEBUG)logger.debug("init(): Feature Service Attributes not yet set, creating new  Feature Service Attribute");
+      try
+      {
+        this.setFeatureServiceAttributes(featureFactory.createAttributes(layerInitWorker));
+      } catch (UnsupportedOperationException uoe)
+      {
+        if(DEBUG)logger.debug("Feature Factory '" + this.getFeatureFactory().getClass().getSimpleName() + "' does not support Attributes");
+        if (this.getFeatureServiceAttributes() == null)
+        {
+          this.setFeatureServiceAttributes(new Vector());
         }
-
-        getRetrievedResults().clear();
-        getRetrievedResults().addAll(newRetrievedResults);
-
-        RetrievalEvent re = new RetrievalEvent();
-        re.setIsComplete(true);
-        re.setHasErrors(false);
-        re.setRefreshExisting(true);
-        re.setRetrievedObject(this.getRetrievedResults());
-        re.setRequestIdentifier(System.currentTimeMillis());
-        fireRetrievalStarted(re);
-        fireRetrievalComplete(re);
+      }
+    } else
+    {
+      if(DEBUG)logger.debug("init(): Feature Service Attributes already created");
     }
 
-    /**
-     * Creates a vector with FeatureServiceAttribute of all retrieved features.
-     * @param ctm the current time im milliseconds
-     * @param currentWorker FeatureRetrievalWorker
-     * @return vector with all found FeatureServiceAttributes
-     */
-    protected void createFeatureAttributes() {
-        Vector<FeatureServiceAttribute> tmp = new Vector<FeatureServiceAttribute>();
-        try {
-            Feature[] fc = getFeatures();
-            if (fc != null && fc.length > 0) {
-                for (int i = 0; i < fc.length; i++) {
-                    FeatureProperty[] featureProperties = fc[i].getProperties();
-                    for (FeatureProperty fp : featureProperties) {
-                        try {
-                            FeatureType type = fc[i].getFeatureType();
-                            for (PropertyType pt : type.getProperties()) {
-                                //log.fatal("Property Name=" + pt.getName() + " PropertyType=" + pt.getType());
-                                //ToDo was ist wenn zwei Geometrien dabei sind
-                                FeatureServiceAttribute fsa = new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true);
-                                if (!tmp.contains(fsa)) {
-                                    tmp.add(fsa);
-                                }
-                            }
-                        } catch (Exception ex) {
-                            log.warn("Fehler beim Anlegen eines FeatureServiceAttribute");
-                        }
-                    }
-                }
-                setAttributes(tmp);
-            } else {
-                setAttributes(tmp);
-            }
-        } catch (Exception ex) {
-            log.error("Fehler beim Anlegen der FeatureServiceAttribute", ex);
-            setAttributes(tmp);
-        }
+    // check if canceled .......................................................
+    if (layerInitWorker.isCancelled())
+    {
+      logger.warn("LIW[" + layerInitWorker.getId() + "]: init is canceled");
+      return;
     }
-    Semaphore bouncer = new Semaphore(1);
+    //..........................................................................
 
-    /**
-     * Creates a new FeatureRetrievalWorker and launchs the retrieval-process.
-     * @param forced TODO not used yet
-     */
-    public void retrieve(boolean forced) {
-        log.debug("retrieve Started", new CurrentStackTrace());
-        if (frw != null && !frw.isDone()) {
-            frw.cancel(true);
-            frw = null;
-        }
 
-        if (isInitialized) {
-            frw = new FeatureRetrievalWorker();
-            frw.execute();
-        } else {
-            synchronized (isInitialized) {
-                if (layerInitWorker == null) {
-                    layerInitWorker = new LayerInitWorker();
-                    layerInitWorker.execute();
-                } else {
-                    log.info("Layer wird initialisiert --> request wird ignoriert");
-                }
-            }
+    //idExpression plausibility check
+    if (this.getLayerProperties().getIdExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME && this.getLayerProperties().getIdExpression() != null && this.getFeatureServiceAttributes() != null && this.getFeatureServiceAttributes().size() > 0)
+    {
+      if(DEBUG)logger.debug("checking if property id expression '" + this.getLayerProperties().getIdExpression() + "' is valid");
+      boolean found = false;
+      for (FeatureServiceAttribute attribute : this.getFeatureServiceAttributes().values())
+      {
+        if(DEBUG)logger.debug("checking attribute '" + attribute.getName() + "'");
+        found = attribute.getName().equals(this.getLayerProperties().getIdExpression());
+        if (found)
+        {
+          if(DEBUG)logger.debug("attribute is valid: " + attribute.getName());
+          break;
         }
+      }
+
+      if (!found)
+      {
+        logger.warn("property id expression '" + this.getLayerProperties().getIdExpression() + "' not found in attributes, resetting to undefined");
+        this.getLayerProperties().setIdExpression(null, LayerProperties.EXPRESSIONTYPE_UNDEFINED);
+      }
     }
-    //setFrw(createWorker());        
-    class LayerInitWorker extends SwingWorker<Void, Void> {
 
-        @Override
-        protected Void doInBackground() throws Exception {
-            initLayer();
-            return null;
-        }
-
-        @Override
-        protected void done() {
-            super.done();
-            try {
-                get();
-            } catch (Exception ex) {
-                log.error("Fehler beim initalisieren des Layers", ex);
-                setIsInitialized(false);
-                RetrievalEvent re = new RetrievalEvent();
-                re.setRequestIdentifier(System.currentTimeMillis());
-                fireRetrievalStarted(re);
-                re.setHasErrors(true);
-                re.setRetrievedObject("Fehler beim initialisieren des Layers");
-                fireRetrievalError(re);
-            }
-            setIsInitialized(true);
-            retrieve(true);
-            layerInitWorker = null;
-        }
+    // check if canceled .......................................................
+    if (layerInitWorker.isCancelled())
+    {
+      logger.warn("LIW[" + layerInitWorker.getId() + "]: init is canceled");
+      return;
     }
+    //..........................................................................
+
+
+    if(DEBUG)logger.debug("init(): performing additional implementation specific initialisation");
+    this.initConcreteInstance();
+
+    //initilaized = true is set in the layerInitWorker
+  }
+
+  /**
+   * Creates a CloneableFeature with defaultvalues.
+   * @return CloneableFeature
+   */
+//  private CloneableFeature createDefaultStyleFeature()
+//  {
+//    DefaultFeatureServiceFeature designer = new DefaultFeatureServiceFeature();
+//    designer.setCanBeSelected(false);
+//    Color defColor = new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
+//    designer.setFillingPaint(defColor);
+//    designer.setLinePaint(defColor.darker());
+//    designer.setTransparency(1.0f);
+//    designer.setPrimaryAnnotation("");
+//    designer.setPrimaryAnnotationScaling(1d);
+//    designer.setPrimaryAnnotationFont(new Font("sansserif", Font.PLAIN, 12));
+//    FeatureAnnotationSymbol fas = new FeatureAnnotationSymbol(PointSymbolCreator.createPointSymbol(true, true, 10, 1, defColor, defColor.darker()));
+//    fas.setSweetSpotX(0.5d);
+//    fas.setSweetSpotY(0.5d);
+//    designer.setPointAnnotationSymbol(fas);
+//    designer.setLineWidth(1);
+//    designer.setMaxScaleDenominator(2500);
+//    designer.setMinScaleDenominator(0);
+//    designer.setAutoScale(true);
+//    designer.setHighlightingEnabled(false);
+//    designer.setIdExpression(this.getDefaultIdExpression());
+//    return designer;
+//  }
+  /**
+   *  Determines which id expression is applicable to the features served by
+   *  the implementing FeatureService. E.g. a WFS FeatureService may return
+   *  "app:gid".
+   *
+   * @return the default id expression applied to the features served by the FeatureService
+   */
+  //protected abstract String getDefaultIdExpression();
+  /**
+   * Refreshs all features by replacing their style with the one of the RenderingFeature.
+   */
+  /*public void refreshFeatures()
+  {
+  ArrayList<CloneableFeature> newRetrievedResults = new ArrayList<CloneableFeature>();
+  for (CloneableFeature cf : getRetrievedResults())
+  {
+  CloneableFeature newCf = (CloneableFeature) getRenderingFeature().clone();
+  newCf.setGeometry(cf.getGeometry());
+
+  if (cf instanceof PropertyContainer && newCf instanceof PropertyContainer)
+  {
+  ((PropertyContainer) newCf).setProperties(((PropertyContainer) cf).getProperties());
+  }
+  customizeFeature(newCf);
+  newRetrievedResults.add(newCf);
+  }
+
+  getRetrievedResults().clear();
+  getRetrievedResults().addAll(newRetrievedResults);
+
+  RetrievalEvent re = new RetrievalEvent();
+  re.setIsComplete(true);
+  re.setHasErrors(false);
+  re.setRefreshExisting(true);
+  re.setRetrievedObject(this.getRetrievedResults());
+  re.setRequestIdentifier(System.currentTimeMillis());
+  fireRetrievalStarted(re);
+  fireRetrievalComplete(re);
+  }*/
+  /**
+   * Creates a vector with FeatureServiceAttribute of all retrieved features.
+   *
+   * @param ctm the current time im milliseconds
+   * @param currentWorker FeatureRetrievalWorker
+   * @return vector with all found FeatureServiceAttributes
+   */
+//  protected void createFeatureAttributes()
+//  {
+//    Vector<FeatureServiceAttribute> tmp = new Vector<FeatureServiceAttribute>();
+//    try
+//    {
+//      Feature[] fc = getFeatures();
+//      if (fc != null && fc.length > 0)
+//      {
+//        for (int i = 0; i < fc.length; i++)
+//        {
+//          FeatureProperty[] featureProperties = fc[i].getProperties();
+//          for (FeatureProperty fp : featureProperties)
+//          {
+//            try
+//            {
+//              FeatureType type = fc[i].getFeatureType();
+//              for (PropertyType pt : type.getProperties())
+//              {
+//                //logger.fatal("Property Name=" + pt.getName() + " PropertyType=" + pt.getType());
+//                //ToDo was ist wenn zwei Geometrien dabei sind
+//                FeatureServiceAttribute fsa = new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true);
+//                if (!tmp.contains(fsa))
+//                {
+//                  tmp.add(fsa);
+//                }
+//              }
+//            } catch (Exception ex)
+//            {
+//              logger.warn("Fehler beim Anlegen eines FeatureServiceAttribute");
+//            }
+//          }
+//        }
+//        setFeatureServiceAttributes(tmp);
+//      } else
+//      {
+//        setFeatureServiceAttributes(tmp);
+//      }
+//    } catch (Exception ex)
+//    {
+//      logger.error("Fehler beim Anlegen der FeatureServiceAttribute", ex);
+//      setFeatureServiceAttributes(tmp);
+//    }
+//  }
+//
+  /**
+   * Creates an instance of a service specific LayerProperties implementation
+   *
+   * @return layer properties to be used
+   */
+  protected abstract LayerProperties createLayerProperties();
+
+  /**
+   * Creates an instance of a service specific FeatureFactory implementation.
+   * All variables required by the concrete FeatureFactory, e.g. the Layer 
+   * Properties must have been initialised before this operation is invoked.
+   *
+   * @return the constructed FeatureFactory
+   * @throws Exception id the costruction failed
+   */
+  protected abstract FeatureFactory createFeatureFactory() throws Exception;
+
+  /**
+   * Get the value of featureFactory
+   *
+   * @return the value of featureFactory
+   */
+  public FeatureFactory getFeatureFactory()
+  {
+    return featureFactory;
+  }
+
+  /**
+   * Get the value of query
+   *
+   * @return the value of query
+   */
+  public abstract QT getQuery();
+
+  /**
+   * Set the value of query
+   *
+   * @param query new value of query
+   */
+  public abstract void setQuery(QT query);
+
+  /**
+   * Cancels the retrievel or the initialisation threads.
+   *
+   * @return {@code true} if a running thread was found and canceled
+   */
+  protected boolean cancel(SwingWorker workerThread)
+  {
+    boolean canceled = false;
+
+//    if (this.layerInitWorker != null && !this.layerInitWorker.isDone())
+//    {
+//      if(this.layerInitWorker != null)logger.warn("canceling LayerInitWorker: " + layerInitWorker.getId());
+//      if(this.layerInitWorker != null)layerInitWorker.cancel(true);
+//      layerInitWorker = null;
+//      canceled = true;
+//    }
+
+    if (workerThread != null && (!workerThread.isDone() || !workerThread.isCancelled()))
+    {
+      if (workerThread != null)
+      {
+        logger.warn("canceling Worker Thread: " + workerThread);
+      }
+      if (workerThread != null)
+      {
+        boolean cancel = workerThread.cancel(true);
+        if(DEBUG)logger.debug("Worker Thread: " + workerThread + " canceled: " + cancel + " (" + workerThread.isCancelled() + ")");
+      }
+      canceled = true;
+    }
+
+    return canceled;
+  }
+
+  /**
+   * Creates a new LayerInitWorker or FeatureRetrievalWorker and launches the
+   * initialisation or retrieval-process depending wheter the layer has already
+   * been initialised or the forced parameter is set to true. A re-initialisation
+   * clears the attribute and layer properties cache and thus resets any saved
+   * properties to default values.
+   *
+   * @param forced forces a re-initialisation of the layer
+   */
+  @Override
+  public synchronized void retrieve(boolean forced)
+  {
+    if(DEBUG)logger.debug("retrieve started (forced = " + forced + ")");
+    if (featureRetrievalWorker != null && !featureRetrievalWorker.isDone())
+    {
+      if(DEBUG)logger.debug("old retrieval thread still running, trying to cancel '" + featureRetrievalWorker.getId() + "' (already canceled = " + featureRetrievalWorker.isCancelled() + ")");
+      this.cancel(featureRetrievalWorker);
+    }
+
+    if(!this.isEnabled() && !this.isVisible())
+    {
+      logger.warn("Service '" + this.getName() + "' is disabled and invisible, ignoring retrieve() request");
+      return;
+    }
+
+    // Initialisierung bereits vorgenommen, d.h. es gibt z.B. Feature Service Attribute
+    if (this.isInitialized() && !this.isRefreshNeeded()/*&& !forced*/)
+    {
+      if(DEBUG)logger.debug("Layer already initialized, starting feature retrieval");
+      if (forced && getFeatureFactory() instanceof CachingFeatureFactory)
+      {
+        if(DEBUG)logger.debug("retrieval forced, flushing cache");
+        if (featureRetrievalWorker != null && !featureRetrievalWorker.isDone())
+        {
+          logger.warn("must wait until thread '" + featureRetrievalWorker + "' is finished before flushing cache");
+          while (!featureRetrievalWorker.isDone())
+          {
+          }
+          if(DEBUG)logger.debug("thread '" + featureRetrievalWorker + "'is finished, flushing cache");
+        }
+        ((CachingFeatureFactory) getFeatureFactory()).flush();
+      }
+
+      this.featureRetrievalWorker = new FeatureRetrievalWorker();
+      featureRetrievalWorker.execute();
+
+    } else
+    {
+      if(DEBUG)logger.debug("Layer not yet initialized ("+this.initialized+") or refresh needed ("+this.isRefreshNeeded()+"), starting LayerInitWorker");
+      if (layerInitWorker == null)
+      {
+        layerInitWorker = new LayerInitWorker();
+        layerInitWorker.execute();
+      } else
+      {
+        logger.warn("Layer wird z.Z. initialisiert --> request wird ignoriert");
+      }
+    }
+  }
+
 // <editor-fold defaultstate="collapsed" desc="Abstract Methods">
 //abstract protected Vector<FeatureServiceAttribute> createFeatureAttributes(final long ctm,final FeatureRetrievalWorker currentWorker) throws Exception;
-    abstract protected void initConcreteInstance() throws Exception;
+  /**
+   * This operation is invoked after the default initialisation. Implementation
+   * classes may implement this merzhod to perform addditional initialisations.
+   *
+   * @throws Exception if the initialisation fails
+   */
+  abstract protected void initConcreteInstance() throws Exception;
 
-    abstract protected Feature[] retrieveFeatures(final long ctm, final FeatureRetrievalWorker currentWorker)
-            throws Exception;
+//  abstract protected Feature[] retrieveFeatures(final long ctm, final FeatureRetrievalWorker currentWorker)
+//          throws Exception;
+//
+//  protected Feature[] retrieveFeatures() throws Exception
+//  {
+//    return retrieveFeatures(System.currentTimeMillis(), null);
+//  }
+  /**
+   *
+   * @return
+   */
+  abstract protected String getFeatureLayerType();
 
-    protected Feature[] retrieveFeatures() throws Exception {
-        return retrieveFeatures(System.currentTimeMillis(), null);
+  //abstract protected void addConcreteElement(Element e);
+  /**
+   *
+   * @param type
+   * @return
+   */
+  abstract public Icon getLayerIcon(int type);
+
+  // </editor-fold>
+  // <editor-fold defaultstate="collapsed" desc="Setters & Getters">
+  /**
+   * Packs the properties of the AbstractFeatureService as JDom-element.
+   * @return JDom-element that outlines this AbstractFeatureService
+   */
+  public boolean isInitialized()
+  {
+    return initialized;
+  }
+
+  protected void setInitialized(boolean isInitialized)
+  {
+    this.initialized = isInitialized;
+  }
+
+//  public Element getLayerConf()
+//  {
+//    return layerConf;
+//  }
+//
+//  public void setLayerConf(Element layerConf)
+//  {
+//    this.layerConf = layerConf;
+//  }
+//  @Deprecated
+//  public Feature[] getFeatures()
+//  {
+//    return features;
+//  }
+//
+//  @Deprecated
+//  public void setFeatures(Feature[] features)
+//  {
+//    this.features = features;
+//  }
+  /**
+   * Returns a list of all featureServiceAttributes of this featureservice
+   */
+  public Map<String, FeatureServiceAttribute> getFeatureServiceAttributes()
+  {
+    return this.featureServiceAttributes;
+  }
+
+  /**
+   * Setter for the featureServiceAttributes of the featureservice.
+   * @param featureServiceAttributes featureServiceAttributes to set
+   */
+  public void setFeatureServiceAttributes(Map<String, FeatureServiceAttribute> featureServiceAttributes)
+  {
+    this.featureServiceAttributes = featureServiceAttributes;
+  }
+
+  /**
+   * Setter for the featureServiceAttributes of the featureservice.
+   * @param featureServiceAttributesVector featureServiceAttributes to set
+   */
+  protected void setFeatureServiceAttributes(Vector<FeatureServiceAttribute> featureServiceAttributesVector)
+  {
+    if (featureServiceAttributesVector != null)
+    {
+      if (this.featureServiceAttributes == null)
+      {
+        this.featureServiceAttributes = new HashMap(featureServiceAttributesVector.size());
+      } else
+      {
+        this.featureServiceAttributes.clear();
+      }
+
+      for (FeatureServiceAttribute fsa : featureServiceAttributesVector)
+      {
+        this.featureServiceAttributes.put(fsa.getName(), fsa);
+      }
     }
+  }
 
-    abstract protected String getFeatureLayerType();
+  /**
+   * This Method is used to set the bounding box to determine which features should
+   * be retrieved
+   * @param bb the bounding box that indicates the area of interest
+   */
+  public BoundingBox getBoundingBox()
+  {
+    return bb;
+  }
 
-    abstract protected void addConcreteElement(Element e);
+  @Override
+  public void setBoundingBox(BoundingBox bb)
+  {
+    this.bb = bb;
+  }
 
-    abstract public Icon getLayerIcon(
-            int type);
+  public String getEncoding()
+  {
+    return encoding;
+  }
 
-    // </editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="Setters & Getters">
-    /**
-     * Packs the properties of the AbstractFeatureService as JDom-element. 
-     * @return JDom-element that outlines this AbstractFeatureService
-     */
-    public boolean isInitialized() {
-        return isInitialized;
-    }
+  public void setEncoding(String encoding)
+  {
+    this.encoding = encoding;
+  }
 
-    public void setIsInitialized(boolean isInitialized) {
-        this.isInitialized = isInitialized;
-    }
-
-    public Element getElement() {
-        Element conf = new Element(getFeatureLayerType());
-        conf.setAttribute("name", getName());
-        conf.setAttribute("visible", new Boolean(getPNode().getVisible()).toString());
-        conf.setAttribute("enabled", new Boolean(isEnabled()).toString());
-        conf.setAttribute("translucency", new Float(getTranslucency()).toString());
-
-        addConcreteElement(conf);
-
-        //getRenderingFeature()
-        if (getRenderingFeature() instanceof ConvertableToXML) {
-            conf.addContent(new Element("renderingFeature").addContent(((ConvertableToXML) getRenderingFeature()).getElement()));
-        }
-
-//getWfsQuery()
-
-//getAttributes
-        Element attrib = new Element("Attributes");
-        for (FeatureServiceAttribute e : getAttributes()) {
-            attrib.addContent(e.getElement());
-        }
-
-        conf.addContent(attrib);
-        return conf;
-    }
-
-    public Element getLayerConf() {
-        return layerConf;
-    }
-
-    public void setLayerConf(Element layerConf) {
-        this.layerConf = layerConf;
-    }
-
-    public Feature[] getFeatures() {
-        return features;
-    }
-
-    public void setFeatures(Feature[] features) {
-        this.features = features;
-    }
-
-    /**
-     * Returns a list of all attributes of this featureservice
-     */
-    public Vector<FeatureServiceAttribute> getAttributes() {
-        return attributes;
-    }
-
-    /**
-     * Setter for the attributes of the featureservice.
-     * @param attributes attributes to set
-     */
-    public void setAttributes(Vector<FeatureServiceAttribute> attributes) {
-        this.attributes = attributes;
-    }
-
-    /**
-     * This Method is used to set the bounding box to determine which features should
-     * be retrieved
-     * @param bb the bounding box that indicates the area of interest
-     */
-    public BoundingBox getBoundingBox() {
-        return bb;
-    }
-
-    public void setBoundingBox(BoundingBox bb) {
-        this.bb = bb;
-    }
-
-    public String getEncoding() {
-        return encoding;
-    }
-
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
-
-    public Color getFillingColor() {
-        return fillingColor;
-    }
-
-    public void setFillingColor(Color fillingColor) {
-        this.fillingColor = fillingColor;
-    }
-
+// public Color getFillingColor()
+//  {
+//    return fillingColor;
+//  }
+//
+//  public void setFillingColor(Color fillingColor)
+//  {
+//    this.fillingColor = fillingColor;
+//  }
 //    public AbstractFeatureRetrievalWorker getFrw() {
-//        return frw;
+//        return featureRetrievalWorker;
 //    }
 //
-//    public void setFrw(AbstractFeatureRetrievalWorker frw) {
-//        this.frw = frw;
+//    public void setFrw(AbstractFeatureRetrievalWorker featureRetrievalWorker) {
+//        this.featureRetrievalWorker = featureRetrievalWorker;
 //    }
-    public Color getLineColor() {
-        return lineColor;
+//  public Color getLineColor()
+//  {
+//    return lineColor;
+//  }
+//
+//  public void setLineColor(Color lineColor)
+//  {
+//    this.lineColor = lineColor;
+//  }
+  public int getMaxFeatureCount()
+  {
+    return maxFeatureCount;
+  }
+
+  public void setMaxFeatureCount(int maxFeatureCount)
+  {
+    this.maxFeatureCount = maxFeatureCount;
+    if (this.getFeatureFactory() != null)
+    {
+      this.getFeatureFactory().setMaxFeatureCount(maxFeatureCount);
+    }
+  }
+
+//  public CloneableFeature getRenderingFeature()
+//  {
+//    return renderingFeature;
+//  }
+//  public void setRenderingFeature(CloneableFeature renderingFeature)
+//  {
+//    this.renderingFeature = renderingFeature;
+//  }
+//  public ArrayList<CloneableFeature> getRetrievedResults()
+//  {
+//    return retrievedResults;
+//  }
+  public LayerProperties getLayerProperties()
+  {
+    return layerProperties;
+  }
+
+  /**
+   * Sets th enew layer properties of the service and
+   * @param layerProperties
+   */
+  public void setLayerProperties(LayerProperties layerProperties)
+  {
+    this.layerProperties = layerProperties;
+
+    if (this.featureFactory != null)
+    {
+      if(DEBUG)logger.debug("setLayerProperties: new layer properties are also applied to all cached features!");
+      // layer properties are appiled to last created features
+      if (featureRetrievalWorker != null && !featureRetrievalWorker.isDone())
+      {
+        logger.warn("must wait until thread '" + featureRetrievalWorker + "' is finished before applying new layer properties");
+        while (!featureRetrievalWorker.isDone())
+        {
+          // wait ....
+        }
+        if(DEBUG)logger.debug("thread '" + featureRetrievalWorker + "' is finished, applying new layer properties");
+      }
+
+      this.featureFactory.setLayerProperties(layerProperties);
+      final Vector<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
+      if (lastCreatedFeatures.size() > 0)
+      {
+        if(DEBUG)logger.debug(lastCreatedFeatures.size() + " last created features refreshed, fiering retrival event");
+        EventQueue.invokeLater(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            RetrievalEvent re = new RetrievalEvent();
+            re.setIsComplete(true);
+            re.setHasErrors(false);
+            re.setRefreshExisting(true);
+            re.setRetrievedObject(lastCreatedFeatures);
+            re.setRequestIdentifier(System.currentTimeMillis());
+            fireRetrievalStarted(re);
+            fireRetrievalComplete(re);
+          }
+        });
+      } else
+      {
+        logger.warn("no last created features that could be refreshed found");
+      }
+    }
+  }
+
+  /**
+   * Deliveres the transparency value of the Featues
+   * @return the translucency value
+   */
+  @Override
+  public float getTranslucency()
+  {
+    return translucency;
+  }
+
+  /**
+   * Setter for the transparency value
+   * @param t the new transparency value
+   */
+  @Override
+  public void setTranslucency(float t)
+  {
+    this.translucency = t;
+  }
+
+  /**
+   * Setter for the name of the AbstractFeatureService
+   * @param name the new name that will be set
+   */
+  @Override
+  public void setName(String name)
+  {
+    this.name = name;
+  }
+
+  /**
+   * This method delivers the name of the layer
+   * @return the name of the layer
+   */
+  @Override
+  public String getName()
+  {
+    return name;
+  }
+
+  /**
+   * This method delivers the postion of the layer in the layer hierachy
+   * @return the postion of the layer in the layer hierarchy
+   */
+  @Override
+  public int getLayerPosition()
+  {
+    return layerPosition;
+  }
+
+  /**
+   * Sets the layer postion. Dependet on this value the layer will be positioned at
+   * top of other layers or behind other layers
+   * @param layerPosition The integer value which determines the postion in the layer hierarchy
+   */
+  @Override
+  public void setLayerPosition(int layerPosition)
+  {
+    this.layerPosition = layerPosition;
+  }
+
+  /**
+   * Returns if the layer is enabled or disabled
+   * @return either true if the layer is enabled or false if its not
+   */
+  @Override
+  public boolean isEnabled()
+  {
+    return enabled;
+  }
+
+  /**
+   * Enables or disables the Layer
+   * @param enabled true enables the layer, false disables it
+   */
+  @Override
+  public void setEnabled(boolean enabled)
+  {
+    if(!enabled)
+    {
+      if(!this.canBeDisabled())
+      {
+        logger.warn("Service '" + this.getName() + "' cannot be disabled");
+      }
+      else
+      {
+        this.enabled = false;
+        //
+      }
+    }
+    else
+    {
+      this.enabled = true;
+    }
+  }
+
+  /**
+   * This method checks either a layer can be disabled or not
+   * @return true if the layer can be disabled or false if not
+   */
+  @Override
+  public boolean canBeDisabled()
+  {
+    return true;
+  }
+
+  @Override
+  public boolean isVisible()
+  {
+    return visible;
+  }
+
+  public void setVisible(boolean visible)
+  {
+    this.visible = visible;
+  }
+
+  @Override
+  public void setSize(int height, int width)
+  {
+  }
+
+  @Override
+  public PNode getPNode()
+  {
+    return pNode;
+  }
+
+  @Override
+  public void setPNode(PNode pNode)
+  {
+    this.pNode = pNode;
+  }
+
+  @Override
+  public String toString()
+  {
+    return this.getName();
+  }
+
+  @Override
+  public Element toElement()
+  {
+    Element element = new Element(getFeatureLayerType());
+    element.setAttribute("name", getName());
+    element.setAttribute("type", this.getClass().getCanonicalName());
+    element.setAttribute("visible", new Boolean(getPNode().getVisible()).toString());
+    element.setAttribute("enabled", new Boolean(isEnabled()).toString());
+    element.setAttribute("translucency", new Float(getTranslucency()).toString());
+    element.setAttribute("maxFeatureCount", new Integer(this.getMaxFeatureCount()).toString());
+    element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString());
+
+    if (this.getFeatureServiceAttributes() != null && this.getFeatureServiceAttributes().size() > 0)
+    {
+      Element attrib = new Element("Attributes");
+      for (FeatureServiceAttribute e : getFeatureServiceAttributes().values())
+      {
+        attrib.addContent(e.toElement());
+      }
+      element.addContent(attrib);
+    }
+    else
+    {
+      logger.warn("FeatureServiceAttributes are null and will not be saved");
     }
 
-    public void setLineColor(Color lineColor) {
-        this.lineColor = lineColor;
+    if (this.getLayerProperties() != null)
+    {
+      Element layerPropertiesElement = this.getLayerProperties().toElement();
+      element.addContent(layerPropertiesElement);
+    }
+    else
+    {
+      logger.warn("Layer Properties are null and will not be saved");
     }
 
-    public int getMaxFeatureCount() {
-        return maxFeatureCount;
+    return element;
+  }
+
+  @Override
+  public void initFromElement(Element element) throws Exception
+  {
+    if (element.getAttributeValue("name") != null)
+    {
+      this.setName(element.getAttributeValue("name"));
+    }
+    if (element.getAttributeValue("visible") != null)
+    {
+      this.setVisible(new Boolean(element.getAttributeValue("visible")));
+    }
+    if (element.getAttributeValue("enabled") != null)
+    {
+      this.setEnabled(new Boolean(element.getAttributeValue("enabled")));
+    }
+    if (element.getAttributeValue("translucency") != null)
+    {
+      this.setTranslucency(element.getAttribute("translucency").getFloatValue());
+    }
+    if (element.getAttributeValue("maxFeatureCount") != null)
+    {
+      this.setMaxFeatureCount(element.getAttribute("maxFeatureCount").getIntValue());
+    }
+    if (element.getAttributeValue("layerPosition") != null)
+    {
+      this.setLayerPosition(element.getAttribute("layerPosition").getIntValue());
+    }
+    if (element.getAttributeValue("maxFeatureCount") != null)
+    {
+      element.setAttribute("maxFeatureCount", new Integer(this.getMaxFeatureCount()).toString());
+    }
+    if (element.getAttributeValue("layerPosition") != null)
+    {
+      element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString());
     }
 
-    public void setMaxFeatureCount(int maxFeatureCount) {
-        this.maxFeatureCount = maxFeatureCount;
+    Element xmlAttributes = element.getChild("Attributes");
+    if (xmlAttributes != null)
+    {
+      featureServiceAttributes = FeatureServiceUtilities.getFeatureServiceAttributes(xmlAttributes);
+      this.setFeatureServiceAttributes(featureServiceAttributes);
     }
 
-    public CloneableFeature getRenderingFeature() {
-        return renderingFeature;
+    if (element.getAttribute(ConvertableToXML.TYPE_ATTRIBUTE) == null)
+    {
+      logger.warn("fromElement: restoring object from deprecated xml element");
+      try
+      {
+               this.fromOldElement(element);
+      }
+      catch(Throwable t)
+      {
+        logger.warn("could not restore deprecated configuration: \n"+t.getMessage(),t);
+      }
+    } else if (element.getChild("LayerProperties") != null)
+    {
+      LayerProperties restoredLayerProperties = null;
+      try
+      {
+        Element layerPropertiesElement = (Element)element.getChild(LayerProperties.LAYER_PROPERTIES_ELEMENT);
+        restoredLayerProperties = (LayerProperties) XMLObjectFactory.restoreObjectfromElement(layerPropertiesElement);
+      } catch (Throwable t)
+      {
+        logger.error("could not restore generic style element '" +
+                element.getChild("LayerProperties").getAttribute(ConvertableToXML.TYPE_ATTRIBUTE) + "': \n" + t.getMessage(), t);
+      }
+      this.layerProperties = restoredLayerProperties;
+    }
+    else
+  {
+    logger.warn("no layer properties ");
+  }
+  }
+
+
+  /**
+   * @param element old XML Configuration
+   * @deprecated
+   */
+  @Deprecated
+  private void fromOldElement(Element element)
+  {
+    //setName(element.getAttributeValue("name"));
+    //setVisible(new Boolean(element.getAttributeValue("visible")));
+    //setEnabled(new Boolean(element.getAttributeValue("enabled")));
+    //setTranslucency(element.getAttribute("translucency").getFloatValue());
+
+    // Element xmlAttributes = element.getChild("Attributes");
+    //featureServiceAttributes = FeatureServiceUtilities.getFeatureServiceAttributes(xmlAttributes);
+    //setFeatureServiceAttributes(featureServiceAttributes);
+
+    DefaultFeatureServiceFeature wfsFeature = new DefaultFeatureServiceFeature();
+    Element renderingFeature = element.getChild("renderingFeature").getChild("DefaultWFSFeature");
+    //f.setId(Integer.parseInt(renderingFeature.getAttributeValue("id")));
+    wfsFeature.setIdExpression(renderingFeature.getAttributeValue("idExpression"));
+    int lineWidth = Integer.parseInt(renderingFeature.getAttributeValue("lineWidth"));
+    wfsFeature.setLineWidth(lineWidth);
+    wfsFeature.setTransparency(Float.parseFloat(renderingFeature.getAttributeValue("transparency")));
+    wfsFeature.setPrimaryAnnotation(renderingFeature.getAttributeValue("primaryAnnotation"));
+    wfsFeature.setSecondaryAnnotation(renderingFeature.getAttributeValue("secondaryAnnotation"));
+    wfsFeature.setPrimaryAnnotationScaling(Double.parseDouble(renderingFeature.getAttributeValue("primaryAnnotationScaling")));
+    wfsFeature.setPrimaryAnnotationJustification(Float.parseFloat(renderingFeature.getAttributeValue("primaryAnnotationJustification")));
+    wfsFeature.setMaxScaleDenominator(Integer.parseInt(renderingFeature.getAttributeValue("maxScaleDenominator")));
+    wfsFeature.setMinScaleDenominator(Integer.parseInt(renderingFeature.getAttributeValue("minScaleDenominator")));
+    wfsFeature.setAutoScale(Boolean.parseBoolean(renderingFeature.getAttributeValue("autoscale")));
+
+    // color kann null sein (fill disabled oder line disabled)
+    Color fill = null;
+    Color line = null;
+
+    if (renderingFeature.getChild("fillingColor") != null)
+    {
+      fill = StaticXMLTools.convertXMLElementToColor(renderingFeature.getChild("fillingColor").getChild("Color"));
+    }
+    wfsFeature.setFillingPaint(fill);
+
+    if (renderingFeature.getChild("lineColor") != null)
+    {
+      line = StaticXMLTools.convertXMLElementToColor(renderingFeature.getChild("lineColor").getChild("Color"));
+    }
+    wfsFeature.setLinePaint(line);
+
+    wfsFeature.setPrimaryAnnotationFont(StaticXMLTools.convertXMLElementToFont(renderingFeature.getChild("primaryAnnotationFont").getChild("Font")));
+    wfsFeature.setPrimaryAnnotationPaint(StaticXMLTools.convertXMLElementToColor(renderingFeature.getChild("primaryAnnotationColor").getChild("Color")));
+    wfsFeature.setHighlightingEnabled(Boolean.parseBoolean(renderingFeature.getAttributeValue("highlightingEnabled")));
+    wfsFeature.getLayerProperties().getStyle().setPointSymbolFilename(Style.AUTO_POINTSYMBOL);
+
+    //FeatureAnnotationSymbol fas = new FeatureAnnotationSymbol(PointSymbolCreator.createPointSymbol((line != null), (fill != null), 10, lineWidth, fill, line));
+    //fas.setSweetSpotX(0.5d);
+    //fas.setSweetSpotY(0.5d);
+    //wfsFeature.setPointAnnotationSymbol(fas);
+
+    this.layerProperties = wfsFeature.getLayerProperties();
+  }
+
+  /**
+   * This operation class the {@code createFeatures()} operation of the current
+   * FeatureFactory. Implementation classes may override this method to pass
+   * additional parameters to the {@code createFeatures()} operation of the
+   * specific FeatureFactory implementation.
+   *
+   * @param worker the current worker thred that is observed
+   * @return the FeatureServiceFeatures created by the current Factory
+   */
+  protected Vector<FT> retrieveFeatures(final FeatureRetrievalWorker worker) throws Exception
+  {
+    if(DEBUG)logger.debug("FRW[" + worker.getId() + "]: retrieveFeatures started");
+    // check if canceled .......................................................
+    if (worker.isCancelled())
+    {
+      logger.warn("FRW[" + worker.getId() + "]: retrieveFeatures is canceled");
+      return null;
+    }
+    // check if canceled .......................................................
+
+    long start = System.currentTimeMillis();
+    final Vector<FT> features = getFeatureFactory().createFeatures(this.getQuery(), this.getBoundingBox(), worker);
+    if (features != null)
+    {
+      logger.info("FRW[" + worker.getId() + "]: " + features.size() + " features retrieved in " + (System.currentTimeMillis() - start) + " ms");
+    } else
+    {
+      logger.warn("FRW[" + worker.getId() + "]: no features found (canceled=" + worker.isCancelled() + ")");
     }
 
-    public void setRenderingFeature(CloneableFeature renderingFeature) {
-        this.renderingFeature = renderingFeature;
+    if(DEBUG)logger.debug("FRW[" + worker.getId() + "]: retrieveFeatures completed");
+    return features;
+  }
+
+  /**
+   * Feature Retrieval Thread started by the {@code retrieve()} operation
+   */
+  protected class FeatureRetrievalWorker extends SwingWorker<Vector<FT>, FT> implements PropertyChangeListener
+  {
+    private final long id = System.nanoTime();
+    //private final long id = System.currentTimeMillis();
+
+    public long getId()
+    {
+      return this.id;
     }
 
-    public ArrayList<CloneableFeature> getRetrievedResults() {
-        return retrievedResults;
-    }
-
-    /**
-     * Deliveres the transparency value of the Featues
-     * @return the translucency value
-     */
-    public float getTranslucency() {
-        return translucency;
-    }
-
-    /**
-     * Setter for the transparency value
-     * @param t the new transparency value
-     */
-    public void setTranslucency(float t) {
-        this.translucency = t;
-    }
-
-    /**
-     * Setter for the name of the AbstractFeatureService
-     * @param name the new name that will be set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * This method delivers the name of the layer
-     * @return the name of the layer
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * This method delivers the postion of the layer in the layer hierachy
-     * @return the postion of the layer in the layer hierarchy
-     */
-    public int getLayerPosition() {
-        return layerPosition;
-    }
-
-    /**
-     * Sets the layer postion. Dependet on this value the layer will be positioned at
-     * top of other layers or behind other layers
-     * @param layerPosition The integer value which determines the postion in the layer hierarchy
-     */
-    public void setLayerPosition(int layerPosition) {
-        this.layerPosition = layerPosition;
-    }
-
-    /**
-     * Returns if the layer is enabled or disabled
-     * @return either true if the layer is enabled or false if its not
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Enables or disables the Layer
-     * @param enabled true enables the layer, false disables it
-     */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    /**
-     * This method checks either a layer can be disabled or not
-     * @return true if the layer can be disabled or false if not
-     */
-    public boolean canBeDisabled() {
-        return true;
-    }
-
-    public boolean isVisible() {
-        return visible;
-    }
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
-
-    public void setSize(int height, int width) {
-    }
-
-    public PNode getPNode() {
-        return pNode;
-    }
-
-    public void setPNode(PNode pNode) {
-        this.pNode = pNode;
+    public FeatureRetrievalWorker()
+    {
+      this.addPropertyChangeListener(this);
     }
 
     @Override
-    public String toString() {
-        return getName();
-    }
-// </editor-fold>
-    class FeatureRetrievalWorker extends SwingWorker<ArrayList<CloneableFeature>, CloneableFeature> {
-
-        private int progress = 0;
-        private int size = 0;
-        private final long ctm = System.currentTimeMillis();
-        private String errorMessage = "";
-        private Boolean blocker = new Boolean(true);
-
-        public FeatureRetrievalWorker() {
-        }
-
-        public long getCtm() {
-            return ctm;
-        }
-
-        public Boolean getBlocker() {
-            return blocker;
-        }
-
-        public void setBlocker(Boolean blocker) {
-            this.blocker = blocker;
-        }
-
-        public String getErrorMessage() {
-            return errorMessage;
-        }
-
-        public void setErrorMessage(String errorMessage) {
-            this.errorMessage = errorMessage;
-        }
-
-        public int getSize() {
-            return size;
-        }
-
-        public void setSize(int size) {
-            this.size = size;
-        }
-
-        protected void processFeatures() throws Exception {
-            long start = System.currentTimeMillis();
-            int geometryIndex = GeometryHeuristics.findBestGeometryIndex(features[0]);
-            for (int i = 0; i < size; i++) {
-                if (isCancelled()) {
-                    log.debug("doInBackground (FeatureService) is canceled");
-                    return;
-                }
-
-                Feature current = features[i];
-
-                if (AbstractFeatureService.this instanceof StaticFeatureService) {
-                    Coordinate[] polyCords = new Coordinate[5];
-                    polyCords[0] = new Coordinate(getBoundingBox().getX1(), getBoundingBox().getY1());
-                    polyCords[1] = new Coordinate(getBoundingBox().getX1(), getBoundingBox().getY2());
-                    polyCords[2] = new Coordinate(getBoundingBox().getX2(), getBoundingBox().getY2());
-                    polyCords[3] = new Coordinate(getBoundingBox().getX2(), getBoundingBox().getY1());
-                    polyCords[4] = new Coordinate(getBoundingBox().getX1(), getBoundingBox().getY1());
-                    Polygon boundingPolygon = (new GeometryFactory()).createPolygon((new GeometryFactory()).createLinearRing(polyCords), null);
-
-                    if (!(JTSAdapter.export(current.getDefaultGeometryPropertyValue())).intersects(boundingPolygon)) {
-                        //log.debug("Feature ist nicht in boundingbox");
-                        continue;
-                    }
-                }
-                //Feature stukturieren
-                String id = current.getId();
-
-                CloneableFeature cloneableFeature = (CloneableFeature) getRenderingFeature().clone();
-                try {
-                    cloneableFeature.setGeometry(JTSAdapter.export(current.getGeometryPropertyValues()[geometryIndex]));
-                } catch (Exception e) {
-                    cloneableFeature.setGeometry(JTSAdapter.export(current.getDefaultGeometryPropertyValue()));
-                }
-                if (cloneableFeature instanceof PropertyContainer) {
-                    PropertyContainer propertyContainerFeature = (PropertyContainer) cloneableFeature;
-                    FeatureProperty[] featureProperties = current.getProperties();
-                    for (FeatureProperty fp : featureProperties) {
-                        propertyContainerFeature.addProperty(fp.getName().getAsString(), fp.getValue());
-                    }
-                // log.debug(propertyContainerFeature.getProperties());
-                }
-                customizeFeature(cloneableFeature);
-
-                getRetrievedResults().add(cloneableFeature);
-                publish(cloneableFeature);
-            }
-
-            if (log.isEnabledFor(Priority.INFO)) {
-                log.info(getRetrievedResults().size() + " Features im gew\u00E4hlten Ausschnitt");
-            }
-
-            if (getRetrievedResults().size() > getMaxFeatureCount()) {
-                setErrorMessage("Mehr als " + getMaxFeatureCount() + " Features k\u00F6nnen nicht dargestellt werden.");
-                throw new Exception(getErrorMessage());
-            }
-
-            long stop = System.currentTimeMillis();
-            if (log.isEnabledFor(Priority.INFO)) {
-                log.info(((stop - start) / 1000.0) + " Sekunden dauerte das Umwandeln in das interne Feature Format");
-            }
-
-            if (isCancelled()) {
-                log.debug("doInBackground (AbstractFeatureService) is canceled");
-                return;
-            }
-        }
-
-        protected ArrayList<CloneableFeature> doInBackground() throws Exception {
-            try {
-                getRetrievedResults().clear();
-                EventQueue.invokeLater(new Runnable() {
-                    public void run() {
-                        RetrievalEvent r = new RetrievalEvent();
-                        r.setRequestIdentifier(getCtm());
-                        fireRetrievalStarted(r);
-                    }
-                });
-
-                if (isCancelled()) {
-                    log.debug("doInBackground (AbstractFeatureService) is canceled");
-                    return null;
-                }
-
-                if (!(AbstractFeatureService.this instanceof StaticFeatureService)) {
-                    setFeatures(null);
-                    setFeatures(retrieveFeatures(getCtm(), this));
-                }
-
-                if (isCancelled()) {
-                    log.debug("doInBackground (AbstractFeatureService) is canceled");
-                    return null;
-                }
-
-                if (getFeatures() == null || getFeatures().length == 0) {
-                    log.info("Keine Features vorhanden");
-                    return null;
-                } else {
-                    setSize(getFeatures().length);
-                    log.debug("Anzahl Features insgesamt: " + getSize());
-                }
-                processFeatures();
-                return getRetrievedResults();
-
-            } catch (Throwable ex) {
-                String message;
-                if (ex.getMessage() == null || ex.getMessage().equalsIgnoreCase("null")) {
-                    try {
-                        message = ex.getMessage();
-                    } catch (Throwable t) {
-                        message = "Nicht zuordnungsf\u00E4higer Fehler (e.getCause()==null)";
-                    }
-                } else {
-                    message = ex.getMessage();
-                }
-                log.error("Fehler im FeatureRetrievalWorker: ", ex);
-                setErrorMessage(message);
-                throw new Exception("Fehler im FeatureRetrievalWorker", ex);
-            }
-        }
-
-        protected void process(ArrayList<CloneableFeature> chunks) {
-            for (CloneableFeature feature : chunks) {
-                if (isCancelled()) {
-                    break;
-                }
-                RetrievalEvent re = new RetrievalEvent();
-                re.setIsComplete(false);
-                double percentage = ((double) getProgress()) / ((double) getSize()) * 100.0;
-                re.setPercentageDone(percentage);
-                re.setRequestIdentifier(getCtm());
-                fireRetrievalProgress(re);
-            }
-        }
-
+    protected Vector<FT> doInBackground() throws Exception
+    {
+      if(DEBUG)logger.debug("FRW[" + this.getId() + "]: doInBackground() started");
+      EventQueue.invokeLater(new Runnable()
+      {
         @Override
-        protected void done() {
-            log.debug("FeatureRetieverWorker done");
-            if (isCancelled()) {
-                log.debug("FeatureRetrieverWorker canceled (done)");
-                setErrorMessage("Die Anfrage wurde abgebrochen");
-                RetrievalEvent re = new RetrievalEvent();
-                re.setHasErrors(false);
-                fireRetrievalAborted(re);
-                return;
-            }
-            try {
-                ArrayList<CloneableFeature> results = get();
-                if (results != null) {
-                    log.debug("FeatureRetrieverWorker brachte " + results.size() + " Ergebnisse");
-                    RetrievalEvent re = new RetrievalEvent();
-                    re.setIsComplete(true);
-                    re.setHasErrors(false);
-                    re.setRetrievedObject(results);
-                    re.setRequestIdentifier(getCtm());
-                    fireRetrievalComplete(re);
-                } else {
-                    log.debug("FeatureRetrieverWorker brachte keine Ergebnisse");
-                    //setErrorMessage("Feature Request brachte keine Ergebnisse");
-                    RetrievalEvent re = new RetrievalEvent();
-                    re.setHasErrors(false);
-                    re.setRetrievedObject(new ArrayList<CloneableFeature>());
-                    re.setRequestIdentifier(getCtm());
-                    fireRetrievalComplete(re);
-                }
-            } catch (Exception ex) {
-                log.debug("Fehler im FeatureRetrieverWorker (done): ", ex);
-                setErrorMessage("Fehler beim Abrufen der Features");
-                cancelRequest();
-            }
+        public void run()
+        {
+          RetrievalEvent r = new RetrievalEvent();
+          r.setRequestIdentifier(getId());
+          r.setPercentageDone(-1);
+          fireRetrievalStarted(r);
+        }
+      });
+
+      // check if canceled .......................................................
+      if (this.isCancelled())
+      {
+        logger.warn("FRW[" + this.getId() + "]: doInBackground() canceled");
+        return null;
+      }
+      // check if canceled .......................................................
+
+      Vector<FT> features = retrieveFeatures(this);
+      if(DEBUG)logger.debug("FRW[" + this.getId() + "]: doInBackground() completed");
+      return features;
+    }
+
+    @Override
+    protected void done()
+    {
+      if(DEBUG)logger.debug("FRW[" + this.getId() + "]: done()");
+      // check if canceled .......................................................
+      if (this.isCancelled())
+      {
+        logger.warn("FRW[" + this.getId() + "]:  canceled (done)");
+        RetrievalEvent re = new RetrievalEvent();
+        re.setRequestIdentifier(this.getId());
+        re.setPercentageDone(0);
+        re.setHasErrors(false);
+        fireRetrievalAborted(re);
+        return;
+      }
+      // check if canceled .......................................................
+
+      try
+      {
+        Vector<FT> results = null;
+        if (!this.isCancelled())
+        {
+          results = this.get();
         }
 
-        protected void cancelRequest() {
-            RetrievalEvent re = new RetrievalEvent();
-            re.setHasErrors(true);
-            re.setRetrievedObject(getErrorMessage());
-            re.setRequestIdentifier(getCtm());
-            fireRetrievalError(re);
+        if (results != null)
+        {
+          if(DEBUG)logger.debug("FRW[" + this.getId() + "]: " + results.size() + " features created");
+          AbstractFeatureService.this.setRefreshNeeded(false);
+          RetrievalEvent re = new RetrievalEvent();
+          re.setRequestIdentifier(getId());
+          re.setIsComplete(true);
+          re.setHasErrors(false);
+          re.setRetrievedObject(results);
+          fireRetrievalComplete(re);
+        } else
+        {
+          logger.warn("FRW[" + this.getId() + "]: FeatureRetrieverWorker brachte keine Ergebnisse (canceled=" + this.isCancelled() + ")");
+          //setErrorMessage("Feature Request brachte keine Ergebnisse");
+          RetrievalEvent re = new RetrievalEvent();
+          re.setHasErrors(false);
+
+          re.setRequestIdentifier(getId());
+          if (this.isCancelled())
+          {
+            fireRetrievalAborted(re);
+          } else
+          {
+            re.setRetrievedObject(new Vector<FT>());
+            fireRetrievalComplete(re);
+          }
         }
+      } catch (Throwable t)
+      {
+        logger.error("FRW[" + this.getId() + "]: Fehler im FeatureRetrieverWorker (done): \n" + t.getMessage(), t);
+
+        RetrievalEvent re = new RetrievalEvent();
+        re.setRequestIdentifier(this.getId());
+        re.setPercentageDone(0);
+        re.setHasErrors(true);
+        re.setRetrievedObject(t.getMessage());
+        fireRetrievalError(re);
+      }
     }
+
+    /**
+     * Fires a RetrievalEvent on progress update.
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt)
+    {
+      if (evt.getPropertyName().equals("progress"))
+      {
+        int progress = (Integer) evt.getNewValue();
+        //AbstractFeatureService.this.setProgress(progress);
+        if(DEBUG)logger.debug("FRW[" + this.getId() + "]: FeatureRetrieverWorker progress: "+progress);
+
+        RetrievalEvent re = new RetrievalEvent();
+        re.setRequestIdentifier(this.getId());
+        re.setIsComplete(progress != 100);
+        re.setPercentageDone(progress);
+        AbstractFeatureService.this.fireRetrievalProgress(re);
+      }
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.valueOf(this.getId());
+    }
+  }
+
+  /**
+   * Initialisiert den Layer
+   */
+  protected class LayerInitWorker extends SwingWorker<Void, Void> implements PropertyChangeListener
+  {
+    private final long id = System.nanoTime();
+    //private final long id = System.currentTimeMillis();
+
+    public LayerInitWorker()
+    {
+      this.addPropertyChangeListener(this);
+    }
+
+    public long getId()
+    {
+      return this.id;
+    }
+
+    @Override
+    protected Void doInBackground() throws Exception
+    {
+      if(DEBUG)logger.debug("LIW[" + this.getId() + "]: doInBackground() started");
+      EventQueue.invokeLater(new Runnable()
+      {
+        @Override
+        public void run()
+        {
+          RetrievalEvent r = new RetrievalEvent();
+          r.setPercentageDone(-1);
+          r.setRequestIdentifier(getId());
+          r.setInitialisationEvent(true);
+          fireRetrievalStarted(r);
+        }
+      });
+
+      init();
+      return null;
+    }
+
+    @Override
+    protected void done()
+    {
+      AbstractFeatureService.this.setRefreshNeeded(false);
+      if(DEBUG)logger.debug("LIW[" + this.getId() + "]: done()");
+      // check if canceled .......................................................
+      if (isCancelled())
+      {
+        if(DEBUG)logger.debug("LIW[" + this.getId() + "]: canceled (done)");
+        setInitialized(false);
+
+        RetrievalEvent re = new RetrievalEvent();
+        re.setInitialisationEvent(true);
+        re.setPercentageDone(0);
+        re.setRequestIdentifier(this.getId());
+        re.setHasErrors(false);
+        fireRetrievalAborted(re);
+        return;
+      }
+      // check if canceled .......................................................
+
+      try
+      {
+        get();
+
+        if(DEBUG)logger.debug("LIW[" + this.getId() + "]: finished");
+        AbstractFeatureService.this.setRefreshNeeded(false);
+        RetrievalEvent re = new RetrievalEvent();
+        re.setInitialisationEvent(true);
+        re.setPercentageDone(100);
+        re.setRequestIdentifier(getId());
+        re.setIsComplete(true);
+        re.setHasErrors(false);
+        re.setRetrievedObject(null);
+        fireRetrievalComplete(re);
+
+      } catch (Throwable t)
+      {
+        logger.error("LIW[" + this.getId() + "]: Fehler beim initalisieren des Layers: "+t.getMessage(), t);
+        setInitialized(false);
+
+        RetrievalEvent re = new RetrievalEvent();
+        re.setInitialisationEvent(true);
+        re.setPercentageDone(0);
+        re.setRequestIdentifier(this.getId());
+        fireRetrievalStarted(re);
+        re.setHasErrors(true);
+        re.setRetrievedObject(t.getMessage());
+        fireRetrievalError(re);
+        return;
+      }
+
+      setInitialized(true);
+      layerInitWorker = null;
+
+      // start initial retrieval
+      retrieve(false);
+    }
+
+    /**
+     * Fires a RetrievalEvent on progress update.
+     */
+    @Override
+    public void propertyChange(PropertyChangeEvent evt)
+    {
+      if (evt.getPropertyName().equals("progress"))
+      {
+        int progress = (Integer) evt.getNewValue();
+        //AbstractFeatureService.this.setProgress(progress);
+        if(DEBUG)logger.debug("LIW[" + this.getId() + "]: LayerInitWorker progress: " + progress);
+
+        RetrievalEvent re = new RetrievalEvent();
+        re.setInitialisationEvent(true);
+        re.setRequestIdentifier(this.getId());
+        re.setIsComplete(progress != 100);
+        re.setPercentageDone(progress);
+        AbstractFeatureService.this.fireRetrievalProgress(re);
+      }
+    }
+
+    @Override
+    public String toString()
+    {
+      return String.valueOf(this.getId());
+    }
+  }
 }

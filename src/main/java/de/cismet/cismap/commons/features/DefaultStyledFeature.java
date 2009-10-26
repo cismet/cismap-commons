@@ -71,6 +71,7 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
 
     /** Creates a new instance of DefaultStyledFeature */
     public DefaultStyledFeature() {
+
     }
 
     public DefaultStyledFeature(DefaultStyledFeature dsf) {
@@ -171,6 +172,7 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
         this.editable = editable;
     }
 
+  @Override
     public void hide(boolean hiding) {
         this.hiding = hiding;
     }
@@ -276,18 +278,16 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
         return justification;
     }
 
-    public void setPrimaryAnnotationJustification(float just) {
-        log.debug("setPrimaryAnnotationJustification " + just);
+    public void setPrimaryAnnotationJustification(float just) {        
         justification = just;
     }
 
-    public boolean isPrimaryAnnotationVisible() {
-        log.debug("isPrimaryAnnotationVisible " + primaryAnnotationVisible);
+    public boolean isPrimaryAnnotationVisible() {        
         return primaryAnnotationVisible;
     }
 
-    public void setPrimaryAnnotationVisible(boolean visible) {
-        log.debug("setPrimaryAnnotationVisible " + visible);
+  @Override
+    public void setPrimaryAnnotationVisible(boolean visible) {        
         primaryAnnotationVisible = visible;
     }
 }

@@ -52,6 +52,7 @@ import org.jdom.Element;
  *
  * @author thorsten.hell@cismet.de
  */
+@Deprecated
 public class DefaultMappingModel implements MappingModel, Configurable {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
@@ -102,24 +103,25 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 
     }
 
-    public static void main(String[] args) {
-        DefaultMappingModel dm = new DefaultMappingModel();
-        TreeMap tm = new TreeMap();
-        tm.put(3, "C");
-        tm.put(4, "D");
-        tm.put(5, "E");
-        tm.put(1, "A");
-        tm.put(2, "B");
-        System.out.println(tm);
-
-        dm.moveObjectInTreeMap(tm, "A", DOWN);
-        System.out.println(tm);
-    }
+//    public static void main(String[] args) {
+//        DefaultMappingModel dm = new DefaultMappingModel();
+//        TreeMap tm = new TreeMap();
+//        tm.put(3, "C");
+//        tm.put(4, "D");
+//        tm.put(5, "E");
+//        tm.put(1, "A");
+//        tm.put(2, "B");
+//        System.out.println(tm);
+//
+//        dm.moveObjectInTreeMap(tm, "A", DOWN);
+//        System.out.println(tm);
+//    }
 
 //    public void putFeatureService(int position, de.cismet.cismap.commons.featureservice.FeatureService featureService) {
 //        featureServices.put(new Integer(position), featureService);
 //    }
 
+  @Override
     public void addMappingModelListener(MappingModelListener mml) {
         if (!(mappingModelListeners.contains(mml))) {
             mappingModelListeners.add(mml);
@@ -129,6 +131,7 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //    public void removeFeatureService(de.cismet.cismap.commons.featureservice.FeatureService featureService) {
 //    }
 
+  @Override
     public void removeMappingModelListener(MappingModelListener mml) {
         mappingModelListeners.remove(mml);
     }
@@ -154,14 +157,17 @@ public class DefaultMappingModel implements MappingModel, Configurable {
         return featureCollection;
     }
 
-    public TreeMap getFeatureServices() {
+
+    public TreeMap getMapServices() {
         return featureServices;
     }
 
+  @Override
     public BoundingBox getInitialBoundingBox() {
         return initialBoundingBox;
     }
 
+  @Override
     public TreeMap getRasterServices() {
         return mapServices;
     }
@@ -194,12 +200,15 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //        }
 //    }
     //TODO
+  @Override
     public void addLayer(RetrievalServiceLayer layer) {
     }
 
+  @Override
     public void removeLayer(RetrievalServiceLayer layer) {
     }
 
+  @Override
     public void configure(Element parent) {
         Element prefs = parent.getChild("cismapMappingPreferences");
 
@@ -244,6 +253,7 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //        }
     }
 
+  @Override
     public void masterConfigure(Element parent) {
         log.debug("masterConfigure im DefaultmappingModel:" + parent);
 
@@ -379,7 +389,14 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 
     }
 
+  @Override
     public Element getConfiguration() throws NoWriteError {
         return null;
     }
+
+  @Override
+  public TreeMap getFeatureServices()
+  {
+    return this.featureServices;
+  }
 }

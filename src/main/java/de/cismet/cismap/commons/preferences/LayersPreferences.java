@@ -49,6 +49,7 @@ public class LayersPreferences{
             Object o = it.next();
             if (o instanceof Element) {
                 Element el = (Element)o;
+                log.debug("parsing '" + el.getName() + "' layer preferences");
                 try {
                     log.debug("SimplePostgisFeatureService hinzugef\u00FCgt");
                     boolean skip = false;

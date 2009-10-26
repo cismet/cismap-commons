@@ -33,7 +33,7 @@
  */
 package de.cismet.cismap.commons.interaction;
 
-import de.cismet.cismap.commons.rasterservice.GUICredentialsProvider;
+import de.cismet.cismap.commons.security.AbstractCredentialsProvider;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.MappingModelListener;
@@ -94,7 +94,7 @@ public class CismapBroker {
     private Vector<MapDnDListener> mapDnDListeners = new Vector<MapDnDListener>();
     private Vector<FeatureCollectionListener> featureCollectionListeners = new Vector<FeatureCollectionListener>();
     private Vector<MapBoundsListener> mapBoundsListeners = new Vector<MapBoundsListener>();    
-    private Hashtable<WMSCapabilities, GUICredentialsProvider> httpCredentialsForCapabilities = new Hashtable<WMSCapabilities, GUICredentialsProvider>();
+    //private Hashtable<WMSCapabilities, GUICredentialsProvider> httpCredentialsForCapabilities = new Hashtable<WMSCapabilities, GUICredentialsProvider>();
     private String srs;
     private String preferredRasterFormat;
     private String preferredTransparentPref;
@@ -430,7 +430,7 @@ public class CismapBroker {
     }
 
     public void cleanUpSystemRegistry() {
-        Preferences appPrefs = Preferences.userNodeForPackage(GUICredentialsProvider.class);
+        Preferences appPrefs = Preferences.userNodeForPackage(AbstractCredentialsProvider.class);
         try {
             log.debug("Versuche Preferences f\u00FCr den Password Dialog zu l\u00F6schen");
             appPrefs.removeNode();

@@ -34,148 +34,200 @@
  *
  * Created on 15. September 2004, 16:00
  */
-
 package de.cismet.cismap.commons.retrieval;
+
+import java.util.ArrayList;
 
 /**
  *
  * @author  hell
  */
-public class RetrievalEvent {
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    double percentageDone=0.0;
-    private String errorType;
-    public static String SERVERERROR="SERVERERROR";
-    public static String CLIENTERROR="CLIENTERROR";
-    private static String UNDEFINED="UNDEFINED";
-    private Object retrievedObject=null;
-    boolean isComplete=false;
-    boolean hasErrors=false;
-    private String contentType=null;
-    private long requestIdentifier;
-    private boolean refreshExisting=false;
-    
-    java.util.Vector errors=new java.util.Vector();
-    private RetrievalService retrievalService;
-    /** Creates a new instance of RetrievalEvent */
-    public RetrievalEvent() {
-    }
-    
-    /**
-     * Getter for property errors.
-     * @return Value of property errors.
-     */
-    public java.util.Vector getErrors() {
-        return errors;
-    }
-    
-    /**
-     * Setter for property errors.
-     * @param errors New value of property errors.
-     */
-    public void setErrors(java.util.Vector errors) {
-        this.errors = errors;
-    }
-    
-    /**
-     * Getter for property hasErrors.
-     * @return Value of property hasErrors.
-     */
-    public boolean isHasErrors() {
-        return hasErrors;
-    }
-    
-    /**
-     * Setter for property hasErrors.
-     * @param hasErrors New value of property hasErrors.
-     */
-    public void setHasErrors(boolean hasErrors) {
-        this.hasErrors = hasErrors;
-    }
-    
-   
-    /**
-     * Getter for property isComplete.
-     * @return Value of property isComplete.
-     */
-    public boolean isIsComplete() {
-        return isComplete;
-    }
-    
-    /**
-     * Setter for property isComplete.
-     * @param isComplete New value of property isComplete.
-     */
-    public void setIsComplete(boolean isComplete) {
-        this.isComplete = isComplete;
-    }
-    
-    /**
-     * Getter for property percentageDone.
-     * @return Value of property percentageDone.
-     */
-    public double getPercentageDone() {
-        return percentageDone;
-    }
-    
-    /**
-     * Setter for property percentageDone.
-     * @param percentageDone New value of property percentageDone.
-     */
-    public void setPercentageDone(double percentageDone) {
-        this.percentageDone = percentageDone;
-    }
+public class RetrievalEvent
+{
+  private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
-    public Object getRetrievedObject() {
-        return retrievedObject;
-    }
+  int percentageDone = 0;
+  private String errorType = UNDEFINED;
+  public static String SERVERERROR = "SERVERERROR";
+  public static String CLIENTERROR = "CLIENTERROR";
+  private static String UNDEFINED = "UNDEFINED";
+  private Object retrievedObject = null;
+  boolean isComplete = false;
+  boolean hasErrors = false;
+  private String contentType = null;
+  private long requestIdentifier;
+  private boolean refreshExisting = false;
+  private boolean initialisationEvent = false;
+  ArrayList errors = new ArrayList();
+  private RetrievalService retrievalService = null;
 
-    public void setRetrievedObject(Object retrievedObject) {
-        this.retrievedObject = retrievedObject;
-    }
+  /** Creates a new instance of RetrievalEvent */
+  public RetrievalEvent()
+  {
+  }
 
-    public String getContentType() {
-        return contentType;
-    }
+  /**
+   * Getter for property errors.
+   * @return Value of property errors.
+   */
+  public ArrayList getErrors()
+  {
+    return errors;
+  }
 
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
+  /**
+   * Setter for property errors.
+   * @param errors New value of property errors.
+   */
+  public void setErrors(ArrayList errors)
+  {
+    this.errors = errors;
+  }
 
-    public RetrievalService getRetrievalService() {
-        return retrievalService;
-    }
+  /**
+   * Getter for property hasErrors.
+   * @return Value of property hasErrors.
+   */
+  public boolean isHasErrors()
+  {
+    return hasErrors;
+  }
 
-    public void setRetrievalService(RetrievalService retrievalService) {
-        this.retrievalService = retrievalService;
-    }
+  /**
+   * Setter for property hasErrors.
+   * @param hasErrors New value of property hasErrors.
+   */
+  public void setHasErrors(boolean hasErrors)
+  {
+    this.hasErrors = hasErrors;
+  }
 
-    public String getErrorType() {
-        if (errorType==null||errorType==UNDEFINED) {
-            log.error("undefined ErrorType !!!!!!1");
-            return UNDEFINED;
-        }
-        return errorType;
-    }
+  /**
+   * Getter for property isComplete.
+   * @return Value of property isComplete.
+   */
+  public boolean isIsComplete()
+  {
+    return isComplete;
+  }
 
-    public void setErrorType(String errorType) {
-        this.errorType = errorType;
-    }
+  /**
+   * Setter for property isComplete.
+   * @param isComplete New value of property isComplete.
+   */
+  public void setIsComplete(boolean isComplete)
+  {
+    this.isComplete = isComplete;
+  }
 
-    public long getRequestIdentifier() {
-        return requestIdentifier;
-    }
+  /**
+   * Getter for property percentageDone.
+   * @return Value of property percentageDone.
+   */
+  public int getPercentageDone()
+  {
+    return percentageDone;
+  }
 
-    public void setRequestIdentifier(long requestIdentifier) {
-        this.requestIdentifier = requestIdentifier;
+  /**
+   * Setter for property percentageDone.
+   * @param percentageDone New value of property percentageDone.
+   */
+  public void setPercentageDone(int percentageDone)
+  {
+    if(percentageDone < -1 || percentageDone > 100)
+    {
+      logger.warn("invalid percentage '"+percentageDone+"', setting to -1 (indeterminate)");
+      this.percentageDone = -1;
     }
-    
-    public boolean isRefreshExisting() {
-        return refreshExisting;
+    else
+    {
+      this.percentageDone = percentageDone;
     }
+  }
 
-    public void setRefreshExisting(boolean refreshExisting) {
-        this.refreshExisting = refreshExisting;
+  public Object getRetrievedObject()
+  {
+    return retrievedObject;
+  }
+
+  public void setRetrievedObject(Object retrievedObject)
+  {
+    this.retrievedObject = retrievedObject;
+  }
+
+  public String getContentType()
+  {
+    return contentType;
+  }
+
+  public void setContentType(String contentType)
+  {
+    this.contentType = contentType;
+  }
+
+  public RetrievalService getRetrievalService()
+  {
+    return retrievalService;
+  }
+
+  public void setRetrievalService(RetrievalService retrievalService)
+  {
+    this.retrievalService = retrievalService;
+  }
+
+  public String getErrorType()
+  {
+    if (errorType == null || errorType.equals(UNDEFINED))
+    {
+      //log.error("undefined ErrorType !!!!!!1");
+      return UNDEFINED;
     }
-    
+    return errorType;
+  }
+
+  public void setErrorType(String errorType)
+  {
+    this.errorType = errorType;
+  }
+
+  public long getRequestIdentifier()
+  {
+    return requestIdentifier;
+  }
+
+  public void setRequestIdentifier(long requestIdentifier)
+  {
+    this.requestIdentifier = requestIdentifier;
+  }
+
+  public boolean isRefreshExisting()
+  {
+    return refreshExisting;
+  }
+
+  public void setRefreshExisting(boolean refreshExisting)
+  {
+    this.refreshExisting = refreshExisting;
+  }
+
+  /**
+   * Get the value of initialisationEvent
+   *
+   * @return the value of initialisationEvent
+   */
+  public boolean isInitialisationEvent()
+  {
+    return initialisationEvent;
+  }
+
+  /**
+   * Set the value of initialisationEvent
+   *
+   * @param initialisationEvent new value of initialisationEvent
+   */
+  public void setInitialisationEvent(boolean initialisationEvent)
+  {
+    this.initialisationEvent = initialisationEvent;
+  }
 }

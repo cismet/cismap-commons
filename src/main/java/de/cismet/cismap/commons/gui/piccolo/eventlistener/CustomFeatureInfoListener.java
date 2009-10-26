@@ -33,6 +33,7 @@ public class CustomFeatureInfoListener extends PBasicInputEventHandler {
     public void mouseClicked(PInputEvent pInputEvent) {
         if (pInputEvent.getComponent() instanceof MappingComponent) {
             MappingComponent mc = (MappingComponent) pInputEvent.getComponent();
+            log.debug("featurInfoRetrievalUrl "+featureInforetrievalUrl);
             SimpleGetFeatureInfoUrl url=new SimpleGetFeatureInfoUrl(featureInforetrievalUrl);
             url.setX((int)pInputEvent.getCanvasPosition().getX());
             url.setY((int)pInputEvent.getCanvasPosition().getY());
@@ -44,7 +45,10 @@ public class CustomFeatureInfoListener extends PBasicInputEventHandler {
             url.setY1(bb.getY1());
             url.setY2(bb.getY2());
             try {
-                String u=url.toString();
+                String u=url.toString();                                
+                if(u != null){
+                    u = u.trim();
+                }
                 log.info("Open:"+u);
                 BrowserLauncher.openURL(u);
             }

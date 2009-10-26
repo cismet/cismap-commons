@@ -1,19 +1,15 @@
 /*
  * StatusBar.java
  *
- * Created on 23. M�rz 2006, 14:23
+ * Created on 23. März 2006, 14:23
  */
-
 package de.cismet.cismap.commons.gui.statusbar;
 
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
-import de.cismet.cismap.commons.features.DefaultWFSFeature;
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
-import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
-import de.cismet.cismap.commons.featureservice.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.printing.Scale;
@@ -31,70 +27,62 @@ import javax.swing.JMenuItem;
  *
  * @author  thorsten.hell@cismet.de
  */
-public class StatusBar extends javax.swing.JPanel implements StatusListener,FeatureCollectionListener{
+public class StatusBar extends javax.swing.JPanel implements StatusListener, FeatureCollectionListener {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     String mode;
-    ImageIcon defaultIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/map.png"));
+    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/map.png"));
     MappingComponent mappingComponent;
+
     /** Creates new form StatusBar */
     public StatusBar(MappingComponent mappingComponent) {
         initComponents();
-        this.mappingComponent=mappingComponent;
+        this.mappingComponent = mappingComponent;
         lblStatusImage.setText("");
         lblCoordinates.setText("");
         lblStatusImage.setIcon(defaultIcon);
     }
 
     public void addScalePopups() {
-        for (Scale s:mappingComponent.getScales()) {
-            if (s.getDenominator()>0) {
-                addScalePopupMenu(s.getText(),s.getDenominator());    
+        for (Scale s : mappingComponent.getScales()) {
+            if (s.getDenominator() > 0) {
+                addScalePopupMenu(s.getText(), s.getDenominator());
             }
         }
     }
-    
+
     public void statusValueChanged(StatusEvent e) {
-//        lblStatus.setText("");
-//        lblStatusImage.setIcon(defaultIcon);
-        
-        if (e.getName().equals(e.COORDINATE_STRING)) {
+        if (e.getName().equals(StatusEvent.COORDINATE_STRING)) {
             lblCoordinates.setText(e.getValue().toString());
-        }
-        else if (e.getName().equals(e.MEASUREMENT_INFOS)) {
+        } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
             lblStatus.setText(e.getValue().toString());
-        }
-        else if (e.getName().equals(e.MAPPING_MODE)) {
+        } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
             lblStatus.setText("");
-            mode=((String)e.getValue());
-        }
-        else if (e.getName().equals(e.OBJECT_INFOS)) {
-            if (e.getValue()!=null && e.getValue() instanceof PFeature &&((PFeature)e.getValue()).getFeature() !=null && ((PFeature)e.getValue()).getFeature() instanceof XStyledFeature) {
-                lblStatus.setText(((XStyledFeature)((PFeature)e.getValue()).getFeature()).getName());
-                ImageIcon ico=((XStyledFeature)((PFeature)e.getValue()).getFeature()).getIconImage();
-                if (ico!=null&& ico.getIconWidth()>0 && ico.getIconHeight()>0) {
+            mode = ((String) e.getValue());
+        } else if (e.getName().equals(StatusEvent.OBJECT_INFOS)) {
+            if (e.getValue() != null && e.getValue() instanceof PFeature && ((PFeature) e.getValue()).getFeature() != null && ((PFeature) e.getValue()).getFeature() instanceof XStyledFeature) {
+                lblStatus.setText(((XStyledFeature) ((PFeature) e.getValue()).getFeature()).getName());
+                ImageIcon ico = ((XStyledFeature) ((PFeature) e.getValue()).getFeature()).getIconImage();
+                if (ico != null && ico.getIconWidth() > 0 && ico.getIconHeight() > 0) {
                     lblStatusImage.setIcon(ico);
-                }
-                else {
+                } else {
                     lblStatusImage.setIcon(defaultIcon);
                 }
-            } else if(e.getValue()!=null && e.getValue() instanceof PFeature &&((PFeature)e.getValue()).getFeature() !=null && ((PFeature)e.getValue()).getFeature() instanceof DefaultWFSFeature){
-                if(((DefaultWFSFeature)((PFeature)e.getValue()).getFeature()).getSecondaryAnnotation() != null){
-                    lblStatus.setText(((DefaultWFSFeature)((PFeature)e.getValue()).getFeature()).getSecondaryAnnotation());
+            } else if (e.getValue() != null && e.getValue() instanceof PFeature && ((PFeature) e.getValue()).getFeature() != null && ((PFeature) e.getValue()).getFeature() instanceof DefaultFeatureServiceFeature) {
+                if (((DefaultFeatureServiceFeature) ((PFeature) e.getValue()).getFeature()).getSecondaryAnnotation() != null) {
+                    lblStatus.setText(((DefaultFeatureServiceFeature) ((PFeature) e.getValue()).getFeature()).getSecondaryAnnotation());
                 } else {
                     lblStatus.setText("");
                 }
-            }
-            else {
+            } else {
                 lblStatus.setText("");
                 lblStatusImage.setIcon(defaultIcon);
             }
-        }
-        else if (e.getName().equals(e.SCALE)) {
-            int sd=(int)(mappingComponent.getScaleDenominator()+0.5);
-            lblScale.setText("1:"+sd);
+        } else if (e.getName().equals(StatusEvent.SCALE)) {
+            int sd = (int) (mappingComponent.getScaleDenominator() + 0.5);
+            lblScale.setText("1:" + sd);
         }
     }
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -206,7 +194,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,Feat
         pomScale.add(jmi);
     }
     
-    
     private  void refreshMeasurementsInStatus() {
         try{
         Collection<Feature> cf=CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getSelectedFeatures();
@@ -230,16 +217,13 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,Feat
         } else {
             lblMeasurement.setText("Fl\u00E4che: "+StaticDecimalTools.round(area)+ "  Umfang: "+StaticDecimalTools.round(umfang));
         }
-        
     }
 
-    public void featuresRemoved(FeatureCollectionEvent fce) {
-        
-    }
+    public void featuresRemoved(FeatureCollectionEvent fce) {}
     
     public void featuresChanged(FeatureCollectionEvent fce) {
         log.debug("FeatureChanged");
-        if (CismapBroker.getInstance().getMappingComponent().getInteractionMode()==MappingComponent.NEW_POLYGON) {
+        if (CismapBroker.getInstance().getMappingComponent().getInteractionMode().equals(MappingComponent.NEW_POLYGON)) {
             refreshMeasurementsInStatus(fce.getEventFeatures());
         }
         else {
@@ -247,26 +231,21 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,Feat
         }
     }
     
-    public void featuresAdded(FeatureCollectionEvent fce) {
-        
-    }
+    public void featuresAdded(FeatureCollectionEvent fce) {}
     
     public void featureSelectionChanged(FeatureCollectionEvent fce) {
          refreshMeasurementsInStatus();
     }
 
-    public void featureReconsiderationRequested(FeatureCollectionEvent fce) {
-    }
+    public void featureReconsiderationRequested(FeatureCollectionEvent fce) {}
 
-    public void allFeaturesRemoved(FeatureCollectionEvent fce) {
-    }
+    public void allFeaturesRemoved(FeatureCollectionEvent fce) {}
 
     public javax.swing.JPopupMenu getPomScale() {
         return pomScale;
     }
 
-    public void featureCollectionChanged() {
-    }
+    public void featureCollectionChanged() {}
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

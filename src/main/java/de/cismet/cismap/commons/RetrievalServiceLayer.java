@@ -42,8 +42,6 @@ import edu.umd.cs.piccolo.PNode;
  * @author thorsten.hell@cismet.de
  */
 public interface RetrievalServiceLayer extends ServiceLayer,RetrievalService{
-    public int getProgress();
-    public void setProgress(int progress);
     public void setErrorObject(Object error);
     public Object getErrorObject();
     public boolean hasErrors();

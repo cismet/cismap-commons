@@ -44,12 +44,12 @@ import de.cismet.cismap.commons.preferences.CapabilityLink;
 
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
+import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.WFSOperator;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
-import de.cismet.cismap.commons.rasterservice.HttpAuthentication;
 import de.cismet.security.AccessHandler;
-import de.cismet.security.WSSPasswordDialog;
 import de.cismet.security.WebAccessManager;
 import de.cismet.security.exceptions.RequestFailedException;
 import de.cismet.security.handler.WSSAccessHandler;
@@ -95,6 +95,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -118,7 +119,9 @@ import javax.swing.tree.TreePath;
 import org.deegree.services.capabilities.OGCWebServiceCapabilities;
 import org.deegree.services.wms.capabilities.Layer;
 import org.deegree.services.wms.capabilities.WMSCapabilities;
+import org.deegree2.framework.xml.schema.ElementDeclaration;
 import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilities;
+import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilitiesDocument;
 import org.deegree_impl.services.wms.capabilities.OGCWMSCapabilitiesFactory;
 import org.jdom.Element;
 
@@ -169,6 +172,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
      * @param interactive true, falls per Drag&Drop, sonst false
      */
     private void processUrl(final String link, final String subparent, final boolean interactive) {
+        log.info("processURL: " + link);
         // Gibts diese URL schon?
         // Text im Tab der L\u00E4nge der URL anpassen
         String tabText;
@@ -223,6 +227,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     }
                 } else {
                     //ToDo cleveres Probieren wenn z.B. nur die service URL angebenen wurde --> getCapabiltiesrequest aufbauen und probieren
+                    log.info("service nicht spezifizierbar");
                     Object[] alternatives = {"OGC-Web Mapping Service", "OGC-Web Feature Service", "OGC-Web Security Service"};
                     Object selectedValue = JOptionPane.showInputDialog(CapabilityWidget.this,
                             "<html>Aus der URL:<br><pre>" + link + "</pre><br>kann der Servicetyp nicht ermittelt werden.<br><br>Um welchen Service handelt es sich?</html>",
@@ -492,7 +497,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
             }
         }
     }//GEN-LAST:event_cmdCollapseActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdAddByUrl;
     private javax.swing.JButton cmdAddFromList;
@@ -821,13 +825,20 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                         if (securedServiceType.equals(WSSAccessHandler.SECURED_SERVICE_TYPE.WFS.toString())) {
                             log.debug("Gesicheter Service ist ein: " + WSSAccessHandler.SECURED_SERVICE_TYPE.WFS);
                             log.debug("Capability Widget: Creating WFScapabilities for URL: " + finalPostUrl.toString());
-                            InputStream result = WebAccessManager.getInstance().doRequest(finalPostUrl, new StringReader("?REQUEST=GetCapabilities&service=WFS"), AccessHandler.ACCESS_METHODS.GET_REQUEST);
-                            final WFSOperator op = new WFSOperator();
-                            final WFSCapabilities capWFS = op.parseWFSCapabilites(new BufferedReader(new InputStreamReader(result)));
-                            log.debug("Erstelle WFSCapabilitiesTreeModel");
-                            capTreeModel = new WFSCapabilitiesTreeModel(capWFS);
-                            capTreeModel.setServiceName(op.getServiceName());
-                            ((WFSCapabilitiesTreeModel) capTreeModel).setFeatureTypes(op.getElements(finalPostUrl, capWFS.getFeatureTypeList()));
+
+//                            InputStream result = WebAccessManager.getInstance().doRequest(finalPostUrl, new StringReader("?REQUEST=GetCapabilities&service=WFS"), AccessHandler.ACCESS_METHODS.GET_REQUEST);
+//                            final WFSOperator op = new WFSOperator();
+//                            final WFSCapabilities capWFS = op.parseWFSCapabilites(new BufferedReader(new InputStreamReader(result)));
+//                            log.debug("Erstelle WFSCapabilitiesTreeModel");
+                             // !!!ToDo WebAccessMananger testen
+                            final FeatureServiceUtilities utilities = new FeatureServiceUtilities();
+                            WFSCapabilitiesDocument wfsDoc = utilities.getWFSCapabilitesDocument(postURL);
+                            final WFSCapabilities cap = (WFSCapabilities) wfsDoc.parseCapabilities();
+                            final String name = FeatureServiceUtilities.getServiceName(wfsDoc);
+
+                            capTreeModel = new WFSCapabilitiesTreeModel(cap, utilities.getElementDeclarations(finalPostUrl, cap.getFeatureTypeList()));
+                            capTreeModel.setServiceName(name);
+                            //((WFSCapabilitiesTreeModel) capTreeModel).setFeatureTypes(op.getElements(finalPostUrl, capWFS.getFeatureTypeList()));
                         } else if (securedServiceType.equals(WSSAccessHandler.SECURED_SERVICE_TYPE.WMS.toString())) {
                             log.debug("Gesicheter Service ist ein: " + WSSAccessHandler.SECURED_SERVICE_TYPE.WMS);
                             try {
@@ -997,20 +1008,20 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     }
 
                     final URL finalPostUrl = postURL;
-                    final WFSOperator op = new WFSOperator();
-                    final WFSCapabilities cap = op.parseWFSCapabilites(postURL);
+                    final FeatureServiceUtilities utilities = new FeatureServiceUtilities();
+                    WFSCapabilitiesDocument wfsDoc = utilities.getWFSCapabilitesDocument(postURL);
+                    final WFSCapabilities cap = (WFSCapabilities) wfsDoc.parseCapabilities();
+                    final String name = FeatureServiceUtilities.getServiceName(wfsDoc);
 
                     // Hashmap mit den FeatureLayer-Attributen erzeugen
                     log.debug("Erzeuge WFSCapabilitiesTreeModel");
-                    final WFSCapabilitiesTreeModel tm = new WFSCapabilitiesTreeModel(cap);
-                    tm.setFeatureTypes(op.getElements(postURL, cap.getFeatureTypeList()));
+                    final WFSCapabilitiesTreeModel tm = new WFSCapabilitiesTreeModel(cap, utilities.getElementDeclarations(postURL, cap.getFeatureTypeList()));
 
                     // Den WFSTree als DropTarget spezifizieren
                     DropTarget dt = new DropTarget(trvCap, acceptableActions, thisWidget);
                     EventQueue.invokeLater(new Runnable() {
 
                         public void run() {
-                            String name = op.getServiceName();
                             trvCap.setModel(tm);
                             trvCap.setBorder(new EmptyBorder(1, 1, 1, 1));
                             trvCap.setCellRenderer(new WFSCapabilitiesTreeCellRenderer(name));
@@ -1280,7 +1291,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
         DragSource dragSource = null;
         TreePath[] cachedTreePaths; //DND Fehlverhalten Workaround
-
         private WMSCapabilities wmsCapabilities;
 
         public DragTree() {
@@ -1291,7 +1301,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     this); // drag gesture recognizer
 
             addMouseListener(new MouseAdapter() {                                       //DND Fehlverhalten Workaround
-
 
                 @Override
                 public void mouseReleased(MouseEvent e) {                           //DND Fehlverhalten Workaround
@@ -1308,7 +1317,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                         CismapBroker.getInstance().fireCapabilityLayerChanged(new CapabilityEvent(getSelectionPath().getLastPathComponent()));
                     } else {
                         if (getSelectionPath() != null) {
-                            log.warn("getSelectionPath().getLastPathComponent()=" + getSelectionPath().getLastPathComponent());
+                          //FIXME: WTF? Warum wan?
+                          log.warn("getSelectionPath().getLastPathComponent()=" + getSelectionPath().getLastPathComponent());
                         }
                     }
                 }
@@ -1337,31 +1347,27 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
             if (this.getModel() instanceof WMSCapabilitiesTreeModel) {
                 trans = new DefaultTransferable(new SelectionAndCapabilities(getSelectionModel().getSelectionPaths(), wmsCapabilities, capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent()).getLink()));
             } else if (this.getModel() instanceof WFSCapabilitiesTreeModel) {
+                WFSCapabilitiesTreeModel model = (WFSCapabilitiesTreeModel) this.getModel();
                 log.debug("Erstelle Transferable f\u00FCr WFS");
                 // TODO ein Transferable zum Testen erstellen
-                if (getSelectionModel().getSelectionPath().getLastPathComponent() instanceof Element) {
-                    Element element = (Element) getSelectionModel().getSelectionPath().getLastPathComponent();
-                    WFSOperator op = null;
-                    String name = "";
-                    String id = "";
-                    if (element.getChildren().size() == 0) { // Attribut geklickt, mit Parent arbeiten
+                if (getSelectionModel().getSelectionPath().getLastPathComponent() instanceof ElementDeclaration) {
+                    ElementDeclaration element = (ElementDeclaration) getSelectionModel().getSelectionPath().getLastPathComponent();
+                    FeatureServiceUtilities utilities = new FeatureServiceUtilities(element.getName().getAsString());
 
-                        op = new WFSOperator(element.getParent().getAttributeValue("name"));
-                        id = element.getAttributeValue("name");
-                        element = element.getParent();
-                    } else {
-                        op = new WFSOperator(element.getAttributeValue("name"));
+                    //TODO Heuristic HIER zur Bestimmung der Geometrie
+                    utilities.setGeometry(FeatureServiceUtilities.getFirstGeometryName(model.getChildren(element)));
+                    Vector<String> names = new Vector<String>();
+                    for (FeatureServiceAttribute fsa : model.getChildren(element)) {
+                        names.add(fsa.getName());
                     }
-                    op.setPropertyNames(element.getChildren());
-                    op.setGeometry(element);
-                    name = element.getAttributeValue("name");
-                    trans = new DefaultTransferable(new WFSSelectionAndCapabilities(name, wfsPostUrls.get(tbpCapabilities.getSelectedComponent()).toString(), op.getQuery(), id, element.getChildren()));
+                    FeatureServiceUtilities.changePropertyNames(utilities.getQuery(), names);
+                    trans = new DefaultTransferable(new WFSSelectionAndCapabilities(
+                            element.getName().getAsString(),
+                            wfsPostUrls.get(tbpCapabilities.getSelectedComponent()).toString(),
+                            utilities.getQuery(),
+                            "",
+                            model.getChildren(element)));
                 }
-//                try {
-//                    log.info((WFSSelectionAndCapabilities) trans.getTransferData(new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SelectionAndCapabilities")));
-//                } catch (Exception ex) {
-//                    log.warn("Kann Transferable nicht auslesen", ex);
-//                }
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
         }

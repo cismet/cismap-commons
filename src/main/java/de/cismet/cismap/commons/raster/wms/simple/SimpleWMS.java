@@ -122,7 +122,7 @@ public class SimpleWMS extends AbstractWMS implements RasterMapService, Retrieva
 
     public Element getElement() {
         Element element = new Element("simpleWms");
-        element.setAttribute("layerposition", new Integer(layerPosition).toString());
+        element.setAttribute("layerPosition", new Integer(layerPosition).toString());
         element.setAttribute("skip", "false");
         element.setAttribute("enabled", new Boolean(enabled).toString());
         element.setAttribute("name", name);

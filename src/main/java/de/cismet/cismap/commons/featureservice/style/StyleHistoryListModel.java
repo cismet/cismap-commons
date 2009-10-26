@@ -6,8 +6,7 @@ package de.cismet.cismap.commons.featureservice.style;
 
 import de.cismet.cismap.commons.ConvertableToXML;
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Vector;
 import javax.swing.ListModel;
 import javax.swing.event.ListDataListener;
 import org.apache.log4j.Logger;
@@ -16,116 +15,165 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 
 /**
- *
+ * The StyleHistoryListModel is a ListModel that contains a list of Style-objects.
  * @author nh
  */
-public class StyleHistoryListModel implements ListModel, ConvertableToXML {
-    private final Logger log = Logger.getLogger(StyleHistoryListModel.class);
-    public static final String STYLE_ROOT = "StyleHistory";
-    private List<Style> list;
-    private SAXBuilder builder = new SAXBuilder();
+public class StyleHistoryListModel implements ListModel, ConvertableToXML
+{
 
-    /**
-     * Konstruktor mit bereits bestehender History.s
-     * @param doc JDOM-Document das die History beinhält
-     */
-    public StyleHistoryListModel(File f) throws Exception {
-        list = new LinkedList<Style>();
-        try {
-            Document doc = builder.build(f);
-            Element root = doc.getRootElement();
-            if (root != null) {
-                for (Object o : doc.getRootElement().getChildren(Style.STYLE_ELEMENT)) {
-                    if (o instanceof Element) {
-                        Style newStyle = StyleFactory.createStyle((Element) o);
-                        if (newStyle != null) {
-                            list.add(newStyle);                            
-                        }
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            log.error("Fehler beim Laden der Style-History", ex);
+  private final Logger logger = Logger.getLogger(StyleHistoryListModel.class);
+  /* Maximum number of styles stored in the listmodel */
+  private static final int MAX_STYLES = 15;
+  /* Name of the root-element of the listmodel as JDOM-element */
+  public static final String STYLE_ROOT = "StyleHistory";
+  /* vector that contains the styles */
+  private Vector<Style> styleList;
+  /* JDOM-parser */
+  private SAXBuilder builder = new SAXBuilder();
+
+  /**
+   * Constructor that creates a list of styles from the delivered XML-file.
+   * @param doc JDOM-Document das die History beinhält
+   */
+  public StyleHistoryListModel(File f) throws Exception
+  {
+    this();
+
+    try
+    {
+      Document doc = builder.build(f);
+      Element root = doc.getRootElement();
+      if (root != null && root.getName().equals(STYLE_ROOT))
+      {
+        this.initFromElement(root);
+      } else
+      {
+        logger.error("Datei '" + f.getName() + "' enthält falschen xml content:\n" + doc);
+      }
+    } catch (Exception ex)
+    {
+      logger.error("Style-History konnte nicht aus '" + f.getName() + "' geladen werden", ex);
+    }
+  }
+
+  /**
+   * Constructor with empty stylelist.
+   */
+  public StyleHistoryListModel()
+  {
+    this.styleList = new Vector<Style>();
+    this.styleList.ensureCapacity(MAX_STYLES);
+  }
+
+  /**
+   * Adds a Style to the listmodel. If the model contains more than the allowed
+   * maximum the oldest style will be dropped.
+   * @param e the style to add
+   */
+  public void addStyle(Style newStyle)
+  {
+    if (!elementEquals(newStyle))
+    {
+      styleList.add(newStyle);
+      if (styleList.size() > MAX_STYLES)
+      {
+        styleList.remove(0);
+      }
+    }
+  }
+
+  /**
+   * Returns the style from a specific position inside the stylelist.
+   * @param index position of the desired style
+   * @return object (instanceof Style)
+   */
+  @Override
+  public Object getElementAt(int index)
+  {
+    return styleList.get(index);
+  }
+
+  /**
+   * Returns the current count of saved styles.
+   */
+  @Override
+  public int getSize()
+  {
+    return styleList.size();
+  }
+
+  /**
+   * Deletes all saved styles.
+   */
+  public void clear()
+  {
+    styleList.clear();
+  }
+
+  /**
+   * Checks if there's already an equal style inside the stylelist.
+   * @param compare Style that should be compared with the list
+   * @return true if there's already an equal style, else false
+   */
+  public boolean elementEquals(Style compare)
+  {
+    if (styleList.isEmpty())
+    {
+      return false;
+    } else
+    {
+      boolean returnValue = false;
+      for (Style s : styleList)
+      {
+        if (s.compareTo(compare) == 0)
+        {
+          returnValue = true;
+          break;
         }
+      }
+      return returnValue;
     }
+  }
 
-    /**
-     * Konstruktor mit leerer History.
-     */
-    public StyleHistoryListModel() {
-        list = new LinkedList<Style>();
+  /**
+   * Returns this model as JDOM-element with all styles as children.
+   */
+  @Override
+  public Element toElement()
+  {
+    Element e = new Element(STYLE_ROOT);
+    for (Style s : styleList)
+    {
+      e.addContent(s.toElement());
     }
-    
-    /**
-     * Hängt ein neues Element an die Liste der vorhandenen Elemente an.
-     * @param e neues JDOM-Element
-     */
-    public void addStyle(Style newStyle) {
-        if (!elementEquals(newStyle)) {
-            list.add(newStyle);
-            if (list.size() > 15) {
-                list.remove(0);
-            }
+    return e;
+  }
+
+  @Override
+  public void addListDataListener(ListDataListener l)
+  {
+  }
+
+  @Override
+  public void removeListDataListener(ListDataListener l)
+  {
+  }
+
+  @Override
+  public void initFromElement(Element element) throws Exception
+  {
+    this.styleList.clear();
+    this.styleList.ensureCapacity(element.getChildren(Style.STYLE_ELEMENT).size());
+    for (Object o : element.getChildren(Style.STYLE_ELEMENT))
+    {
+      if (o instanceof Element)
+      {
+        Style newStyle = new BasicStyle((Element) o);
+        if (newStyle != null)
+        {
+          this.styleList.add(newStyle);
         }
+      }
     }
-
-    /**
-     * Liefert das Element an der Stelle index der Historyliste.
-     * @param index Index des angewählten Objekts
-     * @return JDOM-Element
-     */
-    @Override
-    public Object getElementAt(int index) {
-        return list.get(index);
-    }
-
-    /**
-     * Liefert die momentane Anzahl der gespeicherten Styles.
-     * @return
-     */
-    public int getSize() {
-        return list.size();
-    }
-
-    /**
-     * Löscht alle gespeicherten Styles.
-     */
-    public void clear() {
-        list.clear();
-    }
-
-    /**
-     * Vergleicht das übergebene Element mit allen in der Liste.
-     * @param compare zu vergleichendes Element
-     * @return true, wenn übereinstimmung gefunden, sonst false
-     */
-    public boolean elementEquals(Style compare) {
-        if (list.isEmpty()) {
-            return false;
-        } else {
-            boolean returnValue = false;
-            for (Style s : list) {
-                if (s.compareTo(compare) == 0) {
-                    returnValue = true;
-                    break;
-                }
-            }
-            return returnValue;
-        }
-    }
-
-    /**
-     * Returns this model as JDOM-element with all styles as children.
-     */
-    public Element getElement() {
-        Element e = new Element(STYLE_ROOT);
-        for (Style s : list) {
-            e.addContent(s.getElement());
-        }
-        return e;
-    }
-    
-    public void addListDataListener(ListDataListener l) {}
-    public void removeListDataListener(ListDataListener l) {}
-
+  }
 }

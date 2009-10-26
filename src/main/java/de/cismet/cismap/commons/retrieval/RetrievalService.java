@@ -37,6 +37,7 @@ package de.cismet.cismap.commons.retrieval;
 
 
 /**
+ * Base Interface of all Retrieval Services.
  *
  * @author thorsten.hell@cismet.de
  */
@@ -48,4 +49,6 @@ public interface RetrievalService {
     public boolean isRefreshNeeded();
     public void addPropertyChangeListener(java.beans.PropertyChangeListener l);
     public void removePropertyChangeListener(java.beans.PropertyChangeListener l);
+    public int getProgress();
+    public void setProgress(int progress);
 }
