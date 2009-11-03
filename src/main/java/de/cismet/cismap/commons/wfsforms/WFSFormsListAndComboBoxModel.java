@@ -36,6 +36,7 @@ package de.cismet.cismap.commons.wfsforms;
 
 
 import de.cismet.tools.CismetThreadPool;
+import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticHtmlTools;
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -337,7 +338,12 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
     
     public void featureProgress(int progress) {
         //count +=GMLFeatureCollectionDocument.PROGRESS_CONSTANT;
+        if (WFSFormsListAndComboBoxModel.this.progressBar!=null){
         WFSFormsListAndComboBoxModel.this.progressBar.setValue(progress);
+        }
+        else {
+            log.warn("No Progressbar in WFSGui",new CurrentStackTrace());
+        }
     }
     
     public void featureLoadingFinished() {

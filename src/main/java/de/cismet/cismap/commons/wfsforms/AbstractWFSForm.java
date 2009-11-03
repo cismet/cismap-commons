@@ -39,6 +39,7 @@ package de.cismet.cismap.commons.wfsforms;
 import com.vividsolutions.jts.geom.Point;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -94,6 +95,7 @@ public abstract class AbstractWFSForm extends JPanel {
         pMark.setSweetSpotY(1d);
 
 
+
     }
 
     public JComponent getListComponentByName(String name) {
@@ -105,9 +107,11 @@ public abstract class AbstractWFSForm extends JPanel {
             inited = true;
             //do the initial loading of all queries that are INITIAL
             for (final WFSFormQuery q : queries) {
+                log.debug(title+"Components:"+ listComponents);
                 queriesByComponentName.put(q.getComponentName(), q);
                 if (q.getType().equals(WFSFormQuery.INITIAL) && listComponents.containsKey(q.getComponentName())) {
                     final JComponent c = listComponents.get(q.getComponentName());
+                    log.debug("Comp: "+q.getComponentName());
                     if (c instanceof JComboBox) {
                         try {
                             JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");

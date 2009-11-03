@@ -68,7 +68,7 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
 
     @Override
     public void mouseDragged(PInputEvent e) {
-        //super.mouseDragged(e);
+        super.mouseDragged(e);
         dragPoint = e.getPosition();
         updateRectangle();
     }
