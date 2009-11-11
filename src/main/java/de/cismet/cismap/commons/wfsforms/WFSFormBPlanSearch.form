@@ -189,7 +189,7 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblBehind">
       <Properties>
-        <Property name="text" type="java.lang.String" value="mind. 3 Buchstaben"/>
+        <Property name="text" type="java.lang.String" value="mind. 2 Zeichen"/>
       </Properties>
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -215,7 +215,7 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="101" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="124" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">

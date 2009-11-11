@@ -124,13 +124,13 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
     }
 
     private void doSearch() {
-        if (txtSearch.getText().length() >= 3) {
+        if (txtSearch.getText().length() >= 2) {
             log.debug("doSearch");
             HashMap<String, String> hm = new HashMap<String, String>();
             hm.put("@@search_text@@", txtSearch.getText());
             requestRefresh("cboHits", hm);
         } else {
-            lblBehind.setText("mind. 3 Buchstaben");
+            lblBehind.setText("mind. 2 Zeichen");
         }
     }
 
@@ -275,7 +275,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         add(txtSearch, gridBagConstraints);
 
-        lblBehind.setText("mind. 3 Buchstaben");
+        lblBehind.setText("mind. 2 Zeichen");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -290,7 +290,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         panFill.setLayout(panFillLayout);
         panFillLayout.setHorizontalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 101, Short.MAX_VALUE)
+            .add(0, 124, Short.MAX_VALUE)
         );
         panFillLayout.setVerticalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
