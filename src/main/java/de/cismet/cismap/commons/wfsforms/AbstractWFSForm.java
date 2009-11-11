@@ -77,6 +77,7 @@ public abstract class AbstractWFSForm extends JPanel {
     private String iconPath;
     private String className;
     private boolean inited = false;
+    private String sorter=null;
     protected MappingComponent mappingComponent;
     Vector<ActionListener> actionListener = new Vector<ActionListener>();
     public static final int FEATURE_BORDER = 200;
@@ -318,4 +319,13 @@ public abstract class AbstractWFSForm extends JPanel {
             a.actionPerformed(e);
         }
     }
+
+    public String getSorter() {
+        return sorter;
+    }
+
+    public void setSorter(String sorter) {
+        this.sorter = sorter;
+    }
+    
 }
