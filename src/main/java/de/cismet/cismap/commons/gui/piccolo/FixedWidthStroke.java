@@ -17,7 +17,7 @@ public class FixedWidthStroke extends BasicStroke {
 
     @Override
     public float getLineWidth() {
-        return 0.001f;
+        return 0.0000000001f; //wegen wgs84
 //        if (PPaintContext.CURRENT_PAINT_CONTEXT != null) {
 //            //log.fatal("LineWidth:"+super.getLineWidth() / (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale());
 //            return super.getLineWidth()*multiplyer / (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
