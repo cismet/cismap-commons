@@ -33,9 +33,12 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
 import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.util.PBounds;
+import java.awt.geom.Point2D;
 
 /**
  *
@@ -51,6 +54,22 @@ public class BoundingBoxSearchListener extends RectangleRubberBandListener {
     public void mouseReleased(PInputEvent e) {
         super.mouseReleased(e);
         MapSearchEvent mse = new MapSearchEvent();
+        
+        PBounds pb=super.rectangle.getFullBounds();
+        Point2D[] boundingBoxPoints=new Point2D[2];
+        boundingBoxPoints[0] = new Point2D.Double(pb.getMinX(), pb.getMinY());
+        boundingBoxPoints[1] = new Point2D.Double(pb.getMaxX(), pb.getMaxY());
+
+        Point2D[] p = new Point2D[5];
+            p[0] = (Point2D) boundingBoxPoints[0];
+            p[2] = (Point2D) boundingBoxPoints[1];
+            p[1] = new Point2D.Double(p[0].getX(), p[2].getY());
+            p[3] = new Point2D.Double(p[2].getX(), p[0].getY());
+            p[4] = p[0];
+
+
+        PureNewFeature pnf=new PureNewFeature(p, CismapBroker.getInstance().getMappingComponent().getWtst());
+        mse.setGeometry(pnf.getGeometry());
         mse.setBounds(super.rectangle.getFullBounds());
         CismapBroker.getInstance().fireMapSearchInited(mse);
     }
