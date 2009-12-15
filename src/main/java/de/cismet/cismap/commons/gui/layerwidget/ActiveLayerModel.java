@@ -59,6 +59,7 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupportingRasterLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
 import de.cismet.security.AccessHandler;
 import de.cismet.security.WebAccessManager;
 import de.cismet.tools.CismetThreadPool;
@@ -652,7 +653,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         int counter = 0;
         while (it.hasNext()) {
             Object service = getMapServices().get(it.next());
-            if (service instanceof SimpleFeatureSupportingRasterLayer) {
+            if (service instanceof SimpleFeatureSupportingRasterLayer || service instanceof FeatureAwareRasterService) {
             } else if (service instanceof WMSServiceLayer) {
                 Element layerConf = ((WMSServiceLayer) service).getElement();
                 allLayerConf.addContent(layerConf);
