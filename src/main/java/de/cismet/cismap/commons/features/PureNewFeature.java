@@ -30,9 +30,14 @@ import javax.swing.JComponent;
 public class PureNewFeature extends DefaultStyledFeature implements Cloneable, XStyledFeature {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
+    public static enum geomTypes { ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON };
+    private geomTypes geomType;
     static ImageIcon icoPoint = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/point.png"));
-    static ImageIcon icoLinestring = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/linestring.png"));
+    static ImageIcon icoPolyline = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polyline.png"));
     static ImageIcon icoPolygon = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polygon.png"));
+    static ImageIcon icoEllipse = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/ellipse.png"));
+    static ImageIcon icoRectangle = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/rectangle.png"));
     private String name = "";
 
     public PureNewFeature(Geometry g) {
@@ -113,9 +118,26 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         return "";
     }
 
+    @Override
     public String getName() {
-        try {
-            Vector<Feature> allFeatures=CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures();
+        if (getGeometryType() != null) {
+            switch (getGeometryType()) {
+                case RECTANGLE:
+                    return "Neues Rechteck";
+                case LINESTRING:
+                    return "Neuer Linienzug";
+                case ELLIPSE:
+                    return "Neue Ellipse";
+                case POINT:
+                    return "Neuer Punkt";
+                case POLYGON:
+                    return "Neues Polygon";
+                default:
+                    return "Error in getName()";
+            }
+        } else {
+            try {
+                Vector<Feature> allFeatures=CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures();
 //
 //        int countNewPoints=1;
 //        int countNewLines=1;
@@ -147,20 +169,21 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
 //        }
 
 
-        if (name.trim().equals("")) {
-            if (getGeometry() instanceof Point) {
+                if (name.trim().equals("")) {
+                    if (getGeometry() instanceof Point) {
                 name= "Neuer Punkt";
-            } else if (getGeometry() instanceof LineString) {
-                name = "Neuer Linienzug";
-            } else {
-                name = "Neues Polygon";
-            }
-        }
-        return name;
+                    } else if (getGeometry() instanceof LineString) {
+                        name = "Neuer Linienzug";
+                    } else {
+                        name = "Neues Polygon";
+                    }
+                }
+                return name;
         }
         catch (Exception e){
             log.fatal("getName() error",e);
-            return "Error in getName()";
+                return "Error in getName()";
+            }
         }
     }
 
@@ -181,10 +204,16 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     public ImageIcon getIconImage() {
         if (getGeometry() instanceof Point) {
             return icoPoint;
-        } else if (getGeometry() instanceof LineString) {
-            return icoLinestring;
-        } else {
+        } else if (getGeometryType() == geomTypes.LINESTRING) {
+            return icoPolyline;
+        } else if (getGeometryType() == geomTypes.ELLIPSE) {
+            return icoEllipse;
+        } else if (getGeometryType() == geomTypes.RECTANGLE) {
+            return icoRectangle;
+        } else if (getGeometryType() == geomTypes.POLYGON) {
             return icoPolygon;
+        } else {
+            return null;
         }
     }
 
@@ -203,5 +232,13 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         return getTransparency();
     }
 
+
+    public void setGeometryType(geomTypes geomType) {
+        this.geomType = geomType;
+    }
+
+    public geomTypes getGeometryType() {
+        return geomType;
+    }
     
 }
