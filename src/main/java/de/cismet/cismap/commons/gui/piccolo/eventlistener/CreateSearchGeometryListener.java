@@ -8,7 +8,6 @@ import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
-import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.nodes.PPath;
 import java.awt.Color;
 import java.awt.geom.Point2D;
@@ -22,6 +21,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private boolean holdGeometries = false;
     private Color searchColor = Color.GREEN;
+    private float searchTransparency = 0.5f;
     private PureNewFeature lastFeature;
 
     public CreateSearchGeometryListener(MappingComponent mc) {
@@ -32,7 +32,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener {
     
     @Override
     protected Color getFillingColor() {
-        return new Color(searchColor.getRed(), searchColor.getGreen(), searchColor.getBlue(), 127);
+        return new Color(searchColor.getRed(), searchColor.getGreen(), searchColor.getBlue(), 255 - (int)(255f * searchTransparency));
     }
 
     @Override
@@ -122,6 +122,14 @@ public class CreateSearchGeometryListener extends CreateGeometryListener {
 
     public void setHoldGeometries(boolean holdGeometries) {
         this.holdGeometries = holdGeometries;
+    }
+
+    public float getSearchTransparency() {
+        return searchTransparency;
+    }
+
+    public void setSearchTransparency(float searchTransparency) {
+        this.searchTransparency = searchTransparency;
     }
 
     public Color getSearchColor() {

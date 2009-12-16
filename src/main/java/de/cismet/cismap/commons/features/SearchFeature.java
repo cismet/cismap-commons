@@ -36,8 +36,9 @@ public class SearchFeature extends PureNewFeature {
 
     @Override
     public Paint getFillingPaint() {
-        Color color = ((CreateSearchGeometryListener)CismapBroker.getInstance().getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON)).getSearchColor();
-        return new Color(color.getRed(), color.getGreen(), color.getBlue(), 127);
+        CreateSearchGeometryListener searchListener = ((CreateSearchGeometryListener)CismapBroker.getInstance().getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
+        Color color = searchListener.getSearchColor();
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), 255 - (int)(255f * searchListener.getSearchTransparency()));
     }
 
     @Override

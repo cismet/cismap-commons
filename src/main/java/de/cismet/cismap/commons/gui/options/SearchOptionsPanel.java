@@ -22,9 +22,11 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
     private static final String CONFIGURATION = "SearchOptionsPanel";
     private static final String CONF_HOLD_GEOMETRIES = "HoldGeometries";
     private static final String CONF_GEOMETRY_COLOR = "GeometryColor";
+    private static final String CONF_GEOMETRY_TRANSPARENCY = "GeometryTransparency";
 
     private boolean stillConfigured = false;
     private boolean holdGeometries;
+    private float geometryTransparency;
     private Color geometryColor;
     private CreateSearchGeometryListener listener = ((CreateSearchGeometryListener)CismapBroker.getInstance().getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
 
@@ -42,25 +44,30 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
     public void update() {
         holdGeometries = listener.isHoldingGeometries();
         geometryColor = listener.getSearchColor();
+        geometryTransparency = listener.getSearchTransparency();
 
         jCheckBox1.setSelected(holdGeometries);
         jPanel1.setBackground(geometryColor);
+        jSlider1.setValue((int)(geometryTransparency * 100f));
     }
 
     @Override
     public void applyChanges() {
         holdGeometries = jCheckBox1.isSelected();
         geometryColor = jPanel1.getBackground();
+        geometryTransparency = jSlider1.getValue() / 100f;
 
         listener.setHoldGeometries(holdGeometries);
         listener.setSearchColor(geometryColor);
+        listener.setSearchTransparency(geometryTransparency);
     }
 
     @Override
     public boolean isChanged() {
         return 
                 holdGeometries != jCheckBox1.isSelected() ||
-                geometryColor.getRGB() != jPanel1.getBackground().getRGB();
+                geometryColor.getRGB() != jPanel1.getBackground().getRGB() ||
+                geometryTransparency != jSlider1.getValue() / 100f;
     }
 
     @Override
@@ -75,11 +82,13 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
             try {
                 String elementHoldGeometries = "";
                 String elementGeometryColor = "";
+                String elementGeometryTransparency = "";
                 if (parent != null) {
                     final Element conf = parent.getChild(CONFIGURATION);
                     if (conf != null) {
                         elementHoldGeometries = conf.getChildText(CONF_HOLD_GEOMETRIES);
                         elementGeometryColor = conf.getChildText(CONF_GEOMETRY_COLOR);
+                        elementGeometryTransparency = conf.getChildText(CONF_GEOMETRY_TRANSPARENCY);
                     }
                 }
                 holdGeometries = new Boolean(elementHoldGeometries);
@@ -87,6 +96,11 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
                     geometryColor = new Color(Integer.valueOf(elementGeometryColor));
                 } catch (NumberFormatException ex) {
                     geometryColor = Color.GREEN;
+                }
+                try {
+                    geometryTransparency = Float.valueOf(elementGeometryTransparency);
+                } catch (NumberFormatException ex) {
+                    geometryTransparency = 0.5f;
                 }
 
            } catch (Exception ex) {
@@ -96,6 +110,7 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
             // hier werden die Werte in der GUI gesetzt
             jCheckBox1.setSelected(holdGeometries);
             jPanel1.setBackground(geometryColor);
+            jSlider1.setValue((int)(geometryTransparency * 100f));
 
             stillConfigured = true;
         } else {
@@ -112,12 +127,15 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
         Element holdSearchGeometriesElement = new Element(CONF_HOLD_GEOMETRIES);
         Element searchGeometryColorElement = new Element(CONF_GEOMETRY_COLOR);
+        Element searchGeometryTransparencyElement = new Element(CONF_GEOMETRY_TRANSPARENCY);
 
         holdSearchGeometriesElement.addContent(Boolean.toString(holdGeometries));
         searchGeometryColorElement.addContent(String.valueOf(geometryColor.getRGB()));
+        searchGeometryTransparencyElement.addContent(String.valueOf(geometryTransparency));
 
         conf.addContent(holdSearchGeometriesElement);
         conf.addContent(searchGeometryColorElement);
+        conf.addContent(searchGeometryTransparencyElement);
 
         return conf;
     }
@@ -130,13 +148,21 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         jCheckBox1 = new javax.swing.JCheckBox();
         jButton1 = new javax.swing.JButton();
-        jPanel2 = new javax.swing.JPanel();
+        jSeparator1 = new javax.swing.JSeparator();
+        jLabel2 = new javax.swing.JLabel();
+        jSlider1 = new javax.swing.JSlider();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jSeparator1 = new javax.swing.JSeparator();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+
+        setAlignmentY(0.0F);
+        setLayout(new java.awt.GridBagLayout());
 
         jCheckBox1.setText(org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jCheckBox1.text")); // NOI18N
         jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
@@ -144,6 +170,14 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
                 jCheckBox1ActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.ipady = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(8, 5, 3, 5);
+        add(jCheckBox1, gridBagConstraints);
 
         jButton1.setText(org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -151,55 +185,85 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
                 jButton1ActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(3, 0, 3, 5);
+        add(jButton1, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(jSeparator1, gridBagConstraints);
 
-        jPanel2.setLayout(new java.awt.BorderLayout());
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        jLabel2.setText(org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jLabel2.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(3, 5, 3, 5);
+        add(jLabel2, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(3, 0, 3, 5);
+        add(jSlider1, gridBagConstraints);
 
-        jPanel1.setPreferredSize(new java.awt.Dimension(50, 33));
+        jPanel1.setPreferredSize(new java.awt.Dimension(58, 29));
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 50, Short.MAX_VALUE)
+            .addGap(0, 58, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 33, Short.MAX_VALUE)
+            .addGap(0, 29, Short.MAX_VALUE)
         );
 
-        jPanel2.add(jPanel1, java.awt.BorderLayout.EAST);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(3, 0, 3, 0);
+        add(jPanel1, gridBagConstraints);
 
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         jLabel1.setText(org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jLabel1.text")); // NOI18N
-        jPanel2.add(jLabel1, java.awt.BorderLayout.CENTER);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(3, 5, 3, 5);
+        add(jLabel1, gridBagConstraints);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jCheckBox1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 233, Short.MAX_VALUE)
-                        .addComponent(jButton1))
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 531, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jCheckBox1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
-                .addContainerGap(123, Short.MAX_VALUE))
-        );
+        jLabel3.setPreferredSize(new java.awt.Dimension(50, 17));
+
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, jSlider1, org.jdesktop.beansbinding.ELProperty.create("${value}%"), jLabel3, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        bindingGroup.addBinding(binding);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 0);
+        add(jLabel3, gridBagConstraints);
+
+        jLabel4.setText(org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jLabel4.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.weighty = 1.0;
+        add(jLabel4, gridBagConstraints);
+
+        bindingGroup.bind();
     }// </editor-fold>//GEN-END:initComponents
 
     private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
@@ -229,8 +293,12 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
     private javax.swing.JButton jButton1;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSlider jSlider1;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 }
