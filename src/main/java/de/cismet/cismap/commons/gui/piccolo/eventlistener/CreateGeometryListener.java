@@ -461,7 +461,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     }
 
     protected void finishGeometry(final PureNewFeature newFeature) {
-        mc.getFeatureCollection().addFeature(newFeature);
         mc.getTmpFeatureLayer().removeAllChildren();
     }
 

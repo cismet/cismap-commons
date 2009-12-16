@@ -112,8 +112,10 @@ public class SelectionListener extends RectangleRubberBandListener {
                 if (pInputEvent.getClickCount() == 2) {
                     if (sel.getFeature() instanceof SearchFeature) {
                         if (pInputEvent.isLeftMouseButton()) {
+                            ((DefaultFeatureCollection) mc.getFeatureCollection()).unselectAll();
+                            mc.getHandleLayer().removeAllChildren();
                             // neue Suche mit Geometry auslösen
-                            ((CreateSearchGeometryListener)mc.getInputListener(MappingComponent.CREATE_SEARCH_POLYGON)).performSearch((SearchFeature)sel.getFeature());
+                            ((CreateSearchGeometryListener)mc.getInputListener(MappingComponent.CREATE_SEARCH_POLYGON)).search((SearchFeature)sel.getFeature());
                         }
                     }
                 }

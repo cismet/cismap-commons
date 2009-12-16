@@ -8,6 +8,7 @@ import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
+import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.nodes.PPath;
 import java.awt.Color;
 import java.awt.geom.Point2D;
@@ -21,7 +22,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private boolean holdGeometries = false;
     private Color searchColor = Color.GREEN;
-    private PureNewFeature lastSearchFeature;
+    private PureNewFeature lastFeature;
 
     public CreateSearchGeometryListener(MappingComponent mc) {
         super(mc, SearchFeature.class);
@@ -37,28 +38,82 @@ public class CreateSearchGeometryListener extends CreateGeometryListener {
     @Override
     protected void finishGeometry(PureNewFeature newFeature) {
         super.finishGeometry(newFeature);
+        mc.getFeatureCollection().addFeature(newFeature);
 
-        // neue Suche mit Geometrie auslösen
-        MapSearchEvent mse = new MapSearchEvent();
-        mse.setGeometry(newFeature.getGeometry());
-        CismapBroker.getInstance().fireMapSearchInited(mse);
+        doSearch(newFeature);
 
-        lastSearchFeature = newFeature;
+        cleanup(newFeature);
+    }
 
-        PFeature pFeature = (PFeature)mc.getPFeatureHM().get(newFeature);
-
+    private void cleanup(final PureNewFeature feature) {
+        final PFeature pFeature = (PFeature)mc.getPFeatureHM().get(feature);
         if (isHoldingGeometries()) {
-            pFeature.moveToFront();
-            newFeature.setEditable(true);
-            mc.getFeatureCollection().holdFeature(newFeature);
+            pFeature.moveToFront(); //funktioniert nicht?!
+            feature.setEditable(true);
+            mc.getFeatureCollection().holdFeature(feature);
         } else {
-            mc.getTmpFeatureLayer().addChild(pFeature);            
+            mc.getTmpFeatureLayer().addChild(pFeature);
+            
+            // Transparenz animieren
             pFeature.animateToTransparency(0, 2500);
+            // warten bis Animation zu Ende ist um Feature aus Liste zu entfernen
+            new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    while (pFeature.getTransparency() > 0) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException ex) {
+                        }
+                    }
+                    mc.getFeatureCollection().removeFeature(feature);
+                }
+            }).start();
+
         }
     }
 
-    public void repeatLastSearch() {
-        performSearch(lastSearchFeature);
+    private void doSearch(PureNewFeature searchFeature) {
+
+        // Suche
+        MapSearchEvent mse = new MapSearchEvent();
+        mse.setGeometry(searchFeature.getGeometry());
+        CismapBroker.getInstance().fireMapSearchInited(mse);
+
+        // letzte Suchgeometrie merken
+        lastFeature = searchFeature;
+    }
+
+    public void redoLastSearch() {
+        search(lastFeature);
+    }
+
+    public void showLastFeature() {
+        showFeature(lastFeature);
+    }
+
+    private void showFeature(PureNewFeature feature) {
+        if (feature != null) {
+            PPath tmpFeature = new PPath();
+            tmpFeature.setStroke(new FixedWidthStroke());
+            // Alles außer Linie wird mit Farbe gefüllt
+            if (!isInMode(LINESTRING)) {
+                tmpFeature.setPaint(getFillingColor());
+            }
+            // Punkte abfragen und in neues Feature übertragen
+            Vector<Point2D> points = new Vector<Point2D>();
+            for (Coordinate coord : feature.getGeometry().getCoordinates()) {
+                points.add(new Point2D.Double(coord.x, coord.y));
+            }
+            tmpFeature.setPathToPolyline(points.toArray(new Point2D[0]));
+
+            feature.setEditable(true);
+            mc.getFeatureCollection().addFeature(feature);
+            if (isHoldingGeometries()) {
+                mc.getFeatureCollection().holdFeature(feature);
+            }
+        }
     }
 
     public boolean isHoldingGeometries() {
@@ -79,26 +134,14 @@ public class CreateSearchGeometryListener extends CreateGeometryListener {
     }
 
     public PureNewFeature getLastSearchFeature() {
-        return lastSearchFeature;
+        return lastFeature;
     }
 
-    public void performSearch(PureNewFeature searchFeature) {
+    public void search(PureNewFeature searchFeature) {
         if (searchFeature != null) {
-            mc.getTmpFeatureLayer().removeAllChildren();
-
-            tempFeature = new PPath();
-            tempFeature.setStroke(new FixedWidthStroke());
-            if (isInMode(POLYGON) || isInMode(RECTANGLE) || isInMode(ELLIPSE)) {
-                tempFeature.setPaint(getFillingColor());
-            }
-            Vector<Point2D> points = new Vector<Point2D>();
-            for (Coordinate coord : searchFeature.getGeometry().getCoordinates()) {
-                points.add(new Point2D.Double(coord.x, coord.y));
-            }
-            tempFeature.setPathToPolyline(points.toArray(new Point2D[0]));
-            mc.getTmpFeatureLayer().addChild(tempFeature);
-
-            finishGeometry(searchFeature);
+            showFeature(searchFeature);
+            doSearch(searchFeature);
+            cleanup(searchFeature);
         }
     }
 

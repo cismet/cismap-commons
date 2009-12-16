@@ -35,6 +35,7 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
         super.finishGeometry(newFeature);
 
         newFeature.setEditable(true);
+        mc.getFeatureCollection().addFeature(newFeature);
         mc.getFeatureCollection().holdFeature(newFeature);
     }
 
