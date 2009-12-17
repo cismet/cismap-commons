@@ -47,7 +47,7 @@ public class KeyboardListener extends PBasicInputEventHandler {
         } else if (event.getKeyCode() == KeyEvent.VK_LEFT) {
             pan(X_PAN, 0.05f, 0, 800);
         } else if (event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-            CreateGeometryListener listener = (CreateGeometryListener) viewer.getInputListener(MappingComponent.NEW_POLYGON);
+            CreateNewGeometryListener listener = (CreateNewGeometryListener) viewer.getInputListener(MappingComponent.NEW_POLYGON);
             log.debug("Event an CreateGeometryListener weitergeleitet:" + listener);
             listener.keyPressed(event);
         } else {

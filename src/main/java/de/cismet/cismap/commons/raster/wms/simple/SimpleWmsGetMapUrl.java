@@ -76,12 +76,6 @@ public class SimpleWmsGetMapUrl {
     public String getUrlTemplate() {
         return urlTemplate;
     }
-
-    public void setUrlTemplate(String urlTemplate) {
-        this.urlTemplate = urlTemplate;
-    }
-
-    
     
     public String toString() {
         String url=urlTemplate.replaceAll(widthToken, new Integer(width).toString());

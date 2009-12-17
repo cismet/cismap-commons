@@ -35,9 +35,12 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.ParentNodeIsAPFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
@@ -69,7 +72,7 @@ public class SelectionListener extends RectangleRubberBandListener {
             mc = (MappingComponent) pInputEvent.getComponent();
         }
 
-        if (pInputEvent.getModifiers() == InputEvent.BUTTON3_MASK) {
+        if (pInputEvent.isRightMouseButton()) {
             log.debug("right mouseclick");
 //            if (o instanceof PFeature && ((PFeature)o).getFeature() instanceof XStyledFeature) {
 //                XStyledFeature xf=(XStyledFeature)((PFeature)o).getFeature();
@@ -85,7 +88,7 @@ public class SelectionListener extends RectangleRubberBandListener {
                 super.mouseClicked(pInputEvent);
                 sel = (PFeature) o;
                 if (sel.getFeature().canBeSelected()) {
-                    if (mc != null && pInputEvent.getModifiers() == InputEvent.CTRL_MASK + InputEvent.BUTTON1_MASK) {
+                    if (mc != null && pInputEvent.isLeftMouseButton() && pInputEvent.isControlDown()) {
                         if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
                             if (!((DefaultFeatureCollection) mc.getFeatureCollection()).isSelected(sel.getFeature())) {
                                 ((DefaultFeatureCollection) mc.getFeatureCollection()).addToSelection(sel.getFeature());
@@ -106,6 +109,16 @@ public class SelectionListener extends RectangleRubberBandListener {
                     }
                 }
                 postSelectionChanged();
+                if (pInputEvent.getClickCount() == 2) {
+                    if (sel.getFeature() instanceof SearchFeature) {
+                        if (pInputEvent.isLeftMouseButton()) {
+                            ((DefaultFeatureCollection) mc.getFeatureCollection()).unselectAll();
+                            mc.getHandleLayer().removeAllChildren();
+                            // neue Suche mit Geometry auslösen
+                            ((CreateSearchGeometryListener)mc.getInputListener(MappingComponent.CREATE_SEARCH_POLYGON)).search((SearchFeature)sel.getFeature());
+                        }
+                    }
+                }
             } else {
                 if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
                     ((DefaultFeatureCollection) mc.getFeatureCollection()).unselectAll();
