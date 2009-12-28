@@ -42,6 +42,12 @@ public class SearchFeature extends PureNewFeature {
     }
 
     @Override
+    public Paint getLinePaint() {
+        Color color = (Color)getFillingPaint();
+        return color.darker();
+    }
+
+    @Override
     public String getName() {
         if (getGeometryType() != null) {
             switch (getGeometryType()) {

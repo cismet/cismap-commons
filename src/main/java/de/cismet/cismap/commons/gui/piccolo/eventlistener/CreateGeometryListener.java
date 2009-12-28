@@ -150,19 +150,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
             }
         } else if (isInMode(RECTANGLE)) {
             if (!inProgress) {
-
-                tempFeature = new PPath();
-                tempFeature.setStroke(new FixedWidthStroke());
-                tempFeature.setPaint(getFillingColor());
+                tempFeature = initTempFeature(true);
                 mc.getTmpFeatureLayer().addChild(tempFeature);
 
                 startPoint = pInputEvent.getPosition();
             }
         } else if (isInMode(ELLIPSE)) {
             if (!inProgress) {
-                tempFeature = new PPath();
-                tempFeature.setStroke(new FixedWidthStroke());
-                tempFeature.setPaint(getFillingColor());
+                tempFeature = initTempFeature(true);
                 mc.getTmpFeatureLayer().addChild(tempFeature);
 
                 startPoint = pInputEvent.getPosition();
@@ -178,14 +173,15 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     point = pInputEvent.getPosition();
                 }
                 if (!inProgress) {
-                    //Polygon erzeugen
-                    tempFeature = new PPath();
-                    points = new Vector<Point2D>();
-                    tempFeature.setStroke(new FixedWidthStroke());
                     if (isInMode(POLYGON)) {
-                        tempFeature.setPaint(getFillingColor());
+                        tempFeature = initTempFeature(true);
+                    } else {
+                        tempFeature = initTempFeature(false);
                     }
                     mc.getTmpFeatureLayer().addChild(tempFeature);
+
+                    //Polygon erzeugen
+                    points = new Vector<Point2D>();
                     //Ersten Punkt anlegen
                     startPoint = point;
                     points.add(startPoint);
@@ -264,10 +260,10 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
             }
         } else if (!inProgress && points.isEmpty() && event.isControlDown()) {
             log.debug("Versuche Polygon und Startpunkt wiederherzustellen");
-            tempFeature = new PPath();
-            tempFeature.setStroke(new FixedWidthStroke());
-            tempFeature.setPaint(getFillingColor());
+
+            tempFeature = initTempFeature(true);
             mc.getTmpFeatureLayer().addChild(tempFeature);
+
             //Ersten Punkt anlegen
             startPoint = undoPoints.pop();
             points.add(startPoint);
@@ -473,6 +469,16 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
 
     public int getNumOfEllipseEdges() {
         return numOfEllipseEdges;
+    }
+
+    private PPath initTempFeature(boolean filled) {
+        tempFeature = new PPath();
+        tempFeature.setStroke(new FixedWidthStroke());
+        tempFeature.setStrokePaint(getFillingColor().darker());
+        if (filled) {
+            tempFeature.setPaint(getFillingColor());
+        }
+        return tempFeature;
     }
 
 }
