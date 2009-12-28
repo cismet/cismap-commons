@@ -70,8 +70,10 @@ public class RotationPHandle extends PHandle {
                 ((DefaultFeatureCollection) pfeature.getViewer().getFeatureCollection()).getSelectedFeatures().size() > 1) {
             for (Object o : pfeature.getViewer().getFeatureCollection().getSelectedFeatures()) {
                 PFeature pf = (PFeature) pfeature.getViewer().getPFeatureHM().get(o);
-                pf.rotateAllPoints(dragRot, null);
-                relocateHandle();
+                if (pf.getFeature().isEditable()) {
+                    pf.rotateAllPoints(dragRot, null);
+                    relocateHandle();
+                }
             }
         } else {
             pfeature.rotateAllPoints(dragRot, null);
