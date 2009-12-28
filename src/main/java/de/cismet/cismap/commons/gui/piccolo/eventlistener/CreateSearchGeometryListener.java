@@ -1,6 +1,7 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -8,6 +9,8 @@ import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
+import de.cismet.cismap.commons.tools.PFeatureTools;
+import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
 import java.awt.Color;
 import java.awt.geom.Point2D;
@@ -150,6 +153,26 @@ public class CreateSearchGeometryListener extends CreateGeometryListener {
             showFeature(searchFeature);
             doSearch(searchFeature);
             cleanup(searchFeature);
+        }
+    }
+
+    @Override
+    public void mousePressed(PInputEvent pInputEvent) {
+        boolean progressBefore = inProgress;
+        super.mousePressed(pInputEvent);
+
+        if ((!inProgress || (!progressBefore && inProgress)) && pInputEvent.getClickCount() == 2) {
+            Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[]{PFeature.class});
+            if (o instanceof PFeature) {
+                PFeature sel = (PFeature) o;
+                if (sel.getFeature() instanceof SearchFeature) {
+                    if (pInputEvent.isLeftMouseButton()) {
+                        mc.getHandleLayer().removeAllChildren();
+                        // neue Suche mit Geometry auslösen
+                        ((CreateSearchGeometryListener)mc.getInputListener(MappingComponent.CREATE_SEARCH_POLYGON)).search((SearchFeature)sel.getFeature());
+                    }
+                }
+            }            
         }
     }
 
