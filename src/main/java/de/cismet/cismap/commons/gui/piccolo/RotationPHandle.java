@@ -7,6 +7,7 @@ package de.cismet.cismap.commons.gui.piccolo;
 import com.vividsolutions.jts.geom.Geometry;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
@@ -133,18 +134,20 @@ public class RotationPHandle extends PHandle {
 
             boolean overlap = false;
 
-            // Ewig aufwändiger Check nach Überschneidungen
-            for (Object o : selArr) {
-                Geometry g = ((PFeature) pfeature.getViewer().getPFeatureHM().get(o)).getFeature().getGeometry();
-                if (!overlap) {
-                    for (Feature f : all) {
-                        if (!(g.equals(f.getGeometry())) && g.overlaps(f.getGeometry())) {
-                            overlap = true;
-                            break;
+            if (! (pfeature.getFeature() instanceof SearchFeature)) {
+                // Ewig aufwändiger Check nach Überschneidungen
+                for (Object o : selArr) {
+                    Geometry g = ((PFeature) pfeature.getViewer().getPFeatureHM().get(o)).getFeature().getGeometry();
+                    if (!overlap) {
+                        for (Feature f : all) {
+                            if (!(g.equals(f.getGeometry())) && g.overlaps(f.getGeometry())) {
+                                overlap = true;
+                                break;
+                            }
                         }
+                    } else {
+                        break;
                     }
-                } else {
-                    break;
                 }
             }
 
