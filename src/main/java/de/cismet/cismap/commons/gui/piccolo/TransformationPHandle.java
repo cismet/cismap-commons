@@ -503,48 +503,23 @@ public class TransformationPHandle extends PHandle {
                 int posPrevious = (positionInArray + 3) % 4;
                 int posNext = (positionInArray + 1) % 4;
 
-//                Point2D currentPoint = new Point2D.Double(pfeature.getXp()[positionInArray], pfeature.getYp()[positionInArray]);
                 Point2D previousPoint = new Point2D.Double(pfeature.getXp()[posPrevious], pfeature.getYp()[posPrevious]);
                 Point2D nextPoint = new Point2D.Double(pfeature.getXp()[posNext], pfeature.getYp()[posNext]);
-//                Point2D opposedPoint = new Point2D.Double(pfeature.getXp()[posOpposed], pfeature.getYp()[posOpposed]);
-
-//                double distancePrevious = StaticGeometryFunctions.distanceToLine(opposedPoint, previousPoint, currentPoint);
-//                double distanceNext = StaticGeometryFunctions.distanceToLine(opposedPoint, nextPoint, currentPoint);
-//
-//                double currentAngle = Math.toRadians(Math.toDegrees(angle) - (positionInArray * 90) % 360);
-//                double previousAngle = Math.toRadians(180 - Math.toDegrees(currentAngle));
-//                double nextAngle = Math.toRadians(Math.toDegrees(previousAngle) + 90);
-//
-//                Point2D.Double pN = new Point2D.Double();
-//                pN.x = opposedPoint.getX() + distancePrevious * Math.cos(nextAngle);
-//                pN.y = opposedPoint.getY() + distancePrevious * Math.sin(nextAngle);
-//
-//                Point2D.Double pP = new Point2D.Double();
-//                pP.x = opposedPoint.getX() + distanceNext * Math.cos(previousAngle);
-//                pP.y = opposedPoint.getY() + distanceNext * Math.sin(previousAngle);
-//
-//                log.debug("angle: " + Math.toDegrees(currentAngle));
-//                log.debug("distance Next: " + distanceNext);
-//                log.debug("distance Previous: " + distancePrevious);
-
 
                 // selektierten punkt verschieben
                 pfeature.moveCoordinateToNewPiccoloPosition(positionInArray, newX, newY);
-//                pfeature.moveCoordinateToNewPiccoloPosition(posPrevious, (float)pP.getX(), (float)pP.getY());
-//                pfeature.moveCoordinateToNewPiccoloPosition(posNext, (float)pN.getX(), (float)pN.getY());
                 if (positionInArray % 2 == 0) {
-                    pfeature.moveCoordinateToNewPiccoloPosition(posPrevious, newX, (float)previousPoint.getY());
-                    pfeature.moveCoordinateToNewPiccoloPosition(posNext, (float)nextPoint.getX(), newY);
-                    pfeature.moveCoordinateToNewPiccoloPosition(posOpposed, (float)nextPoint.getX(), (float)previousPoint.getY());
-                } else {
                     pfeature.moveCoordinateToNewPiccoloPosition(posPrevious, (float)previousPoint.getX(),  newY);
                     pfeature.moveCoordinateToNewPiccoloPosition(posNext, newX, (float)nextPoint.getY());
                     pfeature.moveCoordinateToNewPiccoloPosition(posOpposed, (float)previousPoint.getX(), (float)nextPoint.getY());
+                } else {
+                    pfeature.moveCoordinateToNewPiccoloPosition(posPrevious, newX, (float)previousPoint.getY());
+                    pfeature.moveCoordinateToNewPiccoloPosition(posNext, (float)nextPoint.getX(), newY);
+                    pfeature.moveCoordinateToNewPiccoloPosition(posOpposed, (float)nextPoint.getX(), (float)previousPoint.getY());
                 }
 
                 // letzter Punkt ist gleich erster Punkt
-                pfeature.getXp()[4] = pfeature.getXp()[0];
-                pfeature.getYp()[4] = pfeature.getYp()[0];
+                pfeature.moveCoordinateToNewPiccoloPosition(4, pfeature.getXp()[0], pfeature.getYp()[0]);
 
                 // Pfad auf Punkte setzen
                 pfeature.setPathToPolyline(pfeature.getXp(), pfeature.getYp());
