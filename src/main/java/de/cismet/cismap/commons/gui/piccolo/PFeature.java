@@ -799,10 +799,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (getFeature().getGeometry() instanceof Polygon) {
             length--;//xp.length-1 weil der erste und letzte Punkt identisch sind
         }
-        // Handles einfügen
-        for (int i = 0; i < length; ++i) {
-            addRotationHandle(handleLayer, i);
-        }
         // SchwerpunktHandle erzeugen
         if (viewer.isFeatureDebugging()) {
             log.debug("PivotHandle==" + pivotHandle);
@@ -825,6 +821,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     }
                 });
             }
+        }
+        // Handles einfügen
+        for (int i = 0; i < length; ++i) {
+            addRotationHandle(handleLayer, i);
         }
     }
 

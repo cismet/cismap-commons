@@ -117,17 +117,21 @@ public class RotationPHandle extends PHandle {
             }
 
             LinkedHashSet<Feature> temp = (LinkedHashSet<Feature>) pfeature.getViewer().getFeatureCollection().getSelectedFeatures();
-            LinkedHashSet<Feature> selArr = (LinkedHashSet<Feature>) temp.clone();
+            LinkedHashSet<Feature> selArr = new LinkedHashSet<Feature>();
+            for (Feature sel : temp) {
+                if (sel.isEditable()) {
+                    selArr.add(sel);
+                }
+            }
             Vector<Feature> all = pfeature.getViewer().getFeatureCollection().getAllFeatures();
-            temp = null;
 
             // FeatureChangedEvents werfen und aktuell halten
             if (pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
                 Vector v = new Vector();
                 for (Object f : selArr) {
-                    ((PFeature) pfeature.getViewer().getPFeatureHM().get(f)).setPivotPoint(mid);
-                    v.add(((PFeature) pfeature.getViewer().getPFeatureHM().get(f)).getFeature());
-                }
+                        ((PFeature) pfeature.getViewer().getPFeatureHM().get(f)).setPivotPoint(mid);
+                        v.add(((PFeature) pfeature.getViewer().getPFeatureHM().get(f)).getFeature());
+                    }
                 ((DefaultFeatureCollection) pfeature.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
             } else {
                 pfeature.getViewer().getFeatureCollection().reconsiderFeature(pfeature.getFeature());
