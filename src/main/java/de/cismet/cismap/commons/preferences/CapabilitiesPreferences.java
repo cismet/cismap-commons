@@ -34,7 +34,6 @@
 
 package de.cismet.cismap.commons.preferences;
 
-import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
@@ -46,9 +45,9 @@ import org.jdom.Element;
  */
 public class CapabilitiesPreferences {
     
-    final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(CapabilitiesPreferences.class);    
     private TreeMap<Integer, CapabilityLink> capabilities=new TreeMap<Integer, CapabilityLink>();
-    private TreeMap<Integer, CapabilityLink> capabilitiesList=new TreeMap<Integer, CapabilityLink>();
+    private CapabilitiesListTreeNode capabilitiesListTree;
     public CapabilitiesPreferences() {
     }
     /** Creates a new instance of CapabilitiesPreferences */
@@ -71,20 +70,50 @@ public class CapabilitiesPreferences {
                 log.warn("Fehler beim Auslesen der CapabilityPreferences.",t);
             }
         }
-        List capsList=serverRoot.getChildren("capabilitiesList");
-        Iterator<Element> itList=capsList.iterator();
-        int listCounter=0;
-        while (itList.hasNext()) {
+
+        // capabilitiesList auslesen und in Baum speichern
+        capabilitiesListTree = createCapabilitiesListTreeNode(null, serverRoot);
+    }
+
+    /**
+     * Erzeugt rekursiv aus einem JDom-Element einen CapabilitiesList-Knoten
+     * samt CapabilitiesList und Unterknoten.
+     *
+     * @param nodetitle  Title des CapabilitiesList-Knotens
+     * @param element JDom-Element
+     * @return CapabilitiesList-Knoten
+     */
+    private static CapabilitiesListTreeNode createCapabilitiesListTreeNode(String nodetitle, Element element) {
+        CapabilitiesListTreeNode node = new CapabilitiesListTreeNode();
+        int listCounter = 0;
+
+        node.setTitle(nodetitle);
+        
+        TreeMap<Integer, CapabilityLink> capabilitiesList = new TreeMap<Integer, CapabilityLink>();
+        for (Element elem : (List<Element>)element.getChildren("capabilitiesList")) {
             try {
-                Element elem =itList.next();
-                String type=elem.getAttribute("type").getValue();
-                String link=elem.getTextTrim();
-                String subparent=elem.getAttributeValue("subparent");
-                capabilitiesList.put(new Integer(listCounter++),new CapabilityLink(type,link,elem.getAttribute("titlestring").getValue(),subparent));
+                String type = elem.getAttribute("type").getValue();
+                String title = elem.getAttribute("titlestring").getValue();
+
+                if (type.equals(CapabilityLink.MENU)) {
+                    // Unterknoten erzeugen
+                    node.addSubnode(createCapabilitiesListTreeNode(title, elem));
+                } else {
+                    // CapabilitiesList-Eintrag erzeugen
+                    String link = elem.getTextTrim();
+                    String subparent = elem.getAttributeValue("subparent");
+                    capabilitiesList.put(new Integer(listCounter++), new CapabilityLink(type, link, title, subparent));
+                }
             } catch (Throwable t) {
-                log.warn("Fehler beim Auslesen der CapabilityListPreferences.",t);
+                log.warn("Fehler beim Auslesen der CapabilityListPreferences.", t);
             }
-        }        
+        }
+
+        // CapabilitiesList
+        node.setCapabilitiesList(capabilitiesList);
+
+        // fertig
+        return node;
     }
  
     public TreeMap<Integer, CapabilityLink> getCapabilities() {
@@ -95,11 +124,8 @@ public class CapabilitiesPreferences {
         this.capabilities = capabilities;
     }
 
-    public TreeMap<Integer, CapabilityLink> getCapabilitiesList() {
-        return capabilitiesList;
+    public CapabilitiesListTreeNode getCapabilitiesListTree() {
+        return capabilitiesListTree;
     }
 
-    public void setCapabilitiesList(TreeMap<Integer, CapabilityLink> capabilitiesList) {
-        this.capabilitiesList = capabilitiesList;
-    }
 }

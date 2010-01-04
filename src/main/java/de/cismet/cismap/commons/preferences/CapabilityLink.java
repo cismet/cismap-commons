@@ -8,6 +8,7 @@ public class CapabilityLink {
     public static String OGC = "OGC";
     public static String OGC_DEPRECATED = "OGC-WMS";
     public static String SEPARATOR = "SEPARATOR";
+    public static String MENU = "MENU";
     private String type;
     private String subparent;
     private String link;

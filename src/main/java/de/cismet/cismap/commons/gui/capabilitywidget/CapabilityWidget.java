@@ -45,6 +45,7 @@ import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
 import de.cismet.cismap.commons.featureservice.WFSOperator;
+import de.cismet.cismap.commons.preferences.CapabilitiesListTreeNode;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
 import de.cismet.cismap.commons.rasterservice.HttpAuthentication;
@@ -99,6 +100,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -1195,20 +1197,50 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
             tbpCapabilities.setSelectedComponent(activeComponent);
         }
 
+        // CapabilityList-Baum neu aufbauen
         capabilityList.removeAll();
-        Iterator<Integer> itList = cp.getCapabilitiesList().keySet().iterator();
-        while (itList.hasNext()) {
-            Integer i = itList.next();
-            CapabilityLink cl = cp.getCapabilitiesList().get(i);
+        JMenu menu = createCapabilitiesListSubmenu(cp.getCapabilitiesListTree());
+        for (Component component : menu.getMenuComponents()) {
+            capabilityList.add(component);
+        }
+    }
+
+    /**
+     * Erzeugt rekursiv aus einem CapabilitiesListTreeNode ein JMenu mit
+     * Untermenues und CapabilityLink-Einträgen.
+     *
+     * @param node Der Knoten aus dem ein JMenu erzeugt werden soll
+     * @return JMenu mit den Menu-Einträgen und Untermenues des Knoten
+     */
+    private JMenu createCapabilitiesListSubmenu(CapabilitiesListTreeNode node) {
+        JMenu menu = new JMenu(node.getTitle());
+
+        // Untermenues rekursiv erzeugen
+        for (CapabilitiesListTreeNode subnode : node.getSubnodes()) {
+            menu.add(createCapabilitiesListSubmenu(subnode));
+        }
+
+        // CapabilityLink-Einträge erzeugen
+        for (final CapabilityLink cl : node.getCapabilitiesList().values()) {
             if (cl.getType().equals(CapabilityLink.OGC) || cl.getType().equals(CapabilityLink.OGC_DEPRECATED)) {
-                addLinkToMenu(cl);
-//                capabilityList.addSeparator();
+                ListMenuItem lmi = new ListMenuItem("test", cl);
+                lmi.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        addLinkManually(new LinkWithSubparent(cl.getLink(), cl.getSubparent()));
+                    }
+                });
+                menu.add(lmi);
             } else if (cl.getType().equals(CapabilityLink.SEPARATOR)) {
-                capabilityList.addSeparator();
+                menu.addSeparator();
             }
-// TODO Hier WFS, ESRI, Google, ...
+            // TODO Hier WFS, ESRI, Google, ...
 
         }
+
+        // fertig
+        return menu;
     }
 
     /**
@@ -1224,10 +1256,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
     }
 
     /**
-     * 
+     *
      * @param cl
      */
-    private void addLinkToMenu(final CapabilityLink cl) {
+    private void addSubmenuToMenu(final CapabilityLink cl) {
         ListMenuItem lmi = new ListMenuItem("test", cl);
         lmi.addActionListener(new ActionListener() {
 
