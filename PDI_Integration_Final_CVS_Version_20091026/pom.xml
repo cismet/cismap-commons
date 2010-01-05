@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.cismet.cids</groupId>
+        <artifactId>cids-parent</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>de.cismet.commons</groupId>
+    <artifactId>cismap-commons</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>cismap Commons</name>
+    <description>This project contains various tools to enable geo-specific within Java applications</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>de.cismet.commons</groupId>
+            <artifactId>cismet-gui-commons</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jdom</artifactId>
+                    <groupId>jdom</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>edu.umd</groupId>
+            <artifactId>piccolo</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.umd</groupId>
+            <artifactId>piccolox</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>de.cismet.custom</groupId>
+            <artifactId>cismet-deegree</artifactId>
+            <version>0.unknown</version>
+        </dependency>
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree</artifactId>
+            <version>unknown</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jgoodies</groupId>
+            <artifactId>looks</artifactId>
+            <version>2.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>calpa.html</groupId>
+            <artifactId>calpahtml</artifactId>
+            <version>2_04</version>
+        </dependency>
+        <dependency>
+            <groupId>bounce</groupId>
+            <artifactId>bounce</artifactId>
+            <version>0.14</version>
+        </dependency>       
+    </dependencies>
+
+    <build>
+        <finalName>cismapCommons</finalName>
+    </build>
+</project>
+
+
+
+
