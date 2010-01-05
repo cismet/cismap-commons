@@ -52,6 +52,7 @@ import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.features.FeatureWithId;
 import de.cismet.cismap.commons.features.RasterLayerSupportedFeature;
 import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
@@ -166,6 +167,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
+import org.openide.util.Exceptions;
 import pswing.PSwingCanvas;
 
 /**
@@ -1947,6 +1949,14 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                         rescaleStickyNodes();
                         repaint();
                         fireFeaturesAddedToMap(Arrays.asList(features));
+
+                        // SuchFeatures in den Vordergrund stellen
+                        for (Feature feature : featureCollection.getAllFeatures()) {
+                            if (feature instanceof SearchFeature) {
+                                PFeature pFeature = (PFeature)pFeatureHM.get(feature);
+                                pFeature.moveToFront();
+                            }
+                        }
                     }
                 });
             }
