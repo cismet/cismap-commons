@@ -12,12 +12,14 @@ import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.Highlightable;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.AddHandleDialog;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 import de.cismet.math.geometry.StaticGeometryFunctions;
 import de.cismet.tools.CismetThreadPool;
+import de.cismet.tools.gui.StaticSwingTools;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
@@ -27,8 +29,11 @@ import edu.umd.cs.piccolox.util.PLocator;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
+import java.awt.Frame;
+import java.awt.event.InputEvent;
 import java.awt.geom.Point2D;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Vector;
 
 /**
@@ -72,11 +77,11 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     @Override
     public void mouseMoved(final PInputEvent event) {
         Runnable t = new Runnable() {
-            
+
             @Override
             public void run() {
                 try {
-                    if (mc.getInteractionMode().equals(MappingComponent.SELECT) && 
+                    if (mc.getInteractionMode().equals(MappingComponent.SELECT) &&
                             mc.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)) {
                         if (mc.getFeatureCollection() instanceof DefaultFeatureCollection &&
                                 ((DefaultFeatureCollection) mc.getFeatureCollection()).getSelectedFeatures().size() == 1) {
@@ -90,7 +95,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                     @Override
                                     public void handleClicked(PInputEvent e) {
                                         SimpleMoveListener.this.mouseClicked(e);
-    //                                    super.handleClicked(pInputEvent);
+                                        //                                    super.handleClicked(pInputEvent);
                                     }
                                 };
                                 newPointHandle.setPaint(new Color(255, 0, 0, 150));
@@ -100,6 +105,17 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                             Point2D[] neighbours = getNearestNeighbours(trigger, sel);
 
                             Point2D erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
+//                            Point2D erg;
+//                            // CTRL-Taste gedrückt
+//                            if (event.getModifiers() == InputEvent.CTRL_MASK) {
+//                                // Handle zwischen dem linken und rechten Nachbar zentrieren
+//                                Double centerX = (neighbours[0].getX() + neighbours[1].getX()) / (double) 2;
+//                                Double centerY = (neighbours[0].getY() + neighbours[1].getY()) / (double) 2;
+//                                erg = new Point2D.Double(centerX, centerY);
+//                            } else { // CTRL-Taste nicht gedrückt
+//                                // Handle folgt auf der Linie der Maus
+//                                erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
+//                            }
                             handleX = (float) erg.getX();
                             handleY = (float) erg.getY();
                             boolean found = false;
@@ -111,8 +127,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                             if (!found) {
 //                                EventQueue.invokeLater(new Runnable() {
 //                                    public void run() {
-                                        mc.getHandleLayer().addChild(newPointHandle);
-                                        log.info("tempor\u00E4res Handle eingef\u00FCgt");
+                                mc.getHandleLayer().addChild(newPointHandle);
+                                log.info("tempor\u00E4res Handle eingef\u00FCgt");
 //                                    }
 //                                });
                             }
@@ -131,7 +147,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                     }
                     postCoordinateChanged();
                     try {
-                    mc.getSnapHandleLayer().removeAllChildren();
+                        mc.getSnapHandleLayer().removeAllChildren();
                     }
                     catch (Exception e){
                         log.debug("Fehler beim entfernen der SnappingVisualisierung",e);
@@ -201,7 +217,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
         Point2D[] erg = {start, end};
         return erg;
     }
-    
+
     private void handleHighlightingStuff(final PInputEvent event) {
         synchronized (handleHighlightingStuff) {
             Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[]{PFeature.class, PHandle.class});
@@ -250,30 +266,115 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     @Override
     public void mouseClicked(PInputEvent event) {
         try {
-            if (event.getClickCount() == 2
-                    && mc.getInteractionMode().equals(MappingComponent.SELECT)
-                    && mc.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE) 
-                    && (pf != null && pf.isSelected())) {
-                log.info("neues Handle einf\u00FCgen: Anzahl vorher:" + pf.getCoordArr().length);
-                pf.setXp(pf.insertCoordinate(positionInArray, pf.getXp(),handleX));
-                log.debug("Pos="+positionInArray+", HandleX="+handleX);
-                for (float f : pf.getXp()) {
-                    log.debug("X="+f);
+            if (event.getClickCount() == 2 && mc.getInteractionMode().equals(MappingComponent.SELECT) && mc.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE) && (pf != null && pf.isSelected())) {
+
+                // Selektiertes Feature holen
+                Collection sel = ((DefaultFeatureCollection) mc.getFeatureCollection()).getSelectedFeatures();
+
+                // markiertes Handel auf der Linie holen
+                Point2D newPoint = new Point2D.Float(handleX, handleY);
+                Point2D[] neighbours = getNearestNeighbours(newPoint, sel);
+
+                // CTRL-Taste beim Klicken gedrückt
+                if (event.getModifiers() == InputEvent.CTRL_MASK + InputEvent.BUTTON1_MASK) {
+                    // welcher Nachbar ist weiter Links/Rechts?
+                    Point2D leftNeighbour;
+                    Point2D rightNeighbour;
+                    if (neighbours[0].getX() < neighbours[1].getX()) {
+                        // Nachbar "0" ist weiter Links
+                        leftNeighbour = neighbours[0];
+                        rightNeighbour = neighbours[1];
+                    } else if (neighbours[1].getX() < neighbours[0].getX()) {
+                        // Nachbar "1" ist weiter Links
+                        leftNeighbour = neighbours[1];
+                        rightNeighbour = neighbours[0];
+                    } else {
+                        // Nachbar "0" und "1" liegen genau übereinander
+                        if (neighbours[0].getY() <= neighbours[1].getY()) {
+                            // Nachbar "0" ist weiter oben (wird als weiter Links interpretiert)
+                            leftNeighbour = neighbours[0];
+                            rightNeighbour = neighbours[1];
+                        } else {
+                            // Nachbar "1" ist weiter oben (wird als weiter Links interpretiert)
+                            leftNeighbour = neighbours[1];
+                            rightNeighbour = neighbours[0];
+                        }
+                    }
+
+                    // Abstand zum linken Nachbar berechnen
+                    Double distanceLeft = leftNeighbour.distance(newPoint);
+                    log.debug("distanceLeft: " + distanceLeft);
+
+                    // Gesamt-Abstand berechnen
+                    Double distanceTotal = leftNeighbour.distance(rightNeighbour);
+                    log.debug("distanceTotal: " + distanceTotal);
+
+                    // MainFrame holen
+                    Frame frame = StaticSwingTools.getParentFrame(mc);
+
+                    // Dialog modal aufrufen und Werte übergeben
+                    AddHandleDialog dialog = new AddHandleDialog(frame, true, distanceTotal);
+                    dialog.setDistanceToLeft(distanceLeft);
+
+                    // Dialog zentrieren und sichtbar machen
+                    dialog.setLocationRelativeTo(frame);
+                    dialog.setVisible(true);
+
+                    // wenn der Dialog mit OK geschlossen wurde
+                    if (dialog.getReturnStatus() == AddHandleDialog.STATUS_OK) {
+                        // ist der gewählte Punkt näher an Links
+                        if (dialog.getDistanceToLeft() < dialog.getDistanceToRight()) {
+                            // Abstand von Links aus berechnen
+                            distanceLeft = dialog.getDistanceToLeft();
+                        } else { // ist der gewählte Punkt nächer an rechts
+                            // Abstand von Rechts aus berechnen
+                            distanceLeft = distanceTotal - dialog.getDistanceToRight();
+                        }
+                        // Abstand kann nicht größer als Gesamt-Abstand sein
+                        distanceLeft = (distanceLeft > distanceTotal) ? distanceTotal : distanceLeft;
+                        // ist die Gesamtlänge ungleich 0 (division durch null verhindern)
+                        if (distanceTotal != 0) {
+                            // Handle-Koordinaten anhand des Abstands berechnen
+                            handleX = (float) (leftNeighbour.getX() + (rightNeighbour.getX() - leftNeighbour.getX()) * (distanceLeft / distanceTotal));
+                            handleY = (float) (leftNeighbour.getY() + (rightNeighbour.getY() - leftNeighbour.getY()) * (distanceLeft / distanceTotal));
+                        } else { // ist die Gesamtlänge 0
+                            // Handle-Koordinaten sind gleich die des linken Nachbarn
+                            handleX = (float) leftNeighbour.getX();
+                            handleY = (float) leftNeighbour.getY();
+                        }
+                    } else { // wenn der Dialog nicht mit OK geschlossen wurde
+                        // nichts tun
+                        super.mouseClicked(event);
+                        return;
+                    }
                 }
-                pf.setYp(pf.insertCoordinate(positionInArray, pf.getYp(),handleY));
-                log.debug("Pos="+positionInArray+", HandleX="+handleY);
-                for (float f : pf.getYp()) {
-                    log.debug("Y="+f);
+// =====================================================================================
+                if (mc.isSnappingEnabled()) { // Snapping Modus
+                    // Features suchen bei denen der zukünftige neue
+                    // Punkt auf einer identischen Linie sitzt
+
+                    // Alle Objekte durchlaufen
+                    for (Feature feature : mc.getFeatureCollection().getAllFeatures()) {
+                        // Collection erzeugen (wird von getNearestNeighbours erwartet)
+                        LinkedList<Feature> featureCollection = new LinkedList<Feature>();
+                        // und aktuelles Feature hinzufügen
+                        featureCollection.add(feature);
+
+                        // die 2 Nachbarpunkte ermitteln, dessen Linie dem zukünftigen neuen Punkt am Nächsten ist
+                        Point2D[] tmpneighbours = getNearestNeighbours(new Point2D.Float(handleX, handleY), featureCollection);
+
+                        // sind die 2 Nachbarpunkte identisch mit den 2 Nachbarn des neuen Punktes => identische Linie
+                        if ((tmpneighbours[0].equals(neighbours[0]) && tmpneighbours[1].equals(neighbours[1])) ||
+                                (tmpneighbours[0].equals(neighbours[1]) && tmpneighbours[1].equals(neighbours[0]))) {
+                            // Punkt dem jeweiligen Feature hinzufügen
+                            addPoint((PFeature)mc.getPFeatureHM().get(feature), handleX, handleY);
+                        }
+                    }
+                } else { // kein Snapping Modus
+                    // einfach nur den Punkt hinzufügen (wie vorher auch)
+                    addPoint(pf, handleX, handleY);
                 }
-                Coordinate c = new Coordinate(mc.getWtst().getSourceX(handleX), mc.getWtst().getSourceY(handleY));
-                pf.setCoordArr(pf.insertCoordinate(positionInArray, pf.getCoordArr(), c));
-                pf.syncGeometry();
-                log.info("neues Handle einf\u00FCge: Anzahl nachher:" + pf.getCoordArr().length);
-                pf.setPathToPolyline(pf.getXp(), pf.getYp());
-                Vector v = new Vector();
-                v.add(pf.getFeature());
-                ((DefaultFeatureCollection) mc.getFeatureCollection()).fireFeaturesChanged(v);
-                mc.getMemUndo().addAction(new HandleDeleteAction(mc, pf.getFeature(), positionInArray, c, handleX, handleY));
+// =====================================================================================
                 mc.getMemRedo().clear();
                 resetAfterClick();
             }
@@ -282,7 +383,30 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
         }
         super.mouseClicked(event);
     }
-    
+
+    private void addPoint(PFeature pf, float handleX, float handleY) {
+        log.info("neues Handle einf\u00FCgen: Anzahl vorher:" + pf.getCoordArr().length);
+        pf.setXp(pf.insertCoordinate(positionInArray, pf.getXp(),handleX));
+        log.debug("Pos="+positionInArray+", HandleX="+handleX);
+        for (float f : pf.getXp()) {
+            log.debug("X="+f);
+        }
+        pf.setYp(pf.insertCoordinate(positionInArray, pf.getYp(),handleY));
+        log.debug("Pos="+positionInArray+", HandleY="+handleY);
+        for (float f : pf.getYp()) {
+            log.debug("Y="+f);
+        }
+        Coordinate c = new Coordinate(mc.getWtst().getSourceX(handleX), mc.getWtst().getSourceY(handleY));
+        pf.setCoordArr(pf.insertCoordinate(positionInArray, pf.getCoordArr(), c));
+        pf.syncGeometry();
+        log.info("neues Handle einf\u00FCge: Anzahl nachher:" + pf.getCoordArr().length);
+        pf.setPathToPolyline(pf.getXp(), pf.getYp());
+        Vector v = new Vector();
+        v.add(pf.getFeature());
+        ((DefaultFeatureCollection) mc.getFeatureCollection()).fireFeaturesChanged(v);
+        mc.getMemUndo().addAction(new HandleDeleteAction(mc, pf.getFeature(), positionInArray, c, handleX, handleY));
+    }
+
     /**
      * Setzt den Listener nach einem erfolgreichen Einf\u00FCgen eines neuen Punkts
      * wieder auf den Anfangszustand zur\u00FCck.

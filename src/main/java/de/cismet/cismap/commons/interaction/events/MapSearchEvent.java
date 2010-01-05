@@ -34,6 +34,7 @@
 
 package de.cismet.cismap.commons.interaction.events;
 
+import com.vividsolutions.jts.geom.Geometry;
 import de.cismet.cismap.commons.BoundingBox;
 import edu.umd.cs.piccolo.util.PBounds;
 
@@ -44,22 +45,32 @@ import edu.umd.cs.piccolo.util.PBounds;
 public class MapSearchEvent {
     private PBounds bounds;
     private BoundingBox bb;
+    private Geometry geometry;
     /** Creates a new instance of MapSearchEvent */
     public MapSearchEvent() {
     }
 
+    public Geometry getGeometry() {
+        return geometry;
+    }
+
+    public void setGeometry(Geometry geometry) {
+        this.geometry = geometry;
+    }
+
+    @Deprecated
     public PBounds getBounds() {
         return bounds;
     }
-
+    @Deprecated
     public void setBounds(PBounds bounds) {
         this.bounds = bounds;
     }
-
+    @Deprecated
     public BoundingBox getBb() {
         return bb;
     }
-
+    @Deprecated
     public void setBb(BoundingBox bb) {
         this.bb = bb;
     }

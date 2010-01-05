@@ -39,6 +39,7 @@ package de.cismet.cismap.commons.wfsforms;
 import com.vividsolutions.jts.geom.Point;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -76,6 +77,7 @@ public abstract class AbstractWFSForm extends JPanel {
     private String iconPath;
     private String className;
     private boolean inited = false;
+    private String sorter=null;
     protected MappingComponent mappingComponent;
     Vector<ActionListener> actionListener = new Vector<ActionListener>();
     public static final int FEATURE_BORDER = 200;
@@ -94,6 +96,7 @@ public abstract class AbstractWFSForm extends JPanel {
         pMark.setSweetSpotY(1d);
 
 
+
     }
 
     public JComponent getListComponentByName(String name) {
@@ -105,9 +108,11 @@ public abstract class AbstractWFSForm extends JPanel {
             inited = true;
             //do the initial loading of all queries that are INITIAL
             for (final WFSFormQuery q : queries) {
+                log.debug(title+"Components:"+ listComponents);
                 queriesByComponentName.put(q.getComponentName(), q);
                 if (q.getType().equals(WFSFormQuery.INITIAL) && listComponents.containsKey(q.getComponentName())) {
                     final JComponent c = listComponents.get(q.getComponentName());
+                    log.debug("Comp: "+q.getComponentName());
                     if (c instanceof JComboBox) {
                         try {
                             JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");
@@ -314,4 +319,13 @@ public abstract class AbstractWFSForm extends JPanel {
             a.actionPerformed(e);
         }
     }
+
+    public String getSorter() {
+        return sorter;
+    }
+
+    public void setSorter(String sorter) {
+        this.sorter = sorter;
+    }
+    
 }

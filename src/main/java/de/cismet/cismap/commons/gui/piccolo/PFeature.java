@@ -14,7 +14,6 @@ import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
@@ -22,21 +21,12 @@ import de.cismet.cismap.commons.features.Highlightable;
 import de.cismet.cismap.commons.features.Selectable;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.AnnotatedFeature;
+import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRotateAction;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleAddAction;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleMoveAction;
-import de.cismet.cismap.commons.tools.IconUtils;
-import de.cismet.cismap.commons.tools.PFeatureTools;
-import de.cismet.math.geometry.StaticGeometryFunctions;
 import de.cismet.tools.CurrentStackTrace;
-import de.cismet.tools.StaticDecimalTools;
 import de.cismet.tools.collections.MultiMap;
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PNode;
@@ -46,10 +36,8 @@ import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.nodes.PText;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PDimension;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
-import edu.umd.cs.piccolox.util.PLocator;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -57,7 +45,6 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.event.InputEvent;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -66,13 +53,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.ListIterator;
-import java.util.Set;
 import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 import org.jdesktop.swingx.image.ColorTintFilter;
 import pswing.PSwing;
 import pswing.PSwingCanvas;
@@ -84,14 +68,11 @@ import pswing.PSwingCanvas;
 public class PFeature extends PPath implements Highlightable, Selectable, Refreshable {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private static final String DIALOG_TEXT = "Aktion r\u00FCckg\u00E4ngig machen?";
-    private static final String DIALOG_TITLE = "\u00DCberschneidung entdeckt";
     private static final Color TRANSPARENT = new Color(255, 255, 255, 0);
     private Feature feature;
     private WorldToScreenTransform wtst;
     private double x_offset = 0.0d;
     private double y_offset = 0.0d;
-    private double rotation = 0.0d;
     private float[] xp;
     private float[] yp;
     private PNode stickyChild = null;
@@ -105,7 +86,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private Paint nonHighlightingPaint = null;
     private Coordinate[] coordArr;
     private MappingComponent viewer;
-    private float startX, startY, endX, endY;
     private String geometryType = "unknown";
     private Stroke stroke = null;
     private Paint strokePaint = null;
@@ -116,6 +96,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     ArrayList splitHandlesBetween = new ArrayList();
     PHandle splitPolygonFromHandle = null;
     PHandle splitPolygonToHandle = null;
+    PHandle ellipseHandle = null;
     PFeature selectedOriginal = null;
     PPath splitPolygonLine;
     Vector splitPoints = new Vector();
@@ -613,78 +594,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     }
 
     /**
-     * Dupliziert eine Koordinate.
-     * @param position Position der zu duplizierenden Koordinate
-     * @param original Koordinatenarray der Geometrie
-     * @return Koordinatenarray mit dupliziertem Punkt
-     */
-    private Coordinate[] duplicateCoordinate(int position, Coordinate[] original) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position ||
-                getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
-            Coordinate[] newCoordinates = new Coordinate[original.length + 1];
-            //vorher
-            for (int i = 0; i <= position; ++i) {
-                newCoordinates[i] = original[i];
-            }
-
-            //zu entferndes Element duplizieren, hier muss geklont werden
-            newCoordinates[position + 1] = (Coordinate) (original[position].clone());
-
-            //nachher
-            for (int i = position + 1; i < original.length; ++i) {
-                newCoordinates[i + 1] = original[i];
-            }
-
-            //Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist
-            if (position == 0 && getFeature().getGeometry() instanceof Polygon) {
-                newCoordinates[newCoordinates.length - 1] = newCoordinates[0];
-            }
-            syncGeometry();
-            return newCoordinates;
-        } else {
-            if (original != null) {
-                return original;
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Dupliziert einen Punkt.
-     * @param position Position des zu duplizierenden Punkts
-     * @param original PCanvas-Punktarray der Geometrie
-     * @return PCanvas-Punktarray, mit dupliziertem Punkt
-     */
-    private float[] duplicateCoordinate(int position, float[] original) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position ||
-                getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
-            float[] newCoordinates = new float[original.length + 1];
-            //vorher
-            for (int i = 0; i <= position; ++i) {
-                newCoordinates[i] = original[i];
-            }
-
-            //nachher
-            for (int i = position; i < original.length; ++i) {
-                newCoordinates[i + 1] = original[i];
-            }
-
-            //Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist
-            if (position == 0 && getFeature().getGeometry() instanceof Polygon) {
-                newCoordinates[newCoordinates.length - 1] = newCoordinates[0];
-            }
-            return newCoordinates;
-        } else {
-            if (original != null) {
-                return original;
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
      * F\u00FCgt eine neue \u00FCbergebene Koordinate in das Koordinatenarray ein, statt
      * nur einen Punkt zu duplizieren.
      * @param position die Position des neuen Punktes im Array
@@ -801,12 +710,16 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (viewer.isFeatureDebugging()) {
             log.debug("addHandles(): " + yp[0] + "--" + yp[yp.length - 1]);
         }
-        int length = xp.length;
-        if (getFeature().getGeometry() instanceof Polygon) {
-            length--;//xp.length-1 weil der erste und letzte Punkt identisch sind
-        }
-        for (int i = 0; i < length; ++i) {
-            addHandle(handleLayer, i);
+        if (((PureNewFeature)getFeature()).getGeometryType() == PureNewFeature.geomTypes.ELLIPSE) {
+            addEllipseHandle(handleLayer);
+        } else {
+            int length = xp.length;
+            if (getFeature().getGeometry() instanceof Polygon) {
+                length--;//xp.length-1 weil der erste und letzte Punkt identisch sind
+            }
+            for (int i = 0; i < length; ++i) {
+                addHandle(handleLayer, i);
+            }
         }
     }
 
@@ -818,365 +731,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void addHandle(final PNode handleLayer, final int position) {
         final int positionInArray = position;
-        PLocator l = new PLocator() {
+        
+        final PHandle h = new TransformationPHandle(this, positionInArray);
 
-            public double locateX() {
-                try {
-                    return getXp()[positionInArray];
-                } catch (Exception ex) {
-                    log.error("Fehler in  locateX():");
-                    return -1;
-
-                }
-            }
-
-            public double locateY() {
-                try {
-                    return getYp()[positionInArray];
-                } catch (Exception ex) {
-                    log.error("Fehler in  locateY():");
-                    return -1;
-                }
-            }
-        };
-
-        // Handle Start
-        // Ad-Hoc-Override von PHandle
-        final PHandle h = new PHandle(l, viewer) {
-
-            PText leftInfo;
-            PText rightInfo;
-            MultiMap glueCoordinates = new MultiMap();
-            Point2D vetoPoint = null;
-
-            private int getLeftNeighbourIndex(int index) {
-                if (index == 0) {
-                    return getXp().length - 2;
-                } else if (positionInArray == getXp().length - 1) {
-                    return positionInArray - 1;
-                } else {
-                    return index - 1;
-                }
-            }
-
-            private int getRightNeighbourIndex(int index) {
-                if (index == 0) {
-                    return positionInArray + 1;
-                } else if (positionInArray == getXp().length - 1) {
-                    return 1;
-                } else {
-                    return positionInArray + 1;
-                }
-            }
-
-            @Override
-            public void dragHandle(PDimension aLocalDimension, PInputEvent aEvent) {
-                if (!viewer.getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
-                    SimpleMoveListener moveListener = (SimpleMoveListener) getViewer().getInputListener(MappingComponent.MOTION);
-                    if (moveListener != null) {
-                        moveListener.mouseMoved(aEvent);
-                    } else {
-                        log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                    }
-
-                    if (getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE) ||
-                            getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE)) {
-                        //localToParent(aLocalDimension);
-//                     if (viewer.isFeatureDebugging()) log.debug("vorher.DRAG.aLocalDimension:"+aLocalDimension);
-                        viewer.getCamera().localToView(aLocalDimension);
-//                     if (viewer.isFeatureDebugging()) log.debug("nachher.DRAG.aLocalDimension:"+aLocalDimension);
-
-                        float newX = getXp()[positionInArray] + (float) aLocalDimension.getWidth();
-                        float newY = getYp()[positionInArray] + (float) aLocalDimension.getHeight();
-
-                        // if CTRL DOWN
-                        if (aEvent.getModifiers() == InputEvent.CTRL_MASK + InputEvent.BUTTON1_MASK) {
-                            Point2D trigger = aEvent.getCanvasPosition();
-                            trigger = viewer.getCamera().localToView(trigger);
-                            Point2D lineStart = new Point2D.Double();
-                            Point2D lineEnd = new Point2D.Double();
-
-                            int lineStartIndex = getLeftNeighbourIndex(positionInArray);
-                            int lineEndIndex = getRightNeighbourIndex(positionInArray);
-
-//                        if (positionInArray==0) {
-//                            lineStartIndex=getXp().length-2;
-//                            lineEndIndex=positionInArray+1;
-//                        } else if (positionInArray==getXp().length-1){
-//                            lineStartIndex=positionInArray-1;
-//                            lineEndIndex=1;
-//                        } else {
-//                            lineStartIndex=positionInArray-1;
-//                            lineEndIndex=positionInArray+1;
-//                        }
-
-                            lineStart.setLocation(getXp()[lineStartIndex], getYp()[lineStartIndex]);
-                            lineEnd.setLocation(getXp()[lineEndIndex], getYp()[lineEndIndex]);
-                            Point2D erg = StaticGeometryFunctions.createPointOnLine(lineStart, lineEnd, trigger);
-                            newX = (float) erg.getX();
-                            newY = (float) erg.getY();
-                        }
-
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("Width,Height:" + (float) aLocalDimension.getWidth() + "," + (float) aLocalDimension.getHeight());
-                        }
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("Width,Height:" + aLocalDimension.getWidth() + "," + aLocalDimension.getHeight());
-                        }
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("alter.Wert:" + getXp()[positionInArray] + "," + getYp()[positionInArray]);
-                        }
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("neuer.Wert:" + newX + "," + newY);
-                        }
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("Berechnung:" + (float) ((double) getXp()[positionInArray] * 10000 + (double) aLocalDimension.getWidth() * 10000) / 10000);
-                        }
-                        if (viewer.isSnappingEnabled()) {
-//                        Point2D snapPoint=PFeatureTools.getNearestPointInArea(viewer,aEvent.getCanvasPosition(),
-//                                new Point2D.Float(getXp()[positionInArray],getYp()[positionInArray]) );
-                            Point2D snapPoint = PFeatureTools.getNearestPointInArea(viewer, aEvent.getCanvasPosition());
-                            if (snapPoint != null) {
-                                newX = (float) snapPoint.getX();
-                                newY = (float) snapPoint.getY();
-                            }
-                        }
-
-                        // umgekehrte Bewegung fuer Undo speichern
-                        endX = newX;
-                        endY = newY;
-
-                        moveCoordinateToNewPiccoloPosition(positionInArray, newX, newY);
-
-                        //PFeature.this.syncGeometry();
-                        relocateHandle();
-
-                        if (getViewer().isInGlueIdenticalPointsMode()) {
-                            Set<PFeature> pFeatureSet = glueCoordinates.keySet();
-                            for (PFeature gluePFeature : pFeatureSet) {
-                                if (gluePFeature.getFeature().isEditable()) {
-                                    Collection coordinates = (Collection) glueCoordinates.get(gluePFeature);
-                                    if (coordinates != null) {
-                                        for (Object o : coordinates) {
-                                            int oIndex = (Integer) o;
-                                            gluePFeature.moveCoordinateToNewPiccoloPosition(oIndex, newX, newY);
-                                            //   gluePFeature.syncGeometry();
-                                            if (viewer.isFeatureDebugging()) {
-                                                log.debug("moveCoordinateToNewPiccoloPosition " + gluePFeature);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-//                        if (viewer.isFeatureDebugging()) log.debug("glueIdenticalPoints==true");
-//                        List<PFeatureCoordinatePosition> l =PFeature.this.getViewer().getPFeaturesByCoordinates(oldCoordinate);
-//                        if (l!=null) {
-//                            if (viewer.isFeatureDebugging()) log.debug("l.size():"+l.size())   ;
-//                            for (PFeatureCoordinatePosition pc:l){
-//
-//                                if (pc.getPFeature()!=PFeature.this) {
-//                                    if (viewer.isFeatureDebugging()) log.debug("GLUE");
-//                                    //set the x and y value separately, because we don't want to create a flat copy and we don't want to clone
-//                                    pc.getPFeature().getXp()[pc.getPosition()]=getXp()[positionInArray];
-//                                    pc.getPFeature().getYp()[pc.getPosition()]=getYp()[positionInArray];
-//                                    pc.getPFeature().getCoordArr()[pc.getPosition()].x=PFeature.this.getCoordArr()[positionInArray].x;
-//                                    pc.getPFeature().getCoordArr()[pc.getPosition()].y=PFeature.this.getCoordArr()[positionInArray].y;
-//                                    pc.getPFeature().setPathToPolyline(pc.getPFeature().getXp(), pc.getPFeature().getYp());
-//                                    pc.getPFeature().syncGeometry();
-//                                    pc.getPFeature().doGeometry(pc.getPFeature().getFeature().getGeometry());
-//                                    pc.getPFeature().getViewer().reconsiderFeature(pc.getPFeature().getFeature());
-//                                } else {
-//                                    if (viewer.isFeatureDebugging()) log.debug("Same Object no GLUE");
-//                                }
-//                            }
-//                        }
-                        }
-
-                        //Abst\u00E4nde zu den Nachbarn
-                        int lefty = getLeftNeighbourIndex(positionInArray);
-                        int righty = getRightNeighbourIndex(positionInArray);
-                        Coordinate lc = getCoordArr()[lefty];
-                        Coordinate rc = getCoordArr()[righty];
-                        Coordinate thisC = getCoordArr()[positionInArray];
-
-                        double leftDistance = thisC.distance(lc);
-                        double rightDistance = thisC.distance(rc);
-
-                        leftInfo.setText("" + StaticDecimalTools.round(leftDistance));
-                        rightInfo.setText("" + StaticDecimalTools.round(rightDistance));
-
-                        Point2D lp = new Point2D.Double();
-                        Point2D rp = new Point2D.Double();
-                        lp.setLocation(getXp()[lefty], getYp()[lefty]);
-                        rp.setLocation(getXp()[righty], getYp()[righty]);
-                        lp = viewer.getCamera().viewToLocal(lp);
-                        rp = viewer.getCamera().viewToLocal(rp);
-                        leftInfo.setX(lp.getX());
-                        leftInfo.setY(lp.getY());
-                        rightInfo.setX(rp.getX());
-                        rightInfo.setY(rp.getY());
-                    }
-                }
-            }
-
-            /**
-             * Override this method to get notified when the handle starts to get dragged.
-             */
-            @Override
-            public void startHandleDrag(Point2D aLocalPoint, PInputEvent aEvent) {
-                if (!viewer.getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
-                    //Infonodes (Entfernung) anlegen
-                    leftInfo = new PText();
-                    leftInfo.setPaint(new Color(255, 255, 255, 100));
-                    rightInfo = new PText();
-                    rightInfo.setPaint(new Color(255, 255, 255, 100));
-                    addChild(leftInfo);
-                    addChild(rightInfo);
-                    leftInfo.setVisible(true);
-                    rightInfo.setVisible(true);
-
-                    //Glue: IdentischePunkte mitverschieben
-                    if (getViewer().isInGlueIdenticalPointsMode()) {
-                        //Features suchen die identische Punkte haben
-                        glueCoordinates = checkforGlueCoords(positionInArray);
-                        log.info("checkforGlueCoords() aufgerufen und " + glueCoordinates.keySet().size() + " gefunden");
-                    }
-                    vetoPoint = aLocalPoint;
-                    startX = getXp()[positionInArray];
-                    startY = getYp()[positionInArray];
-                    endX = startX;
-                    endY = startY;
-
-                    super.startHandleDrag(aLocalPoint, aEvent);
-                }
-            }
-
-            @Override
-            public void endHandleDrag(java.awt.geom.Point2D aLocalPoint, PInputEvent aEvent) {
-                if (!viewer.getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
-                    if (viewer.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                        PFeature.this.syncGeometry();
-                        Vector v = new Vector();
-                        v.add(PFeature.this.getFeature());
-                        ((DefaultFeatureCollection) viewer.getFeatureCollection()).fireFeaturesChanged(v);
-                    } else {
-                        viewer.getFeatureCollection().reconsiderFeature(getFeature());
-                    }
-
-                    removeChild(leftInfo);
-                    removeChild(rightInfo);
-                    leftInfo = null;
-                    rightInfo = null;
-
-                    if ((getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE)) &&
-                            (Math.abs(startX - endX) > 0.001d) || (Math.abs(startY - endY) > 0.001d)) {
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("neue MoveAction erzeugen");
-                        }
-                        boolean isGluedAction = false;
-                        if (glueCoordinates.size() != 0) {
-                            isGluedAction = true;
-                            Vector v = new Vector();
-                            if (getViewer().isInGlueIdenticalPointsMode()) {
-                                Set<PFeature> pFeatureSet = glueCoordinates.keySet();
-                                for (PFeature gluePFeature : pFeatureSet) {
-                                    if (gluePFeature.getFeature().isEditable()) {
-                                        v.add(gluePFeature.getFeature());
-                                        Collection coordinates = (Collection) glueCoordinates.get(gluePFeature);
-                                        if (coordinates != null) {
-                                            for (Object o : coordinates) {
-//                                                int oIndex = (Integer) o;
-//                                                gluePFeature.moveCoordinateToNewPiccoloPosition(oIndex, newX, newY);
-//                                                gluePFeature.syncGeometry();
-                                                if (viewer.isFeatureDebugging()) {
-                                                    log.debug("PFeature synced:" + gluePFeature);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                ((DefaultFeatureCollection) viewer.getFeatureCollection()).fireFeaturesChanged(v);
-                            }
-                        }
-                        getViewer().getMemUndo().addAction(new HandleMoveAction(positionInArray, PFeature.this, startX, startY, endX, endY, isGluedAction));
-                        getViewer().getMemRedo().clear();
-                    }
-                }
-                super.endHandleDrag(aLocalPoint, aEvent);
-            }
-
-            @Override
-            public void handleClicked(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-                if (viewer.isFeatureDebugging()) {
-                    log.debug("Handle clicked");
-                }
-                if (viewer.getHandleInteractionMode().equals(MappingComponent.REMOVE_HANDLE)) {
-                    getViewer().getMemUndo().addAction(new HandleAddAction(getViewer(), PFeature.this.getFeature(), positionInArray, getCoordArr()[positionInArray], getXp()[positionInArray], getYp()[positionInArray]));
-                    ((PHandle) (pInputEvent.getPickedNode())).removeHandle();
-                } else if (viewer.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)) {
-                    getViewer().getMemUndo().addAction(new HandleDeleteAction(getViewer(), PFeature.this.getFeature(), positionInArray, getCoordArr()[positionInArray], getXp()[positionInArray], getYp()[positionInArray]));
-                    ((PHandle) (pInputEvent.getPickedNode())).duplicateHandle();
-                } else if (viewer.getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
-                    addSplitHandle(((PHandle) (pInputEvent.getPickedNode())));
-                }
-                if (viewer.isFeatureDebugging()) {
-                    log.debug("Ende von handleClicked() getFeature().getGeometry().getCoordinates().length:" + getFeature().getGeometry().getCoordinates().length);
-                }
-                //viewer.getFeatureCollection().reconsiderFeature(getFeature());
-            }
-
-            @Override
-            public void mouseMovedNotInDragOperation(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-                SimpleMoveListener moveListener = (SimpleMoveListener) viewer.getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(pInputEvent);
-                } else {
-                    log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-            }
-
-            @Override
-            public void removeHandle() {
-                //log.error("--- :"+getCoordArr());
-                if (getXp().length > 4 && getFeature().getGeometry() instanceof Polygon ||
-                        getXp().length > 1 && getFeature().getGeometry() instanceof LineString) { //DANGER und Linien ???
-                    setXp(PFeature.this.removeCoordinate(positionInArray, getXp()));
-                    setYp(PFeature.this.removeCoordinate(positionInArray, getYp()));
-                    log.debug("---vorher:" + getCoordArr().length);
-                    PFeature.this.coordArr = PFeature.this.removeCoordinate(positionInArray, PFeature.this.getCoordArr());
-                    PFeature.this.syncGeometry();
-                    log.debug("---nachher:" + getCoordArr().length);
-                    PFeature.this.setPathToPolyline(getXp(), getYp());
-                    //Jetzt sind allerdings alle Locator noch falsch und das handle existiert noch
-                    //handleLayer.removeChild(this);
-                    //Das w\u00E4re zwar optimal (Performance) korrigiert allerdings nicht die falschen
-                    //Locator
-                    Vector v = new Vector();
-                    v.add(PFeature.this.getFeature());
-                    ((DefaultFeatureCollection) viewer.getFeatureCollection()).fireFeaturesChanged(v);
-                    //deswegen (langsam aber funzt):
-                    if (isSelected()) {
-                        getViewer().showHandles(false);
-                    }
-                }
-            }
-
-            @Override
-            public void duplicateHandle() {
-                log.info("duplicate Handle : anzahl der Handles vorher:" + getCoordArr().length);
-                setXp(PFeature.this.duplicateCoordinate(positionInArray, getXp()));
-                setYp(PFeature.this.duplicateCoordinate(positionInArray, getYp()));
-                PFeature.this.coordArr = PFeature.this.duplicateCoordinate(positionInArray, PFeature.this.getCoordArr());
-                PFeature.this.syncGeometry();
-                log.info("duplicate Handle : anzahl der Handles nachher:" + getCoordArr().length);
-                PFeature.this.setPathToPolyline(getXp(), getYp());
-                getViewer().showHandles(false);
-                Vector v = new Vector();
-                v.add(PFeature.this.getFeature());
-                ((DefaultFeatureCollection) viewer.getFeatureCollection()).fireFeaturesChanged(v);
-            }
-        };
-        ///Handle End
         EventQueue.invokeLater(new Runnable() {
 
             public void run() {
@@ -1242,10 +799,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (getFeature().getGeometry() instanceof Polygon) {
             length--;//xp.length-1 weil der erste und letzte Punkt identisch sind
         }
-        // Handles einfügen
-        for (int i = 0; i < length; ++i) {
-            addRotationHandle(handleLayer, i);
-        }
         // SchwerpunktHandle erzeugen
         if (viewer.isFeatureDebugging()) {
             log.debug("PivotHandle==" + pivotHandle);
@@ -1269,6 +822,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 });
             }
         }
+        // Handles einfügen
+        for (int i = 0; i < length; ++i) {
+            addRotationHandle(handleLayer, i);
+        }
     }
 
     /**
@@ -1281,166 +838,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (viewer.isFeatureDebugging()) {
             log.debug("addRotationHandles(): Hinzuf\u00FCgen vom " + position + ". RotationHandle");
         }
-        PLocator l = new PLocator() {
+        
+        final PHandle rotHandle = new RotationPHandle(this, mid, pivotHandle, position);
 
-            public double locateX() {
-                return getXp()[position];
-            }
-
-            public double locateY() {
-                return getYp()[position];
-            }
-        };
-
-        // Handle Start
-        // Ad-Hoc-Override von PHandle
-        final PHandle rotHandle = new PHandle(l, viewer) {
-
-            @Override
-            public void dragHandle(PDimension aLocalDimension, PInputEvent aEvent) {
-                SimpleMoveListener moveListener = (SimpleMoveListener) getViewer().getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(aEvent);
-                } else {
-                    log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-                getViewer().getCamera().localToView(aLocalDimension);
-                double dragRot = calculateDrag(aEvent, getXp()[position], getYp()[position]);
-                if (getViewer().getFeatureCollection() instanceof DefaultFeatureCollection &&
-                        ((DefaultFeatureCollection) getViewer().getFeatureCollection()).getSelectedFeatures().size() > 1) {
-                    for (Object o : getViewer().getFeatureCollection().getSelectedFeatures()) {
-                        PFeature pf = (PFeature) getViewer().getPFeatureHM().get(o);
-                        pf.rotateAllPoints(dragRot, null);
-                        relocateHandle();
-                    }
-                } else {
-                    rotateAllPoints(dragRot, null);
-                    relocateHandle();
-                }
-                rotation -= dragRot;
-            }
-
-            /**
-             * Override this method to get notified when the handle starts to get dragged.
-             */
-            @Override
-            public void startHandleDrag(Point2D aLocalPoint, PInputEvent aEvent) {
-                if (viewer.isFeatureDebugging()) {
-                    log.debug("startHandleDrag");
-                }
-                rotation = 0.0d;
-
-                // InfoNode entfernen, da sie sonst mitdreht
-                Collection selArr = getViewer().getFeatureCollection().getSelectedFeatures();
-                for (Object o : selArr) {
-                    PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
-                    if (pf != null && pf.getInfoNode() != null) {
-                        pf.getInfoNode().setVisible(false);
-                    }
-                }
-
-                handleLayer.removeAllChildren();
-                handleLayer.addChild(this);
-                if (pivotHandle != null) {
-                    handleLayer.addChild(pivotHandle);
-                }
-                super.startHandleDrag(aLocalPoint, aEvent);
-            }
-
-            @Override
-            public void endHandleDrag(java.awt.geom.Point2D aLocalPoint, PInputEvent aEvent) {
-                try {
-                    if (viewer.isFeatureDebugging()) {
-                        log.debug("endHandleDrag");
-                    }
-
-                    LinkedHashSet<Feature> temp = (LinkedHashSet<Feature>) getViewer().getFeatureCollection().getSelectedFeatures();
-                    LinkedHashSet<Feature> selArr = (LinkedHashSet<Feature>) temp.clone();
-                    Vector<Feature> all = getViewer().getFeatureCollection().getAllFeatures();
-                    temp = null;
-
-                    // FeatureChangedEvents werfen und aktuell halten
-                    if (getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
-                        Vector v = new Vector();
-                        for (Object f : selArr) {
-                            ((PFeature) getViewer().getPFeatureHM().get(f)).setPivotPoint(mid);
-                            v.add(((PFeature) getViewer().getPFeatureHM().get(f)).getFeature());
-                        }
-                        ((DefaultFeatureCollection) getViewer().getFeatureCollection()).fireFeaturesChanged(v);
-                    } else {
-                        getViewer().getFeatureCollection().reconsiderFeature(PFeature.this.getFeature());
-                    }
-                    log.debug("Nach fireFeaturesChanged");
-
-                    boolean overlap = false;
-
-                    // Ewig aufwändiger Check nach Überschneidungen
-                    for (Object o : selArr) {
-                        Geometry g = ((PFeature) getViewer().getPFeatureHM().get(o)).getFeature().getGeometry();
-                        if (!overlap) {
-                            for (Feature f : all) {
-                                if (!(g.equals(f.getGeometry())) && g.overlaps(f.getGeometry())) {
-                                    overlap = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-
-                    // Falls ja, dann Abfrage "Sind Sie sicher?"
-                    log.debug("Nach Overlap-Check");
-                    if (overlap) {
-                        log.debug("Überlappt");
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("\u00DCberschneidungen nach Drehung der PFeatures");
-                        }
-                        int answer = JOptionPane.showConfirmDialog(getViewer(), DIALOG_TEXT, DIALOG_TITLE, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("Drehung durchf\u00FChren: " + (answer == JOptionPane.YES_OPTION ? "JA" : "NEIN"));
-                        }
-                        if (answer == JOptionPane.YES_OPTION) {
-                            CustomAction a = new FeatureRotateAction(getViewer(), selArr, (Point2D) mid.clone(), rotation);
-                            a.doAction();
-                        } else {
-                            if (rotation != 0.0d) {
-                                getViewer().getMemUndo().addAction(new FeatureRotateAction(getViewer(), selArr, (Point2D) mid.clone(), rotation));
-                                getViewer().getMemRedo().clear();
-                            }
-                        }
-                    } else {
-                        log.debug("Überlappt nicht");
-                        if (rotation != 0.0d) {
-                            log.debug("arr=" + selArr);
-                            log.debug("mid=" + mid);
-                            Point2D actionMid = new Point2D.Double(mid.getX(), mid.getY());
-                            getViewer().getMemUndo().addAction(new FeatureRotateAction(getViewer(), selArr, actionMid, rotation));
-                            getViewer().getMemRedo().clear();
-                        }
-                    }
-                    super.endHandleDrag(aLocalPoint, aEvent);
-
-                } catch (Throwable ex) {
-                    log.error("Boooooom", ex);
-                }
-            }
-
-            @Override
-            public void mouseMovedNotInDragOperation(PInputEvent pInputEvent) {
-                SimpleMoveListener moveListener = (SimpleMoveListener) viewer.getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(pInputEvent);
-                } else {
-                    log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-            }
-        };
-        // Handle End
-        // \u00E4ndere Farbe des Handles auf GELB
         rotHandle.setPaint(new Color(1f, 1f, 0f, 0.7f));
         EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 handleLayer.addChild(rotHandle);
                 rotHandle.addClientProperty("coordinate", getCoordArr()[position]);
@@ -1476,74 +880,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
             pf.setPivotPoint(allBounds.getCenter2D());
             mid = allBounds.getCenter2D();
-        }
-        final PLocator l = new PLocator() {
+        }        
 
-            public double locateX() {
-                if (mid == null) {
-                    return getBounds().getCenter2D().getX();
-                } else {
-                    return mid.getX();
-                }
-            }
+        pivotHandle = new PivotPHandle(this, mid);
 
-            public double locateY() {
-                if (mid == null) {
-                    return getBounds().getCenter2D().getY();
-                } else {
-                    return mid.getY();
-                }
-            }
-        };
-
-        // Handle Start
-        // Ad-Hoc-Override von PHandle
-        final PHandle pivot = new PHandle(l, viewer) {
-
-            @Override
-            public void dragHandle(PDimension aLocalDimension, PInputEvent aEvent) {
-                double scale = getViewer().getCamera().getViewScale();
-                SimpleMoveListener moveListener = (SimpleMoveListener) getViewer().getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(aEvent);
-                } else {
-                    log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-                mid.setLocation(mid.getX() + (aLocalDimension.width / scale),
-                        mid.getY() + (aLocalDimension.height / scale));
-                relocateHandle();
-            }
-
-            @Override
-            public void endHandleDrag(java.awt.geom.Point2D aLocalPoint, PInputEvent aEvent) {
-                if (getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
-                    Collection selArr = getViewer().getFeatureCollection().getSelectedFeatures();
-                    for (Object o : selArr) {
-                        PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
-                        pf.setPivotPoint(mid);
-                    }
-                }
-                if (viewer.isFeatureDebugging()) {
-                    log.debug("neuer PivotPunkt=(" + mid.getX() + ", " + mid.getY() + ")");
-                }
-                super.endHandleDrag(aLocalPoint, aEvent);
-            }
-
-            @Override
-            public void mouseMovedNotInDragOperation(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-                SimpleMoveListener moveListener = (SimpleMoveListener) viewer.getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(pInputEvent);
-                } else {
-                    log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-            }
-        };
-        ///Handle End
-        pivotHandle = pivot;
         pivotHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
         EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 handleLayer.addChild(pivotHandle);
             }
@@ -1552,6 +896,23 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
             pf.pivotHandle = this.pivotHandle;
         }
+    }
+
+    public void addEllipseHandle(final PNode handleLayer) {
+        if (viewer.isFeatureDebugging()) {
+            log.debug("addEllipseHandle()");
+        }
+
+        ellipseHandle = new EllipsePHandle(this);
+
+        ellipseHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
+        EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                handleLayer.addChild(ellipseHandle);
+            }
+        });
     }
 
     /**
@@ -1604,7 +965,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     }
 
     /**
-     * Bildet aus Mausposition, Mittelpunkt und Handleposition ein Dreieck und 
+     * Bildet aus Mausposition, Mittelpunkt und Handleposition ein Dreieck und
      * berechnet daraus, den bei der Bewegung zur\u00FCckgelegten Winkel und dessen
      * Richtung.
      * @param event PInputEvent der Mausbewegung
@@ -1613,7 +974,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param y Y-Koordinate des Handles
      * @return \u00FCberstrichener Winkel der Bewegung im Bogenma\u00DF
      */
-    protected double calculateDrag(PInputEvent event, float x, float y) {
+    public double calculateDrag(PInputEvent event, float x, float y) {
         Point2D mousePos = event.getPosition();
 
         // create vectors

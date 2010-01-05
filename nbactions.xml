@@ -1,10 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
-        <action>
-            <actionName>CUSTOM-deploy</actionName>
-            <displayName>deploy</displayName>
-            <goals>
-                <goal>deploy</goal>
-            </goals>
-        </action>
-    </actions>
+    <action>
+        <actionName>CUSTOM-deploy</actionName>
+        <displayName>deploy</displayName>
+        <goals>
+            <goal>deploy</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>CUSTOM-public-deploy-flexo</actionName>
+        <displayName>public-deploy-flexo</displayName>
+        <goals>
+            <goal>clean</goal>
+            <goal>deploy</goal>
+        </goals>
+        <activatedProfiles>
+            <activatedProfile>deploy</activatedProfile>
+            <activatedProfile>deploy-public</activatedProfile>
+        </activatedProfiles>
+    </action>
+
+</actions>

@@ -81,7 +81,7 @@ public class CismapBroker {
     private static final String DEFAULT_ALIAS_FILE_PATH = "appLib" + FS + SERVERALIAS_FILE_NAME;
     private Properties userProperties = new Properties();
     private Properties defaultProperties;
-    private String CISMAP_FOLDER_PATH = USER_HOME_DIRECTORY + FS + DEFAULT_CISMAP_FOLDER;
+    private String cismapFolderPath = USER_HOME_DIRECTORY + FS + DEFAULT_CISMAP_FOLDER;
     private File defaultAliasFile;
     private File userAliasFile;
     private Vector<CapabilityListener> capabilityListeners = new Vector<CapabilityListener>();
@@ -93,7 +93,7 @@ public class CismapBroker {
     private Vector<MapSearchListener> mapSearchListeners = new Vector<MapSearchListener>();
     private Vector<MapDnDListener> mapDnDListeners = new Vector<MapDnDListener>();
     private Vector<FeatureCollectionListener> featureCollectionListeners = new Vector<FeatureCollectionListener>();
-    private Vector<MapBoundsListener> mapBoundsListeners = new Vector<MapBoundsListener>();    
+    private Vector<MapBoundsListener> mapBoundsListeners = new Vector<MapBoundsListener>();
     //private Hashtable<WMSCapabilities, GUICredentialsProvider> httpCredentialsForCapabilities = new Hashtable<WMSCapabilities, GUICredentialsProvider>();
     private String srs;
     private String preferredRasterFormat;
@@ -106,9 +106,9 @@ public class CismapBroker {
     private static CismapBroker instance = null;
     PFeature oldPfeature = null;
     private ExecutorService execService = null;
+    private boolean serverAliasesInited = false;
 
     private CismapBroker() {
-        initAliases();
         execService = Executors.newCachedThreadPool();
     }
 
@@ -402,8 +402,8 @@ public class CismapBroker {
     private void initAliases() {
         log.debug("initializing server aliases property");
         try {
-            userAliasFile = new File(CISMAP_FOLDER_PATH + FS + SERVERALIAS_FILE_NAME);
-            File cismapFolder = new File(CISMAP_FOLDER_PATH);
+            userAliasFile = new File(getCismapFolderPath() + FS + SERVERALIAS_FILE_NAME);
+            File cismapFolder = new File(getCismapFolderPath());
 
             if (!cismapFolder.exists()) {
                 cismapFolder.mkdir();
@@ -427,6 +427,7 @@ public class CismapBroker {
         } catch (IOException ex) {
             log.error("Error during reading the server aliases from file", ex);
         }
+        serverAliasesInited = true;
     }
 
     public void cleanUpSystemRegistry() {
@@ -443,6 +444,9 @@ public class CismapBroker {
 
     public void writePropertyFile() {
         log.debug("writing server Aliases to File");
+        if (!serverAliasesInited) {
+            initAliases();
+        }
         try {
             if (userAliasFile.exists()) {
                 FileOutputStream out = new FileOutputStream(userAliasFile);
@@ -455,14 +459,20 @@ public class CismapBroker {
     }
 
     public void addProperty(String key, String value) {
-        userProperties.setProperty(key, value);        
+        if (!serverAliasesInited) {
+            initAliases();
+        }
+        userProperties.setProperty(key, value);
         log.debug("Server alias added  key: " + key + " value: " + value);
     }
 
     public String getProperty(String key) {
+        if (!serverAliasesInited) {
+            initAliases();
+        }
         return defaultProperties.getProperty(key);
     }
-    
+
     public void execute(SwingWorker workerThread) {
         try {
             execService.submit(workerThread);
@@ -471,4 +481,21 @@ public class CismapBroker {
             log.fatal("SwingWorker Error", ex);
         }
     }
+
+    public String getCismapFolderPath() {
+        return cismapFolderPath;
+    }
+
+    public void setCismapFolderPath(String cismapFolderPath) {
+        try {
+            File cismapFolder = new File(cismapFolderPath);
+            if (!cismapFolder.exists()) {
+                cismapFolder.mkdir();
+            }
+        } catch (Exception e) {
+            log.fatal("Fehler beim Anlegen von "+cismapFolderPath,e);
+        }
+        this.cismapFolderPath = cismapFolderPath;
+    }
+    
 }

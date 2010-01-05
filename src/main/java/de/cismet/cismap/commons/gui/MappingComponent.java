@@ -54,6 +54,7 @@ import de.cismet.cismap.commons.features.FeatureWithId;
 import de.cismet.cismap.commons.features.InheritsLayerProperties;
 import de.cismet.cismap.commons.features.RasterLayerSupportedFeature;
 import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
@@ -69,7 +70,7 @@ import de.cismet.cismap.commons.gui.piccolo.XPImage;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.AttachFeatureListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.BackgroundRefreshingPanEventListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.BoundingBoxSearchListener;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CustomFeatureActionListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CustomFeatureInfoListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.DeleteFeatureListener;
@@ -82,6 +83,7 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.OverviewModeListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.RaisePolygonListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.RubberBandZoomListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateSearchGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SplitPolygonListener;
@@ -174,6 +176,7 @@ import java.awt.event.ActionListener;
 import org.apache.log4j.Logger;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
+import org.openide.util.Exceptions;
 import pswing.PSwingCanvas;
 
 /**
@@ -192,7 +195,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     public static final String ZOOM = "ZOOM";
     public static final String PAN = "PAN";
     public static final String FEATURE_INFO = "FEATURE_INFO";
-    public static final String BOUNDING_BOX_SEARCH = "BOUNDING_BOX_SEARCH";
+    public static final String CREATE_SEARCH_POLYGON = "SEARCH_POLYGON";
     public static final String MOVE_POLYGON = "MOVE_POLYGON";
     public static final String REMOVE_POLYGON = "REMOVE_POLYGON";
     public static final String NEW_POLYGON = "NEW_POLYGON";
@@ -894,10 +897,10 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         inputEventListener.put(SELECT, new SelectionListener());
 
         inputEventListener.put(FEATURE_INFO, new GetFeatureInfoClickDetectionListener());
-        inputEventListener.put(BOUNDING_BOX_SEARCH, new BoundingBoxSearchListener());
+        inputEventListener.put(CREATE_SEARCH_POLYGON, new CreateSearchGeometryListener(this));
 
         inputEventListener.put(MOVE_POLYGON, new FeatureMoveListener(this));
-        inputEventListener.put(NEW_POLYGON, new CreateGeometryListener(this));
+        inputEventListener.put(NEW_POLYGON, new CreateNewGeometryListener(this));
         inputEventListener.put(RAISE_POLYGON, new RaisePolygonListener(this));
         inputEventListener.put(REMOVE_POLYGON, new DeleteFeatureListener());
         inputEventListener.put(ATTACH_POLYGON_TO_ALPHADATA, new AttachFeatureListener());
@@ -926,7 +929,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         putCursor(ZOOM, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(PAN, new Cursor(Cursor.HAND_CURSOR));
         putCursor(FEATURE_INFO, new Cursor(Cursor.DEFAULT_CURSOR));
-        putCursor(BOUNDING_BOX_SEARCH, new Cursor(Cursor.CROSSHAIR_CURSOR));
+        putCursor(CREATE_SEARCH_POLYGON, new Cursor(Cursor.CROSSHAIR_CURSOR));
 
         putCursor(MOVE_POLYGON, new Cursor(Cursor.HAND_CURSOR));
         putCursor(ROTATE_POLYGON, new Cursor(Cursor.DEFAULT_CURSOR));
@@ -1019,7 +1022,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 } else {
                     log.warn("this.getInputListener(this.interactionMode)==null");
                 }
-                if (interactionMode.equals(NEW_POLYGON)) {//||interactionMode==SELECT) {
+                if (interactionMode.equals(NEW_POLYGON) || interactionMode.equals(CREATE_SEARCH_POLYGON)) {//||interactionMode==SELECT) {
 //                if (selectedFeature!=null) {
 //                    selectPFeatureManually(null);
 //                }
@@ -2395,6 +2398,14 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                         rescaleStickyNodes();
                         repaint();
                         fireFeaturesAddedToMap(Arrays.asList(features));
+
+                        // SuchFeatures in den Vordergrund stellen
+                        for (Feature feature : featureCollection.getAllFeatures()) {
+                            if (feature instanceof SearchFeature) {
+                                PFeature pFeature = (PFeature)pFeatureHM.get(feature);
+                                pFeature.moveToFront();
+                            }
+                        }
                     }
                 });
             }
@@ -3455,7 +3466,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         log.debug("writing configuration <cismapMappingPreferences>");
         Element ret = new Element("cismapMappingPreferences");
         ret.setAttribute("interactionMode", getInteractionMode());
-        ret.setAttribute("creationMode", ((CreateGeometryListener) getInputListener(MappingComponent.NEW_POLYGON)).getMode());
+        ret.setAttribute("creationMode", ((CreateNewGeometryListener) getInputListener(MappingComponent.NEW_POLYGON)).getMode());
         ret.setAttribute("handleInteractionMode", getHandleInteractionMode());
         ret.setAttribute("snapping", new Boolean(isSnappingEnabled()).toString());
 
@@ -3562,7 +3573,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             if (interactMode.equals(MappingComponent.NEW_POLYGON)) {
                 try {
                     String creationMode = prefs.getAttribute("creationMode").getValue();
-                    ((CreateGeometryListener) getInputListener(MappingComponent.NEW_POLYGON)).setMode(creationMode);
+                    ((CreateNewGeometryListener) getInputListener(MappingComponent.NEW_POLYGON)).setMode(creationMode);
                 } catch (Throwable t) {
                     log.warn("Fehler beim Setzen des CreationInteractionMode", t);
                 }

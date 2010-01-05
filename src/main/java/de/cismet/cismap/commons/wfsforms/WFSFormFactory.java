@@ -39,7 +39,10 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Vector;
 import org.jdom.Element;
@@ -51,11 +54,12 @@ import org.jdom.Element;
 public class WFSFormFactory implements Configurable {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private HashMap<String, AbstractWFSForm> forms = new HashMap<String, AbstractWFSForm>();
+    private LinkedHashMap<String, AbstractWFSForm> forms = new LinkedHashMap<String, AbstractWFSForm>();
     private static WFSFormFactory singletonInstance;
     /** Creates a new instance of WFSFormFactory */
     private Element configuration;
     private MappingComponent mappingComponent;
+    private boolean problemDuringSorting = false;
 
     private WFSFormFactory(MappingComponent map) {
         mappingComponent = map;
@@ -100,6 +104,10 @@ public class WFSFormFactory implements Configurable {
                     AbstractWFSForm form = (AbstractWFSForm) constructor.newInstance();
                     form.setClassName(className);
                     form.setId(e.getAttribute("id").getValue());
+                    try {
+                        form.setSorter(e.getAttribute("sorter").getValue());
+                    } catch (Exception skip) {
+                    }
                     form.setTitle(e.getAttribute("title").getValue());
                     form.setMenuString(e.getAttribute("menu").getValue());
                     form.setIconPath(e.getAttribute("icon").getValue());
@@ -148,8 +156,42 @@ public class WFSFormFactory implements Configurable {
                     log.debug("WFSForm " + form.getId() + " added");
                 } catch (Throwable t) {
                     log.error("Could not create WFSForm", t);
-                } 
+                }
+            }
+            LinkedHashMap lhs = new LinkedHashMap(forms.size());
 
+
+            List<String> keylistSorted = new Vector<String>(forms.keySet());
+
+            Collections.sort(keylistSorted, new Comparator<String>() {
+
+                @Override
+                public int compare(String o1, String o2) {
+                    try {
+                        String sortO1=forms.get(o1).getSorter();
+                        String sortO2=forms.get(o2).getSorter();
+                        if (sortO1!=null&&sortO2!=null){
+                            return sortO1.compareTo(sortO2);
+                        }
+                        else {
+                            problemDuringSorting = true;
+                        }
+                    } catch (Exception e) {
+                        problemDuringSorting = true;
+                    }
+                    return o1.compareTo(o2);
+                }
+            });
+
+            if (!problemDuringSorting) {
+                for (String key : keylistSorted) {
+                    lhs.put(key, forms.get(key));
+                }
+
+                forms = lhs;
+            }
+            else {
+                log.warn("Beim Sortieren der WFSForms gab es einen Fehler. Es wird die Reihenfolge im ConfigFile beibehalten");
             }
         } catch (Throwable t) {
             log.error("Could not create WFSForm", t);
@@ -160,7 +202,7 @@ public class WFSFormFactory implements Configurable {
         //alle Infos kommen immer vom Server
     }
 
-    public HashMap<String, AbstractWFSForm> getForms() {
+    public LinkedHashMap<String, AbstractWFSForm> getForms() {
         return forms;
     }
 
