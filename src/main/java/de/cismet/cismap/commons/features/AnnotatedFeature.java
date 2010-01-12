@@ -46,7 +46,7 @@ import java.awt.Paint;
 public interface AnnotatedFeature{
 
     public String getPrimaryAnnotation();
-    
+
     public boolean isPrimaryAnnotationVisible();
     
     public void setPrimaryAnnotationVisible(boolean visible);

@@ -33,14 +33,12 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
-import de.cismet.cismap.commons.raster.wms.*;
 import java.awt.Component;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import org.deegree2.ogcwebservices.getcapabilities.ServiceIdentification;
+import org.deegree2.framework.xml.schema.ElementDeclaration;
 import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilities;
-import org.jdom.Element;
 
 /**
  * Der WFSCapabilitiesTreeCellRenderer bestimmt, wie ein WFSCapabilitiesTree-Knoten
@@ -48,10 +46,8 @@ import org.jdom.Element;
  * @author nh
  */
 public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
+
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.raster.wfs.WFSCapabilitiesTreeCellRenderer");
-    private static final String STRING = "xsd:string";
-    private static final String INTEGER = "xsd:integer";
-    private static final String GEOM = "gml:GeometryPropertyType";
     private ImageIcon serverIcon;
     private ImageIcon featureIcon;
     private ImageIcon elementIcon;
@@ -71,7 +67,7 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
         integerIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/integer.png"));
         geomIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/geom.png"));
     }
-    
+
     public WFSCapabilitiesTreeCellRenderer(String name) {
         this();
         this.altRootName = name;
@@ -83,7 +79,7 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
         super.getTreeCellRendererComponent(tree, value, isSelected, expanded, leaf, row, hasFocus);
 
         try {
-            // wenn Knoten == WFSCapabilities --> Root
+            // if node is a WFSCapabilities --> root
             if (value instanceof WFSCapabilities) {
                 if (altRootName != null) {
                     setText(altRootName);
@@ -91,24 +87,45 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                     setText("Web Feature Service");
                 }
                 setIcon(serverIcon);
-            }
-            // bleiben nur noch Element-Knoten \u00FCbrig
-            else {
-                Element e = (Element) value;
-                if (e.getChildren().size() == 0) {
-                    if (e.getAttributeValue("type").equals(STRING)) {
-                        setIcon(stringIcon);
-                    } else if (e.getAttributeValue("type").equals(INTEGER)) {
-                        setIcon(integerIcon);
-                    } else if (e.getAttributeValue("type").equals(GEOM)) {
-                        setIcon(geomIcon);
-                    } else {
-                        setIcon(elementIcon);
-                    }
+            } else if (value instanceof ElementDeclaration) {
+                ElementDeclaration e = (ElementDeclaration) value;
+//                if (!e.getType().isResolved()) {
+//                    if (e.getType().getName().getLocalName().equals(FeatureServiceUtilities.STRING_PROPERTY_TYPE)) {
+//                        setIcon(stringIcon);
+//                    } else if (e.getType().getName().getLocalName().equals(FeatureServiceUtilities.INTEGER_PROPERTY_TYPE)) {
+//                        setIcon(integerIcon);
+//                    } else if (e.getType().getName().getLocalName().equals(FeatureServiceUtilities.GEO_PROPERTY_TYPE)) {
+//                        setIcon(geomIcon);
+//                    } else {
+//
+//                    }
+//                } else {
+//                    setIcon(featureIcon);
+//                }
+                setIcon(featureIcon);
+                setText(e.getName().getLocalName());
+            } else if (value instanceof FeatureServiceAttribute) {
+                FeatureServiceAttribute fsf = (FeatureServiceAttribute) value;
+                String type;
+                if(fsf.getType() != null && fsf.getType().lastIndexOf(":") != -1){
+                    type = fsf.getType().substring(fsf.getType().lastIndexOf(":")+1);
                 } else {
-                    setIcon(featureIcon);
+                    type = fsf.getType();
                 }
-                setText(WFSOperator.deleteApp(e.getAttributeValue("name")));
+                if (type.equals(FeatureServiceUtilities.STRING_PROPERTY_TYPE)) {
+                    setIcon(stringIcon);
+                } else if (type.equals(FeatureServiceUtilities.INTEGER_PROPERTY_TYPE)) {
+                    setIcon(integerIcon);
+                } else if (type.equals(FeatureServiceUtilities.GEO_PROPERTY_TYPE)) {
+                    setIcon(geomIcon);
+                } else {
+                    setIcon(elementIcon);
+                }
+                if(fsf.getName() != null && fsf.getName().lastIndexOf(":") != -1){
+                    setText(fsf.getName().substring(fsf.getName().lastIndexOf(":")+1));
+                } else {
+                    setText(fsf.getName());
+                }
             }
         } catch (Exception ex) {
             log.error("Fehler im WFSCapabilitiesTreeCellRenderer", ex);

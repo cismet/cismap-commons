@@ -4,111 +4,165 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
+import de.cismet.cismap.commons.ConvertableToXML;
 import org.jdom.Element;
 
 /**
+ * Describes the attributes of all Featires available in a certain layer.
  *
- * @author spuhl
+ * @author Sebastian Puhl
+ * @author Pascal Dihé
  */
-public class FeatureServiceAttribute {
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    //public static final String STRING = "string";
-    //public static final String INTEGER = "integer";
-    //public static final String GEOMETRY = "geometry";
-    public static final String IS_SELECTED = "isSelected";
-    private String type;
-    private String name;
-    private boolean isGeometry;
-    private boolean isSelected;
+public class FeatureServiceAttribute implements ConvertableToXML, Cloneable
+{
+  private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+  //public static final String STRING = "string";
+  //public static final String INTEGER = "integer";
+  //public static final String GEOMETRY = "geometry";
+  public static final String IS_SELECTED = "isSelected";
+  private String type;
+  private String name;
+  private boolean geometry;
+  private boolean selected;
 
-    public FeatureServiceAttribute(String name, String type, boolean isSelected) throws Exception {
-        setName(name);
-        if (type.equals(FeatureServiceUtilities.GEO_PROPERTY_TYPE_WITH_NS) ||
-                type.equals(Integer.toString(DocumentFeatureService.GML_GEOMETRY_TYPE))) {
-            setIsGeometry(true);
-        }
-        setIsSelected(isSelected);
-        setType(type);
+  public FeatureServiceAttribute(String name, String type, boolean isSelected)
+  {
+    setName(name);
+    if (type.equals(FeatureServiceUtilities.GEO_PROPERTY_TYPE_WITH_NS) ||
+            type.equals(Integer.toString(DocumentFeatureService.GML_GEOMETRY_TYPE)))
+    {
+      setGeometry(true);
+    }
+    setSelected(isSelected);
+    setType(type);
+  }
+
+  public FeatureServiceAttribute(Element e) throws Exception
+  {
+    this.initFromElement(e);
+  }
+
+  protected FeatureServiceAttribute(FeatureServiceAttribute featureServiceAttribute)
+  {
+    this(new String(featureServiceAttribute.getName()), new String(featureServiceAttribute.getType()), featureServiceAttribute.isSelected());
+  }
+
+  public String getName()
+  {
+    return name;
+  }
+
+  public void setName(String name)
+  {
+    this.name = name;
+  }
+
+  public String getType()
+  {
+    return type;
+  }
+
+  public void setType(String type)
+  {
+    this.type = type;
+  }
+
+  public void setGeometry(boolean isGeometry)
+  {
+    this.geometry = isGeometry;
+  }
+
+  public boolean isGeometry()
+  {
+    return geometry;
+  }
+
+  public boolean isSelected()
+  {
+    return selected;
+  }
+
+  public void setSelected(boolean isSelected)
+  {
+    this.selected = isSelected;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (obj == null)
+    {
+      return false;
+    }
+    if (getClass() != obj.getClass())
+    {
+      return false;
+    }
+    final FeatureServiceAttribute other = (FeatureServiceAttribute) obj;
+    if (this.type != other.type && (this.type == null || !this.type.equals(other.type)))
+    {
+      return false;
+    }
+    if (this.name != other.name && (this.name == null || !this.name.equals(other.name)))
+    {
+      return false;
+    }
+    if (this.geometry != other.geometry)
+    {
+      return false;
+    }
+    if (this.selected != other.selected)
+    {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode()
+  {
+    int hash = 7;
+    hash = 71 * hash + (this.type != null ? this.type.hashCode() : 0);
+    hash = 71 * hash + (this.name != null ? this.name.hashCode() : 0);
+    hash = 71 * hash + (this.geometry ? 1 : 0);
+    hash = 71 * hash + (this.selected ? 1 : 0);
+    return hash;
+  }
+
+  @Override
+  public Element toElement()
+  {
+    Element featureServiceAttribute = new Element(FeatureServiceAttribute.class.getSimpleName());
+
+    featureServiceAttribute.setAttribute(ConvertableToXML.TYPE_ATTRIBUTE, this.getClass().getCanonicalName());
+    featureServiceAttribute.setAttribute(FeatureServiceUtilities.XML_NAME_STRING, getName());
+    featureServiceAttribute.setAttribute(FeatureServiceUtilities.IS_GEOMETRY, new Boolean(isGeometry()).toString());
+    featureServiceAttribute.setAttribute(IS_SELECTED, new Boolean(selected).toString());
+    featureServiceAttribute.setAttribute(FeatureServiceUtilities.XML_TYPE_STRING, getType());
+    return featureServiceAttribute;
+  }
+
+  @Override
+  public void initFromElement(Element element) throws Exception
+  {
+    if(element.getAttribute(ConvertableToXML.TYPE_ATTRIBUTE) == null)
+    {
+      log.warn("fromElement: restoring object from deprecarted xml element");
     }
 
-    public FeatureServiceAttribute(Element e) throws Exception {
-        this(e.getAttributeValue(FeatureServiceUtilities.XML_NAME_STRING),
-                e.getAttributeValue(FeatureServiceUtilities.XML_TYPE_STRING),
-                (e.getAttributeValue(IS_SELECTED) != null ? new Boolean(e.getAttributeValue(IS_SELECTED)) : new Boolean(true)));
-    }
+    this.setName(element.getAttributeValue(FeatureServiceUtilities.XML_NAME_STRING));
+    this.setType(element.getAttributeValue(FeatureServiceUtilities.XML_TYPE_STRING));
+    
+    boolean newSelected = element.getAttributeValue(IS_SELECTED) != null ? new Boolean(element.getAttributeValue(IS_SELECTED)) : new Boolean(true);
+    this.setSelected(newSelected);
+    
+    boolean newGeometry = this.getType() != null && (this.getType().equals(FeatureServiceUtilities.GEO_PROPERTY_TYPE_WITH_NS) || this.getType().equals(Integer.toString(DocumentFeatureService.GML_GEOMETRY_TYPE)));
+    this.setGeometry(newGeometry);
+  }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public void setIsGeometry(boolean isGeometry) {
-        this.isGeometry = isGeometry;
-    }
-
-    public boolean isGeometry() {
-        return isGeometry;
-    }
-
-    public boolean isSelected() {
-        return isSelected;
-    }
-
-    public void setIsSelected(boolean isSelected) {
-        this.isSelected = isSelected;
-    }
-
-    public Element getElement() {
-        Element featureServiceAttribute = new Element(FeatureServiceAttribute.class.getSimpleName());
-        featureServiceAttribute.setAttribute(FeatureServiceUtilities.XML_NAME_STRING, getName());
-        featureServiceAttribute.setAttribute(FeatureServiceUtilities.IS_GEOMETRY, new Boolean(isGeometry()).toString());
-        featureServiceAttribute.setAttribute(IS_SELECTED, new Boolean(isSelected).toString());
-        featureServiceAttribute.setAttribute(FeatureServiceUtilities.XML_TYPE_STRING, getType());
-        return featureServiceAttribute;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final FeatureServiceAttribute other = (FeatureServiceAttribute) obj;
-        if (this.type != other.type && (this.type == null || !this.type.equals(other.type))) {
-            return false;
-        }
-        if (this.name != other.name && (this.name == null || !this.name.equals(other.name))) {
-            return false;
-        }
-        if (this.isGeometry != other.isGeometry) {
-            return false;
-        }
-        if (this.isSelected != other.isSelected) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 71 * hash + (this.type != null ? this.type.hashCode() : 0);
-        hash = 71 * hash + (this.name != null ? this.name.hashCode() : 0);
-        hash = 71 * hash + (this.isGeometry ? 1 : 0);
-        hash = 71 * hash + (this.isSelected ? 1 : 0);
-        return hash;
-    }
+  @Override
+  public FeatureServiceAttribute clone()
+  {
+    return new FeatureServiceAttribute(this);
+  }
 }

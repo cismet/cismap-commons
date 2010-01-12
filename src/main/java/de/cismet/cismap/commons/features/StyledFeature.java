@@ -36,14 +36,13 @@
 package de.cismet.cismap.commons.features;
 
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-import java.awt.Font;
 import java.awt.Paint;
 
 /**
  *
  * @author hell
  */
-public interface StyledFeature extends Feature {
+public interface StyledFeature extends Feature{
 
     //public java.awt.Stroke getLineStyle();
     public java.awt.Paint getLinePaint();

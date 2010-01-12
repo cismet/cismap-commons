@@ -1,143 +1,225 @@
 /*
+
  * StylePreviewPanel.java
+
  *
+
  * Created on 25. Februar 2008, 14:31
+
  */
 package de.cismet.cismap.commons.featureservice.style;
 
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+
 import de.cismet.tools.gui.PointSymbolCreator;
+
 import java.awt.AlphaComposite;
+
 import java.awt.BasicStroke;
+
 import java.awt.Color;
-import java.awt.Font;
+
 import java.awt.Graphics;
+
 import java.awt.Graphics2D;
+
 import java.awt.Image;
+
 import java.awt.RenderingHints;
+
 import java.awt.image.BufferedImage;
-import javax.swing.BorderFactory;
+
 import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
 
 /**
- *
+
+ * The StylePreviewPanel is a JPanel that gives the user a visual feedback of the 
+
+ * currently selected or created style of the StyleDialog by painting a square and the
+
+ * pointsymbol beside it. It must to be configured with a Style and a FeatureAnnotationSymbol.
+
  * @author  nh
+
  */
-public class StylePreviewPanel extends JPanel {
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private static final String SAMPLE_TEXT = "Identifier";
-    private boolean drawLine = false;
-    private boolean drawFill = false;
-    private boolean drawText = false;
-    private int symbolSize = 5;
-    private int lineWidth = 0;
-    private float alpha = 1.0f;
-    private Color lineColor = Color.BLUE;
-    private Color fillColor = Color.RED;
-    private Color fontColor = Color.BLACK;
-    private Font fontType = null;
-    private Image pointSymbol = null;
+public class StylePreviewPanel extends JPanel
+{
 
-    /**
-     * Creates new form StylePreviewPanel
-     */
-    public StylePreviewPanel() {
-        initComponents();
-        setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-        log.debug("Erstelle StylePreviewPanel");
+  private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+  private static final String SAMPLE_TEXT = "Identifier";
+  private Style style;
+  private Color lineColor;
+  private Color fillColor;
+  private Image pointSymbol = null;
+
+  /**
+
+   * Creates new form StylePreviewPanel
+
+   */
+  public StylePreviewPanel()
+  {
+
+    initComponents();
+
+    log.debug("Erstelle StylePreviewPanel");
+
+  }
+
+  /**
+
+   * Reassigns the variables of this StylePreviewPanel and calls a repaint.
+
+   * @param style Style with all attributes to display
+
+   * @param pointSymbol FeatureAnnotationSymbol or null
+
+   */
+  public void update(Style style, FeatureAnnotationSymbol pointSymbol)
+  {
+
+    this.style = style;
+
+    this.fillColor = style.isDrawFill() ? style.getFillColor() : null;
+
+    this.lineColor = style.isDrawLine() ? style.getLineColor() : null;
+
+    this.pointSymbol = (pointSymbol == null ? createPointSymbol() : pointSymbol.getImage());
+
+    repaint();
+
+  }
+
+  /**
+
+   * Returns the pointsymbol that is shown in this StylePreviewPanel.
+
+   * @return delivered pointsymbol-image or own created
+
+   */
+  public Image getPointSymbol()
+  {
+
+    return pointSymbol;
+
+  }
+
+  /**
+
+   * Creates a new pointsymbol-image with attributes of the current style.
+
+   */
+  private BufferedImage createPointSymbol()
+  {
+    log.debug("createPointSymbol: PointSymbolSize="+style.getPointSymbolSize()+", LineWidth="+style.getLineWidth());
+    return PointSymbolCreator.createPointSymbol(style.isDrawLine(), style.isDrawFill(), 
+            style.getPointSymbolSize() > Style.MIN_POINTSYMBOLSIZE ? style.getPointSymbolSize() : Style.MIN_POINTSYMBOLSIZE
+            , style.getLineWidth(), fillColor, lineColor);
+  }
+
+  @Override
+  protected void paintComponent(Graphics g)
+  {
+    super.paintComponent(g);
+
+    Graphics2D g2d = (Graphics2D) g;
+
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, style.getAlpha()));
+
+    int[] pointsX =
+    {
+      10, getWidth() - 50, getWidth() - 10, 40
+    };
+
+    int[] pointsY =
+    {
+      getHeight() / 3, 10, getHeight() / 2, getHeight() - 20
+    };
+
+
+
+    // filling
+
+    if (style.isDrawFill())
+    {
+
+      g2d.setColor(fillColor);
+
+      g2d.fillPolygon(pointsX, pointsY, 4);
+
     }
 
-    /**
-     * Setzt die Attribute des PreviewPanels neu und stößt ein erneutes Zeichnen an.
-     * @param drawLine true, wenn Linie gezeichnet werden soll
-     * @param drawFill true, wenn Füllung gezeichnet werden soll
-     * @param drawText true, wenn Labels gezeichnet werden sollen
-     * @param pointSymbol FeatureAnnotationSymbol oder null für eigenes Symbol
-     * @param symbolSize -1 oder Größe des eigenen Symbols
-     * @param lineWidth Dicke der Linie
-     * @param alpha AlphaWert des zu zeichnenden Polygons
-     * @param lc LinieFarbe
-     * @param fc Füllfarbe
-     * @param font Labelschriftart
-     * @param foc Labelschriftfarbe
-     */
-    public void update(boolean drawLine, boolean drawFill, boolean drawText,
-            FeatureAnnotationSymbol pointSymbol, int symbolSize, int lineWidth,
-            float alpha, Color lc, Color fc, Font font, Color foc) {
-        this.drawLine = drawLine;
-        this.drawFill = drawFill;
-        this.drawText = drawText;
-        this.symbolSize = symbolSize;
-        this.lineWidth = lineWidth;
-        this.alpha = alpha;
-        if (drawLine) this.lineColor = new Color(lc.getRed(), lc.getGreen(), lc.getBlue());
-        if (drawFill) this.fillColor = new Color(fc.getRed(), fc.getGreen(), fc.getBlue());
-        this.fontColor = foc;
-        this.fontType = font;
-        this.pointSymbol = (pointSymbol == null ? createPointSymbol() : pointSymbol.getImage());
-        repaint();
+
+
+    // line
+
+    if (style.isDrawLine())
+    {
+
+      g2d.setColor(lineColor);
+
+      g2d.setStroke(new BasicStroke(style.getLineWidth(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+      g2d.drawPolygon(pointsX, pointsY, 4);
+
     }
 
-    public Image getPointSymbol() {
-        return pointSymbol;
+
+
+    // labelling
+
+    if (style.isDrawLabel())
+    {
+
+      g2d.setColor(style.getFontColor());
+
+      g2d.setFont(style.getFont());
+
+      g2d.drawString(SAMPLE_TEXT, getWidth() / 3, getHeight() / 2);
+
     }
 
-    /**
-     * Erstellt das Punktsymbol als Image aus den übergebenen Parametern.
-     */
-    private BufferedImage createPointSymbol() {
-        return PointSymbolCreator.createPointSymbol(drawLine, drawFill, symbolSize, lineWidth, fillColor, lineColor);
-    }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Graphics2D g2d = (Graphics2D) g;
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, alpha));
-        int[] pointsX = {10, getWidth()-50, getWidth()-10, 40};
-        int[] pointsY = {getHeight()/3, 10, getHeight()/2, getHeight()-20};
 
-        // Füllung
-        if (drawFill) {
-            g2d.setColor(fillColor);
-            g2d.fillPolygon(pointsX, pointsY, 4);
-        }
+    // Pointsymbol
 
-        // Linie
-        if (drawLine) {
-            g2d.setColor(lineColor);
-            g2d.setStroke(new BasicStroke(lineWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g2d.drawPolygon(pointsX, pointsY, 4);
-        }
+    g2d.drawImage(pointSymbol, getWidth() - pointSymbol.getWidth(null) / 2 - 40,
+            getHeight() - pointSymbol.getWidth(null) / 2 - 20, null);
 
-        // Text
-        if (drawText) {
-            g2d.setColor(fontColor);
-            g2d.setFont(fontType);
-            g2d.drawString(SAMPLE_TEXT, getWidth()/3, getHeight()/2);
-        }
 
-        // Pointsymbol
-        g2d.drawImage(pointSymbol, getWidth() - pointSymbol.getWidth(null) / 2 - 40,
-                getHeight() - pointSymbol.getWidth(null) / 2 - 20, null);
 
-        g2d.dispose();
-    }
+    g2d.dispose();
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
-     */
+  }
+
+  /** This method is called from within the constructor to
+
+   * initialize the form.
+
+   * WARNING: Do NOT modify this code. The content of this method is
+
+   * always regenerated by the Form Editor.
+
+   */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+
     private void initComponents() {
 
+
+
         setBackground(new java.awt.Color(255, 255, 255));
+
+        setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+
         setMinimumSize(new java.awt.Dimension(50, 50));
+
         setLayout(new java.awt.BorderLayout());
+
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
+
     // End of variables declaration//GEN-END:variables
 }
+

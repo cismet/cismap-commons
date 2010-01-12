@@ -78,15 +78,17 @@ public class ImageRetrieval extends Thread {
     Image image=null;
     
     
+  @Override
     public void interrupt() {
         super.interrupt();
-        log.info("interrupt())");
+        log.debug("interrupt())");
         releaseConnection();
         
     }
     
     GetMethod getMethod=null;
     
+  @Override
     public void run() {
         try {
             //new
@@ -156,7 +158,7 @@ public class ImageRetrieval extends Thread {
             //Image image =Toolkit.getDefaultToolkit().getImage(is);
             image=Toolkit.getDefaultToolkit().createImage(byteArrayOut.toByteArray());
             observer.prepareImage(image, observer);
-            while ((observer.checkImage(image, observer) & observer.ALLBITS)!= observer.ALLBITS) {
+            while ((observer.checkImage(image, observer) & ImageObserver.ALLBITS)!= ImageObserver.ALLBITS) {
                 Thread.sleep(10);
                 if (youngerCall|| isInterrupted() ) {
                     fireLoadingAborted();
@@ -188,7 +190,7 @@ public class ImageRetrieval extends Thread {
                 } catch (Exception ee) {}
             } else {
                 re.setRetrievedObject(e.getMessage());
-                re.setErrorType(re.CLIENTERROR);
+                re.setErrorType(RetrievalEvent.CLIENTERROR);
             }
             
             listener.retrievalError(re);
@@ -248,6 +250,7 @@ public class ImageRetrieval extends Thread {
     
     
     private class ImageObserverInterceptor extends JComponent {
+    @Override
         public boolean imageUpdate(Image img,
                 int infoflags,
                 int x,
@@ -262,7 +265,7 @@ public class ImageRetrieval extends Thread {
             
             if ((infoflags&ImageObserver.SOMEBITS) !=0) {
                 RetrievalEvent e=new RetrievalEvent();
-                e.setPercentageDone((double)y/(img.getHeight(this)-1.0)*100);
+                e.setPercentageDone((int) (y / (img.getHeight(this) - 1.0) * 100));
                 listener.retrievalProgress(e);
             } else if ((infoflags&ImageObserver.ABORT)!=0) {
                 
@@ -270,6 +273,7 @@ public class ImageRetrieval extends Thread {
                 RetrievalEvent e=new RetrievalEvent();
                 e.setHasErrors(true);
                 String error=new String(byteArrayOut.toByteArray());
+                log.error("error during image retrieval: '"+error+"'");
                 e.setRetrievedObject(error);
                 e.setErrorType(RetrievalEvent.SERVERERROR);
                 listener.retrievalError(e);

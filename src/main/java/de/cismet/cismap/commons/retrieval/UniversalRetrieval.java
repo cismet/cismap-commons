@@ -225,7 +225,7 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
                 
                 if ((infoflags&ImageObserver.SOMEBITS) !=0) {
                     RetrievalEvent e=new RetrievalEvent();
-                    e.setPercentageDone((double)y/(img.getHeight(this)-1.0)*100);
+                    e.setPercentageDone((int) (y / (img.getHeight(this) - 1.0) * 100));
                     listener.retrievalProgress(e);
                 } else if ((infoflags&ImageObserver.ABORT)!=0) {
                     

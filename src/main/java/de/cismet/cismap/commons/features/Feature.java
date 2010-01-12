@@ -37,12 +37,14 @@ package de.cismet.cismap.commons.features;
 
 /**
  * A Feature is "something" that has a geometry
+ *
  * @author thorsten.hell@cismet.de
  */
 public interface Feature {
     public com.vividsolutions.jts.geom.Geometry getGeometry(); 
     public void setGeometry(com.vividsolutions.jts.geom.Geometry geom); 
     public boolean canBeSelected();
+    public void setCanBeSelected(boolean canBeSelected);
     public boolean isEditable();
     public void setEditable(boolean editable);
     public boolean isHidden();

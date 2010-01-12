@@ -101,7 +101,8 @@ public class HTTPImageRetrievalWithAuth extends Thread{
             CredentialsProvider.PROVIDER, new ConsoleAuthPrompter());
         
     }
-    
+
+    @Override
     public void run() {
         if (method!=null) {
             method.abort();            
@@ -145,7 +146,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
                     //Image image =Toolkit.getDefaultToolkit().getImage(is);
                     image=Toolkit.getDefaultToolkit().createImage(byteArrayOut.toByteArray());
                     observer.prepareImage(image, observer);
-                    while ((observer.checkImage(image, observer) & observer.ALLBITS)!= observer.ALLBITS) {
+                    while ((observer.checkImage(image, observer) & ImageObserver.ALLBITS)!= ImageObserver.ALLBITS) {
                         Thread.sleep(10);
                         if (youngerCall) {
                             fireLoadingAborted();
@@ -213,6 +214,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
         System.gc();
     }
     private class ImageObserverInterceptor extends JComponent {
+    @Override
         public boolean imageUpdate(Image img,
                 int infoflags,
                 int x,
@@ -227,7 +229,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
             
             if ((infoflags&ImageObserver.SOMEBITS) !=0) {
                 RetrievalEvent e=new RetrievalEvent();
-                e.setPercentageDone((double)y/(img.getHeight(this)-1.0)*100);
+                e.setPercentageDone((int) (y / (img.getHeight(this) - 1.0) * 100));
                 listener.retrievalProgress(e);
             } else if ((infoflags&ImageObserver.ABORT)!=0) {
                 
@@ -256,6 +258,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
             this.creds = creds;
         }
         
+    @Override
         public Credentials getCredentials(
             final AuthScheme authscheme, 
             final String host, 
@@ -315,6 +318,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
             requestDialog.add (okButton);
             okButton.addActionListener(new ActionListener() 
                                   {
+        @Override
                                     public void actionPerformed (ActionEvent e) {
                                     setUsernamePassword(new UsernamePasswordCredentials(usernameField.getText(),new String(passwordField.getPassword())));          
                                     requestDialog.dispose();
@@ -326,6 +330,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
             requestDialog.add (cancelButton);
             cancelButton.addActionListener(new ActionListener() 
                                   {
+        @Override
                                     public void actionPerformed (ActionEvent e) {
                                     //setUsernamePassword(new UsernamePasswordCredentials(usernameField.getText(),new String(passwordField.getPassword())));          
                                     //method.releaseConnection();

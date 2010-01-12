@@ -33,20 +33,11 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
-import de.cismet.cismap.commons.RetrievalServiceLayer;
-import de.cismet.cismap.commons.features.InputEventAwareFeature;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import edu.umd.cs.piccolo.event.PInputEvent;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.util.logging.Level;
-import javax.swing.ImageIcon;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
+import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
+import de.cismet.cismap.commons.featureservice.factory.PostgisAction;
+import de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory;
+import javax.swing.ImageIcon;
 import org.jdom.CDATA;
 import org.jdom.Element;
 
@@ -54,113 +45,80 @@ import org.jdom.Element;
  *
  * @author thorsten.hell@cismet.de
  */
-public class SimpleUpdateablePostgisFeatureService extends SimplePostgisFeatureService implements RetrievalServiceLayer {
+public class SimpleUpdateablePostgisFeatureService extends SimplePostgisFeatureService
+{
+  protected PostgisAction postgisAction;
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    String action;
-    String actionText;
-    ImageIcon icon;
-    String iconPath;
-    public final static String ID_TOKEN = "<cismap::update::id>";
+  /** Creates a new instance of SimpleUpdateablePostgisFeatureService */
+  public SimpleUpdateablePostgisFeatureService(Element element) throws Exception
+  {
+    super(element);
+  }
 
-    /** Creates a new instance of SimpleUpdateablePostgisFeatureService */
-    public SimpleUpdateablePostgisFeatureService(Element object) {
-        super(object);
-        Element actionElement = null;
-        try {
-            actionElement = object.getChild("action");
-            action = actionElement.getText();
-        } catch (Exception e) {
-            log.warn("No action in updateable Service", e);
-        }
-        try {
-            actionText = actionElement.getAttribute("text").getValue();
-            iconPath = actionElement.getAttribute("icon").getValue();
-            icon = new ImageIcon(getClass().getResource(iconPath));
-        } catch (Exception e) {
-            log.warn("No actiontext in updateable Service", e);
-            actionText = "Aktion ausf\u00FChren";
-        }
+  public SimpleUpdateablePostgisFeatureService(SimpleUpdateablePostgisFeatureService supfs)
+  {
+    super(supfs);
+    this.postgisAction = supfs.getPostgisAction();
+  }
+
+  @Override
+  public Element toElement()
+  {
+    Element element = super.toElement();
+    element.setAttribute("updateable", "true");
+    Element actionElement = new Element("action");
+    actionElement.setAttribute("text", this.postgisAction.getActionText());
+    actionElement.setAttribute("icon", this.postgisAction.getIconPath());
+    actionElement.addContent(new CDATA(this.postgisAction.getAction()));
+    element.addContent(actionElement);
+    return element;
+  }
+
+  @Override
+  public void initFromElement(Element element) throws Exception
+  {
+    super.initFromElement(element);
+    Element actionElement = null;
+    this.postgisAction = new PostgisAction();
+    try
+    {
+      actionElement = element.getChild("action");
+      this.postgisAction.setAction(actionElement.getText());
+    } catch (Exception e)
+    {
+      logger.warn("No action in updateable Service: " + e.getMessage());
     }
-
-    public Element getElement() {
-        Element e = super.getElement();
-        e.setAttribute("updateable", "true");
-        Element actionElement = new Element("action");
-        actionElement.setAttribute("text", actionText);
-        actionElement.setAttribute("icon", iconPath);
-        actionElement.addContent(new CDATA(action));
-        e.addContent(actionElement);
-        return e;
+    try
+    {
+      this.postgisAction.setActionText(actionElement.getAttribute("text").getValue());
+      this.postgisAction.setIconPath(actionElement.getAttribute("icon").getValue());
+      this.postgisAction.setIcon(new ImageIcon(getClass().getResource(this.postgisAction.getIconPath())));
+    } catch (Exception e)
+    {
+      logger.warn("No actiontext in updateable Service: " + e.getMessage());
+      this.postgisAction.setActionText("Aktion ausf\u00FChren");
     }
+  }
 
-    public void doAction(String id) throws Exception {
-        if (action != null) {
-            java.sql.Statement s = connection.createStatement();
-            String sql = action.replaceAll(ID_TOKEN, id);
-            log.debug("execute: " + sql);
-            s.execute(sql);
-            s.close();
-        }
-    }
+  /**
+   * Get the value of postgisAction
+   *
+   * @return the value of postgisAction
+   */
+  public PostgisAction getPostgisAction()
+  {
+    return postgisAction;
+  }
 
-    public DefaultFeatureServiceFeature getNewFeatureServiceFeature() {
-        log.debug("getNewFeatureServiceFeature");
-        return new UpdateableFeature();
-    }
+  @Override
+  public SimpleUpdateablePostgisFeatureService clone()
+  {
+    return new SimpleUpdateablePostgisFeatureService(this);
+  }
 
-    private class UpdateableFeature extends DefaultFeatureServiceFeature implements InputEventAwareFeature {
-
-        public boolean noFurtherEventProcessing(PInputEvent event) {
-            return true;
-        }
-
-        public void mouseClicked(PInputEvent event) {
-        }
-
-        public void mouseEntered(PInputEvent event) {
-        }
-
-        public void mouseExited(PInputEvent event) {
-        }
-
-        public void mousePressed(PInputEvent event) {
-            final MappingComponent mappingComponent = (MappingComponent) event.getComponent();
-            if (!mappingComponent.isReadOnly() && event.getModifiers() == InputEvent.BUTTON3_MASK) {
-                log.debug("try to show menu");
-                JPopupMenu pop = new JPopupMenu();
-                JMenuItem mni = new JMenuItem(actionText, icon);
-                mni.addActionListener(new ActionListener() {
-
-                    public void actionPerformed(ActionEvent e) {
-                        try {
-                            doAction("" + getId());
-                            getFeatureService().retrieve(true);
-                        } catch (Exception ex) {
-                            log.error("Error during doAction()", ex);
-                            ErrorInfo ei = new ErrorInfo("Fehler", "Fehler beim Zugriff auf den FeatureService", null,null, ex, Level.ALL, null);
-                            JXErrorPane.showDialog(mappingComponent, ei);
-
-//                            JXErrorDialog.showDialog(mappingComponent,"Fehler","Fehler beim Zugriff auf den FeatureService",ex);
-                        }
-                    }
-                });
-                pop.add(mni);
-                pop.show(mappingComponent, (int) event.getCanvasPosition().getX(), (int) event.getCanvasPosition().getY());
-
-            }
-        }
-
-        public void mouseWheelRotated(PInputEvent event) {
-        }
-
-        public void mouseReleased(PInputEvent event) {
-        }
-
-        public void mouseMoved(PInputEvent event) {
-        }
-
-        public void mouseDragged(PInputEvent event) {
-        }
-    }
+  @Override
+  protected PostgisFeatureFactory createFeatureFactory() throws Exception
+  {
+    return new PostgisFeatureFactory(this.getLayerProperties(), this.getConnectionInfo(), this.postgisAction, this);
+  }
 }

@@ -680,8 +680,9 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
          * @return the number of rows in the model
          * @see #getColumnCount
          */
+    @Override
         public int getRowCount() {
-            return getFeatureCollection().getFeatureCount();
+            return getFeatureCollection() != null ? getFeatureCollection().getFeatureCount() : 0;
         }
 
         /**

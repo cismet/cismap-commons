@@ -34,12 +34,10 @@
 package de.cismet.cismap.commons.featureservice;
 
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
-import de.cismet.cismap.commons.raster.wms.*;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Vector;
-import javax.swing.tree.TreeModel;
+import org.deegree2.framework.xml.schema.ElementDeclaration;
 import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilities;
-import org.jdom.Element;
 
 /**
  * Das WFSCapabilitiesTreeModel liegt hinter dem WFSCapabilitiesTree und gibt vor
@@ -47,48 +45,26 @@ import org.jdom.Element;
  * @author nh
  */
 public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
-    private WFSCapabilities capabilities = null;
+    private WFSCapabilities capabilities;
+    private HashMap<ElementDeclaration, Vector<FeatureServiceAttribute>> nodes;
     private Vector listener = new Vector();
-    private List<Element> featureTypes = null;
 
     /**
      * Erzeugt ein neues WFSCapabilitiesTreeModel.
      * @param capabilities WFSCapabilites-Objekt
      */
-    public WFSCapabilitiesTreeModel(WFSCapabilities capabilities) {
+    public WFSCapabilitiesTreeModel(WFSCapabilities capabilities, HashMap<ElementDeclaration, Vector<FeatureServiceAttribute>> nodes) {
+        this.nodes = nodes;
         this.capabilities = capabilities;
     }
 
     /**
-     * Liefert das diesem Model zugeordnete WFSCapabilities-Objekt.
-     * @return WFSCapabilities-Objekt
+     * Returns all attributes of the given ElementDeclaration-object.
+     * @param dec ElementDeclaration which childs are requested
+     * @return ElementDeclaration-array or null
      */
-    public WFSCapabilities getCapabilities() {
-        return capabilities;
-    }
-
-    /**
-     * Setzt das diesem Model zugeordnete WFSCapabilities-Objekt neu.
-     * @param capabilities das neue WFSCapabilities-Objekt
-     */
-    public void setCapabilities(WFSCapabilities capabilities) {
-        this.capabilities = capabilities;
-    }
-
-    /**
-     * Liefert die Liste mit den FeatureLayer-Knoten.
-     * @return List<Element>
-     */
-    public List<Element> getFeatureTypes() {
-        return featureTypes;
-    }
-
-    /**
-     * Setzt die Liste mit den FeatureLayer-Knoten.
-     * @param children Liste mit FeatureType-Knoten
-     */
-    public void setFeatureTypes(List<Element> featureTypes) {
-        this.featureTypes = featureTypes;
+    public Vector<FeatureServiceAttribute> getChildren(ElementDeclaration dec) {
+        return nodes.get(dec);
     }
 
     /**
@@ -103,14 +79,14 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
      * @return  true if <code>node</code> is a leaf
      */
     public boolean isLeaf(Object node) {
-        if (node instanceof Element) {
-            if (((Element) node).getChildren().size() == 0) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
+        if (node instanceof WFSCapabilities) {
             return false;
+        } else {
+            if (nodes.get(node) != null) {
+                return false;
+            } else {
+                return true;
+            }
         }
     }
 
@@ -125,9 +101,9 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
      */
     public int getChildCount(Object parent) {
         if (parent instanceof WFSCapabilities) {
-            return getFeatureTypes().size();
+            return nodes.size();
         } else {
-            return getFeatureTypes().get(getFeatureTypes().indexOf(parent)).getChildren().size();
+            return nodes.get(parent) != null ? nodes.get(parent).size() : 0;
         }
     }
 
@@ -184,15 +160,15 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
         } else {
             if (parent instanceof WFSCapabilities) {
                 if (index < childs) {
-                    return getFeatureTypes().get(index);
+                    return nodes.keySet().toArray()[index];
                 } else {
-                    return getFeatureTypes().get(index - childs);
+                    return nodes.keySet().toArray()[index - childs];
                 }
             } else {
                 if (index < childs) {
-                    return getFeatureTypes().get(getFeatureTypes().indexOf(parent)).getChildren().get(index);
+                    return nodes.get(parent) != null ? nodes.get(parent).get(index) : null;
                 } else {
-                    return getFeatureTypes().get(getFeatureTypes().indexOf(parent)).getChildren().get(index - childs);
+                    return nodes.get(parent) != null ? nodes.get(parent).get(index - childs) : null;
                 }
             }
         }
@@ -221,4 +197,10 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
     public int getIndexOfChild(Object parent, Object child) {
         return 0;
     }
+
+    public WFSCapabilities getCapabilities() {
+        return capabilities;
+    }
+
+    
 }

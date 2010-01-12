@@ -35,6 +35,8 @@
 package de.cismet.cismap.commons.gui.layerwidget;
 
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.featureservice.GMLFeatureService;
+import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -46,6 +48,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.util.HashMap;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import org.deegree.services.wms.capabilities.Layer;
@@ -93,9 +96,11 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer{
         icons.put(new IconType(SINGLE, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layer.png")));
         icons.put(new IconType(SINGLE + DL, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerOverlaywms.png")));
         icons.put(new IconType(SINGLE + DL, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerOverlaywmsInvisible.png")));
+    
         icons.put(new IconType(SINGLE + INFO, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerInfo.png")));
         icons.put(new IconType(SINGLE + INFO + DL, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerInfoDL.png")));
         icons.put(new IconType(SINGLE + INFO + DL, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerInfoDLinvisible.png")));
+        
         icons.put(new IconType(MULTI, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layers.png")));
         icons.put(new IconType(MULTI + DL, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layersDL.png")));
         icons.put(new IconType(MULTI + DL, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layersDLinvisible.png")));
@@ -103,70 +108,70 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer{
         icons.put(new IconType(ASCII, true, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerAscii.png")));
         icons.put(new IconType(ASCII, false, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerAsciiInvisible.png")));
         icons.put(new IconType(ASCII, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerAscii.png")));
-        icons.put(new IconType(ASCII, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerAsciiInvisible.png")));
-
-        icons.put(new IconType(GML, true, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerGml.png")));
-        icons.put(new IconType(GML, false, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerGmlInvisible.png")));
-        icons.put(new IconType(GML, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGml.png")));
-        icons.put(new IconType(GML, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGmlInvisible.png")));
+        icons.put(new IconType(ASCII, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerAsciiInvisible.png")));       
 
         icons.put(new IconType(POSTGIS, true, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerPostgis.png")));
         icons.put(new IconType(POSTGIS, false, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerPostgisInvisible.png")));
         icons.put(new IconType(POSTGIS, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgis.png")));
-        icons.put(new IconType(POSTGIS, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgisInvisible.png")));
-
-        icons.put(new IconType(SHAPE, true, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png")));
-        icons.put(new IconType(SHAPE, false, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShapeInvisible.png")));
-        icons.put(new IconType(SHAPE, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShape.png")));
-        icons.put(new IconType(SHAPE, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png")));
+        icons.put(new IconType(POSTGIS, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgisInvisible.png")));       
 
         icons.put(new IconType(SIMPLEWMS, true, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerSimplewms.png")));
         icons.put(new IconType(SIMPLEWMS, false, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerSimplewmsInvisible.png")));
         icons.put(new IconType(SIMPLEWMS, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerSimplewms.png")));
         icons.put(new IconType(SIMPLEWMS, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerSimplewmsInvisible.png")));
+        
+        icons.put(new IconType(WFST, true, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfst.png")));
+        icons.put(new IconType(WFST, false, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfstInvisible.png")));
+        icons.put(new IconType(WFST, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfst.png")));
+        icons.put(new IconType(WFST, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfstInvisible.png")));
 
         icons.put(new IconType(WFS, true, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfs.png")));
         icons.put(new IconType(WFS, false, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfsInvisible.png")));
         icons.put(new IconType(WFS, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfs.png")));
         icons.put(new IconType(WFS, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfsInvisible.png")));
 
-        icons.put(new IconType(WFST, true, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfst.png")));
-        icons.put(new IconType(WFST, false, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfstInvisible.png")));
-        icons.put(new IconType(WFST, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfst.png")));
-        icons.put(new IconType(WFST, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfstInvisible.png")));
+        icons.put(new IconType(GML, true, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerGml.png")));
+        icons.put(new IconType(GML, false, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerGmlInvisible.png")));
+        icons.put(new IconType(GML, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGml.png")));
+        icons.put(new IconType(GML, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGmlInvisible.png")));
+
+        icons.put(new IconType(SHAPE, true, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png")));
+        icons.put(new IconType(SHAPE, false, true), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShapeInvisible.png")));
+        icons.put(new IconType(SHAPE, true, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShape.png")));
+        icons.put(new IconType(SHAPE, false, false), new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png")));
     }
     
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value,
             boolean isSelected, boolean expanded,
             boolean leaf, int row, boolean hasFocus) {
-        super.getTreeCellRendererComponent(
+        JLabel ret=(JLabel)super.getTreeCellRendererComponent(
                 tree, value, isSelected,
                 expanded, leaf, row,
                 hasFocus);
-        setMinimumSize(DIM);
-        setMaximumSize(DIM);
-        setPreferredSize(DIM);
-        setText(value.toString());
+        ret.setMinimumSize(DIM);
+        ret.setMaximumSize(DIM);
+        ret.setPreferredSize(DIM);
+        ret.setText(value.toString());
         if (value instanceof RetrievalServiceLayer) {
             RetrievalServiceLayer layer=(RetrievalServiceLayer)value;
-            setText(layer.toString());
+            ret.setText(layer.toString());
             if (value instanceof WMSServiceLayer){
                 WMSServiceLayer wmsLayer=(WMSServiceLayer)layer;
                 if (wmsLayer.getWMSLayers().size()==1) {                    
                     if (((WMSLayer)wmsLayer.getWMSLayers().get(0)).getOgcCapabilitiesLayer().isQueryable()) {
-                        setIcon(getRightIcon(SINGLE+DL+INFO,wmsLayer.getPNode().getVisible(),layer.isEnabled()));
+                        ret.setIcon(getRightIcon(SINGLE+DL+INFO,wmsLayer.getPNode().getVisible(),layer.isEnabled()));
                     } else {
-                        setIcon(getRightIcon(SINGLE+DL,wmsLayer.getPNode().getVisible(),layer.isEnabled()));
+                        ret.setIcon(getRightIcon(SINGLE+DL,wmsLayer.getPNode().getVisible(),layer.isEnabled()));
                     }
                 }
                 if (wmsLayer.getWMSLayers().size()>1) {
-                    setIcon(getRightIcon(MULTI+DL,layer.getPNode().getVisible(),layer.isEnabled()));
+                    ret.setIcon(getRightIcon(MULTI+DL,layer.getPNode().getVisible(),layer.isEnabled()));
                 }
             } else if (value instanceof SimpleWMS) {
-                setIcon(getRightIcon(SIMPLEWMS,layer.getPNode().getVisible(),layer.isEnabled()));
+              ret.setIcon(getRightIcon(SIMPLEWMS,layer.getPNode().getVisible(),layer.isEnabled()));
             } else if (value instanceof WebFeatureService) {
-                setIcon(getRightIcon(WFS,layer.getPNode().getVisible(),layer.isEnabled()));
+                ret.setIcon(getRightIcon(WFS,layer.getPNode().getVisible(),layer.isEnabled()));
 //            } else if (value instanceof TransactionalWebFeatureService) {
 //                setIcon(getRightIcon(WFST,layer.getPNode().getVisible(),layer.isEnabled()));
 //            } else if (value instanceof ShapeService) {
@@ -175,19 +180,24 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer{
 //                setIcon(getRightIcon(GML,true,((GMLService)value).isEnabled()));
 //            } else if (value instanceof ASCIIService) {
 //                setIcon(getRightIcon(ASCII,true,((ASCIIService)value).isEnabled()));
+             } else if (value instanceof GMLFeatureService) {
+                ret.setIcon(getRightIcon(GML,layer.getPNode().getVisible(),layer.isEnabled()));
+             } else if (value instanceof ShapeFileFeatureService) {
+                ret.setIcon(getRightIcon(SHAPE,layer.getPNode().getVisible(),layer.isEnabled()));
             } else if (value instanceof SimplePostgisFeatureService) {
-                setIcon(getRightIcon(POSTGIS,layer.getPNode().getVisible(),layer.isEnabled()));
+            } else if (value instanceof SimplePostgisFeatureService) {
+                ret.setIcon(getRightIcon(POSTGIS,layer.getPNode().getVisible(),layer.isEnabled()));
             } else {
-                setIcon(getRightIcon(SUPPORTER,layer.getPNode().getVisible(),layer.isEnabled()));
+                ret.setIcon(getRightIcon(SUPPORTER,layer.getPNode().getVisible(),layer.isEnabled()));
             }
         } else if (value instanceof WMSLayer) {
             if (((WMSLayer)value).getOgcCapabilitiesLayer().isQueryable()) {
-                setIcon(getRightIcon(SINGLE+INFO,true,((WMSLayer)value).isEnabled()));
+                ret.setIcon(getRightIcon(SINGLE+INFO,true,((WMSLayer)value).isEnabled()));
             } else {
-                setIcon(getRightIcon(SINGLE,true,((WMSLayer)value).isEnabled()));
+                ret.setIcon(getRightIcon(SINGLE,true,((WMSLayer)value).isEnabled()));
             }
         } else if (value instanceof SimpleWMS) {
-            setIcon(getRightIcon(SIMPLEWMS,true,((SimpleWMS)value).isEnabled()));
+            ret.setIcon(getRightIcon(SIMPLEWMS,true,((SimpleWMS)value).isEnabled()));
         }
         
         //ScaleHint
@@ -208,9 +218,9 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer{
                 double scale=CismapBroker.getInstance().getMappingComponent().getCurrentOGCScale();
                 if (scale<mnScale||scale>mxScale) {
                     if (!isSelected) {
-                        setForeground(Color.GRAY);
+                        ret.setForeground(Color.GRAY);
                     } else {
-                        setForeground(fg);
+                        ret.setForeground(fg);
                     }
                     rightScale=false;
                     // setTooltip("Im momentanen Maßstab nicht darstellbar");
@@ -219,7 +229,7 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer{
         } catch (Exception e) {
             log.debug("Fehler bei der ScaleHint Verarbeitung.Kein Problem",e);
         }
-        return this;
+        return ret;
     }
     
     
@@ -228,7 +238,7 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer{
         if (o!=null && o instanceof ImageIcon) {
             return (ImageIcon)o;
         } else {
-            log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("ActiveLayerTreeCellRenderer.log.Icon_nicht_gefunden._Standardicon_verwendet."));
+            log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("ActiveLayerTreeCellRenderer.log.Icon_nicht_gefunden._Standardicon_verwendet.")+" ("+type+")");
             return (ImageIcon)icons.get(new IconType(SINGLE,true,true));
         }
     }
