@@ -39,13 +39,13 @@ package de.cismet.cismap.commons.wfsforms;
 import com.vividsolutions.jts.geom.Point;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.util.HashMap;
+import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -62,11 +62,12 @@ import org.jdom.Element;
  */
 public abstract class AbstractWFSForm extends JPanel {
 
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Vector<WFSFormQuery> queries = new Vector<WFSFormQuery>();
     protected HashMap<String, JComponent> listComponents = new HashMap<String, JComponent>();
     protected HashMap<String, WFSFormQuery> queriesByComponentName = new HashMap<String, WFSFormQuery>();
-    private String loadingMessage = java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("WFSFormListAndComboBoxModel.laden");
+    private String loadingMessage = I18N.getString("de.cismet.cismap.commons.wfsforms.AbstractWFSForm.loadingMessage");
     private WFSFormFeature lastFeature = null;
     protected ImageIcon mark = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"));
     protected FixedPImage pMark = new FixedPImage(mark.getImage());

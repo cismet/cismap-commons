@@ -16,6 +16,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.util.ResourceBundle;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
@@ -26,7 +27,10 @@ import javax.swing.border.BevelBorder;
  */
 public class StylePreviewPanel extends JPanel {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private static final String SAMPLE_TEXT = "Identifier";
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
+    
+    private static final String SAMPLE_TEXT = I18N.getString("de.cismet.cismap.commons.featureservice.style.StylePreviewPanel.SAMPLE_TEXT");
+
     private boolean drawLine = false;
     private boolean drawFill = false;
     private boolean drawText = false;

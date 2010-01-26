@@ -14,6 +14,7 @@ import java.awt.BorderLayout;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -27,6 +28,7 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
  * @author  thorsten.hell@cismet.de
  */
 public class WFSFormPOI extends AbstractWFSForm {
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private WFSFormFeature locationtype = null;
@@ -103,7 +105,7 @@ public class WFSFormPOI extends AbstractWFSForm {
         setLayout(new java.awt.GridBagLayout());
 
         cmdOk.setMnemonic('P');
-        cmdOk.setText("Positionieren");
+        cmdOk.setText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormPOI.cmdOk.text")); // NOI18N
         cmdOk.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdOkActionPerformed(evt);
@@ -202,8 +204,7 @@ public class WFSFormPOI extends AbstractWFSForm {
         add(panLT, gridBagConstraints);
 
         chkVisualize.setSelected(true);
-        chkVisualize.setToolTipText("Markierung anzeigen");
-        chkVisualize.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        chkVisualize.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormPOI.chkVisualize.toolTipText")); // NOI18N
         chkVisualize.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkVisualizeActionPerformed(evt);
@@ -217,7 +218,7 @@ public class WFSFormPOI extends AbstractWFSForm {
         add(chkVisualize, gridBagConstraints);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
-        jLabel1.setToolTipText("Markierung anzeigen");
+        jLabel1.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormPOI.jLabel1.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
@@ -226,8 +227,7 @@ public class WFSFormPOI extends AbstractWFSForm {
         add(jLabel1, gridBagConstraints);
 
         chkLockScale.setSelected(true);
-        chkLockScale.setToolTipText("Maßstab beibehalten");
-        chkLockScale.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        chkLockScale.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormPOI.chkLockScale.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
@@ -236,7 +236,7 @@ public class WFSFormPOI extends AbstractWFSForm {
         add(chkLockScale, gridBagConstraints);
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
-        jLabel2.setToolTipText("Maßstab beibehalten");
+        jLabel2.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormPOI.jLabel2.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;

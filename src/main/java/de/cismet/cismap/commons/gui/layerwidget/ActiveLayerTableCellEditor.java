@@ -60,6 +60,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ResourceBundle;
 import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -84,11 +85,14 @@ import javax.swing.tree.TreeCellEditor;
 import org.deegree.services.wms.capabilities.Style;
 import org.jdom.Element;
 
+
 /**
  *
  * @author thorsten.hell@cismet.de
  */
 public class ActiveLayerTableCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor, PropertyChangeListener {
+    private static final ResourceBundle I18N =
+            ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private JCheckBox informationBox;
@@ -272,7 +276,10 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                             styleDialog.setVisible(true);
                             if (styleDialog.getReturnStatus() != null) {
                                 if (styleDialog.isQueryChanged()) {
-                                    int i = JOptionPane.showConfirmDialog(StaticSwingTools.getParentFrame(wfsStyleButton), "Sollen die Änderungen im QueryString überschrieben werden ?", "Achtung", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                                    int i = JOptionPane.showConfirmDialog(StaticSwingTools.getParentFrame(wfsStyleButton),
+                                                I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerTableCellEditor.mouseClicked().JOptionPane.message"),
+                                                I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerTableCellEditor.mouseClicked().JOptionPane.title"),
+                                                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                                     if (i == JOptionPane.YES_OPTION) {
                                         tempWFS.setRenderingFeature(styleDialog.getReturnStatus());
                                         tempWFS.refreshFeatures();
@@ -532,7 +539,6 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         return retValue;
     }
 }
-
 class StyleChooserCellRenderer extends DefaultListCellRenderer {
 
     private ImageIcon styleIcon;

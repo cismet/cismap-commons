@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.ResourceBundle;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -32,6 +33,7 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
  * @author  thorsten.hell@cismet.de
  */
 public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener {
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());    private WFSFormFeature strasse = null;
     private WFSFormFeature poi = null;
@@ -124,7 +126,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
             hm.put("@@search_text@@", txtSearch.getText());
             requestRefresh("cboPois", hm);
         } else {
-            lblBehind.setText("mind. 3 Buchstaben");
+            lblBehind.setText(I18N.getString("de.cismet.cismap.commons.wfsformsWFSFormPOISearch.lblBehind.text"));
         }
     }
 
@@ -154,7 +156,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         setLayout(new java.awt.GridBagLayout());
 
         cmdOk.setMnemonic('P');
-        cmdOk.setText("Positionieren");
+        cmdOk.setText(I18N.getString("de.cismet.cismap.commons.wfsformsWFSFormPOISearch.cmdOk.text")); // NOI18N
         cmdOk.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdOkActionPerformed(evt);
@@ -210,9 +212,8 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         add(panPois, gridBagConstraints);
 
         chkVisualize.setSelected(true);
-        chkVisualize.setToolTipText("Markierung anzeigen");
+        chkVisualize.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsformsWFSFormPOISearch.chkVisualize.toolTipText")); // NOI18N
         chkVisualize.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        chkVisualize.setMargin(new java.awt.Insets(0, 0, 0, 0));
         chkVisualize.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkVisualizeActionPerformed(evt);
@@ -226,7 +227,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         add(chkVisualize, gridBagConstraints);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
-        jLabel1.setToolTipText("Markierung anzeigen");
+        jLabel1.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsformsWFSFormPOISearch.jLabel1.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
@@ -235,9 +236,8 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         add(jLabel1, gridBagConstraints);
 
         chkLockScale.setSelected(true);
-        chkLockScale.setToolTipText("Ma\u00DFstab beibehalten");
+        chkLockScale.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsformsWFSFormPOISearch.chkLockScale.toolTipText")); // NOI18N
         chkLockScale.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        chkLockScale.setMargin(new java.awt.Insets(0, 0, 0, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
@@ -246,7 +246,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         add(chkLockScale, gridBagConstraints);
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
-        jLabel2.setToolTipText("Ma\u00DFstab beibehalten");
+        jLabel2.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsformsWFSFormPOISearch.jLabel2.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
@@ -269,7 +269,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         add(txtSearch, gridBagConstraints);
 
-        lblBehind.setText("mind. 3 Buchstaben");
+        lblBehind.setText(I18N.getString("de.cismet.cismap.commons.wfsformsWFSFormPOISearch.lblBehind.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -284,7 +284,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         panFill.setLayout(panFillLayout);
         panFillLayout.setHorizontalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 174, Short.MAX_VALUE)
+            .add(0, 125, Short.MAX_VALUE)
         );
         panFillLayout.setVerticalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -361,7 +361,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
    
 
     public void actionPerformed(ActionEvent e) {
-        lblBehind.setText(cboPois.getItemCount() + " Treffer");
+        lblBehind.setText(cboPois.getItemCount() + " " + I18N.getString("de.cismet.cismap.commons.wfsformsWFSFormPOISearch.lblBehind.text2"));
         log.debug("cboPois.getItemAt(0):" + cboPois.getItemAt(0));
         if (cboPois.getItemCount() == 1) {
             cboPois.setEditable(false);

@@ -11,6 +11,7 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import java.util.ResourceBundle;
 
 /**
  * Implementiert das CustomAction-Interface und wird von der Memento-Klasse
@@ -19,6 +20,9 @@ import de.cismet.cismap.commons.gui.MappingComponent;
  * @author nh
  */
 public class FeatureDeleteAction implements CustomAction {
+
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
+
     private Feature f;
     private MappingComponent mc;
     
@@ -45,7 +49,9 @@ public class FeatureDeleteAction implements CustomAction {
      * @return Beschreibungsstring
      */
     public String info() {
-        return "L\u00F6sche Feature: " + f;
+        //
+        return I18N.getString("de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureDeleteAction.info().return")
+                + " " + f;
     }
     
     /**

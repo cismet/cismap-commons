@@ -94,6 +94,8 @@ import org.jdom.output.XMLOutputter;
  */
 public class ActiveLayerModel extends AbstractTreeTableModel implements MappingModel, Configurable {
 
+    private static final java.util.ResourceBundle I18N =
+            java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ActiveLayerModel.class);
     Vector layers = new Vector();
     Vector mappingModelListeners = new Vector();
@@ -395,13 +397,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             case (0):
                 return " ";
             case (1):
-                return java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("ActiveLayerModel.Layer");
+                return I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel.getColumnName().return.layer");
             case (2):
-                return java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("ActiveLayerModel.Style");
+                return I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel.getColumnName().return.style");
             case (3):
-                return java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("ActiveLayerModel.Info");
+                return I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel.getColumnName().return.info");
             case (4):
-                return java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("ActiveLayerModel.Fortschritt_Transparenz");
+                return I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel.getColumnName().return.fortschrittTransparent");
             case (5):
                 return "";
             default:
@@ -746,12 +748,12 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 //
 //                                    if (title != null) {
 //                                        JXErrorDialog.showDialog(CismapBroker.getInstance().getMappingComponent(),
-//                                                java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.AuthenticationCanceled.Title"),
-//                                                java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.AuthenticationCanceled.Text1") +
+//                                                I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel.configure().retrieval.run().JXErrorDialog.title"),
+//                                                I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel.configure().retrieval.run().JXErrorDialog.text1") +
 //                                                "\"" +
 //                                                title +
 //                                                "\" " +
-//                                                java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.AuthenticationCanceled.Text2"));
+//                                                I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel.configure().retrieval.run().JXErrorDialog.text2"));
 //                                    } else {
 //                                        title = getCapURL.toString();
 //                                        if (title.startsWith("http://") && title.length() > 21) {
@@ -760,10 +762,10 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 //                                            title = title.substring(0, 14) + "...";
 //                                        }
 //                                        JXErrorDialog.showDialog(CismapBroker.getInstance().getMappingComponent(),
-//                                                java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.AuthenticationCanceled.Title"),
-//                                                java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.AuthenticationCanceled.Text1") +
+//                                                I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel.configure().retrieval.run().JXErrorDialog.title"),
+//                                                I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel.configure().retrieval.run().JXErrorDialog.text1") +
 //                                                "\"" + title + "\" " +
-//                                                java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.AuthenticationCanceled.Text2"));
+//                                                I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel.configure().retrieval.run().JXErrorDialog.text2"));
 //                                    }
 //                                }
                                 //ToDo Probleme mit WFS wird aber denke ich nicht gebraucht
@@ -794,14 +796,14 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                                 capabilities.put(link, cap);
                             } catch (Exception ex) {
                                 log.debug("Exception für URL: " + link, ex);
-                                log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.RetrievingCapabilitiesExceptions") + ":", ex);
+                                log.warn("Error while retrieving Capabilities" + ":", ex);
                             }
                             try {
                                 currentBarrier.await();
                             } catch (InterruptedException ex) {
-                                log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.log.Interrupted") + ":", ex);
+                                log.warn("Thread was interrupted TODO CUSTOMIZE TEXT" + ":", ex);
                             } catch (BrokenBarrierException ex) {
-                                log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.log.BrokenBarrier") + ":", ex);
+                                log.warn("No layers available TODO CUSTOMIZE TEXT" + ":", ex);
                             }
                         }
                     };

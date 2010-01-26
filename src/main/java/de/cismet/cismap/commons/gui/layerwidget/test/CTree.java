@@ -8,6 +8,7 @@ import java.awt.geom.*;
 import java.awt.image.*;
 import java.io.*;
 
+import java.util.ResourceBundle;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
@@ -24,6 +25,8 @@ public class CTree extends JTree implements DragSourceListener,
 {
 // Constants...
 
+    private static final ResourceBundle I18N =
+            ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
 
 // Fields...
 	private TreePath	_pathSource;			// The path being dragged
@@ -65,7 +68,7 @@ public class CTree extends JTree implements DragSourceListener,
 		JScrollPane scrollPane = new JScrollPane(tree);
 
 
-		JFrame frame = new JFrame("Drag Images");
+		JFrame frame = new JFrame(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.test.CTree.main().frame.title"));
 		frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
 		frame.pack();
 
@@ -511,6 +514,7 @@ public class CTree extends JTree implements DragSourceListener,
 //		http://www.oreilly.com/catalog/jswing/chapter/dnd.beta.pdf
 	
 	private static final int AUTOSCROLL_MARGIN = 12;
+
 	// Ok, we've been told to scroll because the mouse cursor is in our
 	// scroll zone.
 	public void autoscroll(Point pt) 

@@ -22,7 +22,11 @@ import org.deegree.services.wms.capabilities.WMSCapabilities;
  * @author  thorsten.hell@cismet.de
  */
 public class ServerInfo extends javax.swing.JPanel implements CapabilityListener,ActiveLayerListener{
-    
+
+    private static final java.util.ResourceBundle I18N =
+            java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
+
+
     /** Creates new form ServerInfo */
     public ServerInfo() {
         initComponents();
@@ -252,7 +256,7 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
     private void setValues(Values v) {
         //Servername
         if (v.title.trim().equals("")) {
-            lblTitle.setText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("ServerInfo.Kein_Servername_vergeben"));
+            lblTitle.setText(I18N.getString("de.cismet.cismap.commons.gui.infowidgets.ServerInfo.lblTitle.text"));
         } else {
             lblTitle.setText(v.title.trim());
         }

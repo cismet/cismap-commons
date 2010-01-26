@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.ListIterator;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 import javax.swing.ImageIcon;
@@ -83,9 +84,10 @@ import pswing.PSwingCanvas;
  */
 public class PFeature extends PPath implements Highlightable, Selectable, Refreshable {
 
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private static final String DIALOG_TEXT = "Aktion r\u00FCckg\u00E4ngig machen?";
-    private static final String DIALOG_TITLE = "\u00DCberschneidung entdeckt";
+    private static final String DIALOG_TEXT = I18N.getString("de.cismet.cismap.commons.gui.piccolo.PFeature.DIALOG_TEXT");
+    private static final String DIALOG_TITLE = I18N.getString("de.cismet.cismap.commons.gui.piccolo.PFeature.DIALOG_TITLE");
     private static final Color TRANSPARENT = new Color(255, 255, 255, 0);
     private Feature feature;
     private WorldToScreenTransform wtst;

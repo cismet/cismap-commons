@@ -11,15 +11,21 @@
 
 package de.cismet.cismap.commons.gui.about;
 
+import java.util.ResourceBundle;
+
 /**
  *
  * @author thorsten
  */
 public class AboutDialog extends javax.swing.JDialog {
+
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
+    
     /** A return status code - returned if Cancel button has been pressed */
     public static final int RET_CANCEL = 0;
     /** A return status code - returned if OK button has been pressed */
     public static final int RET_OK = 1;
+
 
     /** Creates new form AboutDialog */
     public AboutDialog(java.awt.Frame parent, boolean modal) {
@@ -50,7 +56,7 @@ public class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        okButton.setText("OK");
+        okButton.setText(I18N.getString("de.cismet.cismap.commons.gui.about.AboutDialog.okButton.text")); // NOI18N
         okButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 okButtonActionPerformed(evt);

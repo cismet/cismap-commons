@@ -228,7 +228,7 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer{
         if (o!=null && o instanceof ImageIcon) {
             return (ImageIcon)o;
         } else {
-            log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("ActiveLayerTreeCellRenderer.log.Icon_nicht_gefunden._Standardicon_verwendet."));
+            log.warn("Icon not found, used default icon.");
             return (ImageIcon)icons.get(new IconType(SINGLE,true,true));
         }
     }

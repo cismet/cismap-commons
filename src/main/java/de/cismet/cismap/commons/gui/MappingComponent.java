@@ -155,6 +155,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
@@ -167,6 +168,7 @@ import org.jdom.DataConversionException;
 import org.jdom.Element;
 import pswing.PSwingCanvas;
 
+
 /**
  *
  * @author thorsten.hell@cismet.de
@@ -174,6 +176,8 @@ import pswing.PSwingCanvas;
 public class MappingComponent extends PSwingCanvas implements MappingModelListener, FeatureCollectionListener, HistoryModel, Configurable, DropTargetListener {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
+    
     public static final String MOTION = "MOTION";
     public static final String SELECT = "SELECT";
     public static final String ZOOM = "ZOOM";
@@ -399,10 +403,10 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         zoomAction = new AbstractAction() {
 
             {
-                putValue(Action.NAME, "Zoom");
+                putValue(Action.NAME, I18N.getString("de.cismet.cismap.commons.gui.MappingComponent.zoomAction.NAME"));
                 putValue(Action.SMALL_ICON, new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers.png")));
-                putValue(Action.SHORT_DESCRIPTION, "Zoom");
-                putValue(Action.LONG_DESCRIPTION, "Wechsel des Modus auf Zoom");
+                putValue(Action.SHORT_DESCRIPTION, I18N.getString("de.cismet.cismap.commons.gui.MappingComponent.zoomAction.SHORT_DESCRIPTION"));
+                putValue(Action.LONG_DESCRIPTION, I18N.getString("de.cismet.cismap.commons.gui.MappingComponent.zoomAction.LONG_DESCRIPTION"));
                 putValue(Action.MNEMONIC_KEY, new Integer('Z'));
                 putValue(Action.ACTION_COMMAND_KEY, "zoom.action");
             }
@@ -3763,7 +3767,6 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         }
     }
 }
-
 class ImageSelection implements Transferable {
 
     private Image image;

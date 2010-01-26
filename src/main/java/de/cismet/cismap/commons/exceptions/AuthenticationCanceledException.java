@@ -9,19 +9,24 @@
 
 package de.cismet.cismap.commons.exceptions;
 
+import java.util.ResourceBundle;
+
 /**
  *
  * @author Sebastian
  */
 public class AuthenticationCanceledException extends Exception {
-    
+
+    private static final ResourceBundle I18N = 
+            ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
+
     /** Creates a new instance of AuthenticationCanceledException */
     public AuthenticationCanceledException() {
-    super(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Exception.AuthenticationCanceledException"));    
+        super(I18N.getString("de.cismet.cismap.commons.exceptions.AuthenticationCanceledException"));
     }
     
     public AuthenticationCanceledException(String message) {
-    super(message);
+        super(message);
     }
-    
+
 }

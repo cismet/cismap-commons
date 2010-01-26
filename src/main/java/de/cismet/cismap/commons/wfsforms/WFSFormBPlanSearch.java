@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
@@ -40,6 +41,8 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
  * @author  thorsten.hell@cismet.de
  */
 public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListener {
+    
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private WFSFormFeature strasse = null;
@@ -130,7 +133,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
             hm.put("@@search_text@@", txtSearch.getText());
             requestRefresh("cboHits", hm);
         } else {
-            lblBehind.setText("mind. 2 Zeichen");
+            lblBehind.setText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormBPlanSearch.lblBehind.text"));
         }
     }
 
@@ -160,7 +163,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         setLayout(new java.awt.GridBagLayout());
 
         cmdOk.setMnemonic('P');
-        cmdOk.setText("Positionieren");
+        cmdOk.setText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormBPlanSearch.cmdOk.text")); // NOI18N
         cmdOk.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdOkActionPerformed(evt);
@@ -216,9 +219,8 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         add(panGazGUI, gridBagConstraints);
 
         chkVisualize.setSelected(true);
-        chkVisualize.setToolTipText("Markierung anzeigen");
+        chkVisualize.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormBPlanSearch.chkVisualize.toolTipText")); // NOI18N
         chkVisualize.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        chkVisualize.setMargin(new java.awt.Insets(0, 0, 0, 0));
         chkVisualize.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkVisualizeActionPerformed(evt);
@@ -232,7 +234,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         add(chkVisualize, gridBagConstraints);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
-        jLabel1.setToolTipText("Markierung anzeigen");
+        jLabel1.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormBPlanSearch.jLabel1.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
@@ -241,9 +243,8 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         add(jLabel1, gridBagConstraints);
 
         chkLockScale.setSelected(true);
-        chkLockScale.setToolTipText("Maßstab beibehalten");
+        chkLockScale.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormBPlanSearch.chkLockScale.toolTipText")); // NOI18N
         chkLockScale.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        chkLockScale.setMargin(new java.awt.Insets(0, 0, 0, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
@@ -252,7 +253,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         add(chkLockScale, gridBagConstraints);
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
-        jLabel2.setToolTipText("Maßstab beibehalten");
+        jLabel2.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormBPlanSearch.jLabel2.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
@@ -263,10 +264,10 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         txtSearch.setMinimumSize(new java.awt.Dimension(80, 20));
         txtSearch.setPreferredSize(new java.awt.Dimension(80, 20));
         txtSearch.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+            }
             public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
                 txtSearchInputMethodTextChanged(evt);
-            }
-            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -275,7 +276,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         add(txtSearch, gridBagConstraints);
 
-        lblBehind.setText("mind. 2 Zeichen");
+        lblBehind.setText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormBPlanSearch.lblBehind.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -370,7 +371,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
     // End of variables declaration//GEN-END:variables
 
     public void actionPerformed(ActionEvent e) {
-        lblBehind.setText(cboHits.getItemCount() + " Treffer");
+        lblBehind.setText(cboHits.getItemCount() + " " + I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormBPlanSearch.lblBehind.text2"));
         log.debug("cboPois.getItemAt(0):" + cboHits.getItemAt(0));
         if (cboHits.getItemCount() == 1) {
             cboHits.setEditable(false);

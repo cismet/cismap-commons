@@ -13,6 +13,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
+import java.util.ResourceBundle;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -23,8 +24,9 @@ import javax.swing.JList;
  * @author  nh
  */
 public class FontChooserDialog extends JDialog {
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     /** Display text */
-    private static final String SAMPLE_TEXT = "The quick brown fox jumps over the lazy dog.";
+    private static final String SAMPLE_TEXT = I18N.getString("de.cismet.cismap.commons.featureservice.style.FontChooserDialog.SAMPLE_TEXT");
     /** Selected index of the default fontsize */
     private static final int DEFAULT_SIZE = 4;
     /** The font the user has chosen */
@@ -193,7 +195,7 @@ public class FontChooserDialog extends JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 10);
         panFontAttrib.add(scrFontSize, gridBagConstraints);
 
-        chkBold.setText("Fett");
+        chkBold.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.FontChooserDialog.chkBold.text")); // NOI18N
         chkBold.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkBoldItemStateChanged(evt);
@@ -206,7 +208,7 @@ public class FontChooserDialog extends JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
         panFontAttrib.add(chkBold, gridBagConstraints);
 
-        chkItalic.setText("Kursiv");
+        chkItalic.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.FontChooserDialog.chkItalic.text")); // NOI18N
         chkItalic.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkItalicItemStateChanged(evt);
@@ -220,7 +222,7 @@ public class FontChooserDialog extends JDialog {
         panFontAttrib.add(chkItalic, gridBagConstraints);
 
         jLabel1.setLabelFor(lstFontName);
-        jLabel1.setText("Schriftart");
+        jLabel1.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.FontChooserDialog.jLabel1.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -229,7 +231,7 @@ public class FontChooserDialog extends JDialog {
         panFontAttrib.add(jLabel1, gridBagConstraints);
 
         jLabel2.setLabelFor(lstFontSize);
-        jLabel2.setText("Größe");
+        jLabel2.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.FontChooserDialog.jLabel2.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -260,7 +262,7 @@ public class FontChooserDialog extends JDialog {
         panDialogButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, 0));
         panDialogButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 5, 0));
 
-        cmdOK.setText("OK");
+        cmdOK.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.FontChooserDialog.cmdOK.text")); // NOI18N
         cmdOK.setMaximumSize(new java.awt.Dimension(90, 23));
         cmdOK.setMinimumSize(new java.awt.Dimension(90, 23));
         cmdOK.setPreferredSize(new java.awt.Dimension(90, 23));
@@ -271,7 +273,7 @@ public class FontChooserDialog extends JDialog {
         });
         panDialogButtons.add(cmdOK);
 
-        cmdCancel.setText("Abbrechen");
+        cmdCancel.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.FontChooserDialog.cmdCancel.text")); // NOI18N
         cmdCancel.setMaximumSize(new java.awt.Dimension(90, 23));
         cmdCancel.setMinimumSize(new java.awt.Dimension(90, 23));
         cmdCancel.setPreferredSize(new java.awt.Dimension(90, 23));

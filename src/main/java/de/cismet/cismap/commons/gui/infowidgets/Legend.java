@@ -148,7 +148,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             removeLegendByName(slp.getLegendIdentifier());
 
         } else {
-            log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.von_diesem_Typ_kann_keine_Legende_erstellt_werden") + e.getLayer());
+            log.warn("For this type no legend can be created. " + e.getLayer());
         }
     }
 
@@ -160,7 +160,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             LegendURL[] lua = wl.getSelectedStyle().getLegendURL();
             url = lua[0].getOnlineResource().toString();
         } catch (Throwable t) {
-            log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.konnte_fuer_") + title + java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.keine_Legende_finden."), t);
+            log.debug("Could not find a legend for " + title, t);
         }
         if (url != null) {
             this.removeLegendByName(name);
@@ -179,7 +179,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             try {
                 scrollToLegend(layer.getSelectedStyle().getLegendURL()[0].getOnlineResource().toString());
             } catch (Exception ex) {
-                log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.Kann_nicht_zur_Legende_von_") + e.getLayer() + java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.scrollen"), ex);
+                log.debug("Cannot scroll to legend of " + e.getLayer(), ex);
             }
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
 
@@ -211,7 +211,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                         LegendURL[] lua = wl.getSelectedStyle().getLegendURL();
                         url = lua[0].getOnlineResource().toString();
                     } catch (Throwable t) {
-                        log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.konnte_fuer") + title + java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.keine_Legende_finden"), t);
+                        log.debug("Could not find legend for " + title, t);
                     }
                     if (url != null) {
                         wmsCapabilities.put(url, wmsLayer.getWmsCapabilities());
@@ -225,7 +225,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             this.addLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
 
         } else {
-            log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.von_diesem_Typ_kann_keine_Legende_erstellt_werden") + e.getLayer());
+            log.warn("For this type no legend can be created. " + e.getLayer());
         }
     }
 
@@ -247,7 +247,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                         LegendURL[] lua = wl.getSelectedStyle().getLegendURL();
                         url = lua[0].getOnlineResource().toString();
                     } catch (Throwable t) {
-                        log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.konnte_fuer") + title + java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.keine_Legende_finden"), t);
+                        log.debug("Could not find legend for " + title, t);
                     }
                     if (url != null) {
                         wmsCapabilities.put(url, wmsLayer.getWmsCapabilities());
@@ -262,7 +262,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             tableModel.refreshLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
 
         } else {
-            log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.von_diesem_Typ_kann_keine_Legende_erstellt_werden") + e.getLayer());
+            log.warn("For this type no legend can be created. " + e.getLayer());
         }
     }
 
@@ -346,7 +346,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
 
         public void retrievalError(RetrievalEvent e) {
             lblImage.setText("");
-            log.error(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.Fehler_beim_Laden_der_Legende"));
+            log.error("Error while loading legend.");
             tableModel.fireTableDataChanged();
 
         }

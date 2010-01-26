@@ -19,6 +19,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.geom.Point2D;
+import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -33,6 +34,7 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     static ImageIcon icoPoint = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/point.png"));
     static ImageIcon icoLinestring = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/linestring.png"));
     static ImageIcon icoPolygon = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polygon.png"));
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private String name = "";
 
     public PureNewFeature(Geometry g) {
@@ -99,7 +101,11 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
 
     public java.awt.Paint getFillingPaint() {
         try {
-            return new Color(new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.RED")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.GREEN")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.BLUE")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.TRANSPARENT")));
+            return new Color(
+                new Float(I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.getFillingPaint().RED")),
+                new Float(I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.getFillingPaint().GREEN")),
+                new Float(I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.getFillingPaint().BLUE")),
+                new Float(I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.getFillingPaint().TRANSPARENT")));
         } catch (Exception e) {
             return new Color(1f, 0f, 0f, 0.4f);
         }
@@ -117,7 +123,7 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         try {
             Vector<Feature> allFeatures=CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures();
 //
-//        int countNewPoints=1;
+//        int countNewPoints=1; 
 //        int countNewLines=1;
 //        int countNewPoly=1;
 //
@@ -149,11 +155,11 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
 
         if (name.trim().equals("")) {
             if (getGeometry() instanceof Point) {
-                name= "Neuer Punkt";
+                name= I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.name.neuerPunkt");
             } else if (getGeometry() instanceof LineString) {
-                name = "Neuer Linienzug";
+                name = I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.name.neuerLinienzug");
             } else {
-                name = "Neues Polygon";
+                name = I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.name.neuesPolygon");
             }
         }
         return name;
@@ -163,11 +169,6 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
             return "Error in getName()";
         }
     }
-
-
-
-
-
 
 
     public void setName(String name) {

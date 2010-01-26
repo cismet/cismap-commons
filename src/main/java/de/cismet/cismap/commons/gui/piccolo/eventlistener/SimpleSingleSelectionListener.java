@@ -11,6 +11,7 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
+import java.util.ResourceBundle;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -21,6 +22,7 @@ import javax.swing.JPopupMenu;
 public class SimpleSingleSelectionListener extends PBasicInputEventHandler {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION";
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     PFeature sel = null;
     private int clickCount = 0;
     MappingComponent mc = null;
@@ -39,8 +41,8 @@ public class SimpleSingleSelectionListener extends PBasicInputEventHandler {
             if (o instanceof PFeature && ((PFeature) o).getFeature() instanceof XStyledFeature) {
                 XStyledFeature xf = (XStyledFeature) ((PFeature) o).getFeature();
                 log.debug("valid object under pointer");
-                JPopupMenu popup = new JPopupMenu("Test");
-                JMenuItem m = new JMenuItem("TIM Merker anlegen");
+                JPopupMenu popup = new JPopupMenu(I18N.getString("de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleSingleSelectionListener.popup.text"));
+                JMenuItem m = new JMenuItem(I18N.getString("de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleSingleSelectionListener.m.text"));
                 m.setIcon(xf.getIconImage());
                 popup.add(m);
                 popup.show(mc, (int) pInputEvent.getCanvasPosition().getX(), (int) pInputEvent.getCanvasPosition().getY());

@@ -72,6 +72,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.ImageIcon;
@@ -89,7 +90,7 @@ import javax.swing.tree.TreePath;
 import org.jdom.Element;
 
 /**
- * 
+ *
  * @author nh
  */
 public class NewSimpleInternalLayerWidget extends JInternalFrame implements MappingModelListener, TableModelListener, DropTargetListener, Configurable {
@@ -102,6 +103,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
     private final ImageIcon INVISIBLE = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerDLinvisible.png"));
     private static final int ROW_HEIGHT = 18;
     private static final int WIDGET_WIDTH = 350;
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private int layerCount = 0;
     private boolean deactivatePopupMenuButtons = true;
     private ActiveLayerModel activeLayerModel;
@@ -139,7 +141,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
         activeLayerModel = (ActiveLayerModel) mc.getMappingModel();
         popupMenu = new JPopupMenu();
         up = new JMenuItem();
-        up.setText("nach oben");
+        up.setText(I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget.up.text"));
         up.setIcon(UP);
         up.addActionListener(new ActionListener() {
 
@@ -158,7 +160,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         down = new JMenuItem();
-        down.setText("nach unten");
+        down.setText(I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget.down.text"));
         down.setIcon(DOWN);
         down.addActionListener(new ActionListener() {
 
@@ -177,7 +179,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         dis = new JMenuItem();
-        dis.setText("deaktivieren");
+        dis.setText(I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget.dis.text"));
         dis.setIcon(DISABLE);
         dis.addActionListener(new ActionListener() {
 
@@ -195,7 +197,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         del = new JMenuItem();
-        del.setText("entfernen");
+        del.setText(I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget.del.text"));
         del.setIcon(DELETE);
         del.addActionListener(new ActionListener() {
 
@@ -214,7 +216,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         vis = new JMenuItem();
-        vis.setText("unsichtbar");
+        vis.setText(I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget.vis.text"));
         vis.setIcon(INVISIBLE);
         vis.addActionListener(new ActionListener() {
 
@@ -450,10 +452,9 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
     public void drop(DropTargetDropEvent dtde) {
         DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SelectionAndCapabilities");
         try {
-            log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.log.Es_gibt") + dtde.getTransferable().getTransferDataFlavors().length +
-                    java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.log.DataFlavours"));
+            log.debug("There are " + dtde.getTransferable().getTransferDataFlavors().length + "DataFlavours");
             for (int i = 0; i < dtde.getTransferable().getTransferDataFlavors().length; ++i) {
-                log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.log.DataFlavour") + i + ":" + dtde.getTransferable().getTransferDataFlavors()[i]);
+                log.debug("DataFlavour" + i + ":" + dtde.getTransferable().getTransferDataFlavors()[i]);
             }
             final Object o = dtde.getTransferable().getTransferData(TREEPATH_FLAVOR);
             final Vector v = new Vector();
@@ -485,8 +486,10 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
             scpMain.setViewportView(treeTable);
         } catch (IllegalArgumentException schonVorhanden) {
-            JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this), java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.LayerAlreadyExists"),
-                    java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.AddLayer"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this), 
+                    I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget.drop().JOptionPane.message"), // NOI18N
+                    I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget.drop().JOptionPane.title"), // NOI18N
+                    JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
             log.error(e, e);
         }

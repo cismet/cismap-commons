@@ -69,6 +69,10 @@ import org.deegree.services.wms.capabilities.Style;
  * @author thorsten.hell@cismet.de
  */
 public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
+
+    private static final java.util.ResourceBundle I18N =
+            java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
+
     private javax.swing.ImageIcon styleIcon;
     private javax.swing.ImageIcon unselectedStyleIcon;
     private LayerWidget layerWidgetParent = null;
@@ -192,7 +196,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                 internalWidgetParent.setErrorImage((Image) ((RetrievalServiceLayer) value).getErrorObject());
                             }
                         }
-                        setToolTipText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("ActiveLayerTableCellRenderer.Der_Server_lieferte_folgendes_Fehlerbild_zurueck"));
+                        setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.ActiveLayerTableCellRenderer.toolTipText"));
                     } else if (((RetrievalServiceLayer) value).getErrorObject() instanceof String) {
                         setToolTipText(((RetrievalServiceLayer) value).getErrorObject().toString());
                     }

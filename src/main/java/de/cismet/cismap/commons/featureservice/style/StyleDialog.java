@@ -15,6 +15,7 @@ import de.cismet.cismap.commons.featureservice.WFSOperator;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
+import java.util.ResourceBundle;
 import org.bounce.text.LineNumberMargin;
 import java.awt.Color;
 import java.awt.Component;
@@ -69,6 +70,7 @@ import org.jdom.output.XMLOutputter;
  * @author  nh
  */
 public class StyleDialog extends JDialog implements ListSelectionListener {
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.featureservice.style.StyleDialog");
     // Hashmap-Keys
     
@@ -81,17 +83,18 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
     // Lokalisierungskonstanten
     private static final String CISMAP_FOLDER = ".cismap";
     private static final String DEFAULT_HISTORY_NAME = "defaultStyleHistory.xml";
-    private static final String COLORCHOOSER_TITLE = "Farbe w\u00E4hlen";
-    private static final String FONTCHOOSER_TITLE = "Schriftart w\u00E4hlen";
+    private static final String COLORCHOOSER_TITLE = I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.COLORCHOOSER_TITLE");
+    private static final String FONTCHOOSER_TITLE = I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.FONTCHOOSER_TITLE");
     private static final String POINTSYMBOL_FOLDER = "/de/cismet/cismap/commons/featureservice/res/pointsymbols/";
     private final String home = System.getProperty("user.home");
     private final String seperator = System.getProperty("file.separator");
     private final File fileToCismapFolder = new File(home + seperator + CISMAP_FOLDER);
     
     // Popup-Konstanten
-    private final static String POPUP_SAVE = "speichern";
-    private final static String POPUP_LOAD = "laden";
-    private final static String POPUP_CLEAR = "l\u00F6schen";
+    private final static String POPUP_SAVE = I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.POPUP_SAVE");
+    private final static String POPUP_LOAD = I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.POPUP_LOAD");
+    private final static String POPUP_CLEAR = I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.POPUP_CLEAR");
+
     
     private BasicStyle style;
     private Vector pointSymbolList = new Vector();
@@ -468,8 +471,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 } catch (Exception ex) {
                     log.error("Fehler beim Schreiben der History", ex);
                     JOptionPane.showMessageDialog(StyleDialog.this,
-                            "<html>Fehler beim Schreiben der History<br>" + ex.getMessage() + "</html>",
-                            "Fehler", JOptionPane.ERROR_MESSAGE);
+                            "<html>"+
+                            I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.writeHistory().JOptionPane.message")
+                            + "<br>" + ex.getMessage() + "</html>",
+                            I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.writeHistory().JOptionPane.title"), JOptionPane.ERROR_MESSAGE);
                 } finally {
                     try {
                         writer.close();
@@ -501,8 +506,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 } catch (Exception ex) {
                     log.error("Fehler beim Laden der History", ex);
                     JOptionPane.showMessageDialog(StyleDialog.this,
-                            "<html>Fehler beim Laden der History<br>" + ex.getMessage() + "</html>",
-                            "Fehler", JOptionPane.ERROR_MESSAGE);
+                            "<html>" +
+                            I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.loadHistory().JOptionPane.message")
+                            + "<br>" + ex.getMessage() + "</html>",
+                            I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.loadHistory().JOptionPane.title"), JOptionPane.ERROR_MESSAGE);
                 }
             }
         };
@@ -525,7 +532,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
             @Override
             public String getDescription() {
-                return "XML Dateien (*.xml)";
+                return I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.createHistoryListPopupMenu().getDescription().return");
             }
         };
 
@@ -1125,10 +1132,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         StringBuffer name = new StringBuffer(fontType.getSize() + "pt ");
         name.append(fontType.getName());
         if (fontType.isBold()) {
-            name.append(" Bold");
+            name.append(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblFontname.text1"));
         }
         if (fontType.isItalic()) {
-            name.append(" Italic");
+            name.append(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblFontname.text2"));
         }
         lblFontname.setText(name.toString());
     }
@@ -1350,7 +1357,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panRulesButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         cmdAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_add.png"))); // NOI18N
-        cmdAdd.setText("neu");
+        cmdAdd.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.cmdAdd.text")); // NOI18N
         cmdAdd.setMargin(new java.awt.Insets(2, 5, 2, 5));
         cmdAdd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1360,7 +1367,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panRulesButtons.add(cmdAdd);
 
         cmdRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_remove.png"))); // NOI18N
-        cmdRemove.setText("löschen");
+        cmdRemove.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.cmdRemove.text")); // NOI18N
         cmdRemove.setMargin(new java.awt.Insets(2, 5, 2, 5));
         cmdRemove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1396,7 +1403,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panQueryCheckbox.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 5));
         panQueryCheckbox.setLayout(new java.awt.GridLayout(2, 0));
 
-        chkLinewrap.setText("Zeilenumbruch");
+        chkLinewrap.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.chkLinewrap.text")); // NOI18N
         chkLinewrap.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkLinewrapActionPerformed(evt);
@@ -1404,12 +1411,12 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         });
         panQueryCheckbox.add(chkLinewrap);
 
-        chkUseQueryString.setText("benutze dieses Benutzer-Query");
+        chkUseQueryString.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.chkUseQueryString.text")); // NOI18N
         panQueryCheckbox.add(chkUseQueryString);
 
         panTabQuery.add(panQueryCheckbox, java.awt.BorderLayout.SOUTH);
 
-        setTitle("Style anpassen");
+        setTitle(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.title")); // NOI18N
         setLocationByPlatform(true);
         setMinimumSize(new java.awt.Dimension(685, 461));
         setModal(true);
@@ -1435,7 +1442,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panInfoComp.add(jLabel1, gridBagConstraints);
 
         jLabel2.setLabelFor(jLabel1);
-        jLabel2.setText("<html>Dieser Dialog dient der<br>Anpassung der visuellen<br>Gestaltung des WFS-Layers</html>");
+        jLabel2.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.jLabel2.text")); // NOI18N
         jLabel2.setVerticalAlignment(javax.swing.SwingConstants.TOP);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -1462,7 +1469,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         );
         panPreviewLayout.setVerticalGroup(
             panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 187, Short.MAX_VALUE)
+            .addGap(0, 184, Short.MAX_VALUE)
         );
 
         jPanel1.add(panPreview, java.awt.BorderLayout.CENTER);
@@ -1476,7 +1483,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         jPanel3.add(jPanel1, gridBagConstraints);
 
         lblPreview.setLabelFor(panPreview);
-        lblPreview.setText("Vorschau:");
+        lblPreview.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblPreview.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -1497,7 +1504,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panFill.setLayout(new java.awt.GridBagLayout());
 
         chkFill.setSelected(true);
-        chkFill.setText("Füllung:");
+        chkFill.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.chkFill.text")); // NOI18N
         chkFill.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkFillItemStateChanged(evt);
@@ -1508,7 +1515,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
         panFill.add(chkFill, gridBagConstraints);
 
-        chkFillPattern.setText("Füllmuster:");
+        chkFillPattern.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.chkFillPattern.text")); // NOI18N
         chkFillPattern.setEnabled(false);
         chkFillPattern.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -1533,7 +1540,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
         panFill.add(cbbFillPattern, gridBagConstraints);
 
-        chkLine.setText("Linie:");
+        chkLine.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.chkLine.text")); // NOI18N
         chkLine.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkLineItemStateChanged(evt);
@@ -1546,7 +1553,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 10);
         panFill.add(chkLine, gridBagConstraints);
 
-        chkLinePattern.setText("Linienmuster:");
+        chkLinePattern.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.chkLinePattern.text")); // NOI18N
         chkLinePattern.setEnabled(false);
         chkLinePattern.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -1571,7 +1578,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
         panFill.add(cbbLinePattern, gridBagConstraints);
 
-        chkSync.setText("Linien- an Füllfarbe angleichen");
+        chkSync.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.chkLineSync.text")); // NOI18N
         chkSync.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkSyncItemStateChanged(evt);
@@ -1585,7 +1592,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 10);
         panFill.add(chkSync, gridBagConstraints);
 
-        chkHighlightable.setText("Geometrie unter der Maus hervorheben");
+        chkHighlightable.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.chkHighlightable.text")); // NOI18N
         chkHighlightable.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkHighlightableItemStateChanged(evt);
@@ -1600,7 +1607,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panFill.add(chkHighlightable, gridBagConstraints);
 
         lblLineWidth.setLabelFor(sldLineWidth);
-        lblLineWidth.setText("Liniendicke (px):");
+        lblLineWidth.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblLineWidth.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 6;
@@ -1648,7 +1655,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panFill.add(txtLineWidth, gridBagConstraints);
 
         lblAlpha.setLabelFor(jPanel7);
-        lblAlpha.setText("Alpha (%):");
+        lblAlpha.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblAlpha.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 7;
@@ -1838,7 +1845,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panFill.add(lblHistory, gridBagConstraints);
 
         lblPointSymbol.setLabelFor(cbbPointSymbol);
-        lblPointSymbol.setText("Punktsymbol:");
+        lblPointSymbol.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblPointSymbol.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 8;
@@ -1863,7 +1870,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panFill.add(cbbPointSymbol, gridBagConstraints);
 
         lblPointSymbolSize.setLabelFor(sldPointSymbolSize);
-        lblPointSymbolSize.setText("Punktsymbolgröße:");
+        lblPointSymbolSize.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblPointSymbolSize.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 9;
@@ -1911,14 +1918,14 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         panTabFill.add(panFill, java.awt.BorderLayout.WEST);
 
-        tbpTabs.addTab("Füllung & Linien", new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style_color.png")), panTabFill); // NOI18N
+        tbpTabs.addTab(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.tbpTabs.tab1.title"), new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style_color.png")), panTabFill); // NOI18N
 
         panTabLabeling.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 20, 20));
 
         panLabeling.setLayout(new java.awt.GridBagLayout());
 
         chkActivateLabels.setSelected(true);
-        chkActivateLabels.setText("Labels anschalten");
+        chkActivateLabels.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.chkActivateLabels.text")); // NOI18N
         chkActivateLabels.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkActivateLabelsItemStateChanged(evt);
@@ -1931,7 +1938,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panLabeling.add(chkActivateLabels, gridBagConstraints);
 
         lblAttrib.setLabelFor(cbbAttribute);
-        lblAttrib.setText("Label-Attribut:");
+        lblAttrib.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblAttrib.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -1951,7 +1958,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panLabelButtons.setBorder(javax.swing.BorderFactory.createTitledBorder("Schriftdetails"));
         panLabelButtons.setLayout(new java.awt.GridBagLayout());
 
-        cmdChangeColor.setText("Farbe wechseln");
+        cmdChangeColor.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.cmdChangeColor.text")); // NOI18N
         cmdChangeColor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdChangeColorActionPerformed(evt);
@@ -1965,7 +1972,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
         panLabelButtons.add(cmdChangeColor, gridBagConstraints);
 
-        cmdChangeFont.setText("Schrift wechseln");
+        cmdChangeFont.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.cmdChangeFont.text")); // NOI18N
         cmdChangeFont.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdChangeFontActionPerformed(evt);
@@ -2022,7 +2029,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panScale.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
 
         lblMin.setLabelFor(txtMin);
-        lblMin.setText("Sichtbar von 1:");
+        lblMin.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblMin.text")); // NOI18N
         panScale.add(lblMin);
 
         txtMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
@@ -2032,7 +2039,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panScale.add(txtMin);
 
         lblMax.setLabelFor(txtMax);
-        lblMax.setText("bis 1:");
+        lblMax.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblMax.text")); // NOI18N
         panScale.add(lblMax);
 
         txtMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
@@ -2050,7 +2057,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panLabeling.add(panScale, gridBagConstraints);
 
         chkAutoscale.setSelected(true);
-        chkAutoscale.setText("Größe der Skalierung anpassen");
+        chkAutoscale.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.chkAutoscale.text")); // NOI18N
         chkAutoscale.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkAutoscaleItemStateChanged(evt);
@@ -2068,7 +2075,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         btgAlignment.add(radLeft);
         radLeft.setSelected(true);
-        radLeft.setText("links");
+        radLeft.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.radleft.text")); // NOI18N
         radLeft.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radLeftActionPerformed(evt);
@@ -2077,7 +2084,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panAlignment.add(radLeft);
 
         btgAlignment.add(radCenter);
-        radCenter.setText("zentriert");
+        radCenter.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.radCenter.text")); // NOI18N
         radCenter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radCenterActionPerformed(evt);
@@ -2086,7 +2093,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panAlignment.add(radCenter);
 
         btgAlignment.add(radRight);
-        radRight.setText("rechts");
+        radRight.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.radRight.text")); // NOI18N
         radRight.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 radRightActionPerformed(evt);
@@ -2102,7 +2109,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panLabeling.add(panAlignment, gridBagConstraints);
 
         lblAlignment.setLabelFor(panAlignment);
-        lblAlignment.setText("Ausrichtung");
+        lblAlignment.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblAlignment.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -2111,7 +2118,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panLabeling.add(lblAlignment, gridBagConstraints);
 
         lblMultiplier.setLabelFor(txtMultiplier);
-        lblMultiplier.setText("Größenmultiplikator");
+        lblMultiplier.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblMultiplier.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
@@ -2132,9 +2139,9 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         panTabLabeling.add(panLabeling);
 
-        tbpTabs.addTab("Beschriftung", new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/labelling.png")), panTabLabeling); // NOI18N
+        tbpTabs.addTab(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.tbpTabs.tab2.title"), new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/labelling.png")), panTabLabeling); // NOI18N
 
-        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10), javax.swing.BorderFactory.createTitledBorder("Abzufragende Attribute auswählen")));
+        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10), javax.swing.BorderFactory.createTitledBorder(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.panTabAttrib.border.title")))); // NOI18N
         panTabAttrib.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
 
         jPanel2.setLayout(new java.awt.GridBagLayout());
@@ -2172,7 +2179,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         jPanel2.add(panAttribNorm, gridBagConstraints);
 
         lblPrimary.setLabelFor(cbbPrimary);
-        lblPrimary.setText("Primärschlüssel");
+        lblPrimary.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.lblPrimary.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -2186,7 +2193,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         panTabAttrib.add(jPanel2);
 
-        tbpTabs.addTab("Attribute", new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/attributes.png")), panTabAttrib); // NOI18N
+        tbpTabs.addTab(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.tbpTabs.tab3.title"), new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/attributes.png")), panTabAttrib); // NOI18N
         panTabAttrib.getAccessibleContext().setAccessibleName(null);
 
         panTabs.add(tbpTabs, java.awt.BorderLayout.CENTER);
@@ -2198,7 +2205,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panDialogButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, -5));
         panDialogButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 0));
 
-        cmdOK.setText("OK");
+        cmdOK.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.cmdIOK.text")); // NOI18N
         cmdOK.setMaximumSize(new java.awt.Dimension(88, 23));
         cmdOK.setMinimumSize(new java.awt.Dimension(88, 23));
         cmdOK.setPreferredSize(new java.awt.Dimension(88, 23));
@@ -2209,7 +2216,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         });
         panDialogButtons.add(cmdOK);
 
-        cmdCancel.setText("Abbrechen");
+        cmdCancel.setText(I18N.getString("de.cismet.cismap.commons.featureservice.style.StyleDialog.cmdCancel.text")); // NOI18N
         cmdCancel.setMaximumSize(new java.awt.Dimension(88, 23));
         cmdCancel.setMinimumSize(new java.awt.Dimension(88, 23));
         cmdCancel.setPreferredSize(new java.awt.Dimension(88, 23));

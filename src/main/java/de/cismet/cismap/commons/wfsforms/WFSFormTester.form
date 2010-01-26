@@ -77,7 +77,9 @@
     </Component>
     <Component class="javax.swing.JButton" name="cmdOk">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Ok"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.wfsforms.WFSFormTester.cmdOk.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+        </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JProgressBar" name="prbStreets">

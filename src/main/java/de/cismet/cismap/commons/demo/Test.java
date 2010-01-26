@@ -1,21 +1,23 @@
 package de.cismet.cismap.commons.demo;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ResourceBundle;
 import javax.swing.*;
 import javax.swing.event.*;
  
 public class Test extends JFrame {
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     public Test () {
         setContentPane (new Desktop ());
         setDefaultCloseOperation (EXIT_ON_CLOSE);
-        setTitle ("Test");
+        setTitle (I18N.getString("de.cismet.cismap.commons.demo.Test.title"));
         setSize (600, 400);
         setLocationRelativeTo (null);
         setVisible (true);
     }
  
     public static void main (String[] parameters) {
-        //new Test ();
+        new Test ();
         String s="SRID=31466;POLYGON((2583920 5677047,2583920 5677547,2584420 5677547,2584420 5677047,2583920 5677047))";
        
         System.out.println("s:"+s.replaceAll("SRID=31466","SRID=-1"));
@@ -86,9 +88,9 @@ public class Test extends JFrame {
     private class TestPanel extends JPanel {
         public TestPanel (final Desktop desktop) {
             setLayout (new FlowLayout (FlowLayout.LEFT));
-            add (new JButton (new AbstractAction ("Open modal dialog") {
+            add (new JButton (new AbstractAction (I18N.getString("de.cismet.cismap.commons.demo.Test.TestPanel.button.text")) {
                 public void actionPerformed (ActionEvent event) {
-                    desktop.openModalDialog ("This dialog is modal!");
+                    desktop.openModalDialog (I18N.getString("de.cismet.cismap.commons.demo.Test.TestPanel.modalDialog.text"));
                 }
             }));
         }
@@ -131,7 +133,7 @@ public class Test extends JFrame {
            setClosable (true);
             
             setDefaultCloseOperation (HIDE_ON_CLOSE);
-            setTitle ("Dialog");
+            setTitle (I18N.getString("de.cismet.cismap.commons.demo.Test.TestFrame.title"));
  
             getContentPane ().setLayout (new FlowLayout ());
             getContentPane ().add (new JLabel ("57657667"));

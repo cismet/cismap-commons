@@ -5,6 +5,7 @@
 
 package de.cismet.cismap.commons.featureservice.style;
 
+import java.util.ResourceBundle;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
@@ -13,8 +14,18 @@ import javax.swing.JComboBox;
  * @author nh
  */
 public class OperatorComboBox extends JComboBox {
-    String[] arr =  {"kleiner als", "kleiner oder gleich","gleich","ungleich",
-                     "gr\u00F6\u00DFer oder gleich","gr\u00F6\u00DFer als","enth\u00E4lt","gleicht"};
+    
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
+
+    String[] arr =  {
+        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.lessThan"),
+        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.lessThanOrEqual"),
+        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.equal"),
+        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.notEqual"),
+        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.greaterThanOrEqual"),
+        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.greaterThan"),
+        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.contains"),
+        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.isLike")};
     
     public OperatorComboBox() {
         super();

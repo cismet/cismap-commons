@@ -44,6 +44,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 import javax.swing.AbstractListModel;
@@ -70,12 +71,13 @@ import org.jdom.input.SAXBuilder;
  */
 public class WFSFormsListAndComboBoxModel extends AbstractListModel implements ComboBoxModel, FeatureProgressListener {
 
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle"); // NOI18N
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Vector<WFSFormFeature> features = new Vector<WFSFormFeature>();
     FeatureCollection fc = null;
     private Vector<ChangeListener> changeListeners = new Vector<ChangeListener>();
     private Object selectedValue;
-    private String loadingMessage = java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("WFSFormListAndComboBoxModel.laden");
+    private String loadingMessage = I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormsListAndComboBoxModel.loadingMessage"); // NOI18N
     private boolean started = false;
     private boolean finished = false;
     private int estimatedFeatureCount = -1;

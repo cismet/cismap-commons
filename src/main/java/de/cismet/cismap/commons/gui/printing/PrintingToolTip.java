@@ -41,25 +41,28 @@ import edu.umd.cs.piccolo.nodes.PText;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ResourceBundle;
 
 /**
- *
+ *de.cismet.cismap.commons.gui.printing.PrintingToolTip.PrintingToolTip().
  * @author thorsten.hell@cismet.de
  */
 public class PrintingToolTip extends PNode{
-    
+
+    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
+
     /** Creates a new instance of PrintingToolTip */
     public PrintingToolTip(Color backgroundColor) {
         PImage image=new PImage(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/frameprint64.png")).getImage());
         image.setOffset(10,10);
-        PText t1=new PText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Auswahl_des_Druckbereichs:"));
+        PText t1=new PText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingToolTip.PrintingToolTip().t1"));
         
         Font defaultFont=t1.getFont();
         Font boldDefaultFont=new Font(defaultFont.getName(),defaultFont.getStyle()+Font.BOLD,defaultFont.getSize());
         t1.setFont(boldDefaultFont);
-        PText t2=new PText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("-_Verschieben_des_Druckbereichs_durch_Ziehen_und_Ablegen"));
-        PText t3=new PText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("-_Veraendern_des_Massstabes_durch_das_Mausrad_(nur_bei_freiem_Massstab)"));
-        PText t4=new PText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("-_Weiter_mit_Doppelclick"));
+        PText t2=new PText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingToolTip.PrintingToolTip().t2"));
+        PText t3=new PText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingToolTip.PrintingToolTip().t3"));
+        PText t4=new PText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingToolTip.PrintingToolTip().t4"));
         
 
         double textHeight=t1.getHeight()+5+t2.getHeight()+5+t3.getHeight()+5+t4.getHeight();
