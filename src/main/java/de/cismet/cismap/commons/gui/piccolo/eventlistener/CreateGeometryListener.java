@@ -87,6 +87,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
         this.mc = mc;
         moveListener = (SimpleMoveListener) mc.getInputListener(MappingComponent.MOTION);
         undoPoints = new Stack<Point2D>();
+        //srichter: fehlerpotential! this referenz eines nicht fertig initialisieren Objekts wieder nach aussen geliefert!
+        //loesungsvorschlag: createInstance-methode, welche den aufruf nach dem erzeugen ausfuehrt.
         mc.getFeatureCollection().addFeatureCollectionListener(this);
     }
 

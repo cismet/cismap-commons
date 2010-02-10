@@ -66,7 +66,7 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
         //3. Alle FeatureLayer unsichtbar machen
         if (aEvent.getComponent() instanceof MappingComponent) {
             MappingComponent mc = (MappingComponent) aEvent.getComponent();
-            mc.getHandleLayer().removeAllChildren();
+//            mc.getHandleLayer().removeAllChildren();
             if (mc.getCismapPrefs() != null && mc.getCismapPrefs().getGlobalPrefs() != null && mc.getCismapPrefs().getGlobalPrefs().isPanPerformanceBoosterEnabled() && mc.getMappingModel().getFeatureServices().size() > 0) {
                 log.debug("isPanPerformanceBoosterEnabled");
                 refreshImage(mc);
