@@ -1980,46 +1980,6 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     }
     private final Map<MapService, Future<?>> serviceFutures = TypeSafeCollections.newConcurrentHashMap();
 
-    static class MapServiceCall {
-
-        public MapServiceCall(MapService rs, int width, int height, BoundingBox bb, boolean forced) {
-            this.rs = rs;
-            this.width = width;
-            this.height = height;
-            this.bb = bb;
-            this.forced = forced;
-        }
-        public final MapService rs;
-        public final int width;
-        public final int height;
-        public final BoundingBox bb;
-        public final boolean forced;
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof MapServiceCall) {
-                MapServiceCall other = (MapServiceCall) obj;
-                return other.width == width
-                        && other.height == height
-                        && other.forced == forced
-                        && other.bb.equals(bb)
-                        && other.rs.equals(rs);
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 67 * hash + (this.rs != null ? this.rs.hashCode() : 0);
-            hash = 67 * hash + this.width;
-            hash = 67 * hash + this.height;
-            hash = 67 * hash + (this.bb != null ? this.bb.hashCode() : 0);
-            hash = 67 * hash + (this.forced ? 1 : 0);
-            return hash;
-        }
-    }
-
 //    private void handleMapService(int position, final MapService rs, int width, int height, final BoundingBox bb, final boolean forced) {
 //        if (DEBUG) {
 //            log.debug("handleMapService: " + rs);
