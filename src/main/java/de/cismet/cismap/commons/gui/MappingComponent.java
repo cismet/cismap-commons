@@ -108,6 +108,7 @@ import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDebuggingTools;
 import de.cismet.tools.collections.MultiMap;
+import de.cismet.tools.collections.TypeSafeCollections;
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.gui.historybutton.DefaultHistoryModel;
 import de.cismet.tools.gui.historybutton.HistoryModel;
@@ -126,7 +127,6 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Image;
-import java.awt.MouseInfo;
 import java.awt.Paint;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
@@ -170,6 +170,7 @@ import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
+import java.util.Map;
 import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.jdom.DataConversionException;
@@ -1949,7 +1950,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 //        final MapServiceCall call = new MapServiceCall(rs, width, height, bb, forced);
 
         if (((ServiceLayer) rs).isEnabled()) {
-            final Future<?> sf = serviceFuture;
+            final Future<?> sf = serviceFutures.get(rs);
             if (sf == null || sf.isDone()) {
                 rs.setSize(height, width);
                 Runnable serviceCall = new Runnable() {
@@ -1969,15 +1970,15 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                             }
                             rs.retrieve(forced);
                         } finally {
-                            serviceFuture = null;
+                            serviceFutures.remove(rs);
                         }
                     }
                 };
-                serviceFuture = CismetThreadPool.submit(serviceCall);
+                serviceFutures.put(rs, CismetThreadPool.submit(serviceCall));
             }
         }
     }
-    private volatile Future<?> serviceFuture = null;
+    private final Map<MapService, Future<?>> serviceFutures = TypeSafeCollections.newConcurrentHashMap();
 
     static class MapServiceCall {
 
