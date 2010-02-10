@@ -9,6 +9,7 @@ import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleLegendProvider;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
@@ -16,7 +17,6 @@ import de.cismet.tools.gui.StaticSwingTools;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Image;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -141,6 +141,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             }
         } else if (e.getLayer() instanceof WMSLayer) {
             removeWMSLayer((WMSLayer) e.getLayer());
+        } else if (e.getLayer() instanceof SimpleLegendProvider) {
+            SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
+            removeLegendByName(slp.getLegendIdentifier());
+
         } else {
             log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.von_diesem_Typ_kann_keine_Legende_erstellt_werden") + e.getLayer());
         }
@@ -175,6 +179,11 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             } catch (Exception ex) {
                 log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.Kann_nicht_zur_Legende_von_") + e.getLayer() + java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.scrollen"), ex);
             }
+        } else if (e.getLayer() instanceof SimpleLegendProvider) {
+
+            SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
+            scrollToLegend(slp.getLegendUrl());
+
         }
     }
 
@@ -209,6 +218,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                     }
                 }
             }
+        } else if (e.getLayer() instanceof SimpleLegendProvider) {
+            SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
+            this.addLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
+
         } else {
             log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.von_diesem_Typ_kann_keine_Legende_erstellt_werden") + e.getLayer());
         }
@@ -242,6 +255,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                     }
                 }
             }
+        } else if (e.getLayer() instanceof SimpleLegendProvider) {
+            SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
+            tableModel.refreshLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
+
         } else {
             log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Legend.log.von_diesem_Typ_kann_keine_Legende_erstellt_werden") + e.getLayer());
         }
