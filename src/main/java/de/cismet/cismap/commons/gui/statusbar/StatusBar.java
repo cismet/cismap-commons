@@ -196,7 +196,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
     
     private  void refreshMeasurementsInStatus() {
         try{
-        Collection<Feature> cf=CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getSelectedFeatures();
+        Collection<Feature> cf=mappingComponent.getFeatureCollection().getSelectedFeatures();
         refreshMeasurementsInStatus(cf);
         }catch(NullPointerException ex){
             log.error("Error while refreshing measurements",ex);
@@ -223,7 +223,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
     
     public void featuresChanged(FeatureCollectionEvent fce) {
         log.debug("FeatureChanged");
-        if (CismapBroker.getInstance().getMappingComponent().getInteractionMode().equals(MappingComponent.NEW_POLYGON)) {
+        if (mappingComponent.getInteractionMode().equals(MappingComponent.NEW_POLYGON)) {
             refreshMeasurementsInStatus(fce.getEventFeatures());
         }
         else {

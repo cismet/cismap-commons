@@ -54,7 +54,7 @@ public abstract class AbstractWMS extends AbstractRetrievalService implements Ma
     private boolean visible=true;
     protected int height=0;
     protected int width=0;
-    protected ImageRetrieval ir;
+    protected volatile ImageRetrieval ir;
     protected int layerPosition=0;
     protected String name=null;
     protected float translucency=1.0f;

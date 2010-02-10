@@ -23,6 +23,7 @@ import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.AnnotatedFeature;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.RasterDocumentFeature;
 import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -118,11 +119,16 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param y_offset piccolo y-offset
      * @param viewer MappingComponent
      */
+    public PFeature(Feature feature, MappingComponent viewer) {
+        this(feature, viewer.getWtst(), 0, 0, viewer);
+    }
+
     public PFeature(Feature feature, WorldToScreenTransform wtst, double x_offset, double y_offset, MappingComponent viewer) {
         this(feature, wtst, x_offset, y_offset, viewer, false);
 
     }
 
+    @Deprecated
     public PFeature(Feature feature, WorldToScreenTransform wtst, double x_offset, double y_offset, MappingComponent viewer, boolean ignoreStickyfeature) {
         try {
             setFeature(feature);
@@ -149,10 +155,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
     }
 
+    @Deprecated
     public PFeature(Point2D[] canvasPoints, WorldToScreenTransform wtst, double x_offset, double y_offset, MappingComponent viewer) {
         this(new PureNewFeature(canvasPoints, wtst), wtst, 0, 0, viewer);
     }
 
+    @Deprecated
     public PFeature(Coordinate[] coordArr, WorldToScreenTransform wtst, double x_offset, double y_offset, MappingComponent viewer) {
         this(new PureNewFeature(coordArr, wtst), wtst, 0, 0, viewer);
     }
@@ -161,62 +169,109 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         return primaryAnnotation;
     }
 
+    public PBounds boundsFromRectPolygonGeom(Geometry g) {
+        if (g instanceof Polygon) {
+            Polygon poly = (Polygon) g;
+            if (poly.isRectangle()) {
+                Coordinate[] coords = poly.getCoordinates();
+                Coordinate first = coords[0];
+                PBounds b = new PBounds();
+                //init
+                double x1 = first.x;
+                double x2 = first.x;
+                double y1 = first.y;
+                double y2 = first.y;
+                for (int i = 0; i < coords.length; ++i) {
+                    Coordinate c = coords[i];
+                    if (c.x < x1) {
+                        x1 = c.x;
+                    }
+                    if (c.x > x2) {
+                        x2 = c.x;
+                    }
+                    if (c.y < y1) {
+                        y1 = c.y;
+                    }
+                    if (c.y > y1) {
+                        y2 = c.y;
+                    }
+                }
+                return new PBounds(wtst.getScreenX(x1), wtst.getScreenY(y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+            }
+        }
+        throw new IllegalArgumentException("Geometry is not a rectangle polygon!");
+    }
+
     public void visualize() {
         if (viewer.isFeatureDebugging()) {
             log.debug("visualize()", new CurrentStackTrace());
         }
+
         Geometry geom = feature.getGeometry();
-        if (geom instanceof Polygon || geom instanceof LineString || geom instanceof MultiLineString) {
+        if (feature instanceof RasterDocumentFeature) {
+            RasterDocumentFeature rdf = (RasterDocumentFeature) feature;
+            PImage pImage = new PImage(rdf.getRasterDocument());
+            PBounds bounds = boundsFromRectPolygonGeom(rdf.getGeometry());
+            //x,y,with,heigth
+            log.fatal(bounds.x +" "+bounds.y+" "+bounds.width+" "+bounds.height);
+            log.fatal(bounds);
+            pImage.setBounds(bounds);
+            addChild(pImage);
             doGeometry(geom);
-        } else if (geom instanceof MultiPolygon) {
-            MultiPolygon mp = (MultiPolygon) geom;
-            doGeometry(geom);
-        } else if (geom instanceof Point) {
-            doGeometry(geom);
-            if (feature instanceof StyledFeature) {
-                if (pi == null || (pi != null && pi.equals(((StyledFeature) feature).getPointAnnotationSymbol()))) {
-                    try {
-                        //log.debug("Sweetspot updated");
-                        pi = new FeatureAnnotationSymbol(((StyledFeature) getFeature()).getPointAnnotationSymbol().getImage());
+        } else {
+            if (geom instanceof Polygon || geom instanceof LineString || geom instanceof MultiLineString) {
+                doGeometry(geom);
+            } else if (geom instanceof MultiPolygon) {
+//                MultiPolygon mp = (MultiPolygon) geom;
+                doGeometry(geom);
+            } else if (geom instanceof Point) {
+                doGeometry(geom);
+                if (feature instanceof StyledFeature) {
+                    if (pi == null || (pi != null && pi.equals(((StyledFeature) feature).getPointAnnotationSymbol()))) {
+                        try {
+                            //log.debug("Sweetspot updated");
+                            pi = new FeatureAnnotationSymbol(((StyledFeature) getFeature()).getPointAnnotationSymbol().getImage());
+                            log.debug("newSweetSpotx: " + ((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
+                            pi.setSweetSpotX(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
+                            pi.setSweetSpotY(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotY());
+                        } catch (Throwable ex) {
+                            log.warn("Kein PointAnnotationSymbol gefunden", ex);
+                            pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
+                            pi.setSweetSpotX(0.46d);
+                            pi.setSweetSpotY(0.9d);
+                        }
+                    } else if (pi != null && getFeature() != null && getFeature() instanceof StyledFeature && ((StyledFeature) getFeature()).getPointAnnotationSymbol() != null) {
+                        log.fatal("Sweetspot updated");
                         log.debug("newSweetSpotx: " + ((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
                         pi.setSweetSpotX(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
                         pi.setSweetSpotY(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotY());
-                    } catch (Throwable ex) {
-                        log.warn("Kein PointAnnotationSymbol gefunden", ex);
-                        pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
-                        pi.setSweetSpotX(0.46d);
-                        pi.setSweetSpotY(0.9d);
+
                     }
-                } else if (pi != null && getFeature() != null && getFeature() instanceof StyledFeature && ((StyledFeature) getFeature()).getPointAnnotationSymbol() != null) {
-                    log.fatal("Sweetspot updated");
-                    log.debug("newSweetSpotx: " + ((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
-                    pi.setSweetSpotX(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
-                    pi.setSweetSpotY(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotY());
-
                 }
-            }
-            if (!ignoreStickyFeature) {
-                viewer.addStickyNode(pi);
-            }
-
-            //Hier soll getestet werden ob bei einem Punkt der pushpin schon hinzugef\u00FCgt wurde. Wegen reconsider Feature
-            if (stickyChild == null) {
-                stickyChild = pi;
-            } else {
-                if (stickyChild instanceof StickyPText) {
-                    secondStickyChild = pi;
+                if (!ignoreStickyFeature) {
+                    viewer.addStickyNode(pi);
                 }
+
+                //Hier soll getestet werden ob bei einem Punkt der pushpin schon hinzugef\u00FCgt wurde. Wegen reconsider Feature
+                if (stickyChild == null) {
+                    stickyChild = pi;
+                } else {
+                    if (stickyChild instanceof StickyPText) {
+                        secondStickyChild = pi;
+                    }
+                }
+                addChild(pi);
+                pi.setOffset(wtst.getScreenX(coordArr[0].x), wtst.getScreenY(coordArr[0].y));
             }
-            addChild(pi);
-            pi.setOffset(wtst.getScreenX(coordArr[0].x), wtst.getScreenY(coordArr[0].y));
+            if (pi != null) {
+                sweetPureX = pi.getSweetSpotX();
+                sweetPureY = pi.getSweetSpotY();
+                sweetSelX = -1.0d;
+                sweetSelY = -1.0d;
+            }
+            setSelected(isSelected());
         }
-        if (pi != null) {
-            sweetPureX = pi.getSweetSpotX();
-            sweetPureY = pi.getSweetSpotY();
-            sweetSelX = -1.0d;
-            sweetSelY = -1.0d;
-        }
-        setSelected(isSelected());
+
     }
 
     /**
@@ -528,9 +583,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return Koordinatenarray ohne die gew\u00FCnschte Koordinate
      */
     private Coordinate[] removeCoordinate(int position, Coordinate[] original) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position ||
-                getFeature().getGeometry() instanceof LineString && original != null &&
-                original.length > position && original.length > 2) {
+        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position
+                || getFeature().getGeometry() instanceof LineString && original != null
+                && original.length > position && original.length > 2) {
             Coordinate[] newCoordinates = new Coordinate[original.length - 1];
             //vorher
             for (int i = 0; i < position; ++i) {
@@ -566,8 +621,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return PCanvas-Punktarray, ohne den gew\u00FCnschten Punkt
      */
     private float[] removeCoordinate(int position, float[] original) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position ||
-                getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
+        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position
+                || getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
             float[] newCoordinates = new float[original.length - 1];
             //vorher
             for (int i = 0; i < position; ++i) {
@@ -602,8 +657,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return Coordinate-Array mit der neue Koordinate
      */
     public Coordinate[] insertCoordinate(int position, Coordinate[] original, Coordinate newValue) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 >= position ||
-                getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
+        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 >= position
+                || getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
             Coordinate[] newCoordinates = new Coordinate[original.length + 1];
             //vorher
             for (int i = 0; i < position; ++i) {
@@ -642,8 +697,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return float-Array mit der neu eingef\u00FCgten Koordinate
      */
     public float[] insertCoordinate(int position, float[] original, float newValue) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 >= position ||
-                getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
+        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 >= position
+                || getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
             float[] newCoordinates = new float[original.length + 1];
             //vorher
             for (int i = 0; i < position; ++i) {
@@ -710,7 +765,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (viewer.isFeatureDebugging()) {
             log.debug("addHandles(): " + yp[0] + "--" + yp[yp.length - 1]);
         }
-        if (((PureNewFeature)getFeature()).getGeometryType() == PureNewFeature.geomTypes.ELLIPSE) {
+        if ((getFeature() instanceof PureNewFeature) && ((PureNewFeature) getFeature()).getGeometryType() == PureNewFeature.geomTypes.ELLIPSE) {
             addEllipseHandle(handleLayer);
         } else {
             int length = xp.length;
@@ -731,7 +786,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void addHandle(final PNode handleLayer, final int position) {
         final int positionInArray = position;
-        
+
         final PHandle h = new TransformationPHandle(this, positionInArray);
 
         EventQueue.invokeLater(new Runnable() {
@@ -838,7 +893,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (viewer.isFeatureDebugging()) {
             log.debug("addRotationHandles(): Hinzuf\u00FCgen vom " + position + ". RotationHandle");
         }
-        
+
         final PHandle rotHandle = new RotationPHandle(this, mid, pivotHandle, position);
 
         rotHandle.setPaint(new Color(1f, 1f, 0f, 0.7f));
@@ -880,10 +935,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
             pf.setPivotPoint(allBounds.getCenter2D());
             mid = allBounds.getCenter2D();
-        }        
+        }
 
         pivotHandle = new PivotPHandle(this, mid);
-
         pivotHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
         EventQueue.invokeLater(new Runnable() {
 
@@ -1269,8 +1323,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 log.debug("getFeature().getGeometry():" + getFeature().getGeometry());
             }
             if (viewer.isFeatureDebugging()) {
-                log.debug("getFeature().getGeometry().getInteriorPoint().getY():" +
-                        getFeature().getGeometry().getInteriorPoint().getY());
+                log.debug("getFeature().getGeometry().getInteriorPoint().getY():"
+                        + getFeature().getGeometry().getInteriorPoint().getY());
             }
             stickyChild.setOffset(wtst.getScreenX(getFeature().getGeometry().getInteriorPoint().getX()),
                     wtst.getScreenY(getFeature().getGeometry().getInteriorPoint().getY()));
