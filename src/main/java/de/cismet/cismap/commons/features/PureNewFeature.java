@@ -31,7 +31,11 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
-    public static enum geomTypes { ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON };
+    public static enum geomTypes {
+
+        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON
+    };
+    private Paint fillingPaint;
     private geomTypes geomType;
     static ImageIcon icoPoint = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/point.png"));
     static ImageIcon icoPolyline = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polyline.png"));
@@ -58,7 +62,7 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
                 float[] xp = new float[canvasPoints.length];
                 float[] yp = new float[canvasPoints.length];
                 for (int i = 0; i < canvasPoints.length; ++i) {
-                    log.debug("canvasPoints["+i+"]:"+canvasPoints[i]);
+                    log.debug("canvasPoints[" + i + "]:" + canvasPoints[i]);
                     xp[i] = (float) (canvasPoints[i].getX());
                     yp[i] = (float) (canvasPoints[i].getY());
                     coordArr[i] = new Coordinate(wtst.getSourceX(xp[i]), wtst.getSourceY(yp[i]));
@@ -96,6 +100,11 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         } catch (Exception e) {
             log.warn("Fehler im init", e);
         }
+        try {
+            fillingPaint = new Color(new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.RED")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.GREEN")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.BLUE")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.TRANSPARENT")));
+        } catch (Exception e) {
+            fillingPaint = new Color(1f, 0f, 0f, 0.4f);
+        }
     }
 
     public java.awt.Stroke getLineStyle() {
@@ -103,11 +112,12 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     }
 
     public java.awt.Paint getFillingPaint() {
-        try {
-            return new Color(new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.RED")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.GREEN")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.BLUE")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.TRANSPARENT")));
-        } catch (Exception e) {
-            return new Color(1f, 0f, 0f, 0.4f);
-        }
+        return fillingPaint;
+    }
+
+    @Override
+    public void setFillingPaint(Paint fillingStyle) {
+        this.fillingPaint = fillingStyle;
     }
 
     public float getTransparency() {
@@ -137,7 +147,7 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
             }
         } else {
             try {
-                Vector<Feature> allFeatures=CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures();
+                Vector<Feature> allFeatures = CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures();
 //
 //        int countNewPoints=1;
 //        int countNewLines=1;
@@ -171,7 +181,7 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
 
                 if (name.trim().equals("")) {
                     if (getGeometry() instanceof Point) {
-                name= "Neuer Punkt";
+                        name = "Neuer Punkt";
                     } else if (getGeometry() instanceof LineString) {
                         name = "Neuer Linienzug";
                     } else {
@@ -179,19 +189,12 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
                     }
                 }
                 return name;
-        }
-        catch (Exception e){
-            log.fatal("getName() error",e);
+            } catch (Exception e) {
+                log.fatal("getName() error", e);
                 return "Error in getName()";
             }
         }
     }
-
-
-
-
-
-
 
     public void setName(String name) {
         this.name = name;
@@ -232,7 +235,6 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         return getTransparency();
     }
 
-
     public void setGeometryType(geomTypes geomType) {
         this.geomType = geomType;
     }
@@ -240,5 +242,4 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     public geomTypes getGeometryType() {
         return geomType;
     }
-    
 }

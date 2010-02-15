@@ -213,7 +213,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 
     private void enforceSelect(Collection<Feature> cf) {
         log.debug("select(Collection<Feature> cf):" + cf);
-        enforceUnselectAll(true);        
+        enforceUnselectAll(true);
         selectedFeatures.addAll(cf);
         fireSelectionChanged(cf);
     }
@@ -374,11 +374,15 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
         } catch (Exception e) {
             log.error("Fehler in substituteFeatures neue features:" + cf, e);
         }
-    //select(f);
+        //select(f);
+    }
+
+    public void clear() {
+        holdFeatures.clear();
+        removeAllFeatures();
     }
 
     public void removeAllFeatures() {
-
         Vector<Feature> cf = new Vector<Feature>(features);
         features.removeAllElements();
         fireAllFeaturesRemoved(cf);

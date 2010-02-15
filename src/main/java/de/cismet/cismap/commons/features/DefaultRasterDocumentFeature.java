@@ -32,8 +32,8 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
     private static final GeometryFactory GEOM_FACTORY = new GeometryFactory();
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DefaultRasterDocumentFeature.class);
 
-    public DefaultRasterDocumentFeature(BufferedImage rasterDocument) {
-        this(rasterDocument, getGeomFromRasterImage(rasterDocument));
+    public DefaultRasterDocumentFeature(BufferedImage rasterDocument, double x, double y) {
+        this(rasterDocument, getGeomFromRasterImage(rasterDocument, x, y));
     }
 
     public DefaultRasterDocumentFeature(BufferedImage rasterDocument, Geometry geom) {
@@ -98,14 +98,14 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
         this.hidden = hiding;
     }
 
-    private static Geometry getGeomFromRasterImage(BufferedImage bi) {
+    private static Geometry getGeomFromRasterImage(BufferedImage bi, double x, double y) {
         final int width = bi.getWidth();
         final int height = bi.getHeight();
-        Coordinate ursprung0 = new Coordinate(2583621.251964098d, 5682507.032498134d);
-        Coordinate x1 = new Coordinate(width+2583621.251964098d, 5682507.032498134d);
-        Coordinate xy2 = new Coordinate(width+2583621.251964098d, height+5682507.032498134d);
-        Coordinate y3 = new Coordinate(2583621.251964098d, height+5682507.032498134d);
-        Coordinate ursprung4 = new Coordinate(2583621.251964098d, 5682507.032498134d);
+        Coordinate ursprung0 = new Coordinate(x, y);
+        Coordinate x1 = new Coordinate(width + x, y);
+        Coordinate xy2 = new Coordinate(width + x, height + y);
+        Coordinate y3 = new Coordinate(x, height + y);
+        Coordinate ursprung4 = new Coordinate(x, y);
         Coordinate[] coords = new Coordinate[]{ursprung0, x1, xy2, y3, ursprung4};
         LinearRing linearRing = GEOM_FACTORY.createLinearRing(coords);
         Geometry result = GEOM_FACTORY.createPolygon(linearRing, null);
@@ -126,7 +126,6 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
 //        log.info("Created Geometry: " + result);
 //        return result;
 //    }
-
 
     @Override
     public String toString() {

@@ -110,6 +110,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private double sweetPureY = 0;
     private double sweetSelX = 0;
     private double sweetSelY = 0;
+    private static final Stroke FIXED_WIDTH_STROKE = new FixedWidthStroke();
 
     /**
      * Creates a new instance of PFeature
@@ -213,8 +214,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             PImage pImage = new PImage(rdf.getRasterDocument());
             PBounds bounds = boundsFromRectPolygonGeom(rdf.getGeometry());
             //x,y,with,heigth
-            log.fatal(bounds.x +" "+bounds.y+" "+bounds.width+" "+bounds.height);
-            log.fatal(bounds);
             pImage.setBounds(bounds);
             addChild(pImage);
             doGeometry(geom);
@@ -479,10 +478,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 overridingstroke = xsf.getLineStyle();
             }
 
+            if(getFeature() instanceof RasterDocumentFeature) {
+                overridingstroke = FIXED_WIDTH_STROKE;
+            }
+
             if (getFeature() instanceof StyledFeature && overridingstroke == null) {
                 StyledFeature sf = (StyledFeature) getFeature();
                 if (sf.getLineWidth() <= 1) {
-                    setStroke(new FixedWidthStroke());
+                    setStroke(FIXED_WIDTH_STROKE);
                 } else {
                     CustomFixedWidthStroke old = new CustomFixedWidthStroke(sf.getLineWidth());
                     setStroke(old);
@@ -1086,7 +1089,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         splitPolygonLine = new PPath();
         splitPoints = new Vector();
         splitPoints.add(getFirstSplitHandle());
-        splitPolygonLine.setStroke(new FixedWidthStroke());
+        splitPolygonLine.setStroke(FIXED_WIDTH_STROKE);
         //splitPolygonLine.setPaint(new Color(1f,0f,0f,0.5f));
         addChild(splitPolygonLine);
     }
@@ -1669,7 +1672,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if (stroke != null) {
                     setStroke(stroke);
                 } else {
-                    setStroke(new FixedWidthStroke());
+                    setStroke(FIXED_WIDTH_STROKE);
                 }
                 if (strokePaint != null) {
                     setStrokePaint(strokePaint);
@@ -1682,7 +1685,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (stroke != null) {
                 setStroke(stroke);
             } else {
-                setStroke(new FixedWidthStroke());
+                setStroke(FIXED_WIDTH_STROKE);
             }
 
             if (selected) {
