@@ -37,6 +37,7 @@ import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.raster.wms.AbstractWMS;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
+import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import edu.umd.cs.piccolo.PNode;
@@ -50,7 +51,7 @@ import org.jdom.CDATA;
  *
  * @author thorsten.hell@cismet.de
  */
-public class SimpleWMS extends AbstractWMS implements RasterMapService, RetrievalServiceLayer {//implements RasterService,RetrievalListener,ServiceLayer { 
+public class SimpleWMS extends AbstractWMS implements MapService,RasterMapService, RetrievalServiceLayer {//implements RasterService,RetrievalListener,ServiceLayer {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private SimpleWmsGetMapUrl gmUrl;

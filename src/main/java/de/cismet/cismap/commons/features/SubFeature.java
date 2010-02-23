@@ -17,18 +17,13 @@
 
 package de.cismet.cismap.commons.features;
 
-import java.util.Collection;
-
 /**
  *
  * @author thorsten
  */
-public interface FeatureGroup extends Feature, Iterable<Feature> {
-
-    /**
-     *
-     * @return read-only view of all contained features
-     */
-    Collection<Feature> getFeatures();
-
+public interface SubFeature extends Feature {
+    public Feature getParentFeature();
+    public void setParentFeature(Feature parent);
+    public String getMyAttributeStringInParentFeature();
+    public void setMyAttributeStringInParentFeature(String attrString);
 }
