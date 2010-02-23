@@ -10,21 +10,25 @@ import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
+import de.cismet.cismap.commons.features.FeatureGroup;
+import de.cismet.cismap.commons.features.FeatureGroups;
 import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.SubFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDecimalTools;
+import de.cismet.tools.collections.TypeSafeCollections;
 import de.cismet.tools.configuration.Configurable;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PDimension;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -35,7 +39,6 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Filter;
 import org.jdesktop.swingx.decorator.FilterPipeline;
 import org.jdesktop.swingx.table.TableColumnExt;
-import org.jdom.DataConversionException;
 import org.jdom.Element;
 
 /**
@@ -45,7 +48,7 @@ import org.jdom.Element;
 public class FeatureControl extends javax.swing.JPanel implements FeatureCollectionListener, MapBoundsListener, Configurable {
 
     final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private FeatureCollectionFilter filter;
+    private FeatureCollectionFilter featureCollectionFilter;
     private ImageIcon icoGreenled = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/greenled.png"));
     boolean wizardMode = false;
     private MappingComponent mappingComponent = null;
@@ -55,7 +58,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
             log.debug(ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("FeatureControl.log.ValueChanged_des_SelectionListeners_von_jxtFeatures") + e);
             int[] rows = jxtFeatures.getSelectedRows();
 //            mappingComponent.getFeatureCollection().unselectAll(false);
-            List<Feature> list = new LinkedList<Feature>();
+            List<Feature> list = TypeSafeCollections.newArrayList();
             for (int i = 0; i < rows.length; i++) {
                 int mappedRow = mapRowToModel(rows[i]);
                 list.add(getFeatureCollection().getFeature(mappedRow));
@@ -93,8 +96,10 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jxtFeatures.getColumnModel().getColumn(7).setCellRenderer(jxtFeatures.getDefaultRenderer(Icon.class));
         //jxtFeatures.getColumnModel().getColumn(7).setCellEditor(new JXTable.BooleanEditor());
 
-        filter = new FeatureCollectionFilter(false);
-        Filter[] filterArray = {filter};
+        featureCollectionFilter = new FeatureCollectionFilter(false);
+        SubFeatureFilter subFeatureFilter = new SubFeatureFilter();
+        Filter[] filterArray = {featureCollectionFilter, subFeatureFilter};
+//        Filter[] filterArray = {featureCollectionFilter};
         FilterPipeline filters = new FilterPipeline(filterArray);
         jxtFeatures.setFilters(filters);
         //jxtFeatures.setHighlighters(new HighlighterPipeline(new Highlighter[]{ AlternateRowHighlighter.classicLinePrinter }));
@@ -373,16 +378,33 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         mappingComponent.getMemUndo().clear();
         mappingComponent.getMemRedo().clear();
         int[] rows = jxtFeatures.getSelectedRows();
-        Vector<Feature> remove = new Vector<Feature>();
+        final Set<Feature> toRemove = TypeSafeCollections.newHashSet();
         int firstSelectedRow = -1;
         for (int i = 0; i < rows.length; i++) {
             if (firstSelectedRow == -1) {
                 firstSelectedRow = rows[i];
             }
             int mappedRow = mapRowToModel(rows[i]);
-            remove.add(getFeatureCollection().getFeature(mappedRow));
+            Feature currentFeature = getFeatureCollection().getFeature(mappedRow);
+            //ENABLE THIS CODE TO HAVE THE SUBFEATURES DELETE FROM THEIR PARENT ON REMOVE FROM MAP
+//            if (currentFeature instanceof SubFeature) {
+//                SubFeature currentSubFeature = (SubFeature) currentFeature;
+//                FeatureGroup parent = currentSubFeature.getParentFeature();
+//                if (parent != null) {
+//                    currentSubFeature.setParentFeature(null);
+//                    parent.removeFeature(currentFeature);
+//                }
+//            }
+            if (!toRemove.contains(currentFeature)) {
+                if (currentFeature instanceof FeatureGroup) {
+                    //delete group with all contained features
+                    toRemove.addAll(FeatureGroups.expand((FeatureGroup) currentFeature));
+                } else {
+                    toRemove.add(currentFeature);
+                }
+            }
         }
-        getFeatureCollection().removeFeatures(remove);
+        getFeatureCollection().removeFeatures(toRemove);
         if (jxtFeatures.getRowCount() == firstSelectedRow) {
             firstSelectedRow--;
         }
@@ -422,7 +444,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     }//GEN-LAST:event_cmdZoomToFeaturesMouseEntered
 
     private void togShowOnlyVisibleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togShowOnlyVisibleActionPerformed
-        filter.setArmed(togShowOnlyVisible.isSelected());
+        featureCollectionFilter.setArmed(togShowOnlyVisible.isSelected());
         ((FeatureCollectionTableModel) jxtFeatures.getModel()).fireTableDataChanged();
     }//GEN-LAST:event_togShowOnlyVisibleActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -447,7 +469,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 
     public void shownMapBoundsChanged() {
         //refreshTableAndTryToKeepTheFuckingSelection();
-        if (filter.isArmed()) {
+        if (featureCollectionFilter.isArmed()) {
             ((FeatureCollectionTableModel) jxtFeatures.getModel()).fireTableDataChanged();
         }
         JXTable t = new JXTable();
@@ -629,6 +651,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     case 2: //Type
                         if (f instanceof XStyledFeature) {
                             return ((XStyledFeature) f).getType();
+                        } else if (f instanceof FeatureGroup) {
+                            return "GRUPPE";
                         } else {
                             return "";
                         }
@@ -652,8 +676,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                         }
                     case 6: //Zentrum
                         if (f.getGeometry() != null) {
-                            return "(" + StaticDecimalTools.round(f.getGeometry().getCentroid().getX()) + "," +
-                                    StaticDecimalTools.round(f.getGeometry().getCentroid().getY()) + ")";
+                            return "(" + StaticDecimalTools.round(f.getGeometry().getCentroid().getX()) + ","
+                                    + StaticDecimalTools.round(f.getGeometry().getCentroid().getY()) + ")";
                         } else {
                             return 0.0;
                         }
@@ -680,7 +704,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
          * @return the number of rows in the model
          * @see #getColumnCount
          */
-    @Override
+        @Override
         public int getRowCount() {
             return getFeatureCollection() != null ? getFeatureCollection().getFeatureCount() : 0;
         }
@@ -694,6 +718,58 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
          */
         public int getColumnCount() {
             return 8;
+        }
+    }
+
+    final class SubFeatureFilter extends Filter {
+
+        private final List<Integer> toPrevious = TypeSafeCollections.newArrayList();
+
+        protected void reset() {
+            toPrevious.clear();
+            int inputSize = getInputSize();
+            fromPrevious = new int[inputSize];  // fromPrevious is inherited protected
+            for (int i = 0; i < inputSize; i++) {
+                fromPrevious[i] = -1;
+            }
+        }
+
+        protected void init() {
+        }
+
+        public int getSize() {
+            return toPrevious.size();
+        }
+
+        protected int mapTowardModel(int row) {
+            return toPrevious.get(row);
+        }
+
+        public boolean test(int row) {
+
+            try {
+                Feature currentTestFeature = getFeatureCollection().getFeature(row);
+                if (currentTestFeature instanceof SubFeature) {
+                    return ((SubFeature) currentTestFeature).getParentFeature() == null;
+                }
+                return true;
+            } catch (Throwable t) {
+                log.error(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("FeatureControl.log.Fehler_beim_Testen_im_Filter"), t);
+                return true;
+            }
+
+        }
+
+        protected void filter() {
+            int inputSize = getInputSize();
+            int current = 0;
+            for (int i = 0; i < inputSize; i++) {
+                if (test(i)) {
+                    toPrevious.add(i);
+                    // generate inverse map entry while we are here
+                    fromPrevious[i] = current++;
+                }
+            }
         }
     }
 
@@ -759,7 +835,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
             int current = 0;
             for (int i = 0; i < inputSize; i++) {
                 if (test(i)) {
-                    toPrevious.add(new Integer(i));
+                    toPrevious.add(i);
                     // generate inverse map entry while we are here
                     fromPrevious[i] = current++;
                 }
@@ -897,7 +973,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                 } catch (Throwable t) {
                     log.warn("Fehler beim Konfigurieren der featureControlComponent:", t);
                 }
-                filter.setArmed(togShowOnlyVisible.isSelected());
+                featureCollectionFilter.setArmed(togShowOnlyVisible.isSelected());
                 mappingComponent.setInfoNodesVisible(togDisplayObjectInfo.isSelected());
                 mappingComponent.setFixedMapExtent(togFixMapExtent.isSelected());
                 mappingComponent.setFixedMapScale(togFixMapScale.isSelected());

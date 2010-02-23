@@ -14,9 +14,9 @@ import java.util.Set;
 public class PureFeatureGroup implements SubFeature, FeatureGroup {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private String myAttributeStringInParentFeature=null;
-    private Feature parentFeature=null;
-    
+    private String myAttributeStringInParentFeature = null;
+    private FeatureGroup parentFeature = null;
+
     public PureFeatureGroup(Feature feature) {
         this();
         groupFeatures.add(feature);
@@ -145,19 +145,48 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
         this.enclosingGeometry = calculatedEnclosingGeom;
     }
 
-
-
     /**
      *
      * @return read-only view of all contained features
      */
+    @Override
     public Collection<Feature> getFeatures() {
         return readOnlyGroupFeatures;
     }
 
-
-
-
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        if (parentFeature instanceof XStyledFeature) {
+            sb.append(((XStyledFeature) parentFeature).getName());
+        } else {
+            sb.append(parentFeature);
+        }
+        sb.append(".");
+        sb.append(myAttributeStringInParentFeature);
+        return sb.toString();
+    }
+//    private static final String TO_STRING_HEAD = "Gruppe [";
+//    private static final String TO_STRING_SEPARATOR = ", ";
+//    private static final String TO_STRING_END = "]";
+//
+//    @Override
+//    public String toString() {
+//        StringBuilder sb = new StringBuilder(TO_STRING_HEAD);
+//        if (groupFeatures.size() > 0) {
+//            for (Feature f : groupFeatures) {
+//                if (f instanceof XStyledFeature) {
+//                    sb.append(((XStyledFeature) f).getName());
+//                } else {
+//                    sb.append(f.getGeometry());
+//                }
+//                sb.append(TO_STRING_SEPARATOR);
+//            }
+//            sb.delete(sb.length() - TO_STRING_SEPARATOR.length(), sb.length());
+//        }
+//        sb.append(TO_STRING_END);
+//        return sb.toString();
+//    }
 
     final class IteratorWrapper implements Iterator<Feature> {
 
@@ -191,23 +220,23 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
         this.enclosingGeometry = enclosingGeometry;
     }
 
+    @Override
     public String getMyAttributeStringInParentFeature() {
         return myAttributeStringInParentFeature;
     }
 
+    @Override
     public void setMyAttributeStringInParentFeature(String myAttributeStringInParentFeature) {
         this.myAttributeStringInParentFeature = myAttributeStringInParentFeature;
     }
 
-    public Feature getParentFeature() {
+    @Override
+    public FeatureGroup getParentFeature() {
         return parentFeature;
     }
 
-    public void setParentFeature(Feature parentFeature) {
+    @Override
+    public void setParentFeature(FeatureGroup parentFeature) {
         this.parentFeature = parentFeature;
     }
-
-    
-
-
 }

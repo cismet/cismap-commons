@@ -43,12 +43,9 @@ import java.awt.image.ImageObserver;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import javax.swing.JComponent;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.deegree.services.wms.capabilities.WMSCapabilities;
 
 /**
@@ -62,8 +59,8 @@ public class ImageRetrieval extends Thread {
     private ImageObserverInterceptor observer;
     private RetrievalListener listener = null;
     private ByteArrayOutputStream byteArrayOut = null;
-    private URLConnection uc = null;
-    private InputStream is = null;
+//    private URLConnection uc = null;
+//    private InputStream is = null;
     private WMSCapabilities cap;
     private HttpClient preferredHttpClient;
 
@@ -88,15 +85,16 @@ public class ImageRetrieval extends Thread {
         releaseConnection();
 
     }
-    GetMethod getMethod = null;
+//    GetMethod getMethod = null;
 
     @Override
     public void run() {
+        BufferedInputStream in = null;
+        //new
         try {
-            //new
             log.debug("start of ImageRetrieval: " + url);
             listener.retrievalStarted(new RetrievalEvent());
-            URL u = new URL(url.toString());
+//            URL u = new URL(url.toString());
             if (cap != null) {
                 log.debug("Retrieve: " + url.toString() + " WMSCapability: " + cap.getCapability().getLayer().getTitle());
             } else {
@@ -129,7 +127,6 @@ public class ImageRetrieval extends Thread {
                 requestParameter = "";
             }
 
-            BufferedInputStream in;
 //            if(cap != null){
 //                //ToDO!!! checken ob HTTP AUTH noch funktioniert
 //                //in = new BufferedInputStream(HttpAuthentication.getBufferedInputStreamFromCapabilities(cap,u,getMethod));
@@ -199,22 +196,29 @@ public class ImageRetrieval extends Thread {
 
             listener.retrievalError(re);
             log.error("Fehler beim Laden des Bildes ", e);
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    log.warn(ex, ex);
+                }
+            }
         }
         releaseConnection();
     }
 
     private void releaseConnection() {
-
-        if (getMethod != null) {
-            log.debug("Release Connection");
-            if (getMethod != null) {
-                getMethod.releaseConnection();
-            }
-            if (getMethod != null) {
-                getMethod.abort();
-            }
-            getMethod = null;
-        }
+//        if (getMethod != null) {
+//            log.debug("Release Connection");
+//            if (getMethod != null) {
+//                getMethod.releaseConnection();
+//            }
+//            if (getMethod != null) {
+//                getMethod.abort();
+//            }
+//            getMethod = null;
+//        }
     }
 
     public void fireLoadingAborted() {
@@ -224,13 +228,13 @@ public class ImageRetrieval extends Thread {
         log.info("Retrieval unterbrochen");
         image = null;
         observer = null;
-        if (is != null) {
-            try {
-                is.close();
-            } catch (IOException ioe) {
-                log.warn("Exception during premature closing of the inputstream", ioe);
-            }
-        }
+//        if (is != null) {
+//            try {
+//                is.close();
+//            } catch (IOException ioe) {
+//                log.warn("Exception during premature closing of the inputstream", ioe);
+//            }
+//        }
 //        System.gc();
     }
 

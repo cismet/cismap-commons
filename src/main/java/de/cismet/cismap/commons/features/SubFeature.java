@@ -22,8 +22,8 @@ package de.cismet.cismap.commons.features;
  * @author thorsten
  */
 public interface SubFeature extends Feature {
-    public Feature getParentFeature();
-    public void setParentFeature(Feature parent);
+    public FeatureGroup getParentFeature();
+    public void setParentFeature(FeatureGroup parent);
     public String getMyAttributeStringInParentFeature();
     public void setMyAttributeStringInParentFeature(String attrString);
 }

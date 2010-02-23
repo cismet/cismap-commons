@@ -90,7 +90,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private String geometryType = "unknown";
     private Stroke stroke = null;
     private Paint strokePaint = null;
-    private ColorTintFilter tinter;
+//    private ColorTintFilter tinter;
     private ImageIcon pushpinIco = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/pushpin.png"));
     private ImageIcon pushpinSelectedIco = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/pushpinSelected.png"));
     private boolean ignoreStickyFeature = false;
@@ -150,7 +150,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
             stroke = getStroke();
             strokePaint = getStrokePaint();
-            tinter = new ColorTintFilter(Color.BLUE, 0.5f);
+//            tinter = new ColorTintFilter(Color.BLUE, 0.5f);
         } catch (Throwable t) {
             log.error("Fehler im Construktor von PFeature", t);
         }

@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.cismet.cismap.commons.features;
 
 import java.util.Collection;
@@ -29,6 +28,13 @@ public interface FeatureGroup extends Feature, Iterable<Feature> {
      *
      * @return read-only view of all contained features
      */
-    Collection<Feature> getFeatures();
+    public Collection<Feature> getFeatures();
 
+    public boolean addFeature(Feature toAdd);
+
+    public boolean addFeatures(Collection<Feature> toAdd);
+
+    public boolean removeFeature(Feature toRemove);
+
+    public boolean removeFeatures(Collection<Feature> toRemove);
 }

@@ -22,6 +22,7 @@
  */
 package de.cismet.cismap.commons.gui.measuring;
 
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 import de.cismet.cismap.commons.BoundingBox;
@@ -39,7 +40,6 @@ import java.awt.Cursor;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -105,17 +105,26 @@ public class MeasuringComponent extends javax.swing.JPanel {
 
     public void addFeature(Feature feature) {
         if (feature != null) {
-            getFeatureCollection().addFeature(feature);
             if (feature instanceof RasterDocumentFeature) {
                 mainRasterDocumentFeature = (RasterDocumentFeature) feature;
             }
+            getFeatureCollection().addFeature(feature);
         } else {
             log.warn("Feature is null!");
         }
     }
 
     public void addImage(BufferedImage bi) {
-        DefaultRasterDocumentFeature drdf = new DefaultRasterDocumentFeature(bi, initialBoundingBox.getX1(), initialBoundingBox.getY1());
+        addImage(bi, null);
+    }
+
+    public void addImage(BufferedImage bi, Geometry geometry) {
+        final DefaultRasterDocumentFeature drdf;
+        if (geometry != null) {
+            drdf = new DefaultRasterDocumentFeature(bi, geometry);
+        } else {
+            drdf = new DefaultRasterDocumentFeature(bi, initialBoundingBox.getX1(), initialBoundingBox.getY1());
+        }
         addFeature(drdf);
     }
 
@@ -142,9 +151,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
-        btnGrpMode = new javax.swing.ButtonGroup();
         panCenter = new javax.swing.JPanel();
         map = new de.cismet.cismap.commons.gui.MappingComponent();
 
@@ -159,18 +166,6 @@ public class MeasuringComponent extends javax.swing.JPanel {
 
         add(panCenter, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
-
-    private double askForDistanceValue() {
-        try {
-            String laenge = JOptionPane.showInputDialog(this, "Bitte Länge bzw. Umfang in Metern eingeben:", "Kalibrierung", JOptionPane.QUESTION_MESSAGE);
-            if (laenge != null) {
-                return Double.parseDouble(laenge.replace(',', '.'));
-            }
-        } catch (Exception ex) {
-            log.warn(ex, ex);
-        }
-        return 0d;
-    }
 
     private double calculateScaleFactor(double realDistance) {
         for (Feature f : map.getFeatureCollection().getAllFeatures()) {
@@ -193,7 +188,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
         double vX2 = oldViewBounds.getX2();
         double vY2 = oldViewBounds.getY2();
 
-        //unhold all features, so that they will all be scaled
+        //unhold all features, so that they all can be scaled
         getFeatureCollection().setHoldAll(false);
         final List<Feature> backup = new ArrayList<Feature>();
         for (Feature f : map.getFeatureCollection().getAllFeatures()) {
@@ -215,8 +210,8 @@ public class MeasuringComponent extends javax.swing.JPanel {
         AffineTransformation backTranslation = AffineTransformation.translationInstance(transX, transY);
         for (Feature f : backup) {
             f.getGeometry().apply(backTranslation);
-            map.getFeatureCollection().addFeature(f);
         }
+        map.getFeatureCollection().addFeatures(backup);
         //apply trafo on camera position
         vX1 *= scalefactor;
         vY1 *= scalefactor;
@@ -236,13 +231,19 @@ public class MeasuringComponent extends javax.swing.JPanel {
         map.zoomToFeatureCollection();
     }
 
-    public void actionCalibrate() {
-        double measuredDistance = askForDistanceValue();
+    public void actionCalibrate(double measuredDistance) {
         if (measuredDistance != 0d && mainRasterDocumentFeature != null) {
             double scalefactor = calculateScaleFactor(measuredDistance);
             applyScaling(scalefactor);
         }
         map.setInteractionMode(MappingComponent.PAN);
+    }
+
+    public Geometry getMainDocumentGeometry() {
+        if (mainRasterDocumentFeature != null) {
+            return mainRasterDocumentFeature.getGeometry();
+        }
+        return null;
     }
 
     public void actionMeasurePolygon() {
@@ -264,11 +265,8 @@ public class MeasuringComponent extends javax.swing.JPanel {
     public void actionZoom() {
         map.setInteractionMode(MappingComponent.ZOOM);
     }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.ButtonGroup btnGrpMode;
     private de.cismet.cismap.commons.gui.MappingComponent map;
     private javax.swing.JPanel panCenter;
     // End of variables declaration//GEN-END:variables
-
 }

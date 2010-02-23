@@ -133,10 +133,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragSource;
-import java.awt.dnd.DragSourceListener;
-import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
@@ -211,23 +207,23 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     public static final String CUSTOM_FEATUREINFO = "CUSTOM_FEATUREINFO";
     public static final String OVERVIEW = "OVERVIEW";
     private boolean gridEnabled = true;
-    private Feature[] currentlyShownFeatures = null;
-    private com.vividsolutions.jts.geom.Envelope currentFeatureEnvelope = null;
+//    private Feature[] currentlyShownFeatures = null;
+//    private com.vividsolutions.jts.geom.Envelope currentFeatureEnvelope = null;
     private MappingModel mappingModel;
-    private ConcurrentHashMap pFeatureHM = new ConcurrentHashMap();
+    private ConcurrentHashMap<Feature, PFeature> pFeatureHM = TypeSafeCollections.newConcurrentHashMap();
     private MultiMap pFeatureHMbyCoordinate = new MultiMap();
     //Attribute die zum selektieren von PNodes gebraucht werden
     //private PFeature selectedFeature=null;
-    private Paint paint = null;
+//    private Paint paint = null;
     private WorldToScreenTransform wtst = null;
     private double clip_offset_x;
     private double clip_offset_y;
     private double printingResolution = 0d;
-    double viewScale;
-    private PImage imageBackground = new XPImage();
-    private SimpleWmsGetMapUrl wmsBackgroundUrl;
+//    double viewScale;
+//    private PImage imageBackground = new XPImage();
+//    private SimpleWmsGetMapUrl wmsBackgroundUrl;
     private boolean backgroundEnabled = true;
-    private ConcurrentHashMap<String, PLayer> featureLayers = new ConcurrentHashMap<String, PLayer>();
+//    private ConcurrentHashMap<String, PLayer> featureLayers = new ConcurrentHashMap<String, PLayer>();
     private PLayer featureLayer = new PLayer();
     private PLayer tmpFeatureLayer = new PLayer();
     private PLayer mapServicelayer = new PLayer();
@@ -245,21 +241,21 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     private boolean visualizeSnappingEnabled = true;
     private boolean visualizeSnappingRectEnabled = false;
     private int snappingRectSize = 20;
-    private HashMap cursors = new HashMap();
-    private HashMap<String, PBasicInputEventHandler> inputEventListener = new HashMap<String, PBasicInputEventHandler>();
-    private Action backAction;
-    private Action forwardAction;
-    private Action homeAction;
-    private Action refreshAction;
-    private Action snappingAction;
-    private Action backgroundAction;
-    private Action zoomAction;
-    private Action panAction;
-    private Action selectAction;
-    private int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
-    private DragSource dragSource;
-    private DragGestureListener dgListener;
-    private DragSourceListener dsListener;
+    private final Map<String, Cursor> cursors = TypeSafeCollections.newHashMap();
+    private final HashMap<String, PBasicInputEventHandler> inputEventListener = TypeSafeCollections.newHashMap();
+//    private Action backAction;
+//    private Action forwardAction;
+//    private Action homeAction;
+//    private Action refreshAction;
+//    private Action snappingAction;
+//    private Action backgroundAction;
+    private final Action zoomAction;
+//    private Action panAction;
+//    private Action selectAction;
+//    private int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
+//    private DragSource dragSource;
+//    private DragGestureListener dgListener;
+//    private DragSourceListener dsListener;
     private FeatureCollection featureCollection;
     //private boolean internalLayerWidgetAvailable = false;
     private boolean infoNodesVisible = false;
@@ -279,9 +275,9 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     // zu halten und dann als Hintergrund von z.B. einem
     // Panel zu fungieren
     // coooooooool, was ? ;-)
-    private PCanvas selectedObjectPresenter = new PCanvas();
+    private final PCanvas selectedObjectPresenter = new PCanvas();
     private BoundingBox currentBoundingBox = null;
-    private HashMap rasterServiceImages = new HashMap();
+//    private HashMap rasterServiceImages = new HashMap();
     static private MappingComponent THIS;
     private Rectangle2D newViewBounds;
     private int animationDuration = 500;
@@ -289,33 +285,33 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     private CismapPreferences cismapPrefs;
     //private NewSimpleInternalLayerWidget internalLayerWidget = null;//new NewSimpleInternalLayerWidget(this);
     boolean featureServiceLayerVisible = true;
-    Vector layerControls = new Vector();
+    final Vector<LayerControl> layerControls = TypeSafeCollections.newVector();
     private DefaultHistoryModel historyModel = new DefaultHistoryModel();
-    private HashSet<Feature> holdFeatures = new HashSet<Feature>();
+//    private Set<Feature> holdFeatures = new HashSet<Feature>();
     //Scales
-    private Vector<Scale> scales = new Vector<Scale>();
+    private final Vector<Scale> scales = TypeSafeCollections.newVector();
     //Printing
     private PrintingSettingsWidget printingSettingsDialog;
     private PrintingWidget printingDialog;
     //Scalebar
     private double screenResolution = 100.0;
     private volatile boolean locked = true;
-    private Vector<PNode> stickyPNodes = new Vector<PNode>();
+    private final Vector<PNode> stickyPNodes = new Vector<PNode>();
     //Undo- & Redo-Stacks
-    private MementoInterface memUndo = new Memento();
-    private MementoInterface memRedo = new Memento();
+    private final MementoInterface memUndo = new Memento();
+    private final MementoInterface memRedo = new Memento();
     private boolean featureDebugging = false;
     private BoundingBox fixedBoundingBox = null;
-    Object handleFeatureServiceBlocker = new Object();
-    private ArrayList<MapListener> mapListeners = new ArrayList();
+//    Object handleFeatureServiceBlocker = new Object();
+    private final List<MapListener> mapListeners = TypeSafeCollections.newArrayList();
     /**
      * Contains the internal widgets
      */
-    private HashMap<String, JInternalFrame> internalWidgets = new HashMap();
+    private final Map<String, JInternalFrame> internalWidgets = TypeSafeCollections.newHashMap();
     /**
      * Contains the positions of the internal widgets
      */
-    private HashMap<String, Integer> internalWidgetPositions = new HashMap();
+    private final Map<String, Integer> internalWidgetPositions = TypeSafeCollections.newHashMap();
     /**
      * Name of the internal Simple Layer Widget
      */
@@ -353,7 +349,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * If a document exceeds the criticalDocumentSize, the document progress widget
      * is displayed
      */
-    private final long criticalDocumentSize = 10000000; // 10MB
+    private static final long criticalDocumentSize = 10000000; // 10MB
 
     public void addMapListener(MapListener mapListener) {
         if (mapListener != null) {
@@ -393,7 +389,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         setFeatureCollection(new DefaultFeatureCollection());
 
         addMapListener((DefaultFeatureCollection) getFeatureCollection());
-        DropTarget dt = new DropTarget(this, acceptableActions, this);
+//        DropTarget dt = new DropTarget(this, acceptableActions, this);
 
 //        setDefaultRenderQuality(PPaintContext.HIGH_QUALITY_RENDERING);
 //        setAnimatingRenderQuality(PPaintContext.HIGH_QUALITY_RENDERING);
@@ -1946,39 +1942,38 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         if (DEBUG) {
             log.debug("handleMapService: " + rs);
         }
-
-//        final MapServiceCall call = new MapServiceCall(rs, width, height, bb, forced);
-
         if (((ServiceLayer) rs).isEnabled()) {
-            final Future<?> sf = serviceFutures.get(rs);
-            if (sf == null || sf.isDone()) {
-                rs.setSize(height, width);
-                Runnable serviceCall = new Runnable() {
+            synchronized (serviceFuturesMap) {
+                final Future<?> sf = serviceFuturesMap.get(rs);
+                if (sf == null || sf.isDone()) {
+                    rs.setSize(height, width);
+                    Runnable serviceCall = new Runnable() {
 
-                    @Override
-                    public void run() {
-                        try {
-                            while (getAnimating()) {
-                                try {
-                                    Thread.currentThread().sleep(50);
-                                } catch (Exception e) {
+                        @Override
+                        public void run() {
+                            try {
+                                while (getAnimating()) {
+                                    try {
+                                        Thread.currentThread().sleep(50);
+                                    } catch (Exception e) {
+                                    }
                                 }
+                                rs.setBoundingBox(bb);
+                                if (rs instanceof FeatureAwareRasterService) {
+                                    ((FeatureAwareRasterService) rs).setFeatureCollection(featureCollection);
+                                }
+                                rs.retrieve(forced);
+                            } finally {
+                                serviceFuturesMap.remove(rs);
                             }
-                            rs.setBoundingBox(bb);
-                            if (rs instanceof FeatureAwareRasterService) {
-                                ((FeatureAwareRasterService) rs).setFeatureCollection(featureCollection);
-                            }
-                            rs.retrieve(forced);
-                        } finally {
-                            serviceFutures.remove(rs);
                         }
-                    }
-                };
-                serviceFutures.put(rs, CismetThreadPool.submit(serviceCall));
+                    };
+                    serviceFuturesMap.put(rs, CismetThreadPool.submit(serviceCall));
+                }
             }
         }
     }
-    private final Map<MapService, Future<?>> serviceFutures = TypeSafeCollections.newConcurrentHashMap();
+    private final Map<MapService, Future<?>> serviceFuturesMap = TypeSafeCollections.newHashMap();
 
 //    private void handleMapService(int position, final MapService rs, int width, int height, final BoundingBox bb, final boolean forced) {
 //        if (DEBUG) {
@@ -2235,7 +2230,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     public void featureReconsiderationRequested(FeatureCollectionEvent fce) {
         for (Feature f : fce.getEventFeatures()) {
             if (f != null) {
-                PFeature node = ((PFeature) pFeatureHM.get(f));
+                PFeature node = pFeatureHM.get(f);
                 if (node != null) {
                     node.syncGeometry();
                     node.visualize();
@@ -2447,7 +2442,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                         // SuchFeatures in den Vordergrund stellen
                         for (Feature feature : featureCollection.getAllFeatures()) {
                             if (feature instanceof SearchFeature) {
-                                PFeature pFeature = (PFeature) pFeatureHM.get(feature);
+                                PFeature pFeature = pFeatureHM.get(feature);
                                 pFeature.moveToFront();
                             }
                         }
@@ -2612,12 +2607,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * @return Cursor-object or null
      */
     public Cursor getCursor(String mode) {
-        Object o = cursors.get(mode);
-        if (o instanceof Cursor) {
-            return (Cursor) o;
-        } else {
-            return null;
-        }
+        return cursors.get(mode);
     }
 
     /**
@@ -2768,7 +2758,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         if (DEBUG) {
             log.debug("pFeatureHM" + pFeatureHM);
         }
-        PFeature pf = (PFeature) pFeatureHM.get(f);
+        PFeature pf = pFeatureHM.get(f);
 
         if (pf != null) {
             pf.cleanup();
@@ -3212,8 +3202,8 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * former synchronized method
      */
     public boolean isRunning() {
-        for (Iterator it = layerControls.iterator(); it.hasNext();) {
-            if (((LayerControl) (it.next())).isRunning()) {
+        for (LayerControl lc : layerControls) {
+            if (lc.isRunning()) {
                 return true;
             }
         }
@@ -4091,7 +4081,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             if (selF == null) {
                 return null;
             }
-            return (PFeature) pFeatureHM.get(selF);
+            return pFeatureHM.get(selF);
         } else {
             return null;
         }
@@ -4198,7 +4188,8 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     }
 
     public void setInputEventListener(HashMap<String, PBasicInputEventHandler> inputEventListener) {
-        this.inputEventListener = inputEventListener;
+        this.inputEventListener.clear();
+        this.inputEventListener.putAll(inputEventListener);
     }
 
     /////////////////////////////////////////////////
