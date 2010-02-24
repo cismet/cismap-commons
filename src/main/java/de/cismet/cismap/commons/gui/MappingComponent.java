@@ -98,7 +98,6 @@ import de.cismet.cismap.commons.preferences.CismapPreferences;
 import de.cismet.cismap.commons.preferences.GlobalPreferences;
 import de.cismet.cismap.commons.preferences.LayersPreferences;
 import de.cismet.cismap.commons.rasterservice.MapService;
-import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
@@ -119,7 +118,6 @@ import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.PRoot;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEventListener;
-import edu.umd.cs.piccolo.nodes.PImage;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPaintContext;
@@ -133,6 +131,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
@@ -252,7 +251,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     private final Action zoomAction;
 //    private Action panAction;
 //    private Action selectAction;
-//    private int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
+    private int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
 //    private DragSource dragSource;
 //    private DragGestureListener dgListener;
 //    private DragSourceListener dsListener;
@@ -389,7 +388,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         setFeatureCollection(new DefaultFeatureCollection());
 
         addMapListener((DefaultFeatureCollection) getFeatureCollection());
-//        DropTarget dt = new DropTarget(this, acceptableActions, this);
+        DropTarget dt = new DropTarget(this, acceptableActions, this);
 
 //        setDefaultRenderQuality(PPaintContext.HIGH_QUALITY_RENDERING);
 //        setAnimatingRenderQuality(PPaintContext.HIGH_QUALITY_RENDERING);
@@ -485,7 +484,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 putValue(Action.SMALL_ICON, new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers.png")));
                 putValue(Action.SHORT_DESCRIPTION, "Zoom");
                 putValue(Action.LONG_DESCRIPTION, "Wechsel des Modus auf Zoom");
-                putValue(Action.MNEMONIC_KEY, new Integer('Z'));
+                putValue(Action.MNEMONIC_KEY, Integer.valueOf('Z'));
                 putValue(Action.ACTION_COMMAND_KEY, "zoom.action");
             }
 
