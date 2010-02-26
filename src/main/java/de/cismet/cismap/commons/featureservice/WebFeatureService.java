@@ -33,7 +33,7 @@ import org.jdom.Element;
  */
 public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
 {
-  public static String WFS_FEATURELAYER_TYPE = "WebFeatureServiceLayer";
+  public static final String WFS_FEATURELAYER_TYPE = "WebFeatureServiceLayer";
   public static final HashMap<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
 
   static

@@ -7,8 +7,9 @@ package de.cismet.cismap.commons.featureservice;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.GMLFeatureFactory;
+import de.cismet.tools.collections.TypeSafeCollections;
 import java.net.URI;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -23,8 +24,8 @@ import org.jdom.Element;
 public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeature, String>
 {
 
-  public static String GML_FEATURELAYER_TYPE = "GMLFeatureServiceLayer";
-  public static final HashMap<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
+  public static final String GML_FEATURELAYER_TYPE = "GMLFeatureServiceLayer";
+  public static final Map<Integer, Icon> layerIcons = TypeSafeCollections.newHashMap();
 
   static
   {

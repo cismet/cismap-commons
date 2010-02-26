@@ -49,6 +49,8 @@ import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
+import de.cismet.cismap.commons.features.FeatureGroup;
+import de.cismet.cismap.commons.features.FeatureGroups;
 import de.cismet.cismap.commons.features.FeatureWithId;
 import de.cismet.cismap.commons.features.RasterLayerSupportedFeature;
 import de.cismet.cismap.commons.features.PureNewFeature;
@@ -166,6 +168,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.jdom.DataConversionException;
@@ -2179,6 +2182,18 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         } else {
             c = featureCollection.getSelectedFeatures();
         }
+
+        ////handle featuregroup select-delegation////
+        final Set<Feature> selectionResult = TypeSafeCollections.newHashSet();
+        for (Feature current : c) {
+            if (current instanceof FeatureGroup) {
+                selectionResult.addAll(FeatureGroups.expandToLeafs((FeatureGroup) current));
+            } else {
+                selectionResult.add(current);
+            }
+        }
+        /////////////////////////////////////////////
+        c = selectionResult;
         for (Feature f : c) {
             if (f != null) {
                 PFeature feature = (PFeature) getPFeatureHM().get(f);

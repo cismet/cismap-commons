@@ -62,11 +62,11 @@ import edu.umd.cs.piccolox.util.PLocator;
 public class PHandle extends PPath {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static double DEFAULT_HANDLE_SIZE = 8;
-    public static Shape DEFAULT_HANDLE_SHAPE = new Ellipse2D.Double(0f, 0f, DEFAULT_HANDLE_SIZE, DEFAULT_HANDLE_SIZE);
+    public static final double DEFAULT_HANDLE_SIZE = 8;
+    public static final Shape DEFAULT_HANDLE_SHAPE = new Ellipse2D.Double(0f, 0f, DEFAULT_HANDLE_SIZE, DEFAULT_HANDLE_SIZE);
     //public static Shape DEFAULT_HANDLE_SHAPE = new Rectangle.Double(0f, 0f, DEFAULT_HANDLE_SIZE, DEFAULT_HANDLE_SIZE);
-    public static Color DEFAULT_COLOR = new Color(1f, 1f, 1f, 0.4f);//Color.white;
-    public static Color DEFAULT_SELECTED_COLOR = Color.red;
+    public static final Color DEFAULT_COLOR = new Color(1f, 1f, 1f, 0.4f);//Color.white;
+    public static final Color DEFAULT_SELECTED_COLOR = Color.red;
     private static PAffineTransform TEMP_TRANSFORM = new PAffineTransform();
     private PLocator locator;
     private PDragSequenceEventHandler handleDragger;

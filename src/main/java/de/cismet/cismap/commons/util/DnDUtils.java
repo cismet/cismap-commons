@@ -15,7 +15,7 @@ public class DnDUtils {
 
     
     //TODO Best position for this code snippet ?
-    public static DataFlavor URI_LIST_FLAVOR;    
+    public static DataFlavor URI_LIST_FLAVOR;
     static {
         try {
             URI_LIST_FLAVOR = new DataFlavor("text/uri-list;class=java.lang.String");

@@ -56,8 +56,8 @@ import org.jdom.Element;
 public class DefaultMappingModel implements MappingModel, Configurable {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static int UP = -1;
-    public static int DOWN = 1;
+    public final static int UP = -1;
+    public final static int DOWN = 1;
     TreeMap mapServices = new TreeMap();
     TreeMap featureServices = new TreeMap();
     FeatureCollection featureCollection;

@@ -49,7 +49,7 @@ public final class IconUtils {
                 }
                 sumY += rec.getHeight() * 0.8;
             }
-            final float offset = new Double(sumY / strings.size()).floatValue();
+            final float offset = ((float)sumY) / strings.size();
             final int imageX = new Double(img.getWidth(null) + SPACING_X + maxX).intValue() + 1;
             final int imageY = Math.max(img.getHeight(null), new Double(sumY - offset * 0.2).intValue() + 1);
             final BufferedImage bi = new BufferedImage(imageX, imageY, BufferedImage.TYPE_4BYTE_ABGR);

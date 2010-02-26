@@ -12,8 +12,8 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
  */
 public class SimpleGetFeatureInfoUrl extends SimpleWmsGetMapUrl {
 
-    public static String X_TOKEN = "<cismap:x>";
-    public static String Y_TOKEN = "<cismap:y>";
+    public static final String X_TOKEN = "<cismap:x>";
+    public static final String Y_TOKEN = "<cismap:y>";
     private String xToken;
     private String yToken;
     

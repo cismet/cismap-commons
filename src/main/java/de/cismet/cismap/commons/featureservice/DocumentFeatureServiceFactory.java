@@ -19,13 +19,13 @@ import org.deegree2.io.shpapi.FileHeader;
 public class DocumentFeatureServiceFactory
 {
   private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DocumentFeatureServiceFactory.class);
-  public static String XML_FILE_EXTENSION = ".xml";
-  public static String GML_FILE_EXTENSION = ".gml";
-  public static String SHP_FILE_EXTENSION = ".shp";
-  public static String SHP_DBF_FILE_EXTENSION = ".dbf";
-  public static String SHP_INDEX_FILE_EXTENSION = ".shx";
-  public static String XML_IDENTIFICATION_STRING = "<?xml";
-  public static String GML_IDENTIFICATION_STRING = "xmlns:gml";
+  public static final String XML_FILE_EXTENSION = ".xml";
+  public static final String GML_FILE_EXTENSION = ".gml";
+  public static final String SHP_FILE_EXTENSION = ".shp";
+  public static final String SHP_DBF_FILE_EXTENSION = ".dbf";
+  public static final String SHP_INDEX_FILE_EXTENSION = ".shx";
+  public static final String XML_IDENTIFICATION_STRING = "<?xml";
+  public static final String GML_IDENTIFICATION_STRING = "xmlns:gml";
 
 //    public static DocumentFeatureService createDocumentFeatureService(File documentFile) throws Exception {
 //        if (documentFile != null) {

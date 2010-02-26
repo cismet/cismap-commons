@@ -5,10 +5,10 @@ import org.jdom.CDATA;
 import org.jdom.Element;
 
 public class CapabilityLink {
-    public static String OGC = "OGC";
-    public static String OGC_DEPRECATED = "OGC-WMS";
-    public static String SEPARATOR = "SEPARATOR";
-    public static String MENU = "MENU";
+    public static final String OGC = "OGC";
+    public static final String OGC_DEPRECATED = "OGC-WMS";
+    public static final String SEPARATOR = "SEPARATOR";
+    public static final String MENU = "MENU";
     private String type;
     private String subparent;
     private String link;

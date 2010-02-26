@@ -56,7 +56,6 @@ import java.awt.geom.Point2D;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Stack;
 
 /**
  *
@@ -70,8 +69,8 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
     protected PPath tempFeature;
     protected MappingComponent mc;
     protected boolean inProgress;
-    private List<Point2D> points;
-    private Stack<Point2D> undoPoints;
+    private final List<Point2D> points = TypeSafeCollections.newArrayList();;
+    private final List<Point2D> undoPoints  = TypeSafeCollections.newArrayList();;
     private int numOfEllipseEdges;
     private SimpleMoveListener moveListener;
     private String mode = POLYGON;
@@ -93,7 +92,7 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         zoomDelegate = new RubberBandZoomListener();
         this.mc = mc;
         moveListener = (SimpleMoveListener) mc.getInputListener(MappingComponent.MOTION);
-        undoPoints = new Stack<Point2D>();
+        undoPoints.clear();
         //srichter: fehlerpotential! this referenz eines nicht fertig initialisieren Objekts wieder nach aussen geliefert!
         //loesungsvorschlag: createInstance-methode, welche den aufruf nach dem erzeugen ausfuehrt.
         mc.getFeatureCollection().addFeatureCollectionListener(this);
@@ -191,7 +190,7 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
                     mc.getTmpFeatureLayer().addChild(tempFeature);
 
                     //Polygon erzeugen
-                    points = TypeSafeCollections.newArrayList();
+                    points.clear();
                     //Ersten Punkt anlegen
                     startPoint = point;
                     points.add(startPoint);
@@ -268,7 +267,7 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
                 updatePolygon(null);
             } else if (event.isControlDown()) { // Strg gedr\u00FCckt
                 if (!undoPoints.isEmpty()) {
-                    points.add(undoPoints.pop());
+                    points.add(undoPoints.remove(undoPoints.size()-1));
                     log.debug("Backspace + STRG gedr\u00FCckt: letzter gel\u00F6schter Punkt wiederhergestellt.");
                     updatePolygon(null);
                 }
@@ -280,7 +279,7 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
             mc.getTmpFeatureLayer().addChild(tempFeature);
 
             //Ersten Punkt anlegen
-            startPoint = undoPoints.pop();
+            startPoint = undoPoints.remove(undoPoints.size()-1);
             points.add(startPoint);
             inProgress = true;
         }
@@ -414,7 +413,7 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
             inProgress = true;
 
             // 4 Punkte, und der erste Punkt nochmal als letzter Punkt
-            points = TypeSafeCollections.newArrayList(5);
+            points.clear();
             points.add(startPoint);
             points.add(new Point2D.Double(startPoint.getX(), pInputEvent.getPosition().getY()));
             points.add(pInputEvent.getPosition());
@@ -439,7 +438,7 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
                     pInputEvent.isControlDown(),
                     pInputEvent.isShiftDown());
 
-            points = TypeSafeCollections.newArrayList(coordArr.length);
+            points.clear();
             for (int i = 0; i < coordArr.length; i++) {
                 points.add(new Point2D.Double(startX - coordArr[i].x, startY - coordArr[i].y));
             }

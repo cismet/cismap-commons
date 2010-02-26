@@ -41,7 +41,7 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
  * @author thorsten.hell@cismet.de
  */
 public class SimpleFeatureSupporterRasterServiceUrl extends SimpleWmsGetMapUrl{
-     public static String FILTER_TOKEN="<cismap:filterString>";
+     public static final String FILTER_TOKEN="<cismap:filterString>";
      private String filterToken;
      private String filter;
      public SimpleFeatureSupporterRasterServiceUrl(String urlTemplate) {

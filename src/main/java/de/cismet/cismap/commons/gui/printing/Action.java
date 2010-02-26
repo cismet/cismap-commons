@@ -57,7 +57,7 @@ public class Action {
     }
     public Element getElement(boolean selected) {
         Element e=new Element("action");
-        e.setAttribute("selected",new Boolean(selected).toString());
+        e.setAttribute("selected",String.valueOf(selected));
         e.setAttribute("id",id);
         e.setText(getTitle());
         return e;

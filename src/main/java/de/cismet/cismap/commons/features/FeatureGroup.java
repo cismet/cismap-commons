@@ -22,19 +22,20 @@ import java.util.Collection;
  *
  * @author thorsten
  */
-public interface FeatureGroup extends Feature, Iterable<Feature> {
+public interface FeatureGroup extends SubFeature, Iterable<Feature> {
 
     /**
      *
      * @return read-only view of all contained features
      */
-    public Collection<Feature> getFeatures();
+    public Collection<? extends Feature> getFeatures();
 
     public boolean addFeature(Feature toAdd);
 
-    public boolean addFeatures(Collection<Feature> toAdd);
+    public boolean addFeatures(Collection<? extends Feature> toAdd);
 
     public boolean removeFeature(Feature toRemove);
 
-    public boolean removeFeatures(Collection<Feature> toRemove);
+    public boolean removeFeatures(Collection<? extends Feature> toRemove);
+    
 }

@@ -59,7 +59,7 @@ public class Resolution {
     }
     public Element getElement(boolean selected) {
         Element e=new Element("resolution");
-        e.setAttribute("selected",new Boolean(selected).toString());
+        e.setAttribute("selected",String.valueOf(selected));
         e.setAttribute("dpi",resolution+"");
         e.setText(text);
         return e;

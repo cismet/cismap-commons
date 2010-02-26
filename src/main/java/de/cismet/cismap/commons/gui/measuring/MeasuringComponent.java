@@ -36,9 +36,9 @@ import de.cismet.cismap.commons.features.RasterDocumentFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MessenGeometryListener;
+import de.cismet.tools.collections.TypeSafeCollections;
 import java.awt.Cursor;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -190,19 +190,19 @@ public class MeasuringComponent extends javax.swing.JPanel {
 
         //unhold all features, so that they all can be scaled
         getFeatureCollection().setHoldAll(false);
-        final List<Feature> backup = new ArrayList<Feature>();
+        final List<Feature> backup = TypeSafeCollections.newArrayList();
         for (Feature f : map.getFeatureCollection().getAllFeatures()) {
             backup.add(f);
         }
         map.getFeatureCollection().removeAllFeatures();
-        AffineTransformation x = new AffineTransformation();
-        x = x.scale(scalefactor, scalefactor);
+        AffineTransformation trafo = new AffineTransformation();
+        trafo = trafo.scale(scalefactor, scalefactor);
         Point centroid = mainRasterDocumentFeature.getGeometry().getCentroid();
         double oldX = centroid.getX();
         double oldY = centroid.getY();
 
         for (Feature f : backup) {
-            f.getGeometry().apply(x);
+            f.getGeometry().apply(trafo);
         }
         centroid = mainRasterDocumentFeature.getGeometry().getCentroid();
         double transX = oldX - centroid.getX();

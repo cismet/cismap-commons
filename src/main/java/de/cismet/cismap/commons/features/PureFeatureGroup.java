@@ -1,7 +1,9 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.tools.collections.TypeSafeCollections;
+import java.awt.Paint;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -11,7 +13,7 @@ import java.util.Set;
  *
  * @author srichter
  */
-public class PureFeatureGroup implements SubFeature, FeatureGroup {
+public class PureFeatureGroup implements FeatureGroup, StyledFeature {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private String myAttributeStringInParentFeature = null;
@@ -22,7 +24,7 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
         groupFeatures.add(feature);
     }
 
-    public PureFeatureGroup(Collection<Feature> features) {
+    public PureFeatureGroup(Collection<? extends Feature> features) {
         if (features == null || features.size() <= 0) {
             this.groupFeatures = TypeSafeCollections.newHashSet();
         } else {
@@ -37,8 +39,9 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
     private final Set<Feature> groupFeatures;
     private final Collection<Feature> readOnlyGroupFeatures;
     private Geometry enclosingGeometry;
-    private boolean canBeSelected;
+//    private boolean canBeSelected;
 
+    @Override
     public boolean addFeature(Feature toAdd) {
         final boolean changeHappened = groupFeatures.add(toAdd);
         if (changeHappened) {
@@ -47,7 +50,8 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
         return changeHappened;
     }
 
-    public boolean addFeatures(Collection<Feature> toAdd) {
+    @Override
+    public boolean addFeatures(Collection<? extends Feature> toAdd) {
         final boolean changeHappened = groupFeatures.addAll(toAdd);
         if (changeHappened) {
             enclosingGeometry = null;
@@ -55,6 +59,7 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
         return changeHappened;
     }
 
+    @Override
     public boolean removeFeature(Feature toRemove) {
         final boolean changeHappened = groupFeatures.remove(toRemove);
         if (changeHappened) {
@@ -63,7 +68,8 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
         return changeHappened;
     }
 
-    public boolean removeFeatures(Collection<Feature> toRemove) {
+    @Override
+    public boolean removeFeatures(Collection<? extends Feature> toRemove) {
         final boolean changeHappened = groupFeatures.removeAll(toRemove);
         if (changeHappened) {
             enclosingGeometry = null;
@@ -88,12 +94,12 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
 
     @Override
     public boolean canBeSelected() {
-        return canBeSelected;
+        return false;
     }
 
     @Override
     public void setCanBeSelected(boolean canBeSelected) {
-        this.canBeSelected = canBeSelected;
+        
     }
 
     @Override
@@ -129,20 +135,7 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
     }
 
     private void refreshEnclosingGeometry() {
-        Geometry calculatedEnclosingGeom = null;
-        Geometry currentFeatureGeom = null;
-        for (Feature f : groupFeatures) {
-            currentFeatureGeom = f.getGeometry();
-            if (currentFeatureGeom != null) {
-                currentFeatureGeom = currentFeatureGeom.getEnvelope();
-                if (calculatedEnclosingGeom == null) {
-                    calculatedEnclosingGeom = f.getGeometry().getEnvelope();
-                } else {
-                    calculatedEnclosingGeom = calculatedEnclosingGeom.getEnvelope().union(currentFeatureGeom).getEnvelope();
-                }
-            }
-        }
-        this.enclosingGeometry = calculatedEnclosingGeom;
+        this.enclosingGeometry = FeatureGroups.getEnclosingGeometry(groupFeatures);
     }
 
     /**
@@ -150,7 +143,7 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
      * @return read-only view of all contained features
      */
     @Override
-    public Collection<Feature> getFeatures() {
+    public Collection<? extends Feature> getFeatures() {
         return readOnlyGroupFeatures;
     }
 
@@ -166,6 +159,61 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
         sb.append(myAttributeStringInParentFeature);
         return sb.toString();
     }
+
+    @Override
+    public Paint getLinePaint() {
+        return null;
+    }
+
+    @Override
+    public void setLinePaint(Paint linePaint) {
+    }
+
+    @Override
+    public int getLineWidth() {
+        return 0;
+    }
+
+    @Override
+    public void setLineWidth(int width) {
+    }
+
+    @Override
+    public Paint getFillingPaint() {
+        return null;
+    }
+
+    @Override
+    public void setFillingPaint(Paint fillingStyle) {
+    }
+
+    @Override
+    public float getTransparency() {
+        return 0f;
+    }
+
+    @Override
+    public void setTransparency(float transparrency) {
+    }
+
+    @Override
+    public FeatureAnnotationSymbol getPointAnnotationSymbol() {
+        return null;
+    }
+
+    @Override
+    public void setPointAnnotationSymbol(FeatureAnnotationSymbol featureAnnotationSymbol) {
+    }
+
+    @Override
+    public boolean isHighlightingEnabled() {
+        return false;
+    }
+
+    @Override
+    public void setHighlightingEnabled(boolean enabled) {
+    }
+
 //    private static final String TO_STRING_HEAD = "Gruppe [";
 //    private static final String TO_STRING_SEPARATOR = ", ";
 //    private static final String TO_STRING_END = "]";
@@ -187,7 +235,6 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
 //        sb.append(TO_STRING_END);
 //        return sb.toString();
 //    }
-
     final class IteratorWrapper implements Iterator<Feature> {
 
         public IteratorWrapper(Iterator<Feature> delegate) {
@@ -216,10 +263,9 @@ public class PureFeatureGroup implements SubFeature, FeatureGroup {
         return enclosingGeometry;
     }
 
-    public void setEnclosingGeometry(Geometry enclosingGeometry) {
-        this.enclosingGeometry = enclosingGeometry;
-    }
-
+//    public void setEnclosingGeometry(Geometry enclosingGeometry) {
+//        this.enclosingGeometry = enclosingGeometry;
+//    }
     @Override
     public String getMyAttributeStringInParentFeature() {
         return myAttributeStringInParentFeature;

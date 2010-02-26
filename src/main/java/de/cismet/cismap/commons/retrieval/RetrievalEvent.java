@@ -47,10 +47,10 @@ public class RetrievalEvent
   private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
   int percentageDone = 0;
-  private String errorType = UNDEFINED;
-  public static String SERVERERROR = "SERVERERROR";
-  public static String CLIENTERROR = "CLIENTERROR";
-  private static String UNDEFINED = "UNDEFINED";
+  public static final String SERVERERROR = "SERVERERROR";
+  public static final String CLIENTERROR = "CLIENTERROR";
+  private static final String UNDEFINED = "UNDEFINED";
+  private static String errorType = UNDEFINED;
   private Object retrievedObject = null;
   boolean isComplete = false;
   boolean hasErrors = false;

@@ -7,8 +7,9 @@ package de.cismet.cismap.commons.featureservice;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
+import de.cismet.tools.collections.TypeSafeCollections;
 import java.net.URI;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -22,8 +23,8 @@ import org.jdom.Element;
 public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature, String>
 {
   //public final static String SHAPE_FEATURELAYER_TYPE = "ShapeFileFeatureServiceLayer";
-  public static final HashMap<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
-  public static String SHAPE_FEATURELAYER_TYPE = "ShapeFeatureServiceLayer";
+  public static final Map<Integer, Icon> layerIcons = TypeSafeCollections.newHashMap();
+  public static final String SHAPE_FEATURELAYER_TYPE = "ShapeFeatureServiceLayer";
 
   static
   {

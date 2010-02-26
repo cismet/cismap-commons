@@ -76,7 +76,7 @@ public class Template {
     
     public Element getElement(boolean selected) {
         Element e=new Element("template");
-        e.setAttribute("selected",new Boolean(selected).toString());
+        e.setAttribute("selected",String.valueOf(selected));
         e.setAttribute("title",getTitle());
         e.setAttribute("file",getFile());
         e.setAttribute("className", getClassName());

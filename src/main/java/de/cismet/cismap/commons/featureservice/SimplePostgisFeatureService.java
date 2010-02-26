@@ -51,7 +51,7 @@ import org.jdom.Element;
  */
 public class SimplePostgisFeatureService extends AbstractFeatureService<PostgisFeature, SimpleFeatureServiceSqlStatement>
 {
-  public static String POSTGIS_FEATURELAYER_TYPE = "simplePostgisFeatureService";
+  public static final String POSTGIS_FEATURELAYER_TYPE = "simplePostgisFeatureService";
   private SimpleFeatureServiceSqlStatement sqlStatement;
   private ConnectionInfo connectionInfo;
 

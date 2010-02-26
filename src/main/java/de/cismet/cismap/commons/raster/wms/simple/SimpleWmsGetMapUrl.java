@@ -33,9 +33,9 @@ public class SimpleWmsGetMapUrl {
     double x2=0.0;
     double y2=0.0;
     
-    public static String WIDTH_TOKEN="<cismap:width>";
-    public static String HEIGHT_TOKEN="<cismap:height>";
-    public static String BOUNDING_BOX_TOKEN="<cismap:boundingBox>";
+    public static final String WIDTH_TOKEN="<cismap:width>";
+    public static final String HEIGHT_TOKEN="<cismap:height>";
+    public static final String BOUNDING_BOX_TOKEN="<cismap:boundingBox>";
     
     
     /** Creates a new instance of SimpleWmsGetMapUrl */

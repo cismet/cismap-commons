@@ -44,7 +44,7 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable
 
   protected FeatureServiceAttribute(FeatureServiceAttribute featureServiceAttribute)
   {
-    this(new String(featureServiceAttribute.getName()), new String(featureServiceAttribute.getType()), featureServiceAttribute.isSelected());
+    this(new String(featureServiceAttribute.getName()), String.valueOf(featureServiceAttribute.getType()), featureServiceAttribute.isSelected());
   }
 
   public String getName()
@@ -136,8 +136,8 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable
 
     featureServiceAttribute.setAttribute(ConvertableToXML.TYPE_ATTRIBUTE, this.getClass().getCanonicalName());
     featureServiceAttribute.setAttribute(FeatureServiceUtilities.XML_NAME_STRING, getName());
-    featureServiceAttribute.setAttribute(FeatureServiceUtilities.IS_GEOMETRY, new Boolean(isGeometry()).toString());
-    featureServiceAttribute.setAttribute(IS_SELECTED, new Boolean(selected).toString());
+    featureServiceAttribute.setAttribute(FeatureServiceUtilities.IS_GEOMETRY, String.valueOf(isGeometry()));
+    featureServiceAttribute.setAttribute(IS_SELECTED, String.valueOf(selected));
     featureServiceAttribute.setAttribute(FeatureServiceUtilities.XML_TYPE_STRING, getType());
     return featureServiceAttribute;
   }
@@ -153,7 +153,7 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable
     this.setName(element.getAttributeValue(FeatureServiceUtilities.XML_NAME_STRING));
     this.setType(element.getAttributeValue(FeatureServiceUtilities.XML_TYPE_STRING));
     
-    boolean newSelected = element.getAttributeValue(IS_SELECTED) != null ? new Boolean(element.getAttributeValue(IS_SELECTED)) : new Boolean(true);
+    boolean newSelected = element.getAttributeValue(IS_SELECTED) != null ? Boolean.valueOf(element.getAttributeValue(IS_SELECTED)) : true;
     this.setSelected(newSelected);
     
     boolean newGeometry = this.getType() != null && (this.getType().equals(FeatureServiceUtilities.GEO_PROPERTY_TYPE_WITH_NS) || this.getType().equals(Integer.toString(DocumentFeatureService.GML_GEOMETRY_TYPE)));
