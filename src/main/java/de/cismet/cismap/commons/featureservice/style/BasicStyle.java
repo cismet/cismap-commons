@@ -67,7 +67,7 @@ public class BasicStyle implements Style
     Color defaultColor = new Color((int) (Math.random() * 255), (int) (Math.random() * 255), (int) (Math.random() * 255));
     this.drawFill = true;
     this.drawLine = true;
-    this.highlightFeature = false;
+    this.highlightFeature = true;
     this.colorFill = defaultColor;
     this.colorLine = BasicStyle.darken(defaultColor);
     this.lineWidth = 1;
