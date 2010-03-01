@@ -185,7 +185,6 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer{
              } else if (value instanceof ShapeFileFeatureService) {
                 ret.setIcon(getRightIcon(SHAPE,layer.getPNode().getVisible(),layer.isEnabled()));
             } else if (value instanceof SimplePostgisFeatureService) {
-            } else if (value instanceof SimplePostgisFeatureService) {
                 ret.setIcon(getRightIcon(POSTGIS,layer.getPNode().getVisible(),layer.isEnabled()));
             } else {
                 ret.setIcon(getRightIcon(SUPPORTER,layer.getPNode().getVisible(),layer.isEnabled()));
