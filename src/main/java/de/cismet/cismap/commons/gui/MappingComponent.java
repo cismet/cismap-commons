@@ -167,6 +167,7 @@ import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
+import java.awt.geom.Point2D;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
@@ -4246,30 +4247,45 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         }
 
         @Override
-        public void retrievalComplete(RetrievalEvent e) {
+        public void retrievalComplete(final RetrievalEvent e) {
+            final Point2D localOrigin = getCamera().getViewBounds().getOrigin();
+            final double localScale = getCamera().getViewScale();
+            final PBounds localBounds = getCamera().getViewBounds();
             final Object o = e.getRetrievedObject();
-            fireActivityChanged();
+//            log.fatal(localBounds+ " "+localScale);
             if (DEBUG) {
                 this.logger.debug(rasterService + ": TaskCounter:" + taskCounter);
             }
+            final Runnable paintImageOnMap = new Runnable() {
 
-            if (o instanceof Image && e.isHasErrors() == false) {
-                // TODO Hier ist noch ein Fehler die Sichtbarkeit muss vom Layer erfragt werden
-                if (isBackgroundEnabled()) {
-                    //Image i=Static2DTools.toCompatibleImage((Image)o);
-                    Image i = (Image) o;
-                    if (rasterService.getName().startsWith("prefetching")) {
-                        pi.setImage(i, 0);
-                        pi.setScale(3 / getCamera().getViewScale());
-                        pi.setOffset(getCamera().getViewBounds().getOrigin().getX() - getCamera().getViewBounds().getWidth(),
-                                getCamera().getViewBounds().getOrigin().getY() - getCamera().getViewBounds().getHeight());
-                    } else {
-                        pi.setImage(i, 1000);
-                        pi.setScale(1 / getCamera().getViewScale());
-                        pi.setOffset(getCamera().getViewBounds().getOrigin());
-                        MappingComponent.this.repaint();
+                public void run() {
+                    fireActivityChanged();
+                    if (o instanceof Image && e.isHasErrors() == false) {
+                        // TODO Hier ist noch ein Fehler die Sichtbarkeit muss vom Layer erfragt werden
+                        if (isBackgroundEnabled()) {
+                            //Image i=Static2DTools.toCompatibleImage((Image)o);
+                            Image i = (Image) o;
+                            if (rasterService.getName().startsWith("prefetching")) {
+                                double x = localOrigin.getX() - localBounds.getWidth();
+                                double y = localOrigin.getY() - localBounds.getHeight();
+                                pi.setImage(i, 0);
+                                pi.setScale(3 / localScale);
+                                pi.setOffset(x, y);
+                            } else {
+                                pi.setImage(i, 1000);
+                                pi.setScale(1 / localScale);
+                                pi.setOffset(localOrigin);
+                                MappingComponent.this.repaint();
+                            }
+                        }
                     }
+
                 }
+            };
+            if (EventQueue.isDispatchThread()) {
+                paintImageOnMap.run();
+            } else {
+                EventQueue.invokeLater(paintImageOnMap);
             }
         }
 
