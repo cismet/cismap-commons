@@ -174,9 +174,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
             @Override
             public void retrievalProgress(RetrievalEvent e) {
-                if (DEBUG) {
-                    log.debug(currentLayer.getName() + "[" + e.getRequestIdentifier() + "]: retrievalProgress: " + e.getPercentageDone());
-                }
+                
                 //currentLayer.setProgress((int) (e.getPercentageDone() * 100));
                 fireProgressChanged(currentLayer);
             }

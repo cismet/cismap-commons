@@ -310,9 +310,6 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                             public void actionPerformed(ActionEvent e) {
                                 int currentProgress = ((RetrievalServiceLayer) value).getProgress();
 
-                                if (DEBUG) {
-                                    log.debug(value + ": fireTableChanged (realColumn=" + realColumn + ", realRow=" + realRow + ") (column=" + column + ", row=" + row + ") currentProgress=" + currentProgress);
-                                }
 
                                 // redraw only progress bar column (indeterminate)
                                 ((TreeTableModelAdapter) (table.getModel())).fireTableCellUpdated(realRow, realColumn);
