@@ -76,7 +76,7 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
     private String mode = POLYGON;
     public static final String LINESTRING = "LINESTRING";
     public static final String POINT = "POINT";
-    public static final String POLYGON = "POLYGON";
+        public static final String POLYGON = "POLYGON";
     public static final String RECTANGLE = "BOUNDING_BOX";
     public static final String ELLIPSE = "ELLIPSE";
     private static final int NUMOF_ELLIPSE_EDGES = 36;

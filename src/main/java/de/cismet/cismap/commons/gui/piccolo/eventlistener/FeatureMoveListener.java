@@ -54,6 +54,7 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
             pressPoint = e.getPosition();
             dragDim = e.getCanvasDelta();
             dragPoint = pressPoint;
+            mc.getHandleLayer().removeAllChildren();
             Object o = PFeatureTools.getFirstValidObjectUnderPointer(e, new Class[]{PFeature.class});
             
             if (o instanceof PFeature && ((PFeature) o).getFeature().isEditable() && ((PFeature) o).getFeature().canBeSelected()) {
@@ -124,6 +125,7 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                     }
                 }
             }
+            mc.showHandles(false);
         }
         if (!ctrlPressed(e)) {
             unmarkFeatures();

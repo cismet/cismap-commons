@@ -187,10 +187,13 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      */
     private final static boolean DEBUG = Debug.DEBUG;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    public static final String PROPERTY_MAP_INTERACTION_MODE = "INTERACTION_MODE";
+    //
     public static final String MOTION = "MOTION";
     public static final String SELECT = "SELECT";
     public static final String ZOOM = "ZOOM";
     public static final String PAN = "PAN";
+    public static final String ALKIS_PRINT = "ALKIS_PRINT";
     public static final String FEATURE_INFO = "FEATURE_INFO";
     public static final String CREATE_SEARCH_POLYGON = "SEARCH_POLYGON";
     public static final String MOVE_POLYGON = "MOVE_POLYGON";
@@ -996,10 +999,10 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * Changes the interactionmode.
      * @param interactionMode new interactionmode as String
      */
-    public void setInteractionMode(String interactionMode) {
+    public void setInteractionMode(final String interactionMode) {
         try {
             if (DEBUG) {
-                log.debug("setInteractionMode(" + interactionMode + ")\nAlter InteractionMode:" + this.interactionMode + "");
+                log.debug("setInteractionMode(" + interactionMode + ")\nAlter InteractionMode:" + this.interactionMode + "", new Exception());
             }
 
             try {
@@ -1049,11 +1052,12 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     }
                 }
             }
-
+            final PropertyChangeEvent interactionModeChangedEvent = new PropertyChangeEvent(this, PROPERTY_MAP_INTERACTION_MODE, this.interactionMode, interactionMode);
             this.interactionMode = interactionMode;
-            PInputEventListener pivl = this.getInputListener(interactionMode);
+            PInputEventListener pivl = getInputListener(interactionMode);
             if (pivl != null) {
                 addInputEventListener(pivl);
+                propertyChangeSupport.firePropertyChange(interactionModeChangedEvent);
                 CismapBroker.getInstance().fireStatusValueChanged(new StatusEvent(StatusEvent.MAPPING_MODE, interactionMode));
             } else {
                 log.warn("this.getInputListener(this.interactionMode)==null bei interactionMode=" + interactionMode);
@@ -1971,7 +1975,9 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                             }
                         }
                     };
-                    serviceFuturesMap.put(rs, CismetThreadPool.submit(serviceCall));
+                    synchronized (serviceFuturesMap) {
+                        serviceFuturesMap.put(rs, CismetThreadPool.submit(serviceCall));
+                    }
                 }
             }
         }
@@ -2901,6 +2907,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     if (featureCollection.areFeaturesEditable() && (getInteractionMode().equals(SELECT)
                             || getInteractionMode().equals(PAN)
                             || getInteractionMode().equals(ZOOM)
+                            || getInteractionMode().equals(ALKIS_PRINT)
                             || getInteractionMode().equals(SPLIT_POLYGON))) {
                         // Handles für alle selektierten Features der Collection hinzufügen
                         if (getHandleInteractionMode().equals(ROTATE_POLYGON)) {

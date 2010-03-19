@@ -133,6 +133,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
     public void init(double scaleDenominator,
             int placeholderWidth,
             int placeholderHeight, String oldInteractionMode) {
+//        log.fatal(scaleDenominator+ " "+placeholderWidth+" "+placeholderHeight);
         this.oldInteractionMode = oldInteractionMode;
         this.widthToHeightRatio = (double) placeholderWidth / (double) placeholderHeight;
         this.scaleDenominator = scaleDenominator;

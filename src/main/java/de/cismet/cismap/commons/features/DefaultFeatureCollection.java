@@ -382,6 +382,10 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
         removeAllFeatures();
     }
 
+    public Collection<Feature> getHoldFeatures() {
+        return holdFeatures;
+    }
+
     public void removeAllFeatures() {
         Vector<Feature> cf = new Vector<Feature>(features);
         features.removeAllElements();
