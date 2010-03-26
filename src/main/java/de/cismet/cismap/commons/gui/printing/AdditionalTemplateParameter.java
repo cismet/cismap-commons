@@ -42,18 +42,18 @@ import org.jdom.Element;
  * @author thorsten.hell@cismet.de
  */
 public class AdditionalTemplateParameter {
-    private String placeholder="";
-    private String title="";
+    private String placeholder="";//NOI18N
+    private String title="";//NOI18N
     public AdditionalTemplateParameter(Element parameter) {
-        placeholder=parameter.getAttribute("placeholder").getValue();
-        title=parameter.getAttribute("title").getValue();
+        placeholder=parameter.getAttribute("placeholder").getValue();//NOI18N
+        title=parameter.getAttribute("title").getValue();//NOI18N
         
     }
     
     Element getElement() {
-        Element e=new Element("parameter");
-        e.setAttribute("placeholder",getPlaceholder());
-        e.setAttribute("title",getTitle());
+        Element e=new Element("parameter");//NOI18N
+        e.setAttribute("placeholder",getPlaceholder());//NOI18N
+        e.setAttribute("title",getTitle());//NOI18N
         return e;
     }
     

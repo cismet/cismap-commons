@@ -14,7 +14,6 @@ import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
@@ -22,21 +21,13 @@ import de.cismet.cismap.commons.features.Highlightable;
 import de.cismet.cismap.commons.features.Selectable;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.AnnotatedFeature;
+import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.RasterDocumentFeature;
 import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRotateAction;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleAddAction;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleMoveAction;
-import de.cismet.cismap.commons.tools.IconUtils;
-import de.cismet.cismap.commons.tools.PFeatureTools;
-import de.cismet.math.geometry.StaticGeometryFunctions;
 import de.cismet.tools.CurrentStackTrace;
-import de.cismet.tools.StaticDecimalTools;
 import de.cismet.tools.collections.MultiMap;
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PNode;
@@ -46,10 +37,8 @@ import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.nodes.PText;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PDimension;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Paint;
-import edu.umd.cs.piccolox.util.PLocator;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -57,7 +46,6 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.event.InputEvent;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -66,14 +54,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.ListIterator;
-import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 import org.jdesktop.swingx.image.ColorTintFilter;
 import pswing.PSwing;
 import pswing.PSwingCanvas;
@@ -83,17 +67,14 @@ import pswing.PSwingCanvas;
  * @author hell 
  */
 public class PFeature extends PPath implements Highlightable, Selectable, Refreshable {
-
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private static final String DIALOG_TEXT = I18N.getString("de.cismet.cismap.commons.gui.piccolo.PFeature.DIALOG_TEXT");
-    private static final String DIALOG_TITLE = I18N.getString("de.cismet.cismap.commons.gui.piccolo.PFeature.DIALOG_TITLE");
+    private static final String DIALOG_TEXT = org.openide.util.NbBundle.getMessage(PFeature.class, "PFeature.DIALOG_TEXT");
+    private static final String DIALOG_TITLE = org.openide.util.NbBundle.getMessage(PFeature.class, "PFeature.DIALOG_TITLE");
     private static final Color TRANSPARENT = new Color(255, 255, 255, 0);
     private Feature feature;
     private WorldToScreenTransform wtst;
     private double x_offset = 0.0d;
     private double y_offset = 0.0d;
-    private double rotation = 0.0d;
     private float[] xp;
     private float[] yp;
     private PNode stickyChild = null;
@@ -107,17 +88,17 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private Paint nonHighlightingPaint = null;
     private Coordinate[] coordArr;
     private MappingComponent viewer;
-    private float startX, startY, endX, endY;
-    private String geometryType = "unknown";
+    private String geometryType = "unknown";//NOI18N
     private Stroke stroke = null;
     private Paint strokePaint = null;
-    private ColorTintFilter tinter;
-    private ImageIcon pushpinIco = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/pushpin.png"));
-    private ImageIcon pushpinSelectedIco = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/pushpinSelected.png"));
+//    private ColorTintFilter tinter;
+    private ImageIcon pushpinIco = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/pushpin.png"));//NOI18N
+    private ImageIcon pushpinSelectedIco = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/pushpinSelected.png"));//NOI18N
     private boolean ignoreStickyFeature = false;
     ArrayList splitHandlesBetween = new ArrayList();
     PHandle splitPolygonFromHandle = null;
     PHandle splitPolygonToHandle = null;
+    PHandle ellipseHandle = null;
     PFeature selectedOriginal = null;
     PPath splitPolygonLine;
     Vector splitPoints = new Vector();
@@ -130,6 +111,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private double sweetPureY = 0;
     private double sweetSelX = 0;
     private double sweetSelY = 0;
+    private static final Stroke FIXED_WIDTH_STROKE = new FixedWidthStroke();
 
     /**
      * Creates a new instance of PFeature
@@ -139,11 +121,16 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param y_offset piccolo y-offset
      * @param viewer MappingComponent
      */
+    public PFeature(Feature feature, MappingComponent viewer) {
+        this(feature, viewer.getWtst(), 0, 0, viewer);
+    }
+
     public PFeature(Feature feature, WorldToScreenTransform wtst, double x_offset, double y_offset, MappingComponent viewer) {
         this(feature, wtst, x_offset, y_offset, viewer, false);
 
     }
 
+    @Deprecated
     public PFeature(Feature feature, WorldToScreenTransform wtst, double x_offset, double y_offset, MappingComponent viewer, boolean ignoreStickyfeature) {
         try {
             setFeature(feature);
@@ -164,16 +151,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
             stroke = getStroke();
             strokePaint = getStrokePaint();
-            tinter = new ColorTintFilter(Color.BLUE, 0.5f);
+//            tinter = new ColorTintFilter(Color.BLUE, 0.5f);
         } catch (Throwable t) {
-            log.error("Fehler im Construktor von PFeature", t);
+            log.error("Error in constructor of PFeature", t);//NOI18N
         }
     }
 
+    @Deprecated
     public PFeature(Point2D[] canvasPoints, WorldToScreenTransform wtst, double x_offset, double y_offset, MappingComponent viewer) {
         this(new PureNewFeature(canvasPoints, wtst), wtst, 0, 0, viewer);
     }
 
+    @Deprecated
     public PFeature(Coordinate[] coordArr, WorldToScreenTransform wtst, double x_offset, double y_offset, MappingComponent viewer) {
         this(new PureNewFeature(coordArr, wtst), wtst, 0, 0, viewer);
     }
@@ -182,62 +171,107 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         return primaryAnnotation;
     }
 
+    public PBounds boundsFromRectPolygonGeom(Geometry g) {
+        if (g instanceof Polygon) {
+            Polygon poly = (Polygon) g;
+            if (poly.isRectangle()) {
+                Coordinate[] coords = poly.getCoordinates();
+                Coordinate first = coords[0];
+                PBounds b = new PBounds();
+                //init
+                double x1 = first.x;
+                double x2 = first.x;
+                double y1 = first.y;
+                double y2 = first.y;
+                for (int i = 0; i < coords.length; ++i) {
+                    Coordinate c = coords[i];
+                    if (c.x < x1) {
+                        x1 = c.x;
+                    }
+                    if (c.x > x2) {
+                        x2 = c.x;
+                    }
+                    if (c.y < y1) {
+                        y1 = c.y;
+                    }
+                    if (c.y > y1) {
+                        y2 = c.y;
+                    }
+                }
+                return new PBounds(wtst.getScreenX(x1), wtst.getScreenY(y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+            }
+        }
+        throw new IllegalArgumentException("Geometry is not a rectangle polygon!");//NOI18N
+    }
+
     public void visualize() {
         if (viewer.isFeatureDebugging()) {
-            log.debug("visualize()", new CurrentStackTrace());
+            log.debug("visualize()", new CurrentStackTrace());//NOI18N
         }
+
         Geometry geom = feature.getGeometry();
-        if (geom instanceof Polygon || geom instanceof LineString || geom instanceof MultiLineString) {
+        if (feature instanceof RasterDocumentFeature) {
+            RasterDocumentFeature rdf = (RasterDocumentFeature) feature;
+            PImage pImage = new PImage(rdf.getRasterDocument());
+            PBounds bounds = boundsFromRectPolygonGeom(rdf.getGeometry());
+            //x,y,with,heigth
+            pImage.setBounds(bounds);
+            addChild(pImage);
             doGeometry(geom);
-        } else if (geom instanceof MultiPolygon) {
-            MultiPolygon mp = (MultiPolygon) geom;
-            doGeometry(geom);
-        } else if (geom instanceof Point) {
-            doGeometry(geom);
-            if (feature instanceof StyledFeature) {
-                if (pi == null || (pi != null && pi.equals(((StyledFeature) feature).getPointAnnotationSymbol()))) {
-                    try {
-                        //log.debug("Sweetspot updated");
-                        pi = new FeatureAnnotationSymbol(((StyledFeature) getFeature()).getPointAnnotationSymbol().getImage());
-                        log.debug("newSweetSpotx: " + ((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
+        } else {
+            if (geom instanceof Polygon || geom instanceof LineString || geom instanceof MultiLineString) {
+                doGeometry(geom);
+            } else if (geom instanceof MultiPolygon) {
+//                MultiPolygon mp = (MultiPolygon) geom;
+                doGeometry(geom);
+            } else if (geom instanceof Point) {
+                doGeometry(geom);
+                if (feature instanceof StyledFeature) {
+                    if (pi == null || (pi != null && pi.equals(((StyledFeature) feature).getPointAnnotationSymbol()))) {
+                        try {
+                            //log.debug("Sweetspot updated");
+                            pi = new FeatureAnnotationSymbol(((StyledFeature) getFeature()).getPointAnnotationSymbol().getImage());
+                            log.debug("newSweetSpotx: " + ((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());//NOI18N
+                            pi.setSweetSpotX(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
+                            pi.setSweetSpotY(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotY());
+                        } catch (Throwable ex) {
+                            log.warn("No PointAnnotationSymbol found", ex);//NOI18N
+                            pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
+                            pi.setSweetSpotX(0.46d);
+                            pi.setSweetSpotY(0.9d);
+                        }
+                    } else if (pi != null && getFeature() != null && getFeature() instanceof StyledFeature && ((StyledFeature) getFeature()).getPointAnnotationSymbol() != null) {
+                        log.fatal("Sweetspot updated");//NOI18N
+                        log.debug("newSweetSpotx: " + ((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());//NOI18N
                         pi.setSweetSpotX(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
                         pi.setSweetSpotY(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotY());
-                    } catch (Throwable ex) {
-                        log.warn("Kein PointAnnotationSymbol gefunden", ex);
-                        pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
-                        pi.setSweetSpotX(0.46d);
-                        pi.setSweetSpotY(0.9d);
+
                     }
-                } else if (pi != null && getFeature() != null && getFeature() instanceof StyledFeature && ((StyledFeature) getFeature()).getPointAnnotationSymbol() != null) {
-                    log.fatal("Sweetspot updated");
-                    log.debug("newSweetSpotx: " + ((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
-                    pi.setSweetSpotX(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX());
-                    pi.setSweetSpotY(((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotY());
-
                 }
-            }
-            if (!ignoreStickyFeature) {
-                viewer.addStickyNode(pi);
-            }
-
-            //Hier soll getestet werden ob bei einem Punkt der pushpin schon hinzugef\u00FCgt wurde. Wegen reconsider Feature
-            if (stickyChild == null) {
-                stickyChild = pi;
-            } else {
-                if (stickyChild instanceof StickyPText) {
-                    secondStickyChild = pi;
+                if (!ignoreStickyFeature) {
+                    viewer.addStickyNode(pi);
                 }
+
+                //Hier soll getestet werden ob bei einem Punkt der pushpin schon hinzugef\u00FCgt wurde. Wegen reconsider Feature
+                if (stickyChild == null) {
+                    stickyChild = pi;
+                } else {
+                    if (stickyChild instanceof StickyPText) {
+                        secondStickyChild = pi;
+                    }
+                }
+                addChild(pi);
+                pi.setOffset(wtst.getScreenX(coordArr[0].x), wtst.getScreenY(coordArr[0].y));
             }
-            addChild(pi);
-            pi.setOffset(wtst.getScreenX(coordArr[0].x), wtst.getScreenY(coordArr[0].y));
+            if (pi != null) {
+                sweetPureX = pi.getSweetSpotX();
+                sweetPureY = pi.getSweetSpotY();
+                sweetSelX = -1.0d;
+                sweetSelY = -1.0d;
+            }
+            setSelected(isSelected());
         }
-        if (pi != null) {
-            sweetPureX = pi.getSweetSpotX();
-            sweetPureY = pi.getSweetSpotY();
-            sweetSelX = -1.0d;
-            sweetSelY = -1.0d;
-        }
-        setSelected(isSelected());
+
     }
 
     /**
@@ -248,7 +282,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     @Override
     public Object clone() {
         if (viewer.isFeatureDebugging()) {
-            log.debug("clone()", new CurrentStackTrace());
+            log.debug("clone()", new CurrentStackTrace());//NOI18N
         }
         PFeature p = new PFeature(feature, wtst, this.x_offset, y_offset, viewer);
         p.splitPolygonFromHandle = splitPolygonFromHandle;
@@ -266,14 +300,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             //TODO Im Moment nur f\u00FCr einfache Polygone ohne L\u00F6cher
             if (coordArr != null) {
                 if (viewer.isFeatureDebugging()) {
-                    log.debug("syncGeometry:coordArray.length:" + coordArr.length);
+                    log.debug("syncGeometry:coordArray.length:" + coordArr.length);//NOI18N
                 }
                 if (coordArr.length == 1) {
                     //Point
                     Point p = gf.createPoint(coordArr[0]);
                     feature.setGeometry(p);
                     if (viewer.isFeatureDebugging()) {
-                        log.debug("syncGeometry:Point:" + p);
+                        log.debug("syncGeometry:Point:" + p);//NOI18N
                     }
                 } else if (coordArr.length > 3 && coordArr[0].equals(coordArr[coordArr.length - 1])) {
                     //simple Polygon
@@ -281,18 +315,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     Polygon poly = gf.createPolygon(shell, null);
                     feature.setGeometry(poly);
                     if (viewer.isFeatureDebugging()) {
-                        log.debug("syncGeometry:Polygon:" + poly);
+                        log.debug("syncGeometry:Polygon:" + poly);//NOI18N
                     }
                 } else {
                     //Linestring
                     LineString line = gf.createLineString(coordArr);
                     feature.setGeometry(line);
                     if (viewer.isFeatureDebugging()) {
-                        log.debug("syncGeometry:Line:" + line);
+                        log.debug("syncGeometry:Line:" + line);//NOI18N
                     }
                 }
             } else {
-                log.warn("coordArr==null");
+                log.warn("coordArr==null");//NOI18N
             }
         }
     }
@@ -304,23 +338,23 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private void doGeometry(Geometry geom) {
         getPathReference().reset();
         if (viewer.isFeatureDebugging()) {
-            log.debug("Enter doGeometry()");
+            log.debug("Enter doGeometry()");//NOI18N
         }
         if (geom instanceof Point) {
             if (viewer.isFeatureDebugging()) {
-                log.debug("Point");
+                log.debug("Point");//NOI18N
             }
             coordArr = new Coordinate[1];
             coordArr[0] = ((Point) geom).getCoordinate();
         } else if (geom instanceof Polygon || geom instanceof LinearRing) {
             if (viewer.isFeatureDebugging()) {
-                log.debug("Polygon||LinearRing");
+                log.debug("Polygon||LinearRing");//NOI18N
             }
             Polygon p = (Polygon) geom;
             doPolygon(p);
         } else if (geom instanceof MultiPolygon) {
             if (viewer.isFeatureDebugging()) {
-                log.debug("MultiPolygon" + geom);
+                log.debug("MultiPolygon" + geom);//NOI18N
             }
             MultiPolygon mp = (MultiPolygon) geom;
             getPathReference().reset();
@@ -331,12 +365,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
         } else if (geom instanceof LineString) {
             if (viewer.isFeatureDebugging()) {
-                log.debug("LineString");
+                log.debug("LineString");//NOI18N
             }
             coordArr = ((LineString) geom).getCoordinates();
         } else if (geom instanceof MultiLineString) {
             if (viewer.isFeatureDebugging()) {
-                log.debug("MultiLineString");
+                log.debug("MultiLineString");//NOI18N
             }
             MultiLineString mls = (MultiLineString) geom;
             for (int i = 0; i < mls.getNumGeometries(); ++i) {
@@ -432,7 +466,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             viewer.removeStickyNode(primaryAnnotation);
         }
         if (viewer.isFeatureDebugging()) {
-            log.debug("refreshDesign()", new CurrentStackTrace());
+            log.debug("refreshDesign()", new CurrentStackTrace());//NOI18N
         }
         if (getFeature().isHidden() && !getFeature().isEditable()) {
             setStroke(null);
@@ -445,10 +479,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 overridingstroke = xsf.getLineStyle();
             }
 
+            if(getFeature() instanceof RasterDocumentFeature) {
+                overridingstroke = FIXED_WIDTH_STROKE;
+            }
+
             if (getFeature() instanceof StyledFeature && overridingstroke == null) {
                 StyledFeature sf = (StyledFeature) getFeature();
                 if (sf.getLineWidth() <= 1) {
-                    setStroke(new FixedWidthStroke());
+                    setStroke(FIXED_WIDTH_STROKE);
                 } else {
                     CustomFixedWidthStroke old = new CustomFixedWidthStroke(sf.getLineWidth());
                     setStroke(old);
@@ -549,9 +587,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return Koordinatenarray ohne die gew\u00FCnschte Koordinate
      */
     private Coordinate[] removeCoordinate(int position, Coordinate[] original) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position ||
-                getFeature().getGeometry() instanceof LineString && original != null &&
-                original.length > position && original.length > 2) {
+        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position
+                || getFeature().getGeometry() instanceof LineString && original != null
+                && original.length > position && original.length > 2) {
             Coordinate[] newCoordinates = new Coordinate[original.length - 1];
             //vorher
             for (int i = 0; i < position; ++i) {
@@ -568,8 +606,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (position == 0 && getFeature().getGeometry() instanceof Polygon) {
                 newCoordinates[newCoordinates.length - 1] = newCoordinates[0];
             }
-            log.info("Original: " + original);
-            log.info("New: " + newCoordinates);
+            log.info("Original: " + original);//NOI18N
+            log.info("New: " + newCoordinates);//NOI18N
             return newCoordinates;
         } else {
             if (original != null) {
@@ -587,8 +625,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return PCanvas-Punktarray, ohne den gew\u00FCnschten Punkt
      */
     private float[] removeCoordinate(int position, float[] original) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position ||
-                getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
+        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position
+                || getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
             float[] newCoordinates = new float[original.length - 1];
             //vorher
             for (int i = 0; i < position; ++i) {
@@ -615,78 +653,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     }
 
     /**
-     * Dupliziert eine Koordinate.
-     * @param position Position der zu duplizierenden Koordinate
-     * @param original Koordinatenarray der Geometrie
-     * @return Koordinatenarray mit dupliziertem Punkt
-     */
-    private Coordinate[] duplicateCoordinate(int position, Coordinate[] original) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position ||
-                getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
-            Coordinate[] newCoordinates = new Coordinate[original.length + 1];
-            //vorher
-            for (int i = 0; i <= position; ++i) {
-                newCoordinates[i] = original[i];
-            }
-
-            //zu entferndes Element duplizieren, hier muss geklont werden
-            newCoordinates[position + 1] = (Coordinate) (original[position].clone());
-
-            //nachher
-            for (int i = position + 1; i < original.length; ++i) {
-                newCoordinates[i + 1] = original[i];
-            }
-
-            //Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist
-            if (position == 0 && getFeature().getGeometry() instanceof Polygon) {
-                newCoordinates[newCoordinates.length - 1] = newCoordinates[0];
-            }
-            syncGeometry();
-            return newCoordinates;
-        } else {
-            if (original != null) {
-                return original;
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Dupliziert einen Punkt.
-     * @param position Position des zu duplizierenden Punkts
-     * @param original PCanvas-Punktarray der Geometrie
-     * @return PCanvas-Punktarray, mit dupliziertem Punkt
-     */
-    private float[] duplicateCoordinate(int position, float[] original) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position ||
-                getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
-            float[] newCoordinates = new float[original.length + 1];
-            //vorher
-            for (int i = 0; i <= position; ++i) {
-                newCoordinates[i] = original[i];
-            }
-
-            //nachher
-            for (int i = position; i < original.length; ++i) {
-                newCoordinates[i + 1] = original[i];
-            }
-
-            //Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist
-            if (position == 0 && getFeature().getGeometry() instanceof Polygon) {
-                newCoordinates[newCoordinates.length - 1] = newCoordinates[0];
-            }
-            return newCoordinates;
-        } else {
-            if (original != null) {
-                return original;
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
      * F\u00FCgt eine neue \u00FCbergebene Koordinate in das Koordinatenarray ein, statt
      * nur einen Punkt zu duplizieren.
      * @param position die Position des neuen Punktes im Array
@@ -695,8 +661,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return Coordinate-Array mit der neue Koordinate
      */
     public Coordinate[] insertCoordinate(int position, Coordinate[] original, Coordinate newValue) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 >= position ||
-                getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
+        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 >= position
+                || getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
             Coordinate[] newCoordinates = new Coordinate[original.length + 1];
             //vorher
             for (int i = 0; i < position; ++i) {
@@ -735,8 +701,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return float-Array mit der neu eingef\u00FCgten Koordinate
      */
     public float[] insertCoordinate(int position, float[] original, float newValue) {
-        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 >= position ||
-                getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
+        if (getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 >= position
+                || getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
             float[] newCoordinates = new float[original.length + 1];
             //vorher
             for (int i = 0; i < position; ++i) {
@@ -792,23 +758,27 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void addHandles(PNode handleLayer) {
         if (viewer.isFeatureDebugging()) {
-            log.debug("addHandles(): Hinzuf\u00FCgen von " + xp.length + " Handles");
+            log.debug("addHandles(): Hinzuf\u00FCgen von " + xp.length + " Handles");//NOI18N
         }
         if (viewer.isFeatureDebugging()) {
-            log.debug("addHandles(): PFeature:" + this);
+            log.debug("addHandles(): PFeature:" + this);//NOI18N
         }
         if (viewer.isFeatureDebugging()) {
-            log.debug("addHandles(): " + xp[0] + "--" + xp[xp.length - 1]);
+            log.debug("addHandles(): " + xp[0] + "--" + xp[xp.length - 1]);//NOI18N
         }
         if (viewer.isFeatureDebugging()) {
-            log.debug("addHandles(): " + yp[0] + "--" + yp[yp.length - 1]);
+            log.debug("addHandles(): " + yp[0] + "--" + yp[yp.length - 1]);//NOI18N
         }
-        int length = xp.length;
-        if (getFeature().getGeometry() instanceof Polygon) {
-            length--;//xp.length-1 weil der erste und letzte Punkt identisch sind
-        }
-        for (int i = 0; i < length; ++i) {
-            addHandle(handleLayer, i);
+        if ((getFeature() instanceof PureNewFeature) && ((PureNewFeature) getFeature()).getGeometryType() == PureNewFeature.geomTypes.ELLIPSE) {
+            addEllipseHandle(handleLayer);
+        } else {
+            int length = xp.length;
+            if (getFeature().getGeometry() instanceof Polygon) {
+                length--;//xp.length-1 weil der erste und letzte Punkt identisch sind
+            }
+            for (int i = 0; i < length; ++i) {
+                addHandle(handleLayer, i);
+            }
         }
     }
 
@@ -820,371 +790,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void addHandle(final PNode handleLayer, final int position) {
         final int positionInArray = position;
-        PLocator l = new PLocator() {
 
-           public double locateX() {
-                try{
-                return getXp()[positionInArray];
-                }catch(Exception ex){
-                    log.error("Fehler in  locateX():");
-                    return -1;
-                    
-                }
-            }
+        final PHandle h = new TransformationPHandle(this, positionInArray);
 
-            public double locateY() {
-                  try{
-                return getYp()[positionInArray];
-                }catch(Exception ex){
-                    log.error("Fehler in  locateY():");
-                    return -1;
-                }
-            }
-        };
-
-        // Handle Start
-        // Ad-Hoc-Override von PHandle
-        final PHandle h = new PHandle(l, viewer) {
-
-            PText leftInfo;
-            PText rightInfo;
-            MultiMap glueCoordinates = new MultiMap();
-            Point2D vetoPoint = null;
-
-            private int getLeftNeighbourIndex(int index) {
-                if (index == 0) {
-                    return getXp().length - 2;
-                } else if (positionInArray == getXp().length - 1) {
-                    return positionInArray - 1;
-                } else {
-                    return index - 1;
-                }
-            }
-
-            private int getRightNeighbourIndex(int index) {
-                if (index == 0) {
-                    return positionInArray + 1;
-                } else if (positionInArray == getXp().length - 1) {
-                    return 1;
-                } else {
-                    return positionInArray + 1;
-                }
-            }
-
-            @Override
-            public void dragHandle(PDimension aLocalDimension, PInputEvent aEvent) {
-                if (!viewer.getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
-                    SimpleMoveListener moveListener = (SimpleMoveListener) getViewer().getInputListener(MappingComponent.MOTION);
-                    if (moveListener != null) {
-                        moveListener.mouseMoved(aEvent);
-                    } else {
-                        log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                    }
-
-                    if (getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE) ||
-                            getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE)) {
-                        //localToParent(aLocalDimension);
-//                     if (viewer.isFeatureDebugging()) log.debug("vorher.DRAG.aLocalDimension:"+aLocalDimension);
-                        viewer.getCamera().localToView(aLocalDimension);
-//                     if (viewer.isFeatureDebugging()) log.debug("nachher.DRAG.aLocalDimension:"+aLocalDimension);
-
-                        float newX = getXp()[positionInArray] + (float) aLocalDimension.getWidth();
-                        float newY = getYp()[positionInArray] + (float) aLocalDimension.getHeight();
-
-                        // if CTRL DOWN
-                        if (aEvent.getModifiers() == InputEvent.CTRL_MASK + InputEvent.BUTTON1_MASK) {
-                            Point2D trigger = aEvent.getCanvasPosition();
-                            trigger = viewer.getCamera().localToView(trigger);
-                            Point2D lineStart = new Point2D.Double();
-                            Point2D lineEnd = new Point2D.Double();
-
-                            int lineStartIndex = getLeftNeighbourIndex(positionInArray);
-                            int lineEndIndex = getRightNeighbourIndex(positionInArray);
-
-//                        if (positionInArray==0) {
-//                            lineStartIndex=getXp().length-2;
-//                            lineEndIndex=positionInArray+1;
-//                        } else if (positionInArray==getXp().length-1){
-//                            lineStartIndex=positionInArray-1;
-//                            lineEndIndex=1;
-//                        } else {
-//                            lineStartIndex=positionInArray-1;
-//                            lineEndIndex=positionInArray+1;
-//                        }
-
-                            lineStart.setLocation(getXp()[lineStartIndex], getYp()[lineStartIndex]);
-                            lineEnd.setLocation(getXp()[lineEndIndex], getYp()[lineEndIndex]);
-                            Point2D erg = StaticGeometryFunctions.createPointOnLine(lineStart, lineEnd, trigger);
-                            newX = (float) erg.getX();
-                            newY = (float) erg.getY();
-                        }
-
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("Width,Height:" + (float) aLocalDimension.getWidth() + "," + (float) aLocalDimension.getHeight());
-                        }
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("Width,Height:" + aLocalDimension.getWidth() + "," + aLocalDimension.getHeight());
-                        }
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("alter.Wert:" + getXp()[positionInArray] + "," + getYp()[positionInArray]);
-                        }
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("neuer.Wert:" + newX + "," + newY);
-                        }
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("Berechnung:" + (float) ((double) getXp()[positionInArray] * 10000 + (double) aLocalDimension.getWidth() * 10000) / 10000);
-                        }
-                        if (viewer.isSnappingEnabled()) {
-//                        Point2D snapPoint=PFeatureTools.getNearestPointInArea(viewer,aEvent.getCanvasPosition(),
-//                                new Point2D.Float(getXp()[positionInArray],getYp()[positionInArray]) );
-                            Point2D snapPoint = PFeatureTools.getNearestPointInArea(viewer, aEvent.getCanvasPosition());
-                            if (snapPoint != null) {
-                                newX = (float) snapPoint.getX();
-                                newY = (float) snapPoint.getY();
-                            }
-                        }
-
-                        // umgekehrte Bewegung fuer Undo speichern
-                        endX = newX;
-                        endY = newY;
-
-                        moveCoordinateToNewPiccoloPosition(positionInArray, newX, newY);
-
-                        //PFeature.this.syncGeometry();
-                        relocateHandle();
-
-                        if (getViewer().isInGlueIdenticalPointsMode()) {
-                            Set<PFeature> pFeatureSet = glueCoordinates.keySet();
-                            for (PFeature gluePFeature : pFeatureSet) {
-                                if (gluePFeature.getFeature().isEditable()) {
-                                    Collection coordinates = (Collection) glueCoordinates.get(gluePFeature);
-                                    if (coordinates != null) {
-                                        for (Object o : coordinates) {
-                                            int oIndex = (Integer) o;
-                                            gluePFeature.moveCoordinateToNewPiccoloPosition(oIndex, newX, newY);
-                                            //   gluePFeature.syncGeometry();
-                                            if (viewer.isFeatureDebugging()) {
-                                                log.debug("moveCoordinateToNewPiccoloPosition " + gluePFeature);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-//                        if (viewer.isFeatureDebugging()) log.debug("glueIdenticalPoints==true");
-//                        List<PFeatureCoordinatePosition> l =PFeature.this.getViewer().getPFeaturesByCoordinates(oldCoordinate);
-//                        if (l!=null) {
-//                            if (viewer.isFeatureDebugging()) log.debug("l.size():"+l.size())   ;
-//                            for (PFeatureCoordinatePosition pc:l){
-//
-//                                if (pc.getPFeature()!=PFeature.this) {
-//                                    if (viewer.isFeatureDebugging()) log.debug("GLUE");
-//                                    //set the x and y value separately, because we don't want to create a flat copy and we don't want to clone
-//                                    pc.getPFeature().getXp()[pc.getPosition()]=getXp()[positionInArray];
-//                                    pc.getPFeature().getYp()[pc.getPosition()]=getYp()[positionInArray];
-//                                    pc.getPFeature().getCoordArr()[pc.getPosition()].x=PFeature.this.getCoordArr()[positionInArray].x;
-//                                    pc.getPFeature().getCoordArr()[pc.getPosition()].y=PFeature.this.getCoordArr()[positionInArray].y;
-//                                    pc.getPFeature().setPathToPolyline(pc.getPFeature().getXp(), pc.getPFeature().getYp());
-//                                    pc.getPFeature().syncGeometry();
-//                                    pc.getPFeature().doGeometry(pc.getPFeature().getFeature().getGeometry());
-//                                    pc.getPFeature().getViewer().reconsiderFeature(pc.getPFeature().getFeature());
-//                                } else {
-//                                    if (viewer.isFeatureDebugging()) log.debug("Same Object no GLUE");
-//                                }
-//                            }
-//                        }
-                        }
-
-                        //Abst\u00E4nde zu den Nachbarn
-                        int lefty = getLeftNeighbourIndex(positionInArray);
-                        int righty = getRightNeighbourIndex(positionInArray);
-                        Coordinate lc = getCoordArr()[lefty];
-                        Coordinate rc = getCoordArr()[righty];
-                        Coordinate thisC = getCoordArr()[positionInArray];
-
-                        double leftDistance = thisC.distance(lc);
-                        double rightDistance = thisC.distance(rc);
-
-                        leftInfo.setText("" + StaticDecimalTools.round(leftDistance));
-                        rightInfo.setText("" + StaticDecimalTools.round(rightDistance));
-
-                        Point2D lp = new Point2D.Double();
-                        Point2D rp = new Point2D.Double();
-                        lp.setLocation(getXp()[lefty], getYp()[lefty]);
-                        rp.setLocation(getXp()[righty], getYp()[righty]);
-                        lp = viewer.getCamera().viewToLocal(lp);
-                        rp = viewer.getCamera().viewToLocal(rp);
-                        leftInfo.setX(lp.getX());
-                        leftInfo.setY(lp.getY());
-                        rightInfo.setX(rp.getX());
-                        rightInfo.setY(rp.getY());
-                    }
-                }
-            }
-
-            /**
-             * Override this method to get notified when the handle starts to get dragged.
-             */
-            @Override
-            public void startHandleDrag(Point2D aLocalPoint, PInputEvent aEvent) {
-                if (!viewer.getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
-                    //Infonodes (Entfernung) anlegen
-                    leftInfo = new PText();
-                    leftInfo.setPaint(new Color(255, 255, 255, 100));
-                    rightInfo = new PText();
-                    rightInfo.setPaint(new Color(255, 255, 255, 100));
-                    addChild(leftInfo);
-                    addChild(rightInfo);
-                    leftInfo.setVisible(true);
-                    rightInfo.setVisible(true);
-
-                    //Glue: IdentischePunkte mitverschieben
-                    if (getViewer().isInGlueIdenticalPointsMode()) {
-                        //Features suchen die identische Punkte haben
-                        glueCoordinates = checkforGlueCoords(positionInArray);
-                        log.info("checkforGlueCoords() aufgerufen und " + glueCoordinates.keySet().size() + " gefunden");
-                    }
-                    vetoPoint = aLocalPoint;
-                    startX = getXp()[positionInArray];
-                    startY = getYp()[positionInArray];
-                    endX = startX;
-                    endY = startY;
-
-                    super.startHandleDrag(aLocalPoint, aEvent);
-                }
-            }
-
-            @Override
-            public void endHandleDrag(java.awt.geom.Point2D aLocalPoint, PInputEvent aEvent) {
-                if (!viewer.getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
-                    if (viewer.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                        PFeature.this.syncGeometry();
-                        Vector v = new Vector();
-                        v.add(PFeature.this.getFeature());
-                        ((DefaultFeatureCollection) viewer.getFeatureCollection()).fireFeaturesChanged(v);
-                    } else {
-                        viewer.getFeatureCollection().reconsiderFeature(getFeature());
-                    }
-
-                    removeChild(leftInfo);
-                    removeChild(rightInfo);
-                    leftInfo = null;
-                    rightInfo = null;
-
-                    if ((getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE)) &&
-                            (Math.abs(startX - endX) > 0.001d) || (Math.abs(startY - endY) > 0.001d)) {
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("neue MoveAction erzeugen");
-                        }
-                        boolean isGluedAction = false;
-                        if (glueCoordinates.size() != 0) {
-                            isGluedAction = true;
-                            Vector v = new Vector();
-                            if (getViewer().isInGlueIdenticalPointsMode()) {
-                                Set<PFeature> pFeatureSet = glueCoordinates.keySet();
-                                for (PFeature gluePFeature : pFeatureSet) {
-                                    if (gluePFeature.getFeature().isEditable()) {
-                                        v.add(gluePFeature.getFeature());
-                                        Collection coordinates = (Collection) glueCoordinates.get(gluePFeature);
-                                        if (coordinates != null) {
-                                            for (Object o : coordinates) {
-//                                                int oIndex = (Integer) o;
-//                                                gluePFeature.moveCoordinateToNewPiccoloPosition(oIndex, newX, newY);
-//                                                gluePFeature.syncGeometry();
-                                                if (viewer.isFeatureDebugging()) {
-                                                    log.debug("PFeature synced:" + gluePFeature);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                ((DefaultFeatureCollection) viewer.getFeatureCollection()).fireFeaturesChanged(v);
-                            }
-                        }
-                        getViewer().getMemUndo().addAction(new HandleMoveAction(positionInArray, PFeature.this, startX, startY, endX, endY, isGluedAction));
-                        getViewer().getMemRedo().clear();
-                    }
-                }
-                super.endHandleDrag(aLocalPoint, aEvent);
-            }
-
-            @Override
-            public void handleClicked(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-                if (viewer.isFeatureDebugging()) {
-                    log.debug("Handle clicked");
-                }
-                if (viewer.getHandleInteractionMode().equals(MappingComponent.REMOVE_HANDLE)) {
-                    getViewer().getMemUndo().addAction(new HandleAddAction(getViewer(), PFeature.this.getFeature(), positionInArray, getCoordArr()[positionInArray], getXp()[positionInArray], getYp()[positionInArray]));
-                    ((PHandle) (pInputEvent.getPickedNode())).removeHandle();
-                } else if (viewer.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)) {
-                    getViewer().getMemUndo().addAction(new HandleDeleteAction(getViewer(), PFeature.this.getFeature(), positionInArray, getCoordArr()[positionInArray], getXp()[positionInArray], getYp()[positionInArray]));
-                    ((PHandle) (pInputEvent.getPickedNode())).duplicateHandle();
-                } else if (viewer.getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
-                    addSplitHandle(((PHandle) (pInputEvent.getPickedNode())));
-                }
-                if (viewer.isFeatureDebugging()) {
-                    log.debug("Ende von handleClicked() getFeature().getGeometry().getCoordinates().length:" + getFeature().getGeometry().getCoordinates().length);
-                }
-                //viewer.getFeatureCollection().reconsiderFeature(getFeature());
-            }
-
-            @Override
-            public void mouseMovedNotInDragOperation(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-                SimpleMoveListener moveListener = (SimpleMoveListener) viewer.getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(pInputEvent);
-                } else {
-                    log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-            }
-
-            @Override
-            public void removeHandle() {
-                //log.error("--- :"+getCoordArr());
-                if (getXp().length > 4 && getFeature().getGeometry() instanceof Polygon ||
-                        getXp().length > 1 && getFeature().getGeometry() instanceof LineString) { //DANGER und Linien ???
-                    setXp(PFeature.this.removeCoordinate(positionInArray, getXp()));
-                    setYp(PFeature.this.removeCoordinate(positionInArray, getYp()));
-                    log.debug("---vorher:" + getCoordArr().length);
-                    PFeature.this.coordArr = PFeature.this.removeCoordinate(positionInArray, PFeature.this.getCoordArr());
-                    PFeature.this.syncGeometry();
-                    log.debug("---nachher:" + getCoordArr().length);
-                    PFeature.this.setPathToPolyline(getXp(), getYp());
-                    //Jetzt sind allerdings alle Locator noch falsch und das handle existiert noch
-                    //handleLayer.removeChild(this);
-                    //Das w\u00E4re zwar optimal (Performance) korrigiert allerdings nicht die falschen
-                    //Locator
-                    Vector v = new Vector();
-                    v.add(PFeature.this.getFeature());
-                    ((DefaultFeatureCollection) viewer.getFeatureCollection()).fireFeaturesChanged(v);
-                    //deswegen (langsam aber funzt):
-                    if (isSelected()) {
-                        getViewer().showHandles(false);
-                    }
-                }
-            }
-
-            @Override
-            public void duplicateHandle() {
-                log.info("duplicate Handle : anzahl der Handles vorher:" + getCoordArr().length);
-                setXp(PFeature.this.duplicateCoordinate(positionInArray, getXp()));
-                setYp(PFeature.this.duplicateCoordinate(positionInArray, getYp()));
-                PFeature.this.coordArr = PFeature.this.duplicateCoordinate(positionInArray, PFeature.this.getCoordArr());
-                PFeature.this.syncGeometry();
-                log.info("duplicate Handle : anzahl der Handles nachher:" + getCoordArr().length);
-                PFeature.this.setPathToPolyline(getXp(), getYp());
-                getViewer().showHandles(false);
-                Vector v = new Vector();
-                v.add(PFeature.this.getFeature());
-                ((DefaultFeatureCollection) viewer.getFeatureCollection()).fireFeaturesChanged(v);
-            }
-        };
-        ///Handle End
         EventQueue.invokeLater(new Runnable() {
 
             public void run() {
                 handleLayer.addChild(h);
-                h.addClientProperty("coordinate", getCoordArr()[position]);
-                h.addClientProperty("coordinate_position_in_arr", new Integer(position));
+                h.addClientProperty("coordinate", getCoordArr()[position]);//NOI18N
+                h.addClientProperty("coordinate_position_in_arr", new Integer(position));//NOI18N
             }
         });
     }
@@ -1219,11 +833,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     if (abstand < 0.01) {
                         glueCoords.put(getViewer().getPFeatureHM().get(f), i);
                         if (viewer.isFeatureDebugging()) {
-                            log.debug("checkforGlueCoords() Abstand kleiner als 1cm: " + abstand + " :: " + f);
+                            log.debug("checkforGlueCoords() Abstand kleiner als 1cm: " + abstand + " :: " + f);//NOI18N
                         }
                     } else {
                         if (viewer.isFeatureDebugging()) {
-                            log.debug("checkforGlueCoords() Abstand: " + abstand);
+                            log.debug("checkforGlueCoords() Abstand: " + abstand);//NOI18N
                         }
                     }
                 }
@@ -1238,19 +852,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void addRotationHandles(final PNode handleLayer) {
         if (viewer.isFeatureDebugging()) {
-            log.debug("addRotationHandles(): PFeature:" + this);
+            log.debug("addRotationHandles(): PFeature:" + this);//NOI18N
         }
         int length = xp.length;
         if (getFeature().getGeometry() instanceof Polygon) {
             length--;//xp.length-1 weil der erste und letzte Punkt identisch sind
         }
-        // Handles einfügen
-        for (int i = 0; i < length; ++i) {
-            addRotationHandle(handleLayer, i);
-        }
         // SchwerpunktHandle erzeugen
         if (viewer.isFeatureDebugging()) {
-            log.debug("PivotHandle==" + pivotHandle);
+            log.debug("PivotHandle==" + pivotHandle);//NOI18N
         }
         if (pivotHandle == null) {
             addPivotHandle(handleLayer);
@@ -1271,6 +881,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 });
             }
         }
+        // Handles einfügen
+        for (int i = 0; i < length; ++i) {
+            addRotationHandle(handleLayer, i);
+        }
     }
 
     /**
@@ -1281,172 +895,19 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void addRotationHandle(final PNode handleLayer, final int position) {
         if (viewer.isFeatureDebugging()) {
-            log.debug("addRotationHandles(): Hinzuf\u00FCgen vom " + position + ". RotationHandle");
+            log.debug("addRotationHandles():add from " + position + ". RotationHandle");//NOI18N
         }
-        PLocator l = new PLocator() {
 
-            public double locateX() {
-                return getXp()[position];
-            }
+        final PHandle rotHandle = new RotationPHandle(this, mid, pivotHandle, position);
 
-            public double locateY() {
-                return getYp()[position];
-            }
-        };
-
-        // Handle Start
-        // Ad-Hoc-Override von PHandle
-        final PHandle rotHandle = new PHandle(l, viewer) {
-
-            @Override
-            public void dragHandle(PDimension aLocalDimension, PInputEvent aEvent) {
-                SimpleMoveListener moveListener = (SimpleMoveListener) getViewer().getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(aEvent);
-                } else {
-                    log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-                getViewer().getCamera().localToView(aLocalDimension);
-                double dragRot = calculateDrag(aEvent, getXp()[position], getYp()[position]);
-                if (getViewer().getFeatureCollection() instanceof DefaultFeatureCollection &&
-                        ((DefaultFeatureCollection) getViewer().getFeatureCollection()).getSelectedFeatures().size() > 1) {
-                    for (Object o : getViewer().getFeatureCollection().getSelectedFeatures()) {
-                        PFeature pf = (PFeature) getViewer().getPFeatureHM().get(o);
-                        pf.rotateAllPoints(dragRot, null);
-                        relocateHandle();
-                    }
-                } else {
-                    rotateAllPoints(dragRot, null);
-                    relocateHandle();
-                }
-                rotation -= dragRot;
-            }
-
-            /**
-             * Override this method to get notified when the handle starts to get dragged.
-             */
-            @Override
-            public void startHandleDrag(Point2D aLocalPoint, PInputEvent aEvent) {
-                if (viewer.isFeatureDebugging()) {
-                    log.debug("startHandleDrag");
-                }
-                rotation = 0.0d;
-
-                // InfoNode entfernen, da sie sonst mitdreht
-                Collection selArr = getViewer().getFeatureCollection().getSelectedFeatures();
-                for (Object o : selArr) {
-                    PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
-                    if (pf != null && pf.getInfoNode() != null) {
-                        pf.getInfoNode().setVisible(false);
-                    }
-                }
-
-                handleLayer.removeAllChildren();
-                handleLayer.addChild(this);
-                if (pivotHandle != null) {
-                    handleLayer.addChild(pivotHandle);
-                }
-                super.startHandleDrag(aLocalPoint, aEvent);
-            }
-
-            @Override
-            public void endHandleDrag(java.awt.geom.Point2D aLocalPoint, PInputEvent aEvent) {
-                try {
-                    if (viewer.isFeatureDebugging()) {
-                        log.debug("endHandleDrag");
-                    }
-
-                    LinkedHashSet<Feature> temp = (LinkedHashSet<Feature>) getViewer().getFeatureCollection().getSelectedFeatures();
-                    LinkedHashSet<Feature> selArr = (LinkedHashSet<Feature>) temp.clone();
-                    Vector<Feature> all = getViewer().getFeatureCollection().getAllFeatures();
-                    temp = null;
-
-                    // FeatureChangedEvents werfen und aktuell halten
-                    if (getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
-                        Vector v = new Vector();
-                        for (Object f : selArr) {
-                            ((PFeature) getViewer().getPFeatureHM().get(f)).setPivotPoint(mid);
-                            v.add(((PFeature) getViewer().getPFeatureHM().get(f)).getFeature());
-                        }
-                        ((DefaultFeatureCollection) getViewer().getFeatureCollection()).fireFeaturesChanged(v);
-                    } else {
-                        getViewer().getFeatureCollection().reconsiderFeature(PFeature.this.getFeature());
-                    }
-                    log.debug("Nach fireFeaturesChanged");
-
-                    boolean overlap = false;
-
-                    // Ewig aufwändiger Check nach Überschneidungen
-                    for (Object o : selArr) {
-                        Geometry g = ((PFeature) getViewer().getPFeatureHM().get(o)).getFeature().getGeometry();
-                        if (!overlap) {
-                            for (Feature f : all) {
-                                if (!(g.equals(f.getGeometry())) && g.overlaps(f.getGeometry())) {
-                                    overlap = true;
-                                    break;
-                                }
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-
-                    // Falls ja, dann Abfrage "Sind Sie sicher?"
-                    log.debug("Nach Overlap-Check");
-                    if (overlap) {
-                        log.debug("Überlappt");
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("\u00DCberschneidungen nach Drehung der PFeatures");
-                        }
-                        int answer = JOptionPane.showConfirmDialog(getViewer(), DIALOG_TEXT, DIALOG_TITLE, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                        if (viewer.isFeatureDebugging()) {
-                            log.debug("Drehung durchf\u00FChren: " + (answer == JOptionPane.YES_OPTION ? "JA" : "NEIN"));
-                        }
-                        if (answer == JOptionPane.YES_OPTION) {
-                            CustomAction a = new FeatureRotateAction(getViewer(), selArr, (Point2D) mid.clone(), rotation);
-                            a.doAction();
-                        } else {
-                            if (rotation != 0.0d) {
-                                getViewer().getMemUndo().addAction(new FeatureRotateAction(getViewer(), selArr, (Point2D) mid.clone(), rotation));
-                                getViewer().getMemRedo().clear();
-                            }
-                        }
-                    } else {
-                        log.debug("Überlappt nicht");
-                        if (rotation != 0.0d) {
-                            log.debug("arr=" + selArr);
-                            log.debug("mid=" + mid);
-                            Point2D actionMid = new Point2D.Double(mid.getX(), mid.getY());
-                            getViewer().getMemUndo().addAction(new FeatureRotateAction(getViewer(), selArr, actionMid, rotation));
-                            getViewer().getMemRedo().clear();
-                        }
-                    }
-                    super.endHandleDrag(aLocalPoint, aEvent);
-
-                } catch (Throwable ex) {
-                    log.error("Boooooom", ex);
-                }
-            }
-
-            @Override
-            public void mouseMovedNotInDragOperation(PInputEvent pInputEvent) {
-                SimpleMoveListener moveListener = (SimpleMoveListener) viewer.getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(pInputEvent);
-                } else {
-                    log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-            }
-        };
-        // Handle End
-        // \u00E4ndere Farbe des Handles auf GELB
         rotHandle.setPaint(new Color(1f, 1f, 0f, 0.7f));
         EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 handleLayer.addChild(rotHandle);
-                rotHandle.addClientProperty("coordinate", getCoordArr()[position]);
-                rotHandle.addClientProperty("coordinate_position_in_arr", new Integer(position));
+                rotHandle.addClientProperty("coordinate", getCoordArr()[position]);//NOI18N
+                rotHandle.addClientProperty("coordinate_position_in_arr", new Integer(position));//NOI18N
             }
         });
     }
@@ -1459,7 +920,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void addPivotHandle(final PNode handleLayer) {
         if (viewer.isFeatureDebugging()) {
-            log.debug("addPivotHandle()");
+            log.debug("addPivotHandle()");//NOI18N
         }
         PBounds allBounds = null;
         if (getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
@@ -1479,73 +940,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             pf.setPivotPoint(allBounds.getCenter2D());
             mid = allBounds.getCenter2D();
         }
-        final PLocator l = new PLocator() {
 
-            public double locateX() {
-                if (mid == null) {
-                    return getBounds().getCenter2D().getX();
-                } else {
-                    return mid.getX();
-                }
-            }
-
-            public double locateY() {
-                if (mid == null) {
-                    return getBounds().getCenter2D().getY();
-                } else {
-                    return mid.getY();
-                }
-            }
-        };
-
-        // Handle Start
-        // Ad-Hoc-Override von PHandle
-        final PHandle pivot = new PHandle(l, viewer) {
-
-            @Override
-            public void dragHandle(PDimension aLocalDimension, PInputEvent aEvent) {
-                double scale = getViewer().getCamera().getViewScale();
-                SimpleMoveListener moveListener = (SimpleMoveListener) getViewer().getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(aEvent);
-                } else {
-                    log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-                mid.setLocation(mid.getX() + (aLocalDimension.width / scale),
-                        mid.getY() + (aLocalDimension.height / scale));
-                relocateHandle();
-            }
-
-            @Override
-            public void endHandleDrag(java.awt.geom.Point2D aLocalPoint, PInputEvent aEvent) {
-                if (getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
-                    Collection selArr = getViewer().getFeatureCollection().getSelectedFeatures();
-                    for (Object o : selArr) {
-                        PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
-                        pf.setPivotPoint(mid);
-                    }
-                }
-                if (viewer.isFeatureDebugging()) {
-                    log.debug("neuer PivotPunkt=(" + mid.getX() + ", " + mid.getY() + ")");
-                }
-                super.endHandleDrag(aLocalPoint, aEvent);
-            }
-
-            @Override
-            public void mouseMovedNotInDragOperation(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-                SimpleMoveListener moveListener = (SimpleMoveListener) viewer.getInputListener(MappingComponent.MOTION);
-                if (moveListener != null) {
-                    moveListener.mouseMoved(pInputEvent);
-                } else {
-                    log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
-                }
-            }
-        };
-        ///Handle End
-        pivotHandle = pivot;
+        pivotHandle = new PivotPHandle(this, mid);
         pivotHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
         EventQueue.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 handleLayer.addChild(pivotHandle);
             }
@@ -1554,6 +954,23 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
             pf.pivotHandle = this.pivotHandle;
         }
+    }
+
+    public void addEllipseHandle(final PNode handleLayer) {
+        if (viewer.isFeatureDebugging()) {
+            log.debug("addEllipseHandle()");//NOI18N
+        }
+
+        ellipseHandle = new EllipsePHandle(this);
+
+        ellipseHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
+        EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                handleLayer.addChild(ellipseHandle);
+            }
+        });
     }
 
     /**
@@ -1606,7 +1023,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     }
 
     /**
-     * Bildet aus Mausposition, Mittelpunkt und Handleposition ein Dreieck und 
+     * Bildet aus Mausposition, Mittelpunkt und Handleposition ein Dreieck und
      * berechnet daraus, den bei der Bewegung zur\u00FCckgelegten Winkel und dessen
      * Richtung.
      * @param event PInputEvent der Mausbewegung
@@ -1615,7 +1032,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param y Y-Koordinate des Handles
      * @return \u00FCberstrichener Winkel der Bewegung im Bogenma\u00DF
      */
-    protected double calculateDrag(PInputEvent event, float x, float y) {
+    public double calculateDrag(PInputEvent event, float x, float y) {
         Point2D mousePos = event.getPosition();
 
         // create vectors
@@ -1673,7 +1090,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         splitPolygonLine = new PPath();
         splitPoints = new Vector();
         splitPoints.add(getFirstSplitHandle());
-        splitPolygonLine.setStroke(new FixedWidthStroke());
+        splitPolygonLine.setStroke(FIXED_WIDTH_STROKE);
         //splitPolygonLine.setPaint(new Color(1f,0f,0f,0.5f));
         addChild(splitPolygonLine);
     }
@@ -1685,7 +1102,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void addSplitHandle(PHandle p) {
         if (viewer.isFeatureDebugging()) {
-            log.debug("addSplitHandle()");
+            log.debug("addSplitHandle()");//NOI18N
         }
         if (splitPolygonFromHandle == p) {
             splitPolygonFromHandle = null;
@@ -1698,10 +1115,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             p.setSelected(true);
             resetSplitLine();
             if (viewer.isFeatureDebugging()) {
-                log.debug("nach addSplitHandle: splitPolygonFromHandle=" + splitPolygonFromHandle);
+                log.debug("after addSplitHandle: splitPolygonFromHandle=" + splitPolygonFromHandle);//NOI18N
             }
             if (viewer.isFeatureDebugging()) {
-                log.debug("in addSplitHandle this=" + this);
+                log.debug("in addSplitHandle this=" + this);//NOI18N
             }
         } else if (splitPolygonToHandle == null) {
             splitPolygonToHandle = p;
@@ -1732,8 +1149,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @return Point2D
      */
     public Point2D getFirstSplitHandle() {
-        if (splitPolygonFromHandle != null && splitPolygonFromHandle.getClientProperty("coordinate") instanceof Coordinate) {
-            Coordinate c = ((Coordinate) splitPolygonFromHandle.getClientProperty("coordinate"));
+        if (splitPolygonFromHandle != null && splitPolygonFromHandle.getClientProperty("coordinate") instanceof Coordinate) {//NOI18N
+            Coordinate c = ((Coordinate) splitPolygonFromHandle.getClientProperty("coordinate"));//NOI18N
             Point2D ret = new Point2D.Double((double) splitPolygonFromHandle.getLocator().locateX(), (double) splitPolygonFromHandle.getLocator().locateY());
             return ret;
         } else {
@@ -1748,16 +1165,16 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public boolean inSplitProgress() {
         CurrentStackTrace cst = new CurrentStackTrace();
         if (viewer.isFeatureDebugging()) {
-            log.debug("splitPolygonFromHandle:" + splitPolygonFromHandle, cst);
+            log.debug("splitPolygonFromHandle:" + splitPolygonFromHandle, cst);//NOI18N
         }
         if (viewer.isFeatureDebugging()) {
-            log.debug("splitPolygonToHandle:" + splitPolygonToHandle, cst);
+            log.debug("splitPolygonToHandle:" + splitPolygonToHandle, cst);//NOI18N
         }
         if (viewer.isFeatureDebugging()) {
-            log.debug("inSplitProgress=" + (splitPolygonFromHandle != null && splitPolygonToHandle == null));
+            log.debug("inSplitProgress=" + (splitPolygonFromHandle != null && splitPolygonToHandle == null));//NOI18N
         }
         if (viewer.isFeatureDebugging()) {
-            log.debug("in inSplitProgress this=" + this);
+            log.debug("in inSplitProgress this=" + this);//NOI18N
         }
         return (splitPolygonFromHandle != null && splitPolygonToHandle == null);
     }
@@ -1770,8 +1187,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public Feature[] split() {
         if (isSplittable()) {
             PureNewFeature[] ret = new PureNewFeature[2];
-            int from = ((Integer) (splitPolygonFromHandle.getClientProperty("coordinate_position_in_arr"))).intValue();
-            int to = ((Integer) (splitPolygonToHandle.getClientProperty("coordinate_position_in_arr"))).intValue();
+            int from = ((Integer) (splitPolygonFromHandle.getClientProperty("coordinate_position_in_arr"))).intValue();//NOI18N
+            int to = ((Integer) (splitPolygonToHandle.getClientProperty("coordinate_position_in_arr"))).intValue();//NOI18N
 
             splitPolygonToHandle = null;
             splitPolygonFromHandle = null;
@@ -1789,7 +1206,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             //Erstes Polygon
             if (viewer.isFeatureDebugging()) {
-                log.debug("ErstesPolygon" + (to - from + splitPoints.size()));
+                log.debug("ErstesPolygon" + (to - from + splitPoints.size()));//NOI18N
             }
             Coordinate[] c1 = new Coordinate[to - from + splitPoints.size()];
             int counter = 0;
@@ -1799,7 +1216,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             if (wasSwapped) {
                 if (viewer.isFeatureDebugging()) {
-                    log.debug("SWAPPED");
+                    log.debug("SWAPPED");//NOI18N
                 }
                 for (int i = 1; i < splitPoints.size() - 1; ++i) {
                     Point2D splitPoint = (Point2D) splitPoints.get(i);
@@ -1809,7 +1226,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             } else {
                 if (viewer.isFeatureDebugging()) {
-                    log.debug("NOT_SWAPPED");
+                    log.debug("NOT_SWAPPED");//NOI18N
                 }
                 for (int i = splitPoints.size() - 2; i > 0; --i) {
                     Point2D splitPoint = (Point2D) splitPoints.get(i);
@@ -1832,7 +1249,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             if (wasSwapped) {
                 if (viewer.isFeatureDebugging()) {
-                    log.debug("SWAPPED");
+                    log.debug("SWAPPED");//NOI18N
                 }
                 for (int i = splitPoints.size() - 2; i > 0; --i) {
                     Point2D splitPoint = (Point2D) splitPoints.get(i);
@@ -1842,7 +1259,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             } else {
                 if (viewer.isFeatureDebugging()) {
-                    log.debug("NOT_SWAPPED");
+                    log.debug("NOT_SWAPPED");//NOI18N
                 }
                 for (int i = 1; i < splitPoints.size() - 1; ++i) {
                     Point2D splitPoint = (Point2D) splitPoints.get(i);
@@ -1859,7 +1276,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 //            c1[counter]=(Coordinate)coordArr[0].clone();
             for (int i = 0; i < c2.length; ++i) {
                 if (viewer.isFeatureDebugging()) {
-                    log.debug("c2[" + i + "]=" + c2[i]);
+                    log.debug("c2[" + i + "]=" + c2[i]);//NOI18N
                 }
             }
 //            ret[1]=new PFeature(c2,wtst,x_offset,y_offset,viewer);
@@ -1885,7 +1302,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         try {
             double scale = viewer.getCamera().getViewScale();
             if (viewer.isFeatureDebugging()) {
-                log.debug("Scale=" + scale);
+                log.debug("Scale=" + scale);//NOI18N
             }
             for (int j = 0; j < xp.length; ++j) {
                 xp[j] = xp[j] + (float) (dim.getWidth() / (float) scale);
@@ -1897,7 +1314,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             syncGeometry();
             resetInfoNodePosition();
         } catch (NullPointerException npe) {
-            log.warn("Fehler bei moveFeature:", npe);
+            log.warn("error at moveFeature:", npe);//NOI18N
         }
     }
 
@@ -1907,11 +1324,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public void resetInfoNodePosition() {
         if (stickyChild != null) {
             if (viewer.isFeatureDebugging()) {
-                log.debug("getFeature().getGeometry():" + getFeature().getGeometry());
+                log.debug("getFeature().getGeometry():" + getFeature().getGeometry());//NOI18N
             }
             if (viewer.isFeatureDebugging()) {
-                log.debug("getFeature().getGeometry().getInteriorPoint().getY():" +
-                        getFeature().getGeometry().getInteriorPoint().getY());
+                log.debug("getFeature().getGeometry().getInteriorPoint().getY():"//NOI18N
+                        + getFeature().getGeometry().getInteriorPoint().getY());
             }
             stickyChild.setOffset(wtst.getScreenX(getFeature().getGeometry().getInteriorPoint().getX()),
                     wtst.getScreenY(getFeature().getGeometry().getInteriorPoint().getY()));
@@ -1938,7 +1355,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         EventQueue.invokeLater(new Runnable() {
 
             public void run() {
-                log.debug("refreshInfoNode");
+                log.debug("refreshInfoNode");//NOI18N
                 PFeature.this.refreshInfoNode();
             }
         });
@@ -1959,7 +1376,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
 
                 if (viewer.isFeatureDebugging()) {
-                    log.debug("ADD INFONODE3");
+                    log.debug("ADD INFONODE3");//NOI18N
                 }
 
                 infoPanel = new InfoPanel(infoComponent);
@@ -2008,14 +1425,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         viewer.rescaleStickyNodes();
                     }
                     if (viewer.isFeatureDebugging()) {
-                        log.debug("addInfoNode()");
+                        log.debug("addInfoNode()");//NOI18N
                     }
                 }
                 infoNode = p;
                 if (viewer != null) {
                     infoNode.setVisible(viewer.isInfoNodesVisible());
                     if (viewer.isFeatureDebugging()) {
-                        log.debug("addInfoNode()");
+                        log.debug("addInfoNode()");//NOI18N
                     }
                     viewer.rescaleStickyNodes();
                     p.setWidth(pswingComp.getWidth());
@@ -2023,7 +1440,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 } else {
                     infoNode.setVisible(false);
                 }
-                pswingComp.addPropertyChangeListener("fullBounds", new PropertyChangeListener() {
+                pswingComp.addPropertyChangeListener("fullBounds", new PropertyChangeListener() {//NOI18N
 
                     public void propertyChange(PropertyChangeEvent evt) {
                         p.setWidth(pswingComp.getWidth());
@@ -2032,7 +1449,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 });
             }
         } catch (Throwable t) {
-            log.error("Fehler in AddInfoNode", t);
+            log.error("Error in AddInfoNode", t);//NOI18N
         }
     }
 
@@ -2052,15 +1469,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public void ensureFullVisibility() {
         PBounds all = viewer.getCamera().getViewBounds();
         if (viewer.isFeatureDebugging()) {
-            log.debug("getViewBounds()" + all);
+            log.debug("getViewBounds()" + all);//NOI18N
         }
         PBounds newBounds = new PBounds();
         newBounds.setRect(this.getFullBounds().createUnion(all.getBounds2D()));
         if (viewer.isFeatureDebugging()) {
-            log.debug("getFullBounds()" + getFullBounds());
+            log.debug("getFullBounds()" + getFullBounds());//NOI18N
         }
         if (viewer.isFeatureDebugging()) {
-            log.debug("newBounds" + newBounds);
+            log.debug("newBounds" + newBounds);//NOI18N
         }
         viewer.getCamera().animateViewToCenterBounds(newBounds.getBounds2D(), true, viewer.getAnimationDuration());
     }
@@ -2178,7 +1595,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void setSelected(boolean selected) {
         if (viewer.isFeatureDebugging()) {
-            log.debug("setSelected(" + selected + ")");
+            log.debug("setSelected(" + selected + ")");//NOI18N
         }
 
         splitPolygonFromHandle = null;
@@ -2249,14 +1666,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (selected) {
                 CustomFixedWidthStroke fws = new CustomFixedWidthStroke(5f);
                 setStroke(fws);
-                setStrokePaint(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground"));
+                setStrokePaint(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground"));//NOI18N
                 setPaint(null);
             } else {
                 //setStroke(new FixedWidthStroke());
                 if (stroke != null) {
                     setStroke(stroke);
                 } else {
-                    setStroke(new FixedWidthStroke());
+                    setStroke(FIXED_WIDTH_STROKE);
                 }
                 if (strokePaint != null) {
                     setStrokePaint(strokePaint);
@@ -2269,7 +1686,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (stroke != null) {
                 setStroke(stroke);
             } else {
-                setStroke(new FixedWidthStroke());
+                setStroke(FIXED_WIDTH_STROKE);
             }
 
             if (selected) {
@@ -2277,9 +1694,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if (nonSelectedPaint instanceof Color) {
                     Color c = (Color) nonHighlightingPaint;
                     if (c != null) {
-                        int red = (int) (javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground").getRed());
-                        int green = (int) (javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground").getGreen());
-                        int blue = (int) (javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground").getBlue());
+                        int red = (int) (javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground").getRed());//NOI18N
+                        int green = (int) (javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground").getGreen());//NOI18N
+                        int blue = (int) (javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground").getBlue());//NOI18N
                         setPaint(new Color(red, green, blue, c.getAlpha() / 2));
                     }
                 } else {

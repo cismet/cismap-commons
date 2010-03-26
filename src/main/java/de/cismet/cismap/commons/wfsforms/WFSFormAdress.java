@@ -16,7 +16,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -31,8 +30,6 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
  * @author  thorsten.hell@cismet.de
  */
 public class WFSFormAdress extends AbstractWFSForm {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
-
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private WFSFormFeature strasse = null;
     private WFSFormFeature nr = null;
@@ -40,7 +37,7 @@ public class WFSFormAdress extends AbstractWFSForm {
 
     /** Creates new form WFSFormTester */
     public WFSFormAdress() {
-        log.debug("new WFSFormAddress");
+        log.debug("new WFSFormAddress");//NOI18N
         try {
             initComponents();
 //        cboStreets.setEditable(true);
@@ -51,10 +48,10 @@ public class WFSFormAdress extends AbstractWFSForm {
             prbStreets.setPreferredSize(new java.awt.Dimension(1, 5));
             prbNr.setPreferredSize(new java.awt.Dimension(1, 5));
 
-            listComponents.put("cboAllStreets", cboStreets);
-            listComponents.put("cboAllStreetsProgress", prbStreets);
-            listComponents.put("cboNumbersOfAStreet", cboNr);
-            listComponents.put("cboNumbersOfAStreetProgress", prbNr);
+            listComponents.put("cboAllStreets", cboStreets);//NOI18N
+            listComponents.put("cboAllStreetsProgress", prbStreets);//NOI18N
+            listComponents.put("cboNumbersOfAStreet", cboNr);//NOI18N
+            listComponents.put("cboNumbersOfAStreetProgress", prbNr);//NOI18N
 
             pMark.setVisible(false);
             pMark.setSweetSpotX(0.5d);
@@ -78,7 +75,7 @@ public class WFSFormAdress extends AbstractWFSForm {
             });
             //CismapBroker.getInstance().getMappingComponent().getHighlightingLayer().addChild(pMark);
         } catch (Exception e) {
-            log.error("Could not Create WFForm", e);
+            log.error("Could not Create WFForm", e);//NOI18N
         }
     }
 
@@ -121,7 +118,7 @@ public class WFSFormAdress extends AbstractWFSForm {
         setLayout(new java.awt.GridBagLayout());
 
         cmdOk.setMnemonic('P');
-        cmdOk.setText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormAdress.cmdOk.text")); // NOI18N
+        cmdOk.setText(org.openide.util.NbBundle.getMessage(WFSFormAdress.class, "WFSFormAdress.cmdOk.text")); // NOI18N
         cmdOk.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdOkActionPerformed(evt);
@@ -221,7 +218,7 @@ public class WFSFormAdress extends AbstractWFSForm {
         add(panStr, gridBagConstraints);
 
         chkVisualize.setSelected(true);
-        chkVisualize.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormAdress.chkVisualize.toolTipText")); // NOI18N
+        chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormAdress.class, "WFSFormAdress.chkVisualize.toolTipText")); // NOI18N
         chkVisualize.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkVisualizeActionPerformed(evt);
@@ -235,7 +232,7 @@ public class WFSFormAdress extends AbstractWFSForm {
         add(chkVisualize, gridBagConstraints);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
-        jLabel1.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormAdress.jLabel1.toolTipText")); // NOI18N
+        jLabel1.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormAdress.class, "WFSFormAdress.jLabel1.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
@@ -244,7 +241,7 @@ public class WFSFormAdress extends AbstractWFSForm {
         add(jLabel1, gridBagConstraints);
 
         chkLockScale.setSelected(true);
-        chkLockScale.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormAdress.chkLockScale.toolTipText")); // NOI18N
+        chkLockScale.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormAdress.class, "WFSFormAdress.chkLockScale.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
@@ -253,7 +250,7 @@ public class WFSFormAdress extends AbstractWFSForm {
         add(chkLockScale, gridBagConstraints);
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
-        jLabel2.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormAdress.jLabel2.toolTipText")); // NOI18N
+        jLabel2.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormAdress.class, "WFSFormAdress.jLabel2.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
@@ -268,7 +265,7 @@ public class WFSFormAdress extends AbstractWFSForm {
         panEmpty.setLayout(panEmptyLayout);
         panEmptyLayout.setHorizontalGroup(
             panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 11, Short.MAX_VALUE)
+            .add(0, 13, Short.MAX_VALUE)
         );
         panEmptyLayout.setVerticalGroup(
             panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -301,11 +298,11 @@ public class WFSFormAdress extends AbstractWFSForm {
 
 
     private void cboStreetsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboStreetsActionPerformed
-        log.debug("cboStreetsActionPerformed()");
+        log.debug("cboStreetsActionPerformed()");//NOI18N
         if (cboStreets.getSelectedItem() instanceof WFSFormFeature) {
             strasse = (WFSFormFeature) cboStreets.getSelectedItem();
             nr = null;
-            requestRefresh("cboNumbersOfAStreet", (WFSFormFeature) cboStreets.getSelectedItem());
+            requestRefresh("cboNumbersOfAStreet", (WFSFormFeature) cboStreets.getSelectedItem());//NOI18N
             fireWfsFormAddressStreetSelected();
         }
     }//GEN-LAST:event_cboStreetsActionPerformed
@@ -349,7 +346,7 @@ public class WFSFormAdress extends AbstractWFSForm {
     }
 
     private void cboNrActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboNrActionPerformed
-        log.debug("cboNrActionPerformed()");
+        log.debug("cboNrActionPerformed()");//NOI18N
         if (cboNr.getSelectedItem() instanceof WFSFormFeature) {
             nr = (WFSFormFeature) cboNr.getSelectedItem();
             fireWfsFormAddressNrSelected();
@@ -385,29 +382,29 @@ public class WFSFormAdress extends AbstractWFSForm {
             e.printStackTrace();
         }
         WFSFormQuery allStreets = new WFSFormQuery();
-        allStreets.setComponentName("cboAllStreets");
-        allStreets.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");
-        allStreets.setDisplayTextProperty("geographicIdentifier");
-        allStreets.setExtentProperty("geographicExtent");
-        allStreets.setFilename("/request_all_streets.xml");
-        allStreets.setId("all_streets");
-        allStreets.setIdProperty("identifier");
-        allStreets.setTitle("Strassen");
+        allStreets.setComponentName("cboAllStreets");//NOI18N
+        allStreets.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");//NOI18N
+        allStreets.setDisplayTextProperty("geographicIdentifier");//NOI18N
+        allStreets.setExtentProperty("geographicExtent");//NOI18N
+        allStreets.setFilename("/request_all_streets.xml");//NOI18N
+        allStreets.setId("all_streets");//NOI18N
+        allStreets.setIdProperty("identifier");//NOI18N
+        allStreets.setTitle("Strassen");//NOI18N
         allStreets.setType(WFSFormQuery.INITIAL);
-        allStreets.setWfsQueryString(readFileAsString(new File("C:\\request_alle_strassen_extent.xml")));
+        allStreets.setWfsQueryString(readFileAsString(new File("C:\\request_alle_strassen_extent.xml")));//NOI18N
 
         WFSFormQuery numbers = new WFSFormQuery();
-        numbers.setComponentName("cboNumbersOfAStreet");
-        numbers.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");
-        numbers.setDisplayTextProperty("geographicIdentifier");
-        numbers.setExtentProperty("geographicExtent");
-        numbers.setFilename("/request_all_numbers.xml");
-        numbers.setId("numbers");
-        numbers.setIdProperty("identifier");
-        numbers.setTitle("Nr");
+        numbers.setComponentName("cboNumbersOfAStreet");//NOI18N
+        numbers.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");//NOI18N
+        numbers.setDisplayTextProperty("geographicIdentifier");//NOI18N
+        numbers.setExtentProperty("geographicExtent");//NOI18N
+        numbers.setFilename("/request_all_numbers.xml");//NOI18N
+        numbers.setId("numbers");//NOI18N
+        numbers.setIdProperty("identifier");//NOI18N
+        numbers.setTitle("Nr");//NOI18N
         numbers.setType(WFSFormQuery.FOLLOWUP);
-        numbers.setQueryPlaceholder("@@strasse_id@@");
-        numbers.setWfsQueryString(readFileAsString(new File("C:\\request_hausnummern_from_strasse_extent.xml")));
+        numbers.setQueryPlaceholder("@@strasse_id@@");//NOI18N
+        numbers.setWfsQueryString(readFileAsString(new File("C:\\request_hausnummern_from_strasse_extent.xml")));//NOI18N
         Vector<WFSFormQuery> v = new Vector<WFSFormQuery>();
         v.add(allStreets);
         v.add(numbers);

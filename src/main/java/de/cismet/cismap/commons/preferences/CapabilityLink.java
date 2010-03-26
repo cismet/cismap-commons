@@ -5,9 +5,10 @@ import org.jdom.CDATA;
 import org.jdom.Element;
 
 public class CapabilityLink {
-    public static String OGC = "OGC";
-    public static String OGC_DEPRECATED = "OGC-WMS";
-    public static String SEPARATOR = "SEPARATOR";
+    public static final String OGC = "OGC";//NOI18N
+    public static final String OGC_DEPRECATED = "OGC-WMS";//NOI18N
+    public static final String SEPARATOR = "SEPARATOR";//NOI18N
+    public static final String MENU = "MENU";//NOI18N
     private String type;
     private String subparent;
     private String link;
@@ -37,10 +38,10 @@ public class CapabilityLink {
     }
 
     public CapabilityLink(Element parent) {
-        Element e = parent.getChild("capabilities");
-        type = e.getAttribute("type").getValue();
+        Element e = parent.getChild("capabilities");//NOI18N
+        type = e.getAttribute("type").getValue();//NOI18N
         try {
-            active = e.getAttribute("active").getBooleanValue();
+            active = e.getAttribute("active").getBooleanValue();//NOI18N
         } catch (Exception notHandled) {
         }
         link = e.getTextTrim();
@@ -63,25 +64,25 @@ public class CapabilityLink {
     }
 
     public Element getElement() {
-        Element elem = new Element("capabilities");
+        Element elem = new Element("capabilities");//NOI18N
         CDATA cd = new CDATA(link);
         elem.addContent(cd);
-        elem.setAttribute(new Attribute("type", type));
+        elem.setAttribute(new Attribute("type", type));//NOI18N
         if (subparent != null) {
-            elem.setAttribute(new Attribute("subparent", subparent));
+            elem.setAttribute(new Attribute("subparent", subparent));//NOI18N
         }
-        elem.setAttribute(new Attribute("active", new Boolean(active).toString()));
+        elem.setAttribute(new Attribute("active", new Boolean(active).toString()));//NOI18N
         return elem;
     }
 
     public Element getElementAsListEntry() {
-        Element elem = new Element("capabilitiesList");
+        Element elem = new Element("capabilitiesList");//NOI18N
         CDATA cd = new CDATA(link);
         elem.addContent(cd);
-        elem.setAttribute("titlestring", title);
-        elem.setAttribute(new Attribute("type", type));
+        elem.setAttribute("titlestring", title);//NOI18N
+        elem.setAttribute(new Attribute("type", type));//NOI18N
         if (subparent != null) {
-            elem.setAttribute(new Attribute("subparent", subparent));
+            elem.setAttribute(new Attribute("subparent", subparent));//NOI18N
         }
         return elem;
     }

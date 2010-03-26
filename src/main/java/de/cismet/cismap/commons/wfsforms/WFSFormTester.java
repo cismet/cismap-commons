@@ -13,7 +13,6 @@ import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -25,7 +24,6 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
  * @author  thorsten.hell@cismet.de
  */
 public class WFSFormTester extends AbstractWFSForm {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     
     private WFSFormFeature strasse=null;
@@ -33,16 +31,16 @@ public class WFSFormTester extends AbstractWFSForm {
     
     /** Creates new form WFSFormTester */
     public WFSFormTester() {
-        log.debug("new WFSFormTester");
+        log.debug("new WFSFormTester");//NOI18N
         initComponents();
         AutoCompleteDecorator.decorate(cboStreets);
         AutoCompleteDecorator.decorate(cboNr);
         prbStreets.setPreferredSize(new Dimension(10,5));
         prbNr.setPreferredSize(new Dimension(10,5));
-        listComponents.put("cboAllStreets",cboStreets);
-        listComponents.put("cboAllStreetsProgress",prbStreets);
-        listComponents.put("cboNumbersOfAStreet",cboNr);
-        listComponents.put("cboNumbersOfAStreetProgress",prbNr);
+        listComponents.put("cboAllStreets",cboStreets);//NOI18N
+        listComponents.put("cboAllStreetsProgress",prbStreets);//NOI18N
+        listComponents.put("cboNumbersOfAStreet",cboNr);//NOI18N
+        listComponents.put("cboNumbersOfAStreetProgress",prbNr);//NOI18N
         
         
     }
@@ -84,7 +82,7 @@ public class WFSFormTester extends AbstractWFSForm {
             }
         });
 
-        cmdOk.setText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormTester.cmdOk.text")); // NOI18N
+        cmdOk.setText(org.openide.util.NbBundle.getMessage(WFSFormTester.class, "WFSFormTester.cmdOk.text")); // NOI18N
 
         prbStreets.setBorderPainted(false);
 
@@ -150,7 +148,7 @@ public class WFSFormTester extends AbstractWFSForm {
 //        log.debug(cboStreets.getSelectedItem()+":::"+s);
         if (cboStreets.getSelectedItem() instanceof WFSFormFeature) {
             strasse=(WFSFormFeature)cboStreets.getSelectedItem();
-            requestRefresh("cboNumbersOfAStreet",(WFSFormFeature)cboStreets.getSelectedItem());
+            requestRefresh("cboNumbersOfAStreet",(WFSFormFeature)cboStreets.getSelectedItem());//NOI18N
         }
         
     }//GEN-LAST:event_cboStreetsActionPerformed
@@ -179,29 +177,29 @@ public class WFSFormTester extends AbstractWFSForm {
             e.printStackTrace();
         }
         WFSFormQuery allStreets=new WFSFormQuery();
-        allStreets.setComponentName("cboAllStreets");
-        allStreets.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");
-        allStreets.setDisplayTextProperty("geographicIdentifier");
-        allStreets.setExtentProperty("geographicExtent");
-        allStreets.setFilename("/request_all_streets.xml");
-        allStreets.setId("all_streets");
-        allStreets.setIdProperty("identifier");
-        allStreets.setTitle("Strassen");
+        allStreets.setComponentName("cboAllStreets");//NOI18N
+        allStreets.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");//NOI18N
+        allStreets.setDisplayTextProperty("geographicIdentifier");//NOI18N
+        allStreets.setExtentProperty("geographicExtent");//NOI18N
+        allStreets.setFilename("/request_all_streets.xml");//NOI18N
+        allStreets.setId("all_streets");//NOI18N
+        allStreets.setIdProperty("identifier");//NOI18N
+        allStreets.setTitle("Strassen");//NOI18N
         allStreets.setType(WFSFormQuery.INITIAL);
-        allStreets.setWfsQueryString(readFileAsString(new File("C:\\request_alle_strassen_extent.xml")));
+        allStreets.setWfsQueryString(readFileAsString(new File("C:\\request_alle_strassen_extent.xml")));//NOI18N
         
         WFSFormQuery numbers=new WFSFormQuery();
-        numbers.setComponentName("cboNumbersOfAStreet");
-        numbers.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");
-        numbers.setDisplayTextProperty("geographicIdentifier");
-        numbers.setExtentProperty("geographicExtent");
-        numbers.setFilename("/request_all_numbers.xml");
-        numbers.setId("numbers");
-        numbers.setIdProperty("identifier");
-        numbers.setTitle("Nr");
+        numbers.setComponentName("cboNumbersOfAStreet");//NOI18N
+        numbers.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");//NOI18N
+        numbers.setDisplayTextProperty("geographicIdentifier");//NOI18N
+        numbers.setExtentProperty("geographicExtent");//NOI18N
+        numbers.setFilename("/request_all_numbers.xml");//NOI18N
+        numbers.setId("numbers");//NOI18N
+        numbers.setIdProperty("identifier");//NOI18N
+        numbers.setTitle("Nr");//NOI18N
         numbers.setType(WFSFormQuery.FOLLOWUP);
-        numbers.setQueryPlaceholder("@@strasse_id@@");
-        numbers.setWfsQueryString(readFileAsString(new File("C:\\request_hausnummern_from_strasse_extent.xml")));
+        numbers.setQueryPlaceholder("@@strasse_id@@");//NOI18N
+        numbers.setWfsQueryString(readFileAsString(new File("C:\\request_hausnummern_from_strasse_extent.xml")));//NOI18N
         Vector<WFSFormQuery> v=new Vector<WFSFormQuery>();
         v.add(allStreets);
         v.add(numbers);

@@ -34,15 +34,12 @@
 
 package de.cismet.cismap.commons.gui;
 
-import java.util.ResourceBundle;
 
 /**
  *
  * @author  thorsten.hell@cismet.de
  */
 public class MappingServicePanel extends javax.swing.JPanel {
-
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     
     /** Creates new form MappingServicePanel */
     public MappingServicePanel() {
@@ -69,7 +66,7 @@ public class MappingServicePanel extends javax.swing.JPanel {
         setLayout(new java.awt.BorderLayout());
         add(jTabbedPane1, java.awt.BorderLayout.CENTER);
 
-        jButton1.setText(I18N.getString("de.cismet.cismap.commons.gui.MappingServicePanel.jButton1.text")); // NOI18N
+        jButton1.setText(org.openide.util.NbBundle.getMessage(MappingServicePanel.class, "MappingServicePanel.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -79,16 +76,16 @@ public class MappingServicePanel extends javax.swing.JPanel {
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
 
-        jLabel1.setText(I18N.getString("de.cismet.cismap.commons.gui.MappingServicePanel.jLabel1.text")); // NOI18N
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(MappingServicePanel.class, "MappingServicePanel.jLabel1.text")); // NOI18N
         jPanel2.add(jLabel1);
 
-        jToggleButton1.setText(I18N.getString("de.cismet.cismap.commons.gui.MappingServicePanel.jToggleButton1.text")); // NOI18N
+        jToggleButton1.setText(org.openide.util.NbBundle.getMessage(MappingServicePanel.class, "MappingServicePanel.jToggleButton1.text")); // NOI18N
         jPanel2.add(jToggleButton1);
 
-        jToggleButton2.setText(I18N.getString("de.cismet.cismap.commons.gui.MappingServicePanel.jToggleButton2.text")); // NOI18N
+        jToggleButton2.setText(org.openide.util.NbBundle.getMessage(MappingServicePanel.class, "MappingServicePanel.jToggleButton2.text")); // NOI18N
         jPanel2.add(jToggleButton2);
 
-        jToggleButton3.setText(I18N.getString("de.cismet.cismap.commons.gui.MappingServicePanel.jToggleButton3.text")); // NOI18N
+        jToggleButton3.setText(org.openide.util.NbBundle.getMessage(MappingServicePanel.class, "MappingServicePanel.jToggleButton3.text")); // NOI18N
         jPanel2.add(jToggleButton3);
 
         add(jPanel2, java.awt.BorderLayout.SOUTH);

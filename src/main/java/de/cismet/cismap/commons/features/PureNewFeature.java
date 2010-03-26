@@ -19,7 +19,6 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.geom.Point2D;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -31,11 +30,19 @@ import javax.swing.JComponent;
 public class PureNewFeature extends DefaultStyledFeature implements Cloneable, XStyledFeature {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    static ImageIcon icoPoint = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/point.png"));
-    static ImageIcon icoLinestring = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/linestring.png"));
-    static ImageIcon icoPolygon = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polygon.png"));
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
-    private String name = "";
+
+    public static enum geomTypes {
+
+        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON
+    };
+    private Paint fillingPaint;
+    private geomTypes geomType;
+    static ImageIcon icoPoint = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/point.png"));//NOI18N
+    static ImageIcon icoPolyline = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polyline.png"));//NOI18N
+    static ImageIcon icoPolygon = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polygon.png"));//NOI18N
+    static ImageIcon icoEllipse = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/ellipse.png"));//NOI18N
+    static ImageIcon icoRectangle = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/rectangle.png"));//NOI18N
+    private String name = "";//NOI18N
 
     public PureNewFeature(Geometry g) {
         setGeometry(g);
@@ -50,20 +57,20 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     public PureNewFeature(final Point2D[] canvasPoints, WorldToScreenTransform wtst) {
         synchronized (canvasPoints) {
             try {
-                log.debug("canvasPoints " + canvasPoints);
+                log.debug("canvasPoints " + canvasPoints);//NOI18N
                 Coordinate[] coordArr = new Coordinate[canvasPoints.length];
                 float[] xp = new float[canvasPoints.length];
                 float[] yp = new float[canvasPoints.length];
                 for (int i = 0; i < canvasPoints.length; ++i) {
-                    log.debug("canvasPoints["+i+"]:"+canvasPoints[i]);
+                    log.debug("canvasPoints[" + i + "]:" + canvasPoints[i]);//NOI18N
                     xp[i] = (float) (canvasPoints[i].getX());
                     yp[i] = (float) (canvasPoints[i].getY());
                     coordArr[i] = new Coordinate(wtst.getSourceX(xp[i]), wtst.getSourceY(yp[i]));
                 }
                 init(coordArr, wtst);
-                log.debug("pureNewFeature wurde angelegt");
+                log.debug("pureNewFeature created");//NOI18N
             } catch (Exception e) {
-                log.error("Fehler beim anlegen eines PureNewfeatures", e);
+                log.error("Error during creating a PureNewfeatures", e);//NOI18N
             }
         }
     }
@@ -91,8 +98,9 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
                 setGeometry(line);
             }
         } catch (Exception e) {
-            log.warn("Fehler im init", e);
+            log.warn("Error in init", e);//NOI18N
         }
+        fillingPaint = new Color(1f, 0f, 0f, 0.4f);
     }
 
     public java.awt.Stroke getLineStyle() {
@@ -100,15 +108,12 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     }
 
     public java.awt.Paint getFillingPaint() {
-        try {
-            return new Color(
-                new Float(I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.getFillingPaint().RED")),
-                new Float(I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.getFillingPaint().GREEN")),
-                new Float(I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.getFillingPaint().BLUE")),
-                new Float(I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.getFillingPaint().TRANSPARENT")));
-        } catch (Exception e) {
-            return new Color(1f, 0f, 0f, 0.4f);
-        }
+        return fillingPaint;
+    }
+
+    @Override
+    public void setFillingPaint(Paint fillingStyle) {
+        this.fillingPaint = fillingStyle;
     }
 
     public float getTransparency() {
@@ -116,12 +121,29 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     }
 
     public String getType() {
-        return "";
+        return "";//NOI18N
     }
 
+    @Override
     public String getName() {
-        try {
-            Vector<Feature> allFeatures=CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures();
+        if (getGeometryType() != null) {
+            switch (getGeometryType()) {
+                case RECTANGLE:
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.newRectangle") ;
+                case LINESTRING:
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.newPolyline") ;
+                case ELLIPSE:
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.newEllipse") ;
+                case POINT:
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.newPoint") ;
+                case POLYGON:
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.newPolygon") ;
+                default:
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.errorInGetName") ;
+            }
+        } else {
+            try {
+                Vector<Feature> allFeatures = CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures();
 //
 //        int countNewPoints=1; 
 //        int countNewLines=1;
@@ -153,23 +175,22 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
 //        }
 
 
-        if (name.trim().equals("")) {
-            if (getGeometry() instanceof Point) {
-                name= I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.name.neuerPunkt");
-            } else if (getGeometry() instanceof LineString) {
-                name = I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.name.neuerLinienzug");
-            } else {
-                name = I18N.getString("de.cismet.cismap.commons.features.PureNewFeature.name.neuesPolygon");
+                if (name.trim().equals("")) {
+                    if (getGeometry() instanceof Point) {
+                        name = "Neuer Punkt";
+                    } else if (getGeometry() instanceof LineString) {
+                        name = "Neuer Linienzug";
+                    } else {
+                        name = "Neues Polygon";
+                    }
+                }
+                return name;
+            } catch (Exception e) {
+                log.fatal("getName() error", e);
+                return "Error in getName()";
             }
         }
-        return name;
-        }
-        catch (Exception e){
-            log.fatal("getName() error",e);
-            return "Error in getName()";
-        }
     }
-
 
     public void setName(String name) {
         this.name = name;
@@ -182,10 +203,16 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     public ImageIcon getIconImage() {
         if (getGeometry() instanceof Point) {
             return icoPoint;
-        } else if (getGeometry() instanceof LineString) {
-            return icoLinestring;
-        } else {
+        } else if (getGeometryType() == geomTypes.LINESTRING) {
+            return icoPolyline;
+        } else if (getGeometryType() == geomTypes.ELLIPSE) {
+            return icoEllipse;
+        } else if (getGeometryType() == geomTypes.RECTANGLE) {
+            return icoRectangle;
+        } else if (getGeometryType() == geomTypes.POLYGON) {
             return icoPolygon;
+        } else {
+            return null;
         }
     }
 
@@ -204,5 +231,11 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         return getTransparency();
     }
 
-    
+    public void setGeometryType(geomTypes geomType) {
+        this.geomType = geomType;
+    }
+
+    public geomTypes getGeometryType() {
+        return geomType;
+    }
 }

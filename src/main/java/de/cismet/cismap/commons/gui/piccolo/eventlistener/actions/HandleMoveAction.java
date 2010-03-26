@@ -13,7 +13,6 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.tools.collections.MultiMap;
 import edu.umd.cs.piccolo.PLayer;
 import java.util.Collection;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 
@@ -24,7 +23,6 @@ import java.util.Vector;
  * @author nh
  */
 public class HandleMoveAction implements CustomAction {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private MultiMap gluedCoordinates;
     private PFeature pf;
     private int posInArray;
@@ -97,10 +95,7 @@ public class HandleMoveAction implements CustomAction {
      * @return Beschreibungsstring
      */
     public String info() {
-        return I18N.getString("de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleMoveAction.info().return")
-                + " ("
-                + new Float(startX).intValue()
-                + ", " + new Float(startY).intValue() + ")";
+        return org.openide.util.NbBundle.getMessage(HandleMoveAction.class, "HandleMoveAction.info().return", new Object[]{new Float(startX).intValue(), new Float(startY).intValue()});
     }
 
     /**

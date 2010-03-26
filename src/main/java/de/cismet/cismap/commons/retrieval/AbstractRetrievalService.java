@@ -33,9 +33,10 @@
  */
 package de.cismet.cismap.commons.retrieval;
 
+import de.cismet.cismap.commons.Debug;
 import de.cismet.tools.CurrentStackTrace;
 import java.beans.PropertyChangeListener;
-import java.util.HashSet;
+import java.beans.PropertyChangeSupport;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -43,149 +44,219 @@ import java.util.Vector;
  *
  * @author thorsten.hell@cismet.de
  */
-public abstract class AbstractRetrievalService implements RetrievalService {
+public abstract class AbstractRetrievalService implements RetrievalService
+{
+  public final static String PROGRESS_PROPERTY = "progress";//NOI18N
+  public final static String PROGRESS_REFRESH = "refresh";//NOI18N
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private int progress;
-    private Object errorObject;
-    private boolean refreshNeeded;
-    protected Vector listeners = new Vector();
+  protected final static boolean DEBUG = Debug.DEBUG;
+  protected final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
-    /**
-     * Creates a new instance of AbstractRetrievalService
-     */
-    public AbstractRetrievalService() {
+  protected int progress = -1;
+  protected Object errorObject = null;
+  protected boolean refreshNeeded = false;
+  protected Vector listeners = new Vector();
+  protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
+  /**
+   * Creates a new instance of AbstractRetrievalService
+   */
+  public AbstractRetrievalService()
+  {
+  }
+
+  @Override
+  public void removeRetrievalListener(RetrievalListener irl)
+  {
+    listeners.remove(irl);
+  }
+
+  @Override
+  public void addRetrievalListener(RetrievalListener irl)
+  {
+    if (!(listeners.contains(irl)))
+    {
+      listeners.add(irl);
     }
+  }
+  final Object fireRetrievalStartedLock = new Object();
 
-    public void removeRetrievalListener(RetrievalListener irl) {
-        listeners.remove(irl);
-    }
-
-    public void addRetrievalListener(RetrievalListener irl) {
-        if (!(listeners.contains(irl))) {
-            listeners.add(irl);
+  public void fireRetrievalStarted(RetrievalEvent e)
+  {
+    synchronized (fireRetrievalStartedLock)
+    {
+      this.setProgress(-1);
+      e.setRetrievalService(this);
+      Iterator it = listeners.iterator();
+      while (it.hasNext())
+      {
+        Object l = it.next();
+        if (l instanceof RetrievalListener)
+        {
+          ((RetrievalListener) l).retrievalStarted(e);
         }
+      }
     }
-    Object fireRetrievalStartedLock = new Object();
+  }
+  final Object fireRetrievalProgressLock = new Object();
 
-    public void fireRetrievalStarted(RetrievalEvent e) {
-        synchronized (fireRetrievalStartedLock) {
-            e.setRetrievalService(this);
-            Iterator it = listeners.iterator();
-            while (it.hasNext()) {
-                Object l = it.next();
-                if (l instanceof RetrievalListener) {
-                    ((RetrievalListener) l).retrievalStarted(e);
-                }
-            }
+  public void fireRetrievalProgress(RetrievalEvent e)
+  {
+    synchronized (fireRetrievalProgressLock)
+    {
+      this.setProgress(e.getPercentageDone());
+      e.setRetrievalService(this);
+      Iterator it = listeners.iterator();
+      while (it.hasNext())
+      {
+        Object l = it.next();
+        if (l instanceof RetrievalListener)
+        {
+          ((RetrievalListener) l).retrievalProgress(e);
         }
+      }
     }
-    Object fireRetrievalProgressLock = new Object();
+  }
+  final Object fireRetrievalCompleteLock = new Object();
 
-    public void fireRetrievalProgress(RetrievalEvent e) {
-        synchronized (fireRetrievalProgressLock) {
-            e.setRetrievalService(this);
-            Iterator it = listeners.iterator();
-            while (it.hasNext()) {
-                Object l = it.next();
-                if (l instanceof RetrievalListener) {
-                    ((RetrievalListener) l).retrievalProgress(e);
-                }
-            }
+  public void fireRetrievalComplete(RetrievalEvent e)
+  {
+    synchronized (fireRetrievalCompleteLock)
+    {
+      this.setProgress(100);
+      e.setRetrievalService(this);
+      Iterator it = listeners.iterator();
+      while (it.hasNext())
+      {
+        Object l = it.next();
+        if (l instanceof RetrievalListener)
+        {
+          ((RetrievalListener) l).retrievalComplete(e);
         }
+      }
     }
-    Object fireRetrievalCompleteLock = new Object();
+  }
 
-    public void fireRetrievalComplete(RetrievalEvent e) {
-        synchronized (fireRetrievalCompleteLock) {
-            e.setRetrievalService(this);
-            Iterator it = listeners.iterator();
-            while (it.hasNext()) {
-                Object l = it.next();
-                if (l instanceof RetrievalListener) {
-                    ((RetrievalListener) l).retrievalComplete(e);
-                }
-            }
+  final Object fireRetrievalAbortedLock = new Object();
+
+  public void fireRetrievalAborted(final RetrievalEvent e)
+  {
+    synchronized (fireRetrievalAbortedLock)
+    {
+      this.setProgress(0);
+      e.setRetrievalService(this);
+      Iterator it = listeners.iterator();
+      while (it.hasNext())
+      {
+        Object l = it.next();
+        if (l instanceof RetrievalListener)
+        {
+          ((RetrievalListener) l).retrievalAborted(e);
         }
+      }
     }
-    Object fireRetrievalAbortedLock = new Object();
+  }
+  final Object fireRetrievalErrorLock = new Object();
 
-    public void fireRetrievalAborted(RetrievalEvent e) {
-        synchronized (fireRetrievalAbortedLock) {
-            e.setRetrievalService(this);
-            Iterator it = listeners.iterator();
-            while (it.hasNext()) {
-                Object l = it.next();
-                if (l instanceof RetrievalListener) {
-                    ((RetrievalListener) l).retrievalAborted(e);
-                }
-            }
+  public void fireRetrievalError(RetrievalEvent e)
+  {
+    synchronized (fireRetrievalErrorLock)
+    {
+      this.setProgress(0);
+      logger.warn("fireRetrievalError: ", new CurrentStackTrace());//NOI18N
+      e.setRetrievalService(this);
+      Iterator it = listeners.iterator();
+      while (it.hasNext())
+      {
+        Object l = it.next();
+        if (l instanceof RetrievalListener)
+        {
+          ((RetrievalListener) l).retrievalError(e);
         }
+      }
     }
-    Object fireRetrievalErrorLock = new Object();
+  }
 
-    public void fireRetrievalError(RetrievalEvent e) {
-        synchronized (fireRetrievalErrorLock) {
-            log.warn("fireRetrievalError",new CurrentStackTrace());
-            e.setRetrievalService(this);
-            Iterator it = listeners.iterator();
-            while (it.hasNext()) {
-                Object l = it.next();
-                if (l instanceof RetrievalListener) {
-                    ((RetrievalListener) l).retrievalError(e);
-                }
-            }
-        }
+  @Override
+  public abstract void retrieve(boolean forced);
+
+  @Override
+  public abstract Object clone();
+
+  public AbstractRetrievalService cloneWithoutRetrievalListeners()
+  {
+    AbstractRetrievalService ret = (AbstractRetrievalService) clone();
+    ret.listeners.clear();
+    return ret;
+  }
+
+  public Vector getListeners()
+  {
+    return listeners;
+  }
+
+  @Override
+  public int getProgress()
+  {
+    return progress;
+  }
+
+  @Override
+  public void setProgress(int progress)
+  {
+    int oldProgress = this.progress;
+    if(progress > 100 || progress < -1)
+    {
+      logger.warn("invalid progress '" + progress + "', setting to -1 (indeterminate)");//NOI18N
+      this.progress = -1;
     }
-
-    public abstract void retrieve(boolean forced);
-
-    public abstract Object clone();
-
-    public AbstractRetrievalService cloneWithoutRetrievalListeners() {
-        AbstractRetrievalService ret = (AbstractRetrievalService) clone();
-        ret.listeners.clear();
-        return ret;
-    }
-
-    public Vector getListeners() {
-        return   listeners;
-    }
-
-    public int getProgress() {
-        return progress;
-    }
-
-    public void setProgress(int progress) {
-        this.progress = progress;
-    }
-
-    public Object getErrorObject() {
-        return errorObject;
-    }
-
-    public void setErrorObject(Object errorObject) {
-        this.errorObject = errorObject;
+    else
+    {
+      this.progress = progress;
     }
 
-    public boolean isRefreshNeeded() {
-        return refreshNeeded;
-    }
+    propertyChangeSupport.firePropertyChange(PROGRESS_PROPERTY, oldProgress, this.progress);
+  }
 
-    public void setRefreshNeeded(boolean refreshNeeded) {
-        this.refreshNeeded = refreshNeeded;
-    }
+  public Object getErrorObject()
+  {
+    return errorObject;
+  }
 
-    public boolean hasErrors() {
-        return errorObject != null;
-    }
-    private Vector<PropertyChangeListener> propertyChangeSupportListener = new Vector<PropertyChangeListener>();
+  public void setErrorObject(Object errorObject)
+  {
+    this.errorObject = errorObject;
+  }
 
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        propertyChangeSupportListener.remove(l);
-    }
+  @Override
+  public boolean isRefreshNeeded()
+  {
+    return refreshNeeded;
+  }
 
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        propertyChangeSupportListener.add(l);
-    }
+  @Override
+  public void setRefreshNeeded(boolean refreshNeeded)
+  {
+    boolean  oldRefreshNeeded = this.refreshNeeded;
+    this.refreshNeeded = refreshNeeded;
+
+    propertyChangeSupport.firePropertyChange(PROGRESS_REFRESH, oldRefreshNeeded, this.refreshNeeded);
+  }
+
+  public boolean hasErrors()
+  {
+    return errorObject != null;
+  }
+
+  @Override
+  public void removePropertyChangeListener(PropertyChangeListener l)
+  {
+    this.propertyChangeSupport.removePropertyChangeListener(l);
+  }
+
+  @Override
+  public void addPropertyChangeListener(PropertyChangeListener l)
+  {
+    this.propertyChangeSupport.addPropertyChangeListener(l);
+  }
 }

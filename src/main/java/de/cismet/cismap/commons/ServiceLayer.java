@@ -34,13 +34,17 @@
 
 package de.cismet.cismap.commons;
 
-import edu.umd.cs.piccolo.nodes.PImage;
+import java.util.HashMap;
 
 /**
  *
  * @author thorsten.hell@cismet.de
  */
-public interface ServiceLayer {
+public interface ServiceLayer {    
+    public static final int LAYER_ENABLED_VISIBLE=0;
+    public static final int LAYER_DISABLED_VISIBLE=1;
+    public static final int LAYER_ENABLED_INVISIBLE=2;
+    public static final int LAYER_DISABLED_INVISIBLE=3;
     public boolean isEnabled();
     public void setEnabled(boolean enabled);
     public boolean canBeDisabled();
@@ -49,5 +53,5 @@ public interface ServiceLayer {
     public float getTranslucency();
     public void setTranslucency(float t);
     public String getName();
-    public void setName(String name);
+    public void setName(String name);    
 }

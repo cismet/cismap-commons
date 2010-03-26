@@ -61,7 +61,7 @@ public class PSwingMouseMotionEvent extends PSwingMouseEvent {
                 mouseMotionListener.mouseMoved( this );
                 break;
             default:
-                throw new RuntimeException( "ZMouseMotionEvent with bad ID" );
+                throw new RuntimeException( "ZMouseMotionEvent with bad ID" );//NOI18N
         }
     }
 

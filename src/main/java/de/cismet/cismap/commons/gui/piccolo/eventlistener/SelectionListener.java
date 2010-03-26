@@ -35,14 +35,12 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import de.cismet.cismap.commons.gui.piccolo.ParentNodeIsAPFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
-import java.awt.event.InputEvent;
 import java.util.Vector;
 
 /**
@@ -52,7 +50,7 @@ import java.util.Vector;
 public class SelectionListener extends RectangleRubberBandListener {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION";
+    public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION";//NOI18N
     PFeature sel = null;
     Vector<PFeature> pfVector = new Vector<PFeature>();
     private int clickCount = 0;
@@ -62,15 +60,15 @@ public class SelectionListener extends RectangleRubberBandListener {
     //Selektiere einen PNode
     @Override
     public void mouseClicked(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        log.debug("mouseClicked():" + pInputEvent.getPickedNode());
+        log.debug("mouseClicked():" + pInputEvent.getPickedNode());//NOI18N
         Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[]{PFeature.class});
         clickCount = pInputEvent.getClickCount();
         if (pInputEvent.getComponent() instanceof MappingComponent) {
             mc = (MappingComponent) pInputEvent.getComponent();
         }
 
-        if (pInputEvent.getModifiers() == InputEvent.BUTTON3_MASK) {
-            log.debug("right mouseclick");
+        if (pInputEvent.isRightMouseButton()) {
+            log.debug("right mouseclick");//NOI18N
 //            if (o instanceof PFeature && ((PFeature)o).getFeature() instanceof XStyledFeature) {
 //                XStyledFeature xf=(XStyledFeature)((PFeature)o).getFeature();
 //                log.debug("valid object under pointer");
@@ -85,7 +83,7 @@ public class SelectionListener extends RectangleRubberBandListener {
                 super.mouseClicked(pInputEvent);
                 sel = (PFeature) o;
                 if (sel.getFeature().canBeSelected()) {
-                    if (mc != null && pInputEvent.getModifiers() == InputEvent.CTRL_MASK + InputEvent.BUTTON1_MASK) {
+                    if (mc != null && pInputEvent.isLeftMouseButton() && pInputEvent.isControlDown()) {
                         if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
                             if (!((DefaultFeatureCollection) mc.getFeatureCollection()).isSelected(sel.getFeature())) {
                                 ((DefaultFeatureCollection) mc.getFeatureCollection()).addToSelection(sel.getFeature());
@@ -94,18 +92,28 @@ public class SelectionListener extends RectangleRubberBandListener {
                             }
 
                         } else {
-                            log.warn("mc.getFeatureCollection() instanceof DefaultFeatureCollection == false !!!!!!!");
+                            log.warn("mc.getFeatureCollection() instanceof DefaultFeatureCollection == false !!!!!!!");//NOI18N
                         }
                     } else {
                         mc.getFeatureCollection().select(sel.getFeature());
                     }
                 } else {
-                    log.debug("Feature cannot be selected");
+                    log.debug("Feature cannot be selected");//NOI18N
                     if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
                         ((DefaultFeatureCollection) mc.getFeatureCollection()).unselectAll();
                     }
                 }
                 postSelectionChanged();
+                if (pInputEvent.getClickCount() == 2) {
+                    if (sel.getFeature() instanceof SearchFeature) {
+                        if (pInputEvent.isLeftMouseButton()) {
+                            ((DefaultFeatureCollection) mc.getFeatureCollection()).unselectAll();
+                            mc.getHandleLayer().removeAllChildren();
+                            // neue Suche mit Geometry auslösen
+                            ((CreateSearchGeometryListener)mc.getInputListener(MappingComponent.CREATE_SEARCH_POLYGON)).search((SearchFeature)sel.getFeature());
+                        }
+                    }
+                }
             } else {
                 if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
                     ((DefaultFeatureCollection) mc.getFeatureCollection()).unselectAll();
@@ -144,8 +152,8 @@ public class SelectionListener extends RectangleRubberBandListener {
                 if ( rectangle != null && !(rectangle.getWidth() < RECT_BUFFER || rectangle.getHeight() < RECT_BUFFER)) {
                     // Hole alle PFeatures die das Markierviereck schneiden
                     // und Hinzuf\u00FCgen dieser PFeatures zur Selektion
-                    log.debug("Markierviereck = (X=" + rectangle.getBounds().getX() + ",Y=" + rectangle.getBounds().getY() +
-                            ",W=" + rectangle.getBounds().getWidth() + ",H=" + rectangle.getBounds().getHeight() + ")");
+                    log.debug("Markierviereck = (X=" + rectangle.getBounds().getX() + ",Y=" + rectangle.getBounds().getY() +//NOI18N
+                            ",W=" + rectangle.getBounds().getWidth() + ",H=" + rectangle.getBounds().getHeight() + ")");//NOI18N
                     ((DefaultFeatureCollection) mc.getFeatureCollection()).unselectAll();
                     PFeature[] pfArr = PFeatureTools.getPFeaturesInArea(mc, rectangle.getBounds());
                     Vector<Feature> toBeSelected = new Vector<Feature>();
@@ -155,7 +163,7 @@ public class SelectionListener extends RectangleRubberBandListener {
                         if (pf.getFeature().canBeSelected()) {
                             if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
                                 if (!((DefaultFeatureCollection) mc.getFeatureCollection()).isSelected(pf.getFeature())) {
-                                    log.debug("Feature markiert: " + pf);
+                                    log.debug("Feature markiert: " + pf);//NOI18N
                                     toBeSelected.add(pf.getFeature());
 
                                 } else {
@@ -164,7 +172,7 @@ public class SelectionListener extends RectangleRubberBandListener {
                                 }
                             }
                         } else {
-                            log.debug("Feature cannot be selected");
+                            log.debug("Feature cannot be selected");//NOI18N
                             if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
                                 toBeUnselected.add(pf.getFeature());
                             //((DefaultFeatureCollection) mc.getFeatureCollection()).unselect(pf.getFeature());//war vorher unselectAll()
@@ -184,7 +192,7 @@ public class SelectionListener extends RectangleRubberBandListener {
     }
 
     private void postSelectionChanged() {
-        log.debug("postSelectionChanged");
+        log.debug("postSelectionChanged");//NOI18N
         PNotificationCenter pn = PNotificationCenter.defaultCenter();
         pn.postNotification(SelectionListener.SELECTION_CHANGED_NOTIFICATION, this);
     }

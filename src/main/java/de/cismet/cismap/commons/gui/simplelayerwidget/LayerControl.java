@@ -53,7 +53,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JSlider;
@@ -73,18 +72,17 @@ import javax.swing.event.ChangeListener;
 public class LayerControl extends javax.swing.JPanel implements RetrievalListener{
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
 
     private boolean selected=false;
     private ServiceLayer layer;
     private ImageIcon visibleIcon=null;
     private ImageIcon invisibleIcon=null;
-    private ImageIcon visibleRasterIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/rasterLayerVisible.png"));
-    private ImageIcon invisibleRasterIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/rasterLayerNotVisible.png"));
-    private ImageIcon visibleFeatureIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/featureLayerVisible.png"));
-    private ImageIcon invisibleFeatureIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/featureLayerNotVisible.png"));
-    private ImageIcon visibleCollectionIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/featureCollectionLayerVisible.png"));
-    private ImageIcon invisibleCollectionIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/featureCollectionLayerNotVisible.png"));
+    private ImageIcon visibleRasterIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/rasterLayerVisible.png"));//NOI18N
+    private ImageIcon invisibleRasterIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/rasterLayerNotVisible.png"));//NOI18N
+    private ImageIcon visibleFeatureIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/featureLayerVisible.png"));//NOI18N
+    private ImageIcon invisibleFeatureIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/featureLayerNotVisible.png"));//NOI18N
+    private ImageIcon visibleCollectionIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/featureCollectionLayerVisible.png"));//NOI18N
+    private ImageIcon invisibleCollectionIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/featureCollectionLayerNotVisible.png"));//NOI18N
     private PNode transparentable;
     public static final int RASTER_SERVICE=1;
     public static final int FEATURE_SERVICE=2;
@@ -192,12 +190,12 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         lblLayerName = new javax.swing.JLabel();
         prbLayer = new javax.swing.JProgressBar();
 
-        mitLayerName.setText(I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl.mitLayerName.text")); // NOI18N
+        mitLayerName.setText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.mitLayerName.text")); // NOI18N
         mitLayerName.setEnabled(false);
         pmenProps.add(mitLayerName);
         pmenProps.add(jSeparator1);
 
-        mitGridEnabled.setText(I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl.mitGridEnabled.text")); // NOI18N
+        mitGridEnabled.setText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.mitGridEnabled.text")); // NOI18N
         pmenProps.add(mitGridEnabled);
 
         setToolTipText("");
@@ -219,7 +217,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         add(lblIndent, gridBagConstraints);
 
-        lblIcon.setText("__"); // NOI18N
+        lblIcon.setText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.lblIcon.text")); // NOI18N
         lblIcon.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 lblIconMouseClicked(evt);
@@ -229,7 +227,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
         add(lblIcon, gridBagConstraints);
 
-        lblLayerName.setText(I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl.lblLayerName.text")); // NOI18N
+        lblLayerName.setText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.lblLayerName.text")); // NOI18N
         lblLayerName.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 lblLayerNameMouseClicked(evt);
@@ -257,11 +255,11 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
     }// </editor-fold>//GEN-END:initComponents
     
     private void lblLayerNameKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_lblLayerNameKeyPressed
-        log.debug("LBL Key");
+        log.debug("LBL Key");//NOI18N
     }//GEN-LAST:event_lblLayerNameKeyPressed
     
     private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
-        log.debug("Key");
+        log.debug("Key");//NOI18N
         if (evt.getKeyCode()==evt.VK_UP) {
             fireLayerWantsUp();
         } else if (evt.getKeyCode()==evt.VK_DOWN) {
@@ -383,7 +381,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
                         int newWidth=(int)(i.getWidth(null)*0.7);
                         int newHeight=(int)(i.getHeight(null)*0.7);
                         
-                        log.debug("w,h:"+newWidth+","+newHeight);
+                        log.debug("w,h:"+newWidth+","+newHeight);//NOI18N
                         Image ii=i.getScaledInstance(newWidth,newHeight , i.SCALE_SMOOTH);
                         BufferedImage bi=new BufferedImage(newWidth,newHeight,BufferedImage.TYPE_INT_ARGB);
                         Graphics2D g=(Graphics2D)bi.getGraphics();
@@ -422,14 +420,14 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
                         } catch (Exception e) {
                         }
                         errorImage=bi;
-                        slider.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl.slider.toolTipText1"));
+                        slider.setToolTipText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.slider.toolTipText1"));
                     } else if (e.getRetrievedObject() instanceof String) {
                         errorImage=null;
                         final String message=(String)e.getRetrievedObject();
 //                  slider.setToolTipText("<html><b>Der Server lieferte folgende Fehlermeldung zur�ck:<br></b><body>"+message+"</body></html>");
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
-                                slider.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl.slider.toolTipText2")+message+"</td></tr></table></html>");
+                                slider.setToolTipText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.slider.toolTipText2", new Object[]{message}));
                             }
                         });
                         
@@ -467,7 +465,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
                 if (getLayer().isEnabled()) {
                     if (!e.isHasErrors()) {
                         errorImage=null;
-                        slider.setToolTipText("");
+                        slider.setToolTipText("");//NOI18N
                         prbLayer.setIndeterminate(false);
                         prbLayer.setValue(100);
                     } else {
@@ -520,7 +518,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
         if (transparentable!=null) {
             transparentable.setVisible(b);
         } else {
-            log.warn("transparentable was null");
+            log.warn("transparentable was null");//NOI18N
         }
     }
     
@@ -555,7 +553,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
     }
     
     private void resetProgressbarColor() {
-        prbLayer.setForeground(javax.swing.UIManager.getDefaults().getColor("ProgressBar.foreground"));
+        prbLayer.setForeground(javax.swing.UIManager.getDefaults().getColor("ProgressBar.foreground"));//NOI18N
     }
     
     public boolean isSelected() {

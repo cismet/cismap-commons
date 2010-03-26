@@ -39,13 +39,13 @@ package de.cismet.cismap.commons.interaction.events;
  * @author thorsten.hell@cismet.de
  */
 public class StatusEvent {
-    public static final String ACTIVE_STATUS="active_status";
-    public static final String COORDINATE_STRING="coordinate_string";
-    public static final String ERROR_STATUS="error_status";
-    public static final String MAPPING_MODE="mode";
-    public static final String MEASUREMENT_INFOS="measurement";
-    public static final String OBJECT_INFOS="object_infos";
-    public static final String SCALE="scale";
+    public static final String ACTIVE_STATUS="active_status";//NOI18N
+    public static final String COORDINATE_STRING="coordinate_string";//NOI18N
+    public static final String ERROR_STATUS="error_status";//NOI18N
+    public static final String MAPPING_MODE="mode";//NOI18N
+    public static final String MEASUREMENT_INFOS="measurement";//NOI18N
+    public static final String OBJECT_INFOS="object_infos";//NOI18N
+    public static final String SCALE="scale";//NOI18N
     
     private String name;
     private Object value;

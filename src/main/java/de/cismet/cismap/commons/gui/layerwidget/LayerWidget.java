@@ -34,7 +34,9 @@
 package de.cismet.cismap.commons.gui.layerwidget;
 
 import de.cismet.cismap.commons.RetrievalServiceLayer;
-import de.cismet.cismap.commons.features.AnnotatedFeature;
+import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
+import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
+import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
@@ -44,6 +46,7 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
 import de.cismet.tools.gui.StaticSwingTools;
@@ -54,6 +57,8 @@ import de.cismet.tools.gui.treetable.TreeTableModel;
 import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.SystemFlavorMap;
+import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DragSource;
@@ -62,7 +67,9 @@ import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.io.File;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JOptionPane;
@@ -79,9 +86,6 @@ import org.jdom.Element;
  */
 public class LayerWidget extends JPanel implements DropTargetListener, Configurable {
 
-    private static final java.util.ResourceBundle I18N =
-            java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
-    
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private DragSource dragSource;
     private DragGestureListener dgListener;
@@ -90,19 +94,21 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     private JTreeTable treeTable;
     private int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
     private Image errorImage;
-    private MappingComponent mapC=null;
+    private MappingComponent mapC = null;
 
     /** Creates new form LayerWidget */
     public LayerWidget(MappingComponent mapC) {
+        hackDragAndDropDataFlavors();
         initComponents();
-        this.mapC=mapC;
-        log.info("LayerWidget: " + activeLayerModel);
+        this.mapC = mapC;
+        log.info("LayerWidget: " + activeLayerModel);//NOI18N
         DropTarget dt = new DropTarget(this, acceptableActions, this);
 
         treeTable = new JTreeTable(activeLayerModel) {
+
             @Override
             public JToolTip createToolTip() {
-                log.debug("Tooltip");
+                log.debug("Tooltip");//NOI18N
                 if (getErrorImage() != null) {
                     return new ImageToolTip(getErrorImage());
                 } else {
@@ -110,6 +116,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 }
             }
         };
+
         treeTable.setAutoCreateColumnsFromModel(true);
         treeTable.setShowGrid(true);
         treeTable.getTableHeader().setReorderingAllowed(true);
@@ -142,10 +149,12 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         scpMain.setViewportView(treeTable);
 
         treeTable.getTree().getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+
+            @Override
             public void valueChanged(TreeSelectionEvent e) {
 
                 if (treeTable.getTree().getSelectionPath() != null) {
-                    log.debug("ActiveLayerWidget: selectionChanged()\n" + e);
+                    log.debug("ActiveLayerWidget: selectionChanged()\n" + e);//NOI18N
                     try {
                         ActiveLayerEvent ale = new ActiveLayerEvent();
                         ale.setLayer(treeTable.getTree().getSelectionPath().getLastPathComponent());
@@ -162,6 +171,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         cmdZoomToFullExtent.setVisible(false);
         treeTable.setGridColor(this.getBackground());
         addComponentListener(new ComponentListener() {
+
             public void componentHidden(ComponentEvent e) {
             }
 
@@ -211,7 +221,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         jToolBar1.setRollover(true);
 
         cmdTreeCollapse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/collapseTree.png"))); // NOI18N
-        cmdTreeCollapse.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.LayerWidget.cmdTreeCollapse.toolTipText")); // NOI18N
+        cmdTreeCollapse.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdTreeCollapse.toolTipText")); // NOI18N
         cmdTreeCollapse.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdTreeCollapse.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -221,7 +231,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         jToolBar1.add(cmdTreeCollapse);
 
         cmdRefreshSingleLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/refresh.png"))); // NOI18N
-        cmdRefreshSingleLayer.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.LayerWidget.cmdRefreshSingleLayer.toolTipText")); // NOI18N
+        cmdRefreshSingleLayer.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdRefreshSingleLayer.toolTipText")); // NOI18N
         cmdRefreshSingleLayer.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdRefreshSingleLayer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -231,7 +241,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         jToolBar1.add(cmdRefreshSingleLayer);
 
         cmdDown.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/down.png"))); // NOI18N
-        cmdDown.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.LayerWidget.cmdDown.toolTipText")); // NOI18N
+        cmdDown.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdDown.toolTipText")); // NOI18N
         cmdDown.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdDown.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -241,7 +251,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         jToolBar1.add(cmdDown);
 
         cmdUp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/up.png"))); // NOI18N
-        cmdUp.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.LayerWidget.cmdUp.toolTipText")); // NOI18N
+        cmdUp.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdUp.toolTipText")); // NOI18N
         cmdUp.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdUp.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -251,12 +261,12 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         jToolBar1.add(cmdUp);
 
         cmdZoomToFullExtent.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerZoom.png"))); // NOI18N
-        cmdZoomToFullExtent.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.LayerWidget.cmdZoomToFullExtent.toolTipText")); // NOI18N
+        cmdZoomToFullExtent.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdZoomToFullExtent.toolTipText")); // NOI18N
         cmdZoomToFullExtent.setMargin(new java.awt.Insets(2, 1, 2, 1));
         jToolBar1.add(cmdZoomToFullExtent);
 
         cmdDisable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disable.png"))); // NOI18N
-        cmdDisable.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.LayerWidget.cmdDisable.toolTipText")); // NOI18N
+        cmdDisable.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdDisable.toolTipText")); // NOI18N
         cmdDisable.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdDisable.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -266,7 +276,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         jToolBar1.add(cmdDisable);
 
         cmdRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/removeLayer.png"))); // NOI18N
-        cmdRemove.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.LayerWidget.cmdRemove.toolTipText")); // NOI18N
+        cmdRemove.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdRemove.toolTipText")); // NOI18N
         cmdRemove.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdRemove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -276,7 +286,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         jToolBar1.add(cmdRemove);
 
         cmdMakeInvisible.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerDLinvisible.png"))); // NOI18N
-        cmdMakeInvisible.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.LayerWidget.cmdMakeInvisible.toolTipText")); // NOI18N
+        cmdMakeInvisible.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdMakeInvisible.toolTipText")); // NOI18N
         cmdMakeInvisible.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdMakeInvisible.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -289,6 +299,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
     }// </editor-fold>//GEN-END:initComponents
+
     public void removeAllLayers() {
         activeLayerModel.removeAllLayers();
     }
@@ -301,7 +312,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         } else if (tp != null && tp.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer) {
             ((RetrievalServiceLayer) tp.getParentPath().getLastPathComponent()).retrieve(true);
         }
+        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
         EventQueue.invokeLater(new Runnable() {
+
             public void run() {
                 treeTable.getTree().setSelectionPath(tp);
                 StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
@@ -314,7 +327,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         if (tp != null) {
             activeLayerModel.moveLayerDown(tp);
         }
+        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
         EventQueue.invokeLater(new Runnable() {
+
             public void run() {
                 treeTable.getTree().setSelectionPath(tp);
                 StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
@@ -327,7 +342,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         if (tp != null) {
             activeLayerModel.moveLayerUp(tp);
         }
+        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
         EventQueue.invokeLater(new Runnable() {
+
             public void run() {
                 treeTable.getTree().setSelectionPath(tp);
                 StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
@@ -340,7 +357,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         if (tp != null) {
             activeLayerModel.handleVisibility(tp);
         }
+        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
         EventQueue.invokeLater(new Runnable() {
+
             public void run() {
                 treeTable.getTree().setSelectionPath(tp);
             }
@@ -352,7 +371,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         if (tp != null) {
             activeLayerModel.disableLayer(tp);
         }
+        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
         EventQueue.invokeLater(new Runnable() {
+
             public void run() {
                 treeTable.getTree().setSelectionPath(tp);
             }
@@ -369,7 +390,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         if (tp != null) {
             activeLayerModel.removeLayer(tp);
         }
+        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
         EventQueue.invokeLater(new Runnable() {
+
             public void run() {
                 treeTable.getSelectionModel().setSelectionInterval(row, row);
             }
@@ -392,15 +415,26 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JScrollPane scpMain;
     // End of variables declaration//GEN-END:variables
+
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
         EventQueue.invokeLater(new Runnable() {
+
             public void run() {
                 new Tester().setVisible(true);
             }
         });
+    }
+    private static DataFlavor uriListFlavor;
+
+    static {
+        try {
+            uriListFlavor = new DataFlavor("text/uri-list;class=java.lang.String");//NOI18N
+        } catch (ClassNotFoundException e) { // can't happen
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -443,52 +477,101 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      * <P>
      * @param dtde the <code>DropTargetDropEvent</code>
      */
+    @Override
     public void drop(final java.awt.dnd.DropTargetDropEvent dtde) {
-        DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SelectionAndCapabilities");
-        try {
-            log.debug("There are " + dtde.getTransferable().getTransferDataFlavors().length + " DataFlavours");
-            for (int i = 0; i < dtde.getTransferable().getTransferDataFlavors().length; ++i) {
-                log.debug("DataFlavour" + i + ":" + dtde.getTransferable().getTransferDataFlavors()[i]);
-            }
-            final Object o = dtde.getTransferable().getTransferData(TREEPATH_FLAVOR);
-            final Vector v = new Vector();
-            dtde.dropComplete(true);
-            if (o instanceof SelectionAndCapabilities) {
-                log.debug("instance of SelectionAndCapabilities");
-                TreePath[] tpa = ((SelectionAndCapabilities) o).getSelection();
-                log.debug("Treepath size: "+tpa.length);
-                for (int i = 0; i < tpa.length; ++i) {
-                    log.debug("Treepath added: "+tpa[i]);
-                    v.add(tpa[i]);
+        DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SelectionAndCapabilities");//NOI18N
+        log.debug("Drop with this flavors:" + dtde.getCurrentDataFlavorsAsList());//NOI18N
+        if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor) || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+            dtde.acceptDrop(DnDConstants.ACTION_COPY);
+            try {
+                List<File> data = null;
+                Transferable transferable = dtde.getTransferable();
+                if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                    data = (java.util.List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                } else {
+                    if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                        log.debug("Drop is unix drop xxx " + transferable.getTransferData(DataFlavor.javaFileListFlavor));//NOI18N
+
+                        data = DnDUtils.textURIListToFileList((String) transferable.getTransferData(DnDUtils.URI_LIST_FLAVOR));
+                    } else {
+                        log.debug("Drop is windows drop");//NOI18N
+                        data = (java.util.List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                    }
                 }
-                WMSServiceLayer l = new WMSServiceLayer(v);
-                if (l.getWMSLayers().size() > 0) {
-                    log.debug("mehr als 0 WMS Layer selektiert");
-                    if (treeTable.getEditingRow() != -1 && treeTable.getEditingColumn() != -1) {
-                        treeTable.getCellEditor(treeTable.getEditingRow(), treeTable.getEditingColumn()).stopCellEditing();
+                log.debug("Drag&Drop File List: " + data);//NOI18N
+                if (data != null) {
+                    for (File currentFile : data) {
+                        //NO HARDCODING
+                        try {
+                            log.info("DocumentUri: " + currentFile.toURI());//NOI18N
+                            //GMLFeatureService gfs = new GMLFeatureService(currentFile.getName(),currentFile.toURI(),null);
+                            //langsam sollte nicht im EDT ausgeführt werden
+                            DocumentFeatureService dfs = DocumentFeatureServiceFactory.createDocumentFeatureService(currentFile);
+                            activeLayerModel.addLayer(dfs);
+                        } catch (Exception ex) {
+                            log.error("Error during creation of a FeatureServices", ex);//NOI18N
+                        }
+                    }
+                } else {
+                    log.warn("No files available");//NOI18N
+                }
+            } catch (Exception ex) {
+                log.error("Failure during drag & drop opertation", ex);//NOI18N
+            }
+        } else if (dtde.isDataFlavorSupported(TREEPATH_FLAVOR)) {
+            try {
+                log.debug("There are " + dtde.getTransferable().getTransferDataFlavors().length + " DataFlavours");//NOI18N
+                for (int i = 0; i < dtde.getTransferable().getTransferDataFlavors().length; ++i) {
+                    log.debug("DataFlavour" + i + ": " + dtde.getTransferable().getTransferDataFlavors()[i]);//NOI18N
+                }
+                final Object o = dtde.getTransferable().getTransferData(TREEPATH_FLAVOR);
+                final Vector v = new Vector();
+                dtde.dropComplete(true);
+                if (o instanceof SelectionAndCapabilities) {
+                    TreePath[] tpa = ((SelectionAndCapabilities) o).getSelection();
+                    for (int i = 0; i < tpa.length; ++i) {
+                        v.add(tpa[i]);
+                    }
+                    WMSServiceLayer l = new WMSServiceLayer(v);
+                    if (l.getWMSLayers().size() > 0) {
+                        if (treeTable.getEditingRow() != -1 && treeTable.getEditingColumn() != -1) {
+                            try {
+                            treeTable.getCellEditor(treeTable.getEditingRow(), treeTable.getEditingColumn()).stopCellEditing();
+                            }
+                            catch (Exception e){
+                                //stopCellEditing went wrong. I don't care ;-)
+                            }
+                        }
+                        l.setWmsCapabilities(((SelectionAndCapabilities) o).getCapabilities());
+                        activeLayerModel.addLayer(l);
                     }
                     l.setWmsCapabilities(((SelectionAndCapabilities) o).getCapabilities());
-                    activeLayerModel.addLayer(l);
+                    l.setCapabilitiesUrl(((SelectionAndCapabilities) o).getUrl());
+                    log.debug("((SelectionAndCapabilities)o).getUrl()" + ((SelectionAndCapabilities) o).getUrl());//NOI18N
+                } // Drop-Objekt war ein WFS-Element
+                else if (o instanceof WFSSelectionAndCapabilities) {
+                    WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities) o;
+
+                    WebFeatureService wfs = new WebFeatureService(sac.getName(), sac.getHost(), sac.getQuery(), sac.getAttributes());
+                    if (sac.getIdentifier() != null && sac.getIdentifier().length() > 0) {
+                        log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier() + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
+                        wfs.getLayerProperties().setPrimaryAnnotationExpression(sac.getIdentifier(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+                    } else {
+                        log.warn("could not determine PrimaryAnnotationExpression");//NOI18N
+                    }
+
+                    activeLayerModel.addLayer(wfs);
                 }
-                l.setWmsCapabilities(((SelectionAndCapabilities) o).getCapabilities());
-                l.setCapabilitiesUrl(((SelectionAndCapabilities) o).getUrl());
-                log.debug("((SelectionAndCapabilities)o).getUrl()" + ((SelectionAndCapabilities) o).getUrl());
-            } // Drop-Objekt war ein WFS-Element
-            else if (o instanceof WFSSelectionAndCapabilities) {
-                WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities) o;
-                WebFeatureService wfs = new WebFeatureService(sac.getName(), sac.getHost(), sac.getQuery(), sac.getAttributes());
-                if (wfs.getRenderingFeature() instanceof AnnotatedFeature) {
-                    ((AnnotatedFeature)wfs.getRenderingFeature()).setPrimaryAnnotation(sac.getIdentifier());
-                }
-                activeLayerModel.addLayer(wfs);
+            } catch (IllegalArgumentException schonVorhanden) {
+                JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
+                        org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.drop().JOptionPane.message"),
+                        org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.drop().JOptionPane.title"),
+                        JOptionPane.ERROR_MESSAGE);
+            } catch (Exception e) {
+                log.error(e, e);
             }
-        } catch (IllegalArgumentException schonVorhanden) {
-            JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this), 
-                    I18N.getString("de.cismet.cismap.commons.gui.layerwidget.LayerWidget.drop().JOptionPane.message"),
-                    I18N.getString("de.cismet.cismap.commons.gui.layerwidget.LayerWidget.drop().JOptionPane.title"),
-                    JOptionPane.ERROR_MESSAGE);
-        } catch (Exception e) {
-            log.error(e, e);
+        } else {
+            log.warn("No Matching dataFlavour: " + dtde.getCurrentDataFlavorsAsList());//NOI18N
         }
     }
 
@@ -533,31 +616,42 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 
     public static Vector<String> getCapabilities(Element e, Vector<String> v) {
         try {
-            if (e.getName().equals("capabilities") && e.getAttribute("type") != null
-                && (e.getAttribute("type").getValue().equals(CapabilityLink.OGC)
-                || e.getAttribute("type").getValue().equals(CapabilityLink.OGC_DEPRECATED))) {
-            String url = e.getTextTrim();
-            if (!v.contains(url)) {
-                v.add(url);
-                return v;
-            }
-        } else {
-            Iterator it = e.getChildren().iterator();
-            while (it.hasNext()) {
-                Object elem = (Object) it.next();
-                if (elem instanceof Element) {
-                    getCapabilities((Element) elem, v);
+            if (e.getName().equals("capabilities") && e.getAttribute("type") != null && (e.getAttribute("type").getValue().equals(CapabilityLink.OGC) || e.getAttribute("type").getValue().equals(CapabilityLink.OGC_DEPRECATED))) {//NOI18N
+                String url = e.getTextTrim();
+                if (!v.contains(url)) {
+                    v.add(url);
+                    return v;
+                }
+            } else {
+                Iterator it = e.getChildren().iterator();
+                while (it.hasNext()) {
+                    Object elem = (Object) it.next();
+                    if (elem instanceof Element) {
+                        getCapabilities((Element) elem, v);
+                    }
                 }
             }
-        }
-        return v;
-        }
-        catch (Exception ex) {
+            return v;
+        } catch (Exception ex) {
             return new Vector<String>();
         }
     }
 
     public JTreeTable getTreeTable() {
         return treeTable;
+    }
+
+    /**
+     * This is required to prevent a bug on Macs that causes the first drop operation to fail with an exception,
+     * "java.awt.datatransfer.UnsupportedFlavorException: application/x-java-file-list".  This bug is related to
+     * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4746177 but only occurs during the first Mac OS drop operation in a
+     * Java application.
+     */
+    private static void hackDragAndDropDataFlavors() {
+        SystemFlavorMap sfm = (SystemFlavorMap) SystemFlavorMap.getDefaultFlavorMap();
+        String nativeValue = "application/x-java-file-list";//NOI18N
+        DataFlavor dataFlavor = new DataFlavor("application/x-java-file-list; charset=ASCII; class=java.util.List", "File List");//NOI18N
+        sfm.addUnencodedNativeForFlavor(dataFlavor, nativeValue);
+        sfm.addFlavorForUnencodedNative(nativeValue, dataFlavor);
     }
 }

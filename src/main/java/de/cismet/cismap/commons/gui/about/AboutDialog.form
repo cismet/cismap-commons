@@ -48,7 +48,7 @@
     <Component class="javax.swing.JButton" name="okButton">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.about.AboutDialog.okButton.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="AboutDialog.okButton.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>

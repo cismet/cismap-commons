@@ -96,7 +96,7 @@
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/zoomToAll.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.cmdZoomToAllFeatures.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="FeatureControl.cmdZoomToAllFeatures.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -109,7 +109,7 @@
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/zoomToSelection.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.cmdZoomToFeatures.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="FeatureControl.cmdZoomToFeatures.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -124,7 +124,7 @@
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/removerow.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.cmdRemoveFeatures.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="FeatureControl.cmdRemoveFeatures.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -137,7 +137,7 @@
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/removeAll.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.cmdRemoveAll.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="FeatureControl.cmdRemoveAll.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -150,7 +150,7 @@
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/showOnlyVisible_disabled.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.togShowOnlyVisible.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="FeatureControl.togShowOnlyVisible.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
             <Property name="rolloverIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/showOnlyVisible_disabled.png"/>
@@ -172,7 +172,7 @@
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/fixMapExtent_disabled.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.togFixMapExtent.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="FeatureControl.togFixMapExtent.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
             <Property name="rolloverIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/fixMapExtent_disabled.png"/>
@@ -194,7 +194,7 @@
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/fixMapScale_disabled.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.togFixMapScale.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="FeatureControl.togFixMapScale.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
             <Property name="rolloverIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/fixMapScale_disabled.png"/>
@@ -216,7 +216,7 @@
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/infoLabel_disabled.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.togDisplayObjectInfo.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="FeatureControl.togDisplayObjectInfo.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
             <Property name="rolloverIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/infoLabel_disabled.png"/>
@@ -238,7 +238,7 @@
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/holdAll_disabled.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.togHoldAll.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="FeatureControl.togHoldAll.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
             <Property name="rolloverIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/holdAll_disabled.png"/>
@@ -260,7 +260,7 @@
               <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/holdSelection.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.cmdHold.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="FeatureControl.cmdHold.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>

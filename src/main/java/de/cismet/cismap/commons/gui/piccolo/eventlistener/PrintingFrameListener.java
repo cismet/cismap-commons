@@ -77,10 +77,10 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
     protected PPath east = new PPath();
     protected PPath west = new PPath();
     private String bestimmerDimension=WIDTH;
-    public static final String WIDTH = "WIDTH";
-    public static final String HEIGHT = "HEIGHT";
+    public static final String WIDTH = "WIDTH";//NOI18N
+    public static final String HEIGHT = "HEIGHT";//NOI18N
     public static final Color BORDER_COLOR = new Color(255, 255, 255, 200);
-    private String oldInteractionMode = "";
+    private String oldInteractionMode = "";//NOI18N
     private PPath printingRectangle = new PPath() {
         protected void paint(PPaintContext paintContext) {
             super.paint(paintContext);
@@ -133,6 +133,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
     public void init(double scaleDenominator,
             int placeholderWidth,
             int placeholderHeight, String oldInteractionMode) {
+//        log.fatal(scaleDenominator+ " "+placeholderWidth+" "+placeholderHeight);
         this.oldInteractionMode = oldInteractionMode;
         this.widthToHeightRatio = (double) placeholderWidth / (double) placeholderHeight;
         this.scaleDenominator = scaleDenominator;
@@ -143,7 +144,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
 
         //calculate realworldsize
         if (scaleDenominator == -1) {
-            String s = JOptionPane.showInputDialog(mappingComponent, java.util.ResourceBundle.getBundle("de/cismet/cismap/navigatorplugin/Bundle").getString("Massstab_manuell_auswaehlen"), "");
+            String s = JOptionPane.showInputDialog(mappingComponent, org.openide.util.NbBundle.getMessage(PrintingFrameListener.class, "PrintingFrameListener.init.message"), "");
             try {
                 Double d = new Double(s);
                 scaleDenominator = d;

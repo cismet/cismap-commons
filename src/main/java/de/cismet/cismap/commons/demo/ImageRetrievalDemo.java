@@ -1,6 +1,5 @@
 package de.cismet.cismap.commons.demo;
 import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.rasterservice.HTTPImageRetrieval;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
@@ -8,7 +7,6 @@ import java.awt.Image;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 import java.util.Locale;
-import java.util.ResourceBundle;
 import javax.swing.UIManager;
 
 /**
@@ -16,13 +14,12 @@ import javax.swing.UIManager;
  * @author  thorsten.hell@cismet.de
  */
 public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalListener{
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     HTTPImageRetrieval ir;
     /** Creates new form Test */
     public ImageRetrievalDemo() {
        Log4JQuickConfig.configure4LumbermillOnLocalhost();
-        log.info("Simple Mapping Client started");
+        log.info("Simple Mapping Client started");//NOI18N
         //ClearLookManager.setMode(ClearLookMode.ON);
         //PlasticLookAndFeel.setMyCurrentTheme(new DesertBlue());
         try {
@@ -34,7 +31,7 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
            // UIManager.setLookAndFeel(new PlasticLookAndFeel());
             UIManager.setLookAndFeel(new WindowsLookAndFeel());
         } catch (Exception e) {
-            log.warn("Fehler beim Einstellen des Look&Feels's!",e);
+            log.warn("Fehler beim Einstellen des Look&Feels's!",e);//NOI18N
         }
 
         initComponents();
@@ -77,7 +74,7 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
         panMain.setMinimumSize(new java.awt.Dimension(100, 100));
         getContentPane().add(panMain, java.awt.BorderLayout.CENTER);
 
-        jButton1.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.jButton1.text")); // NOI18N
+        jButton1.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -85,18 +82,18 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
         });
         getContentPane().add(jButton1, java.awt.BorderLayout.NORTH);
 
-        fileMenu.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.fileMenu.text")); // NOI18N
+        fileMenu.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.fileMenu.text")); // NOI18N
 
-        openMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.openMenuItem.text")); // NOI18N
+        openMenuItem.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.openMenuItem.text")); // NOI18N
         fileMenu.add(openMenuItem);
 
-        saveMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.saveMenuItem.text")); // NOI18N
+        saveMenuItem.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.saveMenuItem.text")); // NOI18N
         fileMenu.add(saveMenuItem);
 
-        saveAsMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.saveAsMenuItem.text")); // NOI18N
+        saveAsMenuItem.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.saveAsMenuItem.text")); // NOI18N
         fileMenu.add(saveAsMenuItem);
 
-        exitMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.exitMenuItem.text")); // NOI18N
+        exitMenuItem.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.exitMenuItem.text")); // NOI18N
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitMenuItemActionPerformed(evt);
@@ -106,28 +103,28 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
 
         menuBar.add(fileMenu);
 
-        editMenu.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.editMenu.text")); // NOI18N
+        editMenu.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.editMenu.text")); // NOI18N
 
-        cutMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.cutMenuItem.text")); // NOI18N
+        cutMenuItem.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.cutMenuItem.text")); // NOI18N
         editMenu.add(cutMenuItem);
 
-        copyMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.copyMenuItem.text")); // NOI18N
+        copyMenuItem.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.copyMenuItem.text")); // NOI18N
         editMenu.add(copyMenuItem);
 
-        pasteMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.pasteMenuItem.text")); // NOI18N
+        pasteMenuItem.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.pasteMenuItem.text")); // NOI18N
         editMenu.add(pasteMenuItem);
 
-        deleteMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.deleteMenuItem.text")); // NOI18N
+        deleteMenuItem.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.deleteMenuItem.text")); // NOI18N
         editMenu.add(deleteMenuItem);
 
         menuBar.add(editMenu);
 
-        helpMenu.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.helpMenu.text")); // NOI18N
+        helpMenu.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.helpMenu.text")); // NOI18N
 
-        contentsMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.contentsMenuItem.text")); // NOI18N
+        contentsMenuItem.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.contentsMenuItem.text")); // NOI18N
         helpMenu.add(contentsMenuItem);
 
-        aboutMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.ImageRetrievalDemo.aboutMenuItem.text")); // NOI18N
+        aboutMenuItem.setText(org.openide.util.NbBundle.getMessage(ImageRetrievalDemo.class, "ImageRetrievalDemo.aboutMenuItem.text")); // NOI18N
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
@@ -144,13 +141,13 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
         
         if (ir==null) {
             ir=new HTTPImageRetrieval(this);
-            ir.setUrl("http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig");
+            ir.setUrl("http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig");//NOI18N
             ir.start();
         }
         else {
             ir.endRetrieval();
             ir=new HTTPImageRetrieval(this);
-            ir.setUrl("http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig");
+            ir.setUrl("http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=grundlkarten&VERSION=1.1.1&REQUEST=GetMap&BBOX=2581794.0773859876,5684502.5686845,2581948.756619977,5684588.15786064&WIDTH=750&HEIGHT=415&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=02_11&STYLES=farbig");//NOI18N
             ir.start();
         }
 
@@ -191,7 +188,7 @@ public class ImageRetrievalDemo extends javax.swing.JFrame implements RetrievalL
     }
 
     public void retrievalError(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        log.error("Fehler:"+e.getRetrievedObject());
+        log.error("Error:"+e.getRetrievedObject());//NOI18N
     }
 
     public void retrievalComplete(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {

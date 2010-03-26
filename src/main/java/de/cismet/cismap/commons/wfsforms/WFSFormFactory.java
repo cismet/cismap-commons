@@ -80,7 +80,7 @@ public class WFSFormFactory implements Configurable {
     }
 
     public Element getConfiguration() {
-        Element ret = new Element("cismapWFSFormsPreferences");
+        Element ret = new Element("cismapWFSFormsPreferences");//NOI18N
 //        Set<String> keySet=forms.keySet();
 //        for (String key:keySet) {
 //            Element form=forms.get(key).getElement();
@@ -92,70 +92,70 @@ public class WFSFormFactory implements Configurable {
     public void masterConfigure(Element parent) {
         forms.clear();
         try {
-            configuration = ((Element) parent.clone()).getChild("cismapWFSFormsPreferences").detach();
-            List list = configuration.getChildren("wfsForm");
+            configuration = ((Element) parent.clone()).getChild("cismapWFSFormsPreferences").detach();//NOI18N
+            List list = configuration.getChildren("wfsForm");//NOI18N
             for (Object o : list) {
                 try {
                     Element e = (Element) o;
-                    log.debug("Try to create WFSForm: " + e.getContent());
-                    String className = e.getAttribute("className").getValue();
+                    log.debug("Try to create WFSForm: " + e.getContent());//NOI18N
+                    String className = e.getAttribute("className").getValue();//NOI18N
                     Class formClass = Class.forName(className);
                     Constructor constructor = formClass.getConstructor();
                     AbstractWFSForm form = (AbstractWFSForm) constructor.newInstance();
                     form.setClassName(className);
-                    form.setId(e.getAttribute("id").getValue());
+                    form.setId(e.getAttribute("id").getValue());//NOI18N
                     try {
-                        form.setSorter(e.getAttribute("sorter").getValue());
+                        form.setSorter(e.getAttribute("sorter").getValue());//NOI18N
                     } catch (Exception skip) {
                     }
-                    form.setTitle(e.getAttribute("title").getValue());
-                    form.setMenuString(e.getAttribute("menu").getValue());
-                    form.setIconPath(e.getAttribute("icon").getValue());
-                    form.setIcon(new javax.swing.ImageIcon(getClass().getResource(e.getAttribute("icon").getValue())));
+                    form.setTitle(e.getAttribute("title").getValue());//NOI18N
+                    form.setMenuString(e.getAttribute("menu").getValue());//NOI18N
+                    form.setIconPath(e.getAttribute("icon").getValue());//NOI18N
+                    form.setIcon(new javax.swing.ImageIcon(getClass().getResource(e.getAttribute("icon").getValue())));//NOI18N
                     Vector<WFSFormQuery> queryVector = new Vector<WFSFormQuery>();
-                    List queries = e.getChildren("wfsFormQuery");
+                    List queries = e.getChildren("wfsFormQuery");//NOI18N
                     for (Object oq : queries) {
                         Element q = (Element) oq;
                         WFSFormQuery query = new WFSFormQuery();
-                        query.setComponentName(q.getAttribute("componentName").getValue());
-                        query.setDisplayTextProperty(q.getAttribute("displayTextProperty").getValue());
-                        query.setExtentProperty(q.getAttribute("extentProperty").getValue());
-                        query.setFilename(q.getAttribute("queryFile").getValue());
+                        query.setComponentName(q.getAttribute("componentName").getValue());//NOI18N
+                        query.setDisplayTextProperty(q.getAttribute("displayTextProperty").getValue());//NOI18N
+                        query.setExtentProperty(q.getAttribute("extentProperty").getValue());//NOI18N
+                        query.setFilename(q.getAttribute("queryFile").getValue());//NOI18N
                         query.setWfsQueryString(readFileFromClassPathAsString(query.getFilename()));
-                        query.setId(q.getAttribute("id").getValue());
-                        query.setIdProperty(q.getAttribute("idProperty").getValue());
-                        query.setServerUrl(q.getAttribute("server").getValue());
-                        query.setTitle(q.getAttribute("title").getValue());
-                        query.setType(q.getAttribute("type").getValue());
+                        query.setId(q.getAttribute("id").getValue());//NOI18N
+                        query.setIdProperty(q.getAttribute("idProperty").getValue());//NOI18N
+                        query.setServerUrl(q.getAttribute("server").getValue());//NOI18N
+                        query.setTitle(q.getAttribute("title").getValue());//NOI18N
+                        query.setType(q.getAttribute("type").getValue());//NOI18N
                         try {
-                            query.setPropertyPrefix(q.getAttribute("propertyPrefix").getValue());
+                            query.setPropertyPrefix(q.getAttribute("propertyPrefix").getValue());//NOI18N
                         } catch (Exception skip) {
                             query.setPropertyPrefix(null);
                         }
                         try {
-                            query.setPropertyNamespace(q.getAttribute("propertyNamespace").getValue());
+                            query.setPropertyNamespace(q.getAttribute("propertyNamespace").getValue());//NOI18N
                         } catch (Exception skip) {
                             query.setPropertyNamespace(null);
                         }
                         try {
-                            query.setPositionProperty(q.getAttribute("positionProperty").getValue());
+                            query.setPositionProperty(q.getAttribute("positionProperty").getValue());//NOI18N
                         } catch (Exception skip) {
                             query.setPositionProperty(null);
                         }
 
 
                         //optional
-                        if (q.getAttribute("queryPlaceholder") != null) {
-                            query.setQueryPlaceholder(q.getAttribute("queryPlaceholder").getValue());
+                        if (q.getAttribute("queryPlaceholder") != null) {//NOI18N
+                            query.setQueryPlaceholder(q.getAttribute("queryPlaceholder").getValue());//NOI18N
                         }
                         queryVector.add(query);
                     }
                     form.setQueries(queryVector);
 
                     forms.put(form.getId(), form);
-                    log.debug("WFSForm " + form.getId() + " added");
+                    log.debug("WFSForm " + form.getId() + " added");//NOI18N
                 } catch (Throwable t) {
-                    log.error("Could not create WFSForm", t);
+                    log.error("Could not create WFSForm", t);//NOI18N
                 }
             }
             LinkedHashMap lhs = new LinkedHashMap(forms.size());
@@ -191,10 +191,10 @@ public class WFSFormFactory implements Configurable {
                 forms = lhs;
             }
             else {
-                log.warn("Beim Sortieren der WFSForms gab es einen Fehler. Es wird die Reihenfolge im ConfigFile beibehalten");
+                log.warn("Error while sorting the WFSForms. The order of the config file will be retained.");//NOI18N
             }
         } catch (Throwable t) {
-            log.error("Could not create WFSForm", t);
+            log.error("Could not create WFSForm", t);//NOI18N
         }
     }
 

@@ -12,7 +12,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.util.ResourceBundle;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -24,11 +23,9 @@ import pswing.PSwing;
  * @author  hell
  */
 public class InfoPanel extends JPanel {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
-
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private ImageIcon icoMore = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/more.png"));
-    private ImageIcon icoShrink = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/shrink.png"));
+    private ImageIcon icoMore = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/more.png"));//NOI18N
+    private ImageIcon icoShrink = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/shrink.png"));//NOI18N
     private PFeature pfeature;
     private PNode pNodeParent;
     private PSwing pSwing;
@@ -40,7 +37,7 @@ public class InfoPanel extends JPanel {
         try {
             initComponents();
             cmdMore.setIcon(icoMore);
-            cmdMore.setText("");
+            cmdMore.setText("");//NOI18N
             this.more = more;
             if (more == null) {
                 //cmdMore.setVisible(false); //macht die Komponente zu klein
@@ -75,7 +72,7 @@ public class InfoPanel extends JPanel {
                 });
             }
         } catch (Throwable t) {
-            log.error("Fehler im InfoPanel");
+            log.error("Error in InfoPanel");//NOI18N
         }
     //scptest.setVisible(false);
     }
@@ -103,8 +100,8 @@ public class InfoPanel extends JPanel {
         jPanel1.setLayout(new java.awt.BorderLayout());
 
         lblTitle.setBackground(javax.swing.UIManager.getDefaults().getColor("Nb.Desktop.background"));
-        lblTitle.setFont(new java.awt.Font("Tahoma", 0, 12));
-        lblTitle.setText(I18N.getString("de.cismet.cismap.commons.gui.piccolo.InfoPanel.jLabel1.text")); // NOI18N
+        lblTitle.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        lblTitle.setText(org.openide.util.NbBundle.getMessage(InfoPanel.class, "InfoPanel.jLabel1.text")); // NOI18N
         lblTitle.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 lblTitleMouseClicked(evt);
@@ -114,7 +111,7 @@ public class InfoPanel extends JPanel {
 
         jPanel2.setOpaque(false);
 
-        cmdMore.setText(I18N.getString("de.cismet.cismap.commons.gui.piccolo.InfoPanel.cmdMore.text")); // NOI18N
+        cmdMore.setText(org.openide.util.NbBundle.getMessage(InfoPanel.class, "InfoPanel.cmdMore.text")); // NOI18N
         cmdMore.setBorderPainted(false);
         cmdMore.setFocusPainted(false);
         cmdMore.addActionListener(new java.awt.event.ActionListener() {

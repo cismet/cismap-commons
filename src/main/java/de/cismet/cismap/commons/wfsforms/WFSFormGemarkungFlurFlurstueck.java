@@ -8,7 +8,6 @@ package de.cismet.cismap.commons.wfsforms;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -22,8 +21,6 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
  * @author  thorsten.hell@cismet.de
  */
 public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
-
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private WFSFormFeature gemarkung = null;
     private WFSFormFeature flur = null;
@@ -39,12 +36,12 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
             AutoCompleteDecorator.decorate(cboGem);
             AutoCompleteDecorator.decorate(cboFlur);
             AutoCompleteDecorator.decorate(cboFlurstueck);
-            listComponents.put("cboGem", cboGem);
-            listComponents.put("cboGemProgress", prbGem);
-            listComponents.put("cboFlur", cboFlur);
-            listComponents.put("cboFlurProgress", prbFlur);
-            listComponents.put("cboFlurstueck", cboFlurstueck);
-            listComponents.put("cboFlurstueckProgress", prbFlurstueck);
+            listComponents.put("cboGem", cboGem);//NOI18N
+            listComponents.put("cboGemProgress", prbGem);//NOI18N
+            listComponents.put("cboFlur", cboFlur);//NOI18N
+            listComponents.put("cboFlurProgress", prbFlur);//NOI18N
+            listComponents.put("cboFlurstueck", cboFlurstueck);//NOI18N
+            listComponents.put("cboFlurstueckProgress", prbFlurstueck);//NOI18N
 
             
             JTextField flurEditor = (JTextField) cboFlur.getEditor().getEditorComponent();
@@ -85,7 +82,7 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
 
 
         } catch (Exception e) {
-            log.error("Could not Create WFForm", e);
+            log.error("Could not Create WFForm", e);//NOI18N
         }
     }
 
@@ -107,7 +104,6 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jLabel1 = new javax.swing.JLabel();
         cmdPos = new javax.swing.JButton();
         panGem = new javax.swing.JPanel();
         cboGem = new javax.swing.JComboBox();
@@ -124,13 +120,11 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         jLabel3 = new javax.swing.JLabel();
         panEmpty = new javax.swing.JPanel();
 
-        jLabel1.setText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.jLabel1.text")); // NOI18N
-
         setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
         setPreferredSize(new java.awt.Dimension(400, 38));
         setLayout(new java.awt.GridBagLayout());
 
-        cmdPos.setText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.cmdPos.text")); // NOI18N
+        cmdPos.setText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.cmdPos.text")); // NOI18N
         cmdPos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdPosActionPerformed(evt);
@@ -263,7 +257,7 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         add(panFlur, gridBagConstraints);
 
         chkVisualize.setSelected(true);
-        chkVisualize.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.chkVisualize.toolTipText")); // NOI18N
+        chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.chkVisualize.toolTipText")); // NOI18N
         chkVisualize.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkVisualizeActionPerformed(evt);
@@ -277,7 +271,7 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         add(chkVisualize, gridBagConstraints);
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
-        jLabel2.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.jLabel2.toolTipText")); // NOI18N
+        jLabel2.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.jLabel2.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
@@ -286,7 +280,7 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         add(jLabel2, gridBagConstraints);
 
         chkLockScale.setSelected(true);
-        chkLockScale.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.chkLockScale.toolTipText")); // NOI18N
+        chkLockScale.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.chkLockScale.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
@@ -295,7 +289,7 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         add(chkLockScale, gridBagConstraints);
 
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
-        jLabel3.setToolTipText(I18N.getString("de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.jLabel3.toolTipText")); // NOI18N
+        jLabel3.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.jLabel3.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
@@ -309,7 +303,7 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         panEmpty.setLayout(panEmptyLayout);
         panEmptyLayout.setHorizontalGroup(
             panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 182, Short.MAX_VALUE)
+            .add(0, 226, Short.MAX_VALUE)
         );
         panEmptyLayout.setVerticalGroup(
             panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -374,11 +368,11 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
     private void cboFlurActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFlurActionPerformed
 
         Object selected = cboFlur.getSelectedItem();
-        log.debug("cboFlurActionPerformed selected=" + selected);
+        log.debug("cboFlurActionPerformed selected=" + selected);//NOI18N
         if (selected instanceof WFSFormFeature) {
             flur = (WFSFormFeature) selected;
             flurstueck = null;
-            requestRefresh("cboFlurstueck", (WFSFormFeature) selected);
+            requestRefresh("cboFlurstueck", (WFSFormFeature) selected);//NOI18N
         }
     }//GEN-LAST:event_cboFlurActionPerformed
 
@@ -388,7 +382,7 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
             gemarkung = (WFSFormFeature) selected;
             flur = null;
             flurstueck = null;
-            requestRefresh("cboFlur", (WFSFormFeature) selected);
+            requestRefresh("cboFlur", (WFSFormFeature) selected);//NOI18N
             cboFlurstueck.setEnabled(false);
             cboFlurstueck.setModel(new DefaultComboBoxModel(new Vector()));
         }
@@ -417,7 +411,6 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
     private javax.swing.JCheckBox chkLockScale;
     private javax.swing.JCheckBox chkVisualize;
     private javax.swing.JButton cmdPos;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel panEmpty;

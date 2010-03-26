@@ -40,7 +40,6 @@ package de.cismet.cismap.commons.gui.layerwidget;
  */
 import java.awt.Component;
  
-import java.util.ResourceBundle;
 import javax.swing.*;
 import javax.swing.table.*;
  
@@ -71,8 +70,6 @@ import javax.swing.table.TableCellRenderer;
  */
 public class JTable_Observer extends JFrame implements Observer{
     
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
-    
     JTable table;
     MyDefaultTableModel dtm ;
     public static void main(String[] args) {
@@ -80,14 +77,14 @@ public class JTable_Observer extends JFrame implements Observer{
     }
     
     private JTable_Observer(){
-        super(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.JTable_Observer.title"));
+        super(org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.title"));
         createUI();
         new ObservableChild().addObserver(this);
        
     }
     
     private void createUI(){
-        dtm = new MyDefaultTableModel(new Object[] {I18N.getString("de.cismet.cismap.commons.gui.layerwidget.JTable_Observer.dtm.title1"), I18N.getString("de.cismet.cismap.commons.gui.layerwidget.JTable_Observer.dtm.title2")}, 0);
+        dtm = new MyDefaultTableModel(new Object[] {org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title1"), org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title2")}, 0);
         CustomProgressBar progressBar = new CustomProgressBar();
         CustomProgressBar progressBar2 = new CustomProgressBar();
         CustomProgressBar progressBar3 = new CustomProgressBar();
@@ -97,9 +94,9 @@ public class JTable_Observer extends JFrame implements Observer{
         progressBar2.setIndeterminate(true);
         progressBar3.setBorderPainted(true);
         progressBar3.setIndeterminate(true);
-        dtm.addRow(new Object[]{I18N.getString("de.cismet.cismap.commons.gui.layerwidget.JTable_Observer.row1"),progressBar});
-        dtm.addRow(new Object[]{I18N.getString("de.cismet.cismap.commons.gui.layerwidget.JTable_Observer.row2"),progressBar2});
-        dtm.addRow(new Object[]{I18N.getString("de.cismet.cismap.commons.gui.layerwidget.JTable_Observer.row3"),progressBar3});
+        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row1"),progressBar});
+        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row2"),progressBar2});
+        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row3"),progressBar3});
         table= new JTable(dtm);
         table.getColumnModel().getColumn(1).setCellRenderer(new CustomProgressBar());
         JScrollPane jsp = new JScrollPane(table);        

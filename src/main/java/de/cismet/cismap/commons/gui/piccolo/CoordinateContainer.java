@@ -19,11 +19,11 @@ import java.util.ArrayList;
  * @author nh
  */
 public class CoordinateContainer {
-    public static final String POINT = "POINT";
-    public static final String LINESTRING = "LINESTRING";
-    public static final String LINEARRING = "LINEARRING";
-    public static final String POLYGON = "POLYGON";
-    public static final String MULTIPOLYGON = "MULTIPOLYGON";
+    public static final String POINT = "POINT";//NOI18N
+    public static final String LINESTRING = "LINESTRING";//NOI18N
+    public static final String LINEARRING = "LINEARRING";//NOI18N
+    public static final String POLYGON = "POLYGON";//NOI18N
+    public static final String MULTIPOLYGON = "MULTIPOLYGON";//NOI18N
 
     private Geometry geo;
     private GeometryCollection geoColl;

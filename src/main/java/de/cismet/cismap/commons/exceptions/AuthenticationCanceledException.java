@@ -9,7 +9,6 @@
 
 package de.cismet.cismap.commons.exceptions;
 
-import java.util.ResourceBundle;
 
 /**
  *
@@ -17,12 +16,9 @@ import java.util.ResourceBundle;
  */
 public class AuthenticationCanceledException extends Exception {
 
-    private static final ResourceBundle I18N = 
-            ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
-
     /** Creates a new instance of AuthenticationCanceledException */
     public AuthenticationCanceledException() {
-        super(I18N.getString("de.cismet.cismap.commons.exceptions.AuthenticationCanceledException"));
+        super(org.openide.util.NbBundle.getMessage(AuthenticationCanceledException.class, "AuthenticationCanceledException"));
     }
     
     public AuthenticationCanceledException(String message) {

@@ -44,7 +44,7 @@ public class Scale {
     private int denominator=0;
     private String text;
     public Scale(Element e) throws Exception{
-        denominator=e.getAttribute("denominator").getIntValue();
+        denominator=e.getAttribute("denominator").getIntValue();//NOI18N
         text=e.getText();
     }
     public Scale(int scaleDenominator,String text) {
@@ -58,9 +58,9 @@ public class Scale {
         return obj instanceof Scale && ((Scale)obj).denominator==denominator;
     }
     public Element getElement(boolean selected) {
-        Element e=new Element("scale");
-        e.setAttribute("selected",new Boolean(selected).toString());
-        e.setAttribute("denominator",denominator+"");
+        Element e=new Element("scale");//NOI18N
+        e.setAttribute("selected",new Boolean(selected).toString());//NOI18N
+        e.setAttribute("denominator",denominator+"");//NOI18N
         e.setText(text);
         return e;
     }

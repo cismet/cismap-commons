@@ -82,15 +82,15 @@ public class GoogleTileUtils {
         g.setColor(Color.black);
         
         int scale = 400 / keyholeString.length();
-        g.setFont(new Font("Serif", Font.BOLD, scale));
-        g.drawString(keyholeString + " (z=" + getTileZoom(keyholeString) + ")", 10, 200);
+        g.setFont(new Font("Serif", Font.BOLD, scale));//NOI18N
+        g.drawString(keyholeString + " (z=" + getTileZoom(keyholeString) + ")", 10, 200);//NOI18N
         
         Rectangle2D r    = getLatLong(keyholeString);
-        DecimalFormat df = new DecimalFormat("#.####");
-        g.setFont(new Font("SanSerif", 0, 15));
+        DecimalFormat df = new DecimalFormat("#.####");//NOI18N
+        g.setFont(new Font("SanSerif", 0, 15));//NOI18N
         
-        g.drawString(df.format(r.getMinY()) + "," + df.format(r.getMinX()) + " (w:" + df.format(r.getWidth())+" h:" + df.format(r.getHeight())+ ")", 10, 250);
-        g.drawString(df.format(r.getMaxY()) + "," + df.format(r.getMaxX()), 150, 20);
+        g.drawString(df.format(r.getMinY()) + "," + df.format(r.getMinX()) + " (w:" + df.format(r.getWidth())+" h:" + df.format(r.getHeight())+ ")", 10, 250);//NOI18N
+        g.drawString(df.format(r.getMaxY()) + "," + df.format(r.getMaxX()), 150, 20);//NOI18N
         g.drawRect(1, 1, 255, 255);
         g.dispose();
         
@@ -107,15 +107,15 @@ public class GoogleTileUtils {
         g.setColor(Color.black);
         
         int scale = 20;
-        g.setFont(new Font("Serif", Font.BOLD, scale));
-        g.drawString("x:" + x + " y:" + y + " z:" + zoom, 10, 200);
+        g.setFont(new Font("Serif", Font.BOLD, scale));//NOI18N
+        g.drawString("x:" + x + " y:" + y + " z:" + zoom, 10, 200);//NOI18N
         
         Rectangle2D r    = getLatLong(x, y, zoom);
-        DecimalFormat df = new DecimalFormat("#.####");
-        g.setFont(new Font("SanSerif", 0, 15));
+        DecimalFormat df = new DecimalFormat("#.####");//NOI18N
+        g.setFont(new Font("SanSerif", 0, 15));//NOI18N
         
-        g.drawString(df.format(r.getMinY()) + "," + df.format(r.getMinX())+ " (w:" + df.format(r.getWidth())+" h:" + df.format(r.getHeight())+ ")", 10, 250);
-        g.drawString(df.format(r.getMaxY()) + "," + df.format(r.getMaxX()), 150, 20);
+        g.drawString(df.format(r.getMinY()) + "," + df.format(r.getMinX())+ " (w:" + df.format(r.getWidth())+" h:" + df.format(r.getHeight())+ ")", 10, 250);//NOI18N
+        g.drawString(df.format(r.getMaxY()) + "," + df.format(r.getMaxX()), 150, 20);//NOI18N
         g.drawRect(1, 1, 255, 255);
         g.dispose();
         
@@ -128,7 +128,7 @@ public class GoogleTileUtils {
     public static Rectangle2D.Double getLatLong(String keyholeStr) {
         // must start with "t"
         if ((keyholeStr == null) || (keyholeStr.length() == 0) || (keyholeStr.charAt(0) != 't')) {
-            throw new RuntimeException("Keyhole string must start with 't'");
+            throw new RuntimeException("Keyhole string must start with 't'");//NOI18N
         }
         
         double lon      = -180; // x
@@ -172,7 +172,7 @@ public class GoogleTileUtils {
                     break;
                     
                 default:
-                    throw new RuntimeException("unknown char '" + c + "' when decoding keyhole string.");
+                    throw new RuntimeException("unknown char '" + c + "' when decoding keyhole string.");//NOI18N
             }
         }
         

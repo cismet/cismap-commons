@@ -4,7 +4,7 @@
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="2"/>
     <Property name="title" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-      <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.title" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+      <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
     </Property>
   </Properties>
   <SyntheticProperties>
@@ -125,7 +125,7 @@
               <Font name="Tahoma" size="11" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel1.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.jLabel1.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
@@ -134,21 +134,21 @@
         <Component class="javax.swing.JLabel" name="jLabel2">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel2.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.jLabel2.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel3">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel3.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.jLabel3.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel4">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel4.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.jLabel4.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
@@ -167,7 +167,7 @@
       <Properties>
         <Property name="mnemonic" type="int" value="79"/>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.cmdOk.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.cmdOk.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -178,7 +178,7 @@
       <Properties>
         <Property name="mnemonic" type="int" value="65"/>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.cmdCancel.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.cmdCancel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -249,7 +249,7 @@
                       <Component id="jLabel10" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="cboAction" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="81" max="32767" attributes="0"/>
+                  <EmptySpace pref="89" max="32767" attributes="0"/>
                   <Component id="jSeparator4" min="-2" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -262,7 +262,7 @@
               <Font name="Tahoma" size="11" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel6.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.jLabel6.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
@@ -271,28 +271,28 @@
         <Component class="javax.swing.JLabel" name="jLabel7">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel7.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.jLabel7.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel8">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel8.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.jLabel8.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel9">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel9.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.jLabel9.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel10">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel10.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="PrintingSettingsWidget.jLabel10.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>

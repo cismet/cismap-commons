@@ -10,21 +10,29 @@ import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
+import de.cismet.cismap.commons.features.FeatureGroup;
+import de.cismet.cismap.commons.features.FeatureGroups;
 import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.SubFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDecimalTools;
+import de.cismet.tools.collections.TypeSafeCollections;
 import de.cismet.tools.configuration.Configurable;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PDimension;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -36,7 +44,6 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Filter;
 import org.jdesktop.swingx.decorator.FilterPipeline;
 import org.jdesktop.swingx.table.TableColumnExt;
-import org.jdom.DataConversionException;
 import org.jdom.Element;
 
 /**
@@ -44,38 +51,42 @@ import org.jdom.Element;
  * @author  thorsten.hell@cismet.de
  */
 public class FeatureControl extends javax.swing.JPanel implements FeatureCollectionListener, MapBoundsListener, Configurable {
-
-    private static final java.util.ResourceBundle I18N =
-            java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
-
     final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private FeatureCollectionFilter filter;
-    private ImageIcon icoGreenled = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/greenled.png"));
+    private FeatureCollectionFilter featureCollectionFilter;
+    private ImageIcon icoGreenled = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/greenled.png"));//NOI18N
     boolean wizardMode = false;
     private MappingComponent mappingComponent = null;
     private ListSelectionListener theListSelectionListener = new ListSelectionListener() {
-
         public void valueChanged(ListSelectionEvent e) {
-            log.debug("ValueChanged of SelectionListener from jxtFeatures: " + e);
-            int[] rows = jxtFeatures.getSelectedRows();
-//            mappingComponent.getFeatureCollection().unselectAll(false);
-            List<Feature> list = new LinkedList<Feature>();
-            for (int i = 0; i < rows.length; i++) {
-                int mappedRow = mapRowToModel(rows[i]);
-                list.add(getFeatureCollection().getFeature(mappedRow));
-//                if (!(mappingComponent.getFeatureCollection().getSelectedFeatures().contains(getFeatureCollection().getFeature(mappedRow)))) {
-//                    mappingComponent.getFeatureCollection().removeFeatureCollectionListener(FeatureControl.this);
-//                    mappingComponent.getFeatureCollection().addToSelection(getFeatureCollection().getFeature(mappedRow));
-//                }
+            if (!e.getValueIsAdjusting()) {
+                log.debug("invocation of the method SelectionListener.valueChanged from jxtFeatures");//NOI18N
+                updateSelection();
             }
-            // Hinter die Schleife gestellt, damit nicht f\u00FCr alle selektierten Features ein Event gefeuert wird
-            mappingComponent.getFeatureCollection().removeFeatureCollectionListener(FeatureControl.this);
-            mappingComponent.getFeatureCollection().select(list);
-            mappingComponent.getFeatureCollection().addFeatureCollectionListener(FeatureControl.this);
-
         }
     };
 
+    private void updateSelection() {
+        int[] rows = jxtFeatures.getSelectedRows();
+//            mappingComponent.getFeatureCollection().unselectAll(false);
+        final List<Feature> tableSelection = TypeSafeCollections.newArrayList();
+        for (int i = 0; i < rows.length; i++) {
+            int mappedRow = mapRowToModel(rows[i]);
+            tableSelection.add(getFeatureCollection().getFeature(mappedRow));
+        }
+//        final Set<Feature> selectionResult = TypeSafeCollections.newHashSet();
+//        for (Feature current : tableSelection) {
+//            if (current instanceof FeatureGroup) {
+//                selectionResult.addAll(FeatureGroups.expandAll((FeatureGroup) current, true));
+//            } else {
+//                selectionResult.add(current);
+//            }
+//        }
+        // Hinter die Schleife gestellt, damit nicht f\u00FCr alle selektierten Features ein Event gefeuert wird
+        mappingComponent.getFeatureCollection().removeFeatureCollectionListener(FeatureControl.this);
+        mappingComponent.getFeatureCollection().select(tableSelection);
+//        mappingComponent.getFeatureCollection().select(selectionResult);
+        mappingComponent.getFeatureCollection().addFeatureCollectionListener(FeatureControl.this);
+    }
 
     /** Creates new form FeatureControl */
     public FeatureControl(de.cismet.cismap.commons.gui.MappingComponent mappingComponent) {
@@ -98,13 +109,27 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jxtFeatures.getColumnModel().getColumn(7).setCellRenderer(jxtFeatures.getDefaultRenderer(Icon.class));
         //jxtFeatures.getColumnModel().getColumn(7).setCellEditor(new JXTable.BooleanEditor());
 
-        filter = new FeatureCollectionFilter(false);
-        Filter[] filterArray = {filter};
+        featureCollectionFilter = new FeatureCollectionFilter(false);
+        final Filter[] filterArray;
+        if (FeatureGroups.SHOW_GROUPING_ENABLED) {
+            filterArray = new Filter[]{featureCollectionFilter};
+        } else {
+            SubFeatureFilter subFeatureFilter = new SubFeatureFilter();
+            filterArray = new Filter[]{subFeatureFilter, featureCollectionFilter};
+        }
         FilterPipeline filters = new FilterPipeline(filterArray);
         jxtFeatures.setFilters(filters);
         //jxtFeatures.setHighlighters(new HighlighterPipeline(new Highlighter[]{ AlternateRowHighlighter.classicLinePrinter }));
         jxtFeatures.getSelectionModel().addListSelectionListener(theListSelectionListener);
+        jxtFeatures.addMouseListener(new MouseAdapter() {
 
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() > 1) {
+                    updateSelection();
+                }
+            }
+        });
     }
 
     /** This method is called from within the constructor to
@@ -163,7 +188,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jToolBar1.setRollover(true);
 
         cmdZoomToAllFeatures.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/zoomToAll.png"))); // NOI18N
-        cmdZoomToAllFeatures.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.cmdZoomToAllFeatures.toolTipText")); // NOI18N
+        cmdZoomToAllFeatures.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.cmdZoomToAllFeatures.toolTipText")); // NOI18N
         cmdZoomToAllFeatures.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdZoomToAllFeaturesActionPerformed(evt);
@@ -172,7 +197,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jToolBar1.add(cmdZoomToAllFeatures);
 
         cmdZoomToFeatures.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/zoomToSelection.png"))); // NOI18N
-        cmdZoomToFeatures.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.cmdZoomToFeatures.toolTipText")); // NOI18N
+        cmdZoomToFeatures.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.cmdZoomToFeatures.toolTipText")); // NOI18N
         cmdZoomToFeatures.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdZoomToFeaturesActionPerformed(evt);
@@ -189,7 +214,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jToolBar1.add(cmdZoomToFeatures);
 
         cmdRemoveFeatures.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/removerow.png"))); // NOI18N
-        cmdRemoveFeatures.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.cmdRemoveFeatures.toolTipText")); // NOI18N
+        cmdRemoveFeatures.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.cmdRemoveFeatures.toolTipText")); // NOI18N
         cmdRemoveFeatures.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdRemoveFeaturesActionPerformed(evt);
@@ -198,7 +223,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jToolBar1.add(cmdRemoveFeatures);
 
         cmdRemoveAll.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/removeAll.png"))); // NOI18N
-        cmdRemoveAll.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.cmdRemoveAll.toolTipText")); // NOI18N
+        cmdRemoveAll.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.cmdRemoveAll.toolTipText")); // NOI18N
         cmdRemoveAll.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdRemoveAllActionPerformed(evt);
@@ -207,7 +232,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jToolBar1.add(cmdRemoveAll);
 
         togShowOnlyVisible.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/showOnlyVisible_disabled.png"))); // NOI18N
-        togShowOnlyVisible.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.togShowOnlyVisible.toolTipText")); // NOI18N
+        togShowOnlyVisible.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.togShowOnlyVisible.toolTipText")); // NOI18N
         togShowOnlyVisible.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/showOnlyVisible_disabled.png"))); // NOI18N
         togShowOnlyVisible.setRolloverSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/showOnlyVisible.png"))); // NOI18N
         togShowOnlyVisible.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/showOnlyVisible.png"))); // NOI18N
@@ -219,7 +244,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jToolBar1.add(togShowOnlyVisible);
 
         togFixMapExtent.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapExtent_disabled.png"))); // NOI18N
-        togFixMapExtent.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.togFixMapExtent.toolTipText")); // NOI18N
+        togFixMapExtent.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.togFixMapExtent.toolTipText")); // NOI18N
         togFixMapExtent.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapExtent_disabled.png"))); // NOI18N
         togFixMapExtent.setRolloverSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapExtent.png"))); // NOI18N
         togFixMapExtent.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapExtent.png"))); // NOI18N
@@ -231,7 +256,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jToolBar1.add(togFixMapExtent);
 
         togFixMapScale.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale_disabled.png"))); // NOI18N
-        togFixMapScale.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.togFixMapScale.toolTipText")); // NOI18N
+        togFixMapScale.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.togFixMapScale.toolTipText")); // NOI18N
         togFixMapScale.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale_disabled.png"))); // NOI18N
         togFixMapScale.setRolloverSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
         togFixMapScale.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
@@ -243,7 +268,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jToolBar1.add(togFixMapScale);
 
         togDisplayObjectInfo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/infoLabel_disabled.png"))); // NOI18N
-        togDisplayObjectInfo.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.togDisplayObjectInfo.toolTipText")); // NOI18N
+        togDisplayObjectInfo.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.togDisplayObjectInfo.toolTipText")); // NOI18N
         togDisplayObjectInfo.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/infoLabel_disabled.png"))); // NOI18N
         togDisplayObjectInfo.setRolloverSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/infoLabel.png"))); // NOI18N
         togDisplayObjectInfo.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/infoLabel.png"))); // NOI18N
@@ -255,7 +280,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jToolBar1.add(togDisplayObjectInfo);
 
         togHoldAll.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/holdAll_disabled.png"))); // NOI18N
-        togHoldAll.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.togHoldAll.toolTipText")); // NOI18N
+        togHoldAll.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.togHoldAll.toolTipText")); // NOI18N
         togHoldAll.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/holdAll_disabled.png"))); // NOI18N
         togHoldAll.setRolloverSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/holdAll.png"))); // NOI18N
         togHoldAll.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/holdAll.png"))); // NOI18N
@@ -267,7 +292,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jToolBar1.add(togHoldAll);
 
         cmdHold.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/holdSelection.png"))); // NOI18N
-        cmdHold.setToolTipText(I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.cmdHold.toolTipText")); // NOI18N
+        cmdHold.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.cmdHold.toolTipText")); // NOI18N
         cmdHold.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdHoldActionPerformed(evt);
@@ -329,7 +354,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         try {
             return mappingComponent.getFeatureCollection();
         } catch (Exception e) {
-            log.warn("Bei getFeatureCollection() geht was schief", e);
+            log.warn("Problem with method getFeatureCollection().", e);//NOI18N
             return new DefaultFeatureCollection();
         }
     }
@@ -347,7 +372,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                 try {
                     v.add((Feature) fc.getAllFeatures().get(mapRowToModel(i)));
                 } catch (Throwable t) {
-                    log.error("Fehler in getAllFeaturesSorted() alleFeatures=" + fc.getAllFeatures() + ", Zugriffsversuch an " + mapRowToModel(i) + ".te Stelle", t);
+                    log.error("Error in getAllFeaturesSorted() allFeatures=" + fc.getAllFeatures() + ", try to access " + mapRowToModel(i) + ". position", t);//NOI18N
                 }
             }
         }
@@ -358,16 +383,33 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         mappingComponent.getMemUndo().clear();
         mappingComponent.getMemRedo().clear();
         int[] rows = jxtFeatures.getSelectedRows();
-        Vector<Feature> remove = new Vector<Feature>();
+        final Set<Feature> toRemove = TypeSafeCollections.newHashSet();
         int firstSelectedRow = -1;
         for (int i = 0; i < rows.length; i++) {
             if (firstSelectedRow == -1) {
                 firstSelectedRow = rows[i];
             }
             int mappedRow = mapRowToModel(rows[i]);
-            remove.add(getFeatureCollection().getFeature(mappedRow));
+            Feature currentFeature = getFeatureCollection().getFeature(mappedRow);
+            //ENABLE THIS CODE TO HAVE THE SUBFEATURES DELETE FROM THEIR PARENT ON REMOVE FROM MAP
+//            if (currentFeature instanceof SubFeature) {
+//                SubFeature currentSubFeature = (SubFeature) currentFeature;
+//                FeatureGroup parent = currentSubFeature.getParentFeature();
+//                if (parent != null) {
+//                    currentSubFeature.setParentFeature(null);
+//                    parent.removeFeature(currentFeature);
+//                }
+//            }
+            if (!toRemove.contains(currentFeature)) {
+                if (currentFeature instanceof FeatureGroup) {
+                    //delete group with all contained features
+                    toRemove.addAll(FeatureGroups.expandAll((FeatureGroup) currentFeature));
+                } else {
+                    toRemove.add(currentFeature);
+                }
+            }
         }
-        getFeatureCollection().removeFeatures(remove);
+        getFeatureCollection().removeFeatures(toRemove);
         if (jxtFeatures.getRowCount() == firstSelectedRow) {
             firstSelectedRow--;
         }
@@ -407,7 +449,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     }//GEN-LAST:event_cmdZoomToFeaturesMouseEntered
 
     private void togShowOnlyVisibleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togShowOnlyVisibleActionPerformed
-        filter.setArmed(togShowOnlyVisible.isSelected());
+        featureCollectionFilter.setArmed(togShowOnlyVisible.isSelected());
         ((FeatureCollectionTableModel) jxtFeatures.getModel()).fireTableDataChanged();
     }//GEN-LAST:event_togShowOnlyVisibleActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -432,7 +474,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 
     public void shownMapBoundsChanged() {
         //refreshTableAndTryToKeepTheFuckingSelection();
-        if (filter.isArmed()) {
+        if (featureCollectionFilter.isArmed()) {
             ((FeatureCollectionTableModel) jxtFeatures.getModel()).fireTableDataChanged();
         }
         JXTable t = new JXTable();
@@ -454,13 +496,13 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     public void featuresChanged(FeatureCollectionEvent fce) {
         Feature f = null;
         Collection<Feature> fc = fce.getFeatureCollection().getSelectedFeatures();
-        log.debug("in featuresChanged: Selectedfeatures (" + fc.size() + ")" + fc, new CurrentStackTrace());
+        log.debug("in featuresChanged: Selectedfeatures (" + fc.size() + ")" + fc, new CurrentStackTrace());//NOI18N
         ((FeatureCollectionTableModel) jxtFeatures.getModel()).fireTableDataChanged();
         for (Feature feat : fc) {
             int index = getFeatureCollection().getAllFeatures().indexOf(feat);
             int viewIndex = jxtFeatures.convertRowIndexToView(index);
             jxtFeatures.getSelectionModel().addSelectionInterval(viewIndex, viewIndex);
-            log.debug("SelectionIntervall added " + viewIndex);
+            log.debug("SelectionIntervall added " + viewIndex);//NOI18N
         }
     }
 
@@ -470,37 +512,32 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 
     public void featureSelectionChanged(FeatureCollectionEvent fce) {
         try {
-            if (fce.getFeatureCollection().getSelectedFeatures().size() == 1) {
-                Feature f = (Feature) fce.getFeatureCollection().getSelectedFeatures().toArray()[0];
-                int index = getFeatureCollection().getAllFeatures().indexOf(f);
-                int viewIndex = jxtFeatures.convertRowIndexToView(index);
-                jxtFeatures.getSelectionModel().removeListSelectionListener(theListSelectionListener);
-                jxtFeatures.getSelectionModel().setSelectionInterval(viewIndex, viewIndex);
-                jxtFeatures.getSelectionModel().addListSelectionListener(theListSelectionListener);
-                jxtFeatures.scrollRowToVisible(viewIndex);
-            } else if (fce.getFeatureCollection().getSelectedFeatures().size() == 0) {
-                jxtFeatures.getSelectionModel().removeListSelectionListener(theListSelectionListener);
-                jxtFeatures.getSelectionModel().clearSelection();
-                jxtFeatures.getSelectionModel().addListSelectionListener(theListSelectionListener);
-                jxtFeatures.scrollRowToVisible(0);
-            } else // if (fce.getFeatureCollection().getSelectedFeatures().size() > 1) 
-            {
-                Object[] fs = fce.getFeatureCollection().getSelectedFeatures().toArray();
-                jxtFeatures.getSelectionModel().removeListSelectionListener(theListSelectionListener);
-                jxtFeatures.getSelectionModel().clearSelection();
-                for (Object o : fs) {
-                    if (o instanceof Feature) {
-                        Feature f = (Feature) o;
-                        int index = getFeatureCollection().getAllFeatures().indexOf(f);
-                        int viewIndex = jxtFeatures.convertRowIndexToView(index);
-                        jxtFeatures.getSelectionModel().addSelectionInterval(viewIndex, viewIndex);
-                    }
-                }
-                jxtFeatures.getSelectionModel().addListSelectionListener(theListSelectionListener);
-            }
+            addFeatureToSelection(fce.getFeatureCollection());
         } catch (Exception e) {
-            log.error("Fehler in featureSelectionChanged", e);
+            log.error("Error in featureSelectionChanged", e);//NOI18N
         }
+    }
+
+    private void addFeatureToSelection(FeatureCollection fc) {
+        final Collection<Feature> features = fc.getSelectedFeatures();
+        jxtFeatures.getSelectionModel().removeListSelectionListener(theListSelectionListener);
+        jxtFeatures.getSelectionModel().clearSelection();
+        if (features != null && features.size() > 0) {
+            final Iterator<Feature> featureIt = features.iterator();
+            for (int i = 0; i < features.size(); ++i) {
+                Feature current = featureIt.next();
+                if (!FeatureGroups.SHOW_GROUPING_ENABLED && current instanceof SubFeature) {
+                    SubFeature sf = (SubFeature) current;
+                    current = FeatureGroups.getRootFeature(sf);
+                }
+                int collectionIndex = fc.getAllFeatures().indexOf(current);
+                int viewIndex = jxtFeatures.convertRowIndexToView(collectionIndex);
+                jxtFeatures.getSelectionModel().addSelectionInterval(viewIndex, viewIndex);
+            }
+        } else {
+            jxtFeatures.scrollRowToVisible(0);
+        }
+        jxtFeatures.getSelectionModel().addListSelectionListener(theListSelectionListener);
     }
 
     class FeatureCollectionTableModel extends AbstractTableModel {
@@ -549,23 +586,23 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         public String getColumnName(int columnIndex) {
             switch (columnIndex) {
                 case 0: //Icon
-                    return I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.getColumnName().return.ico");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.ico");
                 case 1: //Name
-                    return I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.getColumnName().return.name");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.name");
                 case 2: //Type
-                    return I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.getColumnName().return.typ");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.typ");
                 case 3: //Geometrietyp
-                    return I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.getColumnName().return.geometrie");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.geometrie");
                 case 4: //Gr\u00F6\u00DFe
-                    return I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.getColumnName().return.groesse");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.groesse");
                 case 5: //L\u00E4nge
-                    return I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.getColumnName().return.laenge");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.laenge");
                 case 6: //Zentrum
-                    return I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.getColumnName().return.zentrum");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.zentrum");
                 case 7: //Markierung
-                    return I18N.getString("de.cismet.cismap.commons.gui.featurecontrolwidget.FeatureControl.getColumnName().return.Halten");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.Halten");
                 default:
-                    return "";
+                    return "";//NOI18N
             }
         }
 
@@ -614,14 +651,16 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     case 2: //Type
                         if (f instanceof XStyledFeature) {
                             return ((XStyledFeature) f).getType();
+                        } else if (f instanceof FeatureGroup) {
+                            return "GRUPPE";
                         } else {
-                            return "";
+                            return "";//NOI18N
                         }
                     case 3: //Geometrietyp
                         if (f.getGeometry() != null) {
                             return f.getGeometry().getGeometryType();
                         } else {
-                            return "";
+                            return "";//NOI18N
                         }
                     case 4: //Gr\u00F6\u00DFe
                         if (f.getGeometry() != null) {
@@ -637,8 +676,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                         }
                     case 6: //Zentrum
                         if (f.getGeometry() != null) {
-                            return "(" + StaticDecimalTools.round(f.getGeometry().getCentroid().getX()) + "," +
-                                    StaticDecimalTools.round(f.getGeometry().getCentroid().getY()) + ")";
+                            return "(" + StaticDecimalTools.round(f.getGeometry().getCentroid().getX()) + ","//NOI18N
+                                    + StaticDecimalTools.round(f.getGeometry().getCentroid().getY()) + ")";//NOI18N
                         } else {
                             return 0.0;
                         }
@@ -652,7 +691,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                         return null;
                 }
             } catch (Throwable t) {
-                log.error("Error in table.", t);
+                log.error("Error in table.", t);//NOI18N
                 return null;
             }
         }
@@ -665,8 +704,9 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
          * @return the number of rows in the model
          * @see #getColumnCount
          */
+        @Override
         public int getRowCount() {
-            return getFeatureCollection().getFeatureCount();
+            return getFeatureCollection() != null ? getFeatureCollection().getFeatureCount() : 0;
         }
 
         /**
@@ -681,6 +721,58 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         }
     }
 
+    final class SubFeatureFilter extends Filter {
+
+        private final List<Integer> toPrevious = TypeSafeCollections.newArrayList();
+
+        protected void reset() {
+            toPrevious.clear();
+            int inputSize = getInputSize();
+            fromPrevious = new int[inputSize];  // fromPrevious is inherited protected
+            for (int i = 0; i < inputSize; i++) {
+                fromPrevious[i] = -1;
+            }
+        }
+
+        protected void init() {
+        }
+
+        public int getSize() {
+            return toPrevious.size();
+        }
+
+        protected int mapTowardModel(int row) {
+            return toPrevious.get(row);
+        }
+
+        public boolean test(int row) {
+
+            try {
+                Feature currentTestFeature = getFeatureCollection().getFeature(row);
+                if (currentTestFeature instanceof SubFeature) {
+                    return ((SubFeature) currentTestFeature).getParentFeature() == null;
+                }
+                return true;
+            } catch (Throwable t) {
+                log.error("Error while testing in filter", t);//NOI18N
+                return true;
+            }
+
+        }
+
+        protected void filter() {
+            int inputSize = getInputSize();
+            int current = 0;
+            for (int i = 0; i < inputSize; i++) {
+                if (test(i)) {
+                    toPrevious.add(i);
+                    // generate inverse map entry while we are here
+                    fromPrevious[i] = current++;
+                }
+            }
+        }
+    }
+
     class FeatureCollectionFilter extends Filter {
 
         private ArrayList<Integer> toPrevious;
@@ -691,7 +783,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
             init();
             reset();
             this.armed = armed;
-            log.debug("Filter initialised.");
+            log.debug("Filter initialised.");//NOI18N
         }
 
         protected void reset() {
@@ -722,17 +814,21 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                 try {
                     Object value = getFeatureCollection().getFeature(row);
                     PFeature pf = (PFeature) (mappingComponent.getPFeatureHM().get(value));
-                    PBounds all = mappingComponent.getCamera().getViewBounds();
-                    PDimension delta = all.deltaRequiredToContain(pf.getFullBounds());
-                    mappingComponent.getCamera().viewToLocal(delta);
-                    PDimension size = new PDimension(pf.getFullBounds().getSize());
-                    mappingComponent.getCamera().viewToLocal(size);
-                    //boolean test=(Math.abs(delta.width)<pf.getFullBounds().getWidth()*0.75 && Math.abs(delta.height)<pf.getFullBounds().getHeight()*0.75);
-                    //boolean test=(Math.abs(delta.width)<=pf.getFullBounds().getWidth()-10 && Math.abs(delta.height)<=pf.getFullBounds().getHeight()-10);
-                    boolean test = (Math.abs(delta.width) <= size.width && Math.abs(delta.height) <= size.height);
-                    return test;
+                    if (pf != null) {
+                        PBounds all = mappingComponent.getCamera().getViewBounds();
+                        PDimension delta = all.deltaRequiredToContain(pf.getFullBounds());
+                        mappingComponent.getCamera().viewToLocal(delta);
+                        PDimension size = new PDimension(pf.getFullBounds().getSize());
+                        mappingComponent.getCamera().viewToLocal(size);
+                        //boolean test=(Math.abs(delta.width)<pf.getFullBounds().getWidth()*0.75 && Math.abs(delta.height)<pf.getFullBounds().getHeight()*0.75);
+                        //boolean test=(Math.abs(delta.width)<=pf.getFullBounds().getWidth()-10 && Math.abs(delta.height)<=pf.getFullBounds().getHeight()-10);
+                        boolean test = (Math.abs(delta.width) <= size.width && Math.abs(delta.height) <= size.height);
+                        return test;
+                    } else {
+                        return false;
+                    }
                 } catch (Throwable t) {
-                    log.error("Error while testing in filter.", t);
+                    log.error("Error while testing in filter.", t);//NOI18N
                     return true;
                 }
             }
@@ -743,7 +839,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
             int current = 0;
             for (int i = 0; i < inputSize; i++) {
                 if (test(i)) {
-                    toPrevious.add(new Integer(i));
+                    toPrevious.add(i);
                     // generate inverse map entry while we are here
                     fromPrevious[i] = current++;
                 }
@@ -770,36 +866,36 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      */
     public Element getConfiguration() {
         try {
-            Element ret = new Element("cismapFeatureControl");
-            ret.setAttribute("showOnlyObjectsInMap", new Boolean(togShowOnlyVisible.isSelected()).toString());
-            ret.setAttribute("fixedMapExtent", new Boolean(togFixMapExtent.isSelected()).toString());
-            ret.setAttribute("fixedMapScale", new Boolean(togFixMapScale.isSelected()).toString());
-            ret.setAttribute("displayObjectInfo", new Boolean(togDisplayObjectInfo.isSelected()).toString());
-            ret.setAttribute("holdAll", new Boolean(togHoldAll.isSelected()).toString());
+            Element ret = new Element("cismapFeatureControl");//NOI18N
+            ret.setAttribute("showOnlyObjectsInMap", new Boolean(togShowOnlyVisible.isSelected()).toString());//NOI18N
+            ret.setAttribute("fixedMapExtent", new Boolean(togFixMapExtent.isSelected()).toString());//NOI18N
+            ret.setAttribute("fixedMapScale", new Boolean(togFixMapScale.isSelected()).toString());//NOI18N
+            ret.setAttribute("displayObjectInfo", new Boolean(togDisplayObjectInfo.isSelected()).toString());//NOI18N
+            ret.setAttribute("holdAll", new Boolean(togHoldAll.isSelected()).toString());//NOI18N
             if (jxtFeatures.getSortedColumn() != null) {
-                ret.setAttribute("sortedColumn", jxtFeatures.getSortedColumn().getIdentifier().toString());
+                ret.setAttribute("sortedColumn", jxtFeatures.getSortedColumn().getIdentifier().toString());//NOI18N
                 int viewIndex = jxtFeatures.convertColumnIndexToView(jxtFeatures.getSortedColumn().getModelIndex());
-                ret.setAttribute("ascendingSortOrder", new Boolean(jxtFeatures.getSortOrder(viewIndex).isAscending()).toString());
+                ret.setAttribute("ascendingSortOrder", new Boolean(jxtFeatures.getSortOrder(viewIndex).isAscending()).toString());//NOI18N
             }
-            Element columnSequence = new Element("columnSequence");
+            Element columnSequence = new Element("columnSequence");//NOI18N
             for (Object tce : jxtFeatures.getColumns()) {
-                columnSequence.addContent(new Element("id").addContent(((TableColumnExt) tce).getIdentifier().toString()));
+                columnSequence.addContent(new Element("id").addContent(((TableColumnExt) tce).getIdentifier().toString()));//NOI18N
             }
             ret.addContent(columnSequence);
             for (Object o : jxtFeatures.getColumns(true)) {
                 TableColumnExt tce = (TableColumnExt) o;
-                Element columnElement = new Element("column");
-                columnElement.setAttribute("title", tce.getTitle());
-                columnElement.setAttribute("identifier", tce.getIdentifier().toString());
-                columnElement.setAttribute("visible", new Boolean(tce.isVisible()).toString());
-                columnElement.setAttribute("width", "" + tce.getWidth());
+                Element columnElement = new Element("column");//NOI18N
+                columnElement.setAttribute("title", tce.getTitle());//NOI18N
+                columnElement.setAttribute("identifier", tce.getIdentifier().toString());//NOI18N
+                columnElement.setAttribute("visible", new Boolean(tce.isVisible()).toString());//NOI18N
+                columnElement.setAttribute("width", "" + tce.getWidth());//NOI18N
                 //columnElement.setAttribute("sorterClass",tce.getSorter().);
                 ret.addContent(columnElement);
             }
             return ret;
         } catch (Throwable t) {
-            log.error("Error while creating configuration (application exit)", t);
-            return new Element("cismapFeatureControl");
+            log.error("Error while creating configuration (application exit)", t);//NOI18N
+            return new Element("cismapFeatureControl");//NOI18N
         }
     }
 
@@ -809,35 +905,35 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 
     public void configure(Element e) {
         try {
-            Element conf = e.getChild("cismapFeatureControl");
+            Element conf = e.getChild("cismapFeatureControl");//NOI18N
             if (conf != null) {
                 try {
-                    togShowOnlyVisible.setSelected(conf.getAttribute("showOnlyObjectsInMap").getBooleanValue());
+                    togShowOnlyVisible.setSelected(conf.getAttribute("showOnlyObjectsInMap").getBooleanValue());//NOI18N
                 } catch (Exception ex) {
-                    log.warn("Error while reading configs", ex);
+                    log.warn("Error while reading configs", ex);//NOI18N
                 }
                 try {
-                    togFixMapExtent.setSelected(conf.getAttribute("fixedMapExtent").getBooleanValue());
+                    togFixMapExtent.setSelected(conf.getAttribute("fixedMapExtent").getBooleanValue());//NOI18N
                 } catch (Exception ex) {
-                    log.warn("Error while reading configs", ex);
+                    log.warn("Error while reading configs", ex);//NOI18N
                 }
                 try {
-                    togFixMapScale.setSelected(conf.getAttribute("fixedMapScale").getBooleanValue());
+                    togFixMapScale.setSelected(conf.getAttribute("fixedMapScale").getBooleanValue());//NOI18N
                 } catch (Exception ex) {
-                    log.warn("Error while reading configs", ex);
+                    log.warn("Error while reading configs", ex);//NOI18N
                 }
                 try {
-                    togDisplayObjectInfo.setSelected(conf.getAttribute("displayObjectInfo").getBooleanValue());
+                    togDisplayObjectInfo.setSelected(conf.getAttribute("displayObjectInfo").getBooleanValue());//NOI18N
                 } catch (Exception ex) {
-                    log.warn("Error while reading configs", ex);
+                    log.warn("Error while reading configs", ex);//NOI18N
                 }
                 try {
-                    togHoldAll.setSelected(conf.getAttribute("holdAll").getBooleanValue());
+                    togHoldAll.setSelected(conf.getAttribute("holdAll").getBooleanValue());//NOI18N
                 } catch (Exception ex) {
-                    log.warn("Error while reading configs", ex);
+                    log.warn("Error while reading configs", ex);//NOI18N
                 }
                 try {
-                    List seq = conf.getChild("columnSequence").getChildren("id");
+                    List seq = conf.getChild("columnSequence").getChildren("id");//NOI18N
                     Object[] oa = new Object[seq.size()];
                     int i = 0;
                     for (Object elem : seq) {
@@ -846,11 +942,11 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     }
                     jxtFeatures.setColumnSequence(oa);
                 } catch (Exception ex) {
-                    log.warn("Error while reading configs", ex);
+                    log.warn("Error while reading configs", ex);//NOI18N
                 }
                 try {
-                    String columnId = conf.getAttribute("sortedColumn").getValue();
-                    boolean ascending = conf.getAttribute("ascendingSortOrder").getBooleanValue();
+                    String columnId = conf.getAttribute("sortedColumn").getValue();//NOI18N
+                    boolean ascending = conf.getAttribute("ascendingSortOrder").getBooleanValue();//NOI18N
 
                     int viewIndex = jxtFeatures.convertColumnIndexToView(jxtFeatures.getColumn(columnId).getModelIndex());
                     jxtFeatures.toggleSortOrder(viewIndex);
@@ -858,39 +954,39 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                         jxtFeatures.toggleSortOrder(viewIndex);
                     }
                 } catch (Exception ex) {
-                    log.warn("Error while reading configs", ex);
+                    log.warn("Error while reading configs", ex);//NOI18N
                 }
 
-                List lst = conf.getChildren("column");
+                List lst = conf.getChildren("column");//NOI18N
                 try {
                     for (Object elem : lst) {
                         Element col = (Element) elem;
-                        Object id = col.getAttribute("identifier").getValue();
+                        Object id = col.getAttribute("identifier").getValue();//NOI18N
                         try {
-                            jxtFeatures.getColumnExt(id).setVisible(col.getAttribute("visible").getBooleanValue());
+                            jxtFeatures.getColumnExt(id).setVisible(col.getAttribute("visible").getBooleanValue());//NOI18N
                         } catch (Exception ex) {
-                            log.warn("Error while reading configs", ex);
+                            log.warn("Error while reading configs", ex);//NOI18N
                         }
                         try {
-                            jxtFeatures.getColumnExt(id).setPreferredWidth(col.getAttribute("width").getIntValue());
+                            jxtFeatures.getColumnExt(id).setPreferredWidth(col.getAttribute("width").getIntValue());//NOI18N
                             //jxtFeatures.getColumnExt(id).setWidth();
                         } catch (Exception ex) {
-                            log.warn("Error while reading configs", ex);
+                            log.warn("Error while reading configs", ex);//NOI18N
                         }
                     }
                 } catch (Throwable t) {
-                    log.warn("Error while configuring featureControlComponent:", t);
+                    log.warn("Error while configuring featureControlComponent:", t);//NOI18N
                 }
-                filter.setArmed(togShowOnlyVisible.isSelected());
+                featureCollectionFilter.setArmed(togShowOnlyVisible.isSelected());
                 mappingComponent.setInfoNodesVisible(togDisplayObjectInfo.isSelected());
                 mappingComponent.setFixedMapExtent(togFixMapExtent.isSelected());
                 mappingComponent.setFixedMapScale(togFixMapScale.isSelected());
                 mappingComponent.getFeatureCollection().setHoldAll(togHoldAll.isSelected());
             } else {
-                log.warn("No configurarion data for FeatureControl available.");
+                log.warn("No configurarion data for FeatureControl available.");//NOI18N
             }
         } catch (Throwable t) {
-            log.error("Error while loading configuration (application start)", t);
+            log.error("Error while loading configuration (application start)", t);//NOI18N
         }
     }
 

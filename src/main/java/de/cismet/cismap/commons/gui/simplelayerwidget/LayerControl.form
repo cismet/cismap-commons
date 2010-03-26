@@ -11,7 +11,7 @@
         <MenuItem class="javax.swing.JMenuItem" name="mitLayerName">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl.mitLayerName.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="LayerControl.mitLayerName.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
@@ -21,7 +21,7 @@
         <MenuItem class="javax.swing.JCheckBoxMenuItem" name="mitGridEnabled">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl.mitGridEnabled.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="LayerControl.mitGridEnabled.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </MenuItem>
@@ -59,7 +59,7 @@
     <Component class="javax.swing.JLabel" name="lblIcon">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="__" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/gui/simplelayerwidget/Bundle.properties" key="LayerControl.lblIcon.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -74,7 +74,7 @@
     <Component class="javax.swing.JLabel" name="lblLayerName">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl.lblLayerName.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="LayerControl.lblLayerName.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>

@@ -16,7 +16,7 @@ import java.util.Vector;
  */
 
 public class PSwingCanvas extends PCanvas {
-    public static final String SWING_WRAPPER_KEY = "Swing Wrapper";
+    public static final String SWING_WRAPPER_KEY = "Swing Wrapper";//NOI18N
 
     private JComponent swingWrapper = new SwingWrapper();
     private ZBasicRepaintManager zBasicRepaintManager = new ZBasicRepaintManager();

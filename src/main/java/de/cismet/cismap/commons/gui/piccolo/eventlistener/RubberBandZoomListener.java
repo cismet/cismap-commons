@@ -7,17 +7,25 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.tools.CismetThreadPool;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
+import java.awt.event.ActionListener;
+import javax.swing.Timer;
 
 /**
  *
  * @author Hell
  */
 public class RubberBandZoomListener extends RectangleRubberBandListener {
+
+    public RubberBandZoomListener() {
+        timer = new Timer(500, null);
+        timer.setRepeats(false);
+    }
     public static final int ANIMATION_DURATION = 750;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private final Timer timer;
+    private ActionListener zoomListener = null;
 
     @Override
     public void mouseReleased(final PInputEvent e) {
@@ -28,9 +36,11 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
             e.getCamera().viewToLocal(bb);
             if (bb.width > 20 && bb.height > 20) {
                 if (e.getComponent() instanceof MappingComponent) {
-                    e.getCamera().animateViewToCenterBounds(b, true, ((MappingComponent) e.getComponent()).getAnimationDuration());
-                    ((MappingComponent) e.getComponent()).setNewViewBounds(b);
-                    ((MappingComponent) e.getComponent()).queryServices();
+                    MappingComponent map = (MappingComponent) e.getComponent();
+//                    map.getHandleLayer().removeAllChildren();
+                    e.getCamera().animateViewToCenterBounds(b, true, map.getAnimationDuration());
+                    map.setNewViewBounds(b);
+                    map.queryServices();
                 }
             }
         }
@@ -61,54 +71,37 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
     }
 
     public void zoom(float factor, final PInputEvent e, int localAnimationDuration, int delayTime) {
-        final PBounds b = new PBounds();
-        double h = e.getCamera().getViewBounds().getHeight();
-        double w = e.getCamera().getViewBounds().getWidth();
-        double scale = factor;
-        
-        double oldWidth = e.getCamera().getViewBounds().getWidth();
-        double newWidth = oldWidth * (1 - scale + 1);
-        double oldHeight = e.getCamera().getViewBounds().getHeight();
-        double newHeight = oldHeight * (1 - scale + 1);
-        
-        double offsetX = (newWidth - oldWidth) / 2;
-        double offsetY = (newHeight - oldHeight) / 2;
+//        if (e.getComponent() instanceof MappingComponent) {
+//            if (((MappingComponent) e.getComponent()).getAnimating()) {
+                final PBounds b = new PBounds();
+                double scale = factor;
+                double oldWidth = e.getCamera().getViewBounds().getWidth();
+                double newWidth = oldWidth * (1 - scale + 1);
+                double oldHeight = e.getCamera().getViewBounds().getHeight();
+                double newHeight = oldHeight * (1 - scale + 1);
 
-        //Offsetverschiebung sorgt daf\u00FCr das der Punkt auf den man geclickt hat an der gleichen Stelle bleibt        
-        double xR = e.getPosition().getX() - offsetX;
-        double yR = e.getPosition().getY() - offsetY;
-        
-        b.setOrigin(e.getCamera().getViewBounds().getOrigin().getX() - offsetX, e.getCamera().getViewBounds().getOrigin().getY() - offsetY);//);
-        b.setSize(newWidth, newHeight);
-        e.getCamera().animateViewToCenterBounds(b, true, localAnimationDuration);
-        if (localAnimationDuration == 0) {
-            CismapBroker.getInstance().fireMapBoundsChanged();
-        }
-//        if (e.getComponent() instanceof SimpleFeatureViewer) {
-//            ((SimpleFeatureViewer)e.getComponent()).refreshBackground();                            
+                double offsetX = (newWidth - oldWidth) / 2;
+                double offsetY = (newHeight - oldHeight) / 2;
+//        if (e.getComponent() instanceof MappingComponent) {
+//            MappingComponent map = (MappingComponent) e.getComponent();
+//            map.getHandleLayer().removeAllChildren();
 //        }
-        if (e.getComponent() instanceof MappingComponent) {
-            zoomTime = System.currentTimeMillis() + delayTime;
-            if (zoomThread == null || !zoomThread.isAlive()) {
-                zoomThread = new Thread() {
-                    public void run() {
-                        while (System.currentTimeMillis() < zoomTime) {
-                            try {
-                                sleep(100);
-                            //log.debug("WAIT");
-                            } catch (InterruptedException iex) {
-                            }
-                        }
-                        //log.debug("ZOOOOOOOOOOOOOOOOOOOOOOOOOOOM");
-                        ((MappingComponent) e.getComponent()).setNewViewBounds(b);
-                        ((MappingComponent) e.getComponent()).queryServices();
+                //Offsetverschiebung sorgt daf\u00FCr das der Punkt auf den man geclickt hat an der gleichen Stelle bleibt
+                b.setOrigin(e.getCamera().getViewBounds().getOrigin().getX() - offsetX, e.getCamera().getViewBounds().getOrigin().getY() - offsetY);//);
+                b.setSize(newWidth, newHeight);
+                e.getCamera().animateViewToCenterBounds(b, true, localAnimationDuration);
+                if (localAnimationDuration == 0) {
+                    CismapBroker.getInstance().fireMapBoundsChanged();
+                }
+                if (!timer.isRunning()) {
+                    if (zoomListener != null) {
+                        timer.removeActionListener(zoomListener);
                     }
-                };
-                CismetThreadPool.execute(zoomThread);
+                    zoomListener = new ZoomAction(b, e);
+                    timer.addActionListener(zoomListener);
+                    timer.start();
+                }
             }
-        //log.fatal("Breite src:"+((MappingComponent)e.getComponent()).getWtst().getSourceRect().getWidth());
-        }
-    }
-    Thread zoomThread;
-    long zoomTime;
+//        }
+//    }
 }

@@ -36,7 +36,6 @@ package de.cismet.cismap.commons.debug;
 
 import edu.umd.cs.piccolo.PCanvas;
 import edu.umd.cs.piccolo.PNode;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
@@ -47,18 +46,16 @@ import javax.swing.tree.TreePath;
  * @author thorsten.hell@cismet.de
  */
 public class PiccoloDebugTreeModel implements TreeModel{
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     PCanvas pc;
     Vector<TreeModelListener> treeModelListener=new Vector<TreeModelListener>();
-    Object root=I18N.getString("de.cismet.cismap.commons.debug.PiccoloDebugTreeModel.root");
+    Object root= "DebugTree";//NOI18N
     Vector<String> secondLevel= new Vector<String>();
-    
     
     /** Creates a new instance of PiccoloDebugTreeModel */
     public PiccoloDebugTreeModel(PCanvas pc) {
         this.pc=pc;
-        secondLevel.add(I18N.getString("de.cismet.cismap.commons.debug.PiccoloDebugTreeModel.secondLevel.cameras"));
-        secondLevel.add(I18N.getString("de.cismet.cismap.commons.debug.PiccoloDebugTreeModel.secondLevel.layer"));
+        secondLevel.add(org.openide.util.NbBundle.getMessage(PiccoloDebugTreeModel.class, "PiccoloDebugTreeModel.secondLevel.cameras"));
+        secondLevel.add(org.openide.util.NbBundle.getMessage(PiccoloDebugTreeModel.class, "PiccoloDebugTreeModel.secondLevel.layer"));
     }
     
     /**
@@ -155,7 +152,7 @@ public class PiccoloDebugTreeModel implements TreeModel{
             return ((PNode)parent).getChild(index);
         }
         else {
-            return I18N.getString("de.cismet.cismap.commons.debug.PiccoloDebugTreeModel.getChild.return");
+            return "UUPS";//NOI18N
         }
     }
     

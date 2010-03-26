@@ -96,7 +96,7 @@ public class ProgressMonitoredDataTransfer
      * @param msg Message about the problem
      */
     public void handleProblem(String msg) {
-        System.err.println("Transfer problem: " + msg);
+        System.err.println("Transfer problem: " + msg);//NOI18N
     }
 
     /**
@@ -115,7 +115,7 @@ public class ProgressMonitoredDataTransfer
     private synchronized void setDone() { 
         done = true; 
         setChanged();
-        notifyObservers("Done");
+        notifyObservers("Done");//NOI18N
     }
 
     /**
@@ -147,11 +147,11 @@ public class ProgressMonitoredDataTransfer
             }
         }
         catch (InterruptedIOException ioe) {
-            handleProblem("Cancelled by user after " + 
-                          current + " bytes.");
+            handleProblem("Cancelled by user after " + //NOI18N
+                          current + " bytes.");//NOI18N
         }
         catch (Exception ie) {
-            handleProblem("IO exception: " + ie);
+            handleProblem("IO exception: " + ie);//NOI18N
         }
         finally {
             setDone();

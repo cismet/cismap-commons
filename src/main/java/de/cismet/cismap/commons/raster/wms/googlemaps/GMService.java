@@ -24,7 +24,7 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
 
     @Override
     public void retrieve(boolean forced) {
-        log.debug("retrieve()");
+        log.debug("retrieve()");//NOI18N
         
         GMBoundingBox real=new GMBoundingBox();
         
@@ -33,7 +33,7 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
         if (ir != null && ir.isAlive() && ir.getUrl().equals(url.toString()) && !forced) {
             //mach nix 
             //mehrfachaufruf mit der gleichen url = unsinn
-            log.debug("mehrfachaufruf mit der gleichen url = unsinn");
+            log.debug("multiple invocations with the same url = humbug");//NOI18N
         } else {
             if (ir != null && ir.isAlive()) {
                 ir.youngerWMSCall();
@@ -48,7 +48,7 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
             }
             ir = new ImageRetrieval(this);
             ir.setUrl(url);
-            log.debug("ir.start();");
+            log.debug("ir.start();");//NOI18N
             ir.setPriority(Thread.NORM_PRIORITY);
             ir.start();
         }
@@ -96,7 +96,7 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
     }
 
     public String getName() {
-        return "GM";
+        return "GM";//NOI18N
     }
 
     public void setName(String name) {
@@ -141,7 +141,7 @@ public class GMService extends AbstractWMS implements RasterMapService, Retrieva
         if (latitude < 0.0D) {
             latitude += TWO_TO_THIRTYTWO;
         }
-        URL = "http://maps.google.com/mapdata?latitude_e6=" + (new BigDecimal(latitude)).setScale(0, 5) + "&longitude_e6=" + (new BigDecimal(longtitude)).setScale(0, 5) + "&zm=" + ZoomLevel + "&cc=us&min_priority=2&w=" + image_width + "&h=" + image_height;
+        URL = "http://maps.google.com/mapdata?latitude_e6=" + (new BigDecimal(latitude)).setScale(0, 5) + "&longitude_e6=" + (new BigDecimal(longtitude)).setScale(0, 5) + "&zm=" + ZoomLevel + "&cc=us&min_priority=2&w=" + image_width + "&h=" + image_height;//NOI18N
         if (Magnification == 0.0D) {
             Magnification = 1.0D;
         }

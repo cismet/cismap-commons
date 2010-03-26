@@ -13,7 +13,6 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import java.awt.geom.Point2D;
 import java.util.Collection;
-import java.util.ResourceBundle;
 import java.util.Vector;
 
 /**
@@ -23,8 +22,6 @@ import java.util.Vector;
  * @author nh
  */
 public class FeatureRotateAction implements CustomAction {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
-
     private MappingComponent mc;
     private double rot;
     private Point2D pivot;
@@ -66,13 +63,10 @@ public class FeatureRotateAction implements CustomAction {
     public String info() {
         StringBuffer sb = new StringBuffer();
         for (Object o : arr) {
-            sb.append(o.hashCode() + ", ");
+            sb.append(o.hashCode() + ", ");//NOI18N
         }
         sb.delete(sb.length() - 2, sb.length());
-        return I18N.getString("de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRotateAction.info().return1")
-                + " " + sb.toString()
-                + " " + I18N.getString("de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRotateAction.info().return2")
-                + " " + Math.toDegrees(rot) + "°";
+        return org.openide.util.NbBundle.getMessage(FeatureRotateAction.class, "FeatureRotateAction.info().return", new Object[]{sb.toString(), Math.toDegrees(rot)});
     }
 
     /**

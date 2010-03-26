@@ -43,24 +43,24 @@ import org.jdom.Element;
  * @author thorsten.hell@cismet.de
  */
 public class Template {
-    private String title="";
-    private String file="";
-    private String className="";
-    private String mapPlaceholder="";
+    private String title="";//NOI18N
+    private String file="";//NOI18N
+    private String className="";//NOI18N
+    private String mapPlaceholder="";//NOI18N
     private int mapWidth=0;
     private int mapHeight=0;
-    private String scaleDemoninatorPlaceholder="";
+    private String scaleDemoninatorPlaceholder="";//NOI18N
     private Vector<AdditionalTemplateParameter> additionalParameters=new Vector<AdditionalTemplateParameter>();
     
     /** Creates a new instance of Template */
     public Template(Element template) throws Exception{
-        title=template.getAttribute("title").getValue();
-        file=template.getAttribute("file").getValue();
-        className=template.getAttribute("className").getValue();
-        mapPlaceholder=template.getAttribute("mapPlaceholder").getValue();
-        mapWidth=template.getAttribute("mapWidth").getIntValue();
-        mapHeight=template.getAttribute("mapHeight").getIntValue();
-        scaleDemoninatorPlaceholder=template.getAttribute("scaleDenominatorPlaceholder").getValue();
+        title=template.getAttribute("title").getValue();//NOI18N
+        file=template.getAttribute("file").getValue();//NOI18N
+        className=template.getAttribute("className").getValue();//NOI18N
+        mapPlaceholder=template.getAttribute("mapPlaceholder").getValue();//NOI18N
+        mapWidth=template.getAttribute("mapWidth").getIntValue();//NOI18N
+        mapHeight=template.getAttribute("mapHeight").getIntValue();//NOI18N
+        scaleDemoninatorPlaceholder=template.getAttribute("scaleDenominatorPlaceholder").getValue();//NOI18N
 //        List additionalParameterList=template.getChildren("parameter");
 //        for (Object elem : additionalParameterList) {
 //            if (elem instanceof Element) {
@@ -75,15 +75,15 @@ public class Template {
     }
     
     public Element getElement(boolean selected) {
-        Element e=new Element("template");
-        e.setAttribute("selected",new Boolean(selected).toString());
-        e.setAttribute("title",getTitle());
-        e.setAttribute("file",getFile());
-        e.setAttribute("className", getClassName());
-        e.setAttribute("mapPlaceholder",getMapPlaceholder());
-        e.setAttribute("mapWidth",getMapWidth()+"");
-        e.setAttribute("mapHeight",getMapHeight()+"");
-        e.setAttribute("scaleDenominatorPlaceholder",getScaleDemoninatorPlaceholder());
+        Element e=new Element("template");//NOI18N
+        e.setAttribute("selected",String.valueOf(selected));//NOI18N
+        e.setAttribute("title",getTitle());//NOI18N
+        e.setAttribute("file",getFile());//NOI18N
+        e.setAttribute("className", getClassName());//NOI18N
+        e.setAttribute("mapPlaceholder",getMapPlaceholder());//NOI18N
+        e.setAttribute("mapWidth",getMapWidth()+"");//NOI18N
+        e.setAttribute("mapHeight",getMapHeight()+"");//NOI18N
+        e.setAttribute("scaleDenominatorPlaceholder",getScaleDemoninatorPlaceholder());//NOI18N
 //        for (AdditionalTemplateParameter elem : additionalParameters) {
 //            e.addContent(elem.getElement());
 //        }

@@ -8,6 +8,8 @@
  */
 package de.cismet.cismap.commons.rasterservice;
 
+import de.cismet.cismap.commons.security.*;
+import de.cismet.cismap.commons.rasterservice.*;
 import de.cismet.cismap.commons.exceptions.AuthenticationCanceledException;
 import de.cismet.cismap.commons.exceptions.BadHttpStatusCodeException;
 import de.cismet.cismap.commons.exceptions.CannotReadFromURLException;

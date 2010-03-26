@@ -44,7 +44,7 @@ import edu.umd.cs.piccolox.event.PNotificationCenter;
  */
 public class JoinPolygonsListener extends PBasicInputEventHandler {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static final String FEATURE_JOIN_REQUEST_NOTIFICATION = "FEATURE_JOIN_REQUEST_NOTIFICATION";
+    public static final String FEATURE_JOIN_REQUEST_NOTIFICATION = "FEATURE_JOIN_REQUEST_NOTIFICATION";//NOI18N
     PFeature featureRequestedForJoin = null;
     int modifier = -1;
 

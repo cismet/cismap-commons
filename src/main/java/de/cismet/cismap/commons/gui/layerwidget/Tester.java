@@ -33,11 +33,11 @@
  */
 
 package de.cismet.cismap.commons.gui.layerwidget;
+import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.tools.configuration.ConfigurationManager;
 import java.awt.dnd.DnDConstants;
-import java.util.ResourceBundle;
 
 
 /**
@@ -45,10 +45,11 @@ import java.util.ResourceBundle;
  * @author  thorsten.hell@cismet.de
  */
 public class Tester extends javax.swing.JFrame    {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
   private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
    LayerWidget layerWidget;
     private int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
+    // added by therter to fix some errors.
+    private MappingComponent mapC = new MappingComponent();
     /** Creates new form Tester */
     public Tester() {
        try {
@@ -104,7 +105,6 @@ public class Tester extends javax.swing.JFrame    {
         panLayerWidget = new javax.swing.JPanel();
         panCaps = new javax.swing.JPanel();
         panMap = new javax.swing.JPanel();
-        mapC = new de.cismet.cismap.commons.gui.MappingComponent();
         jButton2 = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
@@ -133,11 +133,6 @@ public class Tester extends javax.swing.JFrame    {
         getContentPane().add(panCaps, gridBagConstraints);
 
         panMap.setLayout(new java.awt.BorderLayout());
-
-        mapC.setBackground(new java.awt.Color(236, 233, 216));
-        mapC.setInternalLayerWidgetAvailable(true);
-        panMap.add(mapC, java.awt.BorderLayout.CENTER);
-
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -146,10 +141,10 @@ public class Tester extends javax.swing.JFrame    {
         gridBagConstraints.weighty = 1.0;
         getContentPane().add(panMap, gridBagConstraints);
 
-        jButton2.setText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.Tester.jButton2.text")); // NOI18N
+        jButton2.setText("jButton2");
         getContentPane().add(jButton2, new java.awt.GridBagConstraints());
 
-        jButton1.setText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.Tester.jButton1.text")); // NOI18N
+        jButton1.setText("Home");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -157,7 +152,7 @@ public class Tester extends javax.swing.JFrame    {
         });
         jPanel1.add(jButton1);
 
-        jButton3.setText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.Tester.jButton3.text")); // NOI18N
+        jButton3.setText("LayerWidget");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
@@ -165,7 +160,7 @@ public class Tester extends javax.swing.JFrame    {
         });
         jPanel1.add(jButton3);
 
-        jButton4.setText(I18N.getString("de.cismet.cismap.commons.gui.layerwidget.Tester.jButton4.text")); // NOI18N
+        jButton4.setText("Clear");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton4ActionPerformed(evt);
@@ -216,7 +211,6 @@ public class Tester extends javax.swing.JFrame    {
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JPanel jPanel1;
-    private de.cismet.cismap.commons.gui.MappingComponent mapC;
     private javax.swing.JPanel panCaps;
     private javax.swing.JPanel panLayerWidget;
     private javax.swing.JPanel panMap;

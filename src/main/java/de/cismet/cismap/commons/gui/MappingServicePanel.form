@@ -36,7 +36,7 @@
         <Component class="javax.swing.JButton" name="jButton1">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.MappingServicePanel.jButton1.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="MappingServicePanel.jButton1.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -57,28 +57,28 @@
         <Component class="javax.swing.JLabel" name="jLabel1">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.MappingServicePanel.jLabel1.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="MappingServicePanel.jLabel1.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JToggleButton" name="jToggleButton1">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.MappingServicePanel.jToggleButton1.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="MappingServicePanel.jToggleButton1.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JToggleButton" name="jToggleButton2">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.MappingServicePanel.jToggleButton2.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="MappingServicePanel.jToggleButton2.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>
         <Component class="javax.swing.JToggleButton" name="jToggleButton3">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.MappingServicePanel.jToggleButton3.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="MappingServicePanel.jToggleButton3.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
         </Component>

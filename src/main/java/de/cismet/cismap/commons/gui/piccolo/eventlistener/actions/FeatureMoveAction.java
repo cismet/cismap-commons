@@ -13,7 +13,6 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import edu.umd.cs.piccolo.util.PDimension;
 import java.util.Iterator;
-import java.util.ResourceBundle;
 import java.util.Vector;
 
 /**
@@ -23,7 +22,6 @@ import java.util.Vector;
  * @author nh
  */
 public class FeatureMoveAction implements CustomAction {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private MappingComponent mc;
     private Vector features;
@@ -49,8 +47,8 @@ public class FeatureMoveAction implements CustomAction {
      * Bewegt das Feature.
      */
     public void doAction() {
-        log.debug("X=" + dim.getWidth());
-        log.debug("Y=" + dim.getHeight());
+        log.debug("X=" + dim.getWidth());//NOI18N
+        log.debug("Y=" + dim.getHeight());//NOI18N
         Iterator it = features.iterator();
         while (it.hasNext()) {
             Object o = it.next();
@@ -71,8 +69,7 @@ public class FeatureMoveAction implements CustomAction {
      * @return  Beschreibungsstring
      */
     public String info() {
-        return I18N.getString("de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureMoveAction.info().return")
-            + " " + "(" + dim.getWidth() + ", " + dim.getHeight() + ")";
+        return org.openide.util.NbBundle.getMessage(FeatureMoveAction.class, "FeatureMoveAction.info().return", new Object[] {dim.getWidth(), dim.getHeight()});
     }
 
     /**

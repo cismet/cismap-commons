@@ -31,8 +31,8 @@
  * Created on 27. Juni 2005, 14:20
  *
  */
-
 package de.cismet.cismap.commons.rasterservice.java_iio;
+
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import java.awt.Image;
@@ -51,126 +51,156 @@ import javax.imageio.stream.ImageInputStream;
  *
  * @author thorsten.hell@cismet.de
  */
-public class ImageRetrieval extends Thread implements IIOReadProgressListener{
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private String url;
-    private RetrievalListener listener=null;
-    private ByteArrayOutputStream byteArrayOut=null;
-    private boolean youngerCall=false;
-    Image image=null;
-    ImageReader ir=null;
-    /**
-     * Creates a new instance of ImageRetrieval 
-     */
-    public ImageRetrieval(RetrievalListener listener) {
-        this.listener=listener;
-    }
+public class ImageRetrieval extends Thread implements IIOReadProgressListener
+{
 
-    public void youngerWMSCall() {
-        youngerCall=true;
-        if (ir!=null) {
-            log.debug("ir.abort();");
-            ir.abort();
+  private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+  private String url;
+  private RetrievalListener listener = null;
+  //private ByteArrayOutputStream byteArrayOut=null;
+  private boolean youngerCall = false;
+  Image image = null;
+  ImageReader ir = null;
+
+  /**
+   * Creates a new instance of ImageRetrieval
+   */
+  public ImageRetrieval(RetrievalListener listener)
+  {
+    this.listener = listener;
+  }
+
+  public void youngerWMSCall()
+  {
+    youngerCall = true;
+    if (ir != null)
+    {
+      log.debug("ir.abort();");//NOI18N
+      ir.abort();
+    }
+  }
+
+  public String getUrl()
+  {
+    return url;
+  }
+
+  public void setUrl(String url)
+  {
+    this.url = url;
+  }
+
+  @Override
+  public void run()
+  {
+    log.debug("IR Thread started");//NOI18N
+    image = null;
+    ImageInputStream iis = null;
+    try
+    {
+      URL u = new URL(url.toString());
+      URLConnection uc = u.openConnection();
+      String mimeType = uc.getContentType();
+      uc.connect();
+      InputStream is = uc.getInputStream();
+      iis = ImageIO.createImageInputStream(is);
+      Iterator it = ImageIO.getImageReadersByMIMEType(mimeType);
+      //TODO: Hier kucken ob es \u00FCberhaupt einen Reader gibt
+      if (it.hasNext())
+      {
+        ir = (ImageReader) it.next();
+        ir.setInput(iis, true);
+        ir.addIIOReadProgressListener(this);
+
+        image = ir.read(0);
+        if (!youngerCall)
+        {
+          RetrievalEvent e = new RetrievalEvent();
+          e.setIsComplete(true);
+          e.setRetrievedObject(image);
+          listener.retrievalComplete(e);
+          log.debug("RetrievalComplete");//NOI18N
         }
-    }
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-    public void run() {
-        log.debug("IR Thread started");
-        image=null;
-        ImageInputStream iis=null;
-        try {
-            URL u=new URL(url.toString()); 
-            URLConnection uc=u.openConnection(); 
-            String mimeType=uc.getContentType();
-            uc.connect();
-            InputStream is=uc.getInputStream();
-            iis = ImageIO.createImageInputStream(is);
-            Iterator it=ImageIO.getImageReadersByMIMEType(mimeType);
-            //TODO: Hier kucken ob es \u00FCberhaupt einen Reader gibt
-            if (it.hasNext()){
-                ir=(ImageReader)it.next();
-                ir.setInput(iis, true);
-                ir.addIIOReadProgressListener(this);
-
-                image=ir.read(0);
-                if (!youngerCall) {
-                    RetrievalEvent e=new RetrievalEvent();
-                    e.setIsComplete(true);
-                    e.setRetrievedObject(image);
-                    listener.retrievalComplete(e);
-                    log.debug("RetrievalComplete");
-                }
-            }
-            else {
-                //Fehler
-                BufferedInputStream in = new BufferedInputStream(is);
-                ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
-                int c;
-                while ((c = in.read()) != -1) {
-                    byteArrayOut.write(c);
-                    if (youngerCall) {
-                        //fireLoadingAborted();
-                        return;
-                    }
-                }
-                RetrievalEvent e=new RetrievalEvent();
-                e.setHasErrors(true);
-                String error=new String(byteArrayOut.toByteArray());
-                e.setRetrievedObject(error);
-                listener.retrievalError(e);
-                 
-                
-            }
-            
-        } catch (Exception e) {
-            log.error("Fehler beim Laden des Bildes",e);
+      } else
+      {
+        //Fehler
+        BufferedInputStream in = new BufferedInputStream(is);
+        ByteArrayOutputStream byteArrayOut = new ByteArrayOutputStream();
+        int c;
+        while ((c = in.read()) != -1)
+        {
+          byteArrayOut.write(c);
+          if (youngerCall)
+          {
+            //fireLoadingAborted();
+            return;
+          }
         }
-            
-        
-    }
-    
-    
-    
-    
-    
-    
-    public void imageComplete(ImageReader source) {
-    }
-     
-    public void imageProgress(ImageReader source, float percentageDone) {
-        if (!youngerCall) {
-            RetrievalEvent e=new RetrievalEvent();
-            e.setPercentageDone(percentageDone);
-            listener.retrievalProgress(e);
-        }
-    }
-    
-    public void imageStarted(ImageReader source, int imageIndex) {
-    }
-    
-    public void readAborted(ImageReader source) {
+        RetrievalEvent e = new RetrievalEvent();
+        e.setHasErrors(true);
+        String error = new String(byteArrayOut.toByteArray());
+        e.setRetrievedObject(error);
+        listener.retrievalError(e);
+
+
+      }
+
+    } catch (Exception e)
+    {
+      log.error("Error while loading the image.", e);//NOI18N
     }
 
-    public void sequenceComplete(ImageReader source) {
+
+  }
+
+  @Override
+  public void imageComplete(ImageReader source)
+  {
+  }
+
+  @Override
+  public void imageProgress(ImageReader source, float percentageDone)
+  {
+    if (!youngerCall)
+    {
+      RetrievalEvent e = new RetrievalEvent();
+      e.setPercentageDone((int) percentageDone);
+      listener.retrievalProgress(e);
     }
-    
-    public void sequenceStarted(ImageReader source, int minIndex) {
-    }
-    
-    public void thumbnailComplete(ImageReader source) {
-    }
-    
-    public void thumbnailProgress(ImageReader source, float percentageDone) {
-    }
-    
-    public void thumbnailStarted(ImageReader source, int imageIndex, int thumbnailIndex) {
-    }    
-    
-    
+  }
+
+  @Override
+  public void imageStarted(ImageReader source, int imageIndex)
+  {
+  }
+
+  @Override
+  public void readAborted(ImageReader source)
+  {
+  }
+
+  @Override
+  public void sequenceComplete(ImageReader source)
+  {
+  }
+
+  @Override
+  public void sequenceStarted(ImageReader source, int minIndex)
+  {
+  }
+
+  @Override
+  public void thumbnailComplete(ImageReader source)
+  {
+  }
+
+  @Override
+  public void thumbnailProgress(ImageReader source, float percentageDone)
+  {
+  }
+
+  @Override
+  public void thumbnailStarted(ImageReader source, int imageIndex, int thumbnailIndex)
+  {
+  }
 }

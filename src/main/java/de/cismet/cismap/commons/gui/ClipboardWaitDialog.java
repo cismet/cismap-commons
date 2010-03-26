@@ -6,15 +6,12 @@
 
 package de.cismet.cismap.commons.gui;
 
-import java.util.ResourceBundle;
 
 /**
  *
  * @author  thorsten.hell@cismet.de
  */
 public class ClipboardWaitDialog extends javax.swing.JDialog {
-    
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     
     /**
      * Creates new form ClipboardWaitDialog
@@ -42,7 +39,7 @@ public class ClipboardWaitDialog extends javax.swing.JDialog {
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/clipboard64.png"))); // NOI18N
 
-        jLabel2.setText(I18N.getString("de.cismet.cismap.commons.gui.ClipboardWaitDialog.jLabel2.text")); // NOI18N
+        jLabel2.setText(org.openide.util.NbBundle.getMessage(ClipboardWaitDialog.class, "ClipboardWaitDialog.jLabel2.text")); // NOI18N
 
         jProgressBar2.setBorderPainted(false);
         jProgressBar2.setIndeterminate(true);
@@ -55,7 +52,7 @@ public class ClipboardWaitDialog extends javax.swing.JDialog {
                 .add(jLabel1)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(jProgressBar2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 166, Short.MAX_VALUE)
+                    .add(jProgressBar2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
                     .add(jLabel2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -80,6 +77,7 @@ public class ClipboardWaitDialog extends javax.swing.JDialog {
      */
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new ClipboardWaitDialog(new javax.swing.JFrame(), true).setVisible(true);
             }

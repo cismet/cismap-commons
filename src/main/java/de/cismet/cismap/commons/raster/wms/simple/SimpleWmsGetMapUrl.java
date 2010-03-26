@@ -33,9 +33,9 @@ public class SimpleWmsGetMapUrl {
     double x2=0.0;
     double y2=0.0;
     
-    public static String WIDTH_TOKEN="<cismap:width>";
-    public static String HEIGHT_TOKEN="<cismap:height>";
-    public static String BOUNDING_BOX_TOKEN="<cismap:boundingBox>";
+    public static final String WIDTH_TOKEN="<cismap:width>";//NOI18N
+    public static final String HEIGHT_TOKEN="<cismap:height>";//NOI18N
+    public static final String BOUNDING_BOX_TOKEN="<cismap:boundingBox>";//NOI18N
     
     
     /** Creates a new instance of SimpleWmsGetMapUrl */
@@ -76,28 +76,25 @@ public class SimpleWmsGetMapUrl {
     public String getUrlTemplate() {
         return urlTemplate;
     }
-
     public void setUrlTemplate(String urlTemplate) {
         this.urlTemplate = urlTemplate;
     }
-
-    
     
     public String toString() {
         String url=urlTemplate.replaceAll(widthToken, new Integer(width).toString());
         url=url.replaceAll(heightToken, new Integer(height).toString());
         url=url.replaceAll(boundingBoxToken, 
-                new Double(x1).toString()+","+
-                new Double(y1).toString()+","+
-                new Double(x2).toString()+","+
+                new Double(x1).toString()+","+//NOI18N
+                new Double(y1).toString()+","+//NOI18N
+                new Double(x2).toString()+","+//NOI18N
                 new Double(y2).toString());
         return url;
     
     }
     
     public static void main(String[] args) {
-        SimpleWmsGetMapUrl test=new SimpleWmsGetMapUrl("http://geoportal.wuppertal.de/wms/wms?null&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cids:width>&HEIGHT=<cids:height>&BBOX=<cids:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=false&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:DGK5",
-                "<cids:width>","<cids:height>","<cids:boundingBox>");
+        SimpleWmsGetMapUrl test=new SimpleWmsGetMapUrl("http://geoportal.wuppertal.de/wms/wms?null&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cids:width>&HEIGHT=<cids:height>&BBOX=<cids:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=false&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:DGK5", //NOI18N
+                "<cids:width>","<cids:height>","<cids:boundingBox>");//NOI18N
         test.setWidth(47);
         test.setHeight(11);
         test.setX1(1.1);

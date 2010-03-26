@@ -23,8 +23,8 @@ import java.awt.event.KeyEvent;
 public class KeyboardListener extends PBasicInputEventHandler {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     MappingComponent viewer;
-    public final static String X_PAN = "X_PAN";
-    public final static String Y_PAN = "Y_PAN";
+    public final static String X_PAN = "X_PAN";//NOI18N
+    public final static String Y_PAN = "Y_PAN";//NOI18N
 
     public KeyboardListener(MappingComponent map) {
         viewer = map;
@@ -33,7 +33,7 @@ public class KeyboardListener extends PBasicInputEventHandler {
     @Override
     public void keyPressed(PInputEvent event) {
         super.keyPressed(event);
-        log.debug("keyPressed " + event);
+        log.debug("keyPressed " + event);//NOI18N
         if (event.getKeyChar() == 'a') {
             zoom(0.95f, event, 0, 800);
         } else if (event.getKeyChar() == 'y') {
@@ -47,11 +47,11 @@ public class KeyboardListener extends PBasicInputEventHandler {
         } else if (event.getKeyCode() == KeyEvent.VK_LEFT) {
             pan(X_PAN, 0.05f, 0, 800);
         } else if (event.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
-            CreateGeometryListener listener = (CreateGeometryListener) viewer.getInputListener(MappingComponent.NEW_POLYGON);
-            log.debug("Event an CreateGeometryListener weitergeleitet:" + listener);
+            CreateNewGeometryListener listener = (CreateNewGeometryListener) viewer.getInputListener(MappingComponent.NEW_POLYGON);
+            log.debug("Event an CreateGeometryListener weitergeleitet:" + listener);//NOI18N
             listener.keyPressed(event);
         } else {
-            log.debug("kein treffer:" + event.getKeyCode() + "     (" + KeyEvent.VK_DOWN);
+            log.debug("kein treffer:" + event.getKeyCode() + "     (" + KeyEvent.VK_DOWN);//NOI18N
         }
     }
 
@@ -93,13 +93,13 @@ public class KeyboardListener extends PBasicInputEventHandler {
             //log.fatal("Breite src:"+((MappingComponent)e.getComponent()).getWtst().getSourceRect().getWidth());
             }
         } catch (Exception ex) {
-            log.debug("fehler in pan", ex);
+            log.debug("error in pan", ex);//NOI18N
         }
     }
 
     public void zoom(float factor, final PInputEvent e, int localAnimationDuration, int delayTime) {
         try {
-            log.debug("zoom");
+            log.debug("zoom");//NOI18N
             final PBounds b = new PBounds();
             double h = viewer.getCamera().getViewBounds().getHeight();
             double w = viewer.getCamera().getViewBounds().getWidth();
@@ -148,7 +148,7 @@ public class KeyboardListener extends PBasicInputEventHandler {
             //log.fatal("Breite src:"+((MappingComponent)e.getComponent()).getWtst().getSourceRect().getWidth());
             }
         } catch (Exception ex) {
-            log.debug("fehler in zoom", ex);
+            log.debug("error in zoom", ex);//NOI18N
         }
     }
     Thread refreshThread;

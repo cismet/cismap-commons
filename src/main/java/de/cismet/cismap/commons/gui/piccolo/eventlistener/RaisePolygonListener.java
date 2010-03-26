@@ -55,11 +55,11 @@ public class RaisePolygonListener extends PBasicInputEventHandler {
 
     @Override
     public void mouseClicked(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        log.debug("RaiseTry1");
+        log.debug("RaiseTry1");//NOI18N
         PFeature o = (PFeature) PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[]{PFeature.class});
         //if (o!=null&&o.getFeature() instanceof DefaultFeatureServiceFeature&& o.getVisible()==true && o.getParent()!=null && o.getParent().getVisible()==true) {
         if (o != null && o.getFeature() != null && o.getVisible() == true && o.getParent() != null && o.getParent().getVisible() == true) {
-            log.debug("RaiseTry2");
+            log.debug("RaiseTry2");//NOI18N
             PureNewFeature pnf = new PureNewFeature((Geometry) (o.getFeature().getGeometry().clone()));
             pnf.setEditable(true);
             mc.getFeatureCollection().addFeature(pnf);

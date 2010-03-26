@@ -45,7 +45,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.util.HashMap;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -61,15 +60,13 @@ import org.jdom.Element;
  * @author thorsten.hell@cismet.de
  */
 public abstract class AbstractWFSForm extends JPanel {
-
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Vector<WFSFormQuery> queries = new Vector<WFSFormQuery>();
     protected HashMap<String, JComponent> listComponents = new HashMap<String, JComponent>();
     protected HashMap<String, WFSFormQuery> queriesByComponentName = new HashMap<String, WFSFormQuery>();
-    private String loadingMessage = I18N.getString("de.cismet.cismap.commons.wfsforms.AbstractWFSForm.loadingMessage");
+    private String loadingMessage = org.openide.util.NbBundle.getMessage(AbstractWFSForm.class, "AbstractWFSForm.loadingMessage");
     private WFSFormFeature lastFeature = null;
-    protected ImageIcon mark = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"));
+    protected ImageIcon mark = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"));//NOI18N
     protected FixedPImage pMark = new FixedPImage(mark.getImage());
     private String title;
     private String id;
@@ -109,14 +106,14 @@ public abstract class AbstractWFSForm extends JPanel {
             inited = true;
             //do the initial loading of all queries that are INITIAL
             for (final WFSFormQuery q : queries) {
-                log.debug(title+"Components:"+ listComponents);
+                log.debug(title+"Components:"+ listComponents);//NOI18N
                 queriesByComponentName.put(q.getComponentName(), q);
                 if (q.getType().equals(WFSFormQuery.INITIAL) && listComponents.containsKey(q.getComponentName())) {
                     final JComponent c = listComponents.get(q.getComponentName());
-                    log.debug("Comp: "+q.getComponentName());
+                    log.debug("Comp: "+q.getComponentName());//NOI18N
                     if (c instanceof JComboBox) {
                         try {
-                            JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");
+                            JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");//NOI18N
                             WFSFormsListAndComboBoxModel w = new WFSFormsListAndComboBoxModel(q, c, bar);
                             w.addActionListener(new ActionListener() {
 
@@ -126,11 +123,11 @@ public abstract class AbstractWFSForm extends JPanel {
                             });
                             ((JComboBox) c).setModel(w);
                         } catch (Exception ex) {
-                            log.error("Fehler in initWFSForm", ex);
+                            log.error("Error in initWFSForm", ex);//NOI18N
                         }
                     } else if (c instanceof JList) {
                         try {
-                            JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");
+                            JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");//NOI18N
                             WFSFormsListAndComboBoxModel w = new WFSFormsListAndComboBoxModel(q, c, bar);
                             w.addActionListener(new ActionListener() {
 
@@ -140,18 +137,18 @@ public abstract class AbstractWFSForm extends JPanel {
                             });
                             ((JList) c).setModel(w);
                         } catch (Exception ex) {
-                            log.error("Fehler in initWFSForm", ex);
+                            log.error("Error in initWFSForm", ex);//NOI18N
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            log.error("Error during initWFSForm", e);
+            log.error("Error during initWFSForm", e);//NOI18N
         }
     }
 
     protected void checkCboCorrectness(JComboBox combo) {
-        if (combo.getSelectedItem() != null && !combo.getSelectedItem().toString().trim().equals("") && !combo.getSelectedItem().toString().trim().equals(loadingMessage)&& combo.getSelectedIndex() == -1) {
+        if (combo.getSelectedItem() != null && !combo.getSelectedItem().toString().trim().equals("") && !combo.getSelectedItem().toString().trim().equals(loadingMessage)&& combo.getSelectedIndex() == -1) {//NOI18N
             combo.getEditor().getEditorComponent().setBackground(Color.red);
             garbageDuringAutoCompletion(combo);
         } else {
@@ -162,14 +159,14 @@ public abstract class AbstractWFSForm extends JPanel {
     public abstract void garbageDuringAutoCompletion(JComboBox box);
 
     public void requestRefresh(String component, HashMap<String, String> replacingValues) {
-        log.debug("requestRefresh: Queries=" + queries);
+        log.debug("requestRefresh: Queries=" + queries);//NOI18N
         for (final WFSFormQuery q : queries) {
             if (component.equals(q.getComponentName()) && listComponents.containsKey(q.getComponentName())) {
                 final JComponent c = listComponents.get(q.getComponentName());
-                log.debug("requestRefresh JComponent=" + c);
+                log.debug("requestRefresh JComponent=" + c);//NOI18N
                 if (c instanceof JComboBox) {
                     try {
-                        JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");
+                        JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");//NOI18N
                         WFSFormsListAndComboBoxModel model = new WFSFormsListAndComboBoxModel(q, replacingValues, c, bar);
                         model.addActionListener(new ActionListener() {
 
@@ -179,11 +176,11 @@ public abstract class AbstractWFSForm extends JPanel {
                         });
                         ((JComboBox) c).setModel(model);
                     } catch (Exception ex) {
-                        log.error("Fehler in requestRefresh", ex);
+                        log.error("Error in requestRefresh", ex);//NOI18N
                     }
                 } else if (c instanceof JList) {
                     try {
-                        JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");
+                        JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");//NOI18N
                         WFSFormsListAndComboBoxModel model = new WFSFormsListAndComboBoxModel(q, replacingValues, c, bar);
                         model.addActionListener(new ActionListener() {
 
@@ -193,7 +190,7 @@ public abstract class AbstractWFSForm extends JPanel {
                         });
                         ((JList) c).setModel(model);
                     } catch (Exception ex) {
-                        log.error("Fehler in requestRefresh", ex);
+                        log.error("Error in requestRefresh", ex);//NOI18N
                     }
                 }
             }
@@ -201,12 +198,12 @@ public abstract class AbstractWFSForm extends JPanel {
     }
 
     public Element getElement() {
-        Element ret = new Element("wfsForm");
-        ret.setAttribute("id", getId());
-        ret.setAttribute("title", getTitle());
-        ret.setAttribute("icon", getIconPath());
-        ret.setAttribute("className", getClassName());
-        ret.setAttribute("menu", getMenuString());
+        Element ret = new Element("wfsForm");//NOI18N
+        ret.setAttribute("id", getId());//NOI18N
+        ret.setAttribute("title", getTitle());//NOI18N
+        ret.setAttribute("icon", getIconPath());//NOI18N
+        ret.setAttribute("className", getClassName());//NOI18N
+        ret.setAttribute("menu", getMenuString());//NOI18N
         for (WFSFormQuery query : queries) {
             ret.addContent(query.getElement());
         }
@@ -214,7 +211,7 @@ public abstract class AbstractWFSForm extends JPanel {
     }
 
     public void requestRefresh(String component, WFSFormFeature value) {
-        log.debug("requestRefresh(+" + component + "," + value + ")");
+        log.debug("requestRefresh(+" + component + "," + value + ")");//NOI18N
         if (lastFeature == null || !(value.getIdentifier().equals(lastFeature.getIdentifier()))) {
             lastFeature = value;
             WFSFormQuery q = queriesByComponentName.get(component);

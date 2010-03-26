@@ -53,7 +53,7 @@ import edu.umd.cs.piccolox.event.PNotificationCenter;
  * @author thorsten.hell@cismet.de
  */
 public class MeasurementListener extends PBasicInputEventHandler {
-    public static final String LENGTH_CHANGED = "LENGTH_CHANGED";
+    public static final String LENGTH_CHANGED = "LENGTH_CHANGED";//NOI18N
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     protected Point2D startPoint;
     protected PPath tempFeature;
@@ -75,7 +75,7 @@ public class MeasurementListener extends PBasicInputEventHandler {
         if (moveListener != null) {
             moveListener.mouseMoved(pInputEvent);
         } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
+            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");//NOI18N
         }
         
         if (inProgress) {

@@ -122,7 +122,7 @@ public class RestrictedFileSystemView extends FileSystemView {
      */
     public Icon getSystemIcon(File f) {
         if (f != null) {
-            return UIManager.getIcon(f.isDirectory() ? "FileView.directoryIcon" : "FileView.fileIcon");
+            return UIManager.getIcon(f.isDirectory() ? "FileView.directoryIcon" : "FileView.fileIcon");//NOI18N
         } else {
             return null;
         }
@@ -231,7 +231,7 @@ public class RestrictedFileSystemView extends FileSystemView {
     // code. If a given OS can't, override these methods in its
     // implementation.
     public File getHomeDirectory() {
-        return createFileObject(System.getProperty("user.home"));
+        return createFileObject(System.getProperty("user.home"));//NOI18N
     }
 
     /**
@@ -242,7 +242,7 @@ public class RestrictedFileSystemView extends FileSystemView {
     public File getDefaultDirectory() {
         if (_defaultDirectory == null) {
             try {
-                File tempFile = File.createTempFile("filesystemview", "restricted");
+                File tempFile = File.createTempFile("filesystemview", "restricted");//NOI18N
                 tempFile.deleteOnExit();
                 _defaultDirectory = tempFile.getParentFile();
             } catch (IOException e) {
@@ -343,7 +343,7 @@ public class RestrictedFileSystemView extends FileSystemView {
 
     static class FileSystemRoot extends File {
         public FileSystemRoot(File f) {
-            super(f, "");
+            super(f, "");//NOI18N
         }
 
         public FileSystemRoot(String s) {
@@ -361,7 +361,7 @@ public class RestrictedFileSystemView extends FileSystemView {
 
     public File createNewFolder(File containingDir) throws IOException {
         if (containingDir == null) {
-            throw new IOException("Containing directory is null:");
+            throw new IOException("Containing directory is null:");//NOI18N
         }
         File newFolder = null;
         newFolder = createFileObject(containingDir, newFolderString);
@@ -373,7 +373,7 @@ public class RestrictedFileSystemView extends FileSystemView {
         }
 
         if (newFolder.exists()) {
-            throw new IOException("Directory already exists:" + newFolder.getAbsolutePath());
+            throw new IOException("Directory already exists:" + newFolder.getAbsolutePath());//NOI18N
         } else {
             newFolder.mkdirs();
         }

@@ -10,7 +10,6 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
-import java.util.ResourceBundle;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -21,8 +20,6 @@ import javax.swing.event.DocumentListener;
  */
 public class AddHandleDialog extends javax.swing.JDialog {
 
-    private static final ResourceBundle I18N =
-            ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
     public static final int STATUS_NONE = -1;
@@ -79,7 +76,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         lblTopRightSpacer = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle(I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.title")); // NOI18N
+        setTitle(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.title")); // NOI18N
         setResizable(false);
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
@@ -106,7 +103,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         getContentPane().add(txtRight, gridBagConstraints);
 
         lblNew.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblNew.setText(I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.lblNew.text")); // NOI18N
+        lblNew.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblNew.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
@@ -133,7 +130,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         getContentPane().add(sliDistance, gridBagConstraints);
 
         lblLeftNeighbour.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblLeftNeighbour.setText(I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.lblLeftNeighbour.text")); // NOI18N
+        lblLeftNeighbour.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblLeftNeighbour.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -143,7 +140,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         getContentPane().add(lblLeftNeighbour, gridBagConstraints);
 
         lblRightNeighbour.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblRightNeighbour.setText(I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.lblRightNeighbour.text")); // NOI18N
+        lblRightNeighbour.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblRightNeighbour.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 1;
@@ -153,7 +150,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         getContentPane().add(lblRightNeighbour, gridBagConstraints);
 
         lblDistanceLeft.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblDistanceLeft.setText(I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.lblDistanceLeft.text")); // NOI18N
+        lblDistanceLeft.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblDistanceLeft.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -164,7 +161,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         getContentPane().add(lblDistanceLeft, gridBagConstraints);
 
         lblRightDistance.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        lblRightDistance.setText(I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.lblDistanceRight.text")); // NOI18N
+        lblRightDistance.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblDistanceRight.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
@@ -206,7 +203,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
 
         panFooter.setLayout(new java.awt.GridBagLayout());
 
-        lblDescriptionImage.setText(I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.lblDescriptionImage.text")); // NOI18N
+        lblDescriptionImage.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblDescriptionImage.text")); // NOI18N
         lblDescriptionImage.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         lblDescriptionImage.setPreferredSize(new java.awt.Dimension(250, 120));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -226,7 +223,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
         panFooter.add(lblDescription, gridBagConstraints);
 
-        btnOK.setText(I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.btnOK.text")); // NOI18N
+        btnOK.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.btnOK.text")); // NOI18N
         btnOK.setPreferredSize(new java.awt.Dimension(80, 29));
         btnOK.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -235,7 +232,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         });
         panButtons.add(btnOK);
 
-        btnCancel.setText(I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.btnCancel.text")); // NOI18N
+        btnCancel.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.btnCancel.text")); // NOI18N
         btnCancel.setPreferredSize(new java.awt.Dimension(80, 29));
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -365,23 +362,23 @@ public class AddHandleDialog extends javax.swing.JDialog {
             distanceToLeft = Double.valueOf(txtLeft.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane1.message"),
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane1.title"), JOptionPane.ERROR_MESSAGE);
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane1.message"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane1.title"), JOptionPane.ERROR_MESSAGE);
             return false;
         }
         // - ist kleiner Gesamt-Abstand
         if (distanceToLeft > getDistanceTotal()) {
             JOptionPane.showMessageDialog(null, 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane2.message"), 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane2.title"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane2.message"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane2.title"),
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
         // - ist größer 0
         if (distanceToLeft < 0) {
             JOptionPane.showMessageDialog(null, 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane3.message"), 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane3.title"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane3.message"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane3.title"),
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -392,24 +389,24 @@ public class AddHandleDialog extends javax.swing.JDialog {
             distanceToRight = Double.valueOf(txtRight.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane4.message"), 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane4.title"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane4.message"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane4.title"),
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
         // - ist kleiner Gesamt-Abstand
         if (distanceToRight > getDistanceTotal()) {
             JOptionPane.showMessageDialog(null, 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane5.message"), 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane5.title"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane5.message"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane5.title"),
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
         // - ist größer 0
         if (distanceToRight < 0) {
             JOptionPane.showMessageDialog(null, 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane6.message"), 
-                    I18N.getString("de.cismet.cismap.commons.gui.piccolo.AddHandleDialog.checkTextFields().JOptionPane6.title"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane6.message"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane6.title"),
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }

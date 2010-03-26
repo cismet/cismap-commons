@@ -37,7 +37,7 @@ package de.cismet.cismap.commons;
  * @author hell
  */
 public class Version  {
-    private  final static String VERSION="cismapCommons.jar Version:2 ($Date: 2009-08-25 14:08:08 $(+2) $Revision: 1.1.1.2 $";
+    private  final static String VERSION="cismapCommons.jar Version:2 ($Date: 2009/10/15 09:02:50 $(+2) $Revision: 1.15 $";//NOI18N
     /** Creates a new instance of Version */
     public Version() {
         

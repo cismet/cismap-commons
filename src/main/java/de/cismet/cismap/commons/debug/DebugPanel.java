@@ -14,8 +14,6 @@ import groovy.ui.ConsoleSupport;
  * @author  thorsten.hell@cismet.de
  */
 public class DebugPanel extends javax.swing.JPanel {
-    private static final java.util.ResourceBundle I18N =
-            java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private PCanvas pCanvas;
     /** Creates new form DebugPanel */
@@ -60,7 +58,7 @@ public class DebugPanel extends javax.swing.JPanel {
         jScrollPane3 = new javax.swing.JScrollPane();
         txtGroovy = new javax.swing.JTextPane();
 
-        cmdRefresh.setText(I18N.getString("de.cismet.cismap.commons.debug.DebugPanel.cmdRefresh.text")); // NOI18N
+        cmdRefresh.setText(org.openide.util.NbBundle.getMessage(DebugPanel.class, "DebugPanel.cmdRefresh.text")); // NOI18N
         cmdRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdRefreshActionPerformed(evt);
@@ -71,7 +69,7 @@ public class DebugPanel extends javax.swing.JPanel {
 
         jScrollPane2.setViewportView(treePCanvas1);
 
-        cmdRefresh1.setText(I18N.getString("de.cismet.cismap.commons.debug.DebugPanel.cmdRefresh1.text")); // NOI18N
+        cmdRefresh1.setText(org.openide.util.NbBundle.getMessage(DebugPanel.class, "DebugPanel.cmdRefresh1.text")); // NOI18N
         cmdRefresh1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdRefresh1ActionPerformed(evt);

@@ -5,7 +5,6 @@ package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.PNode;
 
-import java.util.ResourceBundle;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -29,7 +28,6 @@ import pswing.PSwingCanvas;
  */
 
 public class TestPSwingFull extends JFrame {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     public TestPSwingFull() {
         ClassLoader loader;
         PSwingCanvas canvas;
@@ -50,7 +48,7 @@ public class TestPSwingFull extends JFrame {
         PSwing swing2;
 
         // JButton
-        JButton button = new JButton( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.button.text") );
+        JButton button = new JButton( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.button.text") );
         button.setCursor( Cursor.getPredefinedCursor( Cursor.CROSSHAIR_CURSOR ) );
         swing = new PSwing( canvas, button );
         leaf = new ZVisualLeaf( swing );
@@ -80,7 +78,7 @@ public class TestPSwingFull extends JFrame {
         canvas.getLayer().addChild( transform );
 
         // Growable JTextArea
-        JTextArea textArea = new JTextArea( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.textArea.text") );
+        JTextArea textArea = new JTextArea( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.textArea.text") );
         textArea.setBorder( new LineBorder( Color.blue, 3 ) );
         swing = new PSwing( canvas, textArea );
         leaf = new ZVisualLeaf( swing );
@@ -90,7 +88,7 @@ public class TestPSwingFull extends JFrame {
         canvas.getLayer().addChild( transform );
 
         // Growable JTextField
-        JTextField textField = new JTextField( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.textField.text1") );
+        JTextField textField = new JTextField( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.textField.text1") );
         swing = new PSwing( canvas, textField );
         leaf = new ZVisualLeaf( swing );
         transform = new ZTransformGroup();
@@ -120,7 +118,7 @@ public class TestPSwingFull extends JFrame {
         canvas.getLayer().addChild( transform );
 
         // A Scrollable JTextArea
-        JScrollPane pane = new JScrollPane( new JTextArea( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.pane.textArea.text") ) );
+        JScrollPane pane = new JScrollPane( new JTextArea( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.pane.textArea.text") ) );
         pane.setPreferredSize( new Dimension( 150, 150 ) );
         swing = new PSwing( canvas, pane );
         leaf = new ZVisualLeaf( swing );
@@ -134,7 +132,7 @@ public class TestPSwingFull extends JFrame {
         // A non-scrollable JTextField
         // A panel MUST be created with double buffering off
         JPanel panel = new JPanel( false );
-        textField = new JTextField( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.textField.text2") );
+        textField = new JTextField( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.textField.text2") );
         panel.setLayout( new BorderLayout() );
         panel.add( textField );
         swing = new PSwing( canvas, panel );
@@ -158,14 +156,14 @@ public class TestPSwingFull extends JFrame {
         panel = new JPanel( false );
         panel.setBackground( Color.lightGray );
         panel.setLayout( new BorderLayout() );
-        panel.setBorder( new TitledBorder( new EtchedBorder( EtchedBorder.RAISED ), I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.panel.border.TitledBorder.title"), TitledBorder.LEFT, TitledBorder.TOP ) );
+        panel.setBorder( new TitledBorder( new EtchedBorder( EtchedBorder.RAISED ), org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.panel.border.TitledBorder.title"), TitledBorder.LEFT, TitledBorder.TOP ) );
         panel.setPreferredSize( new Dimension( 200, 200 ) );
         Vector data = new Vector();
-        data.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.data.choice1") );
-        data.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.data.choice2") );
-        data.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.data.choice3") );
-        data.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.data.choice4") );
-        data.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.data.choice5") );
+        data.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.choice1") );
+        data.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.choice2") );
+        data.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.choice3") );
+        data.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.choice4") );
+        data.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.choice5") );
         JList list = new JList( data );
         list.setBackground( Color.lightGray );
         panel.add( list );
@@ -177,7 +175,7 @@ public class TestPSwingFull extends JFrame {
         canvas.getLayer().addChild( transform );
 
         // A JLabel
-        JLabel label = new JLabel( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.data.label.text1"));//,
+        JLabel label = new JLabel( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.label.text1"));//,
                                    //new ImageIcon( loader.getResource( "HCIL-logo.gif" ) ), SwingConstants.CENTER );
 
         swing = new PSwing( canvas, label );
@@ -200,17 +198,17 @@ public class TestPSwingFull extends JFrame {
         // A panel MUST be created with double buffering off
         panel = new JPanel( false );
         panel.setLayout( new BorderLayout() );
-        JButton button1 = new JButton( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.data.button1.text") );
-        JButton button2 = new JButton( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.data.button2.text") );
-        label = new JLabel( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.data.label.text2") );
+        JButton button1 = new JButton( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.button1.text") );
+        JButton button2 = new JButton( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.button2.text") );
+        label = new JLabel( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.data.label.text2") );
         label.setHorizontalAlignment( SwingConstants.CENTER );
         label.setForeground( Color.white );
         panel.setBackground( Color.red );
         panel.setPreferredSize( new Dimension( 150, 150 ) );
         panel.setBorder( new EmptyBorder( 5, 5, 5, 5 ) );
-        panel.add( button1, "North" );
-        panel.add( button2, "South" );
-        panel.add( label, "Center" );
+        panel.add( button1, "North" );//NOI18N
+        panel.add( button2, "South" );//NOI18N
+        panel.add( label, "Center" );//NOI18N
         panel.revalidate();
         swing = new PSwing( canvas, panel );
         leaf = new ZVisualLeaf( swing );
@@ -221,54 +219,54 @@ public class TestPSwingFull extends JFrame {
 
         // JTable Example
         Vector columns = new Vector();
-        columns.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.columns.element1") );
-        columns.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.columns.element2") );
-        columns.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.columns.element3") );
+        columns.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.columns.element1") );
+        columns.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.columns.element2") );
+        columns.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.columns.element3") );
         Vector rows = new Vector();
         Vector row = new Vector();
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row1.element1") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row1.element2") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row1.element3") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row1.element1") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row1.element2") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row1.element3") );
         rows.addElement( row );
         row = new Vector();
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row2.element1") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row2.element2") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row21.element3") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row2.element1") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row2.element2") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row21.element3") );
         rows.addElement( row );
         row = new Vector();
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row3.element1") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row3.element2") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row3.element3") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row3.element1") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row3.element2") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row3.element3") );
         rows.addElement( row );
         row = new Vector();
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row4.element1") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row4.element2") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row4.element3") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row4.element1") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row4.element2") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row4.element3") );
         rows.addElement( row );
         row = new Vector();
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row5.element1") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row5.element2") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row5.element3") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row5.element1") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row5.element2") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row5.element3") );
         rows.addElement( row );
         row = new Vector();
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row6.element1") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row6.element2") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row6.elemen") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row6.element1") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row6.element2") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row6.elemen") );
         rows.addElement( row );
         row = new Vector();
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row7.element1") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row7.element2") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row7.element3") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row7.element1") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row7.element2") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row7.element3") );
         rows.addElement( row );
         row = new Vector();
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row8.element1") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row8.element2") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row8.element3") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row8.element1") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row8.element2") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row8.element3") );
         rows.addElement( row );
         row = new Vector();
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row9.element1") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row9.element2") );
-        row.addElement( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.row9.element3") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row9.element1") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row9.element2") );
+        row.addElement( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.row9.element3") );
         rows.addElement( row );
         JTable table = new JTable( rows, columns );
         table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
@@ -293,7 +291,7 @@ public class TestPSwingFull extends JFrame {
         try {
 
 
-            final JEditorPane editorPane = new JEditorPane( loader.getResource( "csdept.html" ) );
+            final JEditorPane editorPane = new JEditorPane( loader.getResource( "csdept.html" ) );//NOI18N
             editorPane.setDoubleBuffered( false );
             editorPane.setEditable( false );
             pane = new JScrollPane( editorPane );
@@ -306,7 +304,7 @@ public class TestPSwingFull extends JFrame {
                             editorPane.setPage( e.getURL() );
                         }
                         catch( IOException ioe ) {
-                            System.out.println( "Couldn't Load Web Page" );
+                            System.out.println( "Couldn't Load Web Page" );//NOI18N
                         }
                     }
                 }
@@ -320,19 +318,19 @@ public class TestPSwingFull extends JFrame {
 
         }
         catch( IOException ioe ) {
-            System.out.println( "Couldn't Load Web Page" );
+            System.out.println( "Couldn't Load Web Page" );//NOI18N
         }
 
         // A JInternalFrame with a JSplitPane - a JOptionPane - and a
         // JToolBar
-        JInternalFrame iframe = new JInternalFrame( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.iframe.title") );
+        JInternalFrame iframe = new JInternalFrame( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.iframe.title") );
         iframe.getRootPane().setDoubleBuffered( false );
         ( (JComponent)iframe.getContentPane() ).setDoubleBuffered( false );
         iframe.setPreferredSize( new Dimension( 500, 500 ) );
         JTabbedPane tabby = new JTabbedPane();
         tabby.setDoubleBuffered( false );
         iframe.getContentPane().setLayout( new BorderLayout() );
-        JOptionPane options = new JOptionPane( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.options.message"),
+        JOptionPane options = new JOptionPane( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.options.message"),
                                                JOptionPane.INFORMATION_MESSAGE,
                                                JOptionPane.DEFAULT_OPTION );
         options.setDoubleBuffered( false );
@@ -342,20 +340,20 @@ public class TestPSwingFull extends JFrame {
         tools.setMinimumSize( new Dimension( 150, 150 ) );
         tools.setPreferredSize( new Dimension( 225, 225 ) );
         JToolBar bar = new JToolBar();
-        Action letter = new AbstractAction( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.letter.name"), new ImageIcon( loader.getResource( "letter.gif" ) ) ) {
+        Action letter = new AbstractAction( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.letter.name"), new ImageIcon( loader.getResource( "letter.gif" ) ) ) {//NOI18N
 
             public void actionPerformed( ActionEvent e ) {}
         };
 
-        Action hand = new AbstractAction( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.hand.name"), new ImageIcon( loader.getResource( "hand.gif" ) ) ) {
+        Action hand = new AbstractAction( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.hand.name"), new ImageIcon( loader.getResource( "hand.gif" ) ) ) {//NOI18N
             public void actionPerformed( ActionEvent e ) {}
         };
-        Action select = new AbstractAction( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.select.name"),
-                                            new ImageIcon( loader.getResource( "select.gif" ) ) ) {
+        Action select = new AbstractAction( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.select.name"),
+                                            new ImageIcon( loader.getResource( "select.gif" ) ) ) {//NOI18N
             public void actionPerformed( ActionEvent e ) {}
         };
 
-        label = new JLabel( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.label.text") );
+        label = new JLabel( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.label.text") );
         label.setHorizontalAlignment( SwingConstants.CENTER );
         bar.add( letter );
         bar.add( hand );
@@ -363,8 +361,8 @@ public class TestPSwingFull extends JFrame {
         bar.setFloatable( false );
         bar.setBorder( new LineBorder( Color.black, 2 ) );
         tools.setLayout( new BorderLayout() );
-        tools.add( bar, "North" );
-        tools.add( label, "Center" );
+        tools.add( bar, "North" );//NOI18N
+        tools.add( label, "Center" );//NOI18N
 
         JSplitPane split = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, options, tools );
         split.setDoubleBuffered( false );
@@ -389,7 +387,7 @@ public class TestPSwingFull extends JFrame {
 
         // A JColorChooser - also demonstrates JTabbedPane
 //        JColorChooser chooser = new JColorChooser();
-        JCheckBox chooser = new JCheckBox( I18N.getString("de.cismet.cismap.commons.gui.piccolo.TestPSwingFull.chooser.text") );
+        JCheckBox chooser = new JCheckBox( org.openide.util.NbBundle.getMessage(TestPSwingFull.class, "TestPSwingFull.chooser.text") );
         swing = new PSwing( canvas, chooser );
         leaf = new ZVisualLeaf( swing );
         transform = new ZTransformGroup();

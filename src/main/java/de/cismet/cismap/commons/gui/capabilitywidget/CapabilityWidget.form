@@ -59,7 +59,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/capabilitywidget/res/collapseTree.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget.cmdCollapse.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="CapabilityWidget.cmdCollapse.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
@@ -75,7 +75,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/capabilitywidget/res/addServerFromList.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget.CapabilityWidget.cmdAddFromList.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="CapabilityWidget.cmdAddFromList.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
@@ -91,7 +91,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/capabilitywidget/res/addServerFromUrl.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget.CapabilityWidget.cmdAddByUrl.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="CapabilityWidget.cmdAddByUrl.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
@@ -107,7 +107,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/capabilitywidget/res/tab_remove.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget.CapabilityWidget.cmdRemove.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="CapabilityWidget.cmdRemove.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
@@ -123,7 +123,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/capabilitywidget/res/refresh.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget.CapabilityWidget.cmdRefresh.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="CapabilityWidget.cmdRefresh.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>

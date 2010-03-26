@@ -57,7 +57,7 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
     
     /** Creates a new instance of UniversalRetrieval */
      public static void main(String[] args) {
-           UniversalRetrieval ur=new UniversalRetrieval("http://www.google.de/intl/de_de/images/logo.gif");
+           UniversalRetrieval ur=new UniversalRetrieval("http://www.google.de/intl/de_de/images/logo.gif");//NOI18N
            //UniversalRetrieval ur=new UniversalRetrieval("http://www.google.de");
            //UniversalRetrieval ur=new UniversalRetrieval("http://www2.demis.nl/WMS/wms.asp?WMS=WorldMap&WMTVER=1.0.0&request=capabilities");
            ur.retrieve(false);
@@ -106,7 +106,7 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
         private InputStream is=null;
         private Image image=null;
         private boolean youngerCall=false;
-        private String contentType="";
+        private String contentType="";//NOI18N
         public RetrievalThread() {
             listener=UniversalRetrieval.this;
         }
@@ -117,12 +117,12 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
         
         public void run() {
             try {
-                log.debug("start of ImageRetrieval");
+                log.debug("start of ImageRetrieval");//NOI18N
                 listener.retrievalStarted(new RetrievalEvent());
                 URL u=new URL(url.toString());
-                log.debug("Retrieve: "+url.toString());
+                log.debug("Retrieve: "+url.toString());//NOI18N
                 uc=u.openConnection();
-                log.debug("contenttype: "+uc.getContentType());
+                log.debug("contenttype: "+uc.getContentType());//NOI18N
                 contentType=uc.getContentType();
                 uc.connect();
                 
@@ -135,11 +135,11 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
                     byteArrayOut.write(c);
                     if (youngerCall) {
                         fireLoadingAborted();
-                        log.debug("interrupt during retrieval");
+                        log.debug("interrupt during retrieval");//NOI18N
                         return;
                     }
                 }
-                if (uc.getContentType().indexOf("image")!=-1) {
+                if (uc.getContentType().indexOf("image")!=-1) {//NOI18N
                     observer=new ImageObserverInterceptor();
                     //Image image =Toolkit.getDefaultToolkit().getImage(is);
                     image=Toolkit.getDefaultToolkit().createImage(byteArrayOut.toByteArray());
@@ -148,7 +148,7 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
                         Thread.sleep(10);
                         if (youngerCall) {
                             fireLoadingAborted();
-                            log.debug("interrupt during assembling");
+                            log.debug("interrupt during assembling");//NOI18N
                             return;
                         }
                     }
@@ -158,11 +158,11 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
                     e.setRetrievedObject(image);
                     if (!youngerCall) {
                         listener.retrievalComplete(e);
-                        log.debug("Retrieval complete");
+                        log.debug("Retrieval complete");//NOI18N
                     } else {
                         fireLoadingAborted();
                     }
-                } else if (uc.getContentType().indexOf("text")!=-1) {
+                } else if (uc.getContentType().indexOf("text")!=-1) {//NOI18N
 
                     RetrievalEvent e=new RetrievalEvent();
                     e.setContentType(contentType);
@@ -182,7 +182,7 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
                 RetrievalEvent re=new RetrievalEvent();
                 re.setIsComplete(false);
                 re.setContentType(contentType);
-                if (e.getMessage()==null||e.getMessage().equals("null")) {
+                if (e.getMessage()==null||e.getMessage().equals("null")) {//NOI18N
                     try {
                         String cause=e.getCause().getMessage();
                         re.setRetrievedObject(cause);
@@ -191,21 +191,21 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
                     re.setRetrievedObject(e.getMessage());
                 }
                 listener.retrievalError(re);
-                log.error("Fehler beim Laden des Bildes ",e);
+                log.error("Fehler beim Laden des Bildes ",e);//NOI18N
             }
         }
         public void fireLoadingAborted(){
 //        RetrievalEvent e=new RetrievalEvent();
 //        listener.retrievalAborted(e);
             //TODO nochmal anschauen
-            log.info("Retrieval unterbrochen");
+            log.info("Retrieval interrupted");//NOI18N
             image=null;
             observer=null;
             if (is!=null){
                 try {
                     is.close();
                 } catch (IOException ioe) {
-                    log.warn("Exception during premature closing of the inputstream",ioe);
+                    log.warn("Exception during premature closing of the inputstream",ioe);//NOI18N
                 }
             }
             System.gc();
@@ -225,7 +225,7 @@ public class UniversalRetrieval extends AbstractRetrievalService implements  Ret
                 
                 if ((infoflags&ImageObserver.SOMEBITS) !=0) {
                     RetrievalEvent e=new RetrievalEvent();
-                    e.setPercentageDone((double)y/(img.getHeight(this)-1.0)*100);
+                    e.setPercentageDone((int) (y / (img.getHeight(this) - 1.0) * 100));
                     listener.retrievalProgress(e);
                 } else if ((infoflags&ImageObserver.ABORT)!=0) {
                     

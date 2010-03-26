@@ -52,11 +52,12 @@ import org.jdom.Element;
  *
  * @author thorsten.hell@cismet.de
  */
+@Deprecated
 public class DefaultMappingModel implements MappingModel, Configurable {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static int UP = -1;
-    public static int DOWN = 1;
+    public final static int UP = -1;
+    public final static int DOWN = 1;
     TreeMap mapServices = new TreeMap();
     TreeMap featureServices = new TreeMap();
     FeatureCollection featureCollection;
@@ -83,7 +84,7 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 
     private int moveObjectInTreeMap(TreeMap tm, Object o, int step) {
         try {
-            log.debug("moveObjectInTreeMap");
+            log.debug("moveObjectInTreeMap");//NOI18N
             Vector v = new Vector(tm.values());
             int currentPosition = v.indexOf(o);
             int newPosition = currentPosition + step;
@@ -96,30 +97,31 @@ public class DefaultMappingModel implements MappingModel, Configurable {
             }
             return newPosition;
         } catch (Exception e) {
-            log.warn("No moving", e);
+            log.warn("No moving", e);//NOI18N
             return -1;
         }
 
     }
 
-    public static void main(String[] args) {
-        DefaultMappingModel dm = new DefaultMappingModel();
-        TreeMap tm = new TreeMap();
-        tm.put(3, "C");
-        tm.put(4, "D");
-        tm.put(5, "E");
-        tm.put(1, "A");
-        tm.put(2, "B");
-        System.out.println(tm);
-
-        dm.moveObjectInTreeMap(tm, "A", DOWN);
-        System.out.println(tm);
-    }
+//    public static void main(String[] args) {
+//        DefaultMappingModel dm = new DefaultMappingModel();
+//        TreeMap tm = new TreeMap();
+//        tm.put(3, "C");
+//        tm.put(4, "D");
+//        tm.put(5, "E");
+//        tm.put(1, "A");
+//        tm.put(2, "B");
+//        System.out.println(tm);
+//
+//        dm.moveObjectInTreeMap(tm, "A", DOWN);
+//        System.out.println(tm);
+//    }
 
 //    public void putFeatureService(int position, de.cismet.cismap.commons.featureservice.FeatureService featureService) {
 //        featureServices.put(new Integer(position), featureService);
 //    }
 
+  @Override
     public void addMappingModelListener(MappingModelListener mml) {
         if (!(mappingModelListeners.contains(mml))) {
             mappingModelListeners.add(mml);
@@ -129,6 +131,7 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //    public void removeFeatureService(de.cismet.cismap.commons.featureservice.FeatureService featureService) {
 //    }
 
+  @Override
     public void removeMappingModelListener(MappingModelListener mml) {
         mappingModelListeners.remove(mml);
     }
@@ -154,14 +157,17 @@ public class DefaultMappingModel implements MappingModel, Configurable {
         return featureCollection;
     }
 
-    public TreeMap getFeatureServices() {
+
+    public TreeMap getMapServices() {
         return featureServices;
     }
 
+  @Override
     public BoundingBox getInitialBoundingBox() {
         return initialBoundingBox;
     }
 
+  @Override
     public TreeMap getRasterServices() {
         return mapServices;
     }
@@ -194,14 +200,17 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //        }
 //    }
     //TODO
+  @Override
     public void addLayer(RetrievalServiceLayer layer) {
     }
 
+  @Override
     public void removeLayer(RetrievalServiceLayer layer) {
     }
 
+  @Override
     public void configure(Element parent) {
-        Element prefs = parent.getChild("cismapMappingPreferences");
+        Element prefs = parent.getChild("cismapMappingPreferences");//NOI18N
 
         XBoundingBox xBox = null;
 
@@ -244,35 +253,36 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //        }
     }
 
+  @Override
     public void masterConfigure(Element parent) {
-        log.debug("masterConfigure im DefaultmappingModel:" + parent);
+        log.debug("masterConfigure im DefaultmappingModel:" + parent);//NOI18N
 
-        Element prefs = parent.getChild("cismapMappingPreferences");
+        Element prefs = parent.getChild("cismapMappingPreferences");//NOI18N
 
-        Iterator<Element> it = prefs.getChildren("home").iterator();
+        Iterator<Element> it = prefs.getChildren("home").iterator();//NOI18N
         XBoundingBox xBox = null;
 
         while (it.hasNext()) {
             Element elem = it.next();
-            String srs = elem.getAttribute("srs").getValue();
+            String srs = elem.getAttribute("srs").getValue();//NOI18N
             boolean metric = false;
             try {
-                metric = elem.getAttribute("metric").getBooleanValue();
+                metric = elem.getAttribute("metric").getBooleanValue();//NOI18N
             } catch (DataConversionException dce) {
-                log.warn("Metric hat falschen Syntax", dce);
+                log.warn("Metric has invalid syntax", dce);//NOI18N
             }
             boolean defaultVal = false;
             try {
-                defaultVal = elem.getAttribute("default").getBooleanValue();
+                defaultVal = elem.getAttribute("default").getBooleanValue();//NOI18N
             } catch (DataConversionException dce) {
-                log.warn("default hat falschen Syntax", dce);
+                log.warn("defaulthas invalid syntax", dce);//NOI18N
             }
             if (defaultVal) {
                 try {
                     xBox = new XBoundingBox(elem, srs, metric);
                     setInitialBoundingBox(xBox);
                 } catch (Throwable t) {
-                    log.fatal("Die Home-BoundingBox konnte nicht gesetzt werden. Das wird wahrscheinlich schiefgehen :-7", t);
+                    log.fatal("The home bounding box cannot be set. This will probably fail :-7", t);//NOI18N
                 }
             }
         }
@@ -280,8 +290,8 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 
         getInitialBoundingBox();
         //SimpleRasterServices
-        prefs = parent.getChild("cismapActiveLayerConfiguration");
-        List simpleWmsList = prefs.getChild("rasterLayers").getChildren("simpleWms");
+        prefs = parent.getChild("cismapActiveLayerConfiguration");//NOI18N
+        List simpleWmsList = prefs.getChild("rasterLayers").getChildren("simpleWms");//NOI18N
         it = simpleWmsList.iterator();
         while (it.hasNext()) {
             Object o = it.next();
@@ -290,38 +300,38 @@ public class DefaultMappingModel implements MappingModel, Configurable {
                 try {
                     boolean skip = false;
                     try {
-                        skip = el.getAttribute("skip").getBooleanValue();
+                        skip = el.getAttribute("skip").getBooleanValue();//NOI18N
                     } catch (Exception skipException) {
                     }
                     if (!skip) {
                         SimpleWMS swms = new SimpleWMS(el);
                         mapServices.put(new Integer(swms.getLayerPosition()), swms);
-                        log.debug("Rasterservice added:" + swms + "(" + swms.getLayerPosition() + ")");
+                        log.debug("Rasterservice added:" + swms + "(" + swms.getLayerPosition() + ")");//NOI18N
                     }
                 } catch (Exception ex) {
-                    log.warn("Preferences Auslesen. Fehler. SimpleWMS erzeugen  ", ex);
+                    log.warn("Read Preferences. Error. create SimpleWMS  ", ex);//NOI18N
                 }
             }
         }
 
         //SimplePostgisServices
-        List simplePostgisFeatureServiceList = prefs.getChild("featureLayers").getChildren("simplePostgisFeatureService");
+        List simplePostgisFeatureServiceList = prefs.getChild("featureLayers").getChildren("simplePostgisFeatureService");//NOI18N
         it = simplePostgisFeatureServiceList.iterator();
         while (it.hasNext()) {
-            log.debug("new SimplePostgisService");
+            log.debug("new SimplePostgisService");//NOI18N
             Object o = it.next();
             if (o instanceof Element) {
                 Element el = (Element) o;
                 try {
-                    log.debug("SimplePostgisFeatureService hinzugef�gt");
+                    log.debug("SimplePostgisFeatureService added");//NOI18N
                     boolean skip = false;
                     boolean updateable = false;
                     try {
-                        skip = el.getAttribute("skip").getBooleanValue();
+                        skip = el.getAttribute("skip").getBooleanValue();//NOI18N
                     } catch (Exception skipException) {
                     }
                     try {
-                        updateable = el.getAttribute("updateable").getBooleanValue();
+                        updateable = el.getAttribute("updateable").getBooleanValue();//NOI18N
                     } catch (Exception skipException) {
                     }
                     if (!skip) {
@@ -335,7 +345,7 @@ public class DefaultMappingModel implements MappingModel, Configurable {
                         featureServices.put(new Integer(spfs.getLayerPosition()), spfs);
                     }
                 } catch (Exception ex) {
-                    log.warn("Preferences Auslesen. Fehler. SimplePostgisFeatureService erzeugen  ", ex);
+                    log.warn("Read Preferences. Error. Create SimplePostgisFeatureService ", ex);//NOI18N
                 }
             }
         }
@@ -379,7 +389,14 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 
     }
 
+  @Override
     public Element getConfiguration() throws NoWriteError {
         return null;
     }
+
+  @Override
+  public TreeMap getFeatureServices()
+  {
+    return this.featureServices;
+  }
 }

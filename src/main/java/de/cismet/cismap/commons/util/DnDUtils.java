@@ -15,10 +15,10 @@ public class DnDUtils {
 
     
     //TODO Best position for this code snippet ?
-    public static DataFlavor URI_LIST_FLAVOR;    
+    public static DataFlavor URI_LIST_FLAVOR;
     static {
         try {
-            URI_LIST_FLAVOR = new DataFlavor("text/uri-list;class=java.lang.String");
+            URI_LIST_FLAVOR = new DataFlavor("text/uri-list;class=java.lang.String");//NOI18N
         } catch (ClassNotFoundException e) { // can't happen
             e.printStackTrace();
         }
@@ -26,10 +26,10 @@ public class DnDUtils {
     
     public static java.util.List textURIListToFileList(String data) {
         java.util.List list = new java.util.ArrayList(1);
-        for (java.util.StringTokenizer st = new java.util.StringTokenizer(data, "\r\n");
+        for (java.util.StringTokenizer st = new java.util.StringTokenizer(data, "\r\n");//NOI18N
                 st.hasMoreTokens();) {
             String s = st.nextToken();
-            if (s.startsWith("#")) {
+            if (s.startsWith("#")) {//NOI18N
                 // the line is a comment (as per the RFC 2483)
                 continue;
             }

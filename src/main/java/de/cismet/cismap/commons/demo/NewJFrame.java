@@ -34,7 +34,6 @@
 
 package de.cismet.cismap.commons.demo;
 
-import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +42,6 @@ import java.util.regex.Pattern;
  * @author  thorsten.hell@cismet.de
  */
 public class NewJFrame extends javax.swing.JFrame {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     
     /** Creates new form NewJFrame */
     public NewJFrame() {
@@ -63,7 +61,7 @@ public class NewJFrame extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(null);
 
-        jLabel1.setText(I18N.getString("de.cismet.cismap.commons.demo.NewJFrame.jLabel1.text")); // NOI18N
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(NewJFrame.class, "NewJFrame.jLabel1.text")); // NOI18N
         getContentPane().add(jLabel1);
         jLabel1.setBounds(120, 120, 45, 17);
 
@@ -80,13 +78,13 @@ public class NewJFrame extends javax.swing.JFrame {
 //            }
 //        });
 
-        String valueString="  23";
+        String valueString="  23";//NOI18N
                 int i=-1;
                 valueString=valueString.trim();
                 boolean hatAlphaTeil=false;
                 try {
                     for (i=1;i<valueString.length();++i) {
-                        System.out.println(i+" "+valueString.substring(0,i));
+                        System.out.println(i+" "+valueString.substring(0,i));//NOI18N
                         Integer integer=new Integer(valueString.substring(0,i));
                     }
                     
@@ -95,11 +93,11 @@ public class NewJFrame extends javax.swing.JFrame {
                     hatAlphaTeil=true;
                 }
                 if (hatAlphaTeil) {
-                    System.out.println(i+" "+valueString.substring(0,i));
+                    System.out.println(i+" "+valueString.substring(0,i));//NOI18N
                     String  intString=valueString.substring(0,i-1);
                     String alphaRest=valueString.substring(i-1,valueString.length());
-                    System.out.println("intString."+intString.trim()+".");
-                    System.out.println("alphaRest."+alphaRest.trim()+".");
+                    System.out.println("intString."+intString.trim()+".");//NOI18N
+                    System.out.println("alphaRest."+alphaRest.trim()+".");//NOI18N
                 }
     
     }

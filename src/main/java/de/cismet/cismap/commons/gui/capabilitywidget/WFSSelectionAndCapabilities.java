@@ -33,8 +33,9 @@
  */
 package de.cismet.cismap.commons.gui.capabilitywidget;
 
-import java.util.List;
 import org.jdom.Element;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import java.util.Vector;
 
 /**
  *
@@ -43,10 +44,11 @@ import org.jdom.Element;
 public class WFSSelectionAndCapabilities {
     private String name, host, id;
     private Element query;
-    private List<Element> attributes;
+    private Vector<FeatureServiceAttribute> attributes;
 
+    // TODO WFS Attribute rausschmeissen
     public WFSSelectionAndCapabilities(String name, String host, Element query,
-            String id, List attributes) {
+            String id, Vector<FeatureServiceAttribute> attributes) {
         this.name = name;
         this.host = host;
         this.query = query;
@@ -86,11 +88,11 @@ public class WFSSelectionAndCapabilities {
         return id;
     }
 
-    public List<Element> getAttributes() {
+    public Vector<FeatureServiceAttribute> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(List attributes) {
+    public void setAttributes(Vector<FeatureServiceAttribute> attributes) {
         this.attributes = attributes;
     }
 }

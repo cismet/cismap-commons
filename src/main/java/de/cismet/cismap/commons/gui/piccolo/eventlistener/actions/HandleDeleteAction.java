@@ -13,7 +13,6 @@ import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import java.util.ResourceBundle;
 import java.util.Vector;
 
 /**
@@ -22,7 +21,6 @@ import java.util.Vector;
  * @author nh
  */
 public class HandleDeleteAction implements CustomAction {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private MappingComponent mc;
     private Feature f;
     private int posInArray;
@@ -61,12 +59,7 @@ public class HandleDeleteAction implements CustomAction {
      * @return Beschreibungsstring
      */
     public String info() {
-        return I18N.getString("de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction.info().return1")
-                + " "
-                + posInArray
-                + ". "
-                + I18N.getString("de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction.info().return2")
-                + " (" + x + ", " + y + ")";
+        return org.openide.util.NbBundle.getMessage(HandleDeleteAction.class, "HandleDeleteAction.info().return", new Object[]{posInArray, x, y});
     }
 
     /**

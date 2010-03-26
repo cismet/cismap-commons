@@ -7,9 +7,7 @@
 package de.cismet.cismap.commons.featureservice;
 
 import java.awt.Frame;
-import java.util.ResourceBundle;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -18,7 +16,6 @@ import javax.swing.JOptionPane;
 public class QueryEditorDialog extends JDialog {
     public static final int RET_OK = 1;
     public static final int RET_CANCEL = 0;
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     
     /** A return status code - returned if Cancel button has been pressed */
     private int returnStatus = RET_CANCEL;
@@ -61,7 +58,7 @@ public class QueryEditorDialog extends JDialog {
         cmdOK = new javax.swing.JButton();
         cmdCancel = new javax.swing.JButton();
 
-        setTitle(I18N.getString("de.cismet.cismap.commons.featureservice.QueryEditorDialog.title")); // NOI18N
+        setTitle(org.openide.util.NbBundle.getMessage(QueryEditorDialog.class, "QueryEditorDialog.title") ); // NOI18N
         setMinimumSize(new java.awt.Dimension(550, 400));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -86,7 +83,7 @@ public class QueryEditorDialog extends JDialog {
         panButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, -5));
         panButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 0));
 
-        cmdOK.setText(I18N.getString("de.cismet.cismap.commons.featureservice.QueryEditorDialog.cmdOK.text")); // NOI18N
+        cmdOK.setText(org.openide.util.NbBundle.getMessage(QueryEditorDialog.class, "QueryEditorDialog.cmdOK.text") ); // NOI18N
         cmdOK.setMaximumSize(new java.awt.Dimension(88, 23));
         cmdOK.setMinimumSize(new java.awt.Dimension(88, 23));
         cmdOK.setPreferredSize(new java.awt.Dimension(88, 23));
@@ -97,7 +94,7 @@ public class QueryEditorDialog extends JDialog {
         });
         panButtons.add(cmdOK);
 
-        cmdCancel.setText(I18N.getString("de.cismet.cismap.commons.featureservice.QueryEditorDialog.cmdCancel.text")); // NOI18N
+        cmdCancel.setText(org.openide.util.NbBundle.getMessage(QueryEditorDialog.class, "QueryEditorDialog.cmdCancel.text") ); // NOI18N
         cmdCancel.setMaximumSize(new java.awt.Dimension(88, 23));
         cmdCancel.setMinimumSize(new java.awt.Dimension(88, 23));
         cmdCancel.setPreferredSize(new java.awt.Dimension(88, 23));

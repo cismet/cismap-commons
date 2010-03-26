@@ -1,19 +1,15 @@
 /*
  * StatusBar.java
  *
- * Created on 23. M�rz 2006, 14:23
+ * Created on 23. März 2006, 14:23
  */
-
 package de.cismet.cismap.commons.gui.statusbar;
 
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
-import de.cismet.cismap.commons.features.DefaultWFSFeature;
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
-import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
-import de.cismet.cismap.commons.featureservice.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.printing.Scale;
@@ -24,7 +20,6 @@ import de.cismet.tools.StaticDecimalTools;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
-import java.util.ResourceBundle;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 
@@ -32,71 +27,62 @@ import javax.swing.JMenuItem;
  *
  * @author  thorsten.hell@cismet.de
  */
-public class StatusBar extends javax.swing.JPanel implements StatusListener,FeatureCollectionListener{
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
+public class StatusBar extends javax.swing.JPanel implements StatusListener, FeatureCollectionListener {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     String mode;
-    ImageIcon defaultIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/map.png"));
+    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/map.png"));//NOI18N
     MappingComponent mappingComponent;
+
     /** Creates new form StatusBar */
     public StatusBar(MappingComponent mappingComponent) {
         initComponents();
-        this.mappingComponent=mappingComponent;
-        lblStatusImage.setText("");
-        lblCoordinates.setText("");
+        this.mappingComponent = mappingComponent;
+        lblStatusImage.setText("");//NOI18N
+        lblCoordinates.setText("");//NOI18N
         lblStatusImage.setIcon(defaultIcon);
     }
 
     public void addScalePopups() {
-        for (Scale s:mappingComponent.getScales()) {
-            if (s.getDenominator()>0) {
-                addScalePopupMenu(s.getText(),s.getDenominator());    
+        for (Scale s : mappingComponent.getScales()) {
+            if (s.getDenominator() > 0) {
+                addScalePopupMenu(s.getText(), s.getDenominator());
             }
         }
     }
-    
+
     public void statusValueChanged(StatusEvent e) {
-//        lblStatus.setText("");
-//        lblStatusImage.setIcon(defaultIcon);
-        
-        if (e.getName().equals(e.COORDINATE_STRING)) {
+        if (e.getName().equals(StatusEvent.COORDINATE_STRING)) {
             lblCoordinates.setText(e.getValue().toString());
-        }
-        else if (e.getName().equals(e.MEASUREMENT_INFOS)) {
+        } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
             lblStatus.setText(e.getValue().toString());
-        }
-        else if (e.getName().equals(e.MAPPING_MODE)) {
-            lblStatus.setText("");
-            mode=((String)e.getValue());
-        }
-        else if (e.getName().equals(e.OBJECT_INFOS)) {
-            if (e.getValue()!=null && e.getValue() instanceof PFeature &&((PFeature)e.getValue()).getFeature() !=null && ((PFeature)e.getValue()).getFeature() instanceof XStyledFeature) {
-                lblStatus.setText(((XStyledFeature)((PFeature)e.getValue()).getFeature()).getName());
-                ImageIcon ico=((XStyledFeature)((PFeature)e.getValue()).getFeature()).getIconImage();
-                if (ico!=null&& ico.getIconWidth()>0 && ico.getIconHeight()>0) {
+        } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
+            lblStatus.setText("");//NOI18N
+            mode = ((String) e.getValue());
+        } else if (e.getName().equals(StatusEvent.OBJECT_INFOS)) {
+            if (e.getValue() != null && e.getValue() instanceof PFeature && ((PFeature) e.getValue()).getFeature() != null && ((PFeature) e.getValue()).getFeature() instanceof XStyledFeature) {
+                lblStatus.setText(((XStyledFeature) ((PFeature) e.getValue()).getFeature()).getName());
+                ImageIcon ico = ((XStyledFeature) ((PFeature) e.getValue()).getFeature()).getIconImage();
+                if (ico != null && ico.getIconWidth() > 0 && ico.getIconHeight() > 0) {
                     lblStatusImage.setIcon(ico);
-                }
-                else {
+                } else {
                     lblStatusImage.setIcon(defaultIcon);
                 }
-            } else if(e.getValue()!=null && e.getValue() instanceof PFeature &&((PFeature)e.getValue()).getFeature() !=null && ((PFeature)e.getValue()).getFeature() instanceof DefaultWFSFeature){
-                if(((DefaultWFSFeature)((PFeature)e.getValue()).getFeature()).getSecondaryAnnotation() != null){
-                    lblStatus.setText(((DefaultWFSFeature)((PFeature)e.getValue()).getFeature()).getSecondaryAnnotation());
+            } else if (e.getValue() != null && e.getValue() instanceof PFeature && ((PFeature) e.getValue()).getFeature() != null && ((PFeature) e.getValue()).getFeature() instanceof DefaultFeatureServiceFeature) {
+                if (((DefaultFeatureServiceFeature) ((PFeature) e.getValue()).getFeature()).getSecondaryAnnotation() != null) {
+                    lblStatus.setText(((DefaultFeatureServiceFeature) ((PFeature) e.getValue()).getFeature()).getSecondaryAnnotation());
                 } else {
-                    lblStatus.setText("");
+                    lblStatus.setText("");//NOI18N
                 }
-            }
-            else {
-                lblStatus.setText("");
+            } else {
+                lblStatus.setText("");//NOI18N
                 lblStatusImage.setIcon(defaultIcon);
             }
-        }
-        else if (e.getName().equals(e.SCALE)) {
-            int sd=(int)(mappingComponent.getScaleDenominator()+0.5);
-            lblScale.setText("1:"+sd);
+        } else if (e.getName().equals(StatusEvent.SCALE)) {
+            int sd = (int) (mappingComponent.getScaleDenominator() + 0.5);
+            lblScale.setText("1:" + sd);//NOI18N
         }
     }
-    
+
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -202,13 +188,12 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,Feat
         pomScale.add(jmi);
     }
     
-    
     private  void refreshMeasurementsInStatus() {
         try{
-        Collection<Feature> cf=CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getSelectedFeatures();
+        Collection<Feature> cf=mappingComponent.getFeatureCollection().getSelectedFeatures();
         refreshMeasurementsInStatus(cf);
         }catch(NullPointerException ex){
-            log.error("Error while refreshing measurements",ex);
+            log.error("Error while refreshing measurements",ex);//NOI18N
         }
     }
     
@@ -222,27 +207,18 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,Feat
             }
         }
         if ((area==0.0 && umfang==0.0)||cf.size()==0){
-            lblMeasurement.setText("");
+            lblMeasurement.setText("");//NOI18N
         } else {
             lblMeasurement.setText(
-                    I18N.getString("de.cismet.cismap.commons.gui.statusbar.StatusBar.lblMeasurement.text1")
-                    + " "
-                    + StaticDecimalTools.round(area)
-                    + "  "
-                    + I18N.getString("de.cismet.cismap.commons.gui.statusbar.StatusBar.lblMeasurement.text2")
-                    + " "
-                    + StaticDecimalTools.round(umfang));
+                    org.openide.util.NbBundle.getMessage(StatusBar.class,"StatusBar.lblMeasurement.text", new Object[]{ StaticDecimalTools.round(area), StaticDecimalTools.round(umfang) }));
         }
-        
     }
 
-    public void featuresRemoved(FeatureCollectionEvent fce) {
-        
-    }
+    public void featuresRemoved(FeatureCollectionEvent fce) {}
     
     public void featuresChanged(FeatureCollectionEvent fce) {
-        log.debug("FeatureChanged");
-        if (CismapBroker.getInstance().getMappingComponent().getInteractionMode()==MappingComponent.NEW_POLYGON) {
+        log.debug("FeatureChanged");//NOI18N
+        if (mappingComponent.getInteractionMode().equals(MappingComponent.NEW_POLYGON)) {
             refreshMeasurementsInStatus(fce.getEventFeatures());
         }
         else {
@@ -250,26 +226,21 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,Feat
         }
     }
     
-    public void featuresAdded(FeatureCollectionEvent fce) {
-        
-    }
+    public void featuresAdded(FeatureCollectionEvent fce) {}
     
     public void featureSelectionChanged(FeatureCollectionEvent fce) {
          refreshMeasurementsInStatus();
     }
 
-    public void featureReconsiderationRequested(FeatureCollectionEvent fce) {
-    }
+    public void featureReconsiderationRequested(FeatureCollectionEvent fce) {}
 
-    public void allFeaturesRemoved(FeatureCollectionEvent fce) {
-    }
+    public void allFeaturesRemoved(FeatureCollectionEvent fce) {}
 
     public javax.swing.JPopupMenu getPomScale() {
         return pomScale;
     }
 
-    public void featureCollectionChanged() {
-    }
+    public void featureCollectionChanged() {}
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

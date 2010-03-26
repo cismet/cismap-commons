@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.3" maxVersion="1.3" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
-  <NonVisualComponents>
-    <Component class="javax.swing.JLabel" name="jLabel1">
-      <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.jLabel1.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
-        </Property>
-      </Properties>
-    </Component>
-  </NonVisualComponents>
   <Properties>
     <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
       <Border info="org.netbeans.modules.form.compat2.border.EmptyBorderInfo">
@@ -37,7 +28,7 @@
     <Component class="javax.swing.JButton" name="cmdPos">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.cmdPos.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="WFSFormGemarkungFlurFlurstueck.cmdPos.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -238,7 +229,7 @@
       <Properties>
         <Property name="selected" type="boolean" value="true"/>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.chkVisualize.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="WFSFormGemarkungFlurFlurstueck.chkVisualize.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Events>
@@ -256,7 +247,7 @@
           <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/markPoint.png"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.jLabel2.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="WFSFormGemarkungFlurFlurstueck.jLabel2.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>
@@ -269,7 +260,7 @@
       <Properties>
         <Property name="selected" type="boolean" value="true"/>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.chkLockScale.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="WFSFormGemarkungFlurFlurstueck.chkLockScale.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>
@@ -284,7 +275,7 @@
           <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/fixMapScale.png"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="de.cismet.cismap.commons.wfsforms.WFSFormGemarkungFlurFlurstueck.jLabel3.toolTipText" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="WFSFormGemarkungFlurFlurstueck.jLabel3.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>
@@ -308,7 +299,7 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="182" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="226" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">

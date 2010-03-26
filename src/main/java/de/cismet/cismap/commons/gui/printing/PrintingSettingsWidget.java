@@ -11,7 +11,6 @@ import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.gui.StaticSwingTools;
 import java.awt.Color;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 import org.jdom.Element;
@@ -21,8 +20,6 @@ import org.jdom.Element;
  * @author  thorsten.hell@cismet.de
  */
 public class PrintingSettingsWidget extends javax.swing.JDialog implements Configurable {
-
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private static final double FEATURE_RESOLUTION_FACTOR = 125.0d;
     private Element configuration = null;
@@ -95,18 +92,18 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         jSeparator4 = new javax.swing.JSeparator();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.title")); // NOI18N
+        setTitle(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.title")); // NOI18N
 
         panDesc.setBackground(java.awt.SystemColor.inactiveCaptionText);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        jLabel1.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel1.text")); // NOI18N
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel1.text")); // NOI18N
 
-        jLabel2.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel2.text")); // NOI18N
+        jLabel2.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel2.text")); // NOI18N
 
-        jLabel3.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel3.text")); // NOI18N
+        jLabel3.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel3.text")); // NOI18N
 
-        jLabel4.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel4.text")); // NOI18N
+        jLabel4.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel4.text")); // NOI18N
 
         jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/frameprint.png"))); // NOI18N
 
@@ -153,7 +150,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         );
 
         cmdOk.setMnemonic('O');
-        cmdOk.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.cmdOk.text")); // NOI18N
+        cmdOk.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.cmdOk.text")); // NOI18N
         cmdOk.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdOkActionPerformed(evt);
@@ -161,23 +158,23 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         });
 
         cmdCancel.setMnemonic('A');
-        cmdCancel.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.cmdCancel.text")); // NOI18N
+        cmdCancel.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.cmdCancel.text")); // NOI18N
         cmdCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdCancelActionPerformed(evt);
             }
         });
 
-        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 11));
-        jLabel6.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel6.text")); // NOI18N
+        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel6.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel6.text")); // NOI18N
 
-        jLabel7.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel7.text")); // NOI18N
+        jLabel7.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel7.text")); // NOI18N
 
-        jLabel8.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel8.text")); // NOI18N
+        jLabel8.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel8.text")); // NOI18N
 
-        jLabel9.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel9.text")); // NOI18N
+        jLabel9.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel9.text")); // NOI18N
 
-        jLabel10.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget.jLabel10.text")); // NOI18N
+        jLabel10.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel10.text")); // NOI18N
 
         cboTemplates.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
@@ -243,7 +240,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 .add(panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(jLabel10)
                     .add(cboAction, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 81, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 89, Short.MAX_VALUE)
                 .add(jSeparator4, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
 
@@ -294,7 +291,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                     interactionModeAfterPrinting);
             dispose();
         } catch (Exception e) {
-            log.error("Fehler beim Verarbeiten der Druckeinstellungen", e);
+            log.error("Fehler beim Verarbeiten der Druckeinstellungen", e);//NOI18N
         }
     }//GEN-LAST:event_cmdOkActionPerformed
     private void cmdCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
@@ -397,7 +394,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 log.error("Error during initialization of the printingDialog", e);//NOI18N
             }
         } catch (Exception ex) {
-            log.error("Fehler beim Initialisieren des PrintingWidgets. Abgefangen.", ex);
+            log.error("Error during initialization of the PrintingWidgets. catched.", ex);//NOI18N
         }
     }
     

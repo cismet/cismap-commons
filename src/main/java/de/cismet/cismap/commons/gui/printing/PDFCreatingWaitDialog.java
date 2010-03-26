@@ -7,14 +7,12 @@
 package de.cismet.cismap.commons.gui.printing;
 
 import java.awt.EventQueue;
-import java.util.ResourceBundle;
 
 /**
  *
  * @author  thorsten.hell@cismet.de
  */
 public class PDFCreatingWaitDialog extends javax.swing.JDialog {
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     /** Creates new form PDFCreatingWaitDialog */
     public PDFCreatingWaitDialog(java.awt.Frame parent, boolean modal) {
@@ -46,7 +44,7 @@ public class PDFCreatingWaitDialog extends javax.swing.JDialog {
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/pdf.png"))); // NOI18N
 
-        jLabel2.setText(I18N.getString("de.cismet.cismap.commons.gui.printing.PDFCreatingWaitDialog.jLabel2.text")); // NOI18N
+        jLabel2.setText(org.openide.util.NbBundle.getMessage(PDFCreatingWaitDialog.class, "PDFCreatingWaitDialog.jLabel2.text")); // NOI18N
 
         jProgressBar1.setForeground(new java.awt.Color(255, 0, 0));
         jProgressBar1.setBorderPainted(false);

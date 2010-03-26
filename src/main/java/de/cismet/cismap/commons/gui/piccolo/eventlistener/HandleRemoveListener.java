@@ -18,10 +18,10 @@ public class HandleRemoveListener extends PBasicInputEventHandler {
 
     @Override
     public void mouseClicked(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        log.info("Entferne Handle");
+        log.info("remove Handle");//NOI18N
         Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[]{PHandle.class});
         if (o instanceof PHandle) {
-            log.info("Entferne Handle");
+            log.info("remove Handle");//NOI18N
             ((PHandle) (o)).removeHandle();
         }
     }
@@ -29,7 +29,7 @@ public class HandleRemoveListener extends PBasicInputEventHandler {
     @Override
     public void mouseMoved(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         if (PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[]{PHandle.class}) instanceof PHandle) {
-            log.info("\u00DCber PHandle");
+            log.info("Over PHandle");//NOI18N
         }
     }
 }

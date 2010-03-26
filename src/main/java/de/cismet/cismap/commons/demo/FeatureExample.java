@@ -22,7 +22,7 @@ import java.awt.Paint;
 public class FeatureExample implements AnnotatedFeature{
 
     private com.vividsolutions.jts.geom.Geometry geom=null;
-    private String name="";
+    private String name="";//NOI18N
     private int art=-1;
     
     /** Creates a new instance of FeatureExample */
@@ -68,7 +68,7 @@ public class FeatureExample implements AnnotatedFeature{
     }
 
     public String getToolTipText() {
-        return "..."+name+"...";
+        return org.openide.util.NbBundle.getMessage(FeatureExample.class, "FeatureExample.getToolTipText().return", new Object[] {name});
     }
 
     public float getTransparency() {
@@ -115,115 +115,115 @@ public class FeatureExample implements AnnotatedFeature{
   
     
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public String getPrimaryLabelText() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public String getSecondaryLabelText() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public String getPrimaryAnnotation() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public Font getPrimaryAnnotationFont() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public double getPrimaryAnnotationScaling() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public String getSecondaryAnnotation() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setPrimaryAnnotation(String primaryAnnotation) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setPrimaryAnnotationFont(Font primaryAnnotationFont) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setPrimaryAnnotationScaling(double primaryAnnotationSize) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setSecondaryAnnotation(String secondaryAnnotation) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public Integer getMaxScaleDenominator() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public Integer getMinScaleDenominator() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public boolean isAutoscale() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public int getLineWidth() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setFillingStyle(Paint fillingStyle) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setLineWidth(int width) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setPointAnnotationSymbol(FeatureAnnotationSymbol featureAnnotationSymbol) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setTransparency(float transparrency) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setAutoScale(boolean autoScale) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setMaxScaleDenominator(Integer max) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setMinScaleDenominator(Integer min) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public Paint getPrimaryAnnotationPaint() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setPrimaryAnnotationPaint(Paint primaryAnnotationPaint) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public float getPrimaryAnnotationJustification() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setPrimaryAnnotationJustification(float just) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public boolean isPrimaryAnnotationVisible() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     public void setPrimaryAnnotationVisible(boolean visible) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");//NOI18N
     }
 
     

@@ -48,7 +48,7 @@ public class Resolution {
         this.text=text;
     }
     public Resolution(Element e) throws Exception{
-        resolution=e.getAttribute("dpi").getIntValue();
+        resolution=e.getAttribute("dpi").getIntValue();//NOI18N
         text=e.getText();
     }
     public String toString(){
@@ -58,9 +58,9 @@ public class Resolution {
         return obj instanceof Resolution && ((Resolution)obj).resolution==resolution;
     }
     public Element getElement(boolean selected) {
-        Element e=new Element("resolution");
-        e.setAttribute("selected",new Boolean(selected).toString());
-        e.setAttribute("dpi",resolution+"");
+        Element e=new Element("resolution");//NOI18N
+        e.setAttribute("selected",String.valueOf(selected));//NOI18N
+        e.setAttribute("dpi",resolution+"");//NOI18N
         e.setText(text);
         return e;
     }

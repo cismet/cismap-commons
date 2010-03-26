@@ -37,6 +37,7 @@ import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.raster.wms.AbstractWMS;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
+import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import edu.umd.cs.piccolo.PNode;
@@ -50,13 +51,13 @@ import org.jdom.CDATA;
  *
  * @author thorsten.hell@cismet.de
  */
-public class SimpleWMS extends AbstractWMS implements RasterMapService, RetrievalServiceLayer {//implements RasterService,RetrievalListener,ServiceLayer { 
+public class SimpleWMS extends AbstractWMS implements MapService,RasterMapService, RetrievalServiceLayer {//implements RasterService,RetrievalListener,ServiceLayer {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private SimpleWmsGetMapUrl gmUrl;
     private ImageRetrieval ir;
     private PNode pNode;
-    private String name = "SimpleWMS";
+    private String name = "SimpleWMS";//NOI18N
     private HttpClient preferredClient=null;
 
     /**
@@ -86,28 +87,28 @@ public class SimpleWMS extends AbstractWMS implements RasterMapService, Retrieva
         String urlTemplate = object.getTextTrim();
         SimpleWmsGetMapUrl url = new SimpleWmsGetMapUrl(urlTemplate);
         gmUrl = url;
-        Attribute layerPositionAttr = object.getAttribute("layerPosition");
+        Attribute layerPositionAttr = object.getAttribute("layerPosition");//NOI18N
         if (layerPositionAttr != null) {
             try {
                 layerPosition = layerPositionAttr.getIntValue();
             } catch (Exception e) {
             }
         }
-        Attribute enabledAttr = object.getAttribute("enabled");
+        Attribute enabledAttr = object.getAttribute("enabled");//NOI18N
         if (enabledAttr != null) {
             try {
                 enabled = enabledAttr.getBooleanValue();
             } catch (Exception e) {
             }
         }
-        Attribute nameAttr = object.getAttribute("name");
+        Attribute nameAttr = object.getAttribute("name");//NOI18N
         if (nameAttr != null) {
             try {
                 name = nameAttr.getValue();
             } catch (Exception e) {
             }
         }
-        Attribute translucencyAttr = object.getAttribute("translucency");
+        Attribute translucencyAttr = object.getAttribute("translucency");//NOI18N
         if (translucencyAttr != null) {
             try {
                 setTranslucency(translucencyAttr.getFloatValue());
@@ -121,12 +122,12 @@ public class SimpleWMS extends AbstractWMS implements RasterMapService, Retrieva
     }
 
     public Element getElement() {
-        Element element = new Element("simpleWms");
-        element.setAttribute("layerposition", new Integer(layerPosition).toString());
-        element.setAttribute("skip", "false");
-        element.setAttribute("enabled", new Boolean(enabled).toString());
-        element.setAttribute("name", name);
-        element.setAttribute("translucency", new Float(translucency).toString());
+        Element element = new Element("simpleWms");//NOI18N
+        element.setAttribute("layerPosition", new Integer(layerPosition).toString());//NOI18N
+        element.setAttribute("skip", "false");//NOI18N
+        element.setAttribute("enabled", new Boolean(enabled).toString());//NOI18N
+        element.setAttribute("name", name);//NOI18N
+        element.setAttribute("translucency", new Float(translucency).toString());//NOI18N
         CDATA data = new CDATA(gmUrl.getUrlTemplate());
         element.addContent(data);
         return element;
@@ -139,7 +140,7 @@ public class SimpleWMS extends AbstractWMS implements RasterMapService, Retrieva
     }
 
     public synchronized void retrieve(boolean forced) {
-        log.debug("retrieve()");
+        log.debug("retrieve()");//NOI18N
         gmUrl.setHeight(height);
         gmUrl.setWidth(width);
         gmUrl.setX1(bb.getX1());
@@ -149,7 +150,7 @@ public class SimpleWMS extends AbstractWMS implements RasterMapService, Retrieva
         if (ir != null && ir.isAlive() && ir.getUrl().equals(gmUrl.toString()) && !forced) {
             //mach nix 
             //mehrfachaufruf mit der gleichen url = unsinn
-            log.debug("mehrfachaufruf mit der gleichen url = unsinn");
+            log.debug("multiple invocations with the same url = humbug");//NOI18N
         } else {
             if (ir != null && ir.isAlive()) {
                 ir.youngerWMSCall();
@@ -165,7 +166,7 @@ public class SimpleWMS extends AbstractWMS implements RasterMapService, Retrieva
             ir = new ImageRetrieval(this);
             ir.setPreferredHttpClient(preferredClient);
             ir.setUrl(gmUrl.toString());
-            log.debug("ir.start();");
+            log.debug("ir.start();");//NOI18N
             ir.setPriority(Thread.NORM_PRIORITY);
             ir.start();
         }

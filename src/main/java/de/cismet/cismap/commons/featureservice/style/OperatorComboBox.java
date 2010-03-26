@@ -5,7 +5,6 @@
 
 package de.cismet.cismap.commons.featureservice.style;
 
-import java.util.ResourceBundle;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 
@@ -14,18 +13,15 @@ import javax.swing.JComboBox;
  * @author nh
  */
 public class OperatorComboBox extends JComboBox {
-    
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
-
     String[] arr =  {
-        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.lessThan"),
-        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.lessThanOrEqual"),
-        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.equal"),
-        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.notEqual"),
-        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.greaterThanOrEqual"),
-        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.greaterThan"),
-        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.contains"),
-        I18N.getString("de.cismet.cismap.commons.featureservice.style.OperatorComboBox.arr.isLike")};
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.lessThan"),
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.lessThanOrEqual"),
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.equal"),
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.notEqual"),
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.greaterThanOrEqual"),
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.greaterThan"),
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.contains"),
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.isLike")};
     
     public OperatorComboBox() {
         super();

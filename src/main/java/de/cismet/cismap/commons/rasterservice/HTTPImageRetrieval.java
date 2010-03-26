@@ -70,25 +70,25 @@ public class HTTPImageRetrieval extends Thread {
         client = new HttpClient();
         //client.getHostConfiguration().setProxy("www-proxy.htw-saarland.de", 3128);
 
-        log.debug("proxySet:" + System.getProperty("http.proxyHost"));
-        log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));
-        log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));
+        log.debug("proxySet:" + System.getProperty("http.proxyHost"));//NOI18N
+        log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));//NOI18N
+        log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));//NOI18N
 
 
 
-        String proxySet = System.getProperty("proxySet");
-        if (proxySet != null && proxySet.equals("true")) {
-            log.debug("proxyIs Set");
-            log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));
-            log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));
+        String proxySet = System.getProperty("proxySet");//NOI18N
+        if (proxySet != null && proxySet.equals("true")) {//NOI18N
+            log.debug("proxyIs Set");//NOI18N
+            log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));//NOI18N
+            log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));//NOI18N
             try {
-                client.getHostConfiguration().setProxy(System.getProperty("http.proxyHost"), Integer.parseInt(System.getProperty("http.proxyPort")));
+                client.getHostConfiguration().setProxy(System.getProperty("http.proxyHost"), Integer.parseInt(System.getProperty("http.proxyPort")));//NOI18N
             } catch (Exception e) {
-                log.error("Problem while setting proxy", e);
+                log.error("Problem while setting proxy", e);//NOI18N
             }
         }
         else {
-            log.debug("no proxyIs Set");
+            log.debug("no proxyIs Set");//NOI18N
         }
 
     }
@@ -103,7 +103,7 @@ public class HTTPImageRetrieval extends Thread {
                 int statusCode = client.executeMethod(method);
 
                 if (statusCode != -1) {
-                    log.debug("reading: " + url);
+                    log.debug("reading: " + url);//NOI18N
                     InputStream is = method.getResponseBodyAsStream();
                     BufferedInputStream in = new BufferedInputStream(is);
                     byteArrayOut = new ByteArrayOutputStream();
@@ -113,12 +113,12 @@ public class HTTPImageRetrieval extends Thread {
                         byteArrayOut.write(c);
                         if (youngerCall) {
                             fireLoadingAborted();
-                            log.debug("interrupt during retrieval");
+                            log.debug("interrupt during retrieval");//NOI18N
                             return;
                         }
                     }
 
-                    log.debug("creating image");
+                    log.debug("creating image");//NOI18N
                     //Image image =observer.createImage( (ImageProducer) o);
                     observer = new ImageObserverInterceptor();
                     //Image image =Toolkit.getDefaultToolkit().getImage(is);
@@ -128,7 +128,7 @@ public class HTTPImageRetrieval extends Thread {
                         Thread.sleep(10);
                         if (youngerCall) {
                             fireLoadingAborted();
-                            log.debug("interrupt during assembling");
+                            log.debug("interrupt during assembling");//NOI18N
                             return;
                         }
                     }
@@ -138,7 +138,7 @@ public class HTTPImageRetrieval extends Thread {
                     e.setRetrievedObject(image);
                     if (!youngerCall) {
                         listener.retrievalComplete(e);
-                        log.debug("Retrieval complete");
+                        log.debug("Retrieval complete");//NOI18N
                     } else {
                         fireLoadingAborted();
                     }
@@ -168,7 +168,7 @@ public class HTTPImageRetrieval extends Thread {
     }
 
     public void fireLoadingAborted() {
-        log.info("Retrieval unterbrochen");
+        log.info("Retrieval interrupted");//NOI18N
         if (method != null && !method.isAborted()) {
             method.abort();
         }
@@ -194,7 +194,7 @@ public class HTTPImageRetrieval extends Thread {
 
             if ((infoflags & ImageObserver.SOMEBITS) != 0) {
                 RetrievalEvent e = new RetrievalEvent();
-                e.setPercentageDone((double) y / (img.getHeight(this) - 1.0) * 100);
+                e.setPercentageDone( (int) (y / (img.getHeight(this) - 1.0) * 100));
                 listener.retrievalProgress(e);
             } else if ((infoflags & ImageObserver.ABORT) != 0) {
             } else if ((infoflags & ImageObserver.ERROR) != 0) {

@@ -42,7 +42,7 @@ public class CreatePolygonFeatureListener extends PBasicInputEventHandler {
         if (moveListener != null) {
             moveListener.mouseMoved(pInputEvent);
         } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
+            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");//NOI18N
         }
         
         if (inProgress) {

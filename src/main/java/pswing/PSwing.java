@@ -170,13 +170,13 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
     /**
      * The default font
      */
-    protected Font defaultFont = new Font( "Serif", Font.PLAIN, 12 );
+    protected Font defaultFont = new Font( "Serif", Font.PLAIN, 12 );//NOI18N
 
     /**
      * Used as a hashtable key for this object in the Swing component's
      * client properties.
      */
-    public static final String VISUAL_COMPONENT_KEY = "ZSwing";
+    public static final String VISUAL_COMPONENT_KEY = "ZSwing";//NOI18N
     private BufferedImage buffer;
     private static final AffineTransform IDENTITY = new AffineTransform();
     private PSwingCanvas PSwingCanvas;
@@ -227,7 +227,7 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
         g2.setStroke( defaultStroke );
 
         if( defaultFont == null ) {
-            defaultFont = new Font( "Serif", Font.PLAIN, 12 );
+            defaultFont = new Font( "Serif", Font.PLAIN, 12 );//NOI18N
         }
 
         g2.setFont( defaultFont );
@@ -400,7 +400,7 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
 
         if( c instanceof JComponent ) {
             ( (JComponent)c ).setDoubleBuffered( false );
-            c.addPropertyChangeListener( "font", this );
+            c.addPropertyChangeListener( "font", this );//NOI18N
         }
     }
 

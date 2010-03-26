@@ -31,8 +31,8 @@
  * Created on 22. Juni 2005, 16:47
  *
  */
-
 package de.cismet.cismap.commons.rasterservice;
+
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.security.AccessHandler.ACCESS_METHODS;
@@ -43,60 +43,62 @@ import java.awt.image.ImageObserver;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import javax.swing.JComponent;
 import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.deegree.services.wms.capabilities.WMSCapabilities;
-
 
 /**
  *
  * @author thorsten.hell@cismet.de
  */
 public class ImageRetrieval extends Thread {
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private String url;
     private ImageObserverInterceptor observer;
-    private RetrievalListener listener=null;
-    private ByteArrayOutputStream byteArrayOut=null;
-    private URLConnection uc=null;
-    private InputStream is=null;
+    private RetrievalListener listener = null;
+    private ByteArrayOutputStream byteArrayOut = null;
+//    private URLConnection uc = null;
+//    private InputStream is = null;
     private WMSCapabilities cap;
     private HttpClient preferredHttpClient;
+
     /** Creates a new instance of ImageRetrieval */
     public ImageRetrieval(RetrievalListener listener) {
-        this.listener=listener;
+        this.listener = listener;
     }
-    
-    private boolean youngerCall=false;
+    private volatile boolean youngerCall = false;
+
     public void youngerWMSCall() {
-        youngerCall=true;
+        youngerCall = true;
     }
-    Image image=null;
-    
-    
+    Image image = null;
+
+    @Override
     public void interrupt() {
         super.interrupt();
-        log.info("interrupt())");
+        if (log.isDebugEnabled()) {
+            log.debug("interrupt())");//NOI18N
+//            log.debug("interrupt())", new Exception());
+        }
         releaseConnection();
-        
+
     }
-    
-    GetMethod getMethod=null;
-    
+//    GetMethod getMethod = null;
+
+    @Override
     public void run() {
+        BufferedInputStream in = null;
+        //new
         try {
-            //new
-            log.debug("start of ImageRetrieval: "+url);
+            log.debug("start of ImageRetrieval: " + url);//NOI18N
             listener.retrievalStarted(new RetrievalEvent());
-            URL u=new URL(url.toString());
-            if (cap != null){
-                log.debug("Retrieve: "+url.toString()+" WMSCapability: "+cap.getCapability().getLayer().getTitle());
+//            URL u = new URL(url.toString());
+            if (cap != null) {
+                log.debug("Retrieve: " + url.toString() + " WMSCapability: " + cap.getCapability().getLayer().getTitle());//NOI18N
             } else {
-                log.debug("Retrieve: "+url.toString());
+                log.debug("Retrieve: " + url.toString());//NOI18N
             }
             // !!! old retrieval !!!
             //uc=u.openConnection();
@@ -104,7 +106,7 @@ public class ImageRetrieval extends Thread {
             //uc.connect();
             //is=uc.getInputStream();
             //BufferedInputStream in = new BufferedInputStream(is);
-            
+
 //            if (getMethod==null) {
 //                getMethod=new GetMethod();
 //            }
@@ -114,126 +116,138 @@ public class ImageRetrieval extends Thread {
 //            }           
             String urlBase = null;
             String requestParameter = null;
-            int indexOfCharacter=0;
-            if((indexOfCharacter =url.indexOf('?')) != -1){
+            int indexOfCharacter = 0;
+            if ((indexOfCharacter = url.indexOf('?')) != -1) {
                 urlBase = url.substring(0, indexOfCharacter);
-                if(indexOfCharacter+1 < url.length()){
-                    requestParameter = url.substring(indexOfCharacter+1,url.length());
-                }                
+                if (indexOfCharacter + 1 < url.length()) {
+                    requestParameter = url.substring(indexOfCharacter + 1, url.length());
+                }
             } else {
                 urlBase = url;
-                requestParameter="";
+                requestParameter = "";//NOI18N
             }
-            
-            BufferedInputStream in;
-            if(cap != null){
-                //ToDO!!! checken ob HTTP AUTH noch funktioniert
-                //in = new BufferedInputStream(HttpAuthentication.getBufferedInputStreamFromCapabilities(cap,u,getMethod));                
-                in = new BufferedInputStream(WebAccessManager.getInstance().doRequest(new URL(urlBase), requestParameter, ACCESS_METHODS.GET_REQUEST));
-            } else {
-                //in = new BufferedInputStream(HttpAuthentication.getBufferedInputStreamFromURL(u,getMethod));
-                in = new BufferedInputStream(WebAccessManager.getInstance().doRequest(new URL(urlBase), requestParameter, ACCESS_METHODS.GET_REQUEST));
-            }
-            
+
+//            if(cap != null){
+//                //ToDO!!! checken ob HTTP AUTH noch funktioniert
+//                //in = new BufferedInputStream(HttpAuthentication.getBufferedInputStreamFromCapabilities(cap,u,getMethod));
+//                in = new BufferedInputStream(WebAccessManager.getInstance().doRequest(new URL(urlBase), requestParameter, ACCESS_METHODS.GET_REQUEST));
+//            } else {
+//                //in = new BufferedInputStream(HttpAuthentication.getBufferedInputStreamFromURL(u,getMethod));
+//                in = new BufferedInputStream(WebAccessManager.getInstance().doRequest(new URL(urlBase), requestParameter, ACCESS_METHODS.GET_REQUEST));
+//            }
+            in = new BufferedInputStream(WebAccessManager.getInstance().doRequest(new URL(urlBase), requestParameter, ACCESS_METHODS.GET_REQUEST));
+
             byteArrayOut = new ByteArrayOutputStream();
-            
+
             int c;
             //ToDo performanz
             while ((c = in.read()) != -1) {
                 byteArrayOut.write(c);
-                if (youngerCall||isInterrupted()) {
+                if (youngerCall || isInterrupted()) {
                     fireLoadingAborted();
-                    log.debug("interrupt during retrieval");
+                    log.debug("interrupt during retrieval");//NOI18N
                     releaseConnection();
                     return;
                 }
             }
-            
-            
-            
+
+
+
             //Image image =observer.createImage( (ImageProducer) o);
-            observer=new ImageObserverInterceptor();
+            observer = new ImageObserverInterceptor();
             //Image image =Toolkit.getDefaultToolkit().getImage(is);
-            image=Toolkit.getDefaultToolkit().createImage(byteArrayOut.toByteArray());
+            image = Toolkit.getDefaultToolkit().createImage(byteArrayOut.toByteArray());
             observer.prepareImage(image, observer);
-            while ((observer.checkImage(image, observer) & observer.ALLBITS)!= observer.ALLBITS) {
+            while ((observer.checkImage(image, observer) & ImageObserver.ALLBITS) != ImageObserver.ALLBITS) {
                 Thread.sleep(10);
-                if (youngerCall|| isInterrupted() ) {
+                if (youngerCall || isInterrupted()) {
                     fireLoadingAborted();
-                    log.debug("interrupt during assembling");
+                    log.debug("interrupt during assembling");//NOI18N
                     releaseConnection();
                     return;
                 }
             }
-            RetrievalEvent e=new RetrievalEvent();
+            RetrievalEvent e = new RetrievalEvent();
             e.setIsComplete(true);
             e.setRetrievedObject(image);
             if (!youngerCall && !isInterrupted()) {
                 listener.retrievalComplete(e);
-                log.debug("Retrieval complete");
+                log.debug("Retrieval complete");//NOI18N
             } else {
                 fireLoadingAborted();
             }
-            
-        } catch ( Exception  e ) {
 
-           
-            log.error("Error in ImageRetrieval output="+ byteArrayOut);
-            RetrievalEvent re=new RetrievalEvent();
+        } catch (Exception e) {
+
+
+            log.error("Error in ImageRetrieval output=" + byteArrayOut);//NOI18N
+            RetrievalEvent re = new RetrievalEvent();
             re.setIsComplete(false);
-            if (e.getMessage()==null||e.getMessage().equals("null")) {
+            if (e.getMessage() == null || e.getMessage().equals("null")) {//NOI18N
                 try {
-                    String cause=e.getCause().getMessage();
+                    String cause = e.getCause().getMessage();
                     re.setRetrievedObject(cause);
-                } catch (Exception ee) {}
+                } catch (Exception ee) {
+                }
             } else {
                 re.setRetrievedObject(e.getMessage());
-                re.setErrorType(re.CLIENTERROR);
+                re.setErrorType(RetrievalEvent.CLIENTERROR);
             }
-            
+
             listener.retrievalError(re);
-            log.error("Fehler beim Laden des Bildes ",e);
+            log.error("Error while loading the image", e);//NOI18N
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    log.warn(ex, ex);
+                }
+            }
         }
         releaseConnection();
     }
-    
+
     private void releaseConnection() {
-        
-        if (getMethod!=null){
-            log.debug("Release Connection");
-            if (getMethod!=null) getMethod.releaseConnection();
-            if (getMethod!=null) getMethod.abort();
-            getMethod=null;
-        }
+//        if (getMethod != null) {
+//            log.debug("Release Connection");
+//            if (getMethod != null) {
+//                getMethod.releaseConnection();
+//            }
+//            if (getMethod != null) {
+//                getMethod.abort();
+//            }
+//            getMethod = null;
+//        }
     }
-    
-    public void fireLoadingAborted(){
+
+    public void fireLoadingAborted() {
 //        RetrievalEvent e=new RetrievalEvent();
 //        listener.retrievalAborted(e);
         //TODO nochmal anschauen
-        log.info("Retrieval unterbrochen");
-        image=null;
-        observer=null;
-        if (is!=null){
-            try {
-                is.close();
-            } catch (IOException ioe) {
-                log.warn("Exception during premature closing of the inputstream",ioe);
-            }
-        }
-        System.gc();
+        log.info("Retrieval interrupted");//NOI18N
+        image = null;
+        observer = null;
+//        if (is != null) {
+//            try {
+//                is.close();
+//            } catch (IOException ioe) {
+//                log.warn("Exception during premature closing of the inputstream", ioe);
+//            }
+//        }
+//        System.gc();
     }
-    
+
     public String getUrl() {
         return url;
     }
-    
+
     public void setUrl(String url) {
         this.url = url;
     }
-    
+
     //new
-    public void setWMSCapabilities(WMSCapabilities cap){
+    public void setWMSCapabilities(WMSCapabilities cap) {
         this.cap = cap;
     }
 
@@ -244,32 +258,32 @@ public class ImageRetrieval extends Thread {
     public void setPreferredHttpClient(HttpClient preferredHttpClient) {
         this.preferredHttpClient = preferredHttpClient;
     }
-    
-    
-    
+
     private class ImageObserverInterceptor extends JComponent {
+
+        @Override
         public boolean imageUpdate(Image img,
                 int infoflags,
                 int x,
                 int y,
                 int width,
                 int height) {
-            boolean ret=super.imageUpdate(img,infoflags,x,y,width,height);
+            boolean ret = super.imageUpdate(img, infoflags, x, y, width, height);
 //            log.debug("ImageUpdate");
 //            log.debug("y "+height);
 //            log.debug("img.getHeight"+img.getHeight(this));
-            
-            
-            if ((infoflags&ImageObserver.SOMEBITS) !=0) {
-                RetrievalEvent e=new RetrievalEvent();
-                e.setPercentageDone((double)y/(img.getHeight(this)-1.0)*100);
+
+
+            if ((infoflags & ImageObserver.SOMEBITS) != 0) {
+                RetrievalEvent e = new RetrievalEvent();
+                e.setPercentageDone((int) (y / (img.getHeight(this) - 1.0) * 100));
                 listener.retrievalProgress(e);
-            } else if ((infoflags&ImageObserver.ABORT)!=0) {
-                
-            } else if ((infoflags&ImageObserver.ERROR)!=0) {
-                RetrievalEvent e=new RetrievalEvent();
+            } else if ((infoflags & ImageObserver.ABORT) != 0) {
+            } else if ((infoflags & ImageObserver.ERROR) != 0) {
+                RetrievalEvent e = new RetrievalEvent();
                 e.setHasErrors(true);
-                String error=new String(byteArrayOut.toByteArray());
+                String error = new String(byteArrayOut.toByteArray());
+                log.error("error during image retrieval: '" + error + "'");//NOI18N
                 e.setRetrievedObject(error);
                 e.setErrorType(RetrievalEvent.SERVERERROR);
                 listener.retrievalError(e);
@@ -277,5 +291,4 @@ public class ImageRetrieval extends Thread {
             return ret;
         }
     }
-    
 }

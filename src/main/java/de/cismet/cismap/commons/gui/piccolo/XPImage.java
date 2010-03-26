@@ -83,7 +83,7 @@ public class XPImage extends PImage {
             XPImage oldX = new XPImage();
             final XPImage old = (XPImage) this.clone();
             old.setImage(getImage());
-            log.debug("this.getParent() in setImage():" + this.getParent());
+            log.debug("this.getParent() in setImage():" + this.getParent());//NOI18N
             this.getParent().addChild(old);
             old.moveInFrontOf(this);
             this.setTransparency(0);
@@ -97,7 +97,7 @@ public class XPImage extends PImage {
                             try {
                                 XPImage.this.getParent().removeChild(old);
                             } catch (Exception e) {
-                                log.info("Entfernen des Tempor\u00E4ren Bildes ging schief. War schon weg.", e);
+                                log.info("Removal of the temporary image failed. It was already removed.", e);//NOI18N
                             }
                         }
                     });
