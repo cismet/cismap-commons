@@ -139,7 +139,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
         activeLayerModel = (ActiveLayerModel) mc.getMappingModel();
         popupMenu = new JPopupMenu();
         up = new JMenuItem();
-        up.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.up.text"));
+        up.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.up.text"));//NOI18N
         up.setIcon(UP);
         up.addActionListener(new ActionListener() {
 
@@ -160,7 +160,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         down = new JMenuItem();
-        down.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.down.text"));
+        down.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.down.text"));//NOI18N
         down.setIcon(DOWN);
         down.addActionListener(new ActionListener() {
 
@@ -180,7 +180,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         dis = new JMenuItem();
-        dis.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.dis.text"));
+        dis.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.dis.text"));//NOI18N
         dis.setIcon(DISABLE);
         dis.addActionListener(new ActionListener() {
 
@@ -200,7 +200,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         del = new JMenuItem();
-        del.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.del.text"));
+        del.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.del.text"));//NOI18N
         del.setIcon(DELETE);
         del.addActionListener(new ActionListener() {
 
@@ -220,7 +220,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         vis = new JMenuItem();
-        vis.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.vis.text"));
+        vis.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.vis.text"));//NOI18N
         vis.setIcon(INVISIBLE);
         vis.addActionListener(new ActionListener() {
 
@@ -483,8 +483,8 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             scpMain.setViewportView(treeTable);
         } catch (IllegalArgumentException schonVorhanden) {
             JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this), 
-                    org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.drop().JOptionPane.message"), // NOI18N
-                    org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.drop().JOptionPane.title"), // NOI18N
+                    org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                    org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
                     JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
             log.error(e, e);

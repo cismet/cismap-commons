@@ -487,10 +487,10 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         zoomAction = new AbstractAction() {
 
             {
-                putValue(Action.NAME, org.openide.util.NbBundle.getMessage(MappingComponent.class, "MappingComponent.zoomAction.NAME"));
+                putValue(Action.NAME, org.openide.util.NbBundle.getMessage(MappingComponent.class, "MappingComponent.zoomAction.NAME"));//NOI18N
                 putValue(Action.SMALL_ICON, new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers.png")));//NOI18N
-                putValue(Action.SHORT_DESCRIPTION, org.openide.util.NbBundle.getMessage(MappingComponent.class, "MappingComponent.zoomAction.SHORT_DESCRIPTION"));
-                putValue(Action.LONG_DESCRIPTION, org.openide.util.NbBundle.getMessage(MappingComponent.class, "MappingComponent.zoomAction.LONG_DESCRIPTION"));
+                putValue(Action.SHORT_DESCRIPTION, org.openide.util.NbBundle.getMessage(MappingComponent.class, "MappingComponent.zoomAction.SHORT_DESCRIPTION"));//NOI18N
+                putValue(Action.LONG_DESCRIPTION, org.openide.util.NbBundle.getMessage(MappingComponent.class, "MappingComponent.zoomAction.LONG_DESCRIPTION"));//NOI18N
                 putValue(Action.MNEMONIC_KEY, Integer.valueOf('Z'));//NOI18N
                 putValue(Action.ACTION_COMMAND_KEY, "zoom.action");//NOI18N
             }

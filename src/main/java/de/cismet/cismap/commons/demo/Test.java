@@ -8,7 +8,7 @@ public class Test extends JFrame {
     public Test () {
         setContentPane (new Desktop ());
         setDefaultCloseOperation (EXIT_ON_CLOSE);
-        setTitle (org.openide.util.NbBundle.getMessage(Test.class, "Test.title"));
+        setTitle (org.openide.util.NbBundle.getMessage(Test.class, "Test.title"));//NOI18N
         setSize (600, 400);
         setLocationRelativeTo (null);
         setVisible (true);
@@ -86,9 +86,9 @@ public class Test extends JFrame {
     private class TestPanel extends JPanel {
         public TestPanel (final Desktop desktop) {
             setLayout (new FlowLayout (FlowLayout.LEFT));
-            add (new JButton (new AbstractAction (org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.button.text")) {
+            add (new JButton (new AbstractAction (org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.button.text")) {//NOI18N
                 public void actionPerformed (ActionEvent event) {
-                    desktop.openModalDialog (org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.modalDialog.text"));
+                    desktop.openModalDialog (org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.modalDialog.text"));//NOI18N
                 }
             }));
         }
@@ -131,7 +131,7 @@ public class Test extends JFrame {
            setClosable (true);
             
             setDefaultCloseOperation (HIDE_ON_CLOSE);
-            setTitle (org.openide.util.NbBundle.getMessage(Test.class, "Test.TestFrame.title"));
+            setTitle (org.openide.util.NbBundle.getMessage(Test.class, "Test.TestFrame.title"));//NOI18N
  
             getContentPane ().setLayout (new FlowLayout ());
             getContentPane ().add (new JLabel ("57657667"));//NOI18N

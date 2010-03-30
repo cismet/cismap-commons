@@ -68,7 +68,7 @@ public class FeatureExample implements AnnotatedFeature{
     }
 
     public String getToolTipText() {
-        return org.openide.util.NbBundle.getMessage(FeatureExample.class, "FeatureExample.getToolTipText().return", new Object[] {name});
+        return org.openide.util.NbBundle.getMessage(FeatureExample.class, "FeatureExample.getToolTipText().return", new Object[] {name});//NOI18N
     }
 
     public float getTransparency() {

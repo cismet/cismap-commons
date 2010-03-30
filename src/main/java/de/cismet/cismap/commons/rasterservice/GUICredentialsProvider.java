@@ -137,7 +137,7 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
         title = broker.getProperty(url.toString());
         if(title != null){
             //
-            login.setMessage(org.openide.util.NbBundle.getMessage(GUICredentialsProvider.class, "GUICredentialsProvider.requestUsernamePassword().login.message", new Object[]{title}));
+            login.setMessage(org.openide.util.NbBundle.getMessage(GUICredentialsProvider.class, "GUICredentialsProvider.requestUsernamePassword().login.message", new Object[]{title}));//NOI18N
         } else {
             title = url.toString();
             if (title.startsWith("http://")&& title.length()>21) {//NOI18N
@@ -146,7 +146,7 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
                 title=title.substring(0,14)+"...";//NOI18N
             }
             
-            login.setMessage(org.openide.util.NbBundle.getMessage(GUICredentialsProvider.class, "GUICredentialsProvider.requestUsernamePassword().login.message", new Object[]{title}));
+            login.setMessage(org.openide.util.NbBundle.getMessage(GUICredentialsProvider.class, "GUICredentialsProvider.requestUsernamePassword().login.message", new Object[]{title}));//NOI18N
         }
         log.debug("parentFrame in GUICredentialprovider:"+parent);//NOI18N
         JXLoginPane.JXLoginDialog dialog = new JXLoginPane.JXLoginDialog((JFrame)parent,login);

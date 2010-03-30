@@ -52,20 +52,20 @@ public class SearchFeature extends PureNewFeature {
         if (getGeometryType() != null) {
             switch (getGeometryType()) {
                 case RECTANGLE:
-                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.name.searchRectangle") ;
+                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.getName().searchRectangle") ;//NOI18N
                 case LINESTRING:
-                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.name.searchPolyline") ;
+                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.getName().searchPolyline") ;//NOI18N
                 case ELLIPSE:
-                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.name.searchEllipse") ;
+                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.getName().searchEllipse") ;//NOI18N
                 case POINT:
-                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.name.searchPoint") ;
+                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.getName().searchPoint") ;//NOI18N
                 case POLYGON:
-                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.name.searchPOLYGON") ;
+                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.getName().searchPOLYGON") ;//NOI18N
                 default:
-                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.name.errorInGetName") ;
+                    return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.getName().errorInGetName") ;//NOI18N
             }
         } else {
-            return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.name.errorInGetName") ;
+            return org.openide.util.NbBundle.getMessage(SearchFeature.class, "SearchFeature.getName().errorInGetName") ;//NOI18N
         }
     }
 

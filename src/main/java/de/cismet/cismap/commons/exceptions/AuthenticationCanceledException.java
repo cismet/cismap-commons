@@ -18,7 +18,7 @@ public class AuthenticationCanceledException extends Exception {
 
     /** Creates a new instance of AuthenticationCanceledException */
     public AuthenticationCanceledException() {
-        super(org.openide.util.NbBundle.getMessage(AuthenticationCanceledException.class, "AuthenticationCanceledException"));
+        super(org.openide.util.NbBundle.getMessage(AuthenticationCanceledException.class, "AuthenticationCanceledException.AuthenticationCanceledException()"));//NOI18N
     }
     
     public AuthenticationCanceledException(String message) {

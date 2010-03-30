@@ -66,7 +66,7 @@ public class FeatureRotateAction implements CustomAction {
             sb.append(o.hashCode() + ", ");//NOI18N
         }
         sb.delete(sb.length() - 2, sb.length());
-        return org.openide.util.NbBundle.getMessage(FeatureRotateAction.class, "FeatureRotateAction.info().return", new Object[]{sb.toString(), Math.toDegrees(rot)});
+        return org.openide.util.NbBundle.getMessage(FeatureRotateAction.class, "FeatureRotateAction.info().return", new Object[]{sb.toString(), Math.toDegrees(rot)});//NOI18N
     }
 
     /**

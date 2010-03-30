@@ -221,9 +221,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                         String message = (String) e.getRetrievedObject();
 //                        message=message.replaceAll("<.*>","");
                         if (e.getErrorType().equals(RetrievalEvent.SERVERERROR)) {
-                            errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError.errorObject.servererror", new Object[] {message});
+                            errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError(RetrievalEvent).errorObject.servererror", new Object[] {message});//NOI18N
                         } else {
-                            errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError.errorObject.noServererror", new Object[] {});
+                            errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError(RetrievalEvent).errorObject.noServererror", new Object[] {});//NOI18N
                         }
                     }// Hier kommt jetzt HTML Fehlermeldung, Internal und XML. Das muss reichen
                     //else if ()
@@ -450,13 +450,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             case (0):
                 return " ";//NOI18N
             case (1):
-                return org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.getColumnName().return.layer");
+                return org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.getColumnName(int).return.layer");//NOI18N
             case (2):
-                return org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.getColumnName().return.style");
+                return org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.getColumnName(int).return.style");//NOI18N
             case (3):
-                return org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.getColumnName().return.info");
+                return org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.getColumnName(int).return.info");//NOI18N
             case (4):
-                return org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.getColumnName().return.fortschrittTransparent");
+                return org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.getColumnName(int).return.fortschrittTransparent");//NOI18N
             case (5):
                 return "";//NOI18N
             default:
@@ -832,12 +832,12 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 //
 //                                    if (title != null) {
 //                                        JXErrorDialog.showDialog(CismapBroker.getInstance().getMappingComponent(),
-//                                                org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.configure().retrieval.run().JXErrorDialog.title"),
-//                                                org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.configure().retrieval.run().JXErrorDialog.text1") +
+//                                                "Authenfication failed!"),
+//                                                "The authentication was canceled.\nAll current layers from server\n") +
 //                                                "\"" +
 //                                                title +
 //                                                "\" " +
-//                                                org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.configure().retrieval.run().JXErrorDialog.text2"));
+//                                                "were removed"));//NOI18N
 //                                    } else {
 //                                        title = getCapURL.toString();
 //                                        if (title.startsWith("http://") && title.length() > 21) {
@@ -846,10 +846,10 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 //                                            title = title.substring(0, 14) + "...";
 //                                        }
 //                                        JXErrorDialog.showDialog(CismapBroker.getInstance().getMappingComponent(),
-//                                                org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.configure().retrieval.run().JXErrorDialog.title"),
-//                                                org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.configure().retrieval.run().JXErrorDialog.text1") +
+//                                                "Authenfication failed!"),
+//                                                "The authentication was canceled.\nAll current layers from server\n") +
 //                                                "\"" + title + "\" " +
-//                                                org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.configure().retrieval.run().JXErrorDialog.text2"));
+//                                                "were removed"));
 //                                    }
 //                                }
                                 //ToDo Probleme mit WFS wird aber denke ich nicht gebraucht

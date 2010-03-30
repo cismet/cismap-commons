@@ -362,23 +362,24 @@ public class AddHandleDialog extends javax.swing.JDialog {
             distanceToLeft = Double.valueOf(txtLeft.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, 
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane1.message"),
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane1.title"), JOptionPane.ERROR_MESSAGE);
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane1.message"),//NOI18N
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane1.title"), //NOI18N
+                    JOptionPane.ERROR_MESSAGE);
             return false;
         }
         // - ist kleiner Gesamt-Abstand
         if (distanceToLeft > getDistanceTotal()) {
             JOptionPane.showMessageDialog(null, 
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane2.message"),
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane2.title"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane2.message"),//NOI18N
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane2.title"),//NOI18N
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
         // - ist größer 0
         if (distanceToLeft < 0) {
             JOptionPane.showMessageDialog(null, 
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane3.message"),
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane3.title"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane3.message"),//NOI18N
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane3.title"),//NOI18N
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -389,24 +390,24 @@ public class AddHandleDialog extends javax.swing.JDialog {
             distanceToRight = Double.valueOf(txtRight.getText());
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, 
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane4.message"),
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane4.title"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane4.message"),//NOI18N
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane4.title"),//NOI18N
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
         // - ist kleiner Gesamt-Abstand
         if (distanceToRight > getDistanceTotal()) {
             JOptionPane.showMessageDialog(null, 
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane5.message"),
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane5.title"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane5.message"),//NOI18N
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane5.title"),//NOI18N
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
         // - ist größer 0
         if (distanceToRight < 0) {
             JOptionPane.showMessageDialog(null, 
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane6.message"),
-                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane6.title"),
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane6.message"),//NOI18N
+                    org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.checkTextFields().JOptionPane6.title"),//NOI18N
                     JOptionPane.ERROR_MESSAGE);
             return false;
         }

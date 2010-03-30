@@ -39,8 +39,8 @@ public class SimpleSingleSelectionListener extends PBasicInputEventHandler {
             if (o instanceof PFeature && ((PFeature) o).getFeature() instanceof XStyledFeature) {
                 XStyledFeature xf = (XStyledFeature) ((PFeature) o).getFeature();
                 log.debug("valid object under pointer");//NOI18N
-                JPopupMenu popup = new JPopupMenu(org.openide.util.NbBundle.getMessage(SimpleSingleSelectionListener.class, "SimpleSingleSelectionListener.popup.text"));
-                JMenuItem m = new JMenuItem(org.openide.util.NbBundle.getMessage(SimpleSingleSelectionListener.class, "SimpleSingleSelectionListener.m.text"));
+                JPopupMenu popup = new JPopupMenu(org.openide.util.NbBundle.getMessage(SimpleSingleSelectionListener.class, "SimpleSingleSelectionListener.popup.text"));//NOI18N
+                JMenuItem m = new JMenuItem(org.openide.util.NbBundle.getMessage(SimpleSingleSelectionListener.class, "SimpleSingleSelectionListener.m.text"));//NOI18N
                 m.setIcon(xf.getIconImage());
                 popup.add(m);
                 popup.show(mc, (int) pInputEvent.getCanvasPosition().getX(), (int) pInputEvent.getCanvasPosition().getY());

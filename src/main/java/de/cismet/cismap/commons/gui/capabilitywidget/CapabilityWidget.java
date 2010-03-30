@@ -230,8 +230,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     log.info("service nicht spezifizierbar");//NOI18N
                     Object[] alternatives = {"OGC-Web Mapping Service", "OGC-Web Feature Service", "OGC-Web Security Service"};//NOI18N
                     Object selectedValue = JOptionPane.showInputDialog(CapabilityWidget.this,
-                            org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.processUrl.JOptionPane.message", new Object[] {link}),
-                            org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.processUrl.JOptionPane.title"), JOptionPane.INFORMATION_MESSAGE, null, alternatives, alternatives[0]);
+                            org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.processUrl(String,String,boolean).JOptionPane.message", new Object[] {link}),//NOI18N
+                            org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.processUrl(String,String,boolean).JOptionPane.title"), JOptionPane.INFORMATION_MESSAGE, null, alternatives, alternatives[0]);//NOI18N
                     if (selectedValue == alternatives[0]) {
                         addOGCWMSCapabilitiesTree(link, load, interactive, subparent);
                     } else if (selectedValue == alternatives[1]) {
@@ -436,8 +436,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
     private void cmdAddByUrlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
         String input = JOptionPane.showInputDialog(this, 
-                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdAddByUrlActionPerformed().JOptionPane.message"),
-                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdAddByUrlActionPerformed().JOptionPane.title"),
+                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdAddByUrlActionPerformed().JOptionPane.message"),//NOI18N
+                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdAddByUrlActionPerformed().JOptionPane.title"),//NOI18N
                 JOptionPane.INFORMATION_MESSAGE);
         if (input != null) {
             processUrl(input, null, true);
@@ -591,10 +591,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                      */
                     System.err.println("cannot read" + ioe);//NOI18N
                     dtde.dropComplete(false);
-                    String message = org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.getLink.message", new Object[] {ioe.getMessage()}) + ioe.getMessage();
+                    String message = org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.getLink(DropTargetDropEvent).message", new Object[] {ioe.getMessage()});//NOI18N
                     JOptionPane.showMessageDialog(this,
                             message,
-                            org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.getLink.title"),
+                            org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.getLink(DropTargetDropEvent).title"),//NOI18N
                             JOptionPane.ERROR_MESSAGE);
 
                     return null;
@@ -634,7 +634,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         panLoad.add(lblWorld, gridBagConstraints);
 
-        lblLoading.setText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.lblLoading.text"));
+        lblLoading.setText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.lblLoading.text"));//NOI18N
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -761,8 +761,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     if (interactive) {
 
                         JOptionPane.showMessageDialog(thisWidget,
-                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWMSCapabilitiesTree.JOptionPane.message", new Object[] {message}),
-                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWMSCapabilitiesTree.JOptionPane.title"),
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWMSCapabilitiesTree.JOptionPane.message", new Object[] {message}),//NOI18N
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWMSCapabilitiesTree.JOptionPane.title"),//NOI18N
                                 JOptionPane.ERROR_MESSAGE);
                     }
                     //TODO: Error \u00FCber die Statuszeile bekanntgeben
@@ -959,8 +959,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
                     if (interactive) {
                         JOptionPane.showMessageDialog(thisWidget,
-                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCCapabilitiesTree.JOptionPane.message", new Object[] {message}),
-                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCCapabilitiesTree.JOptionPane.title"),
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCCapabilitiesTree(String,JComponent,boolean).JOptionPane.message", new Object[] {message}),//NOI18N
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCCapabilitiesTree(String,JComponent,boolean).JOptionPane.title"),//NOI18N
                                 JOptionPane.ERROR_MESSAGE);
                     }
                     log.error("Error during the loading of the capabilities of the server. " + message, e);//NOI18N
@@ -1071,8 +1071,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
                     if (interactive) {
                         JOptionPane.showMessageDialog(thisWidget,
-                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWFSCapabilitiesTree.JOptionPane.message", new Object[] {message}),
-                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWFSCapabilitiesTree.JOptionPane.title"),
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWFSCapabilitiesTree(String,JComponent,boolean).JOptionPane.message", new Object[] {message}),//NOI18N
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWFSCapabilitiesTree(String,JComponent,boolean).JOptionPane.title"),//NOI18N
                                 JOptionPane.ERROR_MESSAGE);
                     }
 

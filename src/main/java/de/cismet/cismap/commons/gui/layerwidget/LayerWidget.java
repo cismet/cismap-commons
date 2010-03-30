@@ -564,8 +564,8 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 }
             } catch (IllegalArgumentException schonVorhanden) {
                 JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
-                        org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.drop().JOptionPane.message"),
-                        org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.drop().JOptionPane.title"),
+                        org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"),//NOI18N
+                        org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"),//NOI18N
                         JOptionPane.ERROR_MESSAGE);
             } catch (Exception e) {
                 log.error(e, e);

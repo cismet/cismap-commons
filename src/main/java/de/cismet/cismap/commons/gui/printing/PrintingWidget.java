@@ -261,7 +261,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             }
         });
 
-        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 11));
         jLabel6.setText(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.jLabel6.text")); // NOI18N
 
         panInscribe.setLayout(new java.awt.BorderLayout());
@@ -390,7 +390,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
 
     Resolution r = mappingComponent.getPrintingSettingsDialog().getSelectedResolution();
-    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.startLoading.msg", new Object[] {r.getResolution()}), EXPERT);
+    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.startLoading().msg", new Object[] {r.getResolution()}), EXPERT);//NOI18N
     BoundingBox bb = ((PrintingFrameListener) mappingComponent.getInputListener(MappingComponent.PRINTING_AREA_SELECTION)).getPrintingBoundingBox();
     imageWidth = (int) ((double) t.getMapWidth() / (double) PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI * (double) r.getResolution());
     imageHeight = (int) ((double) t.getMapHeight() / (double) PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI * (double) r.getResolution());
@@ -584,7 +584,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
       return;
     }
 
-    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalStarted.msg", new Object[] {e.getRetrievalService()}), INFO);
+    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalStarted(RetrievalEvent).msg", new Object[] {e.getRetrievalService()}), INFO);//NOI18N
     if (e.getRetrievalService() instanceof ServiceLayer)
     {
       int num = ((ServiceLayer) e.getRetrievalService()).getLayerPosition();
@@ -618,8 +618,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
       return;
     }
 
-    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalError.msg1", new Object[] {e.getRetrievalService()}), ERROR);
-    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalError.msg2"), ERROR_REASON);
+    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalError(RetrievalEvent).msg1", new Object[] {e.getRetrievalService()}), ERROR);//NOI18N
+    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalError(RetrievalEvent).msg2"), ERROR_REASON);//NOI18N
     retrievalComplete(e);
 //        if (e.getRetrievalService() instanceof  ServiceLayer) {
 //            int num=((ServiceLayer)e.getRetrievalService()).getLayerPosition();
@@ -635,8 +635,9 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
   @Override
   public void retrievalComplete(RetrievalEvent e)
   {
-    log.info(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalComplete");//NOI18N
-
+    if (log.isInfoEnabled()) {
+      log.info(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalComplete");//NOI18N
+    }
     if(e.isInitialisationEvent())
     {
       log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalComplete ignored, initialisation event");//NOI18N
@@ -649,7 +650,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
       if (!e.isHasErrors())
       {
         results.put(num, e.getRetrievedObject());
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete.msg", new Object[] {e.getRetrievalService()}), SUCCESS);
+        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete(RetrievalEvent).msg", new Object[] {e.getRetrievalService()}), SUCCESS);//NOI18N
       } else
       {
         erroneous.put(num, e);
@@ -658,7 +659,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
           //Image scaled=Static2DTools.scaleImage((Image)e.getRetrievedObject(),0.7);
           Image i = Static2DTools.removeUnusedBorder((Image) e.getRetrievedObject(), 5, 0.7);
           addIconToProgressPane(errorImage, i);
-          addMessageToProgressPane( org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete.msg2", new Object[] {e.getRetrievalService()}), ERROR_REASON);
+          addMessageToProgressPane( org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete(RetrievalEvent).msg2", new Object[] {e.getRetrievalService()}), ERROR_REASON);//NOI18N
         }
       }
     }
@@ -667,13 +668,13 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     {
       if (results.size() == services.size())
       {
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete.msg6"), SUCCESS);
+        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete(RetrievalEvent).msg6"), SUCCESS);//NOI18N
       } else if (erroneous.size() == services.size())
       {
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete.msg7"), WARN);
+        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete(RetrievalEvent).msg7"), WARN);//NOI18N
       } else
       {
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete.msg8"), WARN);
+        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete(RetrievalEvent).msg8"), WARN);//NOI18N
       }
 
       for (Integer i : results.keySet())
@@ -719,7 +720,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
       try
       {
         Graphics2D g2d = (Graphics2D) map.getGraphics();
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete.msg3"), INFO);
+        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete(RetrievalEvent).msg3"), INFO);//NOI18N
 
         //Transparency
         float transparency = 0f;
@@ -741,10 +742,10 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
 
       if (erroneous.size() < results.size())
       {
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete.msg4"), SUCCESS);
+        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete(RetrievalEvent).msg4"), SUCCESS);//NOI18N
       } else
       {
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete.msg5"), INFO);
+        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete(RetrievalEvent).msg5"), INFO);//NOI18N
       }
 
       if (DEBUG)
@@ -797,7 +798,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
           label.setText(" ");//NOI18N
           //label.setVerticalAlignment(SwingConstants.TOP);
           label.setAlignmentY(0.8f);
-          label.setToolTipText(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.addIconToProgressPane.label.setToolTipText"));
+          label.setToolTipText(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.addIconToProgressPane(ImageIcon,Image).label.setToolTipText"));//NOI18N
           StyleConstants.setComponent(style, label);
           try
           {

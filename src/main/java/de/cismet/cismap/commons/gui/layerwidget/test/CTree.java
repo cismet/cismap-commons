@@ -62,7 +62,7 @@ public class CTree extends JTree implements DragSourceListener,
 		JScrollPane scrollPane = new JScrollPane(tree);
 
 
-		JFrame frame = new JFrame(org.openide.util.NbBundle.getMessage(CTree.class, "CTree.main().frame.title"));
+		JFrame frame = new JFrame(org.openide.util.NbBundle.getMessage(CTree.class, "CTree.main(String[]).frame.title"));//NOI18N
 		frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
 		frame.pack();
 

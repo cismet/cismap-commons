@@ -68,8 +68,8 @@ import pswing.PSwingCanvas;
  */
 public class PFeature extends PPath implements Highlightable, Selectable, Refreshable {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private static final String DIALOG_TEXT = org.openide.util.NbBundle.getMessage(PFeature.class, "PFeature.DIALOG_TEXT");
-    private static final String DIALOG_TITLE = org.openide.util.NbBundle.getMessage(PFeature.class, "PFeature.DIALOG_TITLE");
+    private static final String DIALOG_TEXT = org.openide.util.NbBundle.getMessage(PFeature.class, "PFeature.DIALOG_TEXT");//NOI18N
+    private static final String DIALOG_TITLE = org.openide.util.NbBundle.getMessage(PFeature.class, "PFeature.DIALOG_TITLE");//NOI18N
     private static final Color TRANSPARENT = new Color(255, 255, 255, 0);
     private Feature feature;
     private WorldToScreenTransform wtst;

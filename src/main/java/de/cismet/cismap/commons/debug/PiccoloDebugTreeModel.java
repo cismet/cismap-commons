@@ -54,8 +54,8 @@ public class PiccoloDebugTreeModel implements TreeModel{
     /** Creates a new instance of PiccoloDebugTreeModel */
     public PiccoloDebugTreeModel(PCanvas pc) {
         this.pc=pc;
-        secondLevel.add(org.openide.util.NbBundle.getMessage(PiccoloDebugTreeModel.class, "PiccoloDebugTreeModel.secondLevel.cameras"));
-        secondLevel.add(org.openide.util.NbBundle.getMessage(PiccoloDebugTreeModel.class, "PiccoloDebugTreeModel.secondLevel.layer"));
+        secondLevel.add(org.openide.util.NbBundle.getMessage(PiccoloDebugTreeModel.class, "PiccoloDebugTreeModel.PiccoloDebugTreeModel(PCanvas).secondLevel.cameras"));//NOI18N
+        secondLevel.add(org.openide.util.NbBundle.getMessage(PiccoloDebugTreeModel.class, "PiccoloDebugTreeModel.PiccoloDebugTreeModel(PCanvas).secondLevel.layer"));//NOI18N
     }
     
     /**

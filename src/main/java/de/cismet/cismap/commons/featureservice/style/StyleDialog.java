@@ -73,17 +73,17 @@ public class StyleDialog extends JDialog implements ListSelectionListener
   // constants: filesystem
   private static final String CISMAP_FOLDER = ".cismap";//NOI18N
   private static final String DEFAULT_HISTORY_NAME = "defaultStyleHistory.xml";//NOI18N
-  private static final String COLORCHOOSER_TITLE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.COLORCHOOSER_TITLE");
-  private static final String FONTCHOOSER_TITLE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.FONTCHOOSER_TITLE");
+  private static final String COLORCHOOSER_TITLE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.COLORCHOOSER_TITLE");//NOI18N
+  private static final String FONTCHOOSER_TITLE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.FONTCHOOSER_TITLE");//NOI18N
   private static final String POINTSYMBOL_FOLDER = "/de/cismet/cismap/commons/featureservice/res/pointsymbols/";//NOI18N
   private final String home = System.getProperty("user.home");//NOI18N
   private final String seperator = System.getProperty("file.separator");//NOI18N
   private final File fileToCismapFolder = new File(home + seperator + CISMAP_FOLDER);
   // constants: popup
   // FIXME: I18N
-  private final static String POPUP_SAVE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_SAVE");
-  private final static String POPUP_LOAD = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_LOAD");
-  private final static String POPUP_CLEAR = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_CLEAR");
+  private final static String POPUP_SAVE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_SAVE");//NOI18N
+  private final static String POPUP_LOAD = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_LOAD");//NOI18N
+  private final static String POPUP_CLEAR = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_CLEAR");//NOI18N
   private TreeMap<String, FeatureAnnotationSymbol> pointSymbolHM = new TreeMap();
   private TreeMap<String, FeatureServiceAttribute> featureServiceAttributes;
   private Map<String, FeatureServiceAttribute> oldFeatureServiceAttributes;
@@ -480,8 +480,8 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         {
           logger.error("Error during writing the history.", ex);//NOI18N
           JOptionPane.showMessageDialog(StyleDialog.this,
-                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.writeHistory().JOptionPane.message", new Object[] {ex.getMessage()}),
-                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.writeHistory().JOptionPane.title"), JOptionPane.ERROR_MESSAGE);
+                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.writeHistory(File,boolean).JOptionPane.message", new Object[] {ex.getMessage()}),//NOI18N
+                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.writeHistory(File,boolean).JOptionPane.title"), JOptionPane.ERROR_MESSAGE);//NOI18N
         } finally
         {
           try
@@ -528,8 +528,8 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         {
           logger.error("Error during loading of the history", ex);//NOI18N
           JOptionPane.showMessageDialog(StyleDialog.this,
-                   org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.loadHistory().JOptionPane.message", new Object[] {ex.getMessage()}),
-                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.loadHistory().JOptionPane.title"), JOptionPane.ERROR_MESSAGE);
+                   org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.loadHistory().JOptionPane.message", new Object[] {ex.getMessage()}),//NOI18N
+                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.loadHistory().JOptionPane.title"), JOptionPane.ERROR_MESSAGE);//NOI18N
         }
       }
     };
@@ -560,7 +560,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       @Override
       public String getDescription()
       {
-        return org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.createHistoryListPopupMenu.description");
+        return org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.createHistoryListPopupMenu().description");//NOI18N
       }
     };
 
@@ -1338,12 +1338,12 @@ public class StyleDialog extends JDialog implements ListSelectionListener
     name.append(fontType.getName());
     if (fontType.isBold())
     {
-      name.append(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.setFontType.name.bold"));
+      name.append(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.setFontType(Font).name.bold"));//NOI18N
     }
 
     if (fontType.isItalic())
     {
-      name.append(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.setFontType.name.italic"));
+      name.append(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.setFontType(Font).name.italic"));//NOI18N
     }
 
     lblFontname.setText(name.toString());

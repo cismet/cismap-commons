@@ -18,7 +18,7 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     
-    private static final String OPTION_NAME = org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.OPTION_NAME");
+    private static final String OPTION_NAME = org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.OPTION_NAME");//NOI18N
     private static final String CONFIGURATION = "SearchOptionsPanel";//NOI18N
     private static final String CONF_HOLD_GEOMETRIES = "HoldGeometries";//NOI18N
     private static final String CONF_GEOMETRY_COLOR = "GeometryColor";//NOI18N
@@ -273,7 +273,7 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         Color color = JColorChooser.showDialog(
              this,
-             org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jButton1ActionPerformed.JColorChooser.title"),
+             org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jButton1ActionPerformed.JColorChooser.title"),//NOI18N
              getColor());
         if (color != null) {
             setColor(color);

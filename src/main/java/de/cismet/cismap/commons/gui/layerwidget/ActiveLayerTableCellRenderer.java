@@ -219,7 +219,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                 internalWidgetParent.setErrorImage((Image) ((RetrievalServiceLayer) value).getErrorObject());
                             }
                         }
-                        setToolTipText(org.openide.util.NbBundle.getMessage(ActiveLayerTableCellRenderer.class, "ActiveLayerTableCellRenderer.toolTipText"));
+                        setToolTipText(org.openide.util.NbBundle.getMessage(ActiveLayerTableCellRenderer.class, "ActiveLayerTableCellRenderer.toolTipText"));//NOI18N
                     } else if (((RetrievalServiceLayer) value).getErrorObject() instanceof String) {
                         setToolTipText(((RetrievalServiceLayer) value).getErrorObject().toString());
                     }

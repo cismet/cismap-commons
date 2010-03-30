@@ -297,24 +297,24 @@ public class HTTPImageRetrievalWithAuth extends Thread{
             // TODO determine main frame and insert
             // TODO Cancel KEY
             JFrame dummy = null;            
-            final JDialog requestDialog = new JDialog (dummy,org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword.title"),true);
+            final JDialog requestDialog = new JDialog (dummy,org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword().title"),true);//NOI18N
             requestDialog.setLayout (new GridLayout (0, 1));
             requestDialog.setPreferredSize(new Dimension(400,200));
-            JLabel usernameLabel = new JLabel (org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword.usernameLabel.text"));
+            JLabel usernameLabel = new JLabel (org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword().usernameLabel.text"));//NOI18N
             requestDialog.add (usernameLabel);
             
             final JTextField usernameField = new JTextField();
             usernameField.setBackground (Color.lightGray);
             requestDialog.add (usernameField);
             
-            JLabel passwordLabel = new JLabel (org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword.passwordLabel.text"));
+            JLabel passwordLabel = new JLabel (org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword().passwordLabel.text"));//NOI18N
             requestDialog.add (passwordLabel);      
             
             final JPasswordField passwordField = new JPasswordField();    
             passwordField.setBackground(Color.lightGray);
             requestDialog.add (passwordField);
             
-            JButton okButton = new JButton (org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword.okButton.text"));
+            JButton okButton = new JButton (org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword().okButton.text"));//NOI18N
             requestDialog.add (okButton);
             okButton.addActionListener(new ActionListener() 
                                   {

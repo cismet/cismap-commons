@@ -332,7 +332,9 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
 
                     if (styleDialog.isQueryStringChanged())
                     {
-                      int i = JOptionPane.showConfirmDialog(StaticSwingTools.getParentFrame(wfsStyleButton), org.openide.util.NbBundle.getMessage(ActiveLayerTableCellEditor.class, "ActiveLayerTableCellEditor.mouseClicked.showConfirmDialog.message"), org.openide.util.NbBundle.getMessage(ActiveLayerTableCellEditor.class, "ActiveLayerTableCellEditor.mouseClicked.showConfirmDialog.title"), JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                      int i = JOptionPane.showConfirmDialog(StaticSwingTools.getParentFrame(wfsStyleButton), org.openide.util.NbBundle.getMessage(ActiveLayerTableCellEditor.class, "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.message"), //NOI18N
+                              org.openide.util.NbBundle.getMessage(ActiveLayerTableCellEditor.class, "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.title"), //NOI18N
+                              JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                       if (i == JOptionPane.YES_OPTION)
                       {
                          if(DEBUG)logger.debug("Query String changed, updating the QUERY String");//NOI18N

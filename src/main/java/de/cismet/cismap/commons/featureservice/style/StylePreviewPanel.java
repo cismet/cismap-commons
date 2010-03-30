@@ -46,7 +46,7 @@ public class StylePreviewPanel extends JPanel
 {
 
   private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-  private static final String SAMPLE_TEXT = org.openide.util.NbBundle.getMessage(StylePreviewPanel.class, "StylePreviewPanel.SAMPLE_TEXT");
+  private static final String SAMPLE_TEXT = org.openide.util.NbBundle.getMessage(StylePreviewPanel.class, "StylePreviewPanel.SAMPLE_TEXT");//NOI18N
   private Style style;
   private Color lineColor;
   private Color fillColor;

@@ -29,8 +29,8 @@ public class RotationPHandle extends PHandle {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private PFeature pfeature;
-    private static final String DIALOG_TEXT = org.openide.util.NbBundle.getMessage(RotationPHandle.class, "RotationPHandle.DIALOG_TEXT");
-    private static final String DIALOG_TITLE = org.openide.util.NbBundle.getMessage(RotationPHandle.class, "RotationPHandle.DIALOG_TITLE");
+    private static final String DIALOG_TEXT = org.openide.util.NbBundle.getMessage(RotationPHandle.class, "RotationPHandle.DIALOG_TEXT");//NOI18N
+    private static final String DIALOG_TITLE = org.openide.util.NbBundle.getMessage(RotationPHandle.class, "RotationPHandle.DIALOG_TITLE");//NOI18N
     private double rotation = 0.0d;
     private PHandle pivotHandle;
     private Point2D mid;

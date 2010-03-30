@@ -420,14 +420,14 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
                         } catch (Exception e) {
                         }
                         errorImage=bi;
-                        slider.setToolTipText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.slider.toolTipText1"));
+                        slider.setToolTipText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.slider.toolTipText1"));//NOI18N
                     } else if (e.getRetrievedObject() instanceof String) {
                         errorImage=null;
                         final String message=(String)e.getRetrievedObject();
 //                  slider.setToolTipText("<html><b>Der Server lieferte folgende Fehlermeldung zur�ck:<br></b><body>"+message+"</body></html>");
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
-                                slider.setToolTipText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.slider.toolTipText2", new Object[]{message}));
+                                slider.setToolTipText(org.openide.util.NbBundle.getMessage(LayerControl.class, "LayerControl.slider.toolTipText2", new Object[]{message}));//NOI18N
                             }
                         });
                         

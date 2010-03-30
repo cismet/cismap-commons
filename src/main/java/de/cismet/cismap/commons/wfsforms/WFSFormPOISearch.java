@@ -123,7 +123,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
             hm.put("@@search_text@@", txtSearch.getText());//NOI18N
             requestRefresh("cboPois", hm);//NOI18N
         } else {
-            lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.lblBehind.text"));
+            lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.lblBehind.text"));//NOI18N
         }
     }
 
@@ -358,7 +358,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
    
 
     public void actionPerformed(ActionEvent e) {
-        lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.lblBehind.text2", new Object[]{cboPois.getItemCount()}));
+        lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.lblBehind.text2", new Object[]{cboPois.getItemCount()}));//NOI18N
         log.debug("cboPois.getItemAt(0):" + cboPois.getItemAt(0));//NOI18N
         if (cboPois.getItemCount() == 1) {
             cboPois.setEditable(false);

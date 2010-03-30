@@ -59,7 +59,7 @@ public class HandleDeleteAction implements CustomAction {
      * @return Beschreibungsstring
      */
     public String info() {
-        return org.openide.util.NbBundle.getMessage(HandleDeleteAction.class, "HandleDeleteAction.info().return", new Object[]{posInArray, x, y});
+        return org.openide.util.NbBundle.getMessage(HandleDeleteAction.class, "HandleDeleteAction.info().return", new Object[]{posInArray, x, y});//NOI18N
     }
 
     /**

@@ -313,7 +313,7 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
     public Object getSelectedItem() {
 
         if (!finished) {
-            return org.openide.util.NbBundle.getMessage(WFSFormsListAndComboBoxModel.class, "WFSFormListAndComboBoxModel.getSelectedItem.return");
+            return org.openide.util.NbBundle.getMessage(WFSFormsListAndComboBoxModel.class, "WFSFormListAndComboBoxModel.getSelectedItem().return");//NOI18N
         } else if (getSize() == 0) {
             return "";//NOI18N
         } else {

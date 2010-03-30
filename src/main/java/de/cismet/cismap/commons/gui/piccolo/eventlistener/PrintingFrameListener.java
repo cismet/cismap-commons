@@ -144,7 +144,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
 
         //calculate realworldsize
         if (scaleDenominator == -1) {
-            String s = JOptionPane.showInputDialog(mappingComponent, org.openide.util.NbBundle.getMessage(PrintingFrameListener.class, "PrintingFrameListener.init.message"), "");
+            String s = JOptionPane.showInputDialog(mappingComponent, org.openide.util.NbBundle.getMessage(PrintingFrameListener.class, "PrintingFrameListener.init(double,int,int,String).message"), "");//NOI18N
             try {
                 Double d = new Double(s);
                 scaleDenominator = d;

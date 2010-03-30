@@ -129,17 +129,17 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         if (getGeometryType() != null) {
             switch (getGeometryType()) {
                 case RECTANGLE:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.newRectangle") ;
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newRectangle") ;//NOI18N
                 case LINESTRING:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.newPolyline") ;
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolyline") ;//NOI18N
                 case ELLIPSE:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.newEllipse") ;
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newEllipse") ;//NOI18N
                 case POINT:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.newPoint") ;
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPoint") ;//NOI18N
                 case POLYGON:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.newPolygon") ;
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolygon") ;//NOI18N
                 default:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.name.errorInGetName") ;
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().errorInGetName") ;//NOI18N
             }
         } else {
             try {

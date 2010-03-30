@@ -210,7 +210,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
             lblMeasurement.setText("");//NOI18N
         } else {
             lblMeasurement.setText(
-                    org.openide.util.NbBundle.getMessage(StatusBar.class,"StatusBar.lblMeasurement.text", new Object[]{ StaticDecimalTools.round(area), StaticDecimalTools.round(umfang) }));
+                    org.openide.util.NbBundle.getMessage(StatusBar.class,"StatusBar.lblMeasurement.text", new Object[]{ StaticDecimalTools.round(area), StaticDecimalTools.round(umfang) }));//NOI18N
         }
     }
 

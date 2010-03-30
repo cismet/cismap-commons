@@ -15,7 +15,7 @@ import org.openide.util.lookup.ServiceProvider;
 public class GeometryOptionsPanel extends AbstractOptionsPanel implements OptionsPanelController {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     
-    private static final String OPTION_NAME = org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.OPTION_NAME");
+    private static final String OPTION_NAME = org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.OPTION_NAME");//NOI18N
     private static final String CONFIGURATION = "GeometryOptionsPanel";//NOI18N
     private static final String CONF_HOLD_GEOMETRIES = "EllipseEgdes";//NOI18N
 

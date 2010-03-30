@@ -252,7 +252,7 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
     private void setValues(Values v) {
         //Servername
         if (v.title.trim().equals("")) {//NOI18N
-            lblTitle.setText(org.openide.util.NbBundle.getMessage(ServerInfo.class, "ServerInfo.lblTitle.text"));
+            lblTitle.setText(org.openide.util.NbBundle.getMessage(ServerInfo.class, "ServerInfo.lblTitle.text"));//NOI18N
         } else {
             lblTitle.setText(v.title.trim());
         }

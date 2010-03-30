@@ -586,21 +586,21 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         public String getColumnName(int columnIndex) {
             switch (columnIndex) {
                 case 0: //Icon
-                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.ico");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName(int).return.ico");//NOI18N
                 case 1: //Name
-                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.name");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName(int).return.name");//NOI18N
                 case 2: //Type
-                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.typ");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName(int).return.typ");//NOI18N
                 case 3: //Geometrietyp
-                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.geometrie");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName(int).return.geometrie");//NOI18N
                 case 4: //Gr\u00F6\u00DFe
-                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.groesse");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName(int).return.groesse");//NOI18N
                 case 5: //L\u00E4nge
-                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.laenge");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName(int).return.laenge");//NOI18N
                 case 6: //Zentrum
-                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.zentrum");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName(int).return.zentrum");//NOI18N
                 case 7: //Markierung
-                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName().return.Halten");
+                    return org.openide.util.NbBundle.getMessage(FeatureControl.class, "FeatureControl.getColumnName(int).return.Halten");//NOI18N
                 default:
                     return "";//NOI18N
             }

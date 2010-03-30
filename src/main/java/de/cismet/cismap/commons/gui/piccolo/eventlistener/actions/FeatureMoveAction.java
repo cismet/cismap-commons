@@ -69,7 +69,7 @@ public class FeatureMoveAction implements CustomAction {
      * @return  Beschreibungsstring
      */
     public String info() {
-        return org.openide.util.NbBundle.getMessage(FeatureMoveAction.class, "FeatureMoveAction.info().return", new Object[] {dim.getWidth(), dim.getHeight()});
+        return org.openide.util.NbBundle.getMessage(FeatureMoveAction.class, "FeatureMoveAction.info().return", new Object[] {dim.getWidth(), dim.getHeight()});//NOI18N
     }
 
     /**

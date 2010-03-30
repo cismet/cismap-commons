@@ -77,14 +77,15 @@ public class JTable_Observer extends JFrame implements Observer{
     }
     
     private JTable_Observer(){
-        super(org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.title"));
+        super(org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.title"));//NOI18N
         createUI();
         new ObservableChild().addObserver(this);
        
     }
     
     private void createUI(){
-        dtm = new MyDefaultTableModel(new Object[] {org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title1"), org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title2")}, 0);
+        dtm = new MyDefaultTableModel(new Object[] {org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title1"), //NOI18N
+        org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title2")}, 0);//NOI18N
         CustomProgressBar progressBar = new CustomProgressBar();
         CustomProgressBar progressBar2 = new CustomProgressBar();
         CustomProgressBar progressBar3 = new CustomProgressBar();
@@ -94,9 +95,9 @@ public class JTable_Observer extends JFrame implements Observer{
         progressBar2.setIndeterminate(true);
         progressBar3.setBorderPainted(true);
         progressBar3.setIndeterminate(true);
-        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row1"),progressBar});
-        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row2"),progressBar2});
-        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row3"),progressBar3});
+        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row1"),progressBar});//NOI18N
+        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row2"),progressBar2});//NOI18N
+        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row3"),progressBar3});//NOI18N
         table= new JTable(dtm);
         table.getColumnModel().getColumn(1).setCellRenderer(new CustomProgressBar());
         JScrollPane jsp = new JScrollPane(table);        

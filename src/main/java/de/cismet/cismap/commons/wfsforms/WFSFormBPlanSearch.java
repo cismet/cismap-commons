@@ -129,7 +129,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
             hm.put("@@search_text@@", txtSearch.getText());//NOI18N
             requestRefresh("cboHits", hm);//NOI18N
         } else {
-            lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.lblBehind.text"));
+            lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.lblBehind.text"));//NOI18N
         }
     }
 
@@ -367,7 +367,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
     // End of variables declaration//GEN-END:variables
 
     public void actionPerformed(ActionEvent e) {
-        lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.lblBehind.text2", new Object[]{cboHits.getItemCount()}));
+        lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.lblBehind.text2", new Object[]{cboHits.getItemCount()}));//NOI18N
         log.debug("cboPois.getItemAt(0):" + cboHits.getItemAt(0));//NOI18N
         if (cboHits.getItemCount() == 1) {
             cboHits.setEditable(false);

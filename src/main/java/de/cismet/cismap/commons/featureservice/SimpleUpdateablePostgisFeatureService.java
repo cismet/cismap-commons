@@ -96,7 +96,7 @@ public class SimpleUpdateablePostgisFeatureService extends SimplePostgisFeatureS
     } catch (Exception e)
     {
       logger.warn("No actiontext in updateable Service: " + e.getMessage());//NOI18N
-      this.postgisAction.setActionText(org.openide.util.NbBundle.getMessage(SimpleUpdateablePostgisFeatureService.class, "SimpleUpdateablePostgisFeatureService.initFromElement.postgisAction.actionText") );
+      this.postgisAction.setActionText(org.openide.util.NbBundle.getMessage(SimpleUpdateablePostgisFeatureService.class, "SimpleUpdateablePostgisFeatureService.initFromElement(Element).postgisAction.actionText") );//NOI18N
     }
   }
 

@@ -358,7 +358,9 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
             } catch (Exception ex)
             {
               logger.error("Error during doAction(): " + ex.getMessage(), ex);//NOI18N
-              ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(PostgisFeatureFactory.class, "PostgisFeatureFactory.mousePressed.ErrorInfo.title") , org.openide.util.NbBundle.getMessage(PostgisFeatureFactory.class, "PostgisFeatureFactory.mousePressed.ErrorInfo.basicErrorMessage") , null, null, ex, Level.ALL, null);//NOI18N
+              ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(PostgisFeatureFactory.class, "PostgisFeatureFactory.mousePressed(PInputEvent).ErrorInfo.title") , //NOI18N
+                      org.openide.util.NbBundle.getMessage(PostgisFeatureFactory.class, "PostgisFeatureFactory.mousePressed(PInputEvent).ErrorInfo.basicErrorMessage") ,//NOI18N
+                      null, null, ex, Level.ALL, null);
               JXErrorPane.showDialog(mappingComponent, ei);
             }
           }

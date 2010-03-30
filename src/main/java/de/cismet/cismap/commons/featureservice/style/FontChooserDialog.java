@@ -23,7 +23,7 @@ import javax.swing.JList;
  */
 public class FontChooserDialog extends JDialog {
     /** Display text */
-    private static final String SAMPLE_TEXT = org.openide.util.NbBundle.getMessage(FontChooserDialog.class, "FontChooserDialog.SAMPLE_TEXT");
+    private static final String SAMPLE_TEXT = org.openide.util.NbBundle.getMessage(FontChooserDialog.class, "FontChooserDialog.SAMPLE_TEXT");//NOI18N
     /** Selected index of the default fontsize */
     private static final int DEFAULT_SIZE = 4;
     /** The font the user has chosen */

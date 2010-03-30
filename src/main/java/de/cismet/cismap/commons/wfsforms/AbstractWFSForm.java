@@ -64,7 +64,7 @@ public abstract class AbstractWFSForm extends JPanel {
     private Vector<WFSFormQuery> queries = new Vector<WFSFormQuery>();
     protected HashMap<String, JComponent> listComponents = new HashMap<String, JComponent>();
     protected HashMap<String, WFSFormQuery> queriesByComponentName = new HashMap<String, WFSFormQuery>();
-    private String loadingMessage = org.openide.util.NbBundle.getMessage(AbstractWFSForm.class, "AbstractWFSForm.loadingMessage");
+    private String loadingMessage = org.openide.util.NbBundle.getMessage(AbstractWFSForm.class, "AbstractWFSForm.loadingMessage");//NOI18N
     private WFSFormFeature lastFeature = null;
     protected ImageIcon mark = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"));//NOI18N
     protected FixedPImage pMark = new FixedPImage(mark.getImage());
