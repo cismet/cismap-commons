@@ -303,7 +303,7 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         panEmpty.setLayout(panEmptyLayout);
         panEmptyLayout.setHorizontalGroup(
             panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 226, Short.MAX_VALUE)
+            .add(0, 258, Short.MAX_VALUE)
         );
         panEmptyLayout.setVerticalGroup(
             panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)

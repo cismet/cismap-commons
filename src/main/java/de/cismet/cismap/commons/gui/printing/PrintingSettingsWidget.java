@@ -96,7 +96,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
 
         panDesc.setBackground(java.awt.SystemColor.inactiveCaptionText);
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11));
         jLabel1.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel1.text")); // NOI18N
 
         jLabel2.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel2.text")); // NOI18N
@@ -165,7 +165,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
             }
         });
 
-        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 11));
         jLabel6.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel6.text")); // NOI18N
 
         jLabel7.setText(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.jLabel7.text")); // NOI18N

@@ -281,7 +281,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         panFill.setLayout(panFillLayout);
         panFillLayout.setHorizontalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 129, Short.MAX_VALUE)
+            .add(0, 200, Short.MAX_VALUE)
         );
         panFillLayout.setVerticalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)

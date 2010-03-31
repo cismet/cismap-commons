@@ -29,8 +29,8 @@
               <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jProgressBar2" pref="222" max="32767" attributes="0"/>
-                  <Component id="jLabel2" alignment="0" max="32767" attributes="1"/>
+                  <Component id="jProgressBar2" pref="227" max="32767" attributes="0"/>
+                  <Component id="jLabel2" alignment="0" pref="227" max="32767" attributes="1"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -64,7 +64,7 @@
     <Component class="javax.swing.JLabel" name="jLabel2">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="ClipboardWaitDialog.jLabel2.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="de/cismet/cismap/commons/gui/Bundle.properties" key="ClipboardWaitDialog.jLabel2.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>

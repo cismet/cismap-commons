@@ -103,7 +103,7 @@ public class WFSFormTester extends AbstractWFSForm {
                     .add(cboNr, 0, 60, Short.MAX_VALUE))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(cmdOk)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(194, Short.MAX_VALUE))
         );
 
         layout.linkSize(new java.awt.Component[] {cboStreets, prbStreets}, org.jdesktop.layout.GroupLayout.HORIZONTAL);

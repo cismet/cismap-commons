@@ -265,7 +265,7 @@ public class WFSFormAdress extends AbstractWFSForm {
         panEmpty.setLayout(panEmptyLayout);
         panEmptyLayout.setHorizontalGroup(
             panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 13, Short.MAX_VALUE)
+            .add(0, 45, Short.MAX_VALUE)
         );
         panEmptyLayout.setVerticalGroup(
             panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)

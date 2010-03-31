@@ -136,7 +136,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         gridBagConstraints.weightx = 1.0;
         panStatus.add(cboMode, gridBagConstraints);
 
-        cmdShowFeatureCollection.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.cmdShowFeatureCollection.text")); // NOI18N
+        cmdShowFeatureCollection.setText(I18N.getString("SimpleMappingClient.cmdShowFeatureCollection.text")); // NOI18N
         cmdShowFeatureCollection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdShowFeatureCollectionActionPerformed(evt);
@@ -144,7 +144,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         });
         panStatus.add(cmdShowFeatureCollection, new java.awt.GridBagConstraints());
 
-        txtKZ.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.txtKZ.text")); // NOI18N
+        txtKZ.setText(I18N.getString("SimpleMappingClient.txtKZ.text")); // NOI18N
         txtKZ.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtKZActionPerformed(evt);
@@ -161,7 +161,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         gridBagConstraints.weightx = 1.0;
         panStatus.add(lblCoord, gridBagConstraints);
 
-        jButton1.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.jButton1.text")); // NOI18N
+        jButton1.setText(I18N.getString("SimpleMappingClient.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -169,7 +169,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         });
         panStatus.add(jButton1, new java.awt.GridBagConstraints());
 
-        cmdBack.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.cmdBack.text")); // NOI18N
+        cmdBack.setText(I18N.getString("SimpleMappingClient.cmdBack.text")); // NOI18N
         cmdBack.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdBackActionPerformed(evt);
@@ -177,7 +177,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         });
         panStatus.add(cmdBack, new java.awt.GridBagConstraints());
 
-        cmdFwd.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.cmdFwd.text")); // NOI18N
+        cmdFwd.setText(I18N.getString("SimpleMappingClient.cmdFwd.text")); // NOI18N
         cmdFwd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdFwdActionPerformed(evt);
@@ -200,18 +200,18 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
 
-        fileMenu.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.fileMenu.text")); // NOI18N
+        fileMenu.setText(I18N.getString("SimpleMappingClient.fileMenu.text")); // NOI18N
 
-        openMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.openMenuItem.text")); // NOI18N
+        openMenuItem.setText(I18N.getString("SimpleMappingClient.openMenuItem.text")); // NOI18N
         fileMenu.add(openMenuItem);
 
-        saveMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.saveMenuItem.text")); // NOI18N
+        saveMenuItem.setText(I18N.getString("SimpleMappingClient.saveMenuItem.text")); // NOI18N
         fileMenu.add(saveMenuItem);
 
-        saveAsMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.saveAsMenuItem.text")); // NOI18N
+        saveAsMenuItem.setText(I18N.getString("SimpleMappingClient.saveAsMenuItem.text")); // NOI18N
         fileMenu.add(saveAsMenuItem);
 
-        exitMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.exitMenuItem.text")); // NOI18N
+        exitMenuItem.setText(I18N.getString("SimpleMappingClient.exitMenuItem.text")); // NOI18N
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitMenuItemActionPerformed(evt);
@@ -221,28 +221,28 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 
         menuBar.add(fileMenu);
 
-        editMenu.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.editMenu.text")); // NOI18N
+        editMenu.setText(I18N.getString("SimpleMappingClient.editMenu.text")); // NOI18N
 
-        cutMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.cutMenuItem.text")); // NOI18N
+        cutMenuItem.setText(I18N.getString("SimpleMappingClient.cutMenuItem.text")); // NOI18N
         editMenu.add(cutMenuItem);
 
-        copyMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.copyMenuItem.text")); // NOI18N
+        copyMenuItem.setText(I18N.getString("SimpleMappingClient.copyMenuItem.text")); // NOI18N
         editMenu.add(copyMenuItem);
 
-        pasteMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.pasteMenuItem.text")); // NOI18N
+        pasteMenuItem.setText(I18N.getString("SimpleMappingClient.pasteMenuItem.text")); // NOI18N
         editMenu.add(pasteMenuItem);
 
-        deleteMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.deleteMenuItem.text")); // NOI18N
+        deleteMenuItem.setText(I18N.getString("SimpleMappingClient.deleteMenuItem.text")); // NOI18N
         editMenu.add(deleteMenuItem);
 
         menuBar.add(editMenu);
 
-        helpMenu.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.helpMenu.text")); // NOI18N
+        helpMenu.setText(I18N.getString("SimpleMappingClient.helpMenu.text")); // NOI18N
 
-        contentsMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.contentsMenuItem.text")); // NOI18N
+        contentsMenuItem.setText(I18N.getString("SimpleMappingClient.contentsMenuItem.text")); // NOI18N
         helpMenu.add(contentsMenuItem);
 
-        aboutMenuItem.setText(I18N.getString("de.cismet.cismap.commons.demo.SimpleMappingClient.aboutMenuItem.text")); // NOI18N
+        aboutMenuItem.setText(I18N.getString("SimpleMappingClient.aboutMenuItem.text")); // NOI18N
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);

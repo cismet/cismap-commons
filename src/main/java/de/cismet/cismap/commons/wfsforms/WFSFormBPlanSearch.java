@@ -287,7 +287,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         panFill.setLayout(panFillLayout);
         panFillLayout.setHorizontalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 153, Short.MAX_VALUE)
+            .add(0, 177, Short.MAX_VALUE)
         );
         panFillLayout.setVerticalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
