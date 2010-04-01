@@ -37,7 +37,7 @@ import javax.swing.filechooser.FileSystemView;
  * 
  */
 public class RestrictedFileSystemView extends FileSystemView {
-    private static final String newFolderString = UIManager.getString("FileChooser.other.newFolder");
+    private static final String newFolderString = UIManager.getString("FileChooser.other.newFolder");//NOI18N
     private File _defaultDirectory;
 
     public RestrictedFileSystemView() {

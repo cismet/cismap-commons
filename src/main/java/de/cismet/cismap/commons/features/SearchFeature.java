@@ -71,7 +71,7 @@ public class SearchFeature extends PureNewFeature {
 
     @Override
     public String getType() {
-        return "Metasuche";
+        return "Metasuche";//NOI18N
     }
 
 }

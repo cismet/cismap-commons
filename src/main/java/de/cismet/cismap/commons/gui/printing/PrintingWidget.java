@@ -454,8 +454,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
           {
             HashMap param = new HashMap();
             param.put(t.getMapPlaceholder(), map);
-            String scaleDenomString = "" + s.getDenominator();
-            if (scaleDenomString.equals("0") || scaleDenomString.equals("-1"))
+            String scaleDenomString = "" + s.getDenominator();//NOI18N
+            if (scaleDenomString.equals("0") || scaleDenomString.equals("-1"))//NOI18N
             {
               int sd = (int) (((PrintingFrameListener) mappingComponent.getInputListener(MappingComponent.PRINTING_AREA_SELECTION)).getScaleDenominator() + 0.5d); //+0.5=Runden
               scaleDenomString = "" + sd;//NOI18N
@@ -477,7 +477,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             if (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW))
             {
               JRViewer aViewer = new JRViewer(jasperPrint);
-              JFrame aFrame = new JFrame("Druckvorschau");
+              JFrame aFrame = new JFrame(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.cmdOKActionPerformed(ActionEvent).aFrame.title"));//NOI18N
               aFrame.getContentPane().add(aViewer);
               java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
               aFrame.setSize(screenSize.width / 2, screenSize.height / 2);
@@ -487,19 +487,19 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
               aFrame.setVisible(true);
             } else if (a.getId().equalsIgnoreCase(Action.PDF))
             {
-              String home = System.getProperty("user.home");
-              String fs = System.getProperty("file.separator");
+              String home = System.getProperty("user.home");//NOI18N
+              String fs = System.getProperty("file.separator");//NOI18N
 
-              String file = home + fs + "cismap.pdf"; //TODO
+              String file = home + fs + "cismap.pdf"; //TODO//NOI18N
               File f = new File(file);
-              file = file.replaceAll("\\\\", "/");
-              file = file.replaceAll(" ", "%20");
+              file = file.replaceAll("\\\\", "/");//NOI18N
+              file = file.replaceAll(" ", "%20");//NOI18N
               //String file="cismap.pdf"; //MesseHotfix
 
               JasperExportManager.exportReportToPdfFile(jasperPrint, f.toString());
 
-              log.info("Versuche pdf zu öffnen:" + file);
-              de.cismet.tools.BrowserLauncher.openURL("file:///" + file);
+              log.info("try to open pdf:" + file);//NOI18N
+              de.cismet.tools.BrowserLauncher.openURL("file:///" + file);//NOI18N
 //                        try {
 //                            if (Desktop.isDesktopSupported()) {
 //                                Desktop desktop =Desktop.getDesktop();
@@ -527,9 +527,11 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             }
           } catch (Throwable tt)
           {
-            log.error("Fehler beim Jaspern", tt);
+            log.error("Error during Jaspern", tt);//NOI18N
 
-            ErrorInfo ei = new ErrorInfo("Fehler beim Drucken", "Beim Erzeugen des Ausdruckes ist ein Fehler aufgetreten.\nStellen Sie sicher das das PDF aus dem letzen Druckvorgang\ngeschlossen oder unter anderem Namen abgespeichert\nwurde.", null, null, tt, Level.ALL, null);
+            ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.cmdOKActionPerformed(ActionEvent).ErrorInfo.title"), //NOI18N
+                    org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.cmdOKActionPerformed(ActionEvent).ErrorInfo.message"), //NOI18N
+                    null, null, tt, Level.ALL, null);
             JXErrorPane.showDialog(PrintingWidget.this, ei);
 //                    JXErrorDialog.showDialog(, "Fehler beim Drucken", "Beim Erzeugen des Ausdruckes ist ein Fehler aufgetreten.\nStellen Sie sicher das das PDF aus dem letzen Druckvorgang\ngeschlossen oder unter anderem Namen abgespeichert\nwurde.", tt);
 
@@ -827,7 +829,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             txpLoadingStatus.getStyledDocument().insertString(txpLoadingStatus.getStyledDocument().getLength(), msg + "\n", styles.get(reason));//NOI18N
           } catch (BadLocationException ble)
           {
-            log.error("Fehler beim Insert", ble);//NOI18N
+            log.error("error during Insert", ble);//NOI18N
           }
         }
       });

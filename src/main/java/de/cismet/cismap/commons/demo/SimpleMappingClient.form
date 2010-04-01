@@ -7,35 +7,35 @@
         <Menu class="javax.swing.JMenu" name="fileMenu">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.fileMenu.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.fileMenu.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="openMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.openMenuItem.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.openMenuItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="saveMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.saveMenuItem.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.saveMenuItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="saveAsMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.saveAsMenuItem.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.saveAsMenuItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="exitMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.exitMenuItem.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.exitMenuItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
               <Events>
@@ -47,35 +47,35 @@
         <Menu class="javax.swing.JMenu" name="editMenu">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.editMenu.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.editMenu.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="cutMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.cutMenuItem.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.cutMenuItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="copyMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.copyMenuItem.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.copyMenuItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="pasteMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.pasteMenuItem.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.pasteMenuItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="deleteMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.deleteMenuItem.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.deleteMenuItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
             </MenuItem>
@@ -84,21 +84,21 @@
         <Menu class="javax.swing.JMenu" name="helpMenu">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.helpMenu.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.helpMenu.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="contentsMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.contentsMenuItem.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.contentsMenuItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="aboutMenuItem">
               <Properties>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.aboutMenuItem.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.aboutMenuItem.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
               </Properties>
             </MenuItem>
@@ -169,7 +169,7 @@
         <Component class="javax.swing.JButton" name="cmdShowFeatureCollection">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.cmdShowFeatureCollection.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.cmdShowFeatureCollection.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -184,7 +184,7 @@
         <Component class="javax.swing.JTextField" name="txtKZ">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.txtKZ.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.txtKZ.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -209,7 +209,7 @@
         <Component class="javax.swing.JButton" name="jButton1">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.jButton1.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.jButton1.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -224,7 +224,7 @@
         <Component class="javax.swing.JButton" name="cmdBack">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.cmdBack.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.cmdBack.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>
@@ -239,7 +239,7 @@
         <Component class="javax.swing.JButton" name="cmdFwd">
           <Properties>
             <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.cmdFwd.text" replaceFormat="I18N.getString(&quot;{key}&quot;)"/>
+              <ResourceString bundle="de/cismet/cismap/commons/demo/Bundle.properties" key="SimpleMappingClient.cmdFwd.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
             </Property>
           </Properties>
           <Events>

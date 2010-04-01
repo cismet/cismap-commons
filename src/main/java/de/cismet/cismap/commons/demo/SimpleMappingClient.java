@@ -28,18 +28,17 @@ import org.postgis.PGgeometry;
  * @author  thorsten.hell@cismet.de
  */
 public class SimpleMappingClient extends javax.swing.JFrame implements RetrievalListener{
-    private static final ResourceBundle I18N = ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle");
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
     /** Creates new form SimpleMappingClient */
     public SimpleMappingClient() {
        try {
-            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource("de/cismet/cismap/commons/demo/log4j.properties"));
+            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource("de/cismet/cismap/commons/demo/log4j.properties"));//NOI18N
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-        log.info("Simple Mapping Client started");
+        log.info("Simple Mapping Client started");//NOI18N
         //ClearLookManager.setMode(ClearLookMode.ON);
         //PlasticLookAndFeel.setMyCurrentTheme(new DesertBlue());
         try {
@@ -50,12 +49,12 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
             //UIManager.setLookAndFeel(new com.sun.java.swing.plaf.windows.WindowsLookAndFeel());
            // UIManager.setLookAndFeel(new PlasticLookAndFeel());
         } catch (Exception e) {
-            log.warn("Fehler beim Einstellen des Lock&Feels's!",e);
+            log.warn("Error during the configuration of the Look&Feel!",e);//NOI18N
         }
 
         initComponents();
         
-        CismapPreferences cismapPrefs=new CismapPreferences(getClass().getResource("/cismapPreferences.xml"));        
+        CismapPreferences cismapPrefs=new CismapPreferences(getClass().getResource("/cismapPreferences.xml"));//NOI18N
         
 
 
@@ -65,7 +64,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 
         
         PNotificationCenter.defaultCenter().addListener(this, 
-                                   "coordinatesChanged", 
+                                   "coordinatesChanged", //NOI18N
                                    SimpleMoveListener.COORDINATES_CHANGED, 
                                    mapC.getInputListener(MappingComponent.MOTION));
         
@@ -136,7 +135,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         gridBagConstraints.weightx = 1.0;
         panStatus.add(cboMode, gridBagConstraints);
 
-        cmdShowFeatureCollection.setText(I18N.getString("SimpleMappingClient.cmdShowFeatureCollection.text")); // NOI18N
+        cmdShowFeatureCollection.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.cmdShowFeatureCollection.text")); // NOI18N
         cmdShowFeatureCollection.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdShowFeatureCollectionActionPerformed(evt);
@@ -144,7 +143,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         });
         panStatus.add(cmdShowFeatureCollection, new java.awt.GridBagConstraints());
 
-        txtKZ.setText(I18N.getString("SimpleMappingClient.txtKZ.text")); // NOI18N
+        txtKZ.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.txtKZ.text")); // NOI18N
         txtKZ.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtKZActionPerformed(evt);
@@ -161,7 +160,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         gridBagConstraints.weightx = 1.0;
         panStatus.add(lblCoord, gridBagConstraints);
 
-        jButton1.setText(I18N.getString("SimpleMappingClient.jButton1.text")); // NOI18N
+        jButton1.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -169,7 +168,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         });
         panStatus.add(jButton1, new java.awt.GridBagConstraints());
 
-        cmdBack.setText(I18N.getString("SimpleMappingClient.cmdBack.text")); // NOI18N
+        cmdBack.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.cmdBack.text")); // NOI18N
         cmdBack.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdBackActionPerformed(evt);
@@ -177,7 +176,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         });
         panStatus.add(cmdBack, new java.awt.GridBagConstraints());
 
-        cmdFwd.setText(I18N.getString("SimpleMappingClient.cmdFwd.text")); // NOI18N
+        cmdFwd.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.cmdFwd.text")); // NOI18N
         cmdFwd.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdFwdActionPerformed(evt);
@@ -200,18 +199,18 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
 
-        fileMenu.setText(I18N.getString("SimpleMappingClient.fileMenu.text")); // NOI18N
+        fileMenu.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.fileMenu.text")); // NOI18N
 
-        openMenuItem.setText(I18N.getString("SimpleMappingClient.openMenuItem.text")); // NOI18N
+        openMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.openMenuItem.text")); // NOI18N
         fileMenu.add(openMenuItem);
 
-        saveMenuItem.setText(I18N.getString("SimpleMappingClient.saveMenuItem.text")); // NOI18N
+        saveMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.saveMenuItem.text")); // NOI18N
         fileMenu.add(saveMenuItem);
 
-        saveAsMenuItem.setText(I18N.getString("SimpleMappingClient.saveAsMenuItem.text")); // NOI18N
+        saveAsMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.saveAsMenuItem.text")); // NOI18N
         fileMenu.add(saveAsMenuItem);
 
-        exitMenuItem.setText(I18N.getString("SimpleMappingClient.exitMenuItem.text")); // NOI18N
+        exitMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.exitMenuItem.text")); // NOI18N
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exitMenuItemActionPerformed(evt);
@@ -221,28 +220,28 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 
         menuBar.add(fileMenu);
 
-        editMenu.setText(I18N.getString("SimpleMappingClient.editMenu.text")); // NOI18N
+        editMenu.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.editMenu.text")); // NOI18N
 
-        cutMenuItem.setText(I18N.getString("SimpleMappingClient.cutMenuItem.text")); // NOI18N
+        cutMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.cutMenuItem.text")); // NOI18N
         editMenu.add(cutMenuItem);
 
-        copyMenuItem.setText(I18N.getString("SimpleMappingClient.copyMenuItem.text")); // NOI18N
+        copyMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.copyMenuItem.text")); // NOI18N
         editMenu.add(copyMenuItem);
 
-        pasteMenuItem.setText(I18N.getString("SimpleMappingClient.pasteMenuItem.text")); // NOI18N
+        pasteMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.pasteMenuItem.text")); // NOI18N
         editMenu.add(pasteMenuItem);
 
-        deleteMenuItem.setText(I18N.getString("SimpleMappingClient.deleteMenuItem.text")); // NOI18N
+        deleteMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.deleteMenuItem.text")); // NOI18N
         editMenu.add(deleteMenuItem);
 
         menuBar.add(editMenu);
 
-        helpMenu.setText(I18N.getString("SimpleMappingClient.helpMenu.text")); // NOI18N
+        helpMenu.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.helpMenu.text")); // NOI18N
 
-        contentsMenuItem.setText(I18N.getString("SimpleMappingClient.contentsMenuItem.text")); // NOI18N
+        contentsMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.contentsMenuItem.text")); // NOI18N
         helpMenu.add(contentsMenuItem);
 
-        aboutMenuItem.setText(I18N.getString("SimpleMappingClient.aboutMenuItem.text")); // NOI18N
+        aboutMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.aboutMenuItem.text")); // NOI18N
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
@@ -346,11 +345,11 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
     private void cboModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboModeActionPerformed
-        if (cboMode.getSelectedItem().equals("Zoom")) {
-            mapC.setInteractionMode("ZOOM");
+        if (cboMode.getSelectedItem().equals("Zoom")) {//NOI18N
+            mapC.setInteractionMode("ZOOM");//NOI18N
         }
-        else if(cboMode.getSelectedItem().equals("Pan")) {
-            mapC.setInteractionMode("PAN");
+        else if(cboMode.getSelectedItem().equals("Pan")) {//NOI18N
+            mapC.setInteractionMode("PAN");//NOI18N
         }
     }//GEN-LAST:event_cboModeActionPerformed
     
@@ -376,7 +375,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
     }
 
     public void retrievalError(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        log.error("Fehlermeldung aus einem Retrieval\n"+e.getRetrievedObject());
+        log.error("Retrieve error message\n"+e.getRetrievedObject());//NOI18N
     
     }
 

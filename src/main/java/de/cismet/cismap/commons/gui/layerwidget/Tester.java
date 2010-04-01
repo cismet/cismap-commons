@@ -53,7 +53,7 @@ public class Tester extends javax.swing.JFrame    {
     /** Creates new form Tester */
     public Tester() {
        try {
-            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource("de/cismet/cismap/commons/demo/log4j.properties"));
+            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource("de/cismet/cismap/commons/demo/log4j.properties"));//NOI18N
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -68,7 +68,7 @@ public class Tester extends javax.swing.JFrame    {
            // UIManager.setLookAndFeel(new PlasticLookAndFeel());
            //javax.swing.UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
         } catch (Exception e) {
-            log.warn("Fehler beim Einstellen des Lock&Feels's!",e);
+            log.warn("Error while configuring the Look&Feel!",e);//NOI18N
         }
         initComponents();
         CapabilityWidget capWidget=new CapabilityWidget();
@@ -82,8 +82,8 @@ public class Tester extends javax.swing.JFrame    {
         cm.addConfigurable(capWidget);
         cm.addConfigurable(layerWidget);
         cm.addConfigurable(mapC);
-        cm.setFileName("configuration.xml");
-        cm.setFolder(".cismap");
+        cm.setFileName("configuration.xml");//NOI18N
+        cm.setFolder(".cismap");//NOI18N
         cm.configure();
        
         
@@ -141,10 +141,10 @@ public class Tester extends javax.swing.JFrame    {
         gridBagConstraints.weighty = 1.0;
         getContentPane().add(panMap, gridBagConstraints);
 
-        jButton2.setText("jButton2");
+        jButton2.setText(org.openide.util.NbBundle.getMessage(Tester.class, "Tester.jButton2.text")); // NOI18N
         getContentPane().add(jButton2, new java.awt.GridBagConstraints());
 
-        jButton1.setText("Home");
+        jButton1.setText(org.openide.util.NbBundle.getMessage(Tester.class, "Tester.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -152,7 +152,7 @@ public class Tester extends javax.swing.JFrame    {
         });
         jPanel1.add(jButton1);
 
-        jButton3.setText("LayerWidget");
+        jButton3.setText(org.openide.util.NbBundle.getMessage(Tester.class, "Tester.jButton3.text")); // NOI18N
         jButton3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton3ActionPerformed(evt);
@@ -160,7 +160,7 @@ public class Tester extends javax.swing.JFrame    {
         });
         jPanel1.add(jButton3);
 
-        jButton4.setText("Clear");
+        jButton4.setText(org.openide.util.NbBundle.getMessage(Tester.class, "Tester.jButton4.text")); // NOI18N
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton4ActionPerformed(evt);

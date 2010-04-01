@@ -51,12 +51,12 @@ public class MeasuringComponent extends javax.swing.JPanel {
     private final XBoundingBox initialBoundingBox;
     private RasterDocumentFeature mainRasterDocumentFeature;
     private final MessenGeometryListener mapListener;
-    private static final String MY_MESSEN_MODE = "MY_MESSEN_MODE";
+    private static final String MY_MESSEN_MODE = "MY_MESSEN_MODE";//NOI18N
 
     /** Creates new form MeasuringComponent */
     public MeasuringComponent() {
         //Wupp home
-        this(new XBoundingBox(2583621.251964098d, 5682507.032498134d, 2584022.9413952776d, 5682742.852810634d, "EPSG:31466", false));
+        this(new XBoundingBox(2583621.251964098d, 5682507.032498134d, 2584022.9413952776d, 5682742.852810634d, "EPSG:31466", false));//NOI18N
     }
 
     public MeasuringComponent(XBoundingBox initialBBox) {
@@ -110,7 +110,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
             }
             getFeatureCollection().addFeature(feature);
         } else {
-            log.warn("Feature is null!");
+            log.warn("Feature is null!");//NOI18N
         }
     }
 

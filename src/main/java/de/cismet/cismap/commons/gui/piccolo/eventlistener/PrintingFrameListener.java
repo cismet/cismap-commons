@@ -221,7 +221,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
     @Override
     public void mousePressed(PInputEvent event) {
         super.mousePressed(event);
-        log.debug("mousePressed:" + event);
+        log.debug("mousePressed:" + event);//NOI18N
         if (event.getPickedNode() == getPrintingRectangle() && event.getClickCount() < 2) {
             inDragOperation = true;
             startDragPosition = event.getCanvasPosition();

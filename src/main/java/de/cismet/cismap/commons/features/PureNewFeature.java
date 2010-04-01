@@ -175,19 +175,19 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
 //        }
 
 
-                if (name.trim().equals("")) {
+                if (name.trim().equals("")) {   //NOI18N
                     if (getGeometry() instanceof Point) {
-                        name = "Neuer Punkt";
+                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPoint") ;//NOI18N
                     } else if (getGeometry() instanceof LineString) {
-                        name = "Neuer Linienzug";
+                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolyline"); //NOI18N
                     } else {
-                        name = "Neues Polygon";
+                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolygon") ;//NOI18N
                     }
                 }
                 return name;
             } catch (Exception e) {
-                log.fatal("getName() error", e);
-                return "Error in getName()";
+                log.fatal("getName() error", e);//NOI18N
+                return "Error in getName()";//NOI18N
             }
         }
     }
