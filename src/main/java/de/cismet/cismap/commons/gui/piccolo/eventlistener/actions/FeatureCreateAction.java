@@ -45,7 +45,7 @@ public class FeatureCreateAction implements CustomAction {
      * @return Beschreibungsstring
      */
     public String info() {
-        return "Erstelle Feature: " + f;
+        return org.openide.util.NbBundle.getMessage(FeatureCreateAction.class, "FeatureCreateAction.info().return", new Object[] {f});//NOI18N
     }
 
     /**

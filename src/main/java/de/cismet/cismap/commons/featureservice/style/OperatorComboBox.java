@@ -13,8 +13,15 @@ import javax.swing.JComboBox;
  * @author nh
  */
 public class OperatorComboBox extends JComboBox {
-    String[] arr =  {"kleiner als", "kleiner oder gleich","gleich","ungleich",
-                     "gr\u00F6\u00DFer oder gleich","gr\u00F6\u00DFer als","enth\u00E4lt","gleicht"};
+    String[] arr =  {
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.lessThan"),//NOI18N
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.lessThanOrEqual"),//NOI18N
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.equal"),//NOI18N
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.notEqual"),//NOI18N
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.greaterThanOrEqual"),//NOI18N
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.greaterThan"),//NOI18N
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.contains"),//NOI18N
+        org.openide.util.NbBundle.getMessage(OperatorComboBox.class, "OperatorComboBox.arr.isLike")};//NOI18N
     
     public OperatorComboBox() {
         super();

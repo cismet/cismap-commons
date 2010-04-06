@@ -46,8 +46,8 @@ import java.util.Vector;
  */
 public abstract class AbstractRetrievalService implements RetrievalService
 {
-  public final static String PROGRESS_PROPERTY = "progress";
-  public final static String PROGRESS_REFRESH = "refresh";
+  public final static String PROGRESS_PROPERTY = "progress";//NOI18N
+  public final static String PROGRESS_REFRESH = "refresh";//NOI18N
 
   protected final static boolean DEBUG = Debug.DEBUG;
   protected final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
@@ -163,7 +163,7 @@ public abstract class AbstractRetrievalService implements RetrievalService
     synchronized (fireRetrievalErrorLock)
     {
       this.setProgress(0);
-      logger.warn("fireRetrievalError: ", new CurrentStackTrace());
+      logger.warn("fireRetrievalError: ", new CurrentStackTrace());//NOI18N
       e.setRetrievalService(this);
       Iterator it = listeners.iterator();
       while (it.hasNext())
@@ -207,7 +207,7 @@ public abstract class AbstractRetrievalService implements RetrievalService
     int oldProgress = this.progress;
     if(progress > 100 || progress < -1)
     {
-      logger.warn("invalid progress '" + progress + "', setting to -1 (indeterminate)");
+      logger.warn("invalid progress '" + progress + "', setting to -1 (indeterminate)");//NOI18N
       this.progress = -1;
     }
     else

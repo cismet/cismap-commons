@@ -49,18 +49,18 @@ public class SimpleFeatureServiceSqlStatement {
     String x2Token; 
     String y2Token;
     
-    public final static String ALL_FIELDS_TOKEN="<cismap::AllFields>";
-    public final static String X1_TOKEN="<cismap::x1>";
-    public final static String Y1_TOKEN="<cismap::y1>";
-    public final static String X2_TOKEN="<cismap::x2>";
-    public final static String Y2_TOKEN="<cismap::y2>";
+    public final static String ALL_FIELDS_TOKEN="<cismap::AllFields>";//NOI18N
+    public final static String X1_TOKEN="<cismap::x1>";//NOI18N
+    public final static String Y1_TOKEN="<cismap::y1>";//NOI18N
+    public final static String X2_TOKEN="<cismap::x2>";//NOI18N
+    public final static String Y2_TOKEN="<cismap::y2>";//NOI18N
     
-    private String allFields="";
+    private String allFields="";//NOI18N
     private double x1=0;
     private double y1=0;
     private double x2=0;
     private double y2=0;
-    private String orderBy="";
+    private String orderBy="";//NOI18N
     
     public SimpleFeatureServiceSqlStatement(String sqlTemplate,String allFieldsToken,String x1Token, String y1Token, String x2Token, String y2Token) {
         this.sqlTemplate=sqlTemplate;
@@ -115,20 +115,20 @@ public class SimpleFeatureServiceSqlStatement {
     public String getFeaturesStatement() {
         String ret=sqlTemplate;
         ret=sqlTemplate.replaceAll(allFieldsToken, allFields);
-        ret=ret.replaceAll(x1Token, x1+"");
-        ret=ret.replaceAll(y1Token, y1+"");
-        ret=ret.replaceAll(x2Token, x2+"");
-        ret=ret.replaceAll(y2Token, y2+"");
-        return ret+" "+orderBy;
+        ret=ret.replaceAll(x1Token, x1+"");//NOI18N
+        ret=ret.replaceAll(y1Token, y1+"");//NOI18N
+        ret=ret.replaceAll(x2Token, x2+"");//NOI18N
+        ret=ret.replaceAll(y2Token, y2+"");//NOI18N
+        return ret+" "+orderBy;//NOI18N
     }
     
     public String getCountFeaturesStatement() {
         String ret=sqlTemplate;
-        ret=ret.replaceAll(allFieldsToken, "count(*)");
-        ret=ret.replaceAll(x1Token, x1+"");
-        ret=ret.replaceAll(y1Token, y1+"");
-        ret=ret.replaceAll(x2Token, x2+"");
-        ret=ret.replaceAll(y2Token, y2+"");
+        ret=ret.replaceAll(allFieldsToken, "count(*)");//NOI18N
+        ret=ret.replaceAll(x1Token, x1+"");//NOI18N
+        ret=ret.replaceAll(y1Token, y1+"");//NOI18N
+        ret=ret.replaceAll(x2Token, x2+"");//NOI18N
+        ret=ret.replaceAll(y2Token, y2+"");//NOI18N
         return ret;
     }
 
@@ -146,9 +146,9 @@ public class SimpleFeatureServiceSqlStatement {
     
     
     public static void main (String[] args) {
-        SimpleFeatureServiceSqlStatement sqlStatement= new SimpleFeatureServiceSqlStatement("select <cismap::AllFields> from geom, cs_all_attr_mapping where geom.id=attr_object_id and attr_class_id=0 and class_id=11 and geom.geo_field && GeomFromText('BOX3D(<cismap::x1> <cismap::y1>,<cismap::x2> <cismap::y2>)',-1)", 
-                                                                                        "<cismap::AllFields>", "<cismap::x1>","<cismap::y1>", "<cismap::x2>", "<cismap::y2>");
-        sqlStatement.setAllFields("'Kassenzeichen' as Type,object_id as GroupingKey, object_id as ObjectName,geo_field as Geom");
+        SimpleFeatureServiceSqlStatement sqlStatement= new SimpleFeatureServiceSqlStatement("select <cismap::AllFields> from geom, cs_all_attr_mapping where geom.id=attr_object_id and attr_class_id=0 and class_id=11 and geom.geo_field && GeomFromText('BOX3D(<cismap::x1> <cismap::y1>,<cismap::x2> <cismap::y2>)',-1)", //NOI18N
+                                                                                        "<cismap::AllFields>", "<cismap::x1>","<cismap::y1>", "<cismap::x2>", "<cismap::y2>");//NOI18N
+        sqlStatement.setAllFields("'Kassenzeichen' as Type,object_id as GroupingKey, object_id as ObjectName,geo_field as Geom");//NOI18N
         sqlStatement.setX1(1);
         sqlStatement.setY1(2);
         sqlStatement.setX2(3);

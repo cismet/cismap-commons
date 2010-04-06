@@ -103,7 +103,7 @@ public class PHandle extends PPath {
 
             @Override
             protected void startDrag(PInputEvent event) {
-                log.debug("Handle Start Drag");
+                log.debug("Handle Start Drag");//NOI18N
                 super.startDrag(event);
                 inDragOperation = true;
                 startHandleDrag(event.getPositionRelativeTo(PHandle.this), event);
@@ -111,7 +111,7 @@ public class PHandle extends PPath {
 
             @Override
             protected void drag(PInputEvent event) {
-                log.debug("Handle Drag");
+                log.debug("Handle Drag");//NOI18N
                 super.drag(event);
                 PDimension aDelta = event.getDeltaRelativeTo(PHandle.this);
                 if (aDelta.getWidth() != 0 || aDelta.getHeight() != 0) {
@@ -121,7 +121,7 @@ public class PHandle extends PPath {
 
             @Override
             protected void endDrag(PInputEvent event) {
-                log.debug("Handle End Drag");
+                log.debug("Handle End Drag");//NOI18N
                 super.endDrag(event);
                 inDragOperation = false;
                 endHandleDrag(event.getPositionRelativeTo(PHandle.this), event);
@@ -147,7 +147,7 @@ public class PHandle extends PPath {
 
             @Override
             public void mouseClicked(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-                log.debug("Handle Mouse Clicked");
+                log.debug("Handle Mouse Clicked");//NOI18N
                 handleClicked(pInputEvent);
             }
 

@@ -8,17 +8,17 @@ public class Test extends JFrame {
     public Test () {
         setContentPane (new Desktop ());
         setDefaultCloseOperation (EXIT_ON_CLOSE);
-        setTitle ("Test");
+        setTitle (org.openide.util.NbBundle.getMessage(Test.class, "Test.title"));//NOI18N
         setSize (600, 400);
         setLocationRelativeTo (null);
         setVisible (true);
     }
  
     public static void main (String[] parameters) {
-        //new Test ();
-        String s="SRID=31466;POLYGON((2583920 5677047,2583920 5677547,2584420 5677547,2584420 5677047,2583920 5677047))";
+        new Test ();
+        String s="SRID=31466;POLYGON((2583920 5677047,2583920 5677547,2584420 5677547,2584420 5677047,2583920 5677047))";//NOI18N
        
-        System.out.println("s:"+s.replaceAll("SRID=31466","SRID=-1"));
+        System.out.println("s:"+s.replaceAll("SRID=31466","SRID=-1"));//NOI18N
     }
  
     // the desktop; note that JLayeredPane is very picky about the order in
@@ -86,9 +86,9 @@ public class Test extends JFrame {
     private class TestPanel extends JPanel {
         public TestPanel (final Desktop desktop) {
             setLayout (new FlowLayout (FlowLayout.LEFT));
-            add (new JButton (new AbstractAction ("Open modal dialog") {
+            add (new JButton (new AbstractAction (org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.button.text")) {//NOI18N
                 public void actionPerformed (ActionEvent event) {
-                    desktop.openModalDialog ("This dialog is modal!");
+                    desktop.openModalDialog (org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.modalDialog.text"));//NOI18N
                 }
             }));
         }
@@ -124,17 +124,17 @@ public class Test extends JFrame {
  
     private class TestFrame extends JInternalFrame {
         public TestFrame (String message) {
-            putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);    
+            putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);//NOI18N
 //            setIconifiable (false);
 //            setMaximizable (false);
 //            setResizable (false);
            setClosable (true);
             
             setDefaultCloseOperation (HIDE_ON_CLOSE);
-            setTitle ("Dialog");
+            setTitle (org.openide.util.NbBundle.getMessage(Test.class, "Test.TestFrame.title"));//NOI18N
  
             getContentPane ().setLayout (new FlowLayout ());
-            getContentPane ().add (new JLabel ("57657667"));
+            getContentPane ().add (new JLabel ("57657667"));//NOI18N
  
             pack ();
         }

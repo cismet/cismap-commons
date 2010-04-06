@@ -47,8 +47,8 @@ public class FeatureMoveAction implements CustomAction {
      * Bewegt das Feature.
      */
     public void doAction() {
-        log.debug("X=" + dim.getWidth());
-        log.debug("Y=" + dim.getHeight());
+        log.debug("X=" + dim.getWidth());//NOI18N
+        log.debug("Y=" + dim.getHeight());//NOI18N
         Iterator it = features.iterator();
         while (it.hasNext()) {
             Object o = it.next();
@@ -69,7 +69,7 @@ public class FeatureMoveAction implements CustomAction {
      * @return  Beschreibungsstring
      */
     public String info() {
-        return "Bewege Feature um (" + dim.getWidth() + ", " + dim.getHeight() + ")";
+        return org.openide.util.NbBundle.getMessage(FeatureMoveAction.class, "FeatureMoveAction.info().return", new Object[] {dim.getWidth(), dim.getHeight()});//NOI18N
     }
 
     /**

@@ -55,7 +55,7 @@ public class PBoundsWithCleverToString extends PBounds{
         double y2=wtst.getWorldY(y);
         double x2=x1+width;
         double y1=y2-height;
-        return StaticDecimalTools.round("0.00",x1)+","+StaticDecimalTools.round("0.00",y1)+","+StaticDecimalTools.round("0.00",x2)+","+StaticDecimalTools.round("0.00",y2);
+        return StaticDecimalTools.round("0.00",x1)+","+StaticDecimalTools.round("0.00",y1)+","+StaticDecimalTools.round("0.00",x2)+","+StaticDecimalTools.round("0.00",y2);//NOI18N
         
     }
     

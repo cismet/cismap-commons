@@ -24,14 +24,14 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
 {
   //public final static String SHAPE_FEATURELAYER_TYPE = "ShapeFileFeatureServiceLayer";
   public static final Map<Integer, Icon> layerIcons = TypeSafeCollections.newHashMap();
-  public static final String SHAPE_FEATURELAYER_TYPE = "ShapeFeatureServiceLayer";
+  public static final String SHAPE_FEATURELAYER_TYPE = "ShapeFeatureServiceLayer";//NOI18N
 
   static
   {
-    layerIcons.put(LAYER_ENABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png")));
-    layerIcons.put(LAYER_ENABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShapeInvisible.png")));
-    layerIcons.put(LAYER_DISABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShape.png")));
-    layerIcons.put(LAYER_DISABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png")));
+    layerIcons.put(LAYER_ENABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png")));//NOI18N
+    layerIcons.put(LAYER_ENABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShapeInvisible.png")));//NOI18N
+    layerIcons.put(LAYER_DISABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShape.png")));//NOI18N
+    layerIcons.put(LAYER_DISABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png")));//NOI18N
   }
 
   public ShapeFileFeatureService(String name, URI documentURI, long documentSize, Vector<FeatureServiceAttribute> attributes) throws Exception
@@ -83,7 +83,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
   @Override
   public void setQuery(String query)
   {
-    logger.warn("unexpected call to setQuery, not supported by this service:\n" + query);
+    logger.warn("unexpected call to setQuery, not supported by this service:\n" + query);//NOI18N
   }
 
   @Override
@@ -111,7 +111,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
   @Override
   public Object clone()
   {
-    logger.info("cloning service "+this.getName());
+    logger.info("cloning service "+this.getName());//NOI18N
     return new ShapeFileFeatureService(this);
   }
 

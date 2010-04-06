@@ -45,9 +45,9 @@ import javax.swing.ImageIcon;
  * @author thorsten.hell@cismet.de
  */
 public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandler {
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget");
-    final public static String FEATURE_INFO_MODE = "FEATURE_INFO_CLICK";
-    private ImageIcon info = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/featureInfo.png"));
+    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget");//NOI18N
+    final public static String FEATURE_INFO_MODE = "FEATURE_INFO_CLICK";//NOI18N
+    private ImageIcon info = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/featureInfo.png"));//NOI18N
     private FixedPImage pInfo = new FixedPImage(info.getImage());
 
     /** Creates a new instance of GetFeatureInfoClickDetectionListener */

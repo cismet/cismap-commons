@@ -74,12 +74,12 @@ public class CismapPreferences {
         readFromCismapPreferences(cismapPreferences);
     }
     private void readFromCismapPreferences(Element cismapPreferences) {
-        try {layersPrefs=new LayersPreferences(this, cismapPreferences.getChild("cismapLayersPreferences"));}
-        catch (Exception e) {log.warn("Fehler beim Laden der LayersPreferences",e);}
-        try {globalPrefs=new GlobalPreferences(cismapPreferences.getChild("cismapGlobalPreferences"));}
-        catch (Exception e) {log.warn("Fehler beim Laden der GlobalPreferences",e);}
-        try {capabilityPrefs=new CapabilitiesPreferences(cismapPreferences.getChild("cismapCapabilitiesPreferences"),cismapPreferences.getChild("cismapCapabilitiesPreferences"));}
-        catch (Exception e) {log.warn("Fehler beim Laden der CapabilitiesPreferences",e);}
+        try {layersPrefs=new LayersPreferences(this, cismapPreferences.getChild("cismapLayersPreferences"));}//NOI18N
+        catch (Exception e) {log.warn("Error while loading the LayersPreferences",e);}//NOI18N
+        try {globalPrefs=new GlobalPreferences(cismapPreferences.getChild("cismapGlobalPreferences"));}//NOI18N
+        catch (Exception e) {log.warn("Error while loading the GlobalPreferences",e);}//NOI18N
+        try {capabilityPrefs=new CapabilitiesPreferences(cismapPreferences.getChild("cismapCapabilitiesPreferences"),cismapPreferences.getChild("cismapCapabilitiesPreferences"));}//NOI18N
+        catch (Exception e) {log.warn("Error while loading the CapabilitiesPreferences",e);}//NOI18N
     }
     public LayersPreferences getLayersPrefs() {
         return layersPrefs;

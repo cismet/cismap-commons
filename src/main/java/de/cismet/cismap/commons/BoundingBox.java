@@ -97,11 +97,11 @@ public class BoundingBox implements Cloneable,Serializable{
     }
 
     public BoundingBox(Element parent) throws DataConversionException{
-        Element conf=parent.getChild("BoundingBox");
-        setX1(conf.getAttribute("x1").getDoubleValue());
-        setY1(conf.getAttribute("y1").getDoubleValue());
-        setX2(conf.getAttribute("x2").getDoubleValue());
-        setY2(conf.getAttribute("y2").getDoubleValue());
+        Element conf=parent.getChild("BoundingBox");//NOI18N
+        setX1(conf.getAttribute("x1").getDoubleValue());//NOI18N
+        setY1(conf.getAttribute("y1").getDoubleValue());//NOI18N
+        setX2(conf.getAttribute("x2").getDoubleValue());//NOI18N
+        setY2(conf.getAttribute("y2").getDoubleValue());//NOI18N
     }
 
     public BoundingBox(Geometry geom) {
@@ -121,7 +121,7 @@ public class BoundingBox implements Cloneable,Serializable{
             setY2(((Polygon)bb).getExteriorRing().getCoordinateN(2).y);
         }
         else {
-            log.fatal("BoundingBox wurde nicht angelegt von jtsGeometry:"+geom);
+            log.fatal("BoundingBox was not created by jtsGeometry:"+geom);//NOI18N
         }
     }
 
@@ -138,7 +138,7 @@ public class BoundingBox implements Cloneable,Serializable{
         }
 
         catch (GM_Exception gmEx) {
-            log.error("Error during creating BoundingBox fromGML",gmEx);
+            log.error("Error during creating BoundingBox from GML",gmEx);//NOI18N
         }
     }
 
@@ -241,7 +241,7 @@ public class BoundingBox implements Cloneable,Serializable{
      */
     public String toString() {
          
-        return "("+round(getX1())+","+round(getY1())+","+round(getX2())+","+round(getY2())+")";
+        return "("+round(getX1())+","+round(getY1())+","+round(getX2())+","+round(getY2())+")";//NOI18N
     }
     
     /**
@@ -249,18 +249,18 @@ public class BoundingBox implements Cloneable,Serializable{
      * @return String to assemble URL
      */
     public String getURLString() {
-        return getX1()+","+getY1()+","+getX2()+","+getY2();
+        return getX1()+","+getY1()+","+getX2()+","+getY2();//NOI18N
     }
     
     public String getGeometryFromTextLineString(){
-        return "LINESTRING("+getX1()+" "+getY1()+","+getX2()+" "+getY2()+")";
+        return "LINESTRING("+getX1()+" "+getY1()+","+getX2()+" "+getY2()+")";//NOI18N
     }
     /**
      * This Method return the BoundingBox like BOX3D(-179.99999999999997,-105.48710130136223,176.35443037974682,114.6141645214226)
      * @return String to work in GeometryFromText
      */
     public String getGeometryFromTextCompatibleString() {
-        return "BOX3D("+getURLString()+")";
+        return "BOX3D("+getURLString()+")";//NOI18N
     }    
 
     public Logger getLog() {
@@ -299,7 +299,7 @@ public class BoundingBox implements Cloneable,Serializable{
      */
     public static String round(double d)   {
         double dd=((double)(Math.round(d*100)))/100;
-        String pattern ="0.00";
+        String pattern ="0.00";//NOI18N
         java.text.DecimalFormat myFormatter = new java.text.DecimalFormat(pattern);
         java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
         symbols.setDecimalSeparator('.');
@@ -309,11 +309,11 @@ public class BoundingBox implements Cloneable,Serializable{
     }
 
     public Element getJDOMElement() {
-        Element e=new Element("BoundingBox");
-        e.setAttribute("x1",new Double(x1).toString());
-        e.setAttribute("y1",new Double(y1).toString());
-        e.setAttribute("x2",new Double(x2).toString());
-        e.setAttribute("y2",new Double(y2).toString());
+        Element e=new Element("BoundingBox");//NOI18N
+        e.setAttribute("x1",new Double(x1).toString());//NOI18N
+        e.setAttribute("y1",new Double(y1).toString());//NOI18N
+        e.setAttribute("x2",new Double(x2).toString());//NOI18N
+        e.setAttribute("y2",new Double(y2).toString());//NOI18N
         return e;
     }
 //    public Geometry getGeometry() {
@@ -330,8 +330,8 @@ public class BoundingBox implements Cloneable,Serializable{
     }
 
    public String toGmlString() {
-       return "<gml:Box><gml:coord><gml:X>"+getX1()+"</gml:X><gml:Y>"+getY1()+"</gml:Y></gml:coord>"+
-                                   "<gml:coord><gml:X>"+getX2()+"</gml:X><gml:Y>"+getY2()+"</gml:Y></gml:coord>"+
-                 "</gml:Box>";
+       return "<gml:Box><gml:coord><gml:X>"+getX1()+"</gml:X><gml:Y>"+getY1()+"</gml:Y></gml:coord>"+//NOI18N
+                                   "<gml:coord><gml:X>"+getX2()+"</gml:X><gml:Y>"+getY2()+"</gml:Y></gml:coord>"+//NOI18N
+                 "</gml:Box>";//NOI18N
    }
 }

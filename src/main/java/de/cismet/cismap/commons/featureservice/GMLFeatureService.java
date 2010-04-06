@@ -24,15 +24,15 @@ import org.jdom.Element;
 public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeature, String>
 {
 
-  public static final String GML_FEATURELAYER_TYPE = "GMLFeatureServiceLayer";
+  public static final String GML_FEATURELAYER_TYPE = "GMLFeatureServiceLayer";//NOI18N
   public static final Map<Integer, Icon> layerIcons = TypeSafeCollections.newHashMap();
 
   static
   {
-    layerIcons.put(LAYER_ENABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerGml.png")));
-    layerIcons.put(LAYER_ENABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerGmlInvisible.png")));
-    layerIcons.put(LAYER_DISABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGml.png")));
-    layerIcons.put(LAYER_DISABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGmlInvisible.png")));
+    layerIcons.put(LAYER_ENABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerGml.png")));//NOI18N
+    layerIcons.put(LAYER_ENABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerGmlInvisible.png")));//NOI18N
+    layerIcons.put(LAYER_DISABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGml.png")));//NOI18N
+    layerIcons.put(LAYER_DISABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerGmlInvisible.png")));//NOI18N
   }
 
   public GMLFeatureService(String name, URI documentURI, long documentSize, Vector<FeatureServiceAttribute> attributes) throws Exception
@@ -82,7 +82,7 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
   @Override
   public void setQuery(String query)
   {
-    logger.warn("unexpected call to setQuery, not supported by this service:\n" + query);
+    logger.warn("unexpected call to setQuery, not supported by this service:\n" + query);//NOI18N
   }
 
   @Override
@@ -110,7 +110,7 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
   @Override
   public Object clone()
   {
-    logger.info("cloning service "+this.getName());
+    logger.info("cloning service "+this.getName());//NOI18N
     return new GMLFeatureService(this);
   }
 }

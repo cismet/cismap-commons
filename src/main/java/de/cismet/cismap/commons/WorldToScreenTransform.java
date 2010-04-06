@@ -45,7 +45,7 @@ public class WorldToScreenTransform {
     public WorldToScreenTransform(double x,double y) {
         xHome=x;
         yHome=y;
-        log.debug("WorldToScreenTransform(x="+xHome+",y="+yHome+")");
+        log.debug("WorldToScreenTransform(x="+xHome+",y="+yHome+")");//NOI18N
     }
     
     
@@ -77,7 +77,7 @@ public class WorldToScreenTransform {
     
     
     private static String xyToScreen(WorldToScreenTransform wtst,double x, double y){
-        return wtst.getScreenX(x)+","+wtst.getScreenY(y);
+        return wtst.getScreenX(x)+","+wtst.getScreenY(y);//NOI18N
     }
     
     public static void main(String[] args) {
@@ -95,7 +95,7 @@ public class WorldToScreenTransform {
     }
     
     public String toString() {
-        return "de.cismet.cismap.commons.WorldToScreenTransform: xHome:"+xHome+ " yHome:"+yHome;
+        return "de.cismet.cismap.commons.WorldToScreenTransform: xHome:"+xHome+ " yHome:"+yHome;//NOI18N
     }
     
     

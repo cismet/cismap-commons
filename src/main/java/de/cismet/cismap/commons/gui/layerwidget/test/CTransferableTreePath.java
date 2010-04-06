@@ -11,7 +11,7 @@ import javax.swing.tree.TreePath;
 class CTransferableTreePath implements Transferable
 {
 	// The type of DnD object being dragged...
-	public static final DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "TreePath");
+	public static final DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "TreePath");//NOI18N
 
 	private TreePath		_path;
 

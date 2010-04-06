@@ -1,24 +1,32 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.0" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
+<Form version="1.2" maxVersion="1.2" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <NonVisualComponents>
-    <Menu class="javax.swing.JPopupMenu" name="pmenProps">
+    <Container class="javax.swing.JPopupMenu" name="pmenProps">
+
+      <Layout class="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout">
+        <Property name="useNullLayout" type="boolean" value="true"/>
+      </Layout>
       <SubComponents>
         <MenuItem class="javax.swing.JMenuItem" name="mitLayerName">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Item"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="de/cismet/cismap/commons/gui/simplelayerwidget/Bundle.properties" key="LayerControl.mitLayerName.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+            </Property>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
         </MenuItem>
-        <MenuItem class="javax.swing.JSeparator" name="jSeparator1">
-        </MenuItem>
+        <Component class="javax.swing.JSeparator" name="jSeparator1">
+        </Component>
         <MenuItem class="javax.swing.JCheckBoxMenuItem" name="mitGridEnabled">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Wird von Snapping verwendet"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="de/cismet/cismap/commons/gui/simplelayerwidget/Bundle.properties" key="LayerControl.mitGridEnabled.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+            </Property>
           </Properties>
         </MenuItem>
       </SubComponents>
-    </Menu>
+    </Container>
   </NonVisualComponents>
   <Properties>
     <Property name="toolTipText" type="java.lang.String" value=""/>
@@ -29,6 +37,8 @@
     <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="formKeyPressed"/>
   </Events>
   <AuxValues>
+    <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
+    <AuxValue name="FormSettings_generateFQN" type="java.lang.Boolean" value="true"/>
     <AuxValue name="FormSettings_generateMnemonicsCode" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_i18nAutoMode" type="java.lang.Boolean" value="false"/>
     <AuxValue name="FormSettings_listenerGenerationStyle" type="java.lang.Integer" value="0"/>
@@ -48,7 +58,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblIcon">
       <Properties>
-        <Property name="text" type="java.lang.String" value="  "/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="de/cismet/cismap/commons/gui/simplelayerwidget/Bundle.properties" key="LayerControl.lblIcon.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <Events>
         <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="lblIconMouseClicked"/>
@@ -61,7 +73,9 @@
     </Component>
     <Component class="javax.swing.JLabel" name="lblLayerName">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Verdis Layer"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="de/cismet/cismap/commons/gui/simplelayerwidget/Bundle.properties" key="LayerControl.lblLayerName.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <Events>
         <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="lblLayerNameMouseClicked"/>

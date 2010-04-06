@@ -32,13 +32,12 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
  * @author  thorsten.hell@cismet.de
  */
 public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener {
-
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());    private WFSFormFeature strasse = null;
     private WFSFormFeature poi = null;
 
     /** Creates new form WFSFormTester */
     public WFSFormPOISearch() {
-        log.debug("new WFSFormPOISearch");
+        log.debug("new WFSFormPOISearch");//NOI18N
         try {
             initComponents();
 //        cboStreets.setEditable(true);
@@ -53,17 +52,17 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
 
                     DefaultListCellRenderer dlcr = new DefaultListCellRenderer();
                     JLabel lbl = (JLabel) (dlcr.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus));
-                    String additionalInfo = "";
+                    String additionalInfo = "";//NOI18N
                     try {
                        
-                        FeatureProperty[] fpa = ((WFSFormFeature) value).getRawFeatureArray("app", "alternativeGeographicIdentifier", "http://www.deegree.org/app");
+                        FeatureProperty[] fpa = ((WFSFormFeature) value).getRawFeatureArray("app", "alternativeGeographicIdentifier", "http://www.deegree.org/app");//NOI18N
 
                         for (int i = 0; i < fpa.length; ++i) {
                             if (i>0){
-                                additionalInfo+=", " ;
+                                additionalInfo+=", " ;//NOI18N
                             }
                             
-                            additionalInfo+=((DefaultFeature) fpa[i].getValue()).getProperties(new QualifiedName("app", "alternativeGeographicIdentifier", new URI("http://www.deegree.org/app")))[0].getValue().toString();
+                            additionalInfo+=((DefaultFeature) fpa[i].getValue()).getProperties(new QualifiedName("app", "alternativeGeographicIdentifier", new URI("http://www.deegree.org/app")))[0].getValue().toString();//NOI18N
 
                         }
 
@@ -82,8 +81,8 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
 
 //        listComponents.put("cboAllLocationtypes",cboLocationtypes);
 //        listComponents.put("cboAllLocationtypesProgress",prbLocationtypes);
-            listComponents.put("cboPois", cboPois);
-            listComponents.put("cboPoisProgress", prbPois);
+            listComponents.put("cboPois", cboPois);//NOI18N
+            listComponents.put("cboPoisProgress", prbPois);//NOI18N
 
             pMark.setVisible(false);
             pMark.setSweetSpotX(0.5d);
@@ -110,7 +109,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
 
         //CismapBroker.getInstance().getMappingComponent().getHighlightingLayer().addChild(pMark);
         } catch (Exception e) {
-            log.error("Could not Create WFForm", e);
+            log.error("Could not Create WFForm", e);//NOI18N
         }
     }
 
@@ -119,12 +118,12 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
     }
     private void doSearch() {
         if (txtSearch.getText().length() >= 3) {
-            log.debug("doSearch");
+            log.debug("doSearch");//NOI18N
             HashMap<String, String> hm = new HashMap<String, String>();
-            hm.put("@@search_text@@", txtSearch.getText());
-            requestRefresh("cboPois", hm);
+            hm.put("@@search_text@@", txtSearch.getText());//NOI18N
+            requestRefresh("cboPois", hm);//NOI18N
         } else {
-            lblBehind.setText("mind. 3 Buchstaben");
+            lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.lblBehind.text"));//NOI18N
         }
     }
 
@@ -154,7 +153,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         setLayout(new java.awt.GridBagLayout());
 
         cmdOk.setMnemonic('P');
-        cmdOk.setText("Positionieren");
+        cmdOk.setText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.cmdOk.text")); // NOI18N
         cmdOk.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdOkActionPerformed(evt);
@@ -210,9 +209,8 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         add(panPois, gridBagConstraints);
 
         chkVisualize.setSelected(true);
-        chkVisualize.setToolTipText("Markierung anzeigen");
+        chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.chkVisualize.toolTipText")); // NOI18N
         chkVisualize.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        chkVisualize.setMargin(new java.awt.Insets(0, 0, 0, 0));
         chkVisualize.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkVisualizeActionPerformed(evt);
@@ -226,7 +224,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         add(chkVisualize, gridBagConstraints);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
-        jLabel1.setToolTipText("Markierung anzeigen");
+        jLabel1.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.jLabel1.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
@@ -235,9 +233,8 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         add(jLabel1, gridBagConstraints);
 
         chkLockScale.setSelected(true);
-        chkLockScale.setToolTipText("Ma\u00DFstab beibehalten");
+        chkLockScale.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.chkLockScale.toolTipText")); // NOI18N
         chkLockScale.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        chkLockScale.setMargin(new java.awt.Insets(0, 0, 0, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
@@ -246,7 +243,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         add(chkLockScale, gridBagConstraints);
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
-        jLabel2.setToolTipText("Ma\u00DFstab beibehalten");
+        jLabel2.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.jLabel2.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
@@ -269,7 +266,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         add(txtSearch, gridBagConstraints);
 
-        lblBehind.setText("mind. 3 Buchstaben");
+        lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.lblBehind.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -284,7 +281,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         panFill.setLayout(panFillLayout);
         panFillLayout.setHorizontalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 174, Short.MAX_VALUE)
+            .add(0, 200, Short.MAX_VALUE)
         );
         panFillLayout.setVerticalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -300,7 +297,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         add(panFill, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
     private void txtSearchInputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_txtSearchInputMethodTextChanged
-        log.fatal("kik");
+        log.fatal("kik");//NOI18N
     }//GEN-LAST:event_txtSearchInputMethodTextChanged
 
     private void chkVisualizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVisualizeActionPerformed
@@ -340,7 +337,7 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
     }//GEN-LAST:event_cmdOkActionPerformed
 
     private void cboPoisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboPoisActionPerformed
-        log.debug("cboPoisActionPerformed()");
+        log.debug("cboPoisActionPerformed()");//NOI18N
         if (cboPois.getSelectedItem() instanceof WFSFormFeature) {
             poi = (WFSFormFeature) cboPois.getSelectedItem();
         }
@@ -361,8 +358,8 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
    
 
     public void actionPerformed(ActionEvent e) {
-        lblBehind.setText(cboPois.getItemCount() + " Treffer");
-        log.debug("cboPois.getItemAt(0):" + cboPois.getItemAt(0));
+        lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormPOISearch.class, "WFSFormPOISearch.lblBehind.text2", new Object[]{cboPois.getItemCount()}));//NOI18N
+        log.debug("cboPois.getItemAt(0):" + cboPois.getItemAt(0));//NOI18N
         if (cboPois.getItemCount() == 1) {
             cboPois.setEditable(false);
             cboPois.setSelectedItem(cboPois.getItemAt(0));

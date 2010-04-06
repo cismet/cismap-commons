@@ -43,23 +43,23 @@ import java.awt.Font;
 import java.awt.geom.RoundRectangle2D;
 
 /**
- *
+ *de.cismet.cismap.commons.gui.printing.PrintingToolTip.PrintingToolTip().
  * @author thorsten.hell@cismet.de
  */
 public class PrintingToolTip extends PNode{
-    
+
     /** Creates a new instance of PrintingToolTip */
     public PrintingToolTip(Color backgroundColor) {
-        PImage image=new PImage(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/frameprint64.png")).getImage());
+        PImage image=new PImage(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/frameprint64.png")).getImage());//NOI18N
         image.setOffset(10,10);
-        PText t1=new PText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Auswahl_des_Druckbereichs:"));
+        PText t1=new PText(org.openide.util.NbBundle.getMessage(PrintingToolTip.class,"PrintingToolTip.PrintingToolTip(Color).t1"));//NOI18N
         
         Font defaultFont=t1.getFont();
         Font boldDefaultFont=new Font(defaultFont.getName(),defaultFont.getStyle()+Font.BOLD,defaultFont.getSize());
         t1.setFont(boldDefaultFont);
-        PText t2=new PText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("-_Verschieben_des_Druckbereichs_durch_Ziehen_und_Ablegen"));
-        PText t3=new PText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("-_Veraendern_des_Massstabes_durch_das_Mausrad_(nur_bei_freiem_Massstab)"));
-        PText t4=new PText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("-_Weiter_mit_Doppelclick"));
+        PText t2=new PText(org.openide.util.NbBundle.getMessage(PrintingToolTip.class,"PrintingToolTip.PrintingToolTip(Color).t2"));//NOI18N
+        PText t3=new PText(org.openide.util.NbBundle.getMessage(PrintingToolTip.class,"PrintingToolTip.PrintingToolTip(Color).t3"));//NOI18N
+        PText t4=new PText(org.openide.util.NbBundle.getMessage(PrintingToolTip.class,"PrintingToolTip.PrintingToolTip(Color).t4"));//NOI18N
         
 
         double textHeight=t1.getHeight()+5+t2.getHeight()+5+t3.getHeight()+5+t4.getHeight();

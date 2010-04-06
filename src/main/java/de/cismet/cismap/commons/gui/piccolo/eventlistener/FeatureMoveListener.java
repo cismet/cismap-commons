@@ -27,7 +27,7 @@ import java.util.Vector;
  */
 public class FeatureMoveListener extends PBasicInputEventHandler {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION_FEATUREMOVE";
+    public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION_FEATUREMOVE";//NOI18N
     protected Point2D pressPoint;
     protected Point2D dragPoint;
     protected PDimension dragDim;
@@ -81,7 +81,7 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
         if (moveListener != null) {
             moveListener.mouseMoved(e);
         } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
+            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");//NOI18N
         }
         super.mouseDragged(e);
         if (feature != null) {

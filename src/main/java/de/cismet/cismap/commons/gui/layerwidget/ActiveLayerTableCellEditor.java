@@ -101,7 +101,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
   private JTable table;
   private JComboBox cbbStyleChooser;
   private StyleDialog styleDialog;// = new StyleDialog(new JFrame("XXX"), true);
-  private JButton moreButton = new JButton(". .");
+  private JButton moreButton = new JButton(". .");//NOI18N
   private JButton wfsStyleButton = new JButton()
   {
     // paints the rectangle inside the button that creates the StyleDialog
@@ -133,7 +133,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
   private DefaultCellEditor stylesCellEditor;
   private JProgressBar progress = new JProgressBar(0, 100);
   private JSlider slider = new JSlider(0, 100);
-  private JLabel visibilityLabel = new JLabel("", JLabel.CENTER);
+  private JLabel visibilityLabel = new JLabel("", JLabel.CENTER);//NOI18N
   private JLabel emptyLabel = new JLabel();
   private RetrievalServiceLayer wmsServiceLayerThatFiresPropertyChangeEvents = null;
 
@@ -141,7 +141,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
   public ActiveLayerTableCellEditor()
   {
     //progress.setUI(new MetalProgressBarUI());
-    progress.setString("");
+    progress.setString("");//NOI18N
     progress.setStringPainted(true);
 
     visibilityLabel.setOpaque(false);
@@ -240,7 +240,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
           CismapBroker.getInstance().fireLayerAdded(ale);
         } catch (Exception ex)
         {
-          logger.error("Fehler beim Aendern des Styles", ex);
+          logger.error("Error while changing the style", ex);//NOI18N
         }
 
       }
@@ -254,7 +254,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        if(DEBUG)logger.debug("FeatureService-QueryEditorDialog aufrufen");
+        if(DEBUG)logger.debug("invoke FeatureService-QueryEditorDialog");//NOI18N
         QueryEditorDialog dia = new QueryEditorDialog(StaticSwingTools.getParentFrame(moreButton), true,
                 ((WebFeatureService) value).getQuery());
         dia.setVisible(true);
@@ -286,27 +286,27 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
 
           try
           {
-            if(DEBUG)logger.debug("FeatureService-StyleDialog aufrufen");
+            if(DEBUG)logger.debug("invoke FeatureService-StyleDialog");//NOI18N
             // only create one instance of the styledialog
             if (styleDialog == null)
             {
               Frame parentFrame = StaticSwingTools.getParentFrame(wfsStyleButton);
-              if(DEBUG)logger.debug("creating new StyleDialog '" + parentFrame.getTitle() + "'");
+              if(DEBUG)logger.debug("creating new StyleDialog '" + parentFrame.getTitle() + "'");//NOI18N
               styleDialog = new StyleDialog(parentFrame, true);
             }
 
             // configure dialog, adding attributes to the tab and
             // set style from the layer properties
-            if(DEBUG)logger.debug("configure dialog");
+            if(DEBUG)logger.debug("configure dialog");//NOI18N
             styleDialog.configureDialog(selectedService.getLayerProperties(), selectedService.getFeatureServiceAttributes(), selectedService.getQuery());
 
-            if(DEBUG)logger.debug("set dialog visible");
+            if(DEBUG)logger.debug("set dialog visible");//NOI18N
             styleDialog.setVisible(true);
 
 
           } catch (Throwable t)
           {
-            logger.error("could not configure StyleDialog: " + t.getMessage(), t);
+            logger.error("could not configure StyleDialog: " + t.getMessage(), t);//NOI18N
           }
           // check returnstatus
           if (styleDialog != null && styleDialog.isAccepted())
@@ -323,7 +323,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                   {
                     if(styleDialog.isGeoAttributeChanged() || styleDialog.isAttributeSelectionChanged())
                     {
-                      if(DEBUG)logger.debug("Attributes changed, updating the QUERY Element");
+                      if(DEBUG)logger.debug("Attributes changed, updating the QUERY Element");//NOI18N
                       Element query = ((WebFeatureService) selectedService).getQueryElement();
                       FeatureServiceUtilities.setGeometry(query, styleDialog.getSelectedGeoAttribute());
                       ((WebFeatureService) selectedService).setQueryElement(FeatureServiceUtilities.changePropertyNames(query, styleDialog.getSelectedAttributes()));
@@ -332,10 +332,12 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
 
                     if (styleDialog.isQueryStringChanged())
                     {
-                      int i = JOptionPane.showConfirmDialog(StaticSwingTools.getParentFrame(wfsStyleButton), "<html>QueryString wurde vom Benutzer geändert.<br>Sollen die Änderungen angewendet werden werden ?</html>", "Achtung", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                      int i = JOptionPane.showConfirmDialog(StaticSwingTools.getParentFrame(wfsStyleButton), org.openide.util.NbBundle.getMessage(ActiveLayerTableCellEditor.class, "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.message"), //NOI18N
+                              org.openide.util.NbBundle.getMessage(ActiveLayerTableCellEditor.class, "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.title"), //NOI18N
+                              JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                       if (i == JOptionPane.YES_OPTION)
                       {
-                         if(DEBUG)logger.debug("Query String changed, updating the QUERY String");
+                         if(DEBUG)logger.debug("Query String changed, updating the QUERY String");//NOI18N
                          selectedService.setQuery(styleDialog.getQueryString());
                          forceUpdate = true;
                       }
@@ -363,7 +365,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
             CismetThreadPool.execute(r);
           } else
           {
-            if(DEBUG)logger.debug("Style Dialog canceled");
+            if(DEBUG)logger.debug("Style Dialog canceled");//NOI18N
           }
         }
       }
@@ -415,7 +417,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
               @Override
               public void mouseClicked(MouseEvent e)
               {
-                if(DEBUG)logger.debug("Click" + e);
+                if(DEBUG)logger.debug("Click" + e);//NOI18N
               }
 
       @Override
@@ -456,7 +458,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
           JTree tree, Object value, boolean isSelected,
           boolean expanded, boolean leaf, int row)
   {
-    if(DEBUG)logger.debug("TreeCellEditor requested");
+    if(DEBUG)logger.debug("TreeCellEditor requested");//NOI18N
     JTextField treeEditorTextField = new JTextField();
     treeEditorTextField.setEditable(true);
     DefaultCellEditor treeEditor = new DefaultCellEditor(treeEditorTextField);
@@ -513,25 +515,25 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
       return visibilityLabel;
     } else if (realColumn == 2)
     {
-      if(DEBUG)logger.debug("Editor Spalte=" + realColumn);
+      if(DEBUG)logger.debug("Editor column=" + realColumn);//NOI18N
       if (value instanceof WMSServiceLayer)
       {
         try
         {
-          if(DEBUG)logger.debug("Combo");
+          if(DEBUG)logger.debug("Combo");//NOI18N
           DefaultComboBoxModel model = new DefaultComboBoxModel(wmsLayer.getOgcCapabilitiesLayer().getStyles());
           cbbStyleChooser.setModel(model);
           cbbStyleChooser.setSelectedItem(wmsLayer.getSelectedStyle());
           return stylesCellEditor.getTableCellEditorComponent(table, wmsLayer.getSelectedStyle(), isSelected, row, column);
         } catch (Exception e)
         {
-          logger.warn("Fehler beim setzen des StyleEditors", e);
+          logger.warn("Error while setting the StyleEditor", e);//NOI18N
           return null;
         }
 
       } else
       {
-        if(DEBUG)logger.debug("StyleButton");
+        if(DEBUG)logger.debug("StyleButton");//NOI18N
         return wfsStyleButton;
       }
 
@@ -598,8 +600,8 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
   @Override
   public void propertyChange(PropertyChangeEvent evt)
   {
-    if(DEBUG)logger.debug("Progressvalue in Editor changed");
-    if (evt.getSource() instanceof RetrievalServiceLayer && evt.getPropertyName().equals("progress"))
+    if(DEBUG)logger.debug("Progressvalue in Editor changed");//NOI18N
+    if (evt.getSource() instanceof RetrievalServiceLayer && evt.getPropertyName().equals("progress"))//NOI18N
     {
       int newValue = ((Integer) (evt.getNewValue())).intValue();
       if (newValue == 0)
@@ -651,7 +653,6 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
   }
 }
 
-
 class StyleChooserCellRenderer extends DefaultListCellRenderer
 {
 
@@ -659,7 +660,7 @@ class StyleChooserCellRenderer extends DefaultListCellRenderer
 
   public StyleChooserCellRenderer()
   {
-    styleIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/style.png"));
+    styleIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/style.png"));//NOI18N
   }
 
   @Override

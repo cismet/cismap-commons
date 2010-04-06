@@ -16,11 +16,11 @@ import org.deegree2.model.spatialschema.Geometry;
  * @author haffkeatcismet
  */
 public class GeometryHeuristics {
-    private static final Logger log = Logger.getLogger("de.cismet.cismap.commons.featureservice.GeometryHeuristics");
-    private static final String POINT = "Point";
-    private static final String LINESTRING = "LineString";
-    private static final String POLYGON = "Polygon";
-    private static final String MULTIPOLYGON = "MultiPolygon";
+    private static final Logger log = Logger.getLogger("de.cismet.cismap.commons.featureservice.GeometryHeuristics");//NOI18N
+    private static final String POINT = "Point";//NOI18N
+    private static final String LINESTRING = "LineString";//NOI18N
+    private static final String POLYGON = "Polygon";//NOI18N
+    private static final String MULTIPOLYGON = "MultiPolygon";//NOI18N
     private static final HashMap<String, Integer> geomOrder = new HashMap<String, Integer>();
     static {
         geomOrder.put(POINT, 1);

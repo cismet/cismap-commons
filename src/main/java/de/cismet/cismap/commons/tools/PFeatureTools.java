@@ -56,7 +56,7 @@ import java.util.Vector;
  * @author thorsten.hell@cismet.de
  */
 public class PFeatureTools {
-    private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.tools.PFeatureTools");
+    private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.tools.PFeatureTools");//NOI18N
         public static PFeature[] getPFeaturesInArea(MappingComponent mc, final PBounds bounds) {
         ArrayList al=new ArrayList();
         mc.getFeatureLayer().findIntersectingNodes(bounds, al);
@@ -228,7 +228,7 @@ public class PFeatureTools {
         } else if (parent instanceof ParentNodeIsAPFeature) {
             return getPFeatureByChild((ParentNodeIsAPFeature)parent);
         } else {
-            throw new  IllegalArgumentException("ParentNodeIsAPFeature "+child +" hat keinen ParentNode der PFeature ist");
+            throw new  IllegalArgumentException("ParentNodeIsAPFeature "+child +" has no ParentNode that is a PFeature");//NOI18N
         }
     }
     

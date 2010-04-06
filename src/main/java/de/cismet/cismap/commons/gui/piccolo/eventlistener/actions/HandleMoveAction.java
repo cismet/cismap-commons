@@ -95,8 +95,7 @@ public class HandleMoveAction implements CustomAction {
      * @return Beschreibungsstring
      */
     public String info() {
-        return "Bewege Handle (" + new Float(startX).intValue() + ", " +
-                new Float(startY).intValue() + ")";
+        return org.openide.util.NbBundle.getMessage(HandleMoveAction.class, "HandleMoveAction.info().return", new Object[]{new Float(startX).intValue(), new Float(startY).intValue()});//NOI18N
     }
 
     /**

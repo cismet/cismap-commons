@@ -39,12 +39,12 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
                 mc.getDragPerformanceImproverLayer().setVisible(false);
                 mc.getDragPerformanceImproverLayer().removeAllChildren();
                 for (int i = 0; i < mc.getFeatureServiceLayer().getChildrenCount(); ++i) {
-                    Object o = mc.getFeatureServiceLayer().getChild(i).getClientProperty("serviceLayer");
+                    Object o = mc.getFeatureServiceLayer().getChild(i).getClientProperty("serviceLayer");//NOI18N
                     boolean enabled = true;
                     if (o != null && o instanceof ServiceLayer) {
                         enabled = ((ServiceLayer) o).isEnabled() && mc.isBackgroundEnabled();
                     } else {
-                        log.warn("konnte nicht feststellen ob ServiceLayer enabled war, deswegen auf true gesetzt");
+                        log.warn("konnte nicht feststellen ob ServiceLayer enabled war, deswegen auf true gesetzt");//NOI18N
                     }
                     mc.getFeatureServiceLayer().getChild(i).setVisible(enabled);
                 }
@@ -68,7 +68,7 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
             MappingComponent mc = (MappingComponent) aEvent.getComponent();
 //            mc.getHandleLayer().removeAllChildren();
             if (mc.getCismapPrefs() != null && mc.getCismapPrefs().getGlobalPrefs() != null && mc.getCismapPrefs().getGlobalPrefs().isPanPerformanceBoosterEnabled() && mc.getMappingModel().getFeatureServices().size() > 0) {
-                log.debug("isPanPerformanceBoosterEnabled");
+                log.debug("isPanPerformanceBoosterEnabled");//NOI18N
                 refreshImage(mc);
                 mc.getDragPerformanceImproverLayer().setVisible(true);
                 mc.getRasterServiceLayer().setVisible(false);

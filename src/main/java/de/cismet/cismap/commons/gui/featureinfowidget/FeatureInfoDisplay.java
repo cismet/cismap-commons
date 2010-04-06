@@ -45,16 +45,16 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
     private int x = -1;
     private int y = -1;
     private JTabbedPane tabbedparent = null;
-    Icon icoProgress = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/featureinfowidget/res/progress.png"));
-    Icon icoProgress64 = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/featureinfowidget/res/progress64.png"));
-    Icon icoInfo = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/featureinfowidget/res/info.png"));
+    Icon icoProgress = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/featureinfowidget/res/progress.png"));//NOI18N
+    Icon icoProgress64 = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/featureinfowidget/res/progress64.png"));//NOI18N
+    Icon icoInfo = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/featureinfowidget/res/info.png"));//NOI18N
     private String urlBuffer = null;
     private SwingWorker currentWorker = null;
     DefaultCalHTMLObserver htmlObserver = new DefaultCalHTMLObserver() {
 
         public void statusUpdate(CalHTMLPane calHTMLPane, int i, URL uRL, int i0, String string) {
             super.statusUpdate(calHTMLPane, i, uRL, i0, string);
-            log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("FeatureInfoDisplay.log.StatusUpdate") + i + uRL);
+            log.debug("StatusUpdate" + i + uRL);//NOI18N
         }
 
         public void linkActivatedUpdate(CalHTMLPane calHTMLPane, URL uRL, String string, String string0) {
@@ -92,14 +92,14 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
         this.x = x;
         this.y = y;
         String url = wmsLayer.getParentServiceLayer().getGetFeatureInfoUrl(x, y, wmsLayer);
-        log.debug("showContet of " + url);
+        log.debug("showContet of " + url);//NOI18N
         urlBuffer=url;
         if (currentWorker != null && !currentWorker.isCancelled()) {
             currentWorker.cancel(true);
         }
-        log.debug("before FeatureInfoRetriever creation");
+        log.debug("before FeatureInfoRetriever creation");//NOI18N
         currentWorker = new FeatureInfoRetriever(url);
-        log.debug("afterFeatureInfoCreation");
+        log.debug("afterFeatureInfoCreation");//NOI18N
         CismapBroker.getInstance().execute(currentWorker);
 //        urlBuffer=url;
 //        UniversalRetrieval ur=new UniversalRetrieval(url);
@@ -150,13 +150,13 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
 //            htmlPane.setContentType("text/html");
 //            htmlPane.setText(StaticHtmlTools.convertHTTPReferences(StaticHtmlTools.stripMetaTag(e.getRetrievedObject().toString())));
             htmlPane.showHTMLDocument(e.getRetrievedObject().toString());
-            log.debug("String:" + e.getRetrievedObject().toString());
+            log.debug("String:" + e.getRetrievedObject().toString());//NOI18N
         } else if (e.getRetrievedObject() instanceof Image) {
 
 //            htmlPane.setText("");
 //            htmlPane.select(0,1);
 //            htmlPane.insertIcon(new ImageIcon((Image)e.getRetrievedObject()));
-            log.debug("Bild:" + e.getRetrievedObject());
+            log.debug("Bild:" + e.getRetrievedObject());//NOI18N
         }
     }
 
@@ -170,7 +170,7 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
      * @param e the event responsible for the update
      */
     public void hyperlinkUpdate(HyperlinkEvent event) {
-        log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("FeatureInfoDisplay.log.hyperlinkUpdate") + event);
+        log.debug("hyperlinkUpdate: " + event);//NOI18N
         if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
             if (shiftDown) {
                 openUrlInExternalBrowser(event.getURL().toExternalForm());
@@ -188,20 +188,20 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
                 de.cismet.tools.BrowserLauncher.openURL(url);
             } else {
                 java.net.URL u = new java.net.URL(url);
-                appletContext.showDocument(u, "cismetBrowser");
+                appletContext.showDocument(u, "cismetBrowser");//NOI18N
 
             }
         } catch (Exception e) {
-            log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("FeatureInfoDisplay.log.Fehler_beim_Oeffnen_von") + url + java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("FeatureInfoDisplay.log.Neuer_Versuch"), e);
+            log.warn("Error while opening: " + url + ".\nNew try.", e);//NOI18N
             //Nochmal zur Sicherheit mit dem BrowserLauncher probieren
             try {
                 de.cismet.tools.BrowserLauncher.openURL(url);
             } catch (Exception e2) {
-                log.warn(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("FeatureInfoDisplay.log.Auch_das_2te_Mal_ging_schief.Fehler_beim_Oeffnen_von") + url + java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("FeatureInfoDisplay.log.Letzter_Versuch"), e2);
+                log.warn("Second try also failed. Error while opening: " + url + "\nLast try.", e2);//NOI18N
                 try {
-                    de.cismet.tools.BrowserLauncher.openURL("file://" + url);
+                    de.cismet.tools.BrowserLauncher.openURL("file://" + url);//NOI18N
                 } catch (Exception e3) {
-                    log.error(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("FeatureInfoDisplay.log.Auch_das_3te_Mal_ging_schief.Fehler_beim_Oeffnen_von:file://") + url, e3);
+                    log.error("Third try also failed. Error while opening: file://" + url, e3);//NOI18N
                 }
             }
         }
@@ -212,8 +212,9 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
      * WARNING: Do NOT modify this code. The content of this method is
      * always regenerated by the Form Editor.
      */
-    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+
         htmlPane_ = new javax.swing.JTextPane();
         tbRight = new javax.swing.JToolBar();
         tbRight.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
@@ -235,24 +236,22 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
         setLayout(new java.awt.BorderLayout());
 
         tbRight.setFloatable(false);
-        cmdOpenExternal.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/featureinfowidget/res/extWindow.png")));
-        cmdOpenExternal.setText("Im externen Browser \u00f6ffnen");
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle"); // NOI18N
-        cmdOpenExternal.setToolTipText(bundle.getString("FeatureInfoDisplay.log.Im_externen_Browser_oeffnen_1")); // NOI18N
+
+        cmdOpenExternal.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/featureinfowidget/res/extWindow.png"))); // NOI18N
+        cmdOpenExternal.setText(org.openide.util.NbBundle.getMessage(FeatureInfoDisplay.class, "FeatureInfoDisplay.cmdOpenExternal.text")); // NOI18N
+        cmdOpenExternal.setToolTipText(org.openide.util.NbBundle.getMessage(FeatureInfoDisplay.class, "FeatureInfoDisplay.cmdOpenExternal.toolTipText")); // NOI18N
         cmdOpenExternal.setBorderPainted(false);
         cmdOpenExternal.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdOpenExternalActionPerformed(evt);
             }
         });
-
         tbRight.add(cmdOpenExternal);
 
         add(tbRight, java.awt.BorderLayout.NORTH);
 
         htmlPane.setDoubleBuffered(true);
         add(htmlPane, java.awt.BorderLayout.CENTER);
-
     }// </editor-fold>//GEN-END:initComponents
 
     private void cmdOpenExternalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOpenExternalActionPerformed
@@ -263,23 +262,23 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
             AccessHandler handler = WebAccessManager.getInstance().getHandlerForURL(new URL(urlBuffer));
             if(handler != null){
                 if(handler instanceof WSSAccessHandler){
-                    log.debug("handler is wss handler --> creating wss get request");
+                    log.debug("handler is wss handler --> creating wss get request");//NOI18N
                     String wssRequest = ((WSSAccessHandler)handler).createGetRequest(urlBuffer);
-                    log.debug("created wss request: "+wssRequest);
+                    log.debug("created wss request: "+wssRequest);//NOI18N
                     openUrlInExternalBrowser(wssRequest);
                     return;                   
                 } else {
-                    log.debug("No special handler --> default access via open URL");
+                    log.debug("No special handler --> default access via open URL");//NOI18N
                 }                
             } else {
-                log.debug("no handler available for given url default access via openURL");
+                log.debug("no handler available for given url default access via openURL");//NOI18N
             }            
             openUrlInExternalBrowser(urlBuffer);
             }catch(Exception ex){
-                log.error("Error while creating url for featureinfo");
+                log.error("Error while creating url for featureinfo");//NOI18N
             }
         } else {
-            openUrlInExternalBrowser("http://www.cismet.de");
+            openUrlInExternalBrowser("http://www.cismet.de");//NOI18N
         }
     }//GEN-LAST:event_cmdOpenExternalActionPerformed
 
@@ -305,7 +304,7 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
         }
 
         protected String doInBackground() throws Exception {
-            log.debug("FeatureInfoRetriever started");
+            log.debug("FeatureInfoRetriever started");//NOI18N
             try {
 
                 EventQueue.invokeLater(new Runnable() {
@@ -340,7 +339,7 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
                 }
                 return byteArrayOut.toString();
             } catch (Exception ex) {
-                log.error("Error while fetching FeatureInfos", ex);
+                log.error("Error while fetching FeatureInfos", ex);//NOI18N
                 return null;
             }
         }
@@ -348,7 +347,7 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
         protected void done() {
             super.done();
             if (isCancelled()) {
-                log.warn("FeatureInfoRetriever was canceled");
+                log.warn("FeatureInfoRetriever was canceled");//NOI18N
                 return;
             }
             try {
@@ -361,7 +360,7 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
 //            htmlPane.setContentType("text/html");
 //            htmlPane.setText(StaticHtmlTools.convertHTTPReferences(StaticHtmlTools.stripMetaTag(e.getRetrievedObject().toString())));
                 htmlPane.showHTMLDocument(result);
-                log.debug("String:" + result);
+                log.debug("String:" + result);//NOI18N
 
             //        } else if (e.getRetrievedObject() instanceof Image) {
 //
@@ -371,7 +370,7 @@ public class FeatureInfoDisplay extends javax.swing.JPanel implements RetrievalL
 //            log.debug("Bild:" + e.getRetrievedObject());
 //        }
             } catch (Exception ex) {
-                log.error("Error while processing data of FeatureInfoRetriever", ex);
+                log.error("Error while processing data of FeatureInfoRetriever", ex);//NOI18N
                 return;
             }
         }

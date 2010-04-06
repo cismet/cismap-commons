@@ -85,15 +85,15 @@ public class HTTPImageRetrievalWithAuth extends Thread{
         this.listener=listener;
         client = new HttpClient();
         //client.getHostConfiguration().setProxy(System.getProperty("proxyHost"), Integer.getInteger(System.getProperty("proxyPort")));
-        String proxySet = System.getProperty("proxySet");
-        if(proxySet != null && proxySet.equals("true")){
-            log.debug("proxyIs Set");
-            log.debug("ProxyHost:"+System.getProperty("http.proxyHost"));
-            log.debug("ProxyPort:"+System.getProperty("http.proxyPort"));
+        String proxySet = System.getProperty("proxySet");//NOI18N
+        if(proxySet != null && proxySet.equals("true")){//NOI18N
+            log.debug("proxyIs Set");//NOI18N
+            log.debug("ProxyHost:"+System.getProperty("http.proxyHost"));//NOI18N
+            log.debug("ProxyPort:"+System.getProperty("http.proxyPort"));//NOI18N
             try {
-            client.getHostConfiguration().setProxy(System.getProperty("http.proxyHost"), Integer.parseInt(System.getProperty("http.proxyPort")));    
+            client.getHostConfiguration().setProxy(System.getProperty("http.proxyHost"), Integer.parseInt(System.getProperty("http.proxyPort"))); //NOI18N
             } catch(Exception e){
-                log.error("Problem while setting proxy",e);
+                log.error("Problem while setting proxy",e);//NOI18N
             }
         }
         //new
@@ -116,7 +116,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
                 
                 ///new 
                 if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
-                    System.err.println("Unauthorized: " + method.getStatusLine());
+                    System.err.println("Unauthorized: " + method.getStatusLine());//NOI18N
                     fireAuthenticationFailed();
                     method.releaseConnection();
                     RetrievalEvent e = new RetrievalEvent();
@@ -125,7 +125,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
                 } else {
                     
                 if( statusCode != -1 ) {
-                    log.debug("reading: "+url);
+                    log.debug("reading: "+url);//NOI18N
                     InputStream is = method.getResponseBodyAsStream();
                     BufferedInputStream in = new BufferedInputStream( is );
                     byteArrayOut = new ByteArrayOutputStream();
@@ -135,12 +135,12 @@ public class HTTPImageRetrievalWithAuth extends Thread{
                         byteArrayOut.write(c);
                         if (youngerCall) {
                             fireLoadingAborted();
-                            log.debug("interrupt during retrieval");
+                            log.debug("interrupt during retrieval");//NOI18N
                             return;
                         }
                     }
                     
-                    log.debug("creating image");
+                    log.debug("creating image");//NOI18N
                     //Image image =observer.createImage( (ImageProducer) o);
                     observer=new ImageObserverInterceptor();
                     //Image image =Toolkit.getDefaultToolkit().getImage(is);
@@ -150,7 +150,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
                         Thread.sleep(10);
                         if (youngerCall) {
                             fireLoadingAborted();
-                            log.debug("interrupt during assembling");
+                            log.debug("interrupt during assembling");//NOI18N
                             return;
                         }
                     }
@@ -160,7 +160,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
                     e.setRetrievedObject(image);
                     if (!youngerCall) {
                         listener.retrievalComplete(e);
-                        log.debug("Retrieval complete");
+                        log.debug("Retrieval complete");//NOI18N
                     } else {
                         fireLoadingAborted();
                     }
@@ -193,7 +193,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
     
     
     public void fireLoadingAborted(){
-        log.info("Retrieval unterbrochen");
+        log.info("Retrieval interrupted");//NOI18N
         if (method!=null&&!method.isAborted()) {
             method.abort();
         }
@@ -205,7 +205,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
     
     //new
     public void fireAuthenticationFailed(){
-        log.info("AuthenticationFailed");
+        log.info("AuthenticationFailed");//NOI18N
         if (method!=null&&!method.isAborted()) {
             method.abort();            
         }
@@ -278,7 +278,7 @@ public class HTTPImageRetrievalWithAuth extends Thread{
                     requestUsernamePassword();
                     return creds;
                 } else {
-                    throw new CredentialsNotAvailableException("Unna gsupported authentication scheme: " +
+                    throw new CredentialsNotAvailableException("Unna gsupported authentication scheme: " +//NOI18N
                         authscheme.getSchemeName());
                 }
             } catch (IOException e) {
@@ -297,24 +297,24 @@ public class HTTPImageRetrievalWithAuth extends Thread{
             // TODO determine main frame and insert
             // TODO Cancel KEY
             JFrame dummy = null;            
-            final JDialog requestDialog = new JDialog (dummy,"Authorisation Request",true);
+            final JDialog requestDialog = new JDialog (dummy,org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword().title"),true);//NOI18N
             requestDialog.setLayout (new GridLayout (0, 1));
             requestDialog.setPreferredSize(new Dimension(400,200));
-            JLabel usernameLabel = new JLabel ("Username");
+            JLabel usernameLabel = new JLabel (org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword().usernameLabel.text"));//NOI18N
             requestDialog.add (usernameLabel);
             
             final JTextField usernameField = new JTextField();
             usernameField.setBackground (Color.lightGray);
             requestDialog.add (usernameField);
             
-            JLabel passwordLabel = new JLabel ("Password");
+            JLabel passwordLabel = new JLabel (org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword().passwordLabel.text"));//NOI18N
             requestDialog.add (passwordLabel);      
             
             final JPasswordField passwordField = new JPasswordField();    
             passwordField.setBackground(Color.lightGray);
             requestDialog.add (passwordField);
             
-            JButton okButton = new JButton ("OK");
+            JButton okButton = new JButton (org.openide.util.NbBundle.getMessage(HTTPImageRetrievalWithAuth.class, "HTTPImageRetrievalWithAuth.requestUsernamePassword().okButton.text"));//NOI18N
             requestDialog.add (okButton);
             okButton.addActionListener(new ActionListener() 
                                   {

@@ -75,7 +75,7 @@ public class ImageRetrieval extends Thread implements IIOReadProgressListener
     youngerCall = true;
     if (ir != null)
     {
-      log.debug("ir.abort();");
+      log.debug("ir.abort();");//NOI18N
       ir.abort();
     }
   }
@@ -93,7 +93,7 @@ public class ImageRetrieval extends Thread implements IIOReadProgressListener
   @Override
   public void run()
   {
-    log.debug("IR Thread started");
+    log.debug("IR Thread started");//NOI18N
     image = null;
     ImageInputStream iis = null;
     try
@@ -119,7 +119,7 @@ public class ImageRetrieval extends Thread implements IIOReadProgressListener
           e.setIsComplete(true);
           e.setRetrievedObject(image);
           listener.retrievalComplete(e);
-          log.debug("RetrievalComplete");
+          log.debug("RetrievalComplete");//NOI18N
         }
       } else
       {
@@ -147,7 +147,7 @@ public class ImageRetrieval extends Thread implements IIOReadProgressListener
 
     } catch (Exception e)
     {
-      log.error("Fehler beim Laden des Bildes", e);
+      log.error("Error while loading the image.", e);//NOI18N
     }
 
 

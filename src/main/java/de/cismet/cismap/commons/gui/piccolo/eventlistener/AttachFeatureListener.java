@@ -15,7 +15,7 @@ import edu.umd.cs.piccolox.event.PNotificationCenter;
  * @author hell
  */
 public class AttachFeatureListener extends PBasicInputEventHandler {
-    public static final String ATTACH_FEATURE_NOTIFICATION = "ATTACH_FEATURE_NOTIFICATION";
+    public static final String ATTACH_FEATURE_NOTIFICATION = "ATTACH_FEATURE_NOTIFICATION";//NOI18N
     PFeature featureToAttach = null;
 
     @Override

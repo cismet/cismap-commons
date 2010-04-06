@@ -24,7 +24,7 @@ public class PointSymbolListRenderer implements ListCellRenderer {
         label.setOpaque(true);
         if (value instanceof String) {
             try {
-                label.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/pointsymbols/"+value)));
+                label.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/pointsymbols/"+value)));//NOI18N
             } catch (Exception ex) {
                 label.setText((String)value);
             }

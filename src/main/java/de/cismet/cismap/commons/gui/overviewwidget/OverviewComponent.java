@@ -35,9 +35,9 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
     MappingComponent overviewMap = null;
     MappingComponent masterMap = null;
     ActiveLayerModel model = new ActiveLayerModel();
-    private String url = "http://geoportal.wuppertal.de/deegree/wms?&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&BBOX=<cismap:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:stadtplan2007&STYLES=default";
+    private String url = "http://geoportal.wuppertal.de/deegree/wms?&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&BBOX=<cismap:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:stadtplan2007&STYLES=default";//NOI18N
     SimpleWMS backgroundService = new SimpleWMS(new SimpleWmsGetMapUrl(url));
-    String srs = "EPSG:31466";
+    String srs = "EPSG:31466";//NOI18N
     BoundingBox home = new BoundingBox(2567799, 5670041, 2594650, 5688258);
 
     /** Creates new form OverviewComponent */
@@ -56,7 +56,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
     }
 
     public void initBackgroundService() {
-        log.debug("initBackgroundService");
+        log.debug("initBackgroundService");//NOI18N
         model = new ActiveLayerModel();
 
         XBoundingBox extent = new XBoundingBox(home.getX1(), home.getY1(), home.getX2(), home.getY2(), srs, true);
@@ -137,22 +137,22 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
 
     public void masterConfigure(Element parent) {
         try {
-            Element prefs = parent.getChild("cismapOverviewComponentPreferences");
+            Element prefs = parent.getChild("cismapOverviewComponentPreferences");//NOI18N
             try {
-                srs = prefs.getAttributeValue("srs");
+                srs = prefs.getAttributeValue("srs");//NOI18N
             } catch (Exception skip) {}
             
             try {
-                home = new BoundingBox(prefs.getChild("overviewExtent"));
+                home = new BoundingBox(prefs.getChild("overviewExtent"));//NOI18N
             } catch (Exception skip) {}
 
             try {
-                SimpleWMS simpleWMS = new SimpleWMS(prefs.getChild("background").getChild("simpleWms"));
+                SimpleWMS simpleWMS = new SimpleWMS(prefs.getChild("background").getChild("simpleWms"));//NOI18N
                 backgroundService = simpleWMS;
             } catch (Exception skip) {}
             initBackgroundService();
         } catch (Exception e) {
-            log.warn("Fehler beim Konfigurieren der OverviewComponent. Fallback=Stadtplan", e);
+            log.warn("Fehler beim Konfigurieren der OverviewComponent. Fallback=Stadtplan", e);//NOI18N
             initBackgroundService();
         }
     }

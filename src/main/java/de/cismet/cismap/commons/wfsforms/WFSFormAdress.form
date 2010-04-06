@@ -45,7 +45,9 @@
     <Component class="javax.swing.JButton" name="cmdOk">
       <Properties>
         <Property name="mnemonic" type="int" value="80"/>
-        <Property name="text" type="java.lang.String" value="Positionieren"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="de/cismet/cismap/commons/wfsforms/Bundle.properties" key="WFSFormAdress.cmdOk.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdOkActionPerformed"/>
@@ -193,7 +195,9 @@
     <Component class="javax.swing.JCheckBox" name="chkVisualize">
       <Properties>
         <Property name="selected" type="boolean" value="true"/>
-        <Property name="toolTipText" type="java.lang.String" value="Markierung anzeigen"/>
+        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="de/cismet/cismap/commons/wfsforms/Bundle.properties" key="WFSFormAdress.chkVisualize.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkVisualizeActionPerformed"/>
@@ -212,7 +216,9 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/markPoint.png"/>
         </Property>
-        <Property name="toolTipText" type="java.lang.String" value="Markierung anzeigen"/>
+        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="de/cismet/cismap/commons/wfsforms/Bundle.properties" key="WFSFormAdress.jLabel1.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="4"/>
@@ -226,7 +232,9 @@
     <Component class="javax.swing.JCheckBox" name="chkLockScale">
       <Properties>
         <Property name="selected" type="boolean" value="true"/>
-        <Property name="toolTipText" type="java.lang.String" value="Ma&#xdf;stab beibehalten"/>
+        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="de/cismet/cismap/commons/wfsforms/Bundle.properties" key="WFSFormAdress.chkLockScale.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="4"/>
@@ -242,7 +250,9 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/de/cismet/cismap/commons/gui/res/fixMapScale.png"/>
         </Property>
-        <Property name="toolTipText" type="java.lang.String" value="Ma&#xdf;stab beibehalten" noResource="true"/>
+        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="de/cismet/cismap/commons/wfsforms/Bundle.properties" key="WFSFormAdress.jLabel2.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="4"/>
@@ -274,12 +284,12 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="45" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+              <EmptySpace min="0" pref="24" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>

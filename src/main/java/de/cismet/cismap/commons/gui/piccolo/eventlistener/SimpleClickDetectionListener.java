@@ -15,7 +15,7 @@ import edu.umd.cs.piccolox.event.PNotificationCenter;
  * @author hell
  */
 public class SimpleClickDetectionListener extends PBasicInputEventHandler {
-    public static final String CLICK_DETECTED = "CLICK_DETECTED";
+    public static final String CLICK_DETECTED = "CLICK_DETECTED";//NOI18N
     PFeature p = null;
 
     @Override

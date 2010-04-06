@@ -63,7 +63,7 @@ public class HandleAddAction implements CustomAction {
      * @return Beschreibungsstring
      */
     public String info() {
-        return "Erstelle Handle an " + posInArray + ". Koord.: (" + x + ", " + y + ")";
+        return org.openide.util.NbBundle.getMessage(HandleAddAction.class, "HandleAddAction.info().return", new Object[]{posInArray, x, y});//NOI18N
     }
 
     /**

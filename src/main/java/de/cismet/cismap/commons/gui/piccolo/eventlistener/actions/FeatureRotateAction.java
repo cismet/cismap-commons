@@ -22,7 +22,6 @@ import java.util.Vector;
  * @author nh
  */
 public class FeatureRotateAction implements CustomAction {
-
     private MappingComponent mc;
     private double rot;
     private Point2D pivot;
@@ -64,10 +63,10 @@ public class FeatureRotateAction implements CustomAction {
     public String info() {
         StringBuffer sb = new StringBuffer();
         for (Object o : arr) {
-            sb.append(o.hashCode() + ", ");
+            sb.append(o.hashCode() + ", ");//NOI18N
         }
         sb.delete(sb.length() - 2, sb.length());
-        return "Drehe Features: " + sb.toString() + " um " + Math.toDegrees(rot) + "°";
+        return org.openide.util.NbBundle.getMessage(FeatureRotateAction.class, "FeatureRotateAction.info().return", new Object[]{sb.toString(), Math.toDegrees(rot)});//NOI18N
     }
 
     /**

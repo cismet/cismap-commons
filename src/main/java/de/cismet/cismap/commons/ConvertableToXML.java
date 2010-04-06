@@ -22,7 +22,7 @@ public interface ConvertableToXML<T>
   /**
    * Name of the mandatory type attribute, value shall be the canonical class name.
    */
-  public final static String TYPE_ATTRIBUTE = "type";
+  public final static String TYPE_ATTRIBUTE = "type";//NOI18N
 /**
  * Serializes the object that implements the ConvertableToXML interface to a
  * DOM Element. Although no further assumption is made about the XML Structure of the

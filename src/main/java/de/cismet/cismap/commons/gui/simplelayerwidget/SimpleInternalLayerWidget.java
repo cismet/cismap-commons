@@ -56,7 +56,7 @@ public class SimpleInternalLayerWidget extends javax.swing.JInternalFrame  imple
     /** Creates new form SimpleInternalLayerWidget */
     public SimpleInternalLayerWidget(MappingComponent mappingComponent) {
         initComponents();
-        putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);
+        putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);//NOI18N
         this.mappingComponent=mappingComponent;
 //setClosable(true);
         

@@ -43,61 +43,61 @@ import org.jdom.output.XMLOutputter;
 public class FeatureServiceUtilities
 {
   /** Log4J initialisation */
-  private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.featureservice.FeatureServiceUtilities");
+  private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.featureservice.FeatureServiceUtilities");//NOI18N
   /** WFS namespace-contant */
-  public static final Namespace WFS = Namespace.getNamespace("wfs", "http://www.opengis.net/wfs");
+  public static final Namespace WFS = Namespace.getNamespace("wfs", "http://www.opengis.net/wfs");//NOI18N
   /** OGC namespace-contant */
-  public static final Namespace OGC = Namespace.getNamespace("ogc", "http://www.opengis.net/ogc");
+  public static final Namespace OGC = Namespace.getNamespace("ogc", "http://www.opengis.net/ogc");//NOI18N
   /** GML namespace-contant */
-  public static final Namespace GML = Namespace.getNamespace("gml", "http://www.opengis.net/gml");
+  public static final Namespace GML = Namespace.getNamespace("gml", "http://www.opengis.net/gml");//NOI18N
   /** OWS namespace-contant */
-  public static final Namespace OWS = Namespace.getNamespace("ows", "http://www.opengis.net/ows");
+  public static final Namespace OWS = Namespace.getNamespace("ows", "http://www.opengis.net/ows");//NOI18N
   /** XSD namespace-contant */
-  public static final Namespace xsd = Namespace.getNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
+  public static final Namespace xsd = Namespace.getNamespace("xsd", "http://www.w3.org/2001/XMLSchema");//NOI18N
   /** name of the CismapQuery-element */
-  public static final String CISMAP_QUERY = "CismapQuery";
+  public static final String CISMAP_QUERY = "CismapQuery";//NOI18N
   /** name of the Query-element */
-  public static final String QUERY = "Query";
+  public static final String QUERY = "Query";//NOI18N
   /** name of the CismapDescribeFeatureType-element */
-  public static final String CISMAP_DESCRIBEFEATURETYPE = "CismapDescribeFeatureType";
+  public static final String CISMAP_DESCRIBEFEATURETYPE = "CismapDescribeFeatureType";//NOI18N
   /** name of the DescribeFeatureType-element */
-  public static final String DESCRIBEFEATURETYPE = "DescribeFeatureType";
+  public static final String DESCRIBEFEATURETYPE = "DescribeFeatureType";//NOI18N
   /** name of the CismapGetCapabilities-element */
-  public static final String CISMAP_GETCAPABILITIES = "CismapGetCapabilities";
+  public static final String CISMAP_GETCAPABILITIES = "CismapGetCapabilities";//NOI18N
   /** name of the GetCapabilities-element */
-  public static final String GETCAPABILITIES = "GetCapabilities";
+  public static final String GETCAPABILITIES = "GetCapabilities";//NOI18N
   /** name of the ServiceIdentification-element */
-  public static final String SERVICE_IDENT = "ServiceIdentification";
+  public static final String SERVICE_IDENT = "ServiceIdentification";//NOI18N
   /** name of the Filter-element */
-  public static final String FILTER = "Filter";
+  public static final String FILTER = "Filter";//NOI18N
   /** name of the BoundingBox-element */
-  public static final String BBOX = "BBOX";
+  public static final String BBOX = "BBOX";//NOI18N
   /** name of the GetFeature-element */
-  public static final String GET_FEATURE = "GetFeature";
+  public static final String GET_FEATURE = "GetFeature";//NOI18N
   /** name of the GetFeature-element */
-  public static final String TYPE_NAME = "typeName";
+  public static final String TYPE_NAME = "typeName";//NOI18N
   /** name of the GetFeature-element */
-  public static final String DEFAULT_TYPENAME = "TypeName";
+  public static final String DEFAULT_TYPENAME = "TypeName";//NOI18N
   /** name of the GetFeature-element */
-  public static final String PROPERTY_NAME = "PropertyName";
+  public static final String PROPERTY_NAME = "PropertyName";//NOI18N
   /** typestring of the GML-geometry-type */
-  public static final String GEO_PROPERTY_TYPE = "GeometryPropertyType";
+  public static final String GEO_PROPERTY_TYPE = "GeometryPropertyType";//NOI18N
   /** typestring of the GML-geometry-type */
-  public static final String GEO_PROPERTY_TYPE_WITH_NS = "gml:GeometryPropertyType";
+  public static final String GEO_PROPERTY_TYPE_WITH_NS = "gml:GeometryPropertyType";//NOI18N
   /** typestring of the string-type */
-  public static final String STRING_PROPERTY_TYPE = "string";
+  public static final String STRING_PROPERTY_TYPE = "string";//NOI18N
   /** typestring of the integer-type */
-  public static final String INTEGER_PROPERTY_TYPE = "integer";
+  public static final String INTEGER_PROPERTY_TYPE = "integer";//NOI18N
   /** name of the name-attribute */
-  public static final String XML_NAME_STRING = "name";
+  public static final String XML_NAME_STRING = "name";//NOI18N
   /** name of the type-attribute */
-  public static final String XML_TYPE_STRING = "type";
+  public static final String XML_TYPE_STRING = "type";//NOI18N
   /** name of the isGeometry-attribute */
-  public static final String IS_GEOMETRY = "isGeometry";
+  public static final String IS_GEOMETRY = "isGeometry";//NOI18N
   /** name of the maxFeatures-attribute */
-  public final static String MAX_FEATURES = "maxFeatures";
+  public final static String MAX_FEATURES = "maxFeatures";//NOI18N
 
-  private final URL XML_FILE = getClass().getResource("wfs.xml"); // TODO Auslagern
+  private final URL XML_FILE = getClass().getResource("wfs.xml"); // TODO Auslagern//NOI18N
   private XMLOutputter out = new XMLOutputter();
   private Element rootNode;
   private Element query;
@@ -107,14 +107,14 @@ public class FeatureServiceUtilities
    */
   public FeatureServiceUtilities()
   {
-    log.debug("createStandardQuery()");
+    log.debug("createStandardQuery()");//NOI18N
     try
     {
       SAXBuilder builder = new SAXBuilder();
       rootNode = builder.build(XML_FILE).getRootElement();
     } catch (Exception ex)
     {
-      log.error("Fehler beim Parsen des CismapXML-Files", ex);
+      log.error("Error during parsing of the CismapXML-Files", ex);//NOI18N
     }
   }
 
@@ -124,7 +124,7 @@ public class FeatureServiceUtilities
    */
   public FeatureServiceUtilities(String typeName)
   {
-    log.debug("createStandardQuery(" + typeName + ")");
+    log.debug("createStandardQuery(" + typeName + ")");//NOI18N
     try
     {
       SAXBuilder builder = new SAXBuilder();
@@ -133,7 +133,7 @@ public class FeatureServiceUtilities
       query.getChild(QUERY, WFS).getAttribute(TYPE_NAME).setValue(typeName);
     } catch (Exception ex)
     {
-      log.error("Fehler beim Erstellen eines Standardquery", ex);
+      log.error("Error during the creation of a default query", ex);//NOI18N
     }
   }
 
@@ -147,21 +147,21 @@ public class FeatureServiceUtilities
     for (Element e : properties)
     {
       Element tmp = new Element(PROPERTY_NAME, WFS);
-      tmp.setText(e.getAttributeValue("name"));
+      tmp.setText(e.getAttributeValue("name"));//NOI18N
       getQuery().getChild(QUERY, WFS).addContent(tmp);
     }
   }
 
   public static void setMaxFeatureCount(Element wfsQuery, int maxFeatureCount)
   {
-    log.debug("setting may maxFeatureCount of WFS Query to " + maxFeatureCount);
+    log.debug("setting may maxFeatureCount of WFS Query to " + maxFeatureCount);//NOI18N
     if(wfsQuery != null)
     {
       wfsQuery.setAttribute(MAX_FEATURES, String.valueOf(maxFeatureCount));
     }
     else
     {
-      log.warn("could not set maxFeatureCount, query not yet initialised");
+      log.warn("could not set maxFeatureCount, query not yet initialised");//NOI18N
     }
   }
 
@@ -210,10 +210,10 @@ public class FeatureServiceUtilities
   {
     if (e == null)
     {
-      return "";
+      return "";//NOI18N
     } else
     {
-      XMLOutputter out = new XMLOutputter("    ", true);
+      XMLOutputter out = new XMLOutputter("    ", true);//NOI18N
       out.setTextTrim(true);
       return out.outputString(e);
     }
@@ -235,11 +235,11 @@ public class FeatureServiceUtilities
    */
   public DescribeFeatureTypeDocument createDescribeFeatureTypeRequest(String name) throws Exception
   {
-    log.debug("Erstelle DescribeFeatureTypeRequest f\u00FCr " + name);
+    log.debug("Create DescribeFeatureTypeRequest for " + name);//NOI18N
     Element describeFeatType = rootNode.getChild(CISMAP_DESCRIBEFEATURETYPE).getChild(DESCRIBEFEATURETYPE, WFS);
     describeFeatType.getChild(DEFAULT_TYPENAME, WFS).setText(name);
     DescribeFeatureTypeDocument dftDoc = new DescribeFeatureTypeDocument();
-    dftDoc.load(new StringReader(out.outputString(describeFeatType)), "http://test0r");
+    dftDoc.load(new StringReader(out.outputString(describeFeatType)), "http://test0r");//NOI18N
     return dftDoc;
   }
 
@@ -249,9 +249,9 @@ public class FeatureServiceUtilities
    */
   private WFSGetCapabilitiesDocument createGetCapabilitiesRequest() throws Exception
   {
-    log.debug("Erstelle GetCapabilitiesRequest");
+    log.debug("Create GetCapabilitiesRequest");//NOI18N
     WFSGetCapabilitiesDocument gcDoc = new WFSGetCapabilitiesDocument();
-    gcDoc.load(new StringReader(out.outputString(rootNode.getChild(CISMAP_GETCAPABILITIES).getChild(GETCAPABILITIES, WFS))), "http://test0r");
+    gcDoc.load(new StringReader(out.outputString(rootNode.getChild(CISMAP_GETCAPABILITIES).getChild(GETCAPABILITIES, WFS))), "http://test0r");//NOI18N
     return gcDoc;
   }
 
@@ -264,7 +264,7 @@ public class FeatureServiceUtilities
   public WFSCapabilitiesDocument getWFSCapabilitesDocument(URL server) throws Exception
   {
     WFSCapabilitiesDocument wfsDoc = new WFSCapabilitiesDocument();
-    wfsDoc.load(new StringReader(postRequest(server, createGetCapabilitiesRequest()).getAsString()), "http://test0r");
+    wfsDoc.load(new StringReader(postRequest(server, createGetCapabilitiesRequest()).getAsString()), "http://test0r");//NOI18N
     return wfsDoc;
   }
 
@@ -277,22 +277,22 @@ public class FeatureServiceUtilities
     String name;
     try
     {
-      name = capDoc.getRootElement().getElementsByTagName("ows:Title").item(0).getFirstChild().getNodeValue();
+      name = capDoc.getRootElement().getElementsByTagName("ows:Title").item(0).getFirstChild().getNodeValue();//NOI18N
     } catch (Exception titleNotFound)
     {
-      log.warn("Titel des FeatureService ist nicht vorhanden", titleNotFound);
+      log.warn("Title of the FeatureService is not found", titleNotFound);//NOI18N
       try
       {
-        name = capDoc.getRootElement().getElementsByTagName("ows:Abstract").item(0).getFirstChild().getNodeValue();
+        name = capDoc.getRootElement().getElementsByTagName("ows:Abstract").item(0).getFirstChild().getNodeValue();//NOI18N
       } catch (Exception abstractNotFound)
       {
-        log.warn("Abstract des FeatureService ist nicht vorhanden", abstractNotFound);
+        log.warn("Abstract of the FeatureService is not found", abstractNotFound);//NOI18N
         try
         {
-          name = capDoc.getRootElement().getElementsByTagName("ows:ServiceType").item(0).getFirstChild().getNodeValue();
+          name = capDoc.getRootElement().getElementsByTagName("ows:ServiceType").item(0).getFirstChild().getNodeValue();//NOI18N
         } catch (Exception servicetypeNotFound)
         {
-          log.warn("ServiceType des FeatureService ist nicht vorhanden", servicetypeNotFound);
+          log.warn("ServiceType of the FeatureService is not found", servicetypeNotFound);//NOI18N
           name = null;
         }
       }
@@ -315,7 +315,7 @@ public class FeatureServiceUtilities
    */
   public static String parseDocumentToString(Document doc)
   {
-    log.debug("parseDocumentToString()");
+    log.debug("parseDocumentToString()");//NOI18N
     XMLOutputter out = new XMLOutputter();
     return out.outputString(doc);
   }
@@ -329,7 +329,7 @@ public class FeatureServiceUtilities
    */
   public HashMap<ElementDeclaration, Vector<FeatureServiceAttribute>> getElementDeclarations(URL postURL, FeatureTypeList featTypes) throws Exception
   {
-    log.debug("getElementDeclarations(" + postURL + ")");
+    log.debug("getElementDeclarations(" + postURL + ")");//NOI18N
     FeatureTypeDescription featTypeDesc = null;
 
     // create hashmap that will be returned
@@ -339,7 +339,7 @@ public class FeatureServiceUtilities
     {
       try
       {
-        log.debug("get complextypes for " + ft.getName().getAsString());
+        log.debug("get complextypes for " + ft.getName().getAsString());//NOI18N
         featTypeDesc = new FeatureTypeDescription(postRequest(postURL, createDescribeFeatureTypeRequest(ft.getName().getAsString())));
         XMLFragment xmlFrag = featTypeDesc.getFeatureTypeSchema();
         if (xmlFrag.hasSchema())
@@ -359,7 +359,7 @@ public class FeatureServiceUtilities
               Vector<FeatureServiceAttribute> fsaVector = new Vector<FeatureServiceAttribute>(compTypeDec.getElements().length);
               for (ElementDeclaration e : compTypeDec.getElements())
               {
-                fsaVector.add(new FeatureServiceAttribute(ft.getName().getPrefix() + ":" + e.getName().getLocalName(), e.getType().getName().getAsString(), true));
+                fsaVector.add(new FeatureServiceAttribute(ft.getName().getPrefix() + ":" + e.getName().getLocalName(), e.getType().getName().getAsString(), true));//NOI18N
               }
               ElementDeclaration newRequestedElement = new ElementDeclaration(
                       new QualifiedName(ft.getName().getPrefix(), requestedElement.getName().getLocalName(), xmlSchema.getTargetNamespace()),
@@ -368,12 +368,12 @@ public class FeatureServiceUtilities
                       requestedElement.getSubstitutionGroup() != null ? requestedElement.getSubstitutionGroup().getName() : null);
               result.put(newRequestedElement, fsaVector);
             }
-            log.debug("complextypes found: " + compTypeDec.getElements());
+            log.debug("complextypes found: " + compTypeDec.getElements());//NOI18N
           }
         }
       } catch (Throwable ex)
       {
-        log.fatal("Error in getElementDeclarations", ex);
+        log.fatal("Error in getElementDeclarations", ex);//NOI18N
       }
     }
     return result;
@@ -422,44 +422,44 @@ public class FeatureServiceUtilities
    */
   public static XMLFragment postRequest(URL serverURL, AbstractWFSRequestDocument request) throws Exception
   {
-    log.info("FeatureServiceUtilities.postRequest("+serverURL+")");
+    log.info("FeatureServiceUtilities.postRequest("+serverURL+")");//NOI18N
     // create HTTP-client
     HttpClient client = new HttpClient();
 
     // is currently a proxy set
-    String proxySet = System.getProperty("proxySet");
+    String proxySet = System.getProperty("proxySet");//NOI18N
 
     // if proxy exists ...
-    if (proxySet != null && proxySet.equals("true"))
+    if (proxySet != null && proxySet.equals("true"))//NOI18N
     {
-      log.debug("Proxy vorhanden");
-      log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));
-      log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));
+      log.debug("Proxy existent");//NOI18N
+      log.debug("ProxyHost:" + System.getProperty("http.proxyHost"));//NOI18N
+      log.debug("ProxyPort:" + System.getProperty("http.proxyPort"));//NOI18N
       try
       {
         // add existing proxy to HTTP-client
-        client.getHostConfiguration().setProxy(System.getProperty("http.proxyHost"),
-                Integer.parseInt(System.getProperty("http.proxyPort")));
+        client.getHostConfiguration().setProxy(System.getProperty("http.proxyHost"),//NOI18N
+                Integer.parseInt(System.getProperty("http.proxyPort")));//NOI18N
       } catch (Exception ex)
       {
-        log.error("Proxy im HTTP-Client setzen fehlgeschlagen", ex);
+        log.error("Set proxy in HTTP-Client failed", ex);//NOI18N
       }
 
     } else
     { // do nothing
-      log.debug("kein Proxy");
+      log.debug("no Proxy");//NOI18N
     }
 
     // create new POST-method with the server-URL
     PostMethod httppost = new PostMethod(serverURL.toString());
-    log.debug("ServerURL = " + httppost.getURI().toString());
+    log.debug("ServerURL = " + httppost.getURI().toString());//NOI18N
 
     // save requeststring so the original won't be changed
     String poststring = request.toString();
 
     // create HTML from request & change charset to ISO-8859-1
-    log.debug("WFS Query = " + StaticHtmlTools.stringToHTMLString(poststring));
-    String modifiedString = new String(poststring.getBytes("UTF-8"), "ISO-8859-1");
+    log.debug("WFS Query = " + StaticHtmlTools.stringToHTMLString(poststring));//NOI18N
+    String modifiedString = new String(poststring.getBytes("UTF-8"), "ISO-8859-1");//NOI18N
     httppost.setRequestEntity(new StringRequestEntity(modifiedString));
 
     try
@@ -470,15 +470,15 @@ public class FeatureServiceUtilities
       // if response == OK
       if (httppost.getStatusCode() == HttpStatus.SC_OK)
       {
-        log.debug("Server hat Request bearbeitet und antwortet");
-        log.debug("InputStream parsen");
+        log.debug("Server handled the request and sends the response");//NOI18N
+        log.debug("parse InputStream");//NOI18N
         XMLFragment fragment = new XMLFragment();
-        fragment.load(httppost.getResponseBodyAsStream(), "http://fake");
-        log.debug("Erfolgreich geparst: " + fragment.getAsString());
+        fragment.load(httppost.getResponseBodyAsStream(), "http://fake");//NOI18N
+        log.debug("Successfully parsed: " + fragment.getAsString());//NOI18N
         return fragment;
       } else
       {
-        log.error("Unexpected failure: " + httppost.getStatusLine().toString());
+        log.error("Unexpected failure: " + httppost.getStatusLine().toString());//NOI18N
       }
     } finally
     {
@@ -503,7 +503,7 @@ public class FeatureServiceUtilities
         fsaMap.put(fsa.getName(), fsa);
       } catch (Exception ex)
       {
-        log.warn("Ein Element konnte nicht als Attribut geparsed werden: " + currentElement, ex);
+        log.warn("An element could not be parsed as attribute: " + currentElement, ex);//NOI18N
       }
     }
     return fsaMap;

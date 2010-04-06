@@ -65,10 +65,10 @@ public class SimpleUpdateablePostgisFeatureService extends SimplePostgisFeatureS
   public Element toElement()
   {
     Element element = super.toElement();
-    element.setAttribute("updateable", "true");
-    Element actionElement = new Element("action");
-    actionElement.setAttribute("text", this.postgisAction.getActionText());
-    actionElement.setAttribute("icon", this.postgisAction.getIconPath());
+    element.setAttribute("updateable", "true");//NOI18N
+    Element actionElement = new Element("action");//NOI18N
+    actionElement.setAttribute("text", this.postgisAction.getActionText());//NOI18N
+    actionElement.setAttribute("icon", this.postgisAction.getIconPath());//NOI18N
     actionElement.addContent(new CDATA(this.postgisAction.getAction()));
     element.addContent(actionElement);
     return element;
@@ -82,21 +82,21 @@ public class SimpleUpdateablePostgisFeatureService extends SimplePostgisFeatureS
     this.postgisAction = new PostgisAction();
     try
     {
-      actionElement = element.getChild("action");
+      actionElement = element.getChild("action");//NOI18N
       this.postgisAction.setAction(actionElement.getText());
     } catch (Exception e)
     {
-      logger.warn("No action in updateable Service: " + e.getMessage());
+      logger.warn("No action in updateable Service: " + e.getMessage());//NOI18N
     }
     try
     {
-      this.postgisAction.setActionText(actionElement.getAttribute("text").getValue());
-      this.postgisAction.setIconPath(actionElement.getAttribute("icon").getValue());
+      this.postgisAction.setActionText(actionElement.getAttribute("text").getValue());//NOI18N
+      this.postgisAction.setIconPath(actionElement.getAttribute("icon").getValue());//NOI18N
       this.postgisAction.setIcon(new ImageIcon(getClass().getResource(this.postgisAction.getIconPath())));
     } catch (Exception e)
     {
-      logger.warn("No actiontext in updateable Service: " + e.getMessage());
-      this.postgisAction.setActionText("Aktion ausf\u00FChren");
+      logger.warn("No actiontext in updateable Service: " + e.getMessage());//NOI18N
+      this.postgisAction.setActionText(org.openide.util.NbBundle.getMessage(SimpleUpdateablePostgisFeatureService.class, "SimpleUpdateablePostgisFeatureService.initFromElement(Element).postgisAction.actionText") );//NOI18N
     }
   }
 

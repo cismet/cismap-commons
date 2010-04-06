@@ -62,7 +62,7 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
                 updateRectangle();
             }
         } catch (ClassCastException cce) {
-            log.error("PCanvas muss vom Typ SimpleFeatureViewer sein", cce);
+            log.error("PCanvas muss vom Typ SimpleFeatureViewer sein", cce);//NOI18N
         }
     }
 

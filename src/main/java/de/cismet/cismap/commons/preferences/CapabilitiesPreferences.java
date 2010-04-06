@@ -52,22 +52,22 @@ public class CapabilitiesPreferences {
     }
     /** Creates a new instance of CapabilitiesPreferences */
     public CapabilitiesPreferences(Element serverParent,Element localParent) {
-        Element serverRoot=serverParent.getChild("cismapCapabilitiesPreferences");
-        Element clientRoot=localParent.getChild("cismapCapabilitiesPreferences");
-        List caps=clientRoot.getChildren("capabilities");
+        Element serverRoot=serverParent.getChild("cismapCapabilitiesPreferences");//NOI18N
+        Element clientRoot=localParent.getChild("cismapCapabilitiesPreferences");//NOI18N
+        List caps=clientRoot.getChildren("capabilities");//NOI18N
         Iterator<Element> it=caps.iterator();
         int counter=0;
         while (it.hasNext()) {
             try {
                 Element elem =it.next();
-                String type=elem.getAttribute("type").getValue();
+                String type=elem.getAttribute("type").getValue();//NOI18N
                 String link=elem.getTextTrim();
-                String subparent=elem.getAttributeValue("subparent");
+                String subparent=elem.getAttributeValue("subparent");//NOI18N
                 boolean active=false;
-                try {active=elem.getAttribute("active").getBooleanValue();}catch(Exception unhandled) {}
+                try {active=elem.getAttribute("active").getBooleanValue();}catch(Exception unhandled) {}//NOI18N
                 capabilities.put(new Integer(counter++),new CapabilityLink(type,link,active,subparent));
             } catch (Throwable t) {
-                log.warn("Fehler beim Auslesen der CapabilityPreferences.",t);
+                log.warn("Error while reading the CapabilityPreferences.",t);//NOI18N
             }
         }
 
@@ -90,10 +90,10 @@ public class CapabilitiesPreferences {
         node.setTitle(nodetitle);
         
         TreeMap<Integer, CapabilityLink> capabilitiesList = new TreeMap<Integer, CapabilityLink>();
-        for (Element elem : (List<Element>)element.getChildren("capabilitiesList")) {
+        for (Element elem : (List<Element>)element.getChildren("capabilitiesList")) {//NOI18N
             try {
-                String type = elem.getAttribute("type").getValue();
-                String title = elem.getAttribute("titlestring").getValue();
+                String type = elem.getAttribute("type").getValue();//NOI18N
+                String title = elem.getAttribute("titlestring").getValue();//NOI18N
 
                 if (type.equals(CapabilityLink.MENU)) {
                     // Unterknoten erzeugen
@@ -101,11 +101,11 @@ public class CapabilitiesPreferences {
                 } else {
                     // CapabilitiesList-Eintrag erzeugen
                     String link = elem.getTextTrim();
-                    String subparent = elem.getAttributeValue("subparent");
+                    String subparent = elem.getAttributeValue("subparent");//NOI18N
                     capabilitiesList.put(new Integer(listCounter++), new CapabilityLink(type, link, title, subparent));
                 }
             } catch (Throwable t) {
-                log.warn("Fehler beim Auslesen der CapabilityListPreferences.", t);
+                log.warn("Error while reading the CapabilityListPreferences.", t);//NOI18N
             }
         }
 
