@@ -47,9 +47,9 @@ public class RetrievalEvent
   private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
 
   int percentageDone = 0;
-  public static final String SERVERERROR = "SERVERERROR";
-  public static final String CLIENTERROR = "CLIENTERROR";
-  private static final String UNDEFINED = "UNDEFINED";
+  public static final String SERVERERROR = "SERVERERROR";//NOI18N
+  public static final String CLIENTERROR = "CLIENTERROR";//NOI18N
+  private static final String UNDEFINED = "UNDEFINED";//NOI18N
   private static String errorType = UNDEFINED;
   private Object retrievedObject = null;
   boolean isComplete = false;
@@ -137,7 +137,7 @@ public class RetrievalEvent
   {
     if(percentageDone < -1 || percentageDone > 100)
     {
-      logger.warn("invalid percentage '"+percentageDone+"', setting to -1 (indeterminate)");
+      logger.warn("invalid percentage '"+percentageDone+"', setting to -1 (indeterminate)");//NOI18N
       this.percentageDone = -1;
     }
     else

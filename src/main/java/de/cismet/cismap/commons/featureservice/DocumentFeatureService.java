@@ -58,18 +58,18 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
     super(name, attributes);
     this.setDocumentURI(documentURI);
     this.documentSize = documentSize;
-    logger.info("creating new DocumentFeatureService from URI: " + this.getDocumentURI());
+    logger.info("creating new DocumentFeatureService from URI: " + this.getDocumentURI());//NOI18N
   }
 
   @Override
   public Element toElement()
   {
     Element parentElement = super.toElement();
-    Element docURI = new Element("documentURI");
+    Element docURI = new Element("documentURI");//NOI18N
     docURI.setText(documentURI.toString());
     parentElement.addContent(docURI);
-    parentElement.setAttribute("maxSupportedFeatureCount", String.valueOf(this.maxSupportedFeatureCount));
-    parentElement.setAttribute("documentSize", String.valueOf(this.documentSize));
+    parentElement.setAttribute("maxSupportedFeatureCount", String.valueOf(this.maxSupportedFeatureCount));//NOI18N
+    parentElement.setAttribute("documentSize", String.valueOf(this.documentSize));//NOI18N
     return parentElement;
   }
 
@@ -78,13 +78,13 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
   public void initFromElement(Element element) throws Exception
   {
     super.initFromElement(element);
-    this.setDocumentURI(new URI(element.getChildText("documentURI").trim()));
-    if(element.getAttribute("maxSupportedFeatureCount") != null){
-      this.maxSupportedFeatureCount = element.getAttribute("maxSupportedFeatureCount").getIntValue();
+    this.setDocumentURI(new URI(element.getChildText("documentURI").trim()));//NOI18N
+    if(element.getAttribute("maxSupportedFeatureCount") != null){//NOI18N
+      this.maxSupportedFeatureCount = element.getAttribute("maxSupportedFeatureCount").getIntValue();//NOI18N
     }
 
-    if(element.getAttribute("documentSize") != null){
-      this.documentSize = element.getAttribute("documentSize").getIntValue();
+    if(element.getAttribute("documentSize") != null){//NOI18N
+      this.documentSize = element.getAttribute("documentSize").getIntValue();//NOI18N
     }
   }
 

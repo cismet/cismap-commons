@@ -8,7 +8,7 @@ import de.cismet.cismap.commons.ConvertableToXML;
 import org.jdom.Element;
 
 /**
- * Describes the attributes of all Featires available in a certain layer.
+ * Describes the attributes of all Features available in a certain layer.
  *
  * @author Sebastian Puhl
  * @author Pascal Dihé
@@ -19,7 +19,7 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable
   //public static final String STRING = "string";
   //public static final String INTEGER = "integer";
   //public static final String GEOMETRY = "geometry";
-  public static final String IS_SELECTED = "isSelected";
+  public static final String IS_SELECTED = "isSelected";//NOI18N
   private String type;
   private String name;
   private boolean geometry;
@@ -147,7 +147,7 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable
   {
     if(element.getAttribute(ConvertableToXML.TYPE_ATTRIBUTE) == null)
     {
-      log.warn("fromElement: restoring object from deprecarted xml element");
+      log.warn("fromElement: restoring object from deprecarted xml element");//NOI18N
     }
 
     this.setName(element.getAttributeValue(FeatureServiceUtilities.XML_NAME_STRING));

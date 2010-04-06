@@ -37,12 +37,12 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     };
     private Paint fillingPaint;
     private geomTypes geomType;
-    static ImageIcon icoPoint = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/point.png"));
-    static ImageIcon icoPolyline = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polyline.png"));
-    static ImageIcon icoPolygon = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polygon.png"));
-    static ImageIcon icoEllipse = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/ellipse.png"));
-    static ImageIcon icoRectangle = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/rectangle.png"));
-    private String name = "";
+    static ImageIcon icoPoint = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/point.png"));//NOI18N
+    static ImageIcon icoPolyline = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polyline.png"));//NOI18N
+    static ImageIcon icoPolygon = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polygon.png"));//NOI18N
+    static ImageIcon icoEllipse = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/ellipse.png"));//NOI18N
+    static ImageIcon icoRectangle = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/rectangle.png"));//NOI18N
+    private String name = "";//NOI18N
 
     public PureNewFeature(Geometry g) {
         setGeometry(g);
@@ -57,20 +57,20 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     public PureNewFeature(final Point2D[] canvasPoints, WorldToScreenTransform wtst) {
         synchronized (canvasPoints) {
             try {
-                log.debug("canvasPoints " + canvasPoints);
+                log.debug("canvasPoints " + canvasPoints);//NOI18N
                 Coordinate[] coordArr = new Coordinate[canvasPoints.length];
                 float[] xp = new float[canvasPoints.length];
                 float[] yp = new float[canvasPoints.length];
                 for (int i = 0; i < canvasPoints.length; ++i) {
-                    log.debug("canvasPoints[" + i + "]:" + canvasPoints[i]);
+                    log.debug("canvasPoints[" + i + "]:" + canvasPoints[i]);//NOI18N
                     xp[i] = (float) (canvasPoints[i].getX());
                     yp[i] = (float) (canvasPoints[i].getY());
                     coordArr[i] = new Coordinate(wtst.getSourceX(xp[i]), wtst.getSourceY(yp[i]));
                 }
                 init(coordArr, wtst);
-                log.debug("pureNewFeature wurde angelegt");
+                log.debug("pureNewFeature created");//NOI18N
             } catch (Exception e) {
-                log.error("Fehler beim anlegen eines PureNewfeatures", e);
+                log.error("Error during creating a PureNewfeatures", e);//NOI18N
             }
         }
     }
@@ -98,13 +98,9 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
                 setGeometry(line);
             }
         } catch (Exception e) {
-            log.warn("Fehler im init", e);
+            log.warn("Error in init", e);//NOI18N
         }
-        try {
-            fillingPaint = new Color(new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.RED")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.GREEN")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.BLUE")), new Float(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("PureNewFeature.FillingColor.TRANSPARENT")));
-        } catch (Exception e) {
-            fillingPaint = new Color(1f, 0f, 0f, 0.4f);
-        }
+        fillingPaint = new Color(1f, 0f, 0f, 0.4f);
     }
 
     public java.awt.Stroke getLineStyle() {
@@ -125,7 +121,7 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     }
 
     public String getType() {
-        return "";
+        return "";//NOI18N
     }
 
     @Override
@@ -133,23 +129,23 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         if (getGeometryType() != null) {
             switch (getGeometryType()) {
                 case RECTANGLE:
-                    return "Neues Rechteck";
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newRectangle") ;//NOI18N
                 case LINESTRING:
-                    return "Neuer Linienzug";
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolyline") ;//NOI18N
                 case ELLIPSE:
-                    return "Neue Ellipse";
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newEllipse") ;//NOI18N
                 case POINT:
-                    return "Neuer Punkt";
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPoint") ;//NOI18N
                 case POLYGON:
-                    return "Neues Polygon";
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolygon") ;//NOI18N
                 default:
-                    return "Error in getName()";
+                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().errorInGetName") ;//NOI18N
             }
         } else {
             try {
                 Vector<Feature> allFeatures = CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures();
 //
-//        int countNewPoints=1;
+//        int countNewPoints=1; 
 //        int countNewLines=1;
 //        int countNewPoly=1;
 //
@@ -179,19 +175,19 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
 //        }
 
 
-                if (name.trim().equals("")) {
+                if (name.trim().equals("")) {   //NOI18N
                     if (getGeometry() instanceof Point) {
-                        name = "Neuer Punkt";
+                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPoint") ;//NOI18N
                     } else if (getGeometry() instanceof LineString) {
-                        name = "Neuer Linienzug";
+                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolyline"); //NOI18N
                     } else {
-                        name = "Neues Polygon";
+                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolygon") ;//NOI18N
                     }
                 }
                 return name;
             } catch (Exception e) {
-                log.fatal("getName() error", e);
-                return "Error in getName()";
+                log.fatal("getName() error", e);//NOI18N
+                return "Error in getName()";//NOI18N
             }
         }
     }

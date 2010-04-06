@@ -30,7 +30,7 @@ import org.jdesktop.swingx.image.ColorTintFilter;
 public final class IconUtils {
 
 
-    private static Font font = new Font("Courier", Font.PLAIN, 11);
+    private static Font font = new Font("Courier", Font.PLAIN, 11);//NOI18N
 
     private IconUtils() {
     }

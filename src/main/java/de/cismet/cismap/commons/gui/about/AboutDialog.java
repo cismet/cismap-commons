@@ -11,6 +11,7 @@
 
 package de.cismet.cismap.commons.gui.about;
 
+
 /**
  *
  * @author thorsten
@@ -20,6 +21,7 @@ public class AboutDialog extends javax.swing.JDialog {
     public static final int RET_CANCEL = 0;
     /** A return status code - returned if OK button has been pressed */
     public static final int RET_OK = 1;
+
 
     /** Creates new form AboutDialog */
     public AboutDialog(java.awt.Frame parent, boolean modal) {
@@ -50,7 +52,7 @@ public class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        okButton.setText("OK");
+        okButton.setText(org.openide.util.NbBundle.getMessage(AboutDialog.class, "AboutDialog.okButton.text")); // NOI18N
         okButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 okButtonActionPerformed(evt);
@@ -103,9 +105,11 @@ public class AboutDialog extends javax.swing.JDialog {
     */
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 AboutDialog dialog = new AboutDialog(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
                         System.exit(0);
                     }

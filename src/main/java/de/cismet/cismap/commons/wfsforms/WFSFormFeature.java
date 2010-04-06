@@ -72,7 +72,7 @@ public class WFSFormFeature {
             //return
             return feature.getProperties(new QualifiedName(query.getPropertyPrefix().toString(),query.getIdProperty().toString(),new URI(query.getPropertyNamespace().toString())))[0].getValue().toString();
         } catch (Exception e) {
-            log.error("Fehler in toIdentifier()",e);
+            log.error("Error in toIdentifier()",e);//NOI18N
             return null;
         }
     }
@@ -112,12 +112,12 @@ public class WFSFormFeature {
 //                return ret;
 //            } catch (Exception ex) {
             try {
-                log.error("Fehler in toString() angefragt wurde: "+new QualifiedName(query.getPropertyPrefix().toString(),query.getDisplayTextProperty().toString(),new URI(query.getPropertyNamespace().toString())).toString(),e);
+                log.error("Error in toString() angefragt wurde: "+new QualifiedName(query.getPropertyPrefix().toString(),query.getDisplayTextProperty().toString(),new URI(query.getPropertyNamespace().toString())).toString(),e);//NOI18N
             } catch (Exception never) {
-                log.error("Fehler in toString()",e);
+                log.error("Error in toString()",e);//NOI18N
             }
             for (FeatureProperty fp:feature.getProperties()) {
-                log.fatal(fp.getName().getPrefix()+"."+fp.getName().getLocalName()+"."+fp.getName().getNamespace()+"->"+fp.getValue());
+                log.fatal(fp.getName().getPrefix()+"."+fp.getName().getLocalName()+"."+fp.getName().getNamespace()+"->"+fp.getValue());//NOI18N
             }
             return null;
 //            }
@@ -142,7 +142,7 @@ public class WFSFormFeature {
         try {
             return JTSAdapter.export(feature.getDefaultGeometryPropertyValue());
         } catch (GeometryException ex) {
-            log.error("Fehler in getJTSGeometry()",ex);
+            log.error("Error in getJTSGeometry()",ex);//NOI18N
         }
         return null;
     }
@@ -152,10 +152,10 @@ public class WFSFormFeature {
         try {
             FeatureProperty[] fp=feature.getProperties(new QualifiedName(query.getPropertyPrefix().toString(),query.getPositionProperty().toString(),new URI(query.getPropertyNamespace().toString())));
             Point p=(Point)(JTSAdapter.export((org.deegree2.model.spatialschema.Geometry)(fp[0].getValue())));
-            log.debug("POSITION="+p);
+            log.debug("POSITION="+p);//NOI18N
             return p;
         } catch (Exception ex) {
-            log.debug("Feature hat keine POSITION. Berechne den Mittelpunkt aus getJTSGeometry() ",ex) ;
+            log.debug("Feature has no POSITION. Calculate the centroid from getJTSGeometry() ",ex) ;//NOI18N
             Point p=getJTSGeometry().getCentroid();
             return p;
         }

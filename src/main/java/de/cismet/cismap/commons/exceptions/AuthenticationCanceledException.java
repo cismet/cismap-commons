@@ -9,19 +9,20 @@
 
 package de.cismet.cismap.commons.exceptions;
 
+
 /**
  *
  * @author Sebastian
  */
 public class AuthenticationCanceledException extends Exception {
-    
+
     /** Creates a new instance of AuthenticationCanceledException */
     public AuthenticationCanceledException() {
-    super(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("Exception.AuthenticationCanceledException"));    
+        super(org.openide.util.NbBundle.getMessage(AuthenticationCanceledException.class, "AuthenticationCanceledException.AuthenticationCanceledException()"));//NOI18N
     }
     
     public AuthenticationCanceledException(String message) {
-    super(message);
+        super(message);
     }
-    
+
 }

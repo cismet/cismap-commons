@@ -48,15 +48,14 @@ import javax.swing.tree.TreePath;
 public class PiccoloDebugTreeModel implements TreeModel{
     PCanvas pc;
     Vector<TreeModelListener> treeModelListener=new Vector<TreeModelListener>();
-    Object root="DebugTree";
+    Object root= "DebugTree";//NOI18N
     Vector<String> secondLevel= new Vector<String>();
-    
     
     /** Creates a new instance of PiccoloDebugTreeModel */
     public PiccoloDebugTreeModel(PCanvas pc) {
         this.pc=pc;
-        secondLevel.add("Camera's");
-        secondLevel.add("Layer");
+        secondLevel.add(org.openide.util.NbBundle.getMessage(PiccoloDebugTreeModel.class, "PiccoloDebugTreeModel.PiccoloDebugTreeModel(PCanvas).secondLevel.cameras"));//NOI18N
+        secondLevel.add(org.openide.util.NbBundle.getMessage(PiccoloDebugTreeModel.class, "PiccoloDebugTreeModel.PiccoloDebugTreeModel(PCanvas).secondLevel.layer"));//NOI18N
     }
     
     /**
@@ -153,7 +152,7 @@ public class PiccoloDebugTreeModel implements TreeModel{
             return ((PNode)parent).getChild(index);
         }
         else {
-            return "UUPS";
+            return "UUPS";//NOI18N
         }
     }
     

@@ -86,7 +86,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/layerwidget/res/collapseTree.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="LayerWidget.cmdTreeCollapse.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/gui/layerwidget/Bundle.properties" key="LayerWidget.cmdTreeCollapse.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
@@ -102,7 +102,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/layerwidget/res/refresh.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="LayerWidget.cmdRefreshSingleLayer.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/gui/layerwidget/Bundle.properties" key="LayerWidget.cmdRefreshSingleLayer.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
@@ -118,7 +118,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/layerwidget/res/down.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="LayerWidget.cmdDown.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/gui/layerwidget/Bundle.properties" key="LayerWidget.cmdDown.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
@@ -134,7 +134,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/layerwidget/res/up.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="LayerWidget.cmdUp.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/gui/layerwidget/Bundle.properties" key="LayerWidget.cmdUp.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
@@ -149,6 +149,9 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/layerwidget/res/layerZoom.png"/>
                 </Property>
+                <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="de/cismet/cismap/commons/gui/layerwidget/Bundle.properties" key="LayerWidget.cmdZoomToFullExtent.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
                 </Property>
@@ -160,7 +163,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/layerwidget/res/disable.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="LayerWidget.cmdDisable.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/gui/layerwidget/Bundle.properties" key="LayerWidget.cmdDisable.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
@@ -176,7 +179,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/layerwidget/res/removeLayer.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="LayerWidget.cmdRemove.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/gui/layerwidget/Bundle.properties" key="LayerWidget.cmdRemove.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>
@@ -192,7 +195,7 @@
                   <Image iconType="3" name="/de/cismet/cismap/commons/gui/layerwidget/res/layerDLinvisible.png"/>
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-                  <ResourceString bundle="de/cismet/cismap/commons/GuiBundle.properties" key="LayerWidget.cmdMakeInvisible.toolTipText" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+                  <ResourceString bundle="de/cismet/cismap/commons/gui/layerwidget/Bundle.properties" key="LayerWidget.cmdMakeInvisible.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
                 </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 1, 2, 1]"/>

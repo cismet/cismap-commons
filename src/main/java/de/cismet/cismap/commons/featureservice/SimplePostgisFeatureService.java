@@ -51,17 +51,17 @@ import org.jdom.Element;
  */
 public class SimplePostgisFeatureService extends AbstractFeatureService<PostgisFeature, SimpleFeatureServiceSqlStatement>
 {
-  public static final String POSTGIS_FEATURELAYER_TYPE = "simplePostgisFeatureService";
+  public static final String POSTGIS_FEATURELAYER_TYPE = "simplePostgisFeatureService";//NOI18N
   private SimpleFeatureServiceSqlStatement sqlStatement;
   private ConnectionInfo connectionInfo;
 
   public static final HashMap<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
   static
   {
-    layerIcons.put(LAYER_ENABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerPostgis.png")));
-    layerIcons.put(LAYER_ENABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerPostgisInvisible.png")));
-    layerIcons.put(LAYER_DISABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgis.png")));
-    layerIcons.put(LAYER_DISABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgisInvisible.png")));
+    layerIcons.put(LAYER_ENABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerPostgis.png")));//NOI18N
+    layerIcons.put(LAYER_ENABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerPostgisInvisible.png")));//NOI18N
+    layerIcons.put(LAYER_DISABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgis.png")));//NOI18N
+    layerIcons.put(LAYER_DISABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerPostgisInvisible.png")));//NOI18N
   }
 
   /** Creates a new instance of SimplePostgisFeatureService */
@@ -82,21 +82,21 @@ public class SimplePostgisFeatureService extends AbstractFeatureService<PostgisF
   {
     super.initFromElement(element);
 
-    if(element.getChild("dbConnectionInfo") != null)
+    if(element.getChild("dbConnectionInfo") != null)//NOI18N
     {
-      ConnectionInfo newConnectionInfo = new ConnectionInfo(element.getChild("dbConnectionInfo"));
+      ConnectionInfo newConnectionInfo = new ConnectionInfo(element.getChild("dbConnectionInfo"));//NOI18N
       this.setConnectionInfo(newConnectionInfo);
-      logger.debug("SimplePostgisFeatureService initialised with connection: \n" + this.getConnectionInfo().getUrl() + ", " + this.getConnectionInfo().getDriver() + ", " + this.getConnectionInfo().getUser());
+      logger.debug("SimplePostgisFeatureService initialised with connection: \n" + this.getConnectionInfo().getUrl() + ", " + this.getConnectionInfo().getDriver() + ", " + this.getConnectionInfo().getUser());//NOI18N
     }
     else
     {
-      logger.error("missing element 'dbConnectionInfo' in xml configuration");
+      logger.error("missing element 'dbConnectionInfo' in xml configuration");//NOI18N
     }
 
     // TODO: SimpleFeatureServiceSqlStatement should implement ConvertableToXML
-    this.sqlStatement = new SimpleFeatureServiceSqlStatement(element.getChild("statement").getTextTrim());
-    this.sqlStatement.setAllFields(element.getChild("allFields").getTextTrim());
-    this.sqlStatement.setOrderBy(element.getChild("orderBy").getTextTrim());
+    this.sqlStatement = new SimpleFeatureServiceSqlStatement(element.getChild("statement").getTextTrim());//NOI18N
+    this.sqlStatement.setAllFields(element.getChild("allFields").getTextTrim());//NOI18N
+    this.sqlStatement.setOrderBy(element.getChild("orderBy").getTextTrim());//NOI18N
   }
 
   @Override
@@ -106,32 +106,32 @@ public class SimplePostgisFeatureService extends AbstractFeatureService<PostgisF
 
     if (this.sqlStatement != null)
     {
-      Element stmnt = new Element("statement");
+      Element stmnt = new Element("statement");//NOI18N
       stmnt.addContent(new CDATA(sqlStatement.getSqlTemplate()));
       e.addContent(stmnt);
-      Element allFields = new Element("allFields");
+      Element allFields = new Element("allFields");//NOI18N
       allFields.addContent(new CDATA(sqlStatement.getAllFields()));
       e.addContent(allFields);
-      Element orderBy = new Element("orderBy");
+      Element orderBy = new Element("orderBy");//NOI18N
       orderBy.addContent(new CDATA(sqlStatement.getOrderBy()));
       e.addContent(orderBy);
     } else
     {
-      logger.warn("sql statement is null and cannot be saved");
+      logger.warn("sql statement is null and cannot be saved");//NOI18N
     }
 
     if (this.connectionInfo != null)
     {
       // TODO: ConnectionInfo should implement ConvertableToXML
-      Element connectionElement = new Element("dbConnectionInfo");
-      connectionElement.addContent(new Element("driverClass").addContent(this.getConnectionInfo().getDriver()));
-      connectionElement.addContent(new Element("dbUrl").addContent(this.getConnectionInfo().getUrl()));
-      connectionElement.addContent(new Element("user").addContent(this.getConnectionInfo().getUser()));
-      connectionElement.addContent(new Element("pass").addContent(this.getConnectionInfo().getPass()));
+      Element connectionElement = new Element("dbConnectionInfo");//NOI18N
+      connectionElement.addContent(new Element("driverClass").addContent(this.getConnectionInfo().getDriver()));//NOI18N
+      connectionElement.addContent(new Element("dbUrl").addContent(this.getConnectionInfo().getUrl()));//NOI18N
+      connectionElement.addContent(new Element("user").addContent(this.getConnectionInfo().getUser()));//NOI18N
+      connectionElement.addContent(new Element("pass").addContent(this.getConnectionInfo().getPass()));//NOI18N
       e.addContent(connectionElement);
     } else
     {
-      logger.warn("connection info is null and cannot be saved");
+      logger.warn("connection info is null and cannot be saved");//NOI18N
     }
 
     return e;
@@ -197,7 +197,7 @@ public class SimplePostgisFeatureService extends AbstractFeatureService<PostgisF
   @Override
   public SimplePostgisFeatureService clone()
   {
-    logger.debug("cloning SimplePostgisFeatureService " + this.getName());
+    logger.debug("cloning SimplePostgisFeatureService " + this.getName());//NOI18N
     return new SimplePostgisFeatureService(this);
   }
 }

@@ -20,8 +20,8 @@ import java.util.Observable;
  */
 public interface MementoInterface {
     
-    public static final String ACTIVATE = "ACTIVATE";
-    public static final String DEACTIVATE = "DEACTIVATE";
+    public static final String ACTIVATE = "ACTIVATE";//NOI18N
+    public static final String DEACTIVATE = "DEACTIVATE";//NOI18N
     
     public CustomAction getLastAction();
     

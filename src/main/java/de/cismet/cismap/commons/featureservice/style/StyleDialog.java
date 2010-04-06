@@ -71,19 +71,19 @@ public class StyleDialog extends JDialog implements ListSelectionListener
 
   private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
   // constants: filesystem
-  private static final String CISMAP_FOLDER = ".cismap";
-  private static final String DEFAULT_HISTORY_NAME = "defaultStyleHistory.xml";
-  private static final String COLORCHOOSER_TITLE = "Farbe w\u00E4hlen";
-  private static final String FONTCHOOSER_TITLE = "Schriftart w\u00E4hlen";
-  private static final String POINTSYMBOL_FOLDER = "/de/cismet/cismap/commons/featureservice/res/pointsymbols/";
-  private final String home = System.getProperty("user.home");
-  private final String seperator = System.getProperty("file.separator");
+  private static final String CISMAP_FOLDER = ".cismap";//NOI18N
+  private static final String DEFAULT_HISTORY_NAME = "defaultStyleHistory.xml";//NOI18N
+  private static final String COLORCHOOSER_TITLE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.COLORCHOOSER_TITLE");//NOI18N
+  private static final String FONTCHOOSER_TITLE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.FONTCHOOSER_TITLE");//NOI18N
+  private static final String POINTSYMBOL_FOLDER = "/de/cismet/cismap/commons/featureservice/res/pointsymbols/";//NOI18N
+  private final String home = System.getProperty("user.home");//NOI18N
+  private final String seperator = System.getProperty("file.separator");//NOI18N
   private final File fileToCismapFolder = new File(home + seperator + CISMAP_FOLDER);
   // constants: popup
   // FIXME: I18N
-  private final static String POPUP_SAVE = "speichern";
-  private final static String POPUP_LOAD = "laden";
-  private final static String POPUP_CLEAR = "l\u00F6schen";
+  private final static String POPUP_SAVE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_SAVE");//NOI18N
+  private final static String POPUP_LOAD = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_LOAD");//NOI18N
+  private final static String POPUP_CLEAR = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_CLEAR");//NOI18N
   private TreeMap<String, FeatureAnnotationSymbol> pointSymbolHM = new TreeMap();
   private TreeMap<String, FeatureServiceAttribute> featureServiceAttributes;
   private Map<String, FeatureServiceAttribute> oldFeatureServiceAttributes;
@@ -108,7 +108,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
 
     try
     {
-      logger.info("Erstelle StyleDialog");
+      logger.info("Erstelle StyleDialog");//NOI18N
       this.layerProperties = new DefaultLayerProperties();
 
       createPointSymbols();
@@ -184,7 +184,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
 
     } catch (Throwable t)
     {
-      logger.error("could not create StyleDialog: " + t.getMessage(), t);
+      logger.error("could not create StyleDialog: " + t.getMessage(), t);//NOI18N
     }
   }
 
@@ -206,7 +206,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
   {
     if (!this.isAccepted())
     {
-      logger.warn("supicious call to 'getLayerProperties()', change snot accepted");
+      logger.warn("supicious call to 'getLayerProperties()', changes not accepted");//NOI18N
     }
 
     return this.layerProperties;
@@ -254,7 +254,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       kit.setLineWrappingEnabled(chkLinewrap.isSelected());
 
       queryEditor.setEditorKit(kit);
-      queryEditor.setFont(new Font("Monospace", Font.PLAIN, 12));
+      queryEditor.setFont(new Font("Monospace", Font.PLAIN, 12));//NOI18N
       queryEditor.getDocument().putProperty(PlainDocument.tabSizeAttribute, new Integer(4));
       queryEditor.getDocument().putProperty(XMLDocument.AUTO_INDENTATION_ATTRIBUTE, new Boolean(true));
       queryEditor.getDocument().putProperty(XMLDocument.TAG_COMPLETION_ATTRIBUTE, new Boolean(true));
@@ -281,7 +281,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       scpQuery.setRowHeaderView(new LineNumberMargin(queryEditor));
     } catch (Exception ex)
     {
-      logger.error("Fehler beim Erstellen des QueryEditors", ex);
+      logger.error("Error during the creation of the QueryEditor", ex);//NOI18N
     }
   }
 
@@ -295,72 +295,72 @@ public class StyleDialog extends JDialog implements ListSelectionListener
     pointSymbolHM.put(Style.NO_POINTSYMBOL, null);
     pointSymbolHM.put(Style.AUTO_POINTSYMBOL, null);
 
-    logger.debug(getClass().getResource(POINTSYMBOL_FOLDER + "pushpin.png"));
-    FeatureAnnotationSymbol pushPin = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "pushpin.png")).getImage());
+    logger.debug(getClass().getResource(POINTSYMBOL_FOLDER + "pushpin.png"));//NOI18N
+    FeatureAnnotationSymbol pushPin = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "pushpin.png")).getImage());//NOI18N
     pushPin.setSweetSpotX(0.14d);
     pushPin.setSweetSpotY(1.0d);
     //pointSymbolList.addElement("pushpin.png");
-    pointSymbolHM.put("pushpin.png", pushPin);
+    pointSymbolHM.put("pushpin.png", pushPin);//NOI18N
 
-    FeatureAnnotationSymbol arrowBlue = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "arrow-blue-down.png")).getImage());
+    FeatureAnnotationSymbol arrowBlue = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "arrow-blue-down.png")).getImage());//NOI18N
     arrowBlue.setSweetSpotX(0.5d);
     arrowBlue.setSweetSpotY(1.0d);
     //pointSymbolList.addElement("arrow-blue-down.png");
-    pointSymbolHM.put("arrow-blue-down.png", arrowBlue);
+    pointSymbolHM.put("arrow-blue-down.png", arrowBlue);//NOI18N
 
-    FeatureAnnotationSymbol arrowGreen = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "arrow-green-down.png")).getImage());
+    FeatureAnnotationSymbol arrowGreen = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "arrow-green-down.png")).getImage());//NOI18N
     arrowGreen.setSweetSpotX(0.5d);
     arrowGreen.setSweetSpotY(1.0d);
     //pointSymbolList.addElement("arrow-green-down.png");
-    pointSymbolHM.put("arrow-green-down.png", arrowGreen);
+    pointSymbolHM.put("arrow-green-down.png", arrowGreen);//NOI18N
 
-    FeatureAnnotationSymbol flagBlack = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-black.png")).getImage());
+    FeatureAnnotationSymbol flagBlack = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-black.png")).getImage());//NOI18N
     flagBlack.setSweetSpotX(0.18d);
     flagBlack.setSweetSpotY(0.96d);
     //pointSymbolList.addElement("flag-black.png");
-    pointSymbolHM.put("flag-black.png", flagBlack);
+    pointSymbolHM.put("flag-black.png", flagBlack);//NOI18N
 
-    FeatureAnnotationSymbol flagBlue = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-blue.png")).getImage());
+    FeatureAnnotationSymbol flagBlue = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-blue.png")).getImage());//NOI18N
     flagBlue.setSweetSpotX(0.18d);
     flagBlue.setSweetSpotY(0.96d);
     //pointSymbolList.addElement("flag-blue.png");
-    pointSymbolHM.put("flag-blue.png", flagBlue);
+    pointSymbolHM.put("flag-blue.png", flagBlue);//NOI18N
 
-    FeatureAnnotationSymbol flagGreen = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-green.png")).getImage());
+    FeatureAnnotationSymbol flagGreen = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-green.png")).getImage());//NOI18N
     flagGreen.setSweetSpotX(0.18d);
     flagGreen.setSweetSpotY(0.96d);
     //pointSymbolList.addElement("flag-green.png");
-    pointSymbolHM.put("flag-green.png", flagGreen);
+    pointSymbolHM.put("flag-green.png", flagGreen);//NOI18N
 
-    FeatureAnnotationSymbol flagRed = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-red.png")).getImage());
+    FeatureAnnotationSymbol flagRed = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-red.png")).getImage());//NOI18N
     flagRed.setSweetSpotX(0.18d);
     flagRed.setSweetSpotY(0.96d);
     //pointSymbolList.addElement("flag-red.png");
-    pointSymbolHM.put("flag-red.png", flagRed);
+    pointSymbolHM.put("flag-red.png", flagRed);//NOI18N
 
-    FeatureAnnotationSymbol flagYellow = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-yellow.png")).getImage());
+    FeatureAnnotationSymbol flagYellow = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-yellow.png")).getImage());//NOI18N
     flagYellow.setSweetSpotX(0.18d);
     flagYellow.setSweetSpotY(0.96d);
     //pointSymbolList.addElement("flag-yellow.png");
-    pointSymbolHM.put("flag-yellow.png", flagYellow);
+    pointSymbolHM.put("flag-yellow.png", flagYellow);//NOI18N
 
-    FeatureAnnotationSymbol starBlack = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "star-black.png")).getImage());
+    FeatureAnnotationSymbol starBlack = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "star-black.png")).getImage());//NOI18N
     starBlack.setSweetSpotX(0.5d);
     starBlack.setSweetSpotY(0.5d);
     //pointSymbolList.addElement("star-black.png");
-    pointSymbolHM.put("star-black.png", starBlack);
+    pointSymbolHM.put("star-black.png", starBlack);//NOI18N
 
-    FeatureAnnotationSymbol starYellow = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "star-yellow.png")).getImage());
+    FeatureAnnotationSymbol starYellow = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "star-yellow.png")).getImage());//NOI18N
     starYellow.setSweetSpotX(0.5d);
     starYellow.setSweetSpotY(0.5d);
     //pointSymbolList.addElement("star-yellow.png");
-    pointSymbolHM.put("star-yellow.png", starYellow);
+    pointSymbolHM.put("star-yellow.png", starYellow);//NOI18N
 
-    FeatureAnnotationSymbol infoButton = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "info.png")).getImage());
+    FeatureAnnotationSymbol infoButton = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "info.png")).getImage());//NOI18N
     infoButton.setSweetSpotX(0.5d);
     infoButton.setSweetSpotY(0.5d);
     //pointSymbolList.addElement("info.png");
-    pointSymbolHM.put("info.png", infoButton);
+    pointSymbolHM.put("info.png", infoButton);//NOI18N
   }
 
   /**
@@ -395,14 +395,14 @@ public class StyleDialog extends JDialog implements ListSelectionListener
    */
   private File searchDefaultHistory()
   {
-    logger.debug("Suche nach " + DEFAULT_HISTORY_NAME);
+    logger.debug("search for " + DEFAULT_HISTORY_NAME);//NOI18N
     if (fileToCismapFolder.exists() && fileToCismapFolder.isDirectory())
     { // .cismap exists
       // does defaultStyleHistory.xml exist?
       File test = new File(fileToCismapFolder.getPath() + seperator + DEFAULT_HISTORY_NAME);
       if (test.exists() && test.isFile() && test.canRead() && test.canWrite())
       {
-        logger.debug(DEFAULT_HISTORY_NAME + " gefunden");
+        logger.debug(DEFAULT_HISTORY_NAME + " found");//NOI18N
         return test;
       } else
       {
@@ -426,11 +426,11 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       // create defaultStyleHistory.xml
       File newFile = new File(fileToCismapFolder.getPath() + seperator + DEFAULT_HISTORY_NAME);
       newFile.createNewFile();
-      logger.debug(DEFAULT_HISTORY_NAME + " erfolgreich angelegt");
+      logger.debug(DEFAULT_HISTORY_NAME + " successfully created");//NOI18N
       return newFile;
     } catch (IOException ex)
     {
-      logger.error(DEFAULT_HISTORY_NAME + " konnte nicht erstellt werden", ex);
+      logger.error(DEFAULT_HISTORY_NAME + " could not create", ex);//NOI18N
       return null;
     }
   }
@@ -443,7 +443,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
    */
   private void writeHistory(final File f, final boolean onClose)
   {
-    logger.debug("writeHistory(" + f + ")");
+    logger.debug("writeHistory(" + f + ")");//NOI18N
     Runnable writeHistoryRunnable = new Runnable()
     {
       @Override
@@ -460,7 +460,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
               ((StyleHistoryListModel) lstHistory.getModel()).addStyle((Style) getStyle().clone());
             }
 
-            XMLOutputter out = new XMLOutputter("\t", true);
+            XMLOutputter out = new XMLOutputter("\t", true);//NOI18N
             out.setTextTrim(true);
             Document doc = new Document(((StyleHistoryListModel) lstHistory.getModel()).toElement());
             writer = new FileWriter(f);
@@ -478,10 +478,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener
           }
         } catch (Exception ex)
         {
-          logger.error("Fehler beim Schreiben der History", ex);
+          logger.error("Error during writing the history.", ex);//NOI18N
           JOptionPane.showMessageDialog(StyleDialog.this,
-                  "<html>Fehler beim Schreiben der History<br>" + ex.getMessage() + "</html>",
-                  "Fehler", JOptionPane.ERROR_MESSAGE);
+                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.writeHistory(File,boolean).JOptionPane.message", new Object[] {ex.getMessage()}),//NOI18N
+                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.writeHistory(File,boolean).JOptionPane.title"), JOptionPane.ERROR_MESSAGE);//NOI18N
         } finally
         {
           try
@@ -502,7 +502,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
    */
   private void loadHistory(final File f)
   {
-    logger.debug("loadHistory(" + f + ")");
+    logger.debug("loadHistory(" + f + ")");//NOI18N
     Runnable loadHistoryRunnable = new Runnable()
     {
 
@@ -521,15 +521,15 @@ public class StyleDialog extends JDialog implements ListSelectionListener
               lstHistory.setModel(model);
               lblHistory.setText(f.getName());
               defaultHistory = f;
-              logger.debug(f + " erfolgreich geladen");
+              logger.debug(f + " successfully loaded");//NOI18N
             }
           });
         } catch (Exception ex)
         {
-          logger.error("Fehler beim Laden der History", ex);
+          logger.error("Error during loading of the history", ex);//NOI18N
           JOptionPane.showMessageDialog(StyleDialog.this,
-                  "<html>Fehler beim Laden der History<br>" + ex.getMessage() + "</html>",
-                  "Fehler", JOptionPane.ERROR_MESSAGE);
+                   org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.loadHistory().JOptionPane.message", new Object[] {ex.getMessage()}),//NOI18N
+                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.loadHistory().JOptionPane.title"), JOptionPane.ERROR_MESSAGE);//NOI18N
         }
       }
     };
@@ -548,7 +548,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       @Override
       public boolean accept(File f)
       {
-        if ((f.isFile() && f.getName().endsWith(".xml")) || f.isDirectory())
+        if ((f.isFile() && f.getName().endsWith(".xml")) || f.isDirectory())//NOI18N
         {
           return true;
         } else
@@ -560,7 +560,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       @Override
       public String getDescription()
       {
-        return "XML Dateien (*.xml)";
+        return org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.createHistoryListPopupMenu().description");//NOI18N
       }
     };
 
@@ -568,7 +568,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
     save.setText(POPUP_SAVE);
     try
     {
-      save.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/save.png")));
+      save.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/save.png")));//NOI18N
     } catch (Exception skipIcon)
     {
     }
@@ -596,16 +596,16 @@ public class StyleDialog extends JDialog implements ListSelectionListener
           if (returnValue == JFileChooser.APPROVE_OPTION)
           {
             File dst = fc.getSelectedFile();
-            if (!dst.getName().endsWith(".xml"))
+            if (!dst.getName().endsWith(".xml"))//NOI18N
             {
-              dst = new File(dst.toString() + ".xml");
+              dst = new File(dst.toString() + ".xml");//NOI18N
             }
             writeHistory(dst, false);
             defaultHistory = dst;
           }
         } catch (Throwable ex)
         {
-          logger.error("Fehler bei Öffnen-Dialog der StyleHistory", ex);
+          logger.error("Error during opening the Open Dialog of the style history", ex);//NOI18N
         }
       }
     });
@@ -614,7 +614,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
     open.setText(POPUP_LOAD);
     try
     {
-      open.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/open.png")));
+      open.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/open.png")));//NOI18N
     } catch (Exception skipIcon)
     {
     }
@@ -646,7 +646,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
           }
         } catch (Throwable ex)
         {
-          logger.error("Fehler bei Öffnen-Dialog der StyleHistory", ex);
+          logger.error("Error in open dialog of the StyleHistory", ex);//NOI18N
         }
       }
     });
@@ -655,7 +655,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
     clear.setText(POPUP_CLEAR);
     try
     {
-      clear.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/delete_history.png")));
+      clear.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/delete_history.png")));//NOI18N
     } catch (Exception skipIcon)
     {
     }
@@ -693,15 +693,15 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       this.setFeatureServiceAttributes(featureServiceAttributes);
       this.setLayerProperties(layerProperties);
 
-      logger.debug("QueryType: " + this.layerProperties.getQueryType());
+      logger.debug("QueryType: " + this.layerProperties.getQueryType());//NOI18N
       if (this.layerProperties.getQueryType() != LayerProperties.QUERYTYPE_UNDEFINED && query != null)
       {
-        logger.debug("Layer supports query, adding query dialog");
-        tbpTabs.addTab("Query Editor", new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/editor.png")), panTabQuery);
+        logger.debug("Layer supports query, adding query dialog");//NOI18N
+        tbpTabs.addTab("Query Editor", new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/editor.png")), panTabQuery);//NOI18N
         setQueryString(query.toString());
       } else
       {
-        logger.debug("Layer does not support query, removing query dialog");
+        logger.debug("Layer does not support query, removing query dialog");//NOI18N
         tbpTabs.remove(panTabQuery);
       }
 
@@ -734,7 +734,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
 
     if (!pointSymbolHM.containsKey(getStyle().getPointSymbolFilename()))
     {
-      logger.warn("unkown point symbol: '" + getStyle().getPointSymbolFilename() + "', adding to list");
+      logger.warn("unkown point symbol: '" + getStyle().getPointSymbolFilename() + "', adding to list");//NOI18N
       pointSymbolHM.put(getStyle().getPointSymbolFilename(), getStyle().getPointSymbol());
       cbbPointSymbol.setModel(new DefaultComboBoxModel(new Vector<String>(this.pointSymbolHM.keySet())));
     }
@@ -755,8 +755,8 @@ public class StyleDialog extends JDialog implements ListSelectionListener
     panFontColor.setBackground(getStyle().getFontColor());
 
     setAlignment(getStyle().getAlignment());
-    txtMin.setText("" + getStyle().getMinScale());
-    txtMax.setText("" + getStyle().getMaxScale());
+    txtMin.setText("" + getStyle().getMinScale());//NOI18N
+    txtMax.setText("" + getStyle().getMaxScale());//NOI18N
     setMultiplier(getStyle().getMultiplier());
     chkAutoscale.setSelected(getStyle().isAutoscale());
   }
@@ -786,7 +786,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
           if (!fsa.isGeometry() && fsa.isSelected())
           {
             this.layerProperties.setIdExpression(fsa.getName(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-            logger.warn("idExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (" + fsa.getType() + ", EXPRESSIONTYPE_PROPERTYNAME)");
+            logger.warn("idExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (" + fsa.getType() + ", EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
             expressionSet = true;
             break;
           }
@@ -801,7 +801,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
             {
               fsa.setSelected(true);
               this.layerProperties.setIdExpression(fsa.getName(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-              logger.warn("idExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME) and forcing attribute enabled");
+              logger.warn("idExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME) and forcing attribute enabled");//NOI18N
               expressionSet = true;
               break;
             }
@@ -810,21 +810,21 @@ public class StyleDialog extends JDialog implements ListSelectionListener
 
         if (!expressionSet)
         {
-          logger.error("no valid id expression could be dertimed from the list of available attributes");
+          logger.error("no valid id expression could be dertimed from the list of available attributes");//NOI18N
         }
 
       } else if (this.layerProperties.getIdExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME)
       {
         if (!this.featureServiceAttributes.get(idExpression).isSelected())
         {
-          logger.warn("idExpression '" + idExpression + "' is not selected, forcing selected");
+          logger.warn("idExpression '" + idExpression + "' is not selected, forcing selected");//NOI18N
           this.featureServiceAttributes.get(idExpression).setSelected(true);
         }
       }
     }
     else
     {
-      logger.debug("the selected layer does not support id expressions");
+      logger.debug("the selected layer does not support id expressions");//NOI18N
       this.cbbIdExpression.setEnabled(false);
     }
 
@@ -838,7 +838,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         if (!fsa.isGeometry() && fsa.isSelected())
         {
           this.layerProperties.setPrimaryAnnotationExpression(fsa.getName(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-          logger.warn("annotationExpressionExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME)");
+          logger.warn("annotationExpressionExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
           expressionSet = true;
           break;
         }
@@ -853,7 +853,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
           {
             fsa.setSelected(true);
             this.layerProperties.setPrimaryAnnotationExpression(fsa.getName(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-            logger.warn("annotationExpressionExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME) and forcing attribute enabled");
+            logger.warn("annotationExpressionExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME) and forcing attribute enabled");//NOI18N
             expressionSet = true;
             break;
           }
@@ -862,14 +862,14 @@ public class StyleDialog extends JDialog implements ListSelectionListener
 
       if (!expressionSet)
       {
-        logger.error("no valid annotationExpression expression could be determined from the list of available attributes");
+        logger.error("no valid annotationExpression expression could be determined from the list of available attributes");//NOI18N
       }
 
     } else if (this.layerProperties.getPrimaryAnnotationExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME)
     {
       if (!this.featureServiceAttributes.get(annotationExpression).isSelected())
       {
-        logger.warn("annotationExpression '" + annotationExpression + "' is not selected, forcing selected");
+        logger.warn("annotationExpression '" + annotationExpression + "' is not selected, forcing selected");//NOI18N
         this.featureServiceAttributes.get(annotationExpression).setSelected(true);
       }
     }
@@ -894,7 +894,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
     if (this.btgGeom.getSelection() == null && this.btgGeom.getButtonCount() > 0)
     {
       this.btgGeom.setSelected(this.btgGeom.getElements().nextElement().getModel(), true);
-      logger.warn("no geo attribute selected, forcing selection of attribute '" + this.btgGeom.getSelection().getActionCommand() + "'");
+      logger.warn("no geo attribute selected, forcing selection of attribute '" + this.btgGeom.getSelection().getActionCommand() + "'");//NOI18N
     }
   }
 
@@ -1005,7 +1005,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
    */
   private void createGeoAttributeButton(final FeatureServiceAttribute fsa)
   {
-    logger.debug("Geo-Attribut \"" + fsa.getName() + "\" adden");
+    logger.debug("Geo-Attribut \"" + fsa.getName() + "\" adden");//NOI18N
 
     // delete attribute from the "normal" attribute-list
     //((Vector<FeatureServiceAttribute>) styleAttribHM.get(ATTRI_NORM_SELECTED)).remove(fsa);
@@ -1042,7 +1042,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
    */
   private void createNormalAttributeButton(final FeatureServiceAttribute fsa)
   {
-    logger.debug("Attribut \"" + fsa.getName() + "\" adden");
+    logger.debug("Attribut \"" + fsa.getName() + "\" adden");//NOI18N
     final JCheckBox cb = new JCheckBox(fsa.getName(), false);
     cb.setActionCommand(fsa.getName());
 
@@ -1102,7 +1102,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
   {
     if (!this.isAccepted())
     {
-      logger.warn("supicious call to 'getQueryString()', changes not accepted");
+      logger.warn("supicious call to 'getQueryString()', changes not accepted");//NOI18N
     }
 
     return this.btgGeom.getSelection().getActionCommand();
@@ -1145,7 +1145,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       sldLineWidth.setValue(lineWidth);
     }
 
-    txtLineWidth.setText("" + lineWidth);
+    txtLineWidth.setText("" + lineWidth);//NOI18N
   }
 
   /**
@@ -1161,7 +1161,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       sldAlpha.setValue(a);
     }
 
-    txtTransparency.setText("" + a);
+    txtTransparency.setText("" + a);//NOI18N
   }
 
   /**
@@ -1189,7 +1189,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
   private void setPointSymbolSize(int size)
   {
     getStyle().setPointSymbolSize(size);
-    txtPointSymbolSize.setText(size + "");
+    txtPointSymbolSize.setText(size + "");//NOI18N
   }
 
   /**
@@ -1238,9 +1238,9 @@ public class StyleDialog extends JDialog implements ListSelectionListener
   private void setMaxScale(int max)
   {
     getStyle().setMaxScale(max);
-    if (!txtMax.getText().equals(max + ""))
+    if (!txtMax.getText().equals(max + ""))//NOI18N
     {
-      txtMax.setText(max + "");
+      txtMax.setText(max + "");//NOI18N
     }
 
   }
@@ -1252,9 +1252,9 @@ public class StyleDialog extends JDialog implements ListSelectionListener
   private void setMinScale(int min)
   {
     getStyle().setMinScale(min);
-    if (!txtMin.getText().equals(min + ""))
+    if (!txtMin.getText().equals(min + ""))//NOI18N
     {
-      txtMin.setText(min + "");
+      txtMin.setText(min + "");//NOI18N
     }
 
   }
@@ -1334,16 +1334,16 @@ public class StyleDialog extends JDialog implements ListSelectionListener
   private void setFontType(Font fontType)
   {
     getStyle().setFont(fontType);
-    StringBuffer name = new StringBuffer(fontType.getSize() + "pt ");
+    StringBuffer name = new StringBuffer(fontType.getSize() + "pt ");//NOI18N
     name.append(fontType.getName());
     if (fontType.isBold())
     {
-      name.append(" Bold");
+      name.append(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.setFontType(Font).name.bold"));//NOI18N
     }
 
     if (fontType.isItalic())
     {
-      name.append(" Italic");
+      name.append(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.setFontType(Font).name.italic"));//NOI18N
     }
 
     lblFontname.setText(name.toString());
@@ -1409,7 +1409,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
   {
     if (!this.isAccepted())
     {
-      logger.warn("supicious call to 'getQueryString()', changes not accepted");
+      logger.warn("supicious call to 'getQueryString()', changes not accepted");//NOI18N
     }
 
     return queryEditor.getText();
@@ -1533,1013 +1533,1024 @@ public class StyleDialog extends JDialog implements ListSelectionListener
    * WARNING: Do NOT modify this code. The content of this method is
    * always regenerated by the Form Editor.
    */
-  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
-
-    panTabRules = new javax.swing.JPanel();
-    panRulesButtons = new javax.swing.JPanel();
-    cmdAdd = new javax.swing.JButton();
-    cmdRemove = new javax.swing.JButton();
-    panRulesScroll = new javax.swing.JPanel();
-    jScrollPane1 = new javax.swing.JScrollPane();
-    panRules = new javax.swing.JPanel();
-    btgGeom = new javax.swing.ButtonGroup();
-    btgAlignment = new javax.swing.ButtonGroup();
-    panTabQuery = new javax.swing.JPanel();
-    panScrollpane = new javax.swing.JPanel();
-    scpQuery = new javax.swing.JScrollPane();
-    panQueryCheckbox = new javax.swing.JPanel();
-    chkLinewrap = new javax.swing.JCheckBox();
-    chkUseQueryString = new javax.swing.JCheckBox();
-    panMain = new javax.swing.JPanel();
-    panInfo = new javax.swing.JPanel();
-    panInfoComp = new javax.swing.JPanel();
-    jLabel1 = new javax.swing.JLabel();
-    jLabel2 = new javax.swing.JLabel();
-    jPanel3 = new javax.swing.JPanel();
-    jPanel1 = new javax.swing.JPanel();
-    panPreview = new StylePreviewPanel();
-    lblPreview = new javax.swing.JLabel();
-    panTabs = new javax.swing.JPanel();
-    tbpTabs = new javax.swing.JTabbedPane();
-    panTabFill = new javax.swing.JPanel();
-    panFill = new javax.swing.JPanel();
-    chkFill = new javax.swing.JCheckBox();
-    chkFillPattern = new javax.swing.JCheckBox();
-    cbbFillPattern = new javax.swing.JComboBox();
-    chkLine = new javax.swing.JCheckBox();
-    chkLinePattern = new javax.swing.JCheckBox();
-    cbbLinePattern = new javax.swing.JComboBox();
-    chkSync = new javax.swing.JCheckBox();
-    chkHighlightable = new javax.swing.JCheckBox();
-    lblLineWidth = new javax.swing.JLabel();
-    sldLineWidth = new javax.swing.JSlider();
-    txtLineWidth = new javax.swing.JTextField();
-    lblAlpha = new javax.swing.JLabel();
-    txtTransparency = new javax.swing.JTextField();
-    jPanel7 = new javax.swing.JPanel();
-    panTransWhite = new javax.swing.JPanel();
-    sldAlpha = new javax.swing.JSlider();
-    panTransColor = new javax.swing.JPanel();
-    jPanel8 = new javax.swing.JPanel();
-    panFillColor = new javax.swing.JPanel();
-    cmdFill = new javax.swing.JButton();
-    jPanel9 = new javax.swing.JPanel();
-    panLineColor = new javax.swing.JPanel();
-    cmdLine = new javax.swing.JButton();
-    scrHistory = new javax.swing.JScrollPane();
-    lstHistory = new javax.swing.JList();
-    lblHistory = new javax.swing.JLabel();
-    lblPointSymbol = new javax.swing.JLabel();
-    cbbPointSymbol = new javax.swing.JComboBox();
-    cbbPointSymbol.setModel(new DefaultComboBoxModel(new Vector(this.pointSymbolHM.keySet())));
-    lblPointSymbolSize = new javax.swing.JLabel();
-    sldPointSymbolSize = new javax.swing.JSlider();
-    txtPointSymbolSize = new javax.swing.JTextField();
-    panTabLabeling = new javax.swing.JPanel();
-    panLabeling = new javax.swing.JPanel();
-    chkActivateLabels = new javax.swing.JCheckBox();
-    lblAnnotationExpression = new javax.swing.JLabel();
-    cbbAnnotationExpression = new javax.swing.JComboBox();
-    panLabelButtons = new javax.swing.JPanel();
-    cmdChangeColor = new javax.swing.JButton();
-    cmdChangeFont = new javax.swing.JButton();
-    lblFontname = new javax.swing.JLabel();
-    panFontColor = new javax.swing.JPanel();
-    panScale = new javax.swing.JPanel();
-    lblMin = new javax.swing.JLabel();
-    txtMin = new javax.swing.JFormattedTextField();
-    lblMax = new javax.swing.JLabel();
-    txtMax = new javax.swing.JFormattedTextField();
-    chkAutoscale = new javax.swing.JCheckBox();
-    panAlignment = new javax.swing.JPanel();
-    radLeft = new javax.swing.JRadioButton();
-    radCenter = new javax.swing.JRadioButton();
-    radRight = new javax.swing.JRadioButton();
-    lblAlignment = new javax.swing.JLabel();
-    lblMultiplier = new javax.swing.JLabel();
-    txtMultiplier = new javax.swing.JFormattedTextField();
-    panTabAttrib = new javax.swing.JPanel();
-    jPanel2 = new javax.swing.JPanel();
-    panAttribGeo = new javax.swing.JPanel();
-    panAttribSeparator = new javax.swing.JPanel();
-    jSeparator1 = new javax.swing.JSeparator();
-    panAttribNorm = new javax.swing.JPanel();
-    lblIdExpression = new javax.swing.JLabel();
-    cbbIdExpression = new javax.swing.JComboBox();
-    panDialogButtons = new javax.swing.JPanel();
-    cmdOK = new javax.swing.JButton();
-    cmdCancel = new javax.swing.JButton();
-
-    panTabRules.setLayout(new java.awt.BorderLayout());
-
-    panRulesButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
-    panRulesButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-    cmdAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_add.png"))); // NOI18N
-    cmdAdd.setText("neu");
-    cmdAdd.setMargin(new java.awt.Insets(2, 5, 2, 5));
-    panRulesButtons.add(cmdAdd);
-
-    cmdRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_remove.png"))); // NOI18N
-    cmdRemove.setText("löschen");
-    cmdRemove.setMargin(new java.awt.Insets(2, 5, 2, 5));
-    panRulesButtons.add(cmdRemove);
-
-    panTabRules.add(panRulesButtons, java.awt.BorderLayout.SOUTH);
-
-    panRulesScroll.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 0, 10));
-    panRulesScroll.setLayout(new java.awt.BorderLayout());
-
-    jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-
-    panRules.setBackground(new java.awt.Color(255, 255, 255));
-    panRules.setLayout(new java.awt.GridLayout(1, 0));
-    jScrollPane1.setViewportView(panRules);
-
-    panRulesScroll.add(jScrollPane1, java.awt.BorderLayout.CENTER);
-
-    panTabRules.add(panRulesScroll, java.awt.BorderLayout.CENTER);
-
-    panTabQuery.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10), javax.swing.BorderFactory.createTitledBorder("Query bearbeiten")));
-    panTabQuery.setLayout(new java.awt.BorderLayout());
-
-    panScrollpane.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 5));
-    panScrollpane.setLayout(new java.awt.BorderLayout());
-    panScrollpane.add(scpQuery, java.awt.BorderLayout.CENTER);
-
-    panTabQuery.add(panScrollpane, java.awt.BorderLayout.CENTER);
-
-    panQueryCheckbox.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 5));
-    panQueryCheckbox.setLayout(new java.awt.GridLayout(2, 0));
-
-    chkLinewrap.setText("Zeilenumbruch");
-    chkLinewrap.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        chkLinewrapActionPerformed(evt);
-      }
-    });
-    panQueryCheckbox.add(chkLinewrap);
-
-    chkUseQueryString.setText("benutze dieses Benutzer-Query");
-    panQueryCheckbox.add(chkUseQueryString);
-
-    panTabQuery.add(panQueryCheckbox, java.awt.BorderLayout.SOUTH);
-
-    setTitle("Style anpassen");
-    setLocationByPlatform(true);
-    setMinimumSize(new java.awt.Dimension(685, 461));
-    setModal(true);
-    addWindowListener(new java.awt.event.WindowAdapter() {
-      public void windowClosing(java.awt.event.WindowEvent evt) {
-        closeDialog(evt);
-      }
-    });
-
-    panMain.setMinimumSize(new java.awt.Dimension(620, 433));
-    panMain.setPreferredSize(new java.awt.Dimension(620, 433));
-    panMain.setLayout(new java.awt.BorderLayout());
-
-    panInfo.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5), javax.swing.BorderFactory.createEtchedBorder()), javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-    panInfo.setLayout(new java.awt.BorderLayout());
-
-    panInfoComp.setLayout(new java.awt.GridBagLayout());
-
-    jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-    jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style.png"))); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    panInfoComp.add(jLabel1, gridBagConstraints);
-
-    jLabel2.setLabelFor(jLabel1);
-    jLabel2.setText("<html>Dieser Dialog dient der<br>Anpassung der visuellen<br>Gestaltung des WFS-Layers</html>");
-    jLabel2.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    panInfoComp.add(jLabel2, gridBagConstraints);
-
-    panInfo.add(panInfoComp, java.awt.BorderLayout.NORTH);
-
-    jPanel3.setPreferredSize(new java.awt.Dimension(150, 220));
-    jPanel3.setLayout(new java.awt.GridBagLayout());
-
-    jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
-    jPanel1.setMinimumSize(new java.awt.Dimension(150, 200));
-    jPanel1.setPreferredSize(new java.awt.Dimension(150, 150));
-    jPanel1.setLayout(new java.awt.BorderLayout());
-
-    panPreview.setBackground(new java.awt.Color(255, 255, 255));
-
-    javax.swing.GroupLayout panPreviewLayout = new javax.swing.GroupLayout(panPreview);
-    panPreview.setLayout(panPreviewLayout);
-    panPreviewLayout.setHorizontalGroup(
-      panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 146, Short.MAX_VALUE)
-    );
-    panPreviewLayout.setVerticalGroup(
-      panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 187, Short.MAX_VALUE)
-    );
-
-    jPanel1.add(panPreview, java.awt.BorderLayout.CENTER);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weighty = 1.0;
-    jPanel3.add(jPanel1, gridBagConstraints);
-
-    lblPreview.setLabelFor(panPreview);
-    lblPreview.setText("Vorschau:");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(15, 0, 0, 0);
-    jPanel3.add(lblPreview, gridBagConstraints);
-
-    panInfo.add(jPanel3, java.awt.BorderLayout.SOUTH);
-
-    panMain.add(panInfo, java.awt.BorderLayout.WEST);
-
-    panTabs.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 0, 5, 5));
-    panTabs.setLayout(new java.awt.BorderLayout());
-
-    panTabFill.setLayout(new java.awt.BorderLayout());
-
-    panFill.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
-    panFill.setLayout(new java.awt.GridBagLayout());
-
-    chkFill.setSelected(true);
-    chkFill.setText("Füllung:");
-    chkFill.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        chkFillItemStateChanged(evt);
-      }
-    });
-    chkFill.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        chkFillActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
-    panFill.add(chkFill, gridBagConstraints);
-
-    chkFillPattern.setText("Füllmuster:");
-    chkFillPattern.setEnabled(false);
-    chkFillPattern.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        chkFillPatternItemStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
-    panFill.add(chkFillPattern, gridBagConstraints);
-
-    cbbFillPattern.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-    cbbFillPattern.setEnabled(false);
-    cbbFillPattern.setMinimumSize(new java.awt.Dimension(56, 20));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
-    panFill.add(cbbFillPattern, gridBagConstraints);
-
-    chkLine.setText("Linie:");
-    chkLine.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        chkLineItemStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 10);
-    panFill.add(chkLine, gridBagConstraints);
-
-    chkLinePattern.setText("Linienmuster:");
-    chkLinePattern.setEnabled(false);
-    chkLinePattern.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        chkLinePatternItemStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
-    panFill.add(chkLinePattern, gridBagConstraints);
-
-    cbbLinePattern.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-    cbbLinePattern.setEnabled(false);
-    cbbLinePattern.setMinimumSize(new java.awt.Dimension(56, 20));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
-    panFill.add(cbbLinePattern, gridBagConstraints);
-
-    chkSync.setText("Linien- an Füllfarbe angleichen");
-    chkSync.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        chkSyncItemStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 10);
-    panFill.add(chkSync, gridBagConstraints);
-
-    chkHighlightable.setText("Geometrie unter der Maus hervorheben");
-    chkHighlightable.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        chkHighlightableItemStateChanged(evt);
-      }
-    });
-    chkHighlightable.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        chkHighlightableActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 10);
-    panFill.add(chkHighlightable, gridBagConstraints);
-
-    lblLineWidth.setLabelFor(sldLineWidth);
-    lblLineWidth.setText("Liniendicke (px):");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
-    panFill.add(lblLineWidth, gridBagConstraints);
-
-    sldLineWidth.setMajorTickSpacing(10);
-    sldLineWidth.setMaximum(20);
-    sldLineWidth.setMinorTickSpacing(1);
-    sldLineWidth.setPaintLabels(true);
-    sldLineWidth.setSnapToTicks(true);
-    sldLineWidth.setValue(1);
-    sldLineWidth.setEnabled(false);
-    sldLineWidth.setMinimumSize(new java.awt.Dimension(130, 37));
-    sldLineWidth.setPreferredSize(new java.awt.Dimension(130, 37));
-    sldLineWidth.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-      public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-        sldLineWidthMouseWheelMoved(evt);
-      }
-    });
-    sldLineWidth.addChangeListener(new javax.swing.event.ChangeListener() {
-      public void stateChanged(javax.swing.event.ChangeEvent evt) {
-        sldLineWidthStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    panFill.add(sldLineWidth, gridBagConstraints);
-
-    txtLineWidth.setColumns(2);
-    txtLineWidth.setEditable(false);
-    txtLineWidth.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-    txtLineWidth.setText("1");
-    txtLineWidth.setEnabled(false);
-    txtLineWidth.setFocusable(false);
-    txtLineWidth.setMinimumSize(new java.awt.Dimension(35, 20));
-    txtLineWidth.setPreferredSize(new java.awt.Dimension(35, 20));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    panFill.add(txtLineWidth, gridBagConstraints);
-
-    lblAlpha.setLabelFor(jPanel7);
-    lblAlpha.setText("Alpha (%):");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
-    panFill.add(lblAlpha, gridBagConstraints);
-
-    txtTransparency.setColumns(3);
-    txtTransparency.setEditable(false);
-    txtTransparency.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-    txtTransparency.setText("100");
-    txtTransparency.setFocusable(false);
-    txtTransparency.setMinimumSize(new java.awt.Dimension(35, 20));
-    txtTransparency.setOpaque(false);
-    txtTransparency.setPreferredSize(new java.awt.Dimension(35, 20));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    panFill.add(txtTransparency, gridBagConstraints);
-
-    jPanel7.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 0));
-
-    panTransWhite.setBackground(new java.awt.Color(255, 255, 255));
-    panTransWhite.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
-    panTransWhite.setMaximumSize(new java.awt.Dimension(14, 14));
-    panTransWhite.setMinimumSize(new java.awt.Dimension(14, 14));
-    panTransWhite.setPreferredSize(new java.awt.Dimension(14, 14));
-
-    javax.swing.GroupLayout panTransWhiteLayout = new javax.swing.GroupLayout(panTransWhite);
-    panTransWhite.setLayout(panTransWhiteLayout);
-    panTransWhiteLayout.setHorizontalGroup(
-      panTransWhiteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 12, Short.MAX_VALUE)
-    );
-    panTransWhiteLayout.setVerticalGroup(
-      panTransWhiteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 12, Short.MAX_VALUE)
-    );
-
-    jPanel7.add(panTransWhite);
-
-    sldAlpha.setMajorTickSpacing(10);
-    sldAlpha.setMinorTickSpacing(1);
-    sldAlpha.setSnapToTicks(true);
-    sldAlpha.setValue(100);
-    sldAlpha.setMinimumSize(new java.awt.Dimension(100, 23));
-    sldAlpha.setPreferredSize(new java.awt.Dimension(100, 23));
-    sldAlpha.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-      public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-        sldAlphaMouseWheelMoved(evt);
-      }
-    });
-    sldAlpha.addChangeListener(new javax.swing.event.ChangeListener() {
-      public void stateChanged(javax.swing.event.ChangeEvent evt) {
-        sldAlphaStateChanged(evt);
-      }
-    });
-    jPanel7.add(sldAlpha);
-
-    panTransColor.setBackground(new java.awt.Color(0, 180, 0));
-    panTransColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
-    panTransColor.setMaximumSize(new java.awt.Dimension(14, 14));
-    panTransColor.setMinimumSize(new java.awt.Dimension(14, 14));
-    panTransColor.setPreferredSize(new java.awt.Dimension(14, 14));
-
-    javax.swing.GroupLayout panTransColorLayout = new javax.swing.GroupLayout(panTransColor);
-    panTransColor.setLayout(panTransColorLayout);
-    panTransColorLayout.setHorizontalGroup(
-      panTransColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 12, Short.MAX_VALUE)
-    );
-    panTransColorLayout.setVerticalGroup(
-      panTransColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 12, Short.MAX_VALUE)
-    );
-
-    jPanel7.add(panTransColor);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    panFill.add(jPanel7, gridBagConstraints);
-
-    jPanel8.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
-
-    panFillColor.setBackground(new java.awt.Color(0, 180, 0));
-    panFillColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
-    panFillColor.setMaximumSize(new java.awt.Dimension(35, 15));
-    panFillColor.setMinimumSize(new java.awt.Dimension(35, 15));
-    panFillColor.setPreferredSize(new java.awt.Dimension(35, 15));
-
-    javax.swing.GroupLayout panFillColorLayout = new javax.swing.GroupLayout(panFillColor);
-    panFillColor.setLayout(panFillColorLayout);
-    panFillColorLayout.setHorizontalGroup(
-      panFillColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 33, Short.MAX_VALUE)
-    );
-    panFillColorLayout.setVerticalGroup(
-      panFillColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 13, Short.MAX_VALUE)
-    );
-
-    jPanel8.add(panFillColor);
-
-    cmdFill.setText("...");
-    cmdFill.setMaximumSize(new java.awt.Dimension(90, 18));
-    cmdFill.setMinimumSize(new java.awt.Dimension(30, 18));
-    cmdFill.setPreferredSize(new java.awt.Dimension(30, 18));
-    cmdFill.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        cmdFillActionPerformed(evt);
-      }
-    });
-    jPanel8.add(cmdFill);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
-    panFill.add(jPanel8, gridBagConstraints);
-
-    jPanel9.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
-
-    panLineColor.setBackground(new java.awt.Color(0, 125, 0));
-    panLineColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
-    panLineColor.setMaximumSize(new java.awt.Dimension(35, 15));
-    panLineColor.setMinimumSize(new java.awt.Dimension(35, 15));
-    panLineColor.setPreferredSize(new java.awt.Dimension(35, 15));
-
-    javax.swing.GroupLayout panLineColorLayout = new javax.swing.GroupLayout(panLineColor);
-    panLineColor.setLayout(panLineColorLayout);
-    panLineColorLayout.setHorizontalGroup(
-      panLineColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 33, Short.MAX_VALUE)
-    );
-    panLineColorLayout.setVerticalGroup(
-      panLineColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 13, Short.MAX_VALUE)
-    );
-
-    jPanel9.add(panLineColor);
-
-    cmdLine.setText("...");
-    cmdLine.setEnabled(false);
-    cmdLine.setMaximumSize(new java.awt.Dimension(30, 18));
-    cmdLine.setMinimumSize(new java.awt.Dimension(30, 18));
-    cmdLine.setPreferredSize(new java.awt.Dimension(30, 18));
-    cmdLine.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        cmdLineActionPerformed(evt);
-      }
-    });
-    jPanel9.add(cmdLine);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 10);
-    panFill.add(jPanel9, gridBagConstraints);
-
-    scrHistory.setMinimumSize(new java.awt.Dimension(80, 50));
-    scrHistory.setPreferredSize(new java.awt.Dimension(80, 50));
-
-    lstHistory.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-    scrHistory.setViewportView(lstHistory);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridheight = 10;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 30);
-    panFill.add(scrHistory, gridBagConstraints);
-
-    lblHistory.setFont(new java.awt.Font("Tahoma", 0, 9));
-    lblHistory.setLabelFor(lstHistory);
-    lblHistory.setText("history.xml");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 10;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 0);
-    panFill.add(lblHistory, gridBagConstraints);
-
-    lblPointSymbol.setLabelFor(cbbPointSymbol);
-    lblPointSymbol.setText("Punktsymbol:");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 10);
-    panFill.add(lblPointSymbol, gridBagConstraints);
-
-    cbbPointSymbol.setMaximumRowCount(9);
-    cbbPointSymbol.setMinimumSize(new java.awt.Dimension(45, 25));
-    cbbPointSymbol.setPreferredSize(new java.awt.Dimension(45, 25));
-    cbbPointSymbol.setRenderer(new PointSymbolListRenderer());
-    cbbPointSymbol.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        cbbPointSymbolItemStateChanged(evt);
-      }
-    });
-    cbbPointSymbol.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        cbbPointSymbolActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 10);
-    panFill.add(cbbPointSymbol, gridBagConstraints);
-
-    lblPointSymbolSize.setLabelFor(sldPointSymbolSize);
-    lblPointSymbolSize.setText("Punktsymbolgröße:");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 10);
-    panFill.add(lblPointSymbolSize, gridBagConstraints);
-
-    sldPointSymbolSize.setMajorTickSpacing(10);
-    sldPointSymbolSize.setMaximum(Style.MAX_POINTSYMBOLSIZE);
-    sldPointSymbolSize.setMinimum(Style.MIN_POINTSYMBOLSIZE);
-    sldPointSymbolSize.setMinorTickSpacing(1);
-    sldPointSymbolSize.setPaintLabels(true);
-    sldPointSymbolSize.setSnapToTicks(true);
-    sldPointSymbolSize.setValue(Style.MIN_POINTSYMBOLSIZE);
-    sldPointSymbolSize.setMinimumSize(new java.awt.Dimension(130, 37));
-    sldPointSymbolSize.setPreferredSize(new java.awt.Dimension(130, 37));
-    sldPointSymbolSize.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-      public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
-        sldPointSymbolSizeMouseWheelMoved(evt);
-      }
-    });
-    sldPointSymbolSize.addChangeListener(new javax.swing.event.ChangeListener() {
-      public void stateChanged(javax.swing.event.ChangeEvent evt) {
-        sldPointSymbolSizeStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 9;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    panFill.add(sldPointSymbolSize, gridBagConstraints);
-
-    txtPointSymbolSize.setColumns(2);
-    txtPointSymbolSize.setEditable(false);
-    txtPointSymbolSize.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-    txtPointSymbolSize.setText("10");
-    txtPointSymbolSize.setFocusable(false);
-    txtPointSymbolSize.setMinimumSize(new java.awt.Dimension(35, 20));
-    txtPointSymbolSize.setPreferredSize(new java.awt.Dimension(35, 20));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 9;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    panFill.add(txtPointSymbolSize, gridBagConstraints);
-
-    panTabFill.add(panFill, java.awt.BorderLayout.WEST);
-
-    tbpTabs.addTab("Füllung & Linien", new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style_color.png")), panTabFill); // NOI18N
-
-    panTabLabeling.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 20, 20));
-
-    panLabeling.setLayout(new java.awt.GridBagLayout());
-
-    chkActivateLabels.setSelected(true);
-    chkActivateLabels.setText("Labels anschalten");
-    chkActivateLabels.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        chkActivateLabelsItemStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
-    panLabeling.add(chkActivateLabels, gridBagConstraints);
-
-    lblAnnotationExpression.setLabelFor(cbbAnnotationExpression);
-    lblAnnotationExpression.setText("Label-Attribut:");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 15);
-    panLabeling.add(lblAnnotationExpression, gridBagConstraints);
-
-    cbbAnnotationExpression.setEditable(true);
-    cbbAnnotationExpression.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        cbbAnnotationExpressionItemStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    panLabeling.add(cbbAnnotationExpression, gridBagConstraints);
-
-    panLabelButtons.setBorder(javax.swing.BorderFactory.createTitledBorder("Schriftdetails"));
-    panLabelButtons.setLayout(new java.awt.GridBagLayout());
-
-    cmdChangeColor.setText("Farbe wechseln");
-    cmdChangeColor.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        cmdChangeColorActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
-    panLabelButtons.add(cmdChangeColor, gridBagConstraints);
-
-    cmdChangeFont.setText("Schrift wechseln");
-    cmdChangeFont.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        cmdChangeFontActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 5);
-    panLabelButtons.add(cmdChangeFont, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 0);
-    panLabelButtons.add(lblFontname, gridBagConstraints);
-
-    panFontColor.setBackground(new java.awt.Color(0, 0, 0));
-    panFontColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
-    panFontColor.setMinimumSize(new java.awt.Dimension(20, 20));
-    panFontColor.setPreferredSize(new java.awt.Dimension(20, 20));
-
-    javax.swing.GroupLayout panFontColorLayout = new javax.swing.GroupLayout(panFontColor);
-    panFontColor.setLayout(panFontColorLayout);
-    panFontColorLayout.setHorizontalGroup(
-      panFontColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 18, Short.MAX_VALUE)
-    );
-    panFontColorLayout.setVerticalGroup(
-      panFontColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-      .addGap(0, 18, Short.MAX_VALUE)
-    );
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 0);
-    panLabelButtons.add(panFontColor, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(15, 0, 0, 0);
-    panLabeling.add(panLabelButtons, gridBagConstraints);
-
-    panScale.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
-
-    lblMin.setLabelFor(txtMin);
-    lblMin.setText("Sichtbar von 1:");
-    panScale.add(lblMin);
-
-    txtMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
-    txtMin.setText("1");
-    txtMin.setMinimumSize(new java.awt.Dimension(60, 20));
-    txtMin.setPreferredSize(new java.awt.Dimension(60, 20));
-    panScale.add(txtMin);
-
-    lblMax.setLabelFor(txtMax);
-    lblMax.setText("bis 1:");
-    panScale.add(lblMax);
-
-    txtMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
-    txtMax.setText("2500");
-    txtMax.setMinimumSize(new java.awt.Dimension(60, 20));
-    txtMax.setPreferredSize(new java.awt.Dimension(60, 20));
-    panScale.add(txtMax);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 10, 0);
-    panLabeling.add(panScale, gridBagConstraints);
-
-    chkAutoscale.setSelected(true);
-    chkAutoscale.setText("Größe der Skalierung anpassen");
-    chkAutoscale.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        chkAutoscaleItemStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 0);
-    panLabeling.add(chkAutoscale, gridBagConstraints);
-
-    panAlignment.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
-
-    btgAlignment.add(radLeft);
-    radLeft.setSelected(true);
-    radLeft.setText("links");
-    radLeft.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        radLeftActionPerformed(evt);
-      }
-    });
-    panAlignment.add(radLeft);
-
-    btgAlignment.add(radCenter);
-    radCenter.setText("zentriert");
-    radCenter.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        radCenterActionPerformed(evt);
-      }
-    });
-    panAlignment.add(radCenter);
-
-    btgAlignment.add(radRight);
-    radRight.setText("rechts");
-    radRight.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        radRightActionPerformed(evt);
-      }
-    });
-    panAlignment.add(radRight);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    panLabeling.add(panAlignment, gridBagConstraints);
-
-    lblAlignment.setLabelFor(panAlignment);
-    lblAlignment.setText("Ausrichtung");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 15);
-    panLabeling.add(lblAlignment, gridBagConstraints);
-
-    lblMultiplier.setLabelFor(txtMultiplier);
-    lblMultiplier.setText("Größenmultiplikator");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 15);
-    panLabeling.add(lblMultiplier, gridBagConstraints);
-
-    txtMultiplier.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
-    txtMultiplier.setText("1,00");
-    txtMultiplier.setMinimumSize(new java.awt.Dimension(40, 20));
-    txtMultiplier.setPreferredSize(new java.awt.Dimension(40, 20));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    panLabeling.add(txtMultiplier, gridBagConstraints);
-
-    panTabLabeling.add(panLabeling);
-
-    tbpTabs.addTab("Beschriftung", new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/labelling.png")), panTabLabeling); // NOI18N
-
-    panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10), javax.swing.BorderFactory.createTitledBorder("Abzufragende Attribute auswählen")));
-    panTabAttrib.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
-
-    jPanel2.setLayout(new java.awt.GridBagLayout());
-
-    panAttribGeo.setLayout(new javax.swing.BoxLayout(panAttribGeo, javax.swing.BoxLayout.Y_AXIS));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 20);
-    jPanel2.add(panAttribGeo, gridBagConstraints);
-
-    panAttribSeparator.setLayout(new java.awt.BorderLayout());
-    panAttribSeparator.add(jSeparator1, java.awt.BorderLayout.CENTER);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
-    jPanel2.add(panAttribSeparator, gridBagConstraints);
-
-    panAttribNorm.setLayout(new javax.swing.BoxLayout(panAttribNorm, javax.swing.BoxLayout.Y_AXIS));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 20);
-    jPanel2.add(panAttribNorm, gridBagConstraints);
-
-    lblIdExpression.setLabelFor(cbbIdExpression);
-    lblIdExpression.setText("Primärschlüssel");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 10);
-    jPanel2.add(lblIdExpression, gridBagConstraints);
-
-    cbbIdExpression.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
-        cbbIdExpressionItemStateChanged(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
-    jPanel2.add(cbbIdExpression, gridBagConstraints);
-
-    panTabAttrib.add(jPanel2);
-
-    tbpTabs.addTab("Attribute", new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/attributes.png")), panTabAttrib); // NOI18N
-    panTabAttrib.getAccessibleContext().setAccessibleName(null);
-
-    panTabs.add(tbpTabs, java.awt.BorderLayout.CENTER);
-
-    panMain.add(panTabs, java.awt.BorderLayout.CENTER);
-
-    getContentPane().add(panMain, java.awt.BorderLayout.CENTER);
-
-    panDialogButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, -5));
-    panDialogButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 0));
-
-    cmdOK.setText("OK");
-    cmdOK.setMaximumSize(new java.awt.Dimension(88, 23));
-    cmdOK.setMinimumSize(new java.awt.Dimension(88, 23));
-    cmdOK.setPreferredSize(new java.awt.Dimension(88, 23));
-    cmdOK.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        cmdOKActionPerformed(evt);
-      }
-    });
-    panDialogButtons.add(cmdOK);
-
-    cmdCancel.setText("Abbrechen");
-    cmdCancel.setMaximumSize(new java.awt.Dimension(88, 23));
-    cmdCancel.setMinimumSize(new java.awt.Dimension(88, 23));
-    cmdCancel.setPreferredSize(new java.awt.Dimension(88, 23));
-    cmdCancel.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        cmdCancelActionPerformed(evt);
-      }
-    });
-    panDialogButtons.add(cmdCancel);
-
-    getContentPane().add(panDialogButtons, java.awt.BorderLayout.SOUTH);
-
-    pack();
-  }// </editor-fold>//GEN-END:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
+
+        panTabRules = new javax.swing.JPanel();
+        panRulesButtons = new javax.swing.JPanel();
+        cmdAdd = new javax.swing.JButton();
+        cmdRemove = new javax.swing.JButton();
+        panRulesScroll = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        panRules = new javax.swing.JPanel();
+        btgGeom = new javax.swing.ButtonGroup();
+        btgAlignment = new javax.swing.ButtonGroup();
+        panTabQuery = new javax.swing.JPanel();
+        panScrollpane = new javax.swing.JPanel();
+        scpQuery = new javax.swing.JScrollPane();
+        panQueryCheckbox = new javax.swing.JPanel();
+        chkLinewrap = new javax.swing.JCheckBox();
+        chkUseQueryString = new javax.swing.JCheckBox();
+        panMain = new javax.swing.JPanel();
+        panInfo = new javax.swing.JPanel();
+        panInfoComp = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jPanel1 = new javax.swing.JPanel();
+        panPreview = new StylePreviewPanel();
+        lblPreview = new javax.swing.JLabel();
+        panTabs = new javax.swing.JPanel();
+        tbpTabs = new javax.swing.JTabbedPane();
+        panTabFill = new javax.swing.JPanel();
+        panFill = new javax.swing.JPanel();
+        chkFill = new javax.swing.JCheckBox();
+        chkFillPattern = new javax.swing.JCheckBox();
+        cbbFillPattern = new javax.swing.JComboBox();
+        chkLine = new javax.swing.JCheckBox();
+        chkLinePattern = new javax.swing.JCheckBox();
+        cbbLinePattern = new javax.swing.JComboBox();
+        chkSync = new javax.swing.JCheckBox();
+        chkHighlightable = new javax.swing.JCheckBox();
+        lblLineWidth = new javax.swing.JLabel();
+        sldLineWidth = new javax.swing.JSlider();
+        txtLineWidth = new javax.swing.JTextField();
+        lblAlpha = new javax.swing.JLabel();
+        txtTransparency = new javax.swing.JTextField();
+        jPanel7 = new javax.swing.JPanel();
+        panTransWhite = new javax.swing.JPanel();
+        sldAlpha = new javax.swing.JSlider();
+        panTransColor = new javax.swing.JPanel();
+        jPanel8 = new javax.swing.JPanel();
+        panFillColor = new javax.swing.JPanel();
+        cmdFill = new javax.swing.JButton();
+        jPanel9 = new javax.swing.JPanel();
+        panLineColor = new javax.swing.JPanel();
+        cmdLine = new javax.swing.JButton();
+        scrHistory = new javax.swing.JScrollPane();
+        lstHistory = new javax.swing.JList();
+        lblHistory = new javax.swing.JLabel();
+        lblPointSymbol = new javax.swing.JLabel();
+        cbbPointSymbol = new javax.swing.JComboBox();
+        cbbPointSymbol.setModel(new DefaultComboBoxModel(new Vector(this.pointSymbolHM.keySet())));
+        lblPointSymbolSize = new javax.swing.JLabel();
+        sldPointSymbolSize = new javax.swing.JSlider();
+        txtPointSymbolSize = new javax.swing.JTextField();
+        panTabLabeling = new javax.swing.JPanel();
+        panLabeling = new javax.swing.JPanel();
+        chkActivateLabels = new javax.swing.JCheckBox();
+        lblAnnotationExpression = new javax.swing.JLabel();
+        cbbAnnotationExpression = new javax.swing.JComboBox();
+        panLabelButtons = new javax.swing.JPanel();
+        cmdChangeColor = new javax.swing.JButton();
+        cmdChangeFont = new javax.swing.JButton();
+        lblFontname = new javax.swing.JLabel();
+        panFontColor = new javax.swing.JPanel();
+        panScale = new javax.swing.JPanel();
+        lblMin = new javax.swing.JLabel();
+        txtMin = new javax.swing.JFormattedTextField();
+        lblMax = new javax.swing.JLabel();
+        txtMax = new javax.swing.JFormattedTextField();
+        chkAutoscale = new javax.swing.JCheckBox();
+        panAlignment = new javax.swing.JPanel();
+        radLeft = new javax.swing.JRadioButton();
+        radCenter = new javax.swing.JRadioButton();
+        radRight = new javax.swing.JRadioButton();
+        lblAlignment = new javax.swing.JLabel();
+        lblMultiplier = new javax.swing.JLabel();
+        txtMultiplier = new javax.swing.JFormattedTextField();
+        panTabAttrib = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        panAttribGeo = new javax.swing.JPanel();
+        panAttribSeparator = new javax.swing.JPanel();
+        jSeparator1 = new javax.swing.JSeparator();
+        panAttribNorm = new javax.swing.JPanel();
+        lblIdExpression = new javax.swing.JLabel();
+        cbbIdExpression = new javax.swing.JComboBox();
+        panDialogButtons = new javax.swing.JPanel();
+        cmdOK = new javax.swing.JButton();
+        cmdCancel = new javax.swing.JButton();
+
+        panTabRules.setLayout(new java.awt.BorderLayout());
+
+        panRulesButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
+        panRulesButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        cmdAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_add.png"))); // NOI18N
+        cmdAdd.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdAdd.text")); // NOI18N
+        cmdAdd.setMargin(new java.awt.Insets(2, 5, 2, 5));
+        cmdAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdAddActionPerformed(evt);
+            }
+        });
+        panRulesButtons.add(cmdAdd);
+
+        cmdRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_remove.png"))); // NOI18N
+        cmdRemove.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdRemove.text")); // NOI18N
+        cmdRemove.setMargin(new java.awt.Insets(2, 5, 2, 5));
+        panRulesButtons.add(cmdRemove);
+
+        panTabRules.add(panRulesButtons, java.awt.BorderLayout.SOUTH);
+
+        panRulesScroll.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 0, 10));
+        panRulesScroll.setLayout(new java.awt.BorderLayout());
+
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+
+        panRules.setBackground(new java.awt.Color(255, 255, 255));
+        panRules.setLayout(new java.awt.GridLayout(1, 0));
+        jScrollPane1.setViewportView(panRules);
+
+        panRulesScroll.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        panTabRules.add(panRulesScroll, java.awt.BorderLayout.CENTER);
+
+        panTabQuery.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10), javax.swing.BorderFactory.createTitledBorder("Query bearbeiten")));
+        panTabQuery.setLayout(new java.awt.BorderLayout());
+
+        panScrollpane.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        panScrollpane.setLayout(new java.awt.BorderLayout());
+        panScrollpane.add(scpQuery, java.awt.BorderLayout.CENTER);
+
+        panTabQuery.add(panScrollpane, java.awt.BorderLayout.CENTER);
+
+        panQueryCheckbox.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        panQueryCheckbox.setLayout(new java.awt.GridLayout(2, 0));
+
+        chkLinewrap.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkLinewrap.text")); // NOI18N
+        chkLinewrap.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkLinewrapActionPerformed(evt);
+            }
+        });
+        panQueryCheckbox.add(chkLinewrap);
+
+        chkUseQueryString.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkUseQueryString.text")); // NOI18N
+        chkUseQueryString.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkUseQueryStringActionPerformed(evt);
+            }
+        });
+        panQueryCheckbox.add(chkUseQueryString);
+
+        panTabQuery.add(panQueryCheckbox, java.awt.BorderLayout.SOUTH);
+
+        setTitle(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.title")); // NOI18N
+        setLocationByPlatform(true);
+        setMinimumSize(new java.awt.Dimension(685, 461));
+        setModal(true);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                closeDialog(evt);
+            }
+        });
+
+        panMain.setMinimumSize(new java.awt.Dimension(620, 433));
+        panMain.setPreferredSize(new java.awt.Dimension(620, 433));
+        panMain.setLayout(new java.awt.BorderLayout());
+
+        panInfo.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5), javax.swing.BorderFactory.createEtchedBorder()), javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        panInfo.setLayout(new java.awt.BorderLayout());
+
+        panInfoComp.setLayout(new java.awt.GridBagLayout());
+
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style.png"))); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        panInfoComp.add(jLabel1, gridBagConstraints);
+
+        jLabel2.setLabelFor(jLabel1);
+        jLabel2.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.jLabel2.text")); // NOI18N
+        jLabel2.setVerticalAlignment(javax.swing.SwingConstants.TOP);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        panInfoComp.add(jLabel2, gridBagConstraints);
+
+        panInfo.add(panInfoComp, java.awt.BorderLayout.NORTH);
+
+        jPanel3.setPreferredSize(new java.awt.Dimension(150, 220));
+        jPanel3.setLayout(new java.awt.GridBagLayout());
+
+        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        jPanel1.setMinimumSize(new java.awt.Dimension(150, 200));
+        jPanel1.setPreferredSize(new java.awt.Dimension(150, 150));
+        jPanel1.setLayout(new java.awt.BorderLayout());
+
+        panPreview.setBackground(new java.awt.Color(255, 255, 255));
+
+        javax.swing.GroupLayout panPreviewLayout = new javax.swing.GroupLayout(panPreview);
+        panPreview.setLayout(panPreviewLayout);
+        panPreviewLayout.setHorizontalGroup(
+            panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 146, Short.MAX_VALUE)
+        );
+        panPreviewLayout.setVerticalGroup(
+            panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 184, Short.MAX_VALUE)
+        );
+
+        jPanel1.add(panPreview, java.awt.BorderLayout.CENTER);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 1.0;
+        jPanel3.add(jPanel1, gridBagConstraints);
+
+        lblPreview.setLabelFor(panPreview);
+        lblPreview.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblPreview.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(15, 0, 0, 0);
+        jPanel3.add(lblPreview, gridBagConstraints);
+
+        panInfo.add(jPanel3, java.awt.BorderLayout.SOUTH);
+
+        panMain.add(panInfo, java.awt.BorderLayout.WEST);
+
+        panTabs.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 0, 5, 5));
+        panTabs.setLayout(new java.awt.BorderLayout());
+
+        panTabFill.setLayout(new java.awt.BorderLayout());
+
+        panFill.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panFill.setLayout(new java.awt.GridBagLayout());
+
+        chkFill.setSelected(true);
+        chkFill.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkFill.text")); // NOI18N
+        chkFill.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkFillItemStateChanged(evt);
+            }
+        });
+        chkFill.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkFillActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
+        panFill.add(chkFill, gridBagConstraints);
+
+        chkFillPattern.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkFillPattern.text")); // NOI18N
+        chkFillPattern.setEnabled(false);
+        chkFillPattern.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkFillPatternItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
+        panFill.add(chkFillPattern, gridBagConstraints);
+
+        cbbFillPattern.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbbFillPattern.setEnabled(false);
+        cbbFillPattern.setMinimumSize(new java.awt.Dimension(56, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
+        panFill.add(cbbFillPattern, gridBagConstraints);
+
+        chkLine.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkLine.text")); // NOI18N
+        chkLine.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkLineItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 10);
+        panFill.add(chkLine, gridBagConstraints);
+
+        chkLinePattern.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkLinePattern.text")); // NOI18N
+        chkLinePattern.setEnabled(false);
+        chkLinePattern.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkLinePatternItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
+        panFill.add(chkLinePattern, gridBagConstraints);
+
+        cbbLinePattern.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbbLinePattern.setEnabled(false);
+        cbbLinePattern.setMinimumSize(new java.awt.Dimension(56, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
+        panFill.add(cbbLinePattern, gridBagConstraints);
+
+        chkSync.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkLineSync.text")); // NOI18N
+        chkSync.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkSyncItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 10);
+        panFill.add(chkSync, gridBagConstraints);
+
+        chkHighlightable.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkHighlightable.text")); // NOI18N
+        chkHighlightable.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkHighlightableItemStateChanged(evt);
+            }
+        });
+        chkHighlightable.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkHighlightableActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 10, 10);
+        panFill.add(chkHighlightable, gridBagConstraints);
+
+        lblLineWidth.setLabelFor(sldLineWidth);
+        lblLineWidth.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblLineWidth.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
+        panFill.add(lblLineWidth, gridBagConstraints);
+
+        sldLineWidth.setMajorTickSpacing(10);
+        sldLineWidth.setMaximum(20);
+        sldLineWidth.setMinorTickSpacing(1);
+        sldLineWidth.setPaintLabels(true);
+        sldLineWidth.setSnapToTicks(true);
+        sldLineWidth.setValue(1);
+        sldLineWidth.setEnabled(false);
+        sldLineWidth.setMinimumSize(new java.awt.Dimension(130, 37));
+        sldLineWidth.setPreferredSize(new java.awt.Dimension(130, 37));
+        sldLineWidth.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                sldLineWidthMouseWheelMoved(evt);
+            }
+        });
+        sldLineWidth.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sldLineWidthStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        panFill.add(sldLineWidth, gridBagConstraints);
+
+        txtLineWidth.setColumns(2);
+        txtLineWidth.setEditable(false);
+        txtLineWidth.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtLineWidth.setText("1");
+        txtLineWidth.setEnabled(false);
+        txtLineWidth.setFocusable(false);
+        txtLineWidth.setMinimumSize(new java.awt.Dimension(35, 20));
+        txtLineWidth.setPreferredSize(new java.awt.Dimension(35, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        panFill.add(txtLineWidth, gridBagConstraints);
+
+        lblAlpha.setLabelFor(jPanel7);
+        lblAlpha.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblAlpha.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
+        panFill.add(lblAlpha, gridBagConstraints);
+
+        txtTransparency.setColumns(3);
+        txtTransparency.setEditable(false);
+        txtTransparency.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtTransparency.setText("100");
+        txtTransparency.setFocusable(false);
+        txtTransparency.setMinimumSize(new java.awt.Dimension(35, 20));
+        txtTransparency.setOpaque(false);
+        txtTransparency.setPreferredSize(new java.awt.Dimension(35, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        panFill.add(txtTransparency, gridBagConstraints);
+
+        jPanel7.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 0));
+
+        panTransWhite.setBackground(new java.awt.Color(255, 255, 255));
+        panTransWhite.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
+        panTransWhite.setMaximumSize(new java.awt.Dimension(14, 14));
+        panTransWhite.setMinimumSize(new java.awt.Dimension(14, 14));
+        panTransWhite.setPreferredSize(new java.awt.Dimension(14, 14));
+
+        javax.swing.GroupLayout panTransWhiteLayout = new javax.swing.GroupLayout(panTransWhite);
+        panTransWhite.setLayout(panTransWhiteLayout);
+        panTransWhiteLayout.setHorizontalGroup(
+            panTransWhiteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 12, Short.MAX_VALUE)
+        );
+        panTransWhiteLayout.setVerticalGroup(
+            panTransWhiteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 12, Short.MAX_VALUE)
+        );
+
+        jPanel7.add(panTransWhite);
+
+        sldAlpha.setMajorTickSpacing(10);
+        sldAlpha.setMinorTickSpacing(1);
+        sldAlpha.setSnapToTicks(true);
+        sldAlpha.setValue(100);
+        sldAlpha.setMinimumSize(new java.awt.Dimension(100, 23));
+        sldAlpha.setPreferredSize(new java.awt.Dimension(100, 23));
+        sldAlpha.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                sldAlphaMouseWheelMoved(evt);
+            }
+        });
+        sldAlpha.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sldAlphaStateChanged(evt);
+            }
+        });
+        jPanel7.add(sldAlpha);
+
+        panTransColor.setBackground(new java.awt.Color(0, 180, 0));
+        panTransColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
+        panTransColor.setMaximumSize(new java.awt.Dimension(14, 14));
+        panTransColor.setMinimumSize(new java.awt.Dimension(14, 14));
+        panTransColor.setPreferredSize(new java.awt.Dimension(14, 14));
+
+        javax.swing.GroupLayout panTransColorLayout = new javax.swing.GroupLayout(panTransColor);
+        panTransColor.setLayout(panTransColorLayout);
+        panTransColorLayout.setHorizontalGroup(
+            panTransColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 12, Short.MAX_VALUE)
+        );
+        panTransColorLayout.setVerticalGroup(
+            panTransColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 12, Short.MAX_VALUE)
+        );
+
+        jPanel7.add(panTransColor);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        panFill.add(jPanel7, gridBagConstraints);
+
+        jPanel8.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+
+        panFillColor.setBackground(new java.awt.Color(0, 180, 0));
+        panFillColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
+        panFillColor.setMaximumSize(new java.awt.Dimension(35, 15));
+        panFillColor.setMinimumSize(new java.awt.Dimension(35, 15));
+        panFillColor.setPreferredSize(new java.awt.Dimension(35, 15));
+
+        javax.swing.GroupLayout panFillColorLayout = new javax.swing.GroupLayout(panFillColor);
+        panFillColor.setLayout(panFillColorLayout);
+        panFillColorLayout.setHorizontalGroup(
+            panFillColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 33, Short.MAX_VALUE)
+        );
+        panFillColorLayout.setVerticalGroup(
+            panFillColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 13, Short.MAX_VALUE)
+        );
+
+        jPanel8.add(panFillColor);
+
+        cmdFill.setText("...");
+        cmdFill.setMaximumSize(new java.awt.Dimension(90, 18));
+        cmdFill.setMinimumSize(new java.awt.Dimension(30, 18));
+        cmdFill.setPreferredSize(new java.awt.Dimension(30, 18));
+        cmdFill.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdFillActionPerformed(evt);
+            }
+        });
+        jPanel8.add(cmdFill);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
+        panFill.add(jPanel8, gridBagConstraints);
+
+        jPanel9.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+
+        panLineColor.setBackground(new java.awt.Color(0, 125, 0));
+        panLineColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
+        panLineColor.setMaximumSize(new java.awt.Dimension(35, 15));
+        panLineColor.setMinimumSize(new java.awt.Dimension(35, 15));
+        panLineColor.setPreferredSize(new java.awt.Dimension(35, 15));
+
+        javax.swing.GroupLayout panLineColorLayout = new javax.swing.GroupLayout(panLineColor);
+        panLineColor.setLayout(panLineColorLayout);
+        panLineColorLayout.setHorizontalGroup(
+            panLineColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 33, Short.MAX_VALUE)
+        );
+        panLineColorLayout.setVerticalGroup(
+            panLineColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 13, Short.MAX_VALUE)
+        );
+
+        jPanel9.add(panLineColor);
+
+        cmdLine.setText("...");
+        cmdLine.setEnabled(false);
+        cmdLine.setMaximumSize(new java.awt.Dimension(30, 18));
+        cmdLine.setMinimumSize(new java.awt.Dimension(30, 18));
+        cmdLine.setPreferredSize(new java.awt.Dimension(30, 18));
+        cmdLine.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdLineActionPerformed(evt);
+            }
+        });
+        jPanel9.add(cmdLine);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 10);
+        panFill.add(jPanel9, gridBagConstraints);
+
+        scrHistory.setMinimumSize(new java.awt.Dimension(80, 50));
+        scrHistory.setPreferredSize(new java.awt.Dimension(80, 50));
+
+        lstHistory.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        scrHistory.setViewportView(lstHistory);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 10;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 30);
+        panFill.add(scrHistory, gridBagConstraints);
+
+        lblHistory.setFont(new java.awt.Font("Tahoma", 0, 9));
+        lblHistory.setLabelFor(lstHistory);
+        lblHistory.setText("history.xml");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 10;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 0);
+        panFill.add(lblHistory, gridBagConstraints);
+
+        lblPointSymbol.setLabelFor(cbbPointSymbol);
+        lblPointSymbol.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblPointSymbol.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 10);
+        panFill.add(lblPointSymbol, gridBagConstraints);
+
+        cbbPointSymbol.setMaximumRowCount(9);
+        cbbPointSymbol.setMinimumSize(new java.awt.Dimension(45, 25));
+        cbbPointSymbol.setPreferredSize(new java.awt.Dimension(45, 25));
+        cbbPointSymbol.setRenderer(new PointSymbolListRenderer());
+        cbbPointSymbol.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbbPointSymbolItemStateChanged(evt);
+            }
+        });
+        cbbPointSymbol.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbbPointSymbolActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 8;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 10);
+        panFill.add(cbbPointSymbol, gridBagConstraints);
+
+        lblPointSymbolSize.setLabelFor(sldPointSymbolSize);
+        lblPointSymbolSize.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblPointSymbolSize.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 10);
+        panFill.add(lblPointSymbolSize, gridBagConstraints);
+
+        sldPointSymbolSize.setMajorTickSpacing(10);
+        sldPointSymbolSize.setMaximum(Style.MAX_POINTSYMBOLSIZE);
+        sldPointSymbolSize.setMinimum(Style.MIN_POINTSYMBOLSIZE);
+        sldPointSymbolSize.setMinorTickSpacing(1);
+        sldPointSymbolSize.setPaintLabels(true);
+        sldPointSymbolSize.setSnapToTicks(true);
+        sldPointSymbolSize.setValue(Style.MIN_POINTSYMBOLSIZE);
+        sldPointSymbolSize.setMinimumSize(new java.awt.Dimension(130, 37));
+        sldPointSymbolSize.setPreferredSize(new java.awt.Dimension(130, 37));
+        sldPointSymbolSize.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                sldPointSymbolSizeMouseWheelMoved(evt);
+            }
+        });
+        sldPointSymbolSize.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sldPointSymbolSizeStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        panFill.add(sldPointSymbolSize, gridBagConstraints);
+
+        txtPointSymbolSize.setColumns(2);
+        txtPointSymbolSize.setEditable(false);
+        txtPointSymbolSize.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        txtPointSymbolSize.setText("10");
+        txtPointSymbolSize.setFocusable(false);
+        txtPointSymbolSize.setMinimumSize(new java.awt.Dimension(35, 20));
+        txtPointSymbolSize.setPreferredSize(new java.awt.Dimension(35, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 9;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        panFill.add(txtPointSymbolSize, gridBagConstraints);
+
+        panTabFill.add(panFill, java.awt.BorderLayout.WEST);
+
+        tbpTabs.addTab(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab1.title"), new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style_color.png")), panTabFill); // NOI18N
+
+        panTabLabeling.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 20, 20));
+
+        panLabeling.setLayout(new java.awt.GridBagLayout());
+
+        chkActivateLabels.setSelected(true);
+        chkActivateLabels.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkActivateLabels.text")); // NOI18N
+        chkActivateLabels.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkActivateLabelsItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
+        panLabeling.add(chkActivateLabels, gridBagConstraints);
+
+        lblAnnotationExpression.setLabelFor(cbbAnnotationExpression);
+        lblAnnotationExpression.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblAttrib.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 15);
+        panLabeling.add(lblAnnotationExpression, gridBagConstraints);
+
+        cbbAnnotationExpression.setEditable(true);
+        cbbAnnotationExpression.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbbAnnotationExpressionItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        panLabeling.add(cbbAnnotationExpression, gridBagConstraints);
+
+        panLabelButtons.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panLabelButtons.border.title"))); // NOI18N
+        panLabelButtons.setLayout(new java.awt.GridBagLayout());
+
+        cmdChangeColor.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdChangeColor.text")); // NOI18N
+        cmdChangeColor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdChangeColorActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
+        panLabelButtons.add(cmdChangeColor, gridBagConstraints);
+
+        cmdChangeFont.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdChangeFont.text")); // NOI18N
+        cmdChangeFont.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdChangeFontActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 5);
+        panLabelButtons.add(cmdChangeFont, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 10, 0);
+        panLabelButtons.add(lblFontname, gridBagConstraints);
+
+        panFontColor.setBackground(new java.awt.Color(0, 0, 0));
+        panFontColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
+        panFontColor.setMinimumSize(new java.awt.Dimension(20, 20));
+        panFontColor.setPreferredSize(new java.awt.Dimension(20, 20));
+
+        javax.swing.GroupLayout panFontColorLayout = new javax.swing.GroupLayout(panFontColor);
+        panFontColor.setLayout(panFontColorLayout);
+        panFontColorLayout.setHorizontalGroup(
+            panFontColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 18, Short.MAX_VALUE)
+        );
+        panFontColorLayout.setVerticalGroup(
+            panFontColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 18, Short.MAX_VALUE)
+        );
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 0);
+        panLabelButtons.add(panFontColor, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridheight = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(15, 0, 0, 0);
+        panLabeling.add(panLabelButtons, gridBagConstraints);
+
+        panScale.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
+
+        lblMin.setLabelFor(txtMin);
+        lblMin.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblMin.text")); // NOI18N
+        panScale.add(lblMin);
+
+        txtMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtMin.setText("1");
+        txtMin.setMinimumSize(new java.awt.Dimension(60, 20));
+        txtMin.setPreferredSize(new java.awt.Dimension(60, 20));
+        panScale.add(txtMin);
+
+        lblMax.setLabelFor(txtMax);
+        lblMax.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblMax.text")); // NOI18N
+        panScale.add(lblMax);
+
+        txtMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtMax.setText("2500");
+        txtMax.setMinimumSize(new java.awt.Dimension(60, 20));
+        txtMax.setPreferredSize(new java.awt.Dimension(60, 20));
+        panScale.add(txtMax);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 10, 0);
+        panLabeling.add(panScale, gridBagConstraints);
+
+        chkAutoscale.setSelected(true);
+        chkAutoscale.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkAutoscale.text")); // NOI18N
+        chkAutoscale.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkAutoscaleItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 0);
+        panLabeling.add(chkAutoscale, gridBagConstraints);
+
+        panAlignment.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+
+        btgAlignment.add(radLeft);
+        radLeft.setSelected(true);
+        radLeft.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.radleft.text")); // NOI18N
+        radLeft.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radLeftActionPerformed(evt);
+            }
+        });
+        panAlignment.add(radLeft);
+
+        btgAlignment.add(radCenter);
+        radCenter.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.radCenter.text")); // NOI18N
+        radCenter.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radCenterActionPerformed(evt);
+            }
+        });
+        panAlignment.add(radCenter);
+
+        btgAlignment.add(radRight);
+        radRight.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.radRight.text")); // NOI18N
+        radRight.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radRightActionPerformed(evt);
+            }
+        });
+        panAlignment.add(radRight);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        panLabeling.add(panAlignment, gridBagConstraints);
+
+        lblAlignment.setLabelFor(panAlignment);
+        lblAlignment.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblAlignment.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 15);
+        panLabeling.add(lblAlignment, gridBagConstraints);
+
+        lblMultiplier.setLabelFor(txtMultiplier);
+        lblMultiplier.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblMultiplier.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 15);
+        panLabeling.add(lblMultiplier, gridBagConstraints);
+
+        txtMultiplier.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtMultiplier.setText("1,00");
+        txtMultiplier.setMinimumSize(new java.awt.Dimension(40, 20));
+        txtMultiplier.setPreferredSize(new java.awt.Dimension(40, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        panLabeling.add(txtMultiplier, gridBagConstraints);
+
+        panTabLabeling.add(panLabeling);
+
+        tbpTabs.addTab(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab2.title"), new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/labelling.png")), panTabLabeling); // NOI18N
+
+        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10), javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panTabAttrib.border.title")))); // NOI18N
+        panTabAttrib.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
+
+        jPanel2.setLayout(new java.awt.GridBagLayout());
+
+        panAttribGeo.setLayout(new javax.swing.BoxLayout(panAttribGeo, javax.swing.BoxLayout.Y_AXIS));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 20);
+        jPanel2.add(panAttribGeo, gridBagConstraints);
+
+        panAttribSeparator.setLayout(new java.awt.BorderLayout());
+        panAttribSeparator.add(jSeparator1, java.awt.BorderLayout.CENTER);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        jPanel2.add(panAttribSeparator, gridBagConstraints);
+
+        panAttribNorm.setLayout(new javax.swing.BoxLayout(panAttribNorm, javax.swing.BoxLayout.Y_AXIS));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 20);
+        jPanel2.add(panAttribNorm, gridBagConstraints);
+
+        lblIdExpression.setLabelFor(cbbIdExpression);
+        lblIdExpression.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblPrimary.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 10);
+        jPanel2.add(lblIdExpression, gridBagConstraints);
+
+        cbbIdExpression.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbbIdExpressionItemStateChanged(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
+        jPanel2.add(cbbIdExpression, gridBagConstraints);
+
+        panTabAttrib.add(jPanel2);
+
+        tbpTabs.addTab(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab3.title"), new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/attributes.png")), panTabAttrib); // NOI18N
+        panTabAttrib.getAccessibleContext().setAccessibleName(null);
+
+        panTabs.add(tbpTabs, java.awt.BorderLayout.CENTER);
+        tbpTabs.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab1.title")); // NOI18N
+
+        panMain.add(panTabs, java.awt.BorderLayout.CENTER);
+
+        getContentPane().add(panMain, java.awt.BorderLayout.CENTER);
+
+        panDialogButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, -5));
+        panDialogButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 0));
+
+        cmdOK.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdIOK.text")); // NOI18N
+        cmdOK.setMaximumSize(new java.awt.Dimension(88, 23));
+        cmdOK.setMinimumSize(new java.awt.Dimension(88, 23));
+        cmdOK.setPreferredSize(new java.awt.Dimension(88, 23));
+        cmdOK.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdOKActionPerformed(evt);
+            }
+        });
+        panDialogButtons.add(cmdOK);
+
+        cmdCancel.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdCancel.text")); // NOI18N
+        cmdCancel.setMaximumSize(new java.awt.Dimension(88, 23));
+        cmdCancel.setMinimumSize(new java.awt.Dimension(88, 23));
+        cmdCancel.setPreferredSize(new java.awt.Dimension(88, 23));
+        cmdCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdCancelActionPerformed(evt);
+            }
+        });
+        panDialogButtons.add(cmdCancel);
+
+        getContentPane().add(panDialogButtons, java.awt.BorderLayout.SOUTH);
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
 
 // <editor-fold defaultstate="collapsed" desc="Eventhandling">
     private void closeDialog(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
@@ -2559,7 +2570,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         txtMultiplier.commitEdit();
       } catch (ParseException ex)
       {
-        logger.warn("Konnte kein commitEdit() durchführen", ex);
+        logger.warn("Could not perform a commitEdit()", ex);//NOI18N
       }
 
       setMultiplier(txtMultiplier.getValue());
@@ -2572,7 +2583,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
 
       if (isQueryStringChanged())
       {
-        logger.debug("setting new Query Template");
+        logger.debug("setting new Query Template");//NOI18N
         //this.layerProperties.setQueryTemplate(this.queryEditor.getText(), this.layerProperties.QUERYTYPE_XML);
       }
 
@@ -2678,7 +2689,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         @Override
         public void actionPerformed(ActionEvent e)
         {
-          logger.debug("neue F\u00FCllung = " + colorChooser.getColor());
+          logger.debug("new filling = " + colorChooser.getColor());//NOI18N
           setFillColor(true, colorChooser.getColor());
           if (chkSync.isSelected())
           {
@@ -2693,7 +2704,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         @Override
         public void actionPerformed(ActionEvent e)
         {
-          logger.debug("ColorChooser abgebrochen");
+          logger.debug("ColorChooser cancelled");//NOI18N
         }
       }).setVisible(true);
     }//GEN-LAST:event_cmdFillActionPerformed
@@ -2709,7 +2720,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        logger.debug("neue Linienfarbe = " + colorChooser.getColor());
+        logger.debug("new line color = " + colorChooser.getColor());//NOI18N
         StyleDialog.this.setLineColor(true, colorChooser.getColor());
         updatePreview();
       }
@@ -2719,7 +2730,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        logger.debug("ColorChooser abgebrochen");
+        logger.debug("ColorChooser cancelled");//NOI18N
       }
     }).setVisible(true);
   }
@@ -2776,7 +2787,7 @@ private void sldPointSymbolSizeMouseWheelMoved(java.awt.event.MouseWheelEvent ev
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        logger.debug("neue F\u00FCllung = " + colorChooser.getColor());
+        logger.debug("new filling = " + colorChooser.getColor());//NOI18N
         setFillColor(true, colorChooser.getColor());
         if (chkSync.isSelected())
         {
@@ -2791,7 +2802,7 @@ private void sldPointSymbolSizeMouseWheelMoved(java.awt.event.MouseWheelEvent ev
       @Override
       public void actionPerformed(ActionEvent e)
       {
-        logger.debug("ColorChooser abgebrochen");
+        logger.debug("ColorChooser cancelled");//NOI18N
       }
     }).setVisible(true);
   }
@@ -2824,7 +2835,7 @@ private void sldPointSymbolSizeMouseWheelMoved(java.awt.event.MouseWheelEvent ev
       if(evt.getStateChange() == ItemEvent.SELECTED)
       {
         String selectedPointSymbol = evt.getItem().toString();
-        logger.debug("select Point Symbol '" + selectedPointSymbol + "'");
+        logger.debug("select Point Symbol '" + selectedPointSymbol + "'");//NOI18N
 
         if(pointSymbolHM.containsKey(selectedPointSymbol))
         {
@@ -2832,7 +2843,7 @@ private void sldPointSymbolSizeMouseWheelMoved(java.awt.event.MouseWheelEvent ev
         }
         else
         {
-          logger.warn("unsupported point symbol '" + selectedPointSymbol + "'");
+          logger.warn("unsupported point symbol '" + selectedPointSymbol + "'");//NOI18N
           setPointSymbol(Style.NO_POINTSYMBOL);
         }
       }
@@ -2880,11 +2891,11 @@ private void chkSyncItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:
         String annotationExpression = cbbAnnotationExpression.getSelectedItem().toString();
         if (this.featureServiceAttributes.containsKey(annotationExpression))
         {
-          logger.debug("setting annotation expression to '" + annotationExpression + "' (EXPRESSIONTYPE_PROPERTYNAME)");
+          logger.debug("setting annotation expression to '" + annotationExpression + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
           this.layerProperties.setPrimaryAnnotationExpression(annotationExpression, LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
         } else
         {
-          logger.debug("setting annotation expression to '" + annotationExpression + "' (EXPRESSIONTYPE_GROOVY)");
+          logger.debug("setting annotation expression to '" + annotationExpression + "' (EXPRESSIONTYPE_GROOVY)");//NOI18N
           this.layerProperties.setPrimaryAnnotationExpression(annotationExpression, LayerProperties.EXPRESSIONTYPE_GROOVY);
         }
       }
@@ -2897,15 +2908,23 @@ private void chkSyncItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:
         String idExpression = cbbIdExpression.getSelectedItem().toString();
         if (this.featureServiceAttributes.containsKey(idExpression))
         {
-          logger.debug("setting primary key to '" + idExpression + "' (EXPRESSIONTYPE_PROPERTYNAME)");
+          logger.debug("setting primary key to '" + idExpression + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
           this.layerProperties.setIdExpression(idExpression, LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
         } else
         {
-          logger.debug("setting primary key to '" + idExpression + "' (EXPRESSIONTYPE_GROOVY)");
+          logger.debug("setting primary key to '" + idExpression + "' (EXPRESSIONTYPE_GROOVY)");//NOI18N
           this.layerProperties.setIdExpression(idExpression, LayerProperties.EXPRESSIONTYPE_GROOVY);
         }
       }
     }//GEN-LAST:event_cbbIdExpressionItemStateChanged
+
+    private void cmdAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmdAddActionPerformed
+
+    private void chkUseQueryStringActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkUseQueryStringActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkUseQueryStringActionPerformed
 
   /**
    * Changes the style of the StyleDialog if the selection of the historylist has changed.
@@ -2924,7 +2943,7 @@ private void chkSyncItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:
 
     } catch (Exception ex)
     {
-      logger.error("Fehler beim Auslesen des Styles", ex);
+      logger.error("Fehler beim Auslesen des Styles", ex);//NOI18N
     }
   }
 
@@ -2937,7 +2956,7 @@ private void chkSyncItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:
   {
     if (!this.isAccepted())
     {
-      logger.warn("supicious call to 'getFeatureServiceAttributes()', changes not accepted");
+      logger.warn("supicious call to 'getFeatureServiceAttributes()', changes not accepted");//NOI18N
     }
 
     return featureServiceAttributes;
@@ -2993,99 +3012,99 @@ private void chkSyncItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:
   }
 
   // </editor-fold>
-  // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.ButtonGroup btgAlignment;
-  private javax.swing.ButtonGroup btgGeom;
-  private javax.swing.JComboBox cbbAnnotationExpression;
-  private javax.swing.JComboBox cbbFillPattern;
-  private javax.swing.JComboBox cbbIdExpression;
-  private javax.swing.JComboBox cbbLinePattern;
-  private javax.swing.JComboBox cbbPointSymbol;
-  private javax.swing.JCheckBox chkActivateLabels;
-  private javax.swing.JCheckBox chkAutoscale;
-  private javax.swing.JCheckBox chkFill;
-  private javax.swing.JCheckBox chkFillPattern;
-  private javax.swing.JCheckBox chkHighlightable;
-  private javax.swing.JCheckBox chkLine;
-  private javax.swing.JCheckBox chkLinePattern;
-  private javax.swing.JCheckBox chkLinewrap;
-  private javax.swing.JCheckBox chkSync;
-  private javax.swing.JCheckBox chkUseQueryString;
-  private javax.swing.JButton cmdAdd;
-  private javax.swing.JButton cmdCancel;
-  private javax.swing.JButton cmdChangeColor;
-  private javax.swing.JButton cmdChangeFont;
-  private javax.swing.JButton cmdFill;
-  private javax.swing.JButton cmdLine;
-  private javax.swing.JButton cmdOK;
-  private javax.swing.JButton cmdRemove;
-  private javax.swing.JLabel jLabel1;
-  private javax.swing.JLabel jLabel2;
-  private javax.swing.JPanel jPanel1;
-  private javax.swing.JPanel jPanel2;
-  private javax.swing.JPanel jPanel3;
-  private javax.swing.JPanel jPanel7;
-  private javax.swing.JPanel jPanel8;
-  private javax.swing.JPanel jPanel9;
-  private javax.swing.JScrollPane jScrollPane1;
-  private javax.swing.JSeparator jSeparator1;
-  private javax.swing.JLabel lblAlignment;
-  private javax.swing.JLabel lblAlpha;
-  private javax.swing.JLabel lblAnnotationExpression;
-  private javax.swing.JLabel lblFontname;
-  private javax.swing.JLabel lblHistory;
-  private javax.swing.JLabel lblIdExpression;
-  private javax.swing.JLabel lblLineWidth;
-  private javax.swing.JLabel lblMax;
-  private javax.swing.JLabel lblMin;
-  private javax.swing.JLabel lblMultiplier;
-  private javax.swing.JLabel lblPointSymbol;
-  private javax.swing.JLabel lblPointSymbolSize;
-  private javax.swing.JLabel lblPreview;
-  private javax.swing.JList lstHistory;
-  private javax.swing.JPanel panAlignment;
-  private javax.swing.JPanel panAttribGeo;
-  private javax.swing.JPanel panAttribNorm;
-  private javax.swing.JPanel panAttribSeparator;
-  private javax.swing.JPanel panDialogButtons;
-  private javax.swing.JPanel panFill;
-  private javax.swing.JPanel panFillColor;
-  private javax.swing.JPanel panFontColor;
-  private javax.swing.JPanel panInfo;
-  private javax.swing.JPanel panInfoComp;
-  private javax.swing.JPanel panLabelButtons;
-  private javax.swing.JPanel panLabeling;
-  private javax.swing.JPanel panLineColor;
-  private javax.swing.JPanel panMain;
-  private javax.swing.JPanel panPreview;
-  private javax.swing.JPanel panQueryCheckbox;
-  private javax.swing.JPanel panRules;
-  private javax.swing.JPanel panRulesButtons;
-  private javax.swing.JPanel panRulesScroll;
-  private javax.swing.JPanel panScale;
-  private javax.swing.JPanel panScrollpane;
-  private javax.swing.JPanel panTabAttrib;
-  private javax.swing.JPanel panTabFill;
-  private javax.swing.JPanel panTabLabeling;
-  private javax.swing.JPanel panTabQuery;
-  private javax.swing.JPanel panTabRules;
-  private javax.swing.JPanel panTabs;
-  private javax.swing.JPanel panTransColor;
-  private javax.swing.JPanel panTransWhite;
-  private javax.swing.JRadioButton radCenter;
-  private javax.swing.JRadioButton radLeft;
-  private javax.swing.JRadioButton radRight;
-  private javax.swing.JScrollPane scpQuery;
-  private javax.swing.JScrollPane scrHistory;
-  private javax.swing.JSlider sldAlpha;
-  private javax.swing.JSlider sldLineWidth;
-  private javax.swing.JSlider sldPointSymbolSize;
-  private javax.swing.JTabbedPane tbpTabs;
-  private javax.swing.JTextField txtLineWidth;
-  private javax.swing.JFormattedTextField txtMax;
-  private javax.swing.JFormattedTextField txtMin;
-  private javax.swing.JFormattedTextField txtMultiplier;
-  private javax.swing.JTextField txtPointSymbolSize;
-  private javax.swing.JTextField txtTransparency;
-  // End of variables declaration//GEN-END:variables
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup btgAlignment;
+    private javax.swing.ButtonGroup btgGeom;
+    private javax.swing.JComboBox cbbAnnotationExpression;
+    private javax.swing.JComboBox cbbFillPattern;
+    private javax.swing.JComboBox cbbIdExpression;
+    private javax.swing.JComboBox cbbLinePattern;
+    private javax.swing.JComboBox cbbPointSymbol;
+    private javax.swing.JCheckBox chkActivateLabels;
+    private javax.swing.JCheckBox chkAutoscale;
+    private javax.swing.JCheckBox chkFill;
+    private javax.swing.JCheckBox chkFillPattern;
+    private javax.swing.JCheckBox chkHighlightable;
+    private javax.swing.JCheckBox chkLine;
+    private javax.swing.JCheckBox chkLinePattern;
+    private javax.swing.JCheckBox chkLinewrap;
+    private javax.swing.JCheckBox chkSync;
+    private javax.swing.JCheckBox chkUseQueryString;
+    private javax.swing.JButton cmdAdd;
+    private javax.swing.JButton cmdCancel;
+    private javax.swing.JButton cmdChangeColor;
+    private javax.swing.JButton cmdChangeFont;
+    private javax.swing.JButton cmdFill;
+    private javax.swing.JButton cmdLine;
+    private javax.swing.JButton cmdOK;
+    private javax.swing.JButton cmdRemove;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JLabel lblAlignment;
+    private javax.swing.JLabel lblAlpha;
+    private javax.swing.JLabel lblAnnotationExpression;
+    private javax.swing.JLabel lblFontname;
+    private javax.swing.JLabel lblHistory;
+    private javax.swing.JLabel lblIdExpression;
+    private javax.swing.JLabel lblLineWidth;
+    private javax.swing.JLabel lblMax;
+    private javax.swing.JLabel lblMin;
+    private javax.swing.JLabel lblMultiplier;
+    private javax.swing.JLabel lblPointSymbol;
+    private javax.swing.JLabel lblPointSymbolSize;
+    private javax.swing.JLabel lblPreview;
+    private javax.swing.JList lstHistory;
+    private javax.swing.JPanel panAlignment;
+    private javax.swing.JPanel panAttribGeo;
+    private javax.swing.JPanel panAttribNorm;
+    private javax.swing.JPanel panAttribSeparator;
+    private javax.swing.JPanel panDialogButtons;
+    private javax.swing.JPanel panFill;
+    private javax.swing.JPanel panFillColor;
+    private javax.swing.JPanel panFontColor;
+    private javax.swing.JPanel panInfo;
+    private javax.swing.JPanel panInfoComp;
+    private javax.swing.JPanel panLabelButtons;
+    private javax.swing.JPanel panLabeling;
+    private javax.swing.JPanel panLineColor;
+    private javax.swing.JPanel panMain;
+    private javax.swing.JPanel panPreview;
+    private javax.swing.JPanel panQueryCheckbox;
+    private javax.swing.JPanel panRules;
+    private javax.swing.JPanel panRulesButtons;
+    private javax.swing.JPanel panRulesScroll;
+    private javax.swing.JPanel panScale;
+    private javax.swing.JPanel panScrollpane;
+    private javax.swing.JPanel panTabAttrib;
+    private javax.swing.JPanel panTabFill;
+    private javax.swing.JPanel panTabLabeling;
+    private javax.swing.JPanel panTabQuery;
+    private javax.swing.JPanel panTabRules;
+    private javax.swing.JPanel panTabs;
+    private javax.swing.JPanel panTransColor;
+    private javax.swing.JPanel panTransWhite;
+    private javax.swing.JRadioButton radCenter;
+    private javax.swing.JRadioButton radLeft;
+    private javax.swing.JRadioButton radRight;
+    private javax.swing.JScrollPane scpQuery;
+    private javax.swing.JScrollPane scrHistory;
+    private javax.swing.JSlider sldAlpha;
+    private javax.swing.JSlider sldLineWidth;
+    private javax.swing.JSlider sldPointSymbolSize;
+    private javax.swing.JTabbedPane tbpTabs;
+    private javax.swing.JTextField txtLineWidth;
+    private javax.swing.JFormattedTextField txtMax;
+    private javax.swing.JFormattedTextField txtMin;
+    private javax.swing.JFormattedTextField txtMultiplier;
+    private javax.swing.JTextField txtPointSymbolSize;
+    private javax.swing.JTextField txtTransparency;
+    // End of variables declaration//GEN-END:variables
 }

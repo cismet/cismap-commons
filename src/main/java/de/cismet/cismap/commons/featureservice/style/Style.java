@@ -19,32 +19,33 @@ import java.awt.Font;
  */
 public interface Style extends ConvertableToXML, Comparable, Cloneable {
     // JDOM-elementconstants
-    public static final String STYLE_ELEMENT = "StyleHistoryElement";
-    public static final String FILL = "Fill";
-    public static final String LINE = "Line";
-    public static final String LABEL = "Label";
-    public static final String POINTSYMBOL = "Pointsymbol";
-    public static final String NO_POINTSYMBOL = "Keins";
-    public static final String AUTO_POINTSYMBOL = "Punkt";
+    //TODO: use english String constants instead of "Keins", "Punkt" and so on
+    public static final String STYLE_ELEMENT = "StyleHistoryElement";//NOI18N
+    public static final String FILL = "Fill";//NOI18N
+    public static final String LINE = "Line";//NOI18N
+    public static final String LABEL = "Label";//NOI18N
+    public static final String POINTSYMBOL = "Pointsymbol";//NOI18N
+    public static final String NO_POINTSYMBOL = "Keins";//NOI18N
+    public static final String AUTO_POINTSYMBOL = "Punkt";//NOI18N
     public static final int MIN_POINTSYMBOLSIZE = 5;
     public static final int MAX_POINTSYMBOLSIZE = 50;
     
     // JDOM-attributes
-    public static final String NAME = "name";
-    public static final String PAINT = "paint";
-    public static final String COLOR = "color";
-    public static final String WIDTH = "width";
-    public static final String ALPHA = "alpha";
-    public static final String HIGHLIGHT = "highlight";
-    public static final String SIZE = "size";
-    public static final String FAMILY = "family";
-    public static final String STYLE = "style";
-    public static final String ATTRIBUTE = "attribute";
-    public static final String ALIGNMENT = "alignment";
-    public static final String MIN_SCALE = "minscale";
-    public static final String MAX_SCALE = "maxscale";
-    public static final String MULTIPLIER = "multiplier";
-    public static final String AUTOSCALE = "autoscale";
+    public static final String NAME = "name";//NOI18N
+    public static final String PAINT = "paint";//NOI18N
+    public static final String COLOR = "color";//NOI18N
+    public static final String WIDTH = "width";//NOI18N
+    public static final String ALPHA = "alpha";//NOI18N
+    public static final String HIGHLIGHT = "highlight";//NOI18N
+    public static final String SIZE = "size";//NOI18N
+    public static final String FAMILY = "family";//NOI18N
+    public static final String STYLE = "style";//NOI18N
+    public static final String ATTRIBUTE = "attribute";//NOI18N
+    public static final String ALIGNMENT = "alignment";//NOI18N
+    public static final String MIN_SCALE = "minscale";//NOI18N
+    public static final String MAX_SCALE = "maxscale";//NOI18N
+    public static final String MULTIPLIER = "multiplier";//NOI18N
+    public static final String AUTOSCALE = "autoscale";//NOI18N
     
     public Object clone() throws CloneNotSupportedException;
     

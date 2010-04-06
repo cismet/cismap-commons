@@ -74,11 +74,11 @@ import org.deegree.services.wms.capabilities.WMSCapabilities;
 public class CismapBroker {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private static final String FS = System.getProperty("file.separator");
-    private static final String USER_HOME_DIRECTORY = System.getProperty("user.home");
-    private static final String SERVERALIAS_FILE_NAME = "serverAliases.properties";
-    private static final String DEFAULT_CISMAP_FOLDER = ".cismap";
-    private static final String DEFAULT_ALIAS_FILE_PATH = "appLib" + FS + SERVERALIAS_FILE_NAME;
+    private static final String FS = System.getProperty("file.separator");//NOI18N
+    private static final String USER_HOME_DIRECTORY = System.getProperty("user.home");//NOI18N
+    private static final String SERVERALIAS_FILE_NAME = "serverAliases.properties";//NOI18N
+    private static final String DEFAULT_CISMAP_FOLDER = ".cismap";//NOI18N
+    private static final String DEFAULT_ALIAS_FILE_PATH = "appLib" + FS + SERVERALIAS_FILE_NAME;//NOI18N
     private Properties userProperties = new Properties();
     private Properties defaultProperties;
     private String cismapFolderPath = USER_HOME_DIRECTORY + FS + DEFAULT_CISMAP_FOLDER;
@@ -342,15 +342,15 @@ public class CismapBroker {
     public void setMappingComponent(MappingComponent mappingComponent) {
         this.mappingComponent = mappingComponent;
         PNotificationCenter.defaultCenter().addListener(this,
-                "coordinatesChanged",
+                "coordinatesChanged",                               //NOI18N
                 SimpleMoveListener.COORDINATES_CHANGED,
                 mappingComponent.getInputListener(MappingComponent.MOTION));
         PNotificationCenter.defaultCenter().addListener(this,
-                "lengthChanged",
+                "lengthChanged",                                    //NOI18N
                 MeasurementListener.LENGTH_CHANGED,
                 mappingComponent.getInputListener(MappingComponent.MEASUREMENT));
         PNotificationCenter.defaultCenter().addListener(this,
-                "selectionChanged",
+                "selectionChanged",                                 //NOI18N
                 PSelectionEventHandler.SELECTION_CHANGED_NOTIFICATION,
                 mappingComponent.getInputListener(MappingComponent.SELECT));
     }
@@ -373,7 +373,7 @@ public class CismapBroker {
         Object o = notification.getObject();
         if (o instanceof MeasurementListener) {
             double length = ((MeasurementListener) o).getMeasuredLength();
-            fireStatusValueChanged(new StatusEvent(StatusEvent.MEASUREMENT_INFOS, StaticDecimalTools.round("0.00", length) + " m"));
+            fireStatusValueChanged(new StatusEvent(StatusEvent.MEASUREMENT_INFOS, StaticDecimalTools.round("0.00", length) + " m"));//NOI18N
         }
     }
 
@@ -400,7 +400,7 @@ public class CismapBroker {
     }
 
     private void initAliases() {
-        log.debug("initializing server aliases property");
+        log.debug("initializing server aliases property");//NOI18N
         try {
             userAliasFile = new File(getCismapFolderPath() + FS + SERVERALIAS_FILE_NAME);
             File cismapFolder = new File(getCismapFolderPath());
@@ -425,7 +425,7 @@ public class CismapBroker {
                 in.close();
             }
         } catch (IOException ex) {
-            log.error("Error during reading the server aliases from file", ex);
+            log.error("Error during reading the server aliases from file", ex);//NOI18N
         }
         serverAliasesInited = true;
     }
@@ -433,29 +433,29 @@ public class CismapBroker {
     public void cleanUpSystemRegistry() {
         Preferences appPrefs = Preferences.userNodeForPackage(AbstractCredentialsProvider.class);
         try {
-            log.debug("Versuche Preferences f\u00FCr den Password Dialog zu l\u00F6schen");
+            log.debug("Try to delete preferences of the password dialog");//NOI18N
             appPrefs.removeNode();
-            log.debug("L\u00F6schen der Preferences erfolgreich");
+            log.debug("deletion of the preferences successfully");//NOI18N
         } catch (BackingStoreException ex) {
-            log.debug("Fehler beim l\u00F6schen der Preferences");
+            log.debug("Error during the deletion of the preferences");//NOI18N
             ex.printStackTrace();
         }
     }
 
     public void writePropertyFile() {
-        log.debug("writing server Aliases to File");
+        log.debug("writing server Aliases to File");//NOI18N
         if (!serverAliasesInited) {
             initAliases();
         }
         try {
             if (userAliasFile.exists()) {
                 FileOutputStream out = new FileOutputStream(userAliasFile);
-                userProperties.store(out, "Server Aliases URL <---> Alias");
+                userProperties.store(out, "Server Aliases URL <---> Alias");//NOI18N
             }
         } catch (IOException ex) {
-            log.error("Error during writing the server aliases to file", ex);
+            log.error("Error during writing the server aliases to file", ex);//NOI18N
         }
-        log.debug("Server Aliases wrote to File");
+        log.debug("Server Aliases wrote to File");//NOI18N
     }
 
     public void addProperty(String key, String value) {
@@ -463,7 +463,7 @@ public class CismapBroker {
             initAliases();
         }
         userProperties.setProperty(key, value);
-        log.debug("Server alias added  key: " + key + " value: " + value);
+        log.debug("Server alias added  key: " + key + " value: " + value);//NOI18N
     }
 
     public String getProperty(String key) {
@@ -476,9 +476,9 @@ public class CismapBroker {
     public void execute(SwingWorker workerThread) {
         try {
             execService.submit(workerThread);
-            log.debug("SwingWorker submitted to Threadpool");
+            log.debug("SwingWorker submitted to Threadpool");//NOI18N
         } catch (Exception ex) {
-            log.fatal("SwingWorker Error", ex);
+            log.fatal("SwingWorker Error", ex);//NOI18N
         }
     }
 
@@ -493,7 +493,7 @@ public class CismapBroker {
                 cismapFolder.mkdir();
             }
         } catch (Exception e) {
-            log.fatal("Fehler beim Anlegen von "+cismapFolderPath,e);
+            log.fatal("Error during the creation of "+cismapFolderPath,e);//NOI18N
         }
         this.cismapFolderPath = cismapFolderPath;
     }

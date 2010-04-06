@@ -64,6 +64,7 @@ import javax.swing.table.TableCellRenderer;
  * JTable_Observer.java
  */
  
+
 /**
  * @author Mayank Joshi 
  */
@@ -76,14 +77,15 @@ public class JTable_Observer extends JFrame implements Observer{
     }
     
     private JTable_Observer(){
-        super("JTable using Observer");
+        super(org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.title"));//NOI18N
         createUI();
         new ObservableChild().addObserver(this);
        
     }
     
     private void createUI(){
-        dtm = new MyDefaultTableModel(new Object[] {"Column 0", "Progress "}, 0);
+        dtm = new MyDefaultTableModel(new Object[] {org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title1"), //NOI18N
+        org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.dtm.title2")}, 0);//NOI18N
         CustomProgressBar progressBar = new CustomProgressBar();
         CustomProgressBar progressBar2 = new CustomProgressBar();
         CustomProgressBar progressBar3 = new CustomProgressBar();
@@ -93,9 +95,9 @@ public class JTable_Observer extends JFrame implements Observer{
         progressBar2.setIndeterminate(true);
         progressBar3.setBorderPainted(true);
         progressBar3.setIndeterminate(true);
-        dtm.addRow(new Object[]{"Progress Bar",progressBar});
-        dtm.addRow(new Object[]{"Progress Bar",progressBar2});
-        dtm.addRow(new Object[]{"Progress Bar",progressBar3});
+        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row1"),progressBar});//NOI18N
+        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row2"),progressBar2});//NOI18N
+        dtm.addRow(new Object[]{org.openide.util.NbBundle.getMessage(JTable_Observer.class, "JTable_Observer.row3"),progressBar3});//NOI18N
         table= new JTable(dtm);
         table.getColumnModel().getColumn(1).setCellRenderer(new CustomProgressBar());
         JScrollPane jsp = new JScrollPane(table);        
@@ -111,7 +113,6 @@ public class JTable_Observer extends JFrame implements Observer{
         ((DefaultTableModel)table.getModel()).fireTableCellUpdated(2,1);
     }
 }
- 
 class ObservableChild extends  Observable implements ActionListener{
     Timer timer = new Timer(500,this);
     

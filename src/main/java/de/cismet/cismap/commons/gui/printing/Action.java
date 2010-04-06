@@ -44,21 +44,21 @@ public class Action {
     private String id;
     private String title;
     
-    public static final String PRINTPREVIEW="PRINTPREVIEW";
-    public static final String PDF="PDF";
-    public static final String PRINT="PRINT";
+    public static final String PRINTPREVIEW="PRINTPREVIEW";//NOI18N
+    public static final String PDF="PDF";//NOI18N
+    public static final String PRINT="PRINT";//NOI18N
     /** Creates a new instance of Action */
     public Action(Element e) throws Exception{
-        id=e.getAttribute("id").getValue();
+        id=e.getAttribute("id").getValue();//NOI18N
         title=e.getText();
     }
     public String toString() {
         return getTitle();
     }
     public Element getElement(boolean selected) {
-        Element e=new Element("action");
-        e.setAttribute("selected",String.valueOf(selected));
-        e.setAttribute("id",id);
+        Element e=new Element("action");//NOI18N
+        e.setAttribute("selected",String.valueOf(selected));//NOI18N
+        e.setAttribute("id",id);//NOI18N
         e.setText(getTitle());
         return e;
              

@@ -76,7 +76,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
     private javax.swing.ImageIcon unselectedStyleIcon;
     private LayerWidget layerWidgetParent = null;
     private NewSimpleInternalLayerWidget internalWidgetParent = null;
-    private JButton moreButton = new JButton("...");
+    private JButton moreButton = new JButton("...");//NOI18N
     private JSlider slider = new JSlider(0, 100);
     private JSlider slider2 = new JSlider(0, 100);
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
@@ -118,8 +118,8 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
 //        progress.setString("");progress.setStringPainted(true);
 //        progressIndeterminate.setUI(new MetalProgressBarUI());
 //        progressIndeterminate.setString("");progressIndeterminate.setStringPainted(true);
-        styleIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/style.png"));
-        unselectedStyleIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/disabledStyle.png"));
+        styleIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/style.png"));//NOI18N
+        unselectedStyleIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/disabledStyle.png"));//NOI18N
         moreButton.setEnabled(false);
         styleLabel.setOpaque(false);
         styleLabel.setBackground(Color.WHITE);
@@ -133,16 +133,16 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
         progressIndeterminate.add(slider2, BorderLayout.CENTER);
         progressIndeterminate.setIndeterminate(true);
 
-        layersIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers.png"));
-        layerIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layer.png"));
-        layersInfoIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers_i.png"));
-        layerInfoIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layer_i.png"));
+        layersIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers.png"));//NOI18N
+        layerIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layer.png"));//NOI18N
+        layersInfoIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers_i.png"));//NOI18N
+        layerInfoIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layer_i.png"));//NOI18N
 
-        okIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/enable30.png"));
-        errorIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/error.png"));
-        refreshIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/refresh.png"));
-        refreshNeededIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/refresh30.png"));
-        inProgressIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/inProgress.png"));
+        okIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/enable30.png"));//NOI18N
+        errorIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/error.png"));//NOI18N
+        refreshIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/refresh.png"));//NOI18N
+        refreshNeededIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/refresh30.png"));//NOI18N
+        inProgressIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/inProgress.png"));//NOI18N
     }
 
     /**
@@ -183,24 +183,24 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
             }
         }
         if (realColumn == 0) {
-            setText("");
+            setText("");//NOI18N
             //label.setIconTextGap(4);
             setHorizontalAlignment(JLabel.CENTER);
             if (value instanceof RetrievalServiceLayer) {
                 int progress = ((RetrievalServiceLayer) value).getProgress();
                 if (((RetrievalServiceLayer) value).isRefreshNeeded()) {
                     if (DEBUG) {
-                        log.warn(value + " isRefreshNeeded");
+                        log.warn(value + " isRefreshNeeded");//NOI18N
                     }
                     setIcon(refreshNeededIcon);
                 } else if (progress != 0 && progress != 100) {
                     if (DEBUG) {
-                        log.debug(value + " isInProgress");
+                        log.debug(value + " isInProgress");//NOI18N
                     }
                     setIcon(inProgressIcon);
                 } else if (((RetrievalServiceLayer) value).hasErrors()) {
                     if (DEBUG) {
-                        log.warn(value + " has errors");
+                        log.warn(value + " has errors");//NOI18N
                     }
                     setIcon(errorIcon);
                     if (((RetrievalServiceLayer) value).getErrorObject() instanceof Image) {
@@ -219,26 +219,26 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                 internalWidgetParent.setErrorImage((Image) ((RetrievalServiceLayer) value).getErrorObject());
                             }
                         }
-                        setToolTipText(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("ActiveLayerTableCellRenderer.Der_Server_lieferte_folgendes_Fehlerbild_zurueck"));
+                        setToolTipText(org.openide.util.NbBundle.getMessage(ActiveLayerTableCellRenderer.class, "ActiveLayerTableCellRenderer.toolTipText"));//NOI18N
                     } else if (((RetrievalServiceLayer) value).getErrorObject() instanceof String) {
                         setToolTipText(((RetrievalServiceLayer) value).getErrorObject().toString());
                     }
                 } else {
                     if (DEBUG) {
-                        log.debug(value + " isFinished");
+                        log.debug(value + " isFinished");//NOI18N
                     }
                     setIcon(okIcon);
                 }
             }
         } else if (realColumn == 2) {
-            setText("");
+            setText("");//NOI18N
             setIcon(null);
             if (value instanceof WMSServiceLayer) {
                 if (((WMSServiceLayer) value).getWMSLayers().size() > 1) {
-                    setText("");
+                    setText("");//NOI18N
                 } else {
                     setHorizontalAlignment(JLabel.LEFT);
-                    setText("");
+                    setText("");//NOI18N
                     //label.setIconTextGap(4);
                     Style selectedStyle = null;
 
@@ -264,7 +264,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 //final Color bg = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column).getBackground();
                 //return temp;
                 if (DEBUG) {
-                    log.debug(value + " getStyleLabel (" + realRow + ", " + realColumn + ")");
+                    log.debug(value + " getStyleLabel (" + realRow + ", " + realColumn + ")");//NOI18N
                 }
                 styleLabel.style = ((AbstractFeatureService) value).getLayerProperties().getStyle();
                 styleLabel.repaint();
@@ -272,7 +272,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
             }
         } else if (realColumn == 3) {
             WMSLayer wmsLayer = null;
-            setText("");
+            setText("");//NOI18N
             setIcon(null);
             setHorizontalAlignment(JLabel.LEFT);
             if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() > 1) {
@@ -286,7 +286,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     return booleanRenderer.getTableCellRendererComponent(table, new Boolean(wmsLayer.isQuerySelected()), isSelected, hasFocus, row, column);
                 } else {
                     setIcon(null);
-                    setText("");
+                    setText("");//NOI18N
                 }
             }
         } else if (realColumn == 4) {
@@ -302,7 +302,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 if (currentProgress == -1 && ((RetrievalServiceLayer) value).isEnabled() && !((RetrievalServiceLayer) value).isRefreshNeeded()) {
                     if (indeterminateProgressTimers[realRow] == null) {
                         if (DEBUG) {
-                            log.debug("new indeterminateProgressTimers[" + realRow + "] created");
+                            log.debug("new indeterminateProgressTimers[" + realRow + "] created");//NOI18N
                         }
                         indeterminateProgressTimers[realRow] = new Timer(30, new ActionListener() {
 
@@ -319,7 +319,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                     indeterminateProgressTimers[realRow].setRepeats(false);
                                     indeterminateProgressTimers[realRow] = null;
                                     if (DEBUG) {
-                                        log.debug(value + ": indeterminateProgressTimer[" + realRow + "] stopped from Timer");
+                                        log.debug(value + ": indeterminateProgressTimer[" + realRow + "] stopped from Timer");//NOI18N
                                     }
 
                                     // redraw all columns (including status icon)
@@ -340,20 +340,20 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     return progressIndeterminate;
                 } else {
                     if (DEBUG) {
-                        log.debug(value + ": getProgress(): " + currentProgress + " (realColumn=" + realColumn + ", realRow=" + realRow + ") (column=" + column + ", row=" + row + ")");
+                        log.debug(value + ": getProgress(): " + currentProgress + " (realColumn=" + realColumn + ", realRow=" + realRow + ") (column=" + column + ", row=" + row + ")");//NOI18N
                     }
 
                     this.progressBar.setValue(currentProgress);
                     if (indeterminateProgressTimers[realRow] != null && (currentProgress == 100 || currentProgress == 0)) {
                         if (DEBUG) {
-                            log.debug(value + ": indeterminateProgressTimer[" + realRow + "] stopped from Renderer");
+                            log.debug(value + ": indeterminateProgressTimer[" + realRow + "] stopped from Renderer");//NOI18N
                         }
                         indeterminateProgressTimers[realRow].setRepeats(false);
                         indeterminateProgressTimers[realRow].stop();
                         indeterminateProgressTimers[realRow] = null;
 
                         if (DEBUG) {
-                            log.debug(value + " indeterminateProgressTimer [" + realRow + "] stopped");
+                            log.debug(value + " indeterminateProgressTimer [" + realRow + "] stopped");//NOI18N
                         }
 
                         // redraw all columns (including status icon)
@@ -370,7 +370,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
 
             } else {
                 setIcon(null);
-                setText("");
+                setText("");//NOI18N
             }
 //            return new JLabel("turned off");
         } else if (realColumn == 5) {
@@ -382,7 +382,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
             return moreButton;
         } else {
             setIcon(null);
-            setText("");
+            setText("");//NOI18N
         }
         return this;
 

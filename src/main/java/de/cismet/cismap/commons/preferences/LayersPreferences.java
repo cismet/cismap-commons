@@ -17,15 +17,15 @@ public class LayersPreferences{
     private TreeMap featureServices = new TreeMap();
     private boolean appFeatureLayerEnabled = true;
     private float appFeatureLayerTranslucency = 0.9f;
-    private String appFeatureLayerName = "";
+    private String appFeatureLayerName = "";//NOI18N
     public LayersPreferences(CismapPreferences cismapPreferences, Element parent) {
         this.cismapPreferences = cismapPreferences;
 
-        try {appFeatureLayerEnabled=parent.getChild("appFeatureLayer").getAttribute("enabled").getBooleanValue();} catch (Exception e){            this.cismapPreferences.log.warn("Preferences Auslesen. Fehler. appFeatureLayer.enabled  ", e);}
-        try {appFeatureLayerTranslucency=parent.getChild("appFeatureLayer").getAttribute("translucency").getFloatValue();} catch (Exception e){            this.cismapPreferences.log.warn("Preferences Auslesen. Fehler. appFeatureLayer.translucency  ", e);}
-        try {appFeatureLayerName=parent.getChild("appFeatureLayer").getAttribute("name").getValue();} catch (Exception e){            this.cismapPreferences.log.warn("Preferences Auslesen. Fehler. appFeatureLayer.name  ", e);}
+        try {appFeatureLayerEnabled=parent.getChild("appFeatureLayer").getAttribute("enabled").getBooleanValue();} catch (Exception e){            this.cismapPreferences.log.warn("Read preferences. Error. appFeatureLayer.enabled  ", e);}//NOI18N
+        try {appFeatureLayerTranslucency=parent.getChild("appFeatureLayer").getAttribute("translucency").getFloatValue();} catch (Exception e){            this.cismapPreferences.log.warn("Read preferences. Error. appFeatureLayer.translucency  ", e);}//NOI18N
+        try {appFeatureLayerName=parent.getChild("appFeatureLayer").getAttribute("name").getValue();} catch (Exception e){            this.cismapPreferences.log.warn("Read preferences. Error. appFeatureLayer.name  ", e);}//NOI18N
         
-        List simpleWmsList = parent.getChild("rasterLayers").getChildren("simpleWms");
+        List simpleWmsList = parent.getChild("rasterLayers").getChildren("simpleWms");//NOI18N
         Iterator it = simpleWmsList.iterator();
         while (it.hasNext()) {
             Object o = it.next();
@@ -33,29 +33,29 @@ public class LayersPreferences{
                 Element el = (Element)o;
                 try {
                     boolean skip = false;
-                    try {skip=el.getAttribute("skip").getBooleanValue();} catch (Exception skipException){}
+                    try {skip=el.getAttribute("skip").getBooleanValue();} catch (Exception skipException){}//NOI18N
                     if (!skip) {
                         SimpleWMS swms = new SimpleWMS(el);
                         rasterServices.put(new Integer(swms.getLayerPosition()),swms);
                     }
                 } catch (Exception ex) {
-                    log.warn("Preferences Auslesen. Fehler. SimpleWMS erzeugen  ", ex);
+                    log.warn("Read preferences. Error. SimpleWMS erzeugen  ", ex);//NOI18N
                 }
             }
         }
-        List simplePostgisFeatureServiceList = parent.getChild("featureLayers").getChildren("simplePostgisFeatureService");
+        List simplePostgisFeatureServiceList = parent.getChild("featureLayers").getChildren("simplePostgisFeatureService");//NOI18N
         it=simplePostgisFeatureServiceList.iterator();
         while (it.hasNext()) {
             Object o = it.next();
             if (o instanceof Element) {
                 Element el = (Element)o;
-                log.debug("parsing '" + el.getName() + "' layer preferences");
+                log.debug("parsing '" + el.getName() + "' layer preferences");//NOI18N
                 try {
-                    log.debug("SimplePostgisFeatureService hinzugef\u00FCgt");
+                    log.debug("SimplePostgisFeatureService added");//NOI18N
                     boolean skip = false;
                     boolean updateable=false;
-                    try {skip=el.getAttribute("skip").getBooleanValue();} catch (Exception skipException){}
-                    try {updateable=el.getAttribute("updateable").getBooleanValue();} catch (Exception skipException){}
+                    try {skip=el.getAttribute("skip").getBooleanValue();} catch (Exception skipException){}//NOI18N
+                    try {updateable=el.getAttribute("updateable").getBooleanValue();} catch (Exception skipException){}//NOI18N
                     if (!skip) {
                         SimplePostgisFeatureService spfs=null;
                         if (updateable) {
@@ -68,12 +68,12 @@ public class LayersPreferences{
                         featureServices.put(new Integer(spfs.getLayerPosition()),spfs);
                     }
                 } catch (Exception ex) {
-                    log.warn("Preferences Auslesen. Fehler. SimplePostgisFeatureService erzeugen  ", ex);
+                    log.warn("Read preferences. Error. Create SimplePostgisFeatureService", ex);//NOI18N
                 }
             }
         }
         
-        List simplePostgisWebServiceList = parent.getChild("featureLayers").getChildren("simpleWebFeatureService");
+        List simplePostgisWebServiceList = parent.getChild("featureLayers").getChildren("simpleWebFeatureService");//NOI18N
         it=simplePostgisWebServiceList.iterator();
         while (it.hasNext()) {            
             Object o = it.next();
@@ -83,8 +83,8 @@ public class LayersPreferences{
                 try {                    
                     boolean skip = false;
                     boolean updateable=false;
-                    try {skip=el.getAttribute("skip").getBooleanValue();} catch (Exception skipException){}
-                    try {updateable=el.getAttribute("updateable").getBooleanValue();} catch (Exception skipException){}
+                    try {skip=el.getAttribute("skip").getBooleanValue();} catch (Exception skipException){}//NOI18N
+                    try {updateable=el.getAttribute("updateable").getBooleanValue();} catch (Exception skipException){}//NOI18N
                     if (!skip) {
                         WebFeatureService swfs=null;
                         if (updateable) {
@@ -96,10 +96,10 @@ public class LayersPreferences{
                             swfs = new WebFeatureService(el);
                         }                        
                         featureServices.put(new Integer(swfs.getLayerPosition()),swfs);
-                        log.debug("SimpleWebFeatureService hinzugef\u00FCgt");
+                        log.debug("SimpleWebFeatureService added");//NOI18N
                     }
                 } catch (Exception ex) {
-                    log.warn("Preferences Auslesen. Fehler. SimpleWebFeatureService erzeugen  ", ex);
+                    log.warn("Read preferences. Error. SimpleWebFeatureService erzeugen  ", ex);//NOI18N
                 }
             }
         }

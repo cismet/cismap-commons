@@ -25,7 +25,7 @@ public class StyleHistoryListModel implements ListModel, ConvertableToXML
   /* Maximum number of styles stored in the listmodel */
   private static final int MAX_STYLES = 15;
   /* Name of the root-element of the listmodel as JDOM-element */
-  public static final String STYLE_ROOT = "StyleHistory";
+  public static final String STYLE_ROOT = "StyleHistory";//NOI18N
   /* vector that contains the styles */
   private Vector<Style> styleList;
   /* JDOM-parser */
@@ -48,11 +48,11 @@ public class StyleHistoryListModel implements ListModel, ConvertableToXML
         this.initFromElement(root);
       } else
       {
-        logger.error("Datei '" + f.getName() + "' enthält falschen xml content:\n" + doc);
+        logger.error("file '" + f.getName() + "' contains wrong xml content:\n" + doc);//NOI18N
       }
     } catch (Exception ex)
     {
-      logger.error("Style-History konnte nicht aus '" + f.getName() + "' geladen werden", ex);
+      logger.error("Could not load style history from '" + f.getName() + "'", ex);//NOI18N
     }
   }
 

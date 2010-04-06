@@ -42,8 +42,8 @@ import org.jdom.Element;
  */
 public class WFSFormQuery {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static final String INITIAL="INITIAL";
-    public static final String FOLLOWUP="FOLLOWUP";
+    public static final String INITIAL="INITIAL";//NOI18N
+    public static final String FOLLOWUP="FOLLOWUP";//NOI18N
     
     private String serverUrl;
     private String filename;
@@ -163,21 +163,21 @@ public class WFSFormQuery {
     }
     
     public Element getElement() {
-        Element ret=new Element("wfsFormQuery");
-        ret.setAttribute("id",getId());
-        ret.setAttribute("title",getTitle());
-        ret.setAttribute("server",getServerUrl());
-        ret.setAttribute("queryFile",getFilename());
-         ret.setAttribute("propertyPrefix",getFilename());
-          ret.setAttribute("propertyNamespace",getFilename());
-        ret.setAttribute("displayTextProperty",getDisplayTextProperty());
-        ret.setAttribute("extentProperty",getExtentProperty());
-        ret.setAttribute("positionProperty",getExtentProperty());
-        ret.setAttribute("idProperty",getIdProperty());
-        ret.setAttribute("type",getType());
-        ret.setAttribute("componentName",getComponentName());
+        Element ret=new Element("wfsFormQuery");//NOI18N
+        ret.setAttribute("id",getId());//NOI18N
+        ret.setAttribute("title",getTitle());//NOI18N
+        ret.setAttribute("server",getServerUrl());//NOI18N
+        ret.setAttribute("queryFile",getFilename());//NOI18N
+         ret.setAttribute("propertyPrefix",getFilename());//NOI18N
+          ret.setAttribute("propertyNamespace",getFilename());//NOI18N
+        ret.setAttribute("displayTextProperty",getDisplayTextProperty());//NOI18N
+        ret.setAttribute("extentProperty",getExtentProperty());//NOI18N
+        ret.setAttribute("positionProperty",getExtentProperty());//NOI18N
+        ret.setAttribute("idProperty",getIdProperty());//NOI18N
+        ret.setAttribute("type",getType());//NOI18N
+        ret.setAttribute("componentName",getComponentName());//NOI18N
         if (getQueryPlaceholder()!=null) {
-            ret.setAttribute("queryPlaceholder",getQueryPlaceholder());
+            ret.setAttribute("queryPlaceholder",getQueryPlaceholder());//NOI18N
         }
         return ret;
     }

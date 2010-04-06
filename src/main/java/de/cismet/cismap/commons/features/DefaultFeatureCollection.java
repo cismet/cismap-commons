@@ -74,7 +74,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
         try {
             return features.get(index);
         } catch (Exception e) {
-            log.fatal("Fehler in getFeature:" + index, e);
+            log.fatal("error in getFeature:" + index, e);//NOI18N
             return null;
         }
     }
@@ -125,7 +125,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     public String getName() {
-        return "DefaultFeatureCollection";
+        return "DefaultFeatureCollection";//NOI18N
     }
 
     public float getTranslucency() {
@@ -160,7 +160,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
             v.add(f);
             fireFeaturesChanged(v);
         } catch (Throwable t) {
-            log.error("Error during hold", t);
+            log.error("Error during hold", t);//NOI18N
         }
 
     }
@@ -198,7 +198,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     private void enforceSelect(Feature f) {
-        log.debug("select(Feature f):" + f);
+        log.debug("select(Feature f):" + f);//NOI18N
         enforceUnselectAll();
         selectedFeatures.add(f);
         fireSelectionChanged(f);
@@ -212,7 +212,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     private void enforceSelect(Collection<Feature> cf) {
-        log.debug("select(Collection<Feature> cf):" + cf);
+        log.debug("select(Collection<Feature> cf):" + cf);//NOI18N
         enforceUnselectAll(true);
         selectedFeatures.addAll(cf);
         fireSelectionChanged(cf);
@@ -250,12 +250,12 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
         if (!assertNoVeto()) {
             return;
         }
-        log.debug("unselect(Feature f):" + f);
+        log.debug("unselect(Feature f):" + f);//NOI18N
         enforceUnselect(f);
     }
 
     private void enforceUnselect(Feature f) {
-        log.debug("unselect(Feature f):" + f);
+        log.debug("unselect(Feature f):" + f);//NOI18N
         selectedFeatures.remove(f);
         fireSelectionChanged(f);
     }
@@ -280,7 +280,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 
     private void enforceUnselectAll(boolean quiet) {
         if (selectedFeatures.size() > 0) {
-            log.debug("unselectAll()");
+            log.debug("unselectAll()");//NOI18N
             LinkedHashSet<Feature> lhs = new LinkedHashSet<Feature>(selectedFeatures);
             selectedFeatures.clear();
             if (!quiet) {
@@ -297,7 +297,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     private void enforceUnselect(Collection<Feature> cf) {
-        log.debug("unselect(Collection<Feature> cf):" + cf);
+        log.debug("unselect(Collection<Feature> cf):" + cf);//NOI18N
         selectedFeatures.removeAll(cf);
         fireSelectionChanged();
     }
@@ -311,21 +311,21 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     public void removeFeature(Feature f) {
-        log.debug("before removal:" + features);
+        log.debug("before removal:" + features);//NOI18N
         boolean removed = false;
-        log.debug("featureToRemove: " + f);
-        log.debug("Feature sizes: " + features.size());
-        log.debug("Features: " + features);
+        log.debug("featureToRemove: " + f);//NOI18N
+        log.debug("Feature sizes: " + features.size());//NOI18N
+        log.debug("Features: " + features);//NOI18N
         removed = features.remove(f);
-        log.debug("feature removed: " + removed);
+        log.debug("feature removed: " + removed);//NOI18N
         removed = holdFeatures.remove(f);
-        log.debug("holdFeature removed: " + removed);
+        log.debug("holdFeature removed: " + removed);//NOI18N
         removed = selectedFeatures.remove(f);
-        log.debug("selected removed: " + removed);
+        log.debug("selected removed: " + removed);//NOI18N
         Vector v = new Vector();
         v.add(f);
         fireFeaturesRemoved(v);
-        log.debug("after removal:" + features);
+        log.debug("after removal:" + features);//NOI18N
     }
 
     public void removeFeatures(Collection<Feature> cf) {
@@ -335,20 +335,20 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     public void addFeature(Feature f) {
-        log.debug("addFeature(Feature f):" + f);
+        log.debug("addFeature(Feature f):" + f);//NOI18N
         if (f != null && f.getGeometry() != null && !features.contains(f)) {
             features.add(f);
             Vector v = new Vector();
             v.add(f);
             fireFeaturesAdded(v);
         } else {
-            log.warn("Feature was not added. It is either null or getGeometry() is null or it is already in the Collection.");
+            log.warn("Feature was not added. It is either null or getGeometry() is null or it is already in the Collection.");//NOI18N
         }
 
     }
 
     public void addFeatures(Collection<Feature> cf) {
-        log.debug("addFeatures(Collection<Feature> cf):" + cf);
+        log.debug("addFeatures(Collection<Feature> cf):" + cf);//NOI18N
         Vector<Feature> v = new Vector<Feature>();
         for (Feature f : cf) {
             if (!features.contains(f)) {
@@ -366,13 +366,13 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 
     public void substituteFeatures(Collection<Feature> cf) {
         try {
-            log.debug("substitute: L\u00F6sche alle");
+            log.debug("substitute: delete all");//NOI18N
             removeAllFeatures();
-            log.debug("substitute: F\u00FCge hinzu:" + cf);
+            log.debug("substitute: add:" + cf);//NOI18N
             addFeatures(cf);
             Feature f = (Feature) cf.toArray()[cf.size() - 1];
         } catch (Exception e) {
-            log.error("Fehler in substituteFeatures neue features:" + cf, e);
+            log.error("Error in substituteFeatures new features:" + cf, e);//NOI18N
         }
         //select(f);
     }
@@ -405,7 +405,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 //        select(f);
         Vector v = new Vector();
         v.add(f);
-        log.debug("reconsiderFeature(Feature f):" + f, new CurrentStackTrace());
+        log.debug("reconsiderFeature(Feature f):" + f, new CurrentStackTrace());//NOI18N
         Vector<FeatureCollectionListener> listenersCopy = new Vector<FeatureCollectionListener>(listeners); //No concurrentModification possible
         for (Iterator<FeatureCollectionListener> it = listenersCopy.iterator(); it.hasNext();) {
             it.next().featureReconsiderationRequested(new FeatureCollectionEvent(this, v));
@@ -417,7 +417,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     public void fireFeaturesAdded(Collection<Feature> cf) {
         for (FeatureCollectionListener curListener : listeners) {
             if (curListener instanceof MappingComponent) {
-                log.debug("adding featuresTo Map");
+                log.debug("adding featuresTo Map");//NOI18N
                 ((MappingComponent) curListener).addFeaturesToMap(cf.toArray(new Feature[0]));
             }
         }
@@ -425,7 +425,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 
     public void fireFeaturesRemoved(Collection<Feature> cf) {
         Vector<FeatureCollectionListener> listenersCopy = new Vector<FeatureCollectionListener>(listeners); //No concurrentModification possible
-        log.debug("fireFeaturesRemoved");
+        log.debug("fireFeaturesRemoved");//NOI18N
         for (Iterator<FeatureCollectionListener> it = listenersCopy.iterator(); it.hasNext();) {
             it.next().featuresRemoved(new FeatureCollectionEvent(this, cf));
         }
@@ -433,7 +433,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 
     public void fireAllFeaturesRemoved(Collection<Feature> cf) {
         Vector<FeatureCollectionListener> listenersCopy = new Vector<FeatureCollectionListener>(listeners); //No concurrentModification possible
-        log.debug("fireAllFeaturesRemoved");
+        log.debug("fireAllFeaturesRemoved");//NOI18N
         for (Iterator<FeatureCollectionListener> it = listenersCopy.iterator(); it.hasNext();) {
             it.next().allFeaturesRemoved(new FeatureCollectionEvent(this, cf));
         }
@@ -441,7 +441,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 
     public void fireFeaturesChanged(Collection<Feature> cf) {
         Vector<FeatureCollectionListener> listenersCopy = new Vector<FeatureCollectionListener>(listeners); //No concurrentModification possible
-        log.debug("fireFeaturesChanged");
+        log.debug("fireFeaturesChanged");//NOI18N
         for (Iterator<FeatureCollectionListener> it = listenersCopy.iterator(); it.hasNext();) {
             it.next().featuresChanged(new FeatureCollectionEvent(this, cf));
         }
@@ -453,7 +453,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 
     public void fireSelectionChanged(Collection<Feature> cf) {
         Vector<FeatureCollectionListener> listenersCopy = new Vector<FeatureCollectionListener>(listeners); //No concurrentModification possible
-        log.debug("fireSelectionChanged");
+        log.debug("fireSelectionChanged");//NOI18N
         for (Iterator<FeatureCollectionListener> it = listenersCopy.iterator(); it.hasNext();) {
             it.next().featureSelectionChanged(new FeatureCollectionEvent(this, cf));
         }
@@ -487,7 +487,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     public void featuresAddedToMap(Collection<Feature> cf) {
-        log.debug("fireFeaturesAddedToMap");
+        log.debug("fireFeaturesAddedToMap");//NOI18N
         Vector<FeatureCollectionListener> listenersCopy = new Vector<FeatureCollectionListener>(listeners); //No concurrentModification possible
         for (Iterator<FeatureCollectionListener> it = listenersCopy.iterator(); it.hasNext();) {
             it.next().featuresAdded(new FeatureCollectionEvent(this, cf));

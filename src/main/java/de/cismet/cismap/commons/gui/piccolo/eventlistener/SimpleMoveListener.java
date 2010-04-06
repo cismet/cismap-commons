@@ -43,7 +43,7 @@ import java.util.Vector;
 public class SimpleMoveListener extends PBasicInputEventHandler {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static final String COORDINATES_CHANGED = "COORDINATES_CHANGED";
+    public static final String COORDINATES_CHANGED = "COORDINATES_CHANGED";//NOI18N
     Highlightable highlighted = null;
     private MappingComponent mc;
     private PFeature underlyingObject = null;
@@ -86,7 +86,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                         if (mc.getFeatureCollection() instanceof DefaultFeatureCollection &&
                                 ((DefaultFeatureCollection) mc.getFeatureCollection()).getSelectedFeatures().size() == 1) {
                             if (l == null || newPointHandle == null) {
-                                log.debug("newPointHandle und Locator erstellen");
+                                log.debug("create newPointHandle and Locator");//NOI18N
                                 l = new PLocator() {
                                     public double locateX() {return handleX;}
                                     public double locateY() {return handleY;}
@@ -128,7 +128,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
 //                                EventQueue.invokeLater(new Runnable() {
 //                                    public void run() {
                                 mc.getHandleLayer().addChild(newPointHandle);
-                                log.info("tempor\u00E4res Handle eingef\u00FCgt");
+                                log.info("tempor\u00E4res Handle eingef\u00FCgt");//NOI18N
 //                                    }
 //                                });
                             }
@@ -150,7 +150,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                         mc.getSnapHandleLayer().removeAllChildren();
                     }
                     catch (Exception e){
-                        log.debug("Fehler beim entfernen der SnappingVisualisierung",e);
+                        log.debug("Fehler beim entfernen der SnappingVisualisierung",e);//NOI18N
                     }
 
                     if (mc.isVisualizeSnappingEnabled()) {
@@ -171,7 +171,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                         }
                     }
                 } catch (Exception e) {
-                    log.info("Fehler beim Moven \u00FCber die Karte ", e);
+                    log.info("Fehler beim Moven \u00FCber die Karte ", e);//NOI18N
                 }
                 handleHighlightingStuff(event);
             }
@@ -236,7 +236,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                     }
                 }
             } catch (Exception e) {
-                log.warn("Fehler beim Highlighten", e);
+                log.warn("Fehler beim Highlighten", e);//NOI18N
             }
         }
     }
@@ -303,11 +303,11 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
 
                     // Abstand zum linken Nachbar berechnen
                     Double distanceLeft = leftNeighbour.distance(newPoint);
-                    log.debug("distanceLeft: " + distanceLeft);
+                    log.debug("distanceLeft: " + distanceLeft);//NOI18N
 
                     // Gesamt-Abstand berechnen
                     Double distanceTotal = leftNeighbour.distance(rightNeighbour);
-                    log.debug("distanceTotal: " + distanceTotal);
+                    log.debug("distanceTotal: " + distanceTotal);//NOI18N
 
                     // MainFrame holen
                     Frame frame = StaticSwingTools.getParentFrame(mc);
@@ -379,27 +379,27 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                 resetAfterClick();
             }
         } catch (Exception ex) {
-            log.error("Fehler beim Anlegen von neuer Koordinate und Handle", ex);
+            log.error("Fehler beim Anlegen von neuer Koordinate und Handle", ex);//NOI18N
         }
         super.mouseClicked(event);
     }
 
     private void addPoint(PFeature pf, float handleX, float handleY) {
-        log.info("neues Handle einf\u00FCgen: Anzahl vorher:" + pf.getCoordArr().length);
+        log.info("neues Handle einf\u00FCgen: Anzahl vorher:" + pf.getCoordArr().length);//NOI18N
         pf.setXp(pf.insertCoordinate(positionInArray, pf.getXp(),handleX));
-        log.debug("Pos="+positionInArray+", HandleX="+handleX);
+        log.debug("Pos="+positionInArray+", HandleX="+handleX);//NOI18N
         for (float f : pf.getXp()) {
-            log.debug("X="+f);
+            log.debug("X="+f);//NOI18N
         }
         pf.setYp(pf.insertCoordinate(positionInArray, pf.getYp(),handleY));
-        log.debug("Pos="+positionInArray+", HandleY="+handleY);
+        log.debug("Pos="+positionInArray+", HandleY="+handleY);//NOI18N
         for (float f : pf.getYp()) {
-            log.debug("Y="+f);
+            log.debug("Y="+f);//NOI18N
         }
         Coordinate c = new Coordinate(mc.getWtst().getSourceX(handleX), mc.getWtst().getSourceY(handleY));
         pf.setCoordArr(pf.insertCoordinate(positionInArray, pf.getCoordArr(), c));
         pf.syncGeometry();
-        log.info("neues Handle einf\u00FCge: Anzahl nachher:" + pf.getCoordArr().length);
+        log.info("neues Handle einf\u00FCge: Anzahl nachher:" + pf.getCoordArr().length);//NOI18N
         pf.setPathToPolyline(pf.getXp(), pf.getYp());
         Vector v = new Vector();
         v.add(pf.getFeature());

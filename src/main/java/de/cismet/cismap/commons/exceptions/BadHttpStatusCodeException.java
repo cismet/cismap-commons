@@ -40,7 +40,7 @@ public class BadHttpStatusCodeException extends Exception{
 
     @Override
     public String getMessage() {
-        return super.getMessage()+": "+statuscode;
+        return super.getMessage()+": "+statuscode;//NOI18N
     }
     
     

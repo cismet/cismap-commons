@@ -46,7 +46,7 @@ public class StylePreviewPanel extends JPanel
 {
 
   private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-  private static final String SAMPLE_TEXT = "Identifier";
+  private static final String SAMPLE_TEXT = org.openide.util.NbBundle.getMessage(StylePreviewPanel.class, "StylePreviewPanel.SAMPLE_TEXT");//NOI18N
   private Style style;
   private Color lineColor;
   private Color fillColor;
@@ -62,7 +62,7 @@ public class StylePreviewPanel extends JPanel
 
     initComponents();
 
-    log.debug("Erstelle StylePreviewPanel");
+    log.debug("Create StylePreviewPanel");//NOI18N
 
   }
 
@@ -111,7 +111,7 @@ public class StylePreviewPanel extends JPanel
    */
   private BufferedImage createPointSymbol()
   {
-    log.debug("createPointSymbol: PointSymbolSize="+style.getPointSymbolSize()+", LineWidth="+style.getLineWidth());
+    log.debug("createPointSymbol: PointSymbolSize="+style.getPointSymbolSize()+", LineWidth="+style.getLineWidth());//NOI18N
     return PointSymbolCreator.createPointSymbol(style.isDrawLine(), style.isDrawFill(), 
             style.getPointSymbolSize() > Style.MIN_POINTSYMBOLSIZE ? style.getPointSymbolSize() : Style.MIN_POINTSYMBOLSIZE
             , style.getLineWidth(), fillColor, lineColor);

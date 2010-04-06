@@ -208,7 +208,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         if (v.title != null) {
             lblName.setText(v.title);
         } else {
-            lblName.setText("-");
+            lblName.setText("-");//NOI18N
         }
         if (v.name != null) {
             lblName.setToolTipText(v.name);
@@ -272,18 +272,18 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         boolean featureInfo;
         String[] srs;
     }
-    private static final String DE = "--DE";
-    private static final String EN = "--EN";
+    private static final String DE = "--DE";//NOI18N
+    private static final String EN = "--EN";//NOI18N
     
     private static final String[] LANGUAGES={DE,EN};
 
     public String getGDILanguageString(String text) {
-        String ret="";
+        String ret="";//NOI18N
         try {
             for (String lan:LANGUAGES){
                 if (text.contains(lan)){
                     int from=text.indexOf(lan);
-                    int to=text.indexOf("--", from+lan.length());
+                    int to=text.indexOf("--", from+lan.length());//NOI18N
                     if (from<0) {
                         break;
                     }
@@ -296,7 +296,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
             }
             return text;
         } catch (Exception e) {
-            log.warn("Fehler beim GDI String Untersuchen", e);
+            log.warn("Error while checking the GDI String", e);//NOI18N
             return text;
         
         }

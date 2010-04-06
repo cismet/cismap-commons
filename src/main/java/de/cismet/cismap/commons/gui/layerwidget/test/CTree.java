@@ -22,9 +22,6 @@ public class CTree extends JTree implements DragSourceListener,
 											Autoscroll,
 											TreeModelListener
 {
-// Constants...
-
-
 // Fields...
 	private TreePath	_pathSource;			// The path being dragged
 	private BufferedImage	_imgGhost;			// The 'drag image' 
@@ -35,7 +32,7 @@ public class CTree extends JTree implements DragSourceListener,
 	public CTree ()	// Use the default JTree constructor so that we get a sample TreeModel built for us
 	{
 
-		putClientProperty("JTree.lineStyle", "Angled");	// I like this look
+		putClientProperty("JTree.lineStyle", "Angled");	// I like this look//NOI18N
 		
 		// Make this JTree a drag source
 		DragSource dragSource = DragSource.getDefaultDragSource();
@@ -65,7 +62,7 @@ public class CTree extends JTree implements DragSourceListener,
 		JScrollPane scrollPane = new JScrollPane(tree);
 
 
-		JFrame frame = new JFrame("Drag Images");
+		JFrame frame = new JFrame(org.openide.util.NbBundle.getMessage(CTree.class, "CTree.main(String[]).frame.title"));//NOI18N
 		frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
 		frame.pack();
 
@@ -146,7 +143,7 @@ public class CTree extends JTree implements DragSourceListener,
 		
 		setSelectionPath(path);	// Select this path in the tree
 		
-		System.out.println("DRAGGING: "+path.getLastPathComponent());
+		System.out.println("DRAGGING: "+path.getLastPathComponent());//NOI18N
 
 		// Wrap the path being transferred into a Transferable object
 		Transferable transferable = new CTransferableTreePath(path);
@@ -186,7 +183,7 @@ public class CTree extends JTree implements DragSourceListener,
 			if (nAction == DnDConstants.ACTION_MOVE)
 			{	// The dragged item (_pathSource) has been inserted at the target selected by the user.
 				// Now it is time to delete it from its original location.
-				System.out.println("REMOVING: " + _pathSource.getLastPathComponent());
+				System.out.println("REMOVING: " + _pathSource.getLastPathComponent());//NOI18N
 
 				// .
 				// .. ask your TreeModel to delete the node 
@@ -381,7 +378,7 @@ public class CTree extends JTree implements DragSourceListener,
 						TreePath pathTarget = getClosestPathForLocation(pt.x, pt.y);
 						TreePath pathSource = (TreePath) transferable.getTransferData(flavor);
 
-						System.out.println("DROPPING: "+pathSource.getLastPathComponent());
+						System.out.println("DROPPING: "+pathSource.getLastPathComponent());//NOI18N
 						TreeModel model =  getModel();
 						TreePath pathNewChild = null;
 						
@@ -511,6 +508,7 @@ public class CTree extends JTree implements DragSourceListener,
 //		http://www.oreilly.com/catalog/jswing/chapter/dnd.beta.pdf
 	
 	private static final int AUTOSCROLL_MARGIN = 12;
+
 	// Ok, we've been told to scroll because the mouse cursor is in our
 	// scroll zone.
 	public void autoscroll(Point pt) 
@@ -568,14 +566,14 @@ public class CTree extends JTree implements DragSourceListener,
 // TreeModelListener interface...
 	public void treeNodesChanged(TreeModelEvent e)
 	{
-		System.out.println("treeNodesChanged");
+		System.out.println("treeNodesChanged");//NOI18N
 		sayWhat(e);
 		// We dont need to reset the selection path, since it has not moved
 	}
 
 	public void treeNodesInserted(TreeModelEvent e)
 	{
-		System.out.println("treeNodesInserted ");
+		System.out.println("treeNodesInserted ");//NOI18N
 		sayWhat(e);
 
 		// We need to reset the selection path to the node just inserted
@@ -586,13 +584,13 @@ public class CTree extends JTree implements DragSourceListener,
 
 	public void treeNodesRemoved(TreeModelEvent e)
 	{
-		System.out.println("treeNodesRemoved ");
+		System.out.println("treeNodesRemoved ");//NOI18N
 		sayWhat(e);
 	}
 
 	public void treeStructureChanged(TreeModelEvent e)
 	{
-		System.out.println("treeStructureChanged ");
+		System.out.println("treeStructureChanged ");//NOI18N
 		sayWhat(e);
 	}
 
@@ -627,7 +625,7 @@ public class CTree extends JTree implements DragSourceListener,
 		int[] nIndex = e.getChildIndices();
 		for (int i = 0; i < nIndex.length ;i++ )
 		{
-			System.out.println(i+". "+nIndex[i]);
+			System.out.println(i+". "+nIndex[i]);//NOI18N
 		}
 	}
 

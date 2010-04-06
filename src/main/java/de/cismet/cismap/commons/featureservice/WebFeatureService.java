@@ -33,15 +33,15 @@ import org.jdom.Element;
  */
 public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
 {
-  public static final String WFS_FEATURELAYER_TYPE = "WebFeatureServiceLayer";
+  public static final String WFS_FEATURELAYER_TYPE = "WebFeatureServiceLayer";//NOI18N
   public static final HashMap<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
 
   static
   {
-    layerIcons.put(LAYER_ENABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfs.png")));
-    layerIcons.put(LAYER_ENABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfsInvisible.png")));
-    layerIcons.put(LAYER_DISABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfs.png")));
-    layerIcons.put(LAYER_DISABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfsInvisible.png")));
+    layerIcons.put(LAYER_ENABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfs.png")));//NOI18N
+    layerIcons.put(LAYER_ENABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerWfsInvisible.png")));//NOI18N
+    layerIcons.put(LAYER_DISABLED_VISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfs.png")));//NOI18N
+    layerIcons.put(LAYER_DISABLED_INVISIBLE, new ImageIcon(AbstractFeatureService.class.getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerWfsInvisible.png")));//NOI18N
   }
   /**
    * the request which will be send to the WFS
@@ -108,7 +108,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
     super.setMaxFeatureCount(maxFeatureCount);
     if (this.wfsQueryElement != null)
     {
-      logger.debug("setting max features of WFS query to "+(maxFeatureCount+100));
+      logger.debug("setting max features of WFS query to "+(maxFeatureCount+100));//NOI18N
       FeatureServiceUtilities.setMaxFeatureCount(this.wfsQueryElement, maxFeatureCount+100);
       this.wfsQueryString = FeatureServiceUtilities.elementToString(this.wfsQueryElement);
     }
@@ -184,7 +184,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
   @Override
   public void setQuery(String wfsQueryString)
   {
-    logger.debug("setting the string representation of the WFS query (will not be saved)");
+    logger.debug("setting the string representation of the WFS query (will not be saved)");//NOI18N
     this.wfsQueryString = wfsQueryString;
   }
 
@@ -200,7 +200,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
    */
   public void setQueryElement(Element wfsQuery)
   {
-    logger.debug("setting the XML Element representation of the WFS query (will be saved)");
+    logger.debug("setting the XML Element representation of the WFS query (will be saved)");//NOI18N
     this.wfsQueryElement = wfsQuery;
     // overwrite string representation of query
     if (this.wfsQueryElement != null)
@@ -230,10 +230,10 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
 
     // very slow:
     //defaultLayerProperties.setPrimaryAnnotationExpression("if (app:flurstn!=\"0\") {return app:flurstz + \" / \" + app:flurstn;} else {return app:flurstz;}", LayerProperties.EXPRESSIONTYPE_GROOVY);
-    defaultLayerProperties.setPrimaryAnnotationExpression("app:flurstz", LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+    defaultLayerProperties.setPrimaryAnnotationExpression("app:flurstz", LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);//NOI18N
     defaultLayerProperties.getStyle().setMultiplier(1d);
-    defaultLayerProperties.getStyle().setFont(new Font("sansserif", Font.PLAIN, 12));
-    defaultLayerProperties.setIdExpression("app:gid", LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+    defaultLayerProperties.getStyle().setFont(new Font("sansserif", Font.PLAIN, 12));//NOI18N
+    defaultLayerProperties.setIdExpression("app:gid", LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);//NOI18N
     defaultLayerProperties.setQueryType(LayerProperties.QUERYTYPE_XML);
 
     return defaultLayerProperties;

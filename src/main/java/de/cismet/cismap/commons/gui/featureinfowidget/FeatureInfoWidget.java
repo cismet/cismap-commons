@@ -80,7 +80,7 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
                     tbpFeatureInfos.remove(d);
                     displays.remove(layer);
                 } catch (Exception ex) {
-                    log.warn("Workaround fuer Styleaenderung(Dort gibt es keine Refresh sonderen ein remove/add)", ex);
+                    log.warn("Workaround for style changes(there is no refresh, but only remove/add)", ex);//NOI18N
                 }
             } else if (d == null && layer.isQuerySelected()) {
                 d = new FeatureInfoDisplay(layer, tbpFeatureInfos);

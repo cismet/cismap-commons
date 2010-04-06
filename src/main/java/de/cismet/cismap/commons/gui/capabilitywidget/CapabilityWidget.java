@@ -94,7 +94,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 import javax.swing.ImageIcon;
@@ -132,12 +131,11 @@ import org.jdom.Element;
  * @author  thorsten.hell@cismet.de
  */
 public class CapabilityWidget extends JPanel implements DropTargetListener, ChangeListener, ActionListener, Configurable, MapBoundsListener {
-
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget");
+    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget");//NOI18N
     private int maxServerNameLength = 14;
-    private ImageIcon icoConnect = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/connect.png"));
-    private ImageIcon icoConnected = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/server.png"));
-    private ImageIcon icoError = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/error.png"));
+    private ImageIcon icoConnect = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/connect.png"));//NOI18N
+    private ImageIcon icoConnected = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/server.png"));//NOI18N
+    private ImageIcon icoError = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/error.png"));//NOI18N
     private LinkedHashMap<LinkWithSubparent, JComponent> capabilityUrls = new LinkedHashMap<LinkWithSubparent, JComponent>();
     private LinkedHashMap<JComponent, LinkWithSubparent> capabilityUrlsReverse = new LinkedHashMap<JComponent, LinkWithSubparent>();
     private int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
@@ -174,17 +172,17 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
      * @param interactive true, falls per Drag&Drop, sonst false
      */
     private void processUrl(final String link, final String subparent, final boolean interactive) {
-        log.info("processURL: " + link);
+        log.info("processURL: " + link);//NOI18N
         // Gibts diese URL schon?
         // Text im Tab der L\u00E4nge der URL anpassen
         String tabText;
         if (subparent != null && subparent.trim().length() > 0) {
             tabText = subparent;
         } else {
-            if (link.startsWith("http://") && link.length() > 21) {
-                tabText = link.substring(7, 21) + "...";
+            if (link.startsWith("http://") && link.length() > 21) {//NOI18N
+                tabText = link.substring(7, 21) + "...";//NOI18N
             } else if (link.length() > 14) {
-                tabText = link.substring(0, 14) + "...";
+                tabText = link.substring(0, 14) + "...";//NOI18N
             } else {
                 tabText = link;
             }
@@ -211,49 +209,49 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
                 //TODO
                 //should be refactored --> coomon parts like capabilities s
-                if (link.toLowerCase().contains("service=wfs")) {
+                if (link.toLowerCase().contains("service=wfs")) {//NOI18N
                     addOGCWFSCapabilitiesTree(link, load, interactive);
-                } else if (link.toLowerCase().contains("service=wms")) {
+                } else if (link.toLowerCase().contains("service=wms")) {//NOI18N
                     addOGCWMSCapabilitiesTree(link, load, interactive, subparent);
-                } else if (link.toLowerCase().contains("service=wss")) {
+                } else if (link.toLowerCase().contains("service=wss")) {//NOI18N
                     try {
-                        log.debug("WSS Capabilties Link hinzugefügt");
+                        log.debug("WSS Capabilties Link hinzugefügt");//NOI18N
                         final URL url = new URL(link.substring(0, link.indexOf('?')));
-                        log.debug("URL des WSS: " + url.toString());
+                        log.debug("URL des WSS: " + url.toString());//NOI18N
                         if (!WebAccessManager.getInstance().isHandlerForURLRegistered(url)) {
                             WebAccessManager.getInstance().registerAccessHandler(url, AccessHandler.ACCESS_HANDLER_TYPES.WSS);
                         }
                         addOGCCapabilitiesTree(link, load, interactive);
                     } catch (MalformedURLException ex) {
-                        log.error("Url is not wellformed no wss authentication possible", ex);
+                        log.error("Url is not wellformed no wss authentication possible", ex);//NOI18N
                     }
                 } else {
                     //ToDo cleveres Probieren wenn z.B. nur die service URL angebenen wurde --> getCapabiltiesrequest aufbauen und probieren
-                    log.info("service nicht spezifizierbar");
-                    Object[] alternatives = {"OGC-Web Mapping Service", "OGC-Web Feature Service", "OGC-Web Security Service"};
+                    log.info("service nicht spezifizierbar");//NOI18N
+                    Object[] alternatives = {"OGC-Web Mapping Service", "OGC-Web Feature Service", "OGC-Web Security Service"};//NOI18N
                     Object selectedValue = JOptionPane.showInputDialog(CapabilityWidget.this,
-                            "<html>Aus der URL:<br><pre>" + link + "</pre><br>kann der Servicetyp nicht ermittelt werden.<br><br>Um welchen Service handelt es sich?</html>",
-                            "Uups", JOptionPane.INFORMATION_MESSAGE, null, alternatives, alternatives[0]);
+                            org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.processUrl(String,String,boolean).JOptionPane.message", new Object[] {link}),//NOI18N
+                            org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.processUrl(String,String,boolean).JOptionPane.title"), JOptionPane.INFORMATION_MESSAGE, null, alternatives, alternatives[0]);//NOI18N
                     if (selectedValue == alternatives[0]) {
                         addOGCWMSCapabilitiesTree(link, load, interactive, subparent);
                     } else if (selectedValue == alternatives[1]) {
                         addOGCWFSCapabilitiesTree(link, load, interactive);
                     } else if (selectedValue == alternatives[2]) {
                         try {
-                            log.debug("WSS Capabilties Link hinzugefügt");
+                            log.debug("WSS Capabilties Link hinzugefügt");//NOI18N
                             URL url;
                             if (link.indexOf('?') != -1) {
                                 url = new URL(link.substring(0, link.indexOf('?')));
                             } else {
                                 url = new URL(link);
                             }
-                            log.debug("URL des WSS: " + url.toString());
+                            log.debug("URL des WSS: " + url.toString());//NOI18N
                             if (!WebAccessManager.getInstance().isHandlerForURLRegistered(url)) {
                                 WebAccessManager.getInstance().registerAccessHandler(url, AccessHandler.ACCESS_HANDLER_TYPES.WSS);
                             }
                             addOGCCapabilitiesTree(link, load, interactive);
                         } catch (MalformedURLException ex) {
-                            log.error("Url is not wellformed no wss authentication possible", ex);
+                            log.error("Url is not wellformed no wss authentication possible", ex);//NOI18N
                         }
                     } else if (selectedValue == null) {
                         tbpCapabilities.remove(load);
@@ -342,8 +340,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
      * WARNING: Do NOT modify this code. The content of this method is
      * always regenerated by the Form Editor.
      */
-    // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+
         jPanel1 = new javax.swing.JPanel();
         jToolBar1 = new javax.swing.JToolBar();
         cmdCollapse = new javax.swing.JButton();
@@ -353,69 +352,64 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         cmdRefresh = new javax.swing.JButton();
         tbpCapabilities = StaticSwingTools.jTabbedPaneWithVerticalTextCreator(JTabbedPane.LEFT,JTabbedPane.SCROLL_TAB_LAYOUT);
 
-        setLayout(new java.awt.BorderLayout());
-
         setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         setPreferredSize(new java.awt.Dimension(200, 250));
+        setLayout(new java.awt.BorderLayout());
+
         jPanel1.setLayout(new java.awt.BorderLayout());
 
         jToolBar1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
-        cmdCollapse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/collapseTree.png")));
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle"); // NOI18N
-        cmdCollapse.setToolTipText(bundle.getString("CapabilityWidget.cmdCollapse.toolTipText")); // NOI18N
+
+        cmdCollapse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/collapseTree.png"))); // NOI18N
+        cmdCollapse.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdCollapse.toolTipText")); // NOI18N
         cmdCollapse.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdCollapse.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdCollapseActionPerformed(evt);
             }
         });
-
         jToolBar1.add(cmdCollapse);
 
-        cmdAddFromList.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/addServerFromList.png")));
-        cmdAddFromList.setToolTipText(bundle.getString("CapabilityWidget.cmdAddFromList.toolTipText")); // NOI18N
+        cmdAddFromList.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/addServerFromList.png"))); // NOI18N
+        cmdAddFromList.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdAddFromList.toolTipText")); // NOI18N
         cmdAddFromList.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdAddFromList.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdAddFromListActionPerformed(evt);
             }
         });
-
         jToolBar1.add(cmdAddFromList);
 
-        cmdAddByUrl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/addServerFromUrl.png")));
-        cmdAddByUrl.setToolTipText(bundle.getString("CapabilityWidget.cmdAddByUrl.toolTipText")); // NOI18N
+        cmdAddByUrl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/addServerFromUrl.png"))); // NOI18N
+        cmdAddByUrl.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdAddByUrl.toolTipText")); // NOI18N
         cmdAddByUrl.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdAddByUrl.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdAddByUrlActionPerformed(evt);
             }
         });
-
         jToolBar1.add(cmdAddByUrl);
 
-        cmdRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/tab_remove.png")));
-        cmdRemove.setToolTipText(bundle.getString("CapabilityWidget.cmdRemove.toolTipText")); // NOI18N
+        cmdRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/tab_remove.png"))); // NOI18N
+        cmdRemove.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdRemove.toolTipText")); // NOI18N
         cmdRemove.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdRemove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdRemoveActionPerformed(evt);
             }
         });
-
         jToolBar1.add(cmdRemove);
 
-        cmdRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/refresh.png")));
-        cmdRefresh.setToolTipText(bundle.getString("CapabilityWidget.cmdRefresh.toolTipText")); // NOI18N
+        cmdRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/refresh.png"))); // NOI18N
+        cmdRefresh.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdRefresh.toolTipText")); // NOI18N
         cmdRefresh.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cmdRefreshActionPerformed(evt);
             }
         });
-
         jToolBar1.add(cmdRefresh);
 
         jPanel1.add(jToolBar1, java.awt.BorderLayout.CENTER);
@@ -426,7 +420,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         tbpCapabilities.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
         tbpCapabilities.setPreferredSize(new java.awt.Dimension(180, 400));
         add(tbpCapabilities, java.awt.BorderLayout.CENTER);
-
     }// </editor-fold>//GEN-END:initComponents
     private void cmdAddFromListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
@@ -442,8 +435,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
     }//GEN-LAST:event_cmdRefreshActionPerformed
 
     private void cmdAddByUrlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
-        String input = JOptionPane.showInputDialog(this, ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Bitte_geben_Sie_den_Link_zum_Server_ein."),
-                ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Url_eingeben"), JOptionPane.INFORMATION_MESSAGE);
+        String input = JOptionPane.showInputDialog(this, 
+                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdAddByUrlActionPerformed().JOptionPane.message"),//NOI18N
+                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdAddByUrlActionPerformed().JOptionPane.title"),//NOI18N
+                JOptionPane.INFORMATION_MESSAGE);
         if (input != null) {
             processUrl(input, null, true);
         }
@@ -459,27 +454,27 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
     private void removeActiveCapabilityTree() {
         JTree active = getActiveTree();
         if (active != null) {
-            log.debug("active = " + active);
+            log.debug("active = " + active);//NOI18N
             //ToDo wenn das hier nur bei einem aktivierten Tree gemacht wird kann der link nicht mehr hinzugefügt werden
             LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             capabilityUrls.remove(link);
             capabilityUrlsReverse.remove(tbpCapabilities.getSelectedComponent());
             if (wmsCapabilities.get(tbpCapabilities.getSelectedComponent()) != null) {
-                log.debug("Entferne WMSCapabilities-Tree");
+                log.debug("Entferne WMSCapabilities-Tree");//NOI18N
                 wmsCapabilities.remove(tbpCapabilities.getSelectedComponent());
                 wmsCapabilitiesTrees.remove(tbpCapabilities.getSelectedComponent());
                 tbpCapabilities.remove(tbpCapabilities.indexOfComponent(tbpCapabilities.getSelectedComponent()));
             } else if (wfsCapabilities.get(tbpCapabilities.getSelectedComponent()) != null) {
-                log.debug("Entferne WFSCapabilities-Tree");
+                log.debug("Entferne WFSCapabilities-Tree");//NOI18N
                 wfsCapabilities.remove(tbpCapabilities.getSelectedComponent());
                 wfsCapabilitiesTrees.remove(tbpCapabilities.getSelectedComponent());
                 wfsPostUrls.remove(tbpCapabilities.getSelectedComponent());
                 tbpCapabilities.remove(tbpCapabilities.indexOfComponent(tbpCapabilities.getSelectedComponent()));
             } else {
-                log.warn("Keine Component zum entfernen aktiv");
+                log.warn("Keine Component zum entfernen aktiv");//NOI18N
             }
         } else {
-            log.debug("kein Baum aktiv, entferne selektierten Reiter");
+            log.debug("kein Baum aktiv, entferne selektierten Reiter");//NOI18N
             if (tbpCapabilities.getSelectedComponent() != null) {
                 wmsCapabilities.remove(tbpCapabilities.getSelectedComponent());
                 wfsCapabilities.remove(tbpCapabilities.getSelectedComponent());
@@ -530,14 +525,14 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
      */
     public static void main(String args[]) {
         try {
-            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource("/de/cismet/cismap/commons/demo/log4j.properties"));
+            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource("/de/cismet/cismap/commons/demo/log4j.properties"));//NOI18N
         } catch (Exception e) {
             e.printStackTrace();
         }
         try {
             UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
         } catch (Exception e) {
-            log.warn(ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Fehler_beim_Einstellen_des_Look_Feels_s"), e);
+            log.warn("Error while setting LookAndFeel", e);//NOI18N
         }
         EventQueue.invokeLater(new Runnable() {
 
@@ -594,20 +589,20 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     e.g. if dragging from MS Word 97 to Java
                     still a bug in 1.2 final
                      */
-                    System.err.println("cannot read" + ioe);
+                    System.err.println("cannot read" + ioe);//NOI18N
                     dtde.dropComplete(false);
-                    String message = "Bad drop\n" + ioe.getMessage();
+                    String message = org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.getLink(DropTargetDropEvent).message", new Object[] {ioe.getMessage()});//NOI18N
                     JOptionPane.showMessageDialog(this,
                             message,
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE); //NOI18N
+                            org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.getLink(DropTargetDropEvent).title"),//NOI18N
+                            JOptionPane.ERROR_MESSAGE);
 
                     return null;
                 }
             }
             //Wir gehen davon aus, dass der Link Title immer in der 2ten Zeile steht
             try {
-                link = link.substring(0, link.indexOf("\n"));
+                link = link.substring(0, link.indexOf("\n"));//NOI18N
             } catch (Exception e) {
             }
             return link;
@@ -629,9 +624,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         JPanel panFillTop = new JPanel();
         JPanel panFillBottom = new JPanel();
         panLoad.setLayout(new GridBagLayout());
-        panLoad.putClientProperty("tabTitle", tabTitle);
+        panLoad.putClientProperty("tabTitle", tabTitle);//NOI18N
         lblWorld.setHorizontalAlignment(SwingConstants.CENTER);
-        lblWorld.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/load.png")));
+        lblWorld.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/load.png")));//NOI18N
         lblWorld.setVerticalAlignment(SwingConstants.TOP);
         GridBagConstraints gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -639,7 +634,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         panLoad.add(lblWorld, gridBagConstraints);
 
-        lblLoading.setText(ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.loading"));
+        lblLoading.setText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.lblLoading.text"));//NOI18N
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -690,7 +685,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
      * @param interactive true, falls per Drag&Drop, sonst false
      */
     private void addOGCWMSCapabilitiesTree(final String link, final JComponent comp, final boolean interactive, final String subparent) {
-        log.debug("addOGCWMSCapabilitiesTree()");
+        log.debug("addOGCWMSCapabilitiesTree()");//NOI18N
         Runnable t = new Runnable() {
 
             @Override
@@ -700,10 +695,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     URL getCapURL = new URL(link);
                     OGCWMSCapabilitiesFactory capFact = new OGCWMSCapabilitiesFactory();
                     CismapBroker broker = CismapBroker.getInstance();
-                    log.debug("Capability Widget: Creating WMScapabilities for URL: " + getCapURL.toString());
+                    log.debug("Capability Widget: Creating WMScapabilities for URL: " + getCapURL.toString());//NOI18N
                     //final WMSCapabilities cap = capFact.createCapabilities(HttpAuthentication.getInputStreamReaderFromURL(CapabilityWidget.this, getCapURL));
                     final WMSCapabilities cap = capFact.createCapabilities(new InputStreamReader(WebAccessManager.getInstance().doRequest(getCapURL)));
-                    log.debug("finished creating Capabilties");
+                    log.debug("finished creating Capabilties");//NOI18N
                     //TODO for WFS
                     //ToDo funktionalität abgeschaltet steckt zur zeit in CismetGUICommons --> refactoring
 //                    broker.addHttpCredentialProviderCapabilities(cap, broker.getHttpCredentialProviderURL(getCapURL));
@@ -739,9 +734,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                             String titleOrig = title;
                             if (title.length() > 0) {
                                 if (title.length() > maxServerNameLength) {
-                                    title = title.substring(0, maxServerNameLength - 3) + "...";
+                                    title = title.substring(0, maxServerNameLength - 3) + "...";//NOI18N
                                 }
-                                sPane.putClientProperty("tabTitle", title);
+                                sPane.putClientProperty("tabTitle", title);//NOI18N
                                 synchronized (this) {
                                     StaticSwingTools.jTabbedPaneWithVerticalTextSetNewText(tbpCapabilities, title, icoConnected, Color.black, sPane);
                                 }
@@ -753,24 +748,25 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                         }
                     });
                 } catch (Exception e) {
-                    log.error("Fehler währened dem erstellen des WMSCapabilties Baums", e);
-                    String message = "";
+                    log.error("Fehler währened dem erstellen des WMSCapabilties Baums", e);//NOI18N
+                    String message = "";//NOI18N
 
                     tbpCapabilities.setIconAt(tbpCapabilities.indexOfComponent(comp), icoError);
-                    if (e instanceof RequestFailedException || e.getMessage() == null || e.getMessage().equals("null")) {
+                    if (e instanceof RequestFailedException || e.getMessage() == null || e.getMessage().equals("null")) {//NOI18N
                         message = e.getCause().getMessage();
                     } else {
                         message = e.getMessage();
                     }
 
                     if (interactive) {
+
                         JOptionPane.showMessageDialog(thisWidget,
-                                ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Fehler_beim_Laden_der_Capabilities_des_Servers") + message,
-                                ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Error"),
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWMSCapabilitiesTree.JOptionPane.message", new Object[] {message}),//NOI18N
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWMSCapabilitiesTree.JOptionPane.title"),//NOI18N
                                 JOptionPane.ERROR_MESSAGE);
                     }
                     //TODO: Error \u00FCber die Statuszeile bekanntgeben
-                    log.error(ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Fehler_beim_Laden_der_Capabilities_des_Servers_log") + message, e);
+                    log.error("Error while loading server capabilities: " + message, e);//NOI18N
                     tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
 
                     JComponent jc = capabilityUrls.get(link);
@@ -783,7 +779,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
     }
 
     public void addOGCCapabilitiesTree(final String link, final JComponent comp, final boolean interactive) {
-        log.debug("addOGCCapabilitiesTree()");
+        log.debug("addOGCCapabilitiesTree()");//NOI18N
         Runnable r = new Runnable() {
 
             @Override
@@ -823,10 +819,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     AccessHandler handler = WebAccessManager.getInstance().getHandlerForURL(finalPostUrl);
                     final String securedServiceType = ((WSSAccessHandler) handler).getSecuredServiceTypeForURL(finalPostUrl);
                     if (securedServiceType != null) {
-                        log.debug("SecuredServiceType des WSS konnte bestimmt werden: " + securedServiceType);
+                        log.debug("SecuredServiceType des WSS konnte bestimmt werden: " + securedServiceType);//NOI18N
                         if (securedServiceType.equals(WSSAccessHandler.SECURED_SERVICE_TYPE.WFS.toString())) {
-                            log.debug("Gesicheter Service ist ein: " + WSSAccessHandler.SECURED_SERVICE_TYPE.WFS);
-                            log.debug("Capability Widget: Creating WFScapabilities for URL: " + finalPostUrl.toString());
+                            log.debug("Gesicheter Service ist ein: " + WSSAccessHandler.SECURED_SERVICE_TYPE.WFS);//NOI18N
+                            log.debug("Capability Widget: Creating WFScapabilities for URL: " + finalPostUrl.toString());//NOI18N
 
 //                            InputStream result = WebAccessManager.getInstance().doRequest(finalPostUrl, new StringReader("?REQUEST=GetCapabilities&service=WFS"), AccessHandler.ACCESS_METHODS.GET_REQUEST);
 //                            final WFSOperator op = new WFSOperator();
@@ -842,53 +838,53 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                             capTreeModel.setServiceName(name);
                             //((WFSCapabilitiesTreeModel) capTreeModel).setFeatureTypes(op.getElements(finalPostUrl, capWFS.getFeatureTypeList()));
                         } else if (securedServiceType.equals(WSSAccessHandler.SECURED_SERVICE_TYPE.WMS.toString())) {
-                            log.debug("Gesicheter Service ist ein: " + WSSAccessHandler.SECURED_SERVICE_TYPE.WMS);
+                            log.debug("Gesicheter Service ist ein: " + WSSAccessHandler.SECURED_SERVICE_TYPE.WMS);//NOI18N
                             try {
                                 OGCWMSCapabilitiesFactory capFact = new OGCWMSCapabilitiesFactory();
-                                log.debug("Capability Widget: Creating WMScapabilities for URL: " + finalPostUrl.toString());
-                                InputStream result = WebAccessManager.getInstance().doRequest(finalPostUrl, new StringReader("REQUEST=GetCapabilities&service=WMS"), AccessHandler.ACCESS_METHODS.GET_REQUEST);
-                                log.debug("WMS Capabilties erstellt");
+                                log.debug("Capability Widget: Creating WMScapabilities for URL: " + finalPostUrl.toString());//NOI18N
+                                InputStream result = WebAccessManager.getInstance().doRequest(finalPostUrl, new StringReader("REQUEST=GetCapabilities&service=WMS"), AccessHandler.ACCESS_METHODS.GET_REQUEST);//NOI18N
+                                log.debug("WMS Capabilties erstellt");//NOI18N
                                 //ToDO Langsam
                                 final WMSCapabilities capWMS = capFact.createCapabilities(new BufferedReader(new InputStreamReader(result)));
-                                log.debug("Erstelle WMSCapabilitiesTreeModel");
+                                log.debug("Erstelle WMSCapabilitiesTreeModel");//NOI18N
                                 capTreeModel = new WMSCapabilitiesTreeModel(capWMS);
                                 capTreeModel.setServiceName(capWMS.getCapability().getLayer().getTitle().trim());
                             } catch (Exception ex) {
-                                log.error("Exception during doRequest cause: ", ex);
+                                log.error("Exception during doRequest cause: ", ex);//NOI18N
                                 return;
                             }
                         } else {
-                            log.debug("Gesicherter Service ist von unbekanntem Typ.");
+                            log.debug("Gesicherter Service ist von unbekanntem Typ.");//NOI18N
                             return;
                         }
                     } else {
-                        log.warn("SecuredServiceType des WSS konnte nicht bestimmt werden");
+                        log.warn("SecuredServiceType des WSS konnte nicht bestimmt werden");//NOI18N
                         return;
                     }
 
                     // ToDo Listener oder sonstwas damit das retrieval auch abgebrochen wird
                     if (tbpCapabilities.indexOfComponent(comp) == -1) {
-                        log.info("Ladepanel ist nicht mehr in TabbedPane --> retrieval wird abgebrochen");
+                        log.info("Ladepanel ist nicht mehr in TabbedPane --> retrieval wird abgebrochen");//NOI18N
                         LinkWithSubparent link = capabilityUrlsReverse.get(comp);
                         capabilityUrls.remove(link);
                         capabilityUrlsReverse.remove(comp);
                         if (wmsCapabilities.get(comp) != null) {
-                            log.debug("Entferne WMSCapabilities-Tree");
+                            log.debug("Entferne WMSCapabilities-Tree");//NOI18N
                             wmsCapabilities.remove(comp);
                             wmsCapabilitiesTrees.remove(comp);
                             tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
                         } else if (wfsCapabilities.get(comp) != null) {
-                            log.debug("Entferne WFSCapabilities-Tree");
+                            log.debug("Entferne WFSCapabilities-Tree");//NOI18N
                             wfsCapabilities.remove(comp);
                             wfsCapabilitiesTrees.remove(comp);
                             wfsPostUrls.remove(comp);
                             tbpCapabilities.remove(comp);
                         } else {
-                            log.warn("Keine Component zum entfernen aktiv");
+                            log.warn("Keine Component zum entfernen aktiv");//NOI18N
                         }
                         return;
                     } else {
-                        log.debug("Capabilitespanel noch vorhanden --> stelle baum dar");
+                        log.debug("Capabilitespanel noch vorhanden --> stelle baum dar");//NOI18N
                     }
                     EventQueue.invokeLater(new Runnable() {
 
@@ -897,7 +893,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                             //ToDO subparent
 
                             String name = capTreeModel.getServiceName();
-                            log.debug("ServiceName: " + name);
+                            log.debug("ServiceName: " + name);//NOI18N
                             trvCap.setModel(capTreeModel);
 
                             trvCap.setBorder(new EmptyBorder(
@@ -912,14 +908,14 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                             }
                             //ToDo generalize --> getCapabilities of AbstractCapabilitiesTreeModel
                             if (capTreeModel instanceof WMSCapabilitiesTreeModel) {
-                                log.debug("WMSTree");
+                                log.debug("WMSTree");//NOI18N
                                 wmsCapabilities.put(sPane, ((WMSCapabilitiesTreeModel) capTreeModel).getCapabilities());
                                 wmsCapabilitiesTrees.put(sPane, trvCap);
                                 trvCap.setWmsCapabilities(((WMSCapabilitiesTreeModel) capTreeModel).getCapabilities());
                                 trvCap.setCellRenderer(new WMSCapabilitiesTreeCellRenderer());
                                 stateChanged(null);
                             } else if (capTreeModel instanceof WFSCapabilitiesTreeModel) {
-                                log.debug("WFSTree");
+                                log.debug("WFSTree");//NOI18N
                                 wfsCapabilities.put(sPane, ((WFSCapabilitiesTreeModel) capTreeModel).getCapabilities());
                                 wfsCapabilitiesTrees.put(sPane, trvCap);
                                 wfsPostUrls.put(sPane, finalPostUrl);
@@ -938,9 +934,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                             if (title.length() >
                                     0) {
                                 if (title.length() > maxServerNameLength) {
-                                    title = title.substring(0, maxServerNameLength - 3) + "...";
+                                    title = title.substring(0, maxServerNameLength - 3) + "...";//NOI18N
                                 }
-                                sPane.putClientProperty("tabTitle", title);
+                                sPane.putClientProperty("tabTitle", title);//NOI18N
                                 synchronized (this) {
                                     StaticSwingTools.jTabbedPaneWithVerticalTextSetNewText(tbpCapabilities, title, icoConnected, Color.black, sPane);
                                 }
@@ -952,10 +948,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                         }
                     });
                 } catch (Exception e) {
-                    String message = "";
+                    String message = "";//NOI18N
 
                     tbpCapabilities.setIconAt(tbpCapabilities.indexOfComponent(comp), icoError);
-                    if (e.getMessage() == null || e.getMessage().equals("null")) {
+                    if (e.getMessage() == null || e.getMessage().equals("null")) {//NOI18N
                         message = e.getCause().getMessage();
                     } else {
                         message = e.getMessage();
@@ -963,11 +959,11 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
                     if (interactive) {
                         JOptionPane.showMessageDialog(thisWidget,
-                                ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Fehler_beim_Laden_der_Capabilities_des_Servers") + " " + message,
-                                ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Error"),
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCCapabilitiesTree(String,JComponent,boolean).JOptionPane.message", new Object[] {message}),//NOI18N
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCCapabilitiesTree(String,JComponent,boolean).JOptionPane.title"),//NOI18N
                                 JOptionPane.ERROR_MESSAGE);
                     }
-                    log.error(ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Fehler_beim_Laden_der_Capabilities_des_Servers_log") + " " + message, e);
+                    log.error("Error during the loading of the capabilities of the server. " + message, e);//NOI18N
                     tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
 
                     JComponent jc = capabilityUrls.get(link);
@@ -990,7 +986,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
     private void addOGCWFSCapabilitiesTree(final String link,
             final JComponent comp,
             final boolean interactive) {
-        log.debug("addOGCWFSCapabilitiesTree()");
+        log.debug("addOGCWFSCapabilitiesTree()");//NOI18N
         Runnable t = new Runnable() {
 
             @Override
@@ -1002,7 +998,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     URL postURL;
 
 // WFSCapabilities aus dem \u00FCbergebenen Link (liefert XML-Dok) parsen
-                    log.debug("Versuche WFSCapabilities zu parsen");
+                    log.debug("try to parse WFSCapabilities");//NOI18N
                     if (link.indexOf('?') > 0) {
                         postURL = new URL(link.substring(0, link.indexOf('?')));
                     } else {
@@ -1016,7 +1012,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     final String name = FeatureServiceUtilities.getServiceName(wfsDoc);
 
                     // Hashmap mit den FeatureLayer-Attributen erzeugen
-                    log.debug("Erzeuge WFSCapabilitiesTreeModel");
+                    log.debug("create WFSCapabilitiesTreeModel");//NOI18N
                     final WFSCapabilitiesTreeModel tm = new WFSCapabilitiesTreeModel(cap, utilities.getElementDeclarations(postURL, cap.getFeatureTypeList()));
 
                     // Den WFSTree als DropTarget spezifizieren
@@ -1046,10 +1042,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                             String titleOrig = title;
                             if (title.length() > 0) {
                                 if (title.length() > maxServerNameLength) {
-                                    title = title.substring(0, maxServerNameLength - 3) + "...";
+                                    title = title.substring(0, maxServerNameLength - 3) + "...";//NOI18N
                                 }
 
-                                sPane.putClientProperty("tabTitle", title);
+                                sPane.putClientProperty("tabTitle", title);//NOI18N
                                 synchronized (this) {
                                     StaticSwingTools.jTabbedPaneWithVerticalTextSetNewText(tbpCapabilities, title, icoConnected, Color.black, sPane);
                                 }
@@ -1064,10 +1060,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                         }
                     });
                 } catch (Exception e) {
-                    String message = "";
+                    String message = "";//NOI18N
 
                     tbpCapabilities.setIconAt(tbpCapabilities.indexOfComponent(comp), icoError);
-                    if (e.getMessage() == null || e.getMessage().equals("null")) {
+                    if (e.getMessage() == null || e.getMessage().equals("null")) {//NOI18N
                         message = e.getCause().getMessage();
                     } else {
                         message = e.getMessage();
@@ -1075,12 +1071,12 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
                     if (interactive) {
                         JOptionPane.showMessageDialog(thisWidget,
-                                ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Fehler_beim_Laden_der_Capabilities_des_Servers") + " " + message,
-                                ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Error"),
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWFSCapabilitiesTree(String,JComponent,boolean).JOptionPane.message", new Object[] {message}),//NOI18N
+                                org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.addOGCWFSCapabilitiesTree(String,JComponent,boolean).JOptionPane.title"),//NOI18N
                                 JOptionPane.ERROR_MESSAGE);
                     }
 
-                    log.error(ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("CapabilityWidget.Fehler_beim_Laden_der_Capabilities_des_Servers_log") + " " + message, e);
+                    log.error("Loading of the server capabilities failed. " + message, e);//NOI18N
                     tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
 
                     JComponent jc = capabilityUrls.get(link);
@@ -1105,9 +1101,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                 String t;
 
                 t =
-                        (String) ((JComponent) tbpCapabilities.getComponentAt(selectedIndex)).getClientProperty("tabTitle");
+                        (String) ((JComponent) tbpCapabilities.getComponentAt(selectedIndex)).getClientProperty("tabTitle");//NOI18N
                 if (t == null) {
-                    t = "";
+                    t = "";//NOI18N
                 }
 
                 StaticSwingTools.jTabbedPaneWithVerticalTextSetNewText(tbpCapabilities, t, icoConnected, Color.black, (JComponent) tbpCapabilities.getComponentAt(selectedIndex));
@@ -1117,9 +1113,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         }
         selectedIndex = tbpCapabilities.getSelectedIndex();
         if (selectedIndex > -1) {
-            String t = (String) ((JComponent) tbpCapabilities.getComponentAt(selectedIndex)).getClientProperty("tabTitle");
+            String t = (String) ((JComponent) tbpCapabilities.getComponentAt(selectedIndex)).getClientProperty("tabTitle");//NOI18N
             if (t == null) {
-                t = "";
+                t = "";//NOI18N
             }
 
             tbpCapabilities.setForegroundAt(selectedIndex, Color.blue);
@@ -1131,8 +1127,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         } else if (wfsCapabilities.get(tbpCapabilities.getSelectedComponent()) != null) {
             CismapBroker.getInstance().fireCapabilityServerChanged(new CapabilityEvent(wfsCapabilities.get(tbpCapabilities.getSelectedComponent())));
         } else {
-            log.debug(wmsCapabilities);
-            log.debug(wfsCapabilities);
+            log.debug(wmsCapabilities);//NOI18N
+            log.debug(wfsCapabilities);//NOI18N
         }
 
     }
@@ -1150,7 +1146,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
      */
     public Element getConfiguration() {
         //TODO Im Moment gibts nur OGC-WMS Links. Da faul ....
-        Element ret = new Element("cismapCapabilitiesPreferences");
+        Element ret = new Element("cismapCapabilitiesPreferences");//NOI18N
         {
 
             Set wmsCapabilitiesSet = capabilityUrls.keySet();
@@ -1234,7 +1230,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         // CapabilityLink-Einträge erzeugen
         for (final CapabilityLink cl : node.getCapabilitiesList().values()) {
             if (cl.getType().equals(CapabilityLink.OGC) || cl.getType().equals(CapabilityLink.OGC_DEPRECATED)) {
-                ListMenuItem lmi = new ListMenuItem("test", cl);
+                ListMenuItem lmi = new ListMenuItem("test", cl);//NOI18N
                 lmi.addActionListener(new ActionListener() {
 
                     @Override
@@ -1271,7 +1267,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
      * @param cl
      */
     private void addSubmenuToMenu(final CapabilityLink cl) {
-        ListMenuItem lmi = new ListMenuItem("test", cl);
+        ListMenuItem lmi = new ListMenuItem("test", cl);//NOI18N
         lmi.addActionListener(new ActionListener() {
 
             public void actionPerformed(
@@ -1350,7 +1346,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     } else {
                         if (getSelectionPath() != null) {
                           //FIXME: WTF? Warum wan?
-                          log.warn("getSelectionPath().getLastPathComponent()=" + getSelectionPath().getLastPathComponent());
+                          log.warn("getSelectionPath().getLastPathComponent()=" + getSelectionPath().getLastPathComponent());//NOI18N
                         }
                     }
                 }
@@ -1380,7 +1376,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                 trans = new DefaultTransferable(new SelectionAndCapabilities(getSelectionModel().getSelectionPaths(), wmsCapabilities, capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent()).getLink()));
             } else if (this.getModel() instanceof WFSCapabilitiesTreeModel) {
                 WFSCapabilitiesTreeModel model = (WFSCapabilitiesTreeModel) this.getModel();
-                log.debug("Erstelle Transferable f\u00FCr WFS");
+                log.debug("create Transferable for WFS");//NOI18N
                 // TODO ein Transferable zum Testen erstellen
                 if (getSelectionModel().getSelectionPath().getLastPathComponent() instanceof ElementDeclaration) {
                     ElementDeclaration element = (ElementDeclaration) getSelectionModel().getSelectionPath().getLastPathComponent();
@@ -1397,7 +1393,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                             element.getName().getAsString(),
                             wfsPostUrls.get(tbpCapabilities.getSelectedComponent()).toString(),
                             utilities.getQuery(),
-                            "",
+                            "",//NOI18N
                             model.getChildren(element)));
                 }
             }
@@ -1435,7 +1431,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
      */
     class DefaultTransferable implements Transferable {
 
-        private DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SelectionAndCapabilities");
+        private DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SelectionAndCapabilities");//NOI18N
         private Object o;
 
         public DefaultTransferable(Object o) {

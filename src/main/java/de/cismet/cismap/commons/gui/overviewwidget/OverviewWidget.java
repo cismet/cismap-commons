@@ -28,12 +28,12 @@ public class OverviewWidget extends PCanvas {
     PLayer highlightingLayer=new PLayer();
      public OverviewWidget(final MappingComponent mapC) {
         super();
-       log.debug("Start");
+       log.debug("Start");//NOI18N
        setBackground(Color.YELLOW);
        setPreferredSize(new Dimension(100,100));
         try {
             getLayer().addChild(highlightingLayer);
-            getLayer().addChild(new PText("Start"));
+            getLayer().addChild(new PText("Start"));//NOI18N
             
         
 //        PBounds pb = new BoundingBox(2568580.612400579, 2568580.612400579, 2568580.612400579, 5687929.518337978).getPBounds(mapC.getWtst());

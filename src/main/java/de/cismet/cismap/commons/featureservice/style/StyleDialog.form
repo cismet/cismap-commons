@@ -29,7 +29,9 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/de/cismet/cismap/commons/featureservice/res/rule_add.png"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="neu"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.cmdAdd.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 5, 2, 5]"/>
                 </Property>
@@ -40,7 +42,9 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/de/cismet/cismap/commons/featureservice/res/rule_remove.png"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="l&#xf6;schen"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.cmdRemove.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
                 <Property name="margin" type="java.awt.Insets" editor="org.netbeans.beaninfo.editors.InsetsEditor">
                   <Insets value="[2, 5, 2, 5]"/>
                 </Property>
@@ -168,7 +172,9 @@
           <SubComponents>
             <Component class="javax.swing.JCheckBox" name="chkLinewrap">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Zeilenumbruch"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.chkLinewrap.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkLinewrapActionPerformed"/>
@@ -176,8 +182,13 @@
             </Component>
             <Component class="javax.swing.JCheckBox" name="chkUseQueryString">
               <Properties>
-                <Property name="text" type="java.lang.String" value="benutze dieses Benutzer-Query"/>
+                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.chkUseQueryString.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkUseQueryStringActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
@@ -185,7 +196,9 @@
     </Container>
   </NonVisualComponents>
   <Properties>
-    <Property name="title" type="java.lang.String" value="Style anpassen"/>
+    <Property name="title" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+      <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+    </Property>
     <Property name="locationByPlatform" type="boolean" value="true"/>
     <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
       <Dimension value="[685, 461]"/>
@@ -287,7 +300,9 @@
                     <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                       <ComponentRef name="jLabel1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="&lt;html&gt;Dieser Dialog dient der&lt;br&gt;Anpassung der visuellen&lt;br&gt;Gestaltung des WFS-Layers&lt;/html&gt;"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.jLabel2.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                    </Property>
                     <Property name="verticalAlignment" type="int" value="1"/>
                   </Properties>
                   <Constraints>
@@ -357,7 +372,7 @@
                         </DimensionLayout>
                         <DimensionLayout dim="1">
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <EmptySpace min="0" pref="187" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="184" max="32767" attributes="0"/>
                           </Group>
                         </DimensionLayout>
                       </Layout>
@@ -369,7 +384,9 @@
                     <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                       <ComponentRef name="panPreview"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Vorschau:"/>
+                    <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                      <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblPreview.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                    </Property>
                   </Properties>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -398,6 +415,11 @@
           <Layout class="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout"/>
           <SubComponents>
             <Container class="javax.swing.JTabbedPane" name="tbpTabs">
+              <AccessibilityProperties>
+                <Property name="AccessibleContext.accessibleName" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.tbpTabs.tab1.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                </Property>
+              </AccessibilityProperties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout" value="org.netbeans.modules.form.compat2.layouts.DesignBorderLayout$BorderConstraintsDescription">
                   <BorderConstraints direction="Center"/>
@@ -409,8 +431,10 @@
                 <Container class="javax.swing.JPanel" name="panTabFill">
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-                      <JTabbedPaneConstraints tabName="F&#xfc;llung &amp; Linien">
-                        <Property name="tabTitle" type="java.lang.String" value="F&#xfc;llung &amp; Linien"/>
+                      <JTabbedPaneConstraints tabName="Filling &amp; lines">
+                        <Property name="tabTitle" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                          <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.tbpTabs.tab1.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                        </Property>
                         <Property name="tabIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                           <Image iconType="3" name="/de/cismet/cismap/commons/featureservice/res/style_color.png"/>
                         </Property>
@@ -439,7 +463,9 @@
                         <Component class="javax.swing.JCheckBox" name="chkFill">
                           <Properties>
                             <Property name="selected" type="boolean" value="true"/>
-                            <Property name="text" type="java.lang.String" value="F&#xfc;llung:"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.chkFill.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Events>
                             <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="chkFillItemStateChanged"/>
@@ -453,7 +479,9 @@
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="chkFillPattern">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="F&#xfc;llmuster:"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.chkFillPattern.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
                           <Events>
@@ -488,7 +516,9 @@
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="chkLine">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Linie:"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.chkLine.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Events>
                             <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="chkLineItemStateChanged"/>
@@ -501,7 +531,9 @@
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="chkLinePattern">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Linienmuster:"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.chkLinePattern.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
                           <Events>
@@ -536,7 +568,9 @@
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="chkSync">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Linien- an F&#xfc;llfarbe angleichen"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.chkLineSync.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Events>
                             <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="chkSyncItemStateChanged"/>
@@ -549,7 +583,9 @@
                         </Component>
                         <Component class="javax.swing.JCheckBox" name="chkHighlightable">
                           <Properties>
-                            <Property name="text" type="java.lang.String" value="Geometrie unter der Maus hervorheben"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.chkHighlightable.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Events>
                             <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="chkHighlightableItemStateChanged"/>
@@ -566,7 +602,9 @@
                             <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                               <ComponentRef name="sldLineWidth"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Liniendicke (px):"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblLineWidth.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -626,7 +664,9 @@
                             <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                               <ComponentRef name="jPanel7"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Alpha (%):"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblAlpha.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -942,7 +982,9 @@
                             <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                               <ComponentRef name="cbbPointSymbol"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Punktsymbol:"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblPointSymbol.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -981,7 +1023,9 @@
                             <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                               <ComponentRef name="sldPointSymbolSize"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Punktsymbolgr&#xf6;&#xdf;e:"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblPointSymbolSize.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -1048,8 +1092,10 @@
                 <Container class="javax.swing.JPanel" name="panTabLabeling">
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-                      <JTabbedPaneConstraints tabName="Beschriftung">
-                        <Property name="tabTitle" type="java.lang.String" value="Beschriftung"/>
+                      <JTabbedPaneConstraints tabName="Labelling">
+                        <Property name="tabTitle" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                          <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.tbpTabs.tab2.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                        </Property>
                         <Property name="tabIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                           <Image iconType="3" name="/de/cismet/cismap/commons/featureservice/res/labelling.png"/>
                         </Property>
@@ -1070,7 +1116,9 @@
                         <Component class="javax.swing.JCheckBox" name="chkActivateLabels">
                           <Properties>
                             <Property name="selected" type="boolean" value="true"/>
-                            <Property name="text" type="java.lang.String" value="Labels anschalten"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.chkActivateLabels.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Events>
                             <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="chkActivateLabelsItemStateChanged"/>
@@ -1086,7 +1134,9 @@
                             <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                               <ComponentRef name="cbbAnnotationExpression"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Label-Attribut:"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblAttrib.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -1114,7 +1164,9 @@
                           <Properties>
                             <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
                               <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                                <TitledBorder title="Schriftdetails"/>
+                                <TitledBorder title="font details">
+                                  <ResourceString PropertyName="titleX" bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.panLabelButtons.border.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                                </TitledBorder>
                               </Border>
                             </Property>
                           </Properties>
@@ -1128,7 +1180,9 @@
                           <SubComponents>
                             <Component class="javax.swing.JButton" name="cmdChangeColor">
                               <Properties>
-                                <Property name="text" type="java.lang.String" value="Farbe wechseln"/>
+                                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.cmdChangeColor.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                                </Property>
                               </Properties>
                               <Events>
                                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdChangeColorActionPerformed"/>
@@ -1141,7 +1195,9 @@
                             </Component>
                             <Component class="javax.swing.JButton" name="cmdChangeFont">
                               <Properties>
-                                <Property name="text" type="java.lang.String" value="Schrift wechseln"/>
+                                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.cmdChangeFont.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                                </Property>
                               </Properties>
                               <Events>
                                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmdChangeFontActionPerformed"/>
@@ -1215,7 +1271,9 @@
                                 <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                                   <ComponentRef name="txtMin"/>
                                 </Property>
-                                <Property name="text" type="java.lang.String" value="Sichtbar von 1:"/>
+                                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblMin.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                                </Property>
                               </Properties>
                             </Component>
                             <Component class="javax.swing.JFormattedTextField" name="txtMin">
@@ -1237,7 +1295,9 @@
                                 <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                                   <ComponentRef name="txtMax"/>
                                 </Property>
-                                <Property name="text" type="java.lang.String" value="bis 1:"/>
+                                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblMax.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                                </Property>
                               </Properties>
                             </Component>
                             <Component class="javax.swing.JFormattedTextField" name="txtMax">
@@ -1259,7 +1319,9 @@
                         <Component class="javax.swing.JCheckBox" name="chkAutoscale">
                           <Properties>
                             <Property name="selected" type="boolean" value="true"/>
-                            <Property name="text" type="java.lang.String" value="Gr&#xf6;&#xdf;e der Skalierung anpassen"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.chkAutoscale.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Events>
                             <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="chkAutoscaleItemStateChanged"/>
@@ -1288,7 +1350,9 @@
                                   <ComponentRef name="btgAlignment"/>
                                 </Property>
                                 <Property name="selected" type="boolean" value="true"/>
-                                <Property name="text" type="java.lang.String" value="links"/>
+                                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.radleft.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                                </Property>
                               </Properties>
                               <Events>
                                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="radLeftActionPerformed"/>
@@ -1299,7 +1363,9 @@
                                 <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                                   <ComponentRef name="btgAlignment"/>
                                 </Property>
-                                <Property name="text" type="java.lang.String" value="zentriert"/>
+                                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.radCenter.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                                </Property>
                               </Properties>
                               <Events>
                                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="radCenterActionPerformed"/>
@@ -1310,7 +1376,9 @@
                                 <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
                                   <ComponentRef name="btgAlignment"/>
                                 </Property>
-                                <Property name="text" type="java.lang.String" value="rechts"/>
+                                <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                                  <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.radRight.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                                </Property>
                               </Properties>
                               <Events>
                                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="radRightActionPerformed"/>
@@ -1323,7 +1391,9 @@
                             <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                               <ComponentRef name="panAlignment"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Ausrichtung"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblAlignment.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -1336,7 +1406,9 @@
                             <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                               <ComponentRef name="txtMultiplier"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Gr&#xf6;&#xdf;enmultiplikator"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblMultiplier.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -1376,7 +1448,9 @@
                             <EmptyBorder bottom="10" left="10" right="10" top="10"/>
                           </Border>
                           <Border PropertyName="inside" info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-                            <TitledBorder title="Abzufragende Attribute ausw&#xe4;hlen"/>
+                            <TitledBorder title="Choose query attributes">
+                              <ResourceString PropertyName="titleX" bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.panTabAttrib.border.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </TitledBorder>
                           </Border>
                         </CompoundBorder>
                       </Border>
@@ -1387,8 +1461,10 @@
                   </AccessibilityProperties>
                   <Constraints>
                     <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-                      <JTabbedPaneConstraints tabName="Attribute">
-                        <Property name="tabTitle" type="java.lang.String" value="Attribute"/>
+                      <JTabbedPaneConstraints tabName="Attributes">
+                        <Property name="tabTitle" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                          <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.tbpTabs.tab3.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                        </Property>
                         <Property name="tabIcon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                           <Image iconType="3" name="/de/cismet/cismap/commons/featureservice/res/attributes.png"/>
                         </Property>
@@ -1449,7 +1525,9 @@
                             <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
                               <ComponentRef name="cbbIdExpression"/>
                             </Property>
-                            <Property name="text" type="java.lang.String" value="Prim&#xe4;rschl&#xfc;ssel"/>
+                            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+                              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.lblPrimary.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+                            </Property>
                           </Properties>
                           <Constraints>
                             <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -1504,7 +1582,9 @@
       <SubComponents>
         <Component class="javax.swing.JButton" name="cmdOK">
           <Properties>
-            <Property name="text" type="java.lang.String" value="OK"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.cmdIOK.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+            </Property>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[88, 23]"/>
             </Property>
@@ -1521,7 +1601,9 @@
         </Component>
         <Component class="javax.swing.JButton" name="cmdCancel">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Abbrechen"/>
+            <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+              <ResourceString bundle="de/cismet/cismap/commons/featureservice/style/Bundle.properties" key="StyleDialog.cmdCancel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+            </Property>
             <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[88, 23]"/>
             </Property>

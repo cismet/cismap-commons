@@ -20,7 +20,7 @@ import javax.swing.JPopupMenu;
  */
 public class SimpleSingleSelectionListener extends PBasicInputEventHandler {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION";
+    public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION";//NOI18N
     PFeature sel = null;
     private int clickCount = 0;
     MappingComponent mc = null;
@@ -28,19 +28,19 @@ public class SimpleSingleSelectionListener extends PBasicInputEventHandler {
     //Selektiere einen PNode
     @Override
     public void mouseClicked(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        log.debug("mouseClicked():" + pInputEvent.getPickedNode());
+        log.debug("mouseClicked():" + pInputEvent.getPickedNode());//NOI18N
         Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[]{PFeature.class});
         clickCount = pInputEvent.getClickCount();
         if (pInputEvent.getComponent() instanceof MappingComponent) {
             mc = (MappingComponent) pInputEvent.getComponent();
         }
         if (pInputEvent.getButton() == 3) {
-            log.debug("right mouseclick");
+            log.debug("right mouseclick");//NOI18N
             if (o instanceof PFeature && ((PFeature) o).getFeature() instanceof XStyledFeature) {
                 XStyledFeature xf = (XStyledFeature) ((PFeature) o).getFeature();
-                log.debug("valid object under pointer");
-                JPopupMenu popup = new JPopupMenu("Test");
-                JMenuItem m = new JMenuItem("TIM Merker anlegen");
+                log.debug("valid object under pointer");//NOI18N
+                JPopupMenu popup = new JPopupMenu(org.openide.util.NbBundle.getMessage(SimpleSingleSelectionListener.class, "SimpleSingleSelectionListener.popup.text"));//NOI18N
+                JMenuItem m = new JMenuItem(org.openide.util.NbBundle.getMessage(SimpleSingleSelectionListener.class, "SimpleSingleSelectionListener.m.text"));//NOI18N
                 m.setIcon(xf.getIconImage());
                 popup.add(m);
                 popup.show(mc, (int) pInputEvent.getCanvasPosition().getX(), (int) pInputEvent.getCanvasPosition().getY());
@@ -70,7 +70,7 @@ public class SimpleSingleSelectionListener extends PBasicInputEventHandler {
         PNotificationCenter pn = PNotificationCenter.defaultCenter();
         pn.postNotification(SimpleSingleSelectionListener.SELECTION_CHANGED_NOTIFICATION, this);
         if (mc != null) {
-            log.debug("unselectAll in postSelectionChanged()");
+            log.debug("unselectAll in postSelectionChanged()");//NOI18N
 //            mc.getFeatureCollection().unselectAll(); //SINGLE SELECTION
             mc.getFeatureCollection().select(sel.getFeature());
         }

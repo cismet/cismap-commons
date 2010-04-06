@@ -18,7 +18,7 @@ import edu.umd.cs.piccolox.event.PNotificationCenter;
  */
 public class DeleteFeatureListener extends PBasicInputEventHandler {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static final String FEATURE_DELETE_REQUEST_NOTIFICATION = "FEATURE_DELETE_REQUEST_NOTIFICATION";
+    public static final String FEATURE_DELETE_REQUEST_NOTIFICATION = "FEATURE_DELETE_REQUEST_NOTIFICATION";//NOI18N
     PFeature featureRequestedForDeletion = null;
 
     @Override

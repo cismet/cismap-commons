@@ -47,7 +47,7 @@ import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilities;
  */
 public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.raster.wfs.WFSCapabilitiesTreeCellRenderer");
+    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.raster.wfs.WFSCapabilitiesTreeCellRenderer");//NOI18N
     private ImageIcon serverIcon;
     private ImageIcon featureIcon;
     private ImageIcon elementIcon;
@@ -60,12 +60,12 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
      * Creates a new instance of WMSCapabilitiesTreeCellRenderer
      */
     public WFSCapabilitiesTreeCellRenderer() {
-        serverIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/server.png"));
-        featureIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/layer.png"));
-        elementIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/attr.png"));
-        stringIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/string.png"));
-        integerIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/integer.png"));
-        geomIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/geom.png"));
+        serverIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/server.png"));//NOI18N
+        featureIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/layer.png"));//NOI18N
+        elementIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/attr.png"));//NOI18N
+        stringIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/string.png"));//NOI18N
+        integerIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/integer.png"));//NOI18N
+        geomIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/geom.png"));//NOI18N
     }
 
     public WFSCapabilitiesTreeCellRenderer(String name) {
@@ -84,7 +84,7 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                 if (altRootName != null) {
                     setText(altRootName);
                 } else {
-                    setText("Web Feature Service");
+                    setText("Web Feature Service");//NOI18N
                 }
                 setIcon(serverIcon);
             } else if (value instanceof ElementDeclaration) {
@@ -107,8 +107,8 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
             } else if (value instanceof FeatureServiceAttribute) {
                 FeatureServiceAttribute fsf = (FeatureServiceAttribute) value;
                 String type;
-                if(fsf.getType() != null && fsf.getType().lastIndexOf(":") != -1){
-                    type = fsf.getType().substring(fsf.getType().lastIndexOf(":")+1);
+                if(fsf.getType() != null && fsf.getType().lastIndexOf(":") != -1){//NOI18N
+                    type = fsf.getType().substring(fsf.getType().lastIndexOf(":")+1);//NOI18N
                 } else {
                     type = fsf.getType();
                 }
@@ -121,14 +121,14 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                 } else {
                     setIcon(elementIcon);
                 }
-                if(fsf.getName() != null && fsf.getName().lastIndexOf(":") != -1){
-                    setText(fsf.getName().substring(fsf.getName().lastIndexOf(":")+1));
+                if(fsf.getName() != null && fsf.getName().lastIndexOf(":") != -1){//NOI18N
+                    setText(fsf.getName().substring(fsf.getName().lastIndexOf(":")+1));//NOI18N
                 } else {
                     setText(fsf.getName());
                 }
             }
         } catch (Exception ex) {
-            log.error("Fehler im WFSCapabilitiesTreeCellRenderer", ex);
+            log.error("error in WFSCapabilitiesTreeCellRenderer", ex);//NOI18N
         }
         return this;
     }

@@ -8,7 +8,6 @@ package de.cismet.cismap.commons.featureservice;
 
 import java.awt.Frame;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -59,7 +58,7 @@ public class QueryEditorDialog extends JDialog {
         cmdOK = new javax.swing.JButton();
         cmdCancel = new javax.swing.JButton();
 
-        setTitle("WFS Query bearbeiten");
+        setTitle(org.openide.util.NbBundle.getMessage(QueryEditorDialog.class, "QueryEditorDialog.title") ); // NOI18N
         setMinimumSize(new java.awt.Dimension(550, 400));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
@@ -84,7 +83,7 @@ public class QueryEditorDialog extends JDialog {
         panButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, -5));
         panButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 0));
 
-        cmdOK.setText("OK");
+        cmdOK.setText(org.openide.util.NbBundle.getMessage(QueryEditorDialog.class, "QueryEditorDialog.cmdOK.text") ); // NOI18N
         cmdOK.setMaximumSize(new java.awt.Dimension(88, 23));
         cmdOK.setMinimumSize(new java.awt.Dimension(88, 23));
         cmdOK.setPreferredSize(new java.awt.Dimension(88, 23));
@@ -95,7 +94,7 @@ public class QueryEditorDialog extends JDialog {
         });
         panButtons.add(cmdOK);
 
-        cmdCancel.setText("Abbrechen");
+        cmdCancel.setText(org.openide.util.NbBundle.getMessage(QueryEditorDialog.class, "QueryEditorDialog.cmdCancel.text") ); // NOI18N
         cmdCancel.setMaximumSize(new java.awt.Dimension(88, 23));
         cmdCancel.setMinimumSize(new java.awt.Dimension(88, 23));
         cmdCancel.setPreferredSize(new java.awt.Dimension(88, 23));

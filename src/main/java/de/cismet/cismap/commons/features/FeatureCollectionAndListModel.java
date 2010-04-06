@@ -87,7 +87,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
                 this.selectionMode = selectionMode;
                 break;
             default:
-                throw new IllegalArgumentException("invalid selectionMode");
+                throw new IllegalArgumentException("invalid selectionMode");//NOI18N
         }
     }
     
@@ -118,7 +118,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
             }
             fireValueChanged();
         } catch (Throwable t) {
-            log.error("Error in setLeadSelectionIndex",t);
+            log.error("Error in setLeadSelectionIndex",t);//NOI18N
         }
         
     }
@@ -137,7 +137,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
                 fireValueChanged();
             }
         } catch (Throwable t) {
-            log.error("Error in setAnchorSelectionIndex",t);
+            log.error("Error in setAnchorSelectionIndex",t);//NOI18N
         }
         
     }
@@ -150,7 +150,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
         try {
             return isSelected((Feature)getAllFeatures().get(index));
         } catch (Throwable t) {
-            log.error("Error in isSelectedIndex",t);
+            log.error("Error in isSelectedIndex",t);//NOI18N
             return false;
         }
     }
@@ -173,7 +173,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
         try {
             this.valueIsAdjusting=valueIsAdjusting;
         } catch (Throwable t) {
-            log.error("Error in setValueIsAdjusting",t);
+            log.error("Error in setValueIsAdjusting",t);//NOI18N
         }
         
         
@@ -236,7 +236,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
             select(getVectorOfFeatures(index0,index1));
             fireValueChanged();
         } catch (Throwable t) {
-            log.error("Error in setSelectionInterval",t);
+            log.error("Error in setSelectionInterval",t);//NOI18N
         }
         
     }
@@ -259,7 +259,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
             unselect(getVectorOfFeatures(index0,index1));
             fireValueChanged();
         } catch (Throwable t) {
-            log.error("Error in removeSelectionInterval",t);
+            log.error("Error in removeSelectionInterval",t);//NOI18N
         }
         
     }
@@ -281,7 +281,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
         try {
             addToSelection(getVectorOfFeatures(index0,index1));
         } catch (Throwable t) {
-            log.error("Error in addSelectionInterval",t);
+            log.error("Error in addSelectionInterval",t);//NOI18N
         }
         
     }
@@ -298,7 +298,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
             unselectAll();
             fireValueChanged();
         } catch (Throwable t) {
-            log.error("Error in clearSelection",t);
+            log.error("Error in clearSelection",t);//NOI18N
         }
         
     }
@@ -352,7 +352,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
                 return ret;
             }
         } catch (Throwable t) {
-            log.error("Error in getMaxSelectionIndex",t);
+            log.error("Error in getMaxSelectionIndex",t);//NOI18N
             return -1;
         }
         
@@ -377,7 +377,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
                 return ret;
             }
         } catch (Throwable t) {
-            log.error("Error in getMinSelectionIndex",t);
+            log.error("Error in getMinSelectionIndex",t);//NOI18N
             return -1;
         }
     }
@@ -409,7 +409,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
         try {
             return selectedFeatures.isEmpty();
         } catch (Throwable t) {
-            log.error("Error in isSelectionEmpty",t);
+            log.error("Error in isSelectionEmpty",t);//NOI18N
             return true;
         }
     }
@@ -425,7 +425,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
             removeFeatures(getVectorOfFeatures(index0,index1));
             fireValueChanged();
         } catch (Throwable t) {
-            log.error("Error in ",t);
+            log.error("Error in ",t);//NOI18N
         }
         
     }
@@ -449,7 +449,7 @@ public class FeatureCollectionAndListModel extends DefaultFeatureCollection impl
             }
             return v;
         } catch (Throwable t) {
-            log.error("Error in getVectorOfFeatures",t);
+            log.error("Error in getVectorOfFeatures",t);//NOI18N
             return null;
         }
         

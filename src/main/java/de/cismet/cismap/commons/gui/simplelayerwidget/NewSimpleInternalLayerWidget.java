@@ -89,17 +89,17 @@ import javax.swing.tree.TreePath;
 import org.jdom.Element;
 
 /**
- * 
+ *
  * @author nh
  */
 public class NewSimpleInternalLayerWidget extends JInternalFrame implements MappingModelListener, TableModelListener, DropTargetListener, Configurable {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private final ImageIcon UP = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/up.png"));
-    private final ImageIcon DOWN = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/down.png"));
-    private final ImageIcon DELETE = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/removeLayer.png"));
-    private final ImageIcon DISABLE = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disable.png"));
-    private final ImageIcon INVISIBLE = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerDLinvisible.png"));
+    private final ImageIcon UP = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/up.png"));//NOI18N
+    private final ImageIcon DOWN = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/down.png"));//NOI18N
+    private final ImageIcon DELETE = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/removeLayer.png"));//NOI18N
+    private final ImageIcon DISABLE = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disable.png"));//NOI18N
+    private final ImageIcon INVISIBLE = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerDLinvisible.png"));//NOI18N
     private static final int ROW_HEIGHT = 18;
     private static final int WIDGET_WIDTH = 350;
     private int layerCount = 0;
@@ -120,7 +120,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
      * @param mc Parent-MappingComponent des Wdgets
      */
     public NewSimpleInternalLayerWidget(MappingComponent mc, boolean deactivatePopupMenuButtons) {
-        log.info("NewSimpleInternalLayerWidget erstellen");
+        log.info("NewSimpleInternalLayerWidget erstellen");//NOI18N
         this.deactivatePopupMenuButtons = deactivatePopupMenuButtons;
 
         // JInternalFrame fixieren, indem alle MouseMotionListener der Statusbar entfernt werden
@@ -132,14 +132,14 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
                 north.removeMouseMotionListener(listener[i]);
             }
         } catch (Exception e) {
-            log.error("Fehler beim Entfernen von Mousemotionlisteners", e);
+            log.error("Error during the removal of the Mousemotionlisteners", e);//NOI18N
         }
         initComponents();
         this.mc = mc;
         activeLayerModel = (ActiveLayerModel) mc.getMappingModel();
         popupMenu = new JPopupMenu();
         up = new JMenuItem();
-        up.setText("nach oben");
+        up.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.up.text"));//NOI18N
         up.setIcon(UP);
         up.addActionListener(new ActionListener() {
 
@@ -160,7 +160,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         down = new JMenuItem();
-        down.setText("nach unten");
+        down.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.down.text"));//NOI18N
         down.setIcon(DOWN);
         down.addActionListener(new ActionListener() {
 
@@ -180,7 +180,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         dis = new JMenuItem();
-        dis.setText("deaktivieren");
+        dis.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.dis.text"));//NOI18N
         dis.setIcon(DISABLE);
         dis.addActionListener(new ActionListener() {
 
@@ -200,7 +200,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         del = new JMenuItem();
-        del.setText("entfernen");
+        del.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.del.text"));//NOI18N
         del.setIcon(DELETE);
         del.addActionListener(new ActionListener() {
 
@@ -220,7 +220,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }
         });
         vis = new JMenuItem();
-        vis.setText("unsichtbar");
+        vis.setText(org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.vis.text"));//NOI18N
         vis.setIcon(INVISIBLE);
         vis.addActionListener(new ActionListener() {
 
@@ -250,13 +250,13 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
 
         try
         {
-          putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);
+          putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);//NOI18N
   //        DropTarget dt = new DropTarget(this, acceptableActions, this);
 
         }
         catch(Throwable t)
         {
-          log.error("Fehler beim setzen der Client Property isPalette: " + t.getMessage(), t);
+          log.error("Fehler beim setzen der Client Property isPalette: " + t.getMessage(), t);//NOI18N
         }
 
         if (activeLayerModel != null) {
@@ -275,7 +275,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             this.activeLayerModel = (ActiveLayerModel) mm;
             createTree();
         } else {
-            log.info("MappingModel ist kein ActiveLayerModel, kann InternalWidget nicht erstellen");
+            log.info("MappingModel ist kein ActiveLayerModel, kann InternalWidget nicht erstellen");//NOI18N
         }
     }
 
@@ -293,7 +293,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
      * @param flag the new boolean value (true hides, false shows)
      */
     public void setDeactivatePopupMenuButtons(boolean deactivate) {
-        log.debug("setDeactivatePopupMenuButtons");
+        log.debug("setDeactivatePopupMenuButtons");//NOI18N
         if (!deactivatePopupMenuButtons && deactivate) {
             //popupMenu.remove(dis);
             popupMenu.remove(del);
@@ -315,7 +315,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
 
                 @Override
                 public JToolTip createToolTip() {
-                    log.debug("Tooltip");
+                    log.debug("Tooltip");//NOI18N
                     if (errorImage != null) {
                         return new ImageToolTip(errorImage);
                     } else {
@@ -352,7 +352,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
               @Override
                 public void valueChanged(TreeSelectionEvent e) {
                     if (treeTable.getTree().getSelectionPath() != null) {
-                        log.debug("ActiveLayerWidget: selectionChanged()\n" + e);
+                        log.debug("ActiveLayerWidget: selectionChanged()\n" + e);//NOI18N
                         try {
                             ActiveLayerEvent ale = new ActiveLayerEvent();
                             ale.setLayer(treeTable.getTree().getSelectionPath().getLastPathComponent());
@@ -361,7 +361,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
                             }
                             CismapBroker.getInstance().fireLayerSelectionChanged(ale);
                         } catch (Exception ex) {
-                            log.warn("Fehler bei fireLayerSelectionChanged ... kein Problem");
+                            log.warn("Error at fireLayerSelectionChanged ... no problem");//NOI18N
                         }
                     }
                 }
@@ -396,7 +396,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
                 }
             });
         } catch (Exception ex) {
-            log.error("Fehler beim erstellen der TreeTable!", ex);
+            log.error("Error during the creation of a TreeTable!", ex);//NOI18N
         }
     }
 
@@ -447,12 +447,11 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
 
     @Override
     public void drop(DropTargetDropEvent dtde) {
-        DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SelectionAndCapabilities");
+        DataFlavor TREEPATH_FLAVOR = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SelectionAndCapabilities");//NOI18N
         try {
-            log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.log.Es_gibt") + dtde.getTransferable().getTransferDataFlavors().length +
-                    java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.log.DataFlavours"));
+            log.debug("There are " + dtde.getTransferable().getTransferDataFlavors().length + "DataFlavours");//NOI18N
             for (int i = 0; i < dtde.getTransferable().getTransferDataFlavors().length; ++i) {
-                log.debug(java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.log.DataFlavour") + i + ":" + dtde.getTransferable().getTransferDataFlavors()[i]);
+                log.debug("DataFlavour" + i + ":" + dtde.getTransferable().getTransferDataFlavors()[i]);//NOI18N
             }
             final Object trasferData = dtde.getTransferable().getTransferData(TREEPATH_FLAVOR);
             final Vector treePaths = new Vector();
@@ -472,19 +471,21 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
                 }
                 l.setWmsCapabilities(((SelectionAndCapabilities) trasferData).getCapabilities());
                 l.setCapabilitiesUrl(((SelectionAndCapabilities) trasferData).getUrl());
-                log.debug("((SelectionAndCapabilities)o).getUrl()" + ((SelectionAndCapabilities) trasferData).getUrl());
+                log.debug("((SelectionAndCapabilities)o).getUrl()" + ((SelectionAndCapabilities) trasferData).getUrl());//NOI18N
             } // Drop-Objekt war ein WFS-Element
             else if (trasferData instanceof WFSSelectionAndCapabilities) {
                 WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities) trasferData;
                 WebFeatureService wfs = new WebFeatureService(sac.getName(), sac.getHost(), sac.getQuery(), sac.getAttributes());
-                log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier() + "' (EXPRESSIONTYPE_PROPERTYNAME)");
+                log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier() + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
                 wfs.getLayerProperties().setPrimaryAnnotationExpression(sac.getIdentifier(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
                 activeLayerModel.addLayer(wfs);
             }
             scpMain.setViewportView(treeTable);
         } catch (IllegalArgumentException schonVorhanden) {
-            JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this), java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.LayerAlreadyExists"),
-                    java.util.ResourceBundle.getBundle("de/cismet/cismap/commons/GuiBundle").getString("LayerWidget.AddLayer"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this), 
+                    org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                    org.openide.util.NbBundle.getMessage(NewSimpleInternalLayerWidget.class, "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
+                    JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
             log.error(e, e);
         }

@@ -47,7 +47,7 @@ import java.util.LinkedList;
  * @author thorsten.hell@cismet.de
  */
 public class CustomFeatureActionListener extends PBasicInputEventHandler {
-    private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.tools.PFeatureTools");
+    private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(CustomFeatureActionListener.class);//NOI18N
     MappingComponent mappingComponent;
     Class[] validClasses = {PFeature.class};
 

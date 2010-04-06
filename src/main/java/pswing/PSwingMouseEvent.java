@@ -213,7 +213,7 @@ public class PSwingMouseEvent extends MouseEvent implements Serializable {
                     mouseListener.mouseReleased( this );
                     break;
                 default:
-                    throw new RuntimeException( "ZMouseEvent with bad ID" );
+                    throw new RuntimeException( "ZMouseEvent with bad ID" );//NOI18N
             }
         }
         else {
@@ -226,7 +226,7 @@ public class PSwingMouseEvent extends MouseEvent implements Serializable {
                     mouseMotionListener.mouseMoved( this );
                     break;
                 default:
-                    throw new RuntimeException( "ZMouseMotionEvent with bad ID" );
+                    throw new RuntimeException( "ZMouseMotionEvent with bad ID" );//NOI18N
             }
         }
     }

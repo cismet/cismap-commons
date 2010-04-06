@@ -46,8 +46,8 @@ import java.awt.geom.Point2D;
  */
 public class SplitPolygonListener extends PBasicInputEventHandler {
     private boolean inProgress;
-    public static final String SPLIT_FINISHED = "SPLIT_FINISHED";
-    public static final String SELECTION_CHANGED = "SELECTION_CHANGED";
+    public static final String SPLIT_FINISHED = "SPLIT_FINISHED";//NOI18N
+    public static final String SELECTION_CHANGED = "SELECTION_CHANGED";//NOI18N
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     MappingComponent mc;
     PFeature p = null;
@@ -59,7 +59,7 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
     
     @Override
     public void mouseClicked(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        log.debug("mouseClicked()");
+        log.debug("mouseClicked()");//NOI18N
         Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[]{PFeature.class});
         if (o instanceof PFeature) {
             super.mouseClicked(pInputEvent);
@@ -114,7 +114,7 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
         //p=mc.getSelectedNode();
         }
         if (p != null && p.inSplitProgress()) {
-            log.debug("will Linie zeichnen");
+            log.debug("want to draw line");//NOI18N
             Point2D point = null;
             if (mc.isSnappingEnabled()) {
                 point = PFeatureTools.getNearestPointInArea(mc, event.getCanvasPosition());
@@ -129,7 +129,7 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
 
     private void updateSplitLine(Point2D lastPoint) {
         Point2D[] pa = getPoints(lastPoint);
-        log.debug("getSplitLine()" + p.getSplitLine());
+        log.debug("getSplitLine()" + p.getSplitLine());//NOI18N
         p.getSplitLine().setPathToPolyline(pa);
         p.getSplitLine().repaint();
     }

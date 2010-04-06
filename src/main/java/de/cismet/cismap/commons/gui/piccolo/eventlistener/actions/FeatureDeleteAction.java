@@ -45,7 +45,8 @@ public class FeatureDeleteAction implements CustomAction {
      * @return Beschreibungsstring
      */
     public String info() {
-        return "L\u00F6sche Feature: " + f;
+        //
+        return org.openide.util.NbBundle.getMessage(FeatureDeleteAction.class, "FeatureDeleteAction.info().return", new Object[] {f});//NOI18N
     }
     
     /**
