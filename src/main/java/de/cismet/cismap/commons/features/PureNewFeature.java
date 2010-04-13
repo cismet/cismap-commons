@@ -127,61 +127,34 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
     @Override
     public String getName() {
         if (getGeometryType() != null) {
-            switch (getGeometryType()) {
-                case RECTANGLE:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newRectangle") ;//NOI18N
-                case LINESTRING:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolyline") ;//NOI18N
-                case ELLIPSE:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newEllipse") ;//NOI18N
-                case POINT:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPoint") ;//NOI18N
-                case POLYGON:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolygon") ;//NOI18N
-                default:
-                    return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().errorInGetName") ;//NOI18N
+            if (name!=null&&name.trim().equals("")) {
+                switch (getGeometryType()) {
+                    case RECTANGLE:
+                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newRectangle");//NOI18N
+                    case LINESTRING:
+                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolyline");//NOI18N
+                    case ELLIPSE:
+                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newEllipse");//NOI18N
+                    case POINT:
+                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPoint");//NOI18N
+                    case POLYGON:
+                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolygon");//NOI18N
+                    default:
+                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().errorInGetName");//NOI18N
+                }
+            } else {
+                return name;
             }
         } else {
             try {
                 Vector<Feature> allFeatures = CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures();
-//
-//        int countNewPoints=1; 
-//        int countNewLines=1;
-//        int countNewPoly=1;
-//
-//        for (Feature f:allFeatures){
-//            if (f instanceof PureNewFeature ){
-//                if (((PureNewFeature)f).name.startsWith("Neuer Punkt")){
-//                    countNewPoints++;
-//                }
-//                else if (((PureNewFeature)f).name.startsWith("Neuer Linienzug")){
-//                    countNewLines++;
-//                }
-//                else if (((PureNewFeature)f).name.startsWith("Neues Polygon")){
-//                    countNewPoly++;
-//                }
-//
-//            }
-//        }
-//
-//        if (name.trim().equals("")) {
-//            if (getGeometry() instanceof Point) {
-//                name= "Neuer Punkt ("+countNewPoints+")";
-//            } else if (getGeometry() instanceof LineString) {
-//                name = "Neuer Linienzug ("+countNewLines+")";
-//            } else {
-//                name = "Neues Polygon ("+countNewPoly+")";
-//            }
-//        }
-
-
                 if (name.trim().equals("")) {   //NOI18N
                     if (getGeometry() instanceof Point) {
-                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPoint") ;//NOI18N
+                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPoint");//NOI18N
                     } else if (getGeometry() instanceof LineString) {
                         name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolyline"); //NOI18N
                     } else {
-                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolygon") ;//NOI18N
+                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolygon");//NOI18N
                     }
                 }
                 return name;
