@@ -99,8 +99,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     public void setMode(String m) throws IllegalArgumentException {
         if (m.equals(LINESTRING) || m.equals(POINT) || m.equals(POLYGON) || m.equals(ELLIPSE) || m.equals(RECTANGLE)) {
             this.mode = m;
-            mc.getTmpFeatureLayer().removeAllChildren();
-            inProgress = false;
+//            mc.getTmpFeatureLayer().removeAllChildren();
+//            inProgress = false;
         } else {
             throw new IllegalArgumentException("Mode:" + m + " is not a valid Mode in this Listener.");//NOI18N
         }
