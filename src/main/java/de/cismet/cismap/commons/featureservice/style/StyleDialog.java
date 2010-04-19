@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * StyleDialog.java
  *
@@ -6,12 +13,18 @@
 package de.cismet.cismap.commons.featureservice.style;
 
 import de.cismet.cismap.commons.RestrictedFileSystemView;
+
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
+
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+
 import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
+
 import javax.swing.ButtonModel;
+
 import org.bounce.text.LineNumberMargin;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -23,13 +36,17 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import java.text.ParseException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -51,1488 +68,2190 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.PlainDocument;
+
 import org.bounce.text.ScrollableEditorPanel;
 import org.bounce.text.xml.XMLDocument;
 import org.bounce.text.xml.XMLEditorKit;
 import org.bounce.text.xml.XMLStyleConstants;
+
 import org.jdom.Document;
-//import org.jdom.input.SAXBuilder;
+
+// import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
+
 import de.cismet.cismap.commons.featureservice.*;
+
 import java.util.Map;
 import java.util.TreeMap;
 
+
 /**
  * A dialog that lets you alter the FeatureLayers appearance.
- * @author  nh
+ *
+ * @author   nh
+ * @version  $Revision$, $Date$
  */
-public class StyleDialog extends JDialog implements ListSelectionListener
-{
+public class StyleDialog extends JDialog implements ListSelectionListener {
 
-  private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
-  // constants: filesystem
-  private static final String CISMAP_FOLDER = ".cismap";//NOI18N
-  private static final String DEFAULT_HISTORY_NAME = "defaultStyleHistory.xml";//NOI18N
-  private static final String COLORCHOOSER_TITLE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.COLORCHOOSER_TITLE");//NOI18N
-  private static final String FONTCHOOSER_TITLE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.FONTCHOOSER_TITLE");//NOI18N
-  private static final String POINTSYMBOL_FOLDER = "/de/cismet/cismap/commons/featureservice/res/pointsymbols/";//NOI18N
-  private final String home = System.getProperty("user.home");//NOI18N
-  private final String seperator = System.getProperty("file.separator");//NOI18N
-  private final File fileToCismapFolder = new File(home + seperator + CISMAP_FOLDER);
-  // constants: popup
-  // FIXME: I18N
-  private final static String POPUP_SAVE = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_SAVE");//NOI18N
-  private final static String POPUP_LOAD = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_LOAD");//NOI18N
-  private final static String POPUP_CLEAR = org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.POPUP_CLEAR");//NOI18N
-  private TreeMap<String, FeatureAnnotationSymbol> pointSymbolHM = new TreeMap();
-  private TreeMap<String, FeatureServiceAttribute> featureServiceAttributes;
-  private Map<String, FeatureServiceAttribute> oldFeatureServiceAttributes;
-  private FeatureAnnotationSymbol pointSymbol = null;
-  private File defaultHistory;
-  private JColorChooser colorChooser;
-  private FontChooserDialog fontChooser;
-  private JPopupMenu popupMenu;
-  private JEditorPane queryEditor = new JEditorPane();
-  private LayerProperties layerProperties;
-  private boolean accepted = false;
-  private boolean ignoreSelectionEvent = true;
+    /** Use serialVersionUID for interoperability. */
+    private final static long serialVersionUID = 2128299309127723684L;
 
-  /**
-   * Constructor for new StyleDialog-objects.
-   * @param parent parent-frame of this dialog
-   * @param modal true, if the dialog should block the parent
-   */
-  public StyleDialog(Frame parent, boolean modal)
-  {
-    super(parent, modal);
+    // constants: filesystem
+    private static final String CISMAP_FOLDER = ".cismap"; // NOI18N
+    private static final String DEFAULT_HISTORY_NAME = "defaultStyleHistory.xml"; // NOI18N
+    private static final String COLORCHOOSER_TITLE = org.openide.util.NbBundle.getMessage(StyleDialog.class,
+            "StyleDialog.COLORCHOOSER_TITLE"); // NOI18N
+    private static final String FONTCHOOSER_TITLE = org.openide.util.NbBundle.getMessage(StyleDialog.class,
+            "StyleDialog.FONTCHOOSER_TITLE"); // NOI18N
+    private static final String POINTSYMBOL_FOLDER = "/de/cismet/cismap/commons/featureservice/res/pointsymbols/"; // NOI18N
 
-    try
-    {
-      logger.info("Erstelle StyleDialog");//NOI18N
-      this.layerProperties = new DefaultLayerProperties();
+    // constants: popup
+    // FIXME: I18N
+    private final static String POPUP_SAVE = org.openide.util.NbBundle.getMessage(StyleDialog.class,
+            "StyleDialog.POPUP_SAVE"); // NOI18N
+    private final static String POPUP_LOAD = org.openide.util.NbBundle.getMessage(StyleDialog.class,
+            "StyleDialog.POPUP_LOAD"); // NOI18N
+    private final static String POPUP_CLEAR = org.openide.util.NbBundle.getMessage(StyleDialog.class,
+            "StyleDialog.POPUP_CLEAR"); // NOI18N
 
-      createPointSymbols();
-      initComponents();
-      createXMLEditor();
-      setLocationRelativeTo(this.getParent());
+    // <editor-fold defaultstate="collapsed" desc="Returnwert-Bestimmung">
+    /**
+     * Returns a modified CloneableFeature.
+     *
+     * @return  CloneableFeature with the current style
+     */
+// public CloneableFeature getReturnStatus()
+// {
+// return feature;
+// }
+    /**
+     * Get the value of layerProperties.
+     *
+     * @return  the value of layerProperties
+     */
+    public LayerProperties getLayerProperties() {
 
-      colorChooser = new JColorChooser();
-      fontChooser = new FontChooserDialog(this, FONTCHOOSER_TITLE);
-
-      // create historylist
-      createHistoryListPopupMenu();
-      lstHistory.setCellRenderer(new StyleHistoryListCellRenderer());
-      lstHistory.addListSelectionListener(this);
-      lstHistory.addMouseListener(new MouseAdapter()
-      {
-
-        @Override
-        public void mouseReleased(MouseEvent e)
-        {
-          if (e.isPopupTrigger() && !popupMenu.isVisible())
-          {
-            popupMenu.show(e.getComponent(), e.getX(), e.getY());
-          }
+        if (!this.isAccepted()) {
+            logger.warn("supicious call to 'getLayerProperties()', changes not accepted"); // NOI18N
         }
 
-        @Override
-        public void mousePressed(MouseEvent e)
-        {
-          if (e.isPopupTrigger() && !popupMenu.isVisible())
-          {
-            popupMenu.show(e.getComponent(), e.getX(), e.getY());
-          }
-        }
-      });
-
-      // load the defaultHistory if available
-      defaultHistory = searchDefaultHistory();
-      loadHistory(defaultHistory);
-
-      // create listener for XML-editor
-      queryEditor.getDocument().addDocumentListener(new DocumentListener()
-      {
-        @Override
-        public void insertUpdate(DocumentEvent e)
-        {
-          chkUseQueryString.setSelected(true);
-          logger.debug(e.getChange(e.getDocument().getDefaultRootElement()));
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent e)
-        {
-          chkUseQueryString.setSelected(true);
-        }
-
-        @Override
-        public void changedUpdate(DocumentEvent e)
-        {
-          chkUseQueryString.setSelected(true);
-        }
-      });
-
-      // hide not implemented functions
-      chkFillPattern.setVisible(false);
-      cbbFillPattern.setVisible(false);
-      chkLinePattern.setVisible(false);
-      cbbLinePattern.setVisible(false);
-
-      // not yet!
-      //this.updateDialog();
-      //this.updatePreview();
-
-    } catch (Throwable t)
-    {
-      logger.error("could not create StyleDialog: " + t.getMessage(), t);//NOI18N
-    }
-  }
-
-  // <editor-fold defaultstate="collapsed" desc="Returnwert-Bestimmung">
-  /**
-   * Returns a modified CloneableFeature.
-   * @return CloneableFeature with the current style
-   */
-//  public CloneableFeature getReturnStatus()
-//  {
-//    return feature;
-//  }
-  /**
-   * Get the value of layerProperties
-   *
-   * @return the value of layerProperties
-   */
-  public LayerProperties getLayerProperties()
-  {
-    if (!this.isAccepted())
-    {
-      logger.warn("supicious call to 'getLayerProperties()', changes not accepted");//NOI18N
+        return this.layerProperties;
     }
 
-    return this.layerProperties;
-  }
+    /**
+     * Set the value of layerProperties.
+     *
+     * @param  layerProperties  new value of layerProperties
+     */
+    protected void setLayerProperties(LayerProperties layerProperties) {
+        this.layerProperties = layerProperties.clone();
+    }
 
-  /**
-   * Set the value of layerProperties
-   *
-   * @param layerProperties new value of layerProperties
-   */
-  protected void setLayerProperties(LayerProperties layerProperties)
-  {
-    this.layerProperties = layerProperties.clone();
-  }
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Style getStyle() {
+        return this.layerProperties.getStyle();
+    }
 
-  private Style getStyle()
-  {
-    return this.layerProperties.getStyle();
-  }
-
-  /**
-   * Closes the dialog and sets the returnvalue.
-   * @param retStatus new returnvalue
-   */
-  private void doClose(boolean accepted)
-  {
-    this.setAccepted(accepted);
-    tbpTabs.setSelectedComponent(panTabFill);
-    lstHistory.setSelectedIndex(-1);
-    setVisible(false);
-    dispose();
-  }
+    /**
+     * Closes the dialog and sets the returnvalue.
+     *
+     * @param  accepted  retStatus new returnvalue
+     */
+    private void doClose(boolean accepted) {
+        this.setAccepted(accepted);
+        tbpTabs.setSelectedComponent(panTabFill);
+        lstHistory.setSelectedIndex(-1);
+        setVisible(false);
+        dispose();
+    }
 // </editor-fold>
 
-  // <editor-fold defaultstate="collapsed" desc="Anzeige-Methoden">
-  /**
-   * Creates the XML-editor and adds it to the scrollpane.
-   */
-  private void createXMLEditor()
-  {
-    try
-    {
-      XMLEditorKit kit = new XMLEditorKit(true);
-      kit.setWrapStyleWord(true);
-      kit.setLineWrappingEnabled(chkLinewrap.isSelected());
+    // <editor-fold defaultstate="collapsed" desc="Anzeige-Methoden">
+    /**
+     * Creates the XML-editor and adds it to the scrollpane.
+     */
+    private void createXMLEditor() {
 
-      queryEditor.setEditorKit(kit);
-      queryEditor.setFont(new Font("Monospace", Font.PLAIN, 12));//NOI18N
-      queryEditor.getDocument().putProperty(PlainDocument.tabSizeAttribute, new Integer(4));
-      queryEditor.getDocument().putProperty(XMLDocument.AUTO_INDENTATION_ATTRIBUTE, new Boolean(true));
-      queryEditor.getDocument().putProperty(XMLDocument.TAG_COMPLETION_ATTRIBUTE, new Boolean(true));
+        try {
+            XMLEditorKit kit = new XMLEditorKit(true);
+            kit.setWrapStyleWord(true);
+            kit.setLineWrappingEnabled(chkLinewrap.isSelected());
 
-      // Set style
-      kit.setStyle(XMLStyleConstants.ATTRIBUTE_NAME, Color.GREEN.darker(), Font.PLAIN);
-      kit.setStyle(XMLStyleConstants.ATTRIBUTE_VALUE, Color.MAGENTA.darker(), Font.PLAIN);
-      kit.setStyle(XMLStyleConstants.COMMENT, Color.GRAY, Font.PLAIN);
-      kit.setStyle(XMLStyleConstants.DECLARATION, Color.DARK_GRAY, Font.BOLD);
-      kit.setStyle(XMLStyleConstants.ELEMENT_NAME, Color.BLUE, Font.PLAIN);
-      kit.setStyle(XMLStyleConstants.ELEMENT_PREFIX, Color.BLUE, Font.PLAIN);
-      kit.setStyle(XMLStyleConstants.ELEMENT_VALUE, Color.BLACK, Font.BOLD);
-      kit.setStyle(XMLStyleConstants.NAMESPACE_NAME, Color.GREEN.darker(), Font.PLAIN);
-      kit.setStyle(XMLStyleConstants.NAMESPACE_VALUE, Color.MAGENTA.darker(), Font.PLAIN);
-      kit.setStyle(XMLStyleConstants.NAMESPACE_PREFIX, Color.GREEN.darker(), Font.PLAIN);
-      kit.setStyle(XMLStyleConstants.SPECIAL, Color.BLACK, Font.PLAIN);
+            queryEditor.setEditorKit(kit);
+            queryEditor.setFont(new Font("Monospace", Font.PLAIN, 12)); // NOI18N
+            queryEditor.getDocument().putProperty(PlainDocument.tabSizeAttribute, new Integer(4));
+            queryEditor.getDocument().putProperty(XMLDocument.AUTO_INDENTATION_ATTRIBUTE, new Boolean(true));
+            queryEditor.getDocument().putProperty(XMLDocument.TAG_COMPLETION_ATTRIBUTE, new Boolean(true));
 
-      // ScrollableEditorPanel forces the queryEditor to resize
-      ScrollableEditorPanel editorPanel = new ScrollableEditorPanel(queryEditor);
+            // Set style
+            kit.setStyle(XMLStyleConstants.ATTRIBUTE_NAME, Color.GREEN.darker(), Font.PLAIN);
+            kit.setStyle(XMLStyleConstants.ATTRIBUTE_VALUE, Color.MAGENTA.darker(), Font.PLAIN);
+            kit.setStyle(XMLStyleConstants.COMMENT, Color.GRAY, Font.PLAIN);
+            kit.setStyle(XMLStyleConstants.DECLARATION, Color.DARK_GRAY, Font.BOLD);
+            kit.setStyle(XMLStyleConstants.ELEMENT_NAME, Color.BLUE, Font.PLAIN);
+            kit.setStyle(XMLStyleConstants.ELEMENT_PREFIX, Color.BLUE, Font.PLAIN);
+            kit.setStyle(XMLStyleConstants.ELEMENT_VALUE, Color.BLACK, Font.BOLD);
+            kit.setStyle(XMLStyleConstants.NAMESPACE_NAME, Color.GREEN.darker(), Font.PLAIN);
+            kit.setStyle(XMLStyleConstants.NAMESPACE_VALUE, Color.MAGENTA.darker(), Font.PLAIN);
+            kit.setStyle(XMLStyleConstants.NAMESPACE_PREFIX, Color.GREEN.darker(), Font.PLAIN);
+            kit.setStyle(XMLStyleConstants.SPECIAL, Color.BLACK, Font.PLAIN);
 
-      scpQuery.setViewportView(editorPanel);
+            // ScrollableEditorPanel forces the queryEditor to resize
+            ScrollableEditorPanel editorPanel = new ScrollableEditorPanel(queryEditor);
 
-      // Add the number margin as a Row Header View
-      scpQuery.setRowHeaderView(new LineNumberMargin(queryEditor));
-    } catch (Exception ex)
-    {
-      logger.error("Error during the creation of the QueryEditor", ex);//NOI18N
+            scpQuery.setViewportView(editorPanel);
+
+            // Add the number margin as a Row Header View
+            scpQuery.setRowHeaderView(new LineNumberMargin(queryEditor));
+        }
+        catch (Exception ex) {
+            logger.error("Error during the creation of the QueryEditor", ex); // NOI18N
+        }
     }
-  }
 
-  /**
-   * Creates all default FeatureAnnotationSymbols and stores them in the
-   * pointSymbol-Hashmap.
-   */
-  private void createPointSymbols()
-  {
-    //pointSymbolList.addElement(getStyle().NO_POINTSYMBOL);
-    pointSymbolHM.put(Style.NO_POINTSYMBOL, null);
-    pointSymbolHM.put(Style.AUTO_POINTSYMBOL, null);
+    /**
+     * Creates all default FeatureAnnotationSymbols and stores them in the pointSymbol-Hashmap.
+     */
+    private void createPointSymbols() {
 
-    logger.debug(getClass().getResource(POINTSYMBOL_FOLDER + "pushpin.png"));//NOI18N
-    FeatureAnnotationSymbol pushPin = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "pushpin.png")).getImage());//NOI18N
-    pushPin.setSweetSpotX(0.14d);
-    pushPin.setSweetSpotY(1.0d);
-    //pointSymbolList.addElement("pushpin.png");
-    pointSymbolHM.put("pushpin.png", pushPin);//NOI18N
+        // pointSymbolList.addElement(getStyle().NO_POINTSYMBOL);
+        pointSymbolHM.put(Style.NO_POINTSYMBOL, null);
+        pointSymbolHM.put(Style.AUTO_POINTSYMBOL, null);
 
-    FeatureAnnotationSymbol arrowBlue = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "arrow-blue-down.png")).getImage());//NOI18N
-    arrowBlue.setSweetSpotX(0.5d);
-    arrowBlue.setSweetSpotY(1.0d);
-    //pointSymbolList.addElement("arrow-blue-down.png");
-    pointSymbolHM.put("arrow-blue-down.png", arrowBlue);//NOI18N
+        logger.debug(getClass().getResource(POINTSYMBOL_FOLDER + "pushpin.png")); // NOI18N
 
-    FeatureAnnotationSymbol arrowGreen = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "arrow-green-down.png")).getImage());//NOI18N
-    arrowGreen.setSweetSpotX(0.5d);
-    arrowGreen.setSweetSpotY(1.0d);
-    //pointSymbolList.addElement("arrow-green-down.png");
-    pointSymbolHM.put("arrow-green-down.png", arrowGreen);//NOI18N
+        FeatureAnnotationSymbol pushPin = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "pushpin.png")).getImage()); // NOI18N
+        pushPin.setSweetSpotX(0.14d);
+        pushPin.setSweetSpotY(1.0d);
 
-    FeatureAnnotationSymbol flagBlack = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-black.png")).getImage());//NOI18N
-    flagBlack.setSweetSpotX(0.18d);
-    flagBlack.setSweetSpotY(0.96d);
-    //pointSymbolList.addElement("flag-black.png");
-    pointSymbolHM.put("flag-black.png", flagBlack);//NOI18N
+        // pointSymbolList.addElement("pushpin.png");
+        pointSymbolHM.put("pushpin.png", pushPin); // NOI18N
 
-    FeatureAnnotationSymbol flagBlue = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-blue.png")).getImage());//NOI18N
-    flagBlue.setSweetSpotX(0.18d);
-    flagBlue.setSweetSpotY(0.96d);
-    //pointSymbolList.addElement("flag-blue.png");
-    pointSymbolHM.put("flag-blue.png", flagBlue);//NOI18N
+        FeatureAnnotationSymbol arrowBlue = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "arrow-blue-down.png")).getImage()); // NOI18N
+        arrowBlue.setSweetSpotX(0.5d);
+        arrowBlue.setSweetSpotY(1.0d);
 
-    FeatureAnnotationSymbol flagGreen = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-green.png")).getImage());//NOI18N
-    flagGreen.setSweetSpotX(0.18d);
-    flagGreen.setSweetSpotY(0.96d);
-    //pointSymbolList.addElement("flag-green.png");
-    pointSymbolHM.put("flag-green.png", flagGreen);//NOI18N
+        // pointSymbolList.addElement("arrow-blue-down.png");
+        pointSymbolHM.put("arrow-blue-down.png", arrowBlue); // NOI18N
 
-    FeatureAnnotationSymbol flagRed = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-red.png")).getImage());//NOI18N
-    flagRed.setSweetSpotX(0.18d);
-    flagRed.setSweetSpotY(0.96d);
-    //pointSymbolList.addElement("flag-red.png");
-    pointSymbolHM.put("flag-red.png", flagRed);//NOI18N
+        FeatureAnnotationSymbol arrowGreen = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "arrow-green-down.png")).getImage()); // NOI18N
+        arrowGreen.setSweetSpotX(0.5d);
+        arrowGreen.setSweetSpotY(1.0d);
 
-    FeatureAnnotationSymbol flagYellow = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-yellow.png")).getImage());//NOI18N
-    flagYellow.setSweetSpotX(0.18d);
-    flagYellow.setSweetSpotY(0.96d);
-    //pointSymbolList.addElement("flag-yellow.png");
-    pointSymbolHM.put("flag-yellow.png", flagYellow);//NOI18N
+        // pointSymbolList.addElement("arrow-green-down.png");
+        pointSymbolHM.put("arrow-green-down.png", arrowGreen); // NOI18N
 
-    FeatureAnnotationSymbol starBlack = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "star-black.png")).getImage());//NOI18N
-    starBlack.setSweetSpotX(0.5d);
-    starBlack.setSweetSpotY(0.5d);
-    //pointSymbolList.addElement("star-black.png");
-    pointSymbolHM.put("star-black.png", starBlack);//NOI18N
+        FeatureAnnotationSymbol flagBlack = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-black.png")).getImage()); // NOI18N
+        flagBlack.setSweetSpotX(0.18d);
+        flagBlack.setSweetSpotY(0.96d);
 
-    FeatureAnnotationSymbol starYellow = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "star-yellow.png")).getImage());//NOI18N
-    starYellow.setSweetSpotX(0.5d);
-    starYellow.setSweetSpotY(0.5d);
-    //pointSymbolList.addElement("star-yellow.png");
-    pointSymbolHM.put("star-yellow.png", starYellow);//NOI18N
+        // pointSymbolList.addElement("flag-black.png");
+        pointSymbolHM.put("flag-black.png", flagBlack); // NOI18N
 
-    FeatureAnnotationSymbol infoButton = new FeatureAnnotationSymbol(new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "info.png")).getImage());//NOI18N
-    infoButton.setSweetSpotX(0.5d);
-    infoButton.setSweetSpotY(0.5d);
-    //pointSymbolList.addElement("info.png");
-    pointSymbolHM.put("info.png", infoButton);//NOI18N
-  }
+        FeatureAnnotationSymbol flagBlue = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-blue.png")).getImage()); // NOI18N
+        flagBlue.setSweetSpotX(0.18d);
+        flagBlue.setSweetSpotY(0.96d);
 
-  /**
-   * Calls update() of the StylePreviewPanel.
-   */
-  private void updatePreview()
-  {
-    ((StylePreviewPanel) panPreview).update(getStyle(), getStyle().getPointSymbol());
-    if (cbbPointSymbol.getSelectedItem().equals(getStyle().AUTO_POINTSYMBOL) && !sldLineWidth.getValueIsAdjusting() && !sldPointSymbolSize.getValueIsAdjusting())
-    {
-      if (pointSymbol == null)
-      {
-        //pointSymbol = new FeatureAnnotationSymbol(((StylePreviewPanel) panPreview).getPointSymbol());
-        //pointSymbol.setSweetSpotX(0.5d);
-        //pointSymbol.setSweetSpotY(0.5d);
+        // pointSymbolList.addElement("flag-blue.png");
+        pointSymbolHM.put("flag-blue.png", flagBlue); // NOI18N
 
-        this.pointSymbol = ((BasicStyle)this.layerProperties.getStyle()).createAutoPointSymbol();
-      } else
-      {
-        pointSymbol.setImage(((StylePreviewPanel) panPreview).getPointSymbol());
-      }
+        FeatureAnnotationSymbol flagGreen = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-green.png")).getImage()); // NOI18N
+        flagGreen.setSweetSpotX(0.18d);
+        flagGreen.setSweetSpotY(0.96d);
+
+        // pointSymbolList.addElement("flag-green.png");
+        pointSymbolHM.put("flag-green.png", flagGreen); // NOI18N
+
+        FeatureAnnotationSymbol flagRed = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-red.png")).getImage()); // NOI18N
+        flagRed.setSweetSpotX(0.18d);
+        flagRed.setSweetSpotY(0.96d);
+
+        // pointSymbolList.addElement("flag-red.png");
+        pointSymbolHM.put("flag-red.png", flagRed); // NOI18N
+
+        FeatureAnnotationSymbol flagYellow = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "flag-yellow.png")).getImage()); // NOI18N
+        flagYellow.setSweetSpotX(0.18d);
+        flagYellow.setSweetSpotY(0.96d);
+
+        // pointSymbolList.addElement("flag-yellow.png");
+        pointSymbolHM.put("flag-yellow.png", flagYellow); // NOI18N
+
+        FeatureAnnotationSymbol starBlack = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "star-black.png")).getImage()); // NOI18N
+        starBlack.setSweetSpotX(0.5d);
+        starBlack.setSweetSpotY(0.5d);
+
+        // pointSymbolList.addElement("star-black.png");
+        pointSymbolHM.put("star-black.png", starBlack); // NOI18N
+
+        FeatureAnnotationSymbol starYellow = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "star-yellow.png")).getImage()); // NOI18N
+        starYellow.setSweetSpotX(0.5d);
+        starYellow.setSweetSpotY(0.5d);
+
+        // pointSymbolList.addElement("star-yellow.png");
+        pointSymbolHM.put("star-yellow.png", starYellow); // NOI18N
+
+        FeatureAnnotationSymbol infoButton = new FeatureAnnotationSymbol(
+                new ImageIcon(getClass().getResource(POINTSYMBOL_FOLDER + "info.png")).getImage()); // NOI18N
+        infoButton.setSweetSpotX(0.5d);
+        infoButton.setSweetSpotY(0.5d);
+
+        // pointSymbolList.addElement("info.png");
+        pointSymbolHM.put("info.png", infoButton); // NOI18N
     }
-  }
 
+    /**
+     * Calls update() of the StylePreviewPanel.
+     */
+    private void updatePreview() {
+        ((StylePreviewPanel) panPreview).update(getStyle(), getStyle().getPointSymbol());
 
-// </editor-fold>
+        if (cbbPointSymbol.getSelectedItem().equals(getStyle().AUTO_POINTSYMBOL) &&
+                !sldLineWidth.getValueIsAdjusting() && !sldPointSymbolSize.getValueIsAdjusting()) {
 
-  // <editor-fold defaultstate="collapsed" desc="History-Methoden">
-  /**
-   * Searches the defaultStyleHistory.xml-file in the default-directory. If the file
-   * doesn't exist it will be created if possible.
-   */
-  private File searchDefaultHistory()
-  {
-    logger.debug("search for " + DEFAULT_HISTORY_NAME);//NOI18N
-    if (fileToCismapFolder.exists() && fileToCismapFolder.isDirectory())
-    { // .cismap exists
-      // does defaultStyleHistory.xml exist?
-      File test = new File(fileToCismapFolder.getPath() + seperator + DEFAULT_HISTORY_NAME);
-      if (test.exists() && test.isFile() && test.canRead() && test.canWrite())
-      {
-        logger.debug(DEFAULT_HISTORY_NAME + " found");//NOI18N
-        return test;
-      } else
-      {
-        return createDefaultHistory();
-      }
-    } else
-    { // .cismap doesn't exist, hence no history
-      fileToCismapFolder.mkdir();
-      return createDefaultHistory();
-    }
-  }
+            if (pointSymbol == null) {
+                // pointSymbol = new FeatureAnnotationSymbol(((StylePreviewPanel) panPreview).getPointSymbol());
+                // pointSymbol.setSweetSpotX(0.5d); pointSymbol.setSweetSpotY(0.5d);
 
-  /**
-   * Tries to create a new defaultStyleHistory.xml in /user/.cismap/
-   * @return file-object if successfully created or null
-   */
-  private File createDefaultHistory()
-  {
-    try
-    {
-      // create defaultStyleHistory.xml
-      File newFile = new File(fileToCismapFolder.getPath() + seperator + DEFAULT_HISTORY_NAME);
-      newFile.createNewFile();
-      logger.debug(DEFAULT_HISTORY_NAME + " successfully created");//NOI18N
-      return newFile;
-    } catch (IOException ex)
-    {
-      logger.error(DEFAULT_HISTORY_NAME + " could not create", ex);//NOI18N
-      return null;
-    }
-  }
-
-  /**
-   * Writes the current historylist-content into a XML-file.
-   * @param f targetfile
-   * @param onClose true, if the current style should be added to the history before
-   * writing, else false
-   */
-  private void writeHistory(final File f, final boolean onClose)
-  {
-    logger.debug("writeHistory(" + f + ")");//NOI18N
-    Runnable writeHistoryRunnable = new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        FileWriter writer = null;
-        try
-        {
-          f.createNewFile();
-          if (f.canWrite())
-          {
-            if (onClose)
-            {
-              ((StyleHistoryListModel) lstHistory.getModel()).addStyle((Style) getStyle().clone());
+                this.pointSymbol = ((BasicStyle) this.layerProperties.getStyle()).createAutoPointSymbol();
             }
+            else {
+                pointSymbol.setImage(((StylePreviewPanel) panPreview).getPointSymbol());
+            }
+        }
+    }
 
-            XMLOutputter out = new XMLOutputter("\t", true);//NOI18N
-            out.setTextTrim(true);
-            Document doc = new Document(((StyleHistoryListModel) lstHistory.getModel()).toElement());
-            writer = new FileWriter(f);
-            out.output(doc, writer);
+// </editor-fold>
 
-            EventQueue.invokeLater(new Runnable()
-            {
+    // <editor-fold defaultstate="collapsed" desc="History-Methoden">
+    /**
+     * Searches the defaultStyleHistory.xml-file in the default-directory. If the file doesn't exist it will be created
+     * if possible.
+     *
+     * @return  searches the defaultStyleHistory.xml-file in the default-directory.
+     */
+    private File searchDefaultHistory() {
+        logger.debug("search for " + DEFAULT_HISTORY_NAME); // NOI18N
 
-              @Override
-              public void run()
-              {
-                lblHistory.setText(f.getName());
-              }
+        if (fileToCismapFolder.exists() && fileToCismapFolder.isDirectory()) { // .cismap exists
+
+            // does defaultStyleHistory.xml exist?
+            File test = new File(fileToCismapFolder.getPath() + seperator + DEFAULT_HISTORY_NAME);
+
+            if (test.exists() && test.isFile() && test.canRead() && test.canWrite()) {
+                logger.debug(DEFAULT_HISTORY_NAME + " found"); // NOI18N
+
+                return test;
+            }
+            else {
+                return createDefaultHistory();
+            }
+        }
+        else { // .cismap doesn't exist, hence no history
+            fileToCismapFolder.mkdir();
+
+            return createDefaultHistory();
+        }
+    }
+
+    /**
+     * Tries to create a new defaultStyleHistory.xml in /user/.cismap/
+     *
+     * @return  file-object if successfully created or null
+     */
+    private File createDefaultHistory() {
+
+        try {
+
+            // create defaultStyleHistory.xml
+            File newFile = new File(fileToCismapFolder.getPath() + seperator + DEFAULT_HISTORY_NAME);
+            newFile.createNewFile();
+            logger.debug(DEFAULT_HISTORY_NAME + " successfully created"); // NOI18N
+
+            return newFile;
+        }
+        catch (IOException ex) {
+            logger.error(DEFAULT_HISTORY_NAME + " could not create", ex); // NOI18N
+
+            return null;
+        }
+    }
+
+    /**
+     * Writes the current historylist-content into a XML-file.
+     *
+     * @param  f        targetfile
+     * @param  onClose  true, if the current style should be added to the history before writing, else false
+     */
+    private void writeHistory(final File f, final boolean onClose) {
+        logger.debug("writeHistory(" + f + ")"); // NOI18N
+
+        Runnable writeHistoryRunnable = new Runnable() {
+                @Override public void run() {
+                    FileWriter writer = null;
+
+                    try {
+                        f.createNewFile();
+
+                        if (f.canWrite()) {
+
+                            if (onClose) {
+                                ((StyleHistoryListModel) lstHistory.getModel()).addStyle((Style) getStyle().clone());
+                            }
+
+                            XMLOutputter out = new XMLOutputter("\t", true); // NOI18N
+                            out.setTextTrim(true);
+
+                            Document doc = new Document(((StyleHistoryListModel) lstHistory.getModel()).toElement());
+                            writer = new FileWriter(f);
+                            out.output(doc, writer);
+
+                            EventQueue.invokeLater(new Runnable() {
+
+                                    @Override public void run() {
+                                        lblHistory.setText(f.getName());
+                                    }
+                                });
+                        }
+                    }
+                    catch (Exception ex) {
+                        logger.error("Error during writing the history.", ex); // NOI18N
+                        JOptionPane.showMessageDialog(StyleDialog.this,
+                            org.openide.util.NbBundle.getMessage(StyleDialog.class,
+                                "StyleDialog.writeHistory(File,boolean).JOptionPane.message",
+                                new Object[] { ex.getMessage() }), // NOI18N
+                            org.openide.util.NbBundle.getMessage(StyleDialog.class,
+                                "StyleDialog.writeHistory(File,boolean).JOptionPane.title"), JOptionPane.ERROR_MESSAGE); // NOI18N
+                    }
+                    finally {
+
+                        try {
+                            writer.close();
+                        }
+                        catch (Exception skip) {
+                        }
+                    }
+                }
+            };
+        CismetThreadPool.execute(writeHistoryRunnable);
+    }
+
+    /**
+     * Loads the history from a XML-file.
+     *
+     * @param  f  historyfile
+     */
+    private void loadHistory(final File f) {
+        logger.debug("loadHistory(" + f + ")"); // NOI18N
+
+        Runnable loadHistoryRunnable = new Runnable() {
+
+                @Override public void run() {
+
+                    try {
+                        final StyleHistoryListModel model = new StyleHistoryListModel(f);
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override public void run() {
+                                    lstHistory.setModel(model);
+                                    lblHistory.setText(f.getName());
+                                    defaultHistory = f;
+                                    logger.debug(f + " successfully loaded"); // NOI18N
+                                }
+                            });
+                    }
+                    catch (Exception ex) {
+                        logger.error("Error during loading of the history", ex); // NOI18N
+                        JOptionPane.showMessageDialog(StyleDialog.this,
+                            org.openide.util.NbBundle.getMessage(StyleDialog.class,
+                                "StyleDialog.loadHistory().JOptionPane.message", new Object[] { ex.getMessage() }), // NOI18N
+                            org.openide.util.NbBundle.getMessage(StyleDialog.class,
+                                "StyleDialog.loadHistory().JOptionPane.title"), JOptionPane.ERROR_MESSAGE); // NOI18N
+                    }
+                }
+            };
+        CismetThreadPool.execute(loadHistoryRunnable);
+
+    }
+
+    /**
+     * Create the popupmenu to manipulate the stylehistory.
+     */
+    private void createHistoryListPopupMenu() {
+        final FileFilter filter = new FileFilter() {
+
+                @Override public boolean accept(File f) {
+
+                    if ((f.isFile() && f.getName().endsWith(".xml")) || f.isDirectory()) // NOI18N
+                    {
+                        return true;
+                    }
+                    else {
+                        return false;
+                    }
+                }
+
+                @Override public String getDescription() {
+                    return org.openide.util.NbBundle.getMessage(StyleDialog.class,
+                            "StyleDialog.createHistoryListPopupMenu().description"); // NOI18N
+                }
+            };
+
+        JMenuItem save = new JMenuItem();
+        save.setText(POPUP_SAVE);
+
+        try {
+            save.setIcon(new ImageIcon(
+                    getClass().getResource("/de/cismet/cismap/commons/featureservice/res/save.png"))); // NOI18N
+        }
+        catch (Exception skipIcon) {
+        }
+
+        save.addActionListener(new ActionListener() {
+
+                @Override public void actionPerformed(ActionEvent e) {
+
+                    try {
+                        JFileChooser fc;
+
+                        try {
+                            fc = new JFileChooser(home + seperator + CISMAP_FOLDER);
+                        }
+                        catch (Exception bug) {
+
+                            // Bug Workaround http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6544857
+                            fc = new JFileChooser(home + seperator + CISMAP_FOLDER, new RestrictedFileSystemView());
+                        }
+
+                        fc.setFileFilter(filter);
+                        fc.setMultiSelectionEnabled(false);
+                        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+                        int returnValue = fc.showSaveDialog(StyleDialog.this);
+
+                        if (returnValue == JFileChooser.APPROVE_OPTION) {
+                            File dst = fc.getSelectedFile();
+
+                            if (!dst.getName().endsWith(".xml")) // NOI18N
+                            {
+                                dst = new File(dst.toString() + ".xml"); // NOI18N
+                            }
+
+                            writeHistory(dst, false);
+                            defaultHistory = dst;
+                        }
+                    }
+                    catch (Throwable ex) {
+                        logger.error("Error during opening the Open Dialog of the style history", ex); // NOI18N
+                    }
+                }
             });
-          }
-        } catch (Exception ex)
-        {
-          logger.error("Error during writing the history.", ex);//NOI18N
-          JOptionPane.showMessageDialog(StyleDialog.this,
-                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.writeHistory(File,boolean).JOptionPane.message", new Object[] {ex.getMessage()}),//NOI18N
-                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.writeHistory(File,boolean).JOptionPane.title"), JOptionPane.ERROR_MESSAGE);//NOI18N
-        } finally
-        {
-          try
-          {
-            writer.close();
-          } catch (Exception skip)
-          {
-          }
+
+        JMenuItem open = new JMenuItem();
+        open.setText(POPUP_LOAD);
+
+        try {
+            open.setIcon(new ImageIcon(
+                    getClass().getResource("/de/cismet/cismap/commons/featureservice/res/open.png"))); // NOI18N
         }
-      }
-    };
-    CismetThreadPool.execute(writeHistoryRunnable);
-  }
-
-  /**
-   * Loads the history from a XML-file.
-   * @param f historyfile
-   */
-  private void loadHistory(final File f)
-  {
-    logger.debug("loadHistory(" + f + ")");//NOI18N
-    Runnable loadHistoryRunnable = new Runnable()
-    {
-
-      @Override
-      public void run()
-      {
-        try
-        {
-          final StyleHistoryListModel model = new StyleHistoryListModel(f);
-          EventQueue.invokeLater(new Runnable()
-          {
-
-            @Override
-            public void run()
-            {
-              lstHistory.setModel(model);
-              lblHistory.setText(f.getName());
-              defaultHistory = f;
-              logger.debug(f + " successfully loaded");//NOI18N
-            }
-          });
-        } catch (Exception ex)
-        {
-          logger.error("Error during loading of the history", ex);//NOI18N
-          JOptionPane.showMessageDialog(StyleDialog.this,
-                   org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.loadHistory().JOptionPane.message", new Object[] {ex.getMessage()}),//NOI18N
-                  org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.loadHistory().JOptionPane.title"), JOptionPane.ERROR_MESSAGE);//NOI18N
+        catch (Exception skipIcon) {
         }
-      }
-    };
-    CismetThreadPool.execute(loadHistoryRunnable);
 
-  }
+        open.addActionListener(new ActionListener() {
 
-  /**
-   * Create the popupmenu to manipulate the stylehistory.
-   */
-  private void createHistoryListPopupMenu()
-  {
-    final FileFilter filter = new FileFilter()
-    {
+                @Override public void actionPerformed(ActionEvent e) {
 
-      @Override
-      public boolean accept(File f)
-      {
-        if ((f.isFile() && f.getName().endsWith(".xml")) || f.isDirectory())//NOI18N
-        {
-          return true;
-        } else
-        {
-          return false;
+                    try {
+                        JFileChooser fc;
+
+                        try {
+                            fc = new JFileChooser(home + seperator + CISMAP_FOLDER);
+                        }
+                        catch (Exception bug) {
+
+                            // Bug Workaround http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6544857
+                            fc = new JFileChooser(home + seperator + CISMAP_FOLDER, new RestrictedFileSystemView());
+                        }
+
+                        fc.setFileFilter(filter);
+                        fc.setMultiSelectionEnabled(false);
+                        fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+                        int returnVal = fc.showOpenDialog(StyleDialog.this);
+
+                        if (returnVal == JFileChooser.APPROVE_OPTION) {
+                            File fileToLoad = fc.getSelectedFile();
+                            loadHistory(fileToLoad);
+                        }
+                    }
+                    catch (Throwable ex) {
+                        logger.error("Error in open dialog of the StyleHistory", ex); // NOI18N
+                    }
+                }
+            });
+
+        JMenuItem clear = new JMenuItem();
+        clear.setText(POPUP_CLEAR);
+
+        try {
+            clear.setIcon(new ImageIcon(
+                    getClass().getResource("/de/cismet/cismap/commons/featureservice/res/delete_history.png"))); // NOI18N
         }
-      }
+        catch (Exception skipIcon) {
+        }
 
-      @Override
-      public String getDescription()
-      {
-        return org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.createHistoryListPopupMenu().description");//NOI18N
-      }
-    };
+        clear.addActionListener(new ActionListener() {
 
-    JMenuItem save = new JMenuItem();
-    save.setText(POPUP_SAVE);
-    try
-    {
-      save.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/save.png")));//NOI18N
-    } catch (Exception skipIcon)
-    {
+                @Override public void actionPerformed(ActionEvent e) {
+                    StyleHistoryListModel model = (StyleHistoryListModel) lstHistory.getModel();
+                    model.clear();
+                    lstHistory.repaint();
+                }
+            });
+
+        popupMenu = new JPopupMenu();
+        popupMenu.add(save);
+        popupMenu.add(open);
+        popupMenu.add(new JSeparator());
+        popupMenu.add(clear);
     }
-    save.addActionListener(new ActionListener()
-    {
-
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        try
-        {
-          JFileChooser fc;
-          try
-          {
-            fc = new JFileChooser(home + seperator + CISMAP_FOLDER);
-          } catch (Exception bug)
-          {
-            // Bug Workaround http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6544857
-            fc = new JFileChooser(home + seperator + CISMAP_FOLDER, new RestrictedFileSystemView());
-          }
-          fc.setFileFilter(filter);
-          fc.setMultiSelectionEnabled(false);
-          fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-          int returnValue = fc.showSaveDialog(StyleDialog.this);
-          if (returnValue == JFileChooser.APPROVE_OPTION)
-          {
-            File dst = fc.getSelectedFile();
-            if (!dst.getName().endsWith(".xml"))//NOI18N
-            {
-              dst = new File(dst.toString() + ".xml");//NOI18N
-            }
-            writeHistory(dst, false);
-            defaultHistory = dst;
-          }
-        } catch (Throwable ex)
-        {
-          logger.error("Error during opening the Open Dialog of the style history", ex);//NOI18N
-        }
-      }
-    });
-
-    JMenuItem open = new JMenuItem();
-    open.setText(POPUP_LOAD);
-    try
-    {
-      open.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/open.png")));//NOI18N
-    } catch (Exception skipIcon)
-    {
-    }
-    open.addActionListener(new ActionListener()
-    {
-
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        try
-        {
-          JFileChooser fc;
-          try
-          {
-            fc = new JFileChooser(home + seperator + CISMAP_FOLDER);
-          } catch (Exception bug)
-          {
-            // Bug Workaround http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6544857
-            fc = new JFileChooser(home + seperator + CISMAP_FOLDER, new RestrictedFileSystemView());
-          }
-          fc.setFileFilter(filter);
-          fc.setMultiSelectionEnabled(false);
-          fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-          int returnVal = fc.showOpenDialog(StyleDialog.this);
-          if (returnVal == JFileChooser.APPROVE_OPTION)
-          {
-            File fileToLoad = fc.getSelectedFile();
-            loadHistory(fileToLoad);
-          }
-        } catch (Throwable ex)
-        {
-          logger.error("Error in open dialog of the StyleHistory", ex);//NOI18N
-        }
-      }
-    });
-
-    JMenuItem clear = new JMenuItem();
-    clear.setText(POPUP_CLEAR);
-    try
-    {
-      clear.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/delete_history.png")));//NOI18N
-    } catch (Exception skipIcon)
-    {
-    }
-    clear.addActionListener(new ActionListener()
-    {
-
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        StyleHistoryListModel model = (StyleHistoryListModel) lstHistory.getModel();
-        model.clear();
-        lstHistory.repaint();
-      }
-    });
-
-    popupMenu = new JPopupMenu();
-    popupMenu.add(save);
-    popupMenu.add(open);
-    popupMenu.add(new JSeparator());
-    popupMenu.add(clear);
-  }
 // </editor-fold>
 
-  // <editor-fold defaultstate="collapsed" desc="Setters & Getters">
+    // <editor-fold defaultstate="collapsed" desc="Setters & Getters">
 
-  /**
-   * Configures the dialog based on the delivered AbstractfeatureService.
-   * @param featureService featureservice to get attributes from
-   */
-  public void configureDialog(LayerProperties layerProperties, Map<String, FeatureServiceAttribute> featureServiceAttributes, Object query)
-  {
-    try
-    {
-      this.setAccepted(false);
-      this.setFeatureServiceAttributes(featureServiceAttributes);
-      this.setLayerProperties(layerProperties);
+    /**
+     * Configures the dialog based on the delivered AbstractfeatureService.
+     *
+     * @param  layerProperties           DOCUMENT ME!
+     * @param  featureServiceAttributes  featureservice to get attributes from
+     * @param  query                     DOCUMENT ME!
+     */
+    public void configureDialog(LayerProperties layerProperties,
+        Map<String, FeatureServiceAttribute> featureServiceAttributes, Object query) {
 
-      logger.debug("QueryType: " + this.layerProperties.getQueryType());//NOI18N
-      if (this.layerProperties.getQueryType() != LayerProperties.QUERYTYPE_UNDEFINED && query != null)
-      {
-        logger.debug("Layer supports query, adding query dialog");//NOI18N
-        tbpTabs.addTab("Query Editor", new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/editor.png")), panTabQuery);//NOI18N
-        setQueryString(query.toString());
-      } else
-      {
-        logger.debug("Layer does not support query, removing query dialog");//NOI18N
-        tbpTabs.remove(panTabQuery);
-      }
+        try {
+            this.setAccepted(false);
+            this.setFeatureServiceAttributes(featureServiceAttributes);
+            this.setLayerProperties(layerProperties);
 
-      this.updateDialog();
-      this.updateAttributes();
-      this.updatePreview();
-    } catch (Throwable t)
-    {
-      logger.error(t.getMessage(), t);
-    }
-  }
+            logger.debug("QueryType: " + this.layerProperties.getQueryType()); // NOI18N
 
-  /**
-   * Reassigns all variables based on the actual Layer Properties.
-   */
-  private void updateDialog()
-  {
-    panFillColor.setBackground(getStyle().getFillColor());
-    panTransColor.setBackground(getStyle().getFillColor());
-    chkFill.setSelected(getStyle().isDrawFill());
-
-    panLineColor.setBackground(getStyle().getLineColor());
-    chkLine.setSelected(getStyle().isDrawLine());
-
-    chkSync.setSelected(false);
-    chkHighlightable.setSelected(getStyle().isHighlightFeature());
-
-    sldLineWidth.setValue(getStyle().getLineWidth());
-    setAlpha(getStyle().getAlpha());
-
-    if (!pointSymbolHM.containsKey(getStyle().getPointSymbolFilename()))
-    {
-      logger.warn("unkown point symbol: '" + getStyle().getPointSymbolFilename() + "', adding to list");//NOI18N
-      pointSymbolHM.put(getStyle().getPointSymbolFilename(), getStyle().getPointSymbol());
-      cbbPointSymbol.setModel(new DefaultComboBoxModel(new Vector<String>(this.pointSymbolHM.keySet())));
-    }
-
-    cbbPointSymbol.setSelectedItem(getStyle().getPointSymbolFilename());
-    if (getStyle().getPointSymbolFilename().equals(getStyle().AUTO_POINTSYMBOL))
-    {
-      setPointSymbolSizeActivated(true);
-      sldPointSymbolSize.setValue(getStyle().getPointSymbolSize());
-    } else
-    {
-      setPointSymbolSizeActivated(false);
-      sldPointSymbolSize.setValue(getStyle().MIN_POINTSYMBOLSIZE);
-    }
-
-    chkActivateLabels.setSelected(getStyle().isDrawLabel());
-    setFontType(getStyle().getFont());
-    panFontColor.setBackground(getStyle().getFontColor());
-
-    setAlignment(getStyle().getAlignment());
-    txtMin.setText("" + getStyle().getMinScale());//NOI18N
-    txtMax.setText("" + getStyle().getMaxScale());//NOI18N
-    setMultiplier(getStyle().getMultiplier());
-    chkAutoscale.setSelected(getStyle().isAutoscale());
-  }
-
-  private void updateAttributes()
-  {
-    // set Attributes ..........................................................
-
-    cbbAnnotationExpression.removeAllItems();
-    cbbIdExpression.removeAllItems();
-    panAttribGeo.removeAll();
-    panAttribNorm.removeAll();
-    btgGeom = new ButtonGroup();
-
-
-    // the stored expression may null or no feature service attribute
-    this.ignoreSelectionEvent = true;
-    if(this.layerProperties.isIdExpressionEnabled())
-    {
-      String idExpression = this.layerProperties.getIdExpression();
-      if (idExpression == null ||
-              (this.layerProperties.getIdExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME && !this.featureServiceAttributes.containsKey(idExpression)))
-      {
-        boolean expressionSet = false;
-        for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values())
-        {
-          if (!fsa.isGeometry() && fsa.isSelected())
-          {
-            this.layerProperties.setIdExpression(fsa.getName(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-            logger.warn("idExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (" + fsa.getType() + ", EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
-            expressionSet = true;
-            break;
-          }
-        }
-
-        // no selected attributes?!
-        if (!expressionSet)
-        {
-          for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values())
-          {
-            if (!fsa.isGeometry())
-            {
-              fsa.setSelected(true);
-              this.layerProperties.setIdExpression(fsa.getName(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-              logger.warn("idExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME) and forcing attribute enabled");//NOI18N
-              expressionSet = true;
-              break;
+            if ((this.layerProperties.getQueryType() != LayerProperties.QUERYTYPE_UNDEFINED) && (query != null)) {
+                logger.debug("Layer supports query, adding query dialog"); // NOI18N
+                tbpTabs.addTab("Query Editor",
+                    new javax.swing.ImageIcon(
+                        getClass().getResource("/de/cismet/cismap/commons/featureservice/res/editor.png")),
+                    panTabQuery); // NOI18N
+                setQueryString(query.toString());
             }
-          }
+            else {
+                logger.debug("Layer does not support query, removing query dialog"); // NOI18N
+                tbpTabs.remove(panTabQuery);
+            }
+
+            this.updateDialog();
+            this.updateAttributes();
+            this.updatePreview();
+        }
+        catch (Throwable t) {
+            logger.error(t.getMessage(), t);
+        }
+    }
+
+    /**
+     * Reassigns all variables based on the actual Layer Properties.
+     */
+    private void updateDialog() {
+        panFillColor.setBackground(getStyle().getFillColor());
+        panTransColor.setBackground(getStyle().getFillColor());
+        chkFill.setSelected(getStyle().isDrawFill());
+
+        panLineColor.setBackground(getStyle().getLineColor());
+        chkLine.setSelected(getStyle().isDrawLine());
+
+        chkSync.setSelected(false);
+        chkHighlightable.setSelected(getStyle().isHighlightFeature());
+
+        sldLineWidth.setValue(getStyle().getLineWidth());
+        setAlpha(getStyle().getAlpha());
+
+        if (!pointSymbolHM.containsKey(getStyle().getPointSymbolFilename())) {
+            logger.warn("unkown point symbol: '" + getStyle().getPointSymbolFilename() + "', adding to list"); // NOI18N
+            pointSymbolHM.put(getStyle().getPointSymbolFilename(), getStyle().getPointSymbol());
+            cbbPointSymbol.setModel(new DefaultComboBoxModel(new Vector<String>(this.pointSymbolHM.keySet())));
         }
 
-        if (!expressionSet)
-        {
-          logger.error("no valid id expression could be dertimed from the list of available attributes");//NOI18N
+        cbbPointSymbol.setSelectedItem(getStyle().getPointSymbolFilename());
+
+        if (getStyle().getPointSymbolFilename().equals(getStyle().AUTO_POINTSYMBOL)) {
+            setPointSymbolSizeActivated(true);
+            sldPointSymbolSize.setValue(getStyle().getPointSymbolSize());
+        }
+        else {
+            setPointSymbolSizeActivated(false);
+            sldPointSymbolSize.setValue(getStyle().MIN_POINTSYMBOLSIZE);
         }
 
-      } else if (this.layerProperties.getIdExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME)
-      {
-        if (!this.featureServiceAttributes.get(idExpression).isSelected())
-        {
-          logger.warn("idExpression '" + idExpression + "' is not selected, forcing selected");//NOI18N
-          this.featureServiceAttributes.get(idExpression).setSelected(true);
+        chkActivateLabels.setSelected(getStyle().isDrawLabel());
+        setFontType(getStyle().getFont());
+        panFontColor.setBackground(getStyle().getFontColor());
+
+        setAlignment(getStyle().getAlignment());
+        txtMin.setText("" + getStyle().getMinScale()); // NOI18N
+        txtMax.setText("" + getStyle().getMaxScale()); // NOI18N
+        setMultiplier(getStyle().getMultiplier());
+        chkAutoscale.setSelected(getStyle().isAutoscale());
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void updateAttributes() {
+        // set Attributes ..........................................................
+
+        cbbAnnotationExpression.removeAllItems();
+        cbbIdExpression.removeAllItems();
+        panAttribGeo.removeAll();
+        panAttribNorm.removeAll();
+        btgGeom = new ButtonGroup();
+
+        // the stored expression may null or no feature service attribute
+        this.ignoreSelectionEvent = true;
+
+        if (this.layerProperties.isIdExpressionEnabled()) {
+            String idExpression = this.layerProperties.getIdExpression();
+
+            if ((idExpression == null) ||
+                    ((this.layerProperties.getIdExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME) &&
+                        !this.featureServiceAttributes.containsKey(idExpression))) {
+                boolean expressionSet = false;
+
+                for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values()) {
+
+                    if (!fsa.isGeometry() && fsa.isSelected()) {
+                        this.layerProperties.setIdExpression(fsa.getName(),
+                            LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+                        logger.warn("idExpression is null or not in attriute list, setting to '" + fsa.getName() +
+                            "' (" + fsa.getType() + ", EXPRESSIONTYPE_PROPERTYNAME)"); // NOI18N
+                        expressionSet = true;
+
+                        break;
+                    }
+                }
+
+                // no selected attributes?!
+                if (!expressionSet) {
+
+                    for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values()) {
+
+                        if (!fsa.isGeometry()) {
+                            fsa.setSelected(true);
+                            this.layerProperties.setIdExpression(fsa.getName(),
+                                LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+                            logger.warn("idExpression is null or not in attriute list, setting to '" + fsa.getName() +
+                                "' (EXPRESSIONTYPE_PROPERTYNAME) and forcing attribute enabled"); // NOI18N
+                            expressionSet = true;
+
+                            break;
+                        }
+                    }
+                }
+
+                if (!expressionSet) {
+                    logger.error("no valid id expression could be dertimed from the list of available attributes"); // NOI18N
+                }
+
+            }
+            else if (this.layerProperties.getIdExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME) {
+
+                if (!this.featureServiceAttributes.get(idExpression).isSelected()) {
+                    logger.warn("idExpression '" + idExpression + "' is not selected, forcing selected"); // NOI18N
+                    this.featureServiceAttributes.get(idExpression).setSelected(true);
+                }
+            }
         }
-      }
-    }
-    else
-    {
-      logger.debug("the selected layer does not support id expressions");//NOI18N
-      this.cbbIdExpression.setEnabled(false);
-    }
-
-    String annotationExpression = this.layerProperties.getPrimaryAnnotationExpression();
-    if (annotationExpression == null ||
-            (this.layerProperties.getPrimaryAnnotationExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME && !this.featureServiceAttributes.containsKey(annotationExpression)))
-    {
-      boolean expressionSet = false;
-      for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values())
-      {
-        if (!fsa.isGeometry() && fsa.isSelected())
-        {
-          this.layerProperties.setPrimaryAnnotationExpression(fsa.getName(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-          logger.warn("annotationExpressionExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
-          expressionSet = true;
-          break;
+        else {
+            logger.debug("the selected layer does not support id expressions"); // NOI18N
+            this.cbbIdExpression.setEnabled(false);
         }
-      }
 
-      // no selected attributes?!
-      if (!expressionSet)
-      {
-        for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values())
-        {
-          if (!fsa.isGeometry())
-          {
-            fsa.setSelected(true);
-            this.layerProperties.setPrimaryAnnotationExpression(fsa.getName(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-            logger.warn("annotationExpressionExpression is null or not in attriute list, setting to '" + fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME) and forcing attribute enabled");//NOI18N
-            expressionSet = true;
-            break;
-          }
+        String annotationExpression = this.layerProperties.getPrimaryAnnotationExpression();
+
+        if ((annotationExpression == null) ||
+                ((this.layerProperties.getPrimaryAnnotationExpressionType() ==
+                        LayerProperties.EXPRESSIONTYPE_PROPERTYNAME) &&
+                    !this.featureServiceAttributes.containsKey(annotationExpression))) {
+            boolean expressionSet = false;
+
+            for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values()) {
+
+                if (!fsa.isGeometry() && fsa.isSelected()) {
+                    this.layerProperties.setPrimaryAnnotationExpression(fsa.getName(),
+                        LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+                    logger.warn("annotationExpressionExpression is null or not in attriute list, setting to '" +
+                        fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME)"); // NOI18N
+                    expressionSet = true;
+
+                    break;
+                }
+            }
+
+            // no selected attributes?!
+            if (!expressionSet) {
+
+                for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values()) {
+
+                    if (!fsa.isGeometry()) {
+                        fsa.setSelected(true);
+                        this.layerProperties.setPrimaryAnnotationExpression(fsa.getName(),
+                            LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+                        logger.warn("annotationExpressionExpression is null or not in attriute list, setting to '" +
+                            fsa.getName() + "' (EXPRESSIONTYPE_PROPERTYNAME) and forcing attribute enabled"); // NOI18N
+                        expressionSet = true;
+
+                        break;
+                    }
+                }
+            }
+
+            if (!expressionSet) {
+                logger.error(
+                    "no valid annotationExpression expression could be determined from the list of available attributes"); // NOI18N
+            }
+
         }
-      }
+        else if (this.layerProperties.getPrimaryAnnotationExpressionType() ==
+                LayerProperties.EXPRESSIONTYPE_PROPERTYNAME) {
 
-      if (!expressionSet)
-      {
-        logger.error("no valid annotationExpression expression could be determined from the list of available attributes");//NOI18N
-      }
-
-    } else if (this.layerProperties.getPrimaryAnnotationExpressionType() == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME)
-    {
-      if (!this.featureServiceAttributes.get(annotationExpression).isSelected())
-      {
-        logger.warn("annotationExpression '" + annotationExpression + "' is not selected, forcing selected");//NOI18N
-        this.featureServiceAttributes.get(annotationExpression).setSelected(true);
-      }
-    }
-
-    // initialise the combo boxes and check boxes
-    for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values())
-    {
-      if (!fsa.isGeometry())
-      {
-        this.createNormalAttributeButton(fsa);
-      } else
-      {
-        this.createGeoAttributeButton(fsa);
-      }
-    }
-
-    if(this.layerProperties.isIdExpressionEnabled())cbbIdExpression.setSelectedItem(this.layerProperties.getIdExpression());
-    cbbAnnotationExpression.setSelectedItem(this.layerProperties.getPrimaryAnnotationExpression());
-    this.ignoreSelectionEvent = false;
-
-    // check if a geo attribute is selected
-    if (this.btgGeom.getSelection() == null && this.btgGeom.getButtonCount() > 0)
-    {
-      this.btgGeom.setSelected(this.btgGeom.getElements().nextElement().getModel(), true);
-      logger.warn("no geo attribute selected, forcing selection of attribute '" + this.btgGeom.getSelection().getActionCommand() + "'");//NOI18N
-    }
-  }
-
-  /**
-   * Reassigns all variables based on the delivered feature.
-   * @param f feature to define the current style of the dialog
-   */
-//  private void setFeature(CloneableFeature f)
-//  {
-//    logger.debug("Setzte StyleFeature im StyleDialog");
-//    if (f != null && f != feature)
-//    {
-//      try
-//      {
-//        this.feature = f;
-//        if (f instanceof StyledFeature)
-//        {
-//          isStyleFeature = true;
-//
-//          // color im BasicStyle Objekt nicht auf null setzen sondern nur paintFill/Line auf false
-//          Paint fillColor = ((StyledFeature) f).getFillingPaint();
-//          setFillColor(fillColor != null, fillColor != null ? (Color) ((StyledFeature) f).getFillingPaint() : getStyle().getFillColor());
-//
-//          Paint lineColor = ((StyledFeature) f).getLinePaint();
-//          setLineColor(lineColor != null, lineColor != null ? (Color) lineColor : getStyle().getLineColor());
-//
-//          setLineWidth(((StyledFeature) f).getLineWidth());
-//
-//          FeatureAnnotationSymbol s = ((StyledFeature) f).getPointAnnotationSymbol();
-//          if (pointSymbolHM.containsValue(s))
-//          {
-//            for (String key : pointSymbolHM.keySet())
-//            {
-//              if (pointSymbolHM.get(key) == s)
-//              {
-//                setPointSymbol(key);
-//                cbbPointSymbol.setSelectedItem(key);
-//                break;
-//              }
-//            }
-//          } else
-//          {
-//            setPointSymbol(getStyle().NO_POINTSYMBOL);
-//            cbbPointSymbol.setSelectedItem(getStyle().NO_POINTSYMBOL);
-//            pointSymbol = s;
-//          }
-//
-//          setAlpha(((StyledFeature) f).getTransparency());
-//          setHighlighting(((StyledFeature) f).isHighlightingEnabled());
-//        }
-//
-//        if (f instanceof AnnotatedFeature)
-//        {
-//          isAnnotatedFeature = true;
-//          setLabelingEnabled(((AnnotatedFeature) f).isPrimaryAnnotationVisible());
-//          setMaxScale(((AnnotatedFeature) f).getMaxScaleDenominator());
-//          setMinScale(((AnnotatedFeature) f).getMinScaleDenominator());
-//          setLabelAttribute(((AnnotatedFeature) f).getPrimaryAnnotation());
-//          setFontType(((AnnotatedFeature) f).getPrimaryAnnotationFont());
-//          setFontColor((Color) ((AnnotatedFeature) f).getPrimaryAnnotationPaint());
-//          setAlignment(((AnnotatedFeature) f).getPrimaryAnnotationJustification());
-//          setAutoscale(((AnnotatedFeature) f).isAutoscale());
-//          setMultiplier(((AnnotatedFeature) f).getPrimaryAnnotationScaling());
-//        }
-//
-//        if (f instanceof FeatureWithId)
-//        {
-//          isIdFeature = true;
-//          setIdExpression(((FeatureWithId) f).getIdExpression());
-//        }
-//      } catch (Exception ex)
-//      {
-//        logger.error("Fehler beim Setzen des StyleFeatures", ex);
-//      }
-//
-//      updatePreview();
-//    }
-//  }
-  /**
-   * Creates components depending on the attributetype and adds them to the
-   * attributes-tab.
-   * @param attributes list with FeatureServiceAttribute
-   */
-  private void setAttributes(List<FeatureServiceAttribute> attributes)
-  {
-  }
-
-//  /**
-//   * Resets the attributevariables.
-//   */
-//  private void resetAttributeVariables()
-//  {
-//    logger.debug("resetAttributeVariables");
-//    //styleAttribHM.put(ATTRI_GEOM, new Vector<Component>());
-//    //styleAttribHM.put(ATTRI_NORM, new Vector<Component>());
-//    //styleAttribHM.put(ATTRI_NORM_SELECTED, new Vector<String>());
-//
-//    cbbAttribute.removeAllItems();
-//    cbbPrimary.removeAllItems();
-//    panAttribGeo.removeAll();
-//    panAttribNorm.removeAll();
-//    btgGeom = new ButtonGroup();
-//  }
-  /**
-   * Is called if setFeatureServiceAttributes() found a attribute with a geometrytype. Creates a new
-   * RadioButton and adds it to the attribute-panel.
-   * @param fsa FeatureServiceAttribute
-   */
-  private void createGeoAttributeButton(final FeatureServiceAttribute fsa)
-  {
-    logger.debug("Geo-Attribut \"" + fsa.getName() + "\" adden");//NOI18N
-
-    // delete attribute from the "normal" attribute-list
-    //((Vector<FeatureServiceAttribute>) styleAttribHM.get(ATTRI_NORM_SELECTED)).remove(fsa);
-    final JRadioButton rb = new JRadioButton(fsa.getName());
-    rb.setActionCommand(fsa.getName());
-
-    btgGeom.add(rb);
-    // select/deselect the RadioButton
-    rb.setSelected(fsa.isSelected());
-    panAttribGeo.add(rb);
-
-    // create ItemStateListener that keeps the HashMap up-to-date
-    rb.addItemListener(new ItemListener()
-    {
-      @Override
-      public void itemStateChanged(ItemEvent e)
-      {
-        if (!ignoreSelectionEvent && e.getStateChange() == ItemEvent.SELECTED)
-        {
-          //setSelectedGeoAttribute(fsa.getName());
-          fsa.setSelected(true);
-        } else
-        {
-          fsa.setSelected(false);
+            if (!this.featureServiceAttributes.get(annotationExpression).isSelected()) {
+                logger.warn("annotationExpression '" + annotationExpression + "' is not selected, forcing selected"); // NOI18N
+                this.featureServiceAttributes.get(annotationExpression).setSelected(true);
+            }
         }
-      }
-    });
-  }
 
-  /**
-   * Is called if setFeatureServiceAttributes() found a attribute that is no geometry. Creates a new
-   * CheckBox and adds it to the attribute-panel.
-   * @param fsa FeatureServiceAttribute
-   */
-  private void createNormalAttributeButton(final FeatureServiceAttribute fsa)
-  {
-    logger.debug("Attribut \"" + fsa.getName() + "\" adden");//NOI18N
-    final JCheckBox cb = new JCheckBox(fsa.getName(), false);
-    cb.setActionCommand(fsa.getName());
+        // initialise the combo boxes and check boxes
+        for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values()) {
 
-    // select/deselect the CheckBox -> item state change
-    cb.setSelected(fsa.isSelected());
-    if(fsa.isSelected())
-    {
-      cbbAnnotationExpression.addItem(fsa.getName());
-      cbbIdExpression.addItem(fsa.getName());
-    }
-
-    cb.addItemListener(new ItemListener()
-    {
-      @Override
-      public void itemStateChanged(ItemEvent e)
-      {
-        if (!ignoreSelectionEvent && e.getStateChange() == ItemEvent.SELECTED)
-        {
-          //sel.add(fsa.getName());
-          fsa.setSelected(true);
-          cbbAnnotationExpression.addItem(fsa.getName());
-          cbbIdExpression.addItem(fsa.getName());
-        } else if(!ignoreSelectionEvent && e.getStateChange() == ItemEvent.DESELECTED)
-        {
-          //sel.remove(fsa.getName());
-          fsa.setSelected(false);
-          cbbAnnotationExpression.removeItem(fsa.getName());
-          cbbIdExpression.removeItem(fsa.getName());
+            if (!fsa.isGeometry()) {
+                this.createNormalAttributeButton(fsa);
+            }
+            else {
+                this.createGeoAttributeButton(fsa);
+            }
         }
-      }
-    });
 
-    panAttribNorm.add(cb);
-  }
+        if (this.layerProperties.isIdExpressionEnabled()) {
+            cbbIdExpression.setSelectedItem(this.layerProperties.getIdExpression());
+        }
 
-  /**
-   * Returns a Vector with all selected attributes (including the geometry-attribute).
-   */
-  public Vector<String> getSelectedAttributes()
-  {
-    Vector<String> selectedAttributes = new Vector(this.featureServiceAttributes.size());
-    for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values())
-    {
-      if (fsa.isSelected())
-      {
-        selectedAttributes.add(fsa.getName());
-      }
+        cbbAnnotationExpression.setSelectedItem(this.layerProperties.getPrimaryAnnotationExpression());
+        this.ignoreSelectionEvent = false;
+
+        // check if a geo attribute is selected
+        if ((this.btgGeom.getSelection() == null) && (this.btgGeom.getButtonCount() > 0)) {
+            this.btgGeom.setSelected(this.btgGeom.getElements().nextElement().getModel(), true);
+            logger.warn("no geo attribute selected, forcing selection of attribute '" +
+                this.btgGeom.getSelection().getActionCommand() + "'"); // NOI18N
+        }
     }
 
-    return selectedAttributes;
-  }
-
-  /**
-   * Returns the selected geometry-attribute.
-   */
-  public String getSelectedGeoAttribute()
-  {
-    if (!this.isAccepted())
-    {
-      logger.warn("supicious call to 'getQueryString()', changes not accepted");//NOI18N
+    /**
+     * Reassigns all variables based on the delivered feature.
+     *
+     * @param  attributes  f feature to define the current style of the dialog
+     */
+// private void setFeature(CloneableFeature f) { logger.debug("Setzte StyleFeature im StyleDialog"); if (f != null && f
+// != feature) { try { this.feature = f; if (f instanceof StyledFeature) { isStyleFeature = true;
+//
+// color im BasicStyle Objekt nicht auf null setzen sondern nur paintFill/Line auf false Paint fillColor = ((StyledFeature)
+// f).getFillingPaint(); setFillColor(fillColor != null, fillColor != null ? (Color) ((StyledFeature)
+// f).getFillingPaint() : getStyle().getFillColor());
+//
+// Paint lineColor = ((StyledFeature) f).getLinePaint(); setLineColor(lineColor != null, lineColor != null ? (Color)
+// lineColor : getStyle().getLineColor());
+//
+// setLineWidth(((StyledFeature) f).getLineWidth());
+//
+// FeatureAnnotationSymbol s = ((StyledFeature) f).getPointAnnotationSymbol(); if (pointSymbolHM.containsValue(s)) { for
+// (String key : pointSymbolHM.keySet()) { if (pointSymbolHM.get(key) == s) { setPointSymbol(key);
+// cbbPointSymbol.setSelectedItem(key); break; } } } else { setPointSymbol(getStyle().NO_POINTSYMBOL);
+// cbbPointSymbol.setSelectedItem(getStyle().NO_POINTSYMBOL); pointSymbol = s; }
+//
+// setAlpha(((StyledFeature) f).getTransparency()); setHighlighting(((StyledFeature) f).isHighlightingEnabled()); }
+//
+// if (f instanceof AnnotatedFeature) { isAnnotatedFeature = true; setLabelingEnabled(((AnnotatedFeature)
+// f).isPrimaryAnnotationVisible()); setMaxScale(((AnnotatedFeature) f).getMaxScaleDenominator());
+// setMinScale(((AnnotatedFeature) f).getMinScaleDenominator()); setLabelAttribute(((AnnotatedFeature)
+// f).getPrimaryAnnotation()); setFontType(((AnnotatedFeature) f).getPrimaryAnnotationFont()); setFontColor((Color)
+// ((AnnotatedFeature) f).getPrimaryAnnotationPaint()); setAlignment(((AnnotatedFeature)
+// f).getPrimaryAnnotationJustification()); setAutoscale(((AnnotatedFeature) f).isAutoscale());
+// setMultiplier(((AnnotatedFeature) f).getPrimaryAnnotationScaling()); }
+//
+// if (f instanceof FeatureWithId) { isIdFeature = true; setIdExpression(((FeatureWithId) f).getIdExpression()); } } catch
+// (Exception ex) { logger.error("Fehler beim Setzen des StyleFeatures", ex); }
+//
+// updatePreview(); } }
+    /**
+     * Creates components depending on the attributetype and adds them to the attributes-tab.
+     *
+     * @param  attributes  list with FeatureServiceAttribute
+     */
+    private void setAttributes(List<FeatureServiceAttribute> attributes) {
     }
 
-    return this.btgGeom.getSelection().getActionCommand();
-  }
+// /**
+// * Resets the attributevariables.
+// */
+// private void resetAttributeVariables()
+// {
+// logger.debug("resetAttributeVariables");
+// //styleAttribHM.put(ATTRI_GEOM, new Vector<Component>());
+// //styleAttribHM.put(ATTRI_NORM, new Vector<Component>());
+// //styleAttribHM.put(ATTRI_NORM_SELECTED, new Vector<String>());
+//
+// cbbAttribute.removeAllItems();
+// cbbPrimary.removeAllItems();
+// panAttribGeo.removeAll();
+// panAttribNorm.removeAll();
+// btgGeom = new ButtonGroup();
+// }
+    /**
+     * Is called if setFeatureServiceAttributes() found a attribute with a geometrytype. Creates a new RadioButton and
+     * adds it to the attribute-panel.
+     *
+     * @param  fsa  FeatureServiceAttribute
+     */
+    private void createGeoAttributeButton(final FeatureServiceAttribute fsa) {
+        logger.debug("Geo-Attribut \"" + fsa.getName() + "\" adden"); // NOI18N
 
-  /**
-   * Changes the fillingcolor.
-   * @param fillColor the new fillingcolor
-   */
-  private void setFillColor(boolean paint, Color fillColor)
-  {
-    getStyle().setDrawFill(paint);
-    getStyle().setFillColor(fillColor);
-    panFillColor.setBackground(fillColor);
-    panTransColor.setBackground(fillColor);
-    chkFill.setSelected(paint);
-  }
+        // delete attribute from the "normal" attribute-list
+        // ((Vector<FeatureServiceAttribute>) styleAttribHM.get(ATTRI_NORM_SELECTED)).remove(fsa);
+        final JRadioButton rb = new JRadioButton(fsa.getName());
+        rb.setActionCommand(fsa.getName());
 
-  /**
-   * Changes the linecolor.
-   * @param lineColor the new linecolor
-   */
-  private void setLineColor(boolean paint, Color lineColor)
-  {
-    getStyle().setDrawLine(paint);
-    getStyle().setLineColor(lineColor);
-    panLineColor.setBackground(lineColor);
-    chkLine.setSelected(paint);
-  }
+        btgGeom.add(rb);
 
-  /**
-   * Changes the linewidth.
-   * @param lineWidth the new linewidth
-   */
-  private void setLineWidth(int lineWidth)
-  {
-    getStyle().setLineWidth(lineWidth);
-    if (sldLineWidth.getValue() != lineWidth)
-    {
-      sldLineWidth.setValue(lineWidth);
+        // select/deselect the RadioButton
+        rb.setSelected(fsa.isSelected());
+        panAttribGeo.add(rb);
+
+        // create ItemStateListener that keeps the HashMap up-to-date
+        rb.addItemListener(new ItemListener() {
+                @Override public void itemStateChanged(ItemEvent e) {
+
+                    if (!ignoreSelectionEvent && (e.getStateChange() == ItemEvent.SELECTED)) {
+
+                        // setSelectedGeoAttribute(fsa.getName());
+                        fsa.setSelected(true);
+                    }
+                    else {
+                        fsa.setSelected(false);
+                    }
+                }
+            });
     }
 
-    txtLineWidth.setText("" + lineWidth);//NOI18N
-  }
+    /**
+     * Is called if setFeatureServiceAttributes() found a attribute that is no geometry. Creates a new CheckBox and adds
+     * it to the attribute-panel.
+     *
+     * @param  fsa  FeatureServiceAttribute
+     */
+    private void createNormalAttributeButton(final FeatureServiceAttribute fsa) {
+        logger.debug("Attribut \"" + fsa.getName() + "\" adden"); // NOI18N
 
-  /**
-   * Changes the transparency.
-   * @param alpha the new transparency
-   */
-  private void setAlpha(float alpha)
-  {
-    getStyle().setAlpha(alpha);
-    int a = Math.round(alpha * 100);
-    if (sldAlpha.getValue() != a)
-    {
-      sldAlpha.setValue(a);
+        final JCheckBox cb = new JCheckBox(fsa.getName(), false);
+        cb.setActionCommand(fsa.getName());
+
+        // select/deselect the CheckBox -> item state change
+        cb.setSelected(fsa.isSelected());
+
+        if (fsa.isSelected()) {
+            cbbAnnotationExpression.addItem(fsa.getName());
+            cbbIdExpression.addItem(fsa.getName());
+        }
+
+        cb.addItemListener(new ItemListener() {
+                @Override public void itemStateChanged(ItemEvent e) {
+
+                    if (!ignoreSelectionEvent && (e.getStateChange() == ItemEvent.SELECTED)) {
+
+                        // sel.add(fsa.getName());
+                        fsa.setSelected(true);
+                        cbbAnnotationExpression.addItem(fsa.getName());
+                        cbbIdExpression.addItem(fsa.getName());
+                    }
+                    else if (!ignoreSelectionEvent && (e.getStateChange() == ItemEvent.DESELECTED)) {
+
+                        // sel.remove(fsa.getName());
+                        fsa.setSelected(false);
+                        cbbAnnotationExpression.removeItem(fsa.getName());
+                        cbbIdExpression.removeItem(fsa.getName());
+                    }
+                }
+            });
+
+        panAttribNorm.add(cb);
     }
 
-    txtTransparency.setText("" + a);//NOI18N
-  }
+    /**
+     * Returns a Vector with all selected attributes (including the geometry-attribute).
+     *
+     * @return  a Vector with all selected attributes (including the geometry-attribute).
+     */
+    public Vector<String> getSelectedAttributes() {
+        Vector<String> selectedAttributes = new Vector(this.featureServiceAttributes.size());
 
-  /**
-   * Changes the pointsymbol.
-   * @param pointSymbol name of the new pointsymbol
-   */
-  private void setPointSymbol(String pointSymbol)
-  {
-    setPointSymbolSizeActivated(pointSymbol.equals(getStyle().AUTO_POINTSYMBOL));
-    getStyle().setPointSymbolFilename(pointSymbol);
-  }
+        for (FeatureServiceAttribute fsa : this.featureServiceAttributes.values()) {
 
-  /**
-   * Returns the FeatureAnnotationSymbol.
-   */
-//  private FeatureAnnotationSymbol getPointSymbol()
-//  {
-//    return pointSymbolHM.get(getStyle().getPointSymbolFilename());
-//  }
+            if (fsa.isSelected()) {
+                selectedAttributes.add(fsa.getName());
+            }
+        }
 
-  /**
-   * Changes the size of the pointsymbol (if "no pointsymbol" is selected).
-   * @param size size of the new pointsymbol
-   */
-  private void setPointSymbolSize(int size)
-  {
-    getStyle().setPointSymbolSize(size);
-    txtPointSymbolSize.setText(size + "");//NOI18N
-  }
-
-  /**
-   * Enables or disables the components to manipulate the size of the pointsymbol.
-   * @param flag true to enable, false to disable
-   */
-  private void setPointSymbolSizeActivated(boolean flag)
-  {
-    lblPointSymbolSize.setEnabled(flag);
-    sldPointSymbolSize.setEnabled(flag);
-    txtPointSymbolSize.setEnabled(flag);
-  }
-
-  /**
-   * Changes whether the features should hightlight at mouseover or not.
-   * @param flag true if there should be a rollover-effect
-   */
-  private void setHighlighting(boolean flag)
-  {
-    getStyle().setHighlightFeature(flag);
-    if (chkHighlightable.isSelected() != flag)
-    {
-      chkHighlightable.setSelected(flag);
+        return selectedAttributes;
     }
 
-  }
+    /**
+     * Returns the selected geometry-attribute.
+     *
+     * @return  the selected geometry-attribute.
+     */
+    public String getSelectedGeoAttribute() {
 
-  /**
-   * Enables/disables the featurelabels
-   * @param enable true if labels should be shown, else false
-   */
-  private void setLabelingEnabled(boolean flag)
-  {
-    getStyle().setDrawLabel(flag);
-    if (flag != chkActivateLabels.isSelected())
-    {
-      chkActivateLabels.setSelected(flag);
+        if (!this.isAccepted()) {
+            logger.warn("supicious call to 'getQueryString()', changes not accepted"); // NOI18N
+        }
+
+        return this.btgGeom.getSelection().getActionCommand();
     }
 
-  }
-
-  /**
-   * Changes the maximum scale at which the labels still are visible.
-   * @param max maximum scale
-   */
-  private void setMaxScale(int max)
-  {
-    getStyle().setMaxScale(max);
-    if (!txtMax.getText().equals(max + ""))//NOI18N
-    {
-      txtMax.setText(max + "");//NOI18N
+    /**
+     * Changes the fillingcolor.
+     *
+     * @param  paint      DOCUMENT ME!
+     * @param  fillColor  the new fillingcolor
+     */
+    private void setFillColor(boolean paint, Color fillColor) {
+        getStyle().setDrawFill(paint);
+        getStyle().setFillColor(fillColor);
+        panFillColor.setBackground(fillColor);
+        panTransColor.setBackground(fillColor);
+        chkFill.setSelected(paint);
     }
 
-  }
-
-  /**
-   * Changes the minimum scale at which the labels still are visible.
-   * @param max minimum scale
-   */
-  private void setMinScale(int min)
-  {
-    getStyle().setMinScale(min);
-    if (!txtMin.getText().equals(min + ""))//NOI18N
-    {
-      txtMin.setText(min + "");//NOI18N
+    /**
+     * Changes the linecolor.
+     *
+     * @param  paint      DOCUMENT ME!
+     * @param  lineColor  the new linecolor
+     */
+    private void setLineColor(boolean paint, Color lineColor) {
+        getStyle().setDrawLine(paint);
+        getStyle().setLineColor(lineColor);
+        panLineColor.setBackground(lineColor);
+        chkLine.setSelected(paint);
     }
 
-  }
+    /**
+     * Changes the linewidth.
+     *
+     * @param  lineWidth  the new linewidth
+     */
+    private void setLineWidth(int lineWidth) {
+        getStyle().setLineWidth(lineWidth);
 
-  /**
-   * Changes the horizontal alignment of the label.
-   * @param align float with the new alignment
-   */
-  private void setAlignment(float align)
-  {
-    getStyle().setAlignment(align);
-    if (align == JLabel.LEFT_ALIGNMENT)
-    {
-      radLeft.setSelected(true);
-    } else if (align == JLabel.CENTER_ALIGNMENT)
-    {
-      radCenter.setSelected(true);
-    } else
-    {
-      radRight.setSelected(true);
+        if (sldLineWidth.getValue() != lineWidth) {
+            sldLineWidth.setValue(lineWidth);
+        }
+
+        txtLineWidth.setText("" + lineWidth); // NOI18N
     }
 
-  }
+    /**
+     * Changes the transparency.
+     *
+     * @param  alpha  the new transparency
+     */
+    private void setAlpha(float alpha) {
+        getStyle().setAlpha(alpha);
 
-  /**
-   * Changes the scaling-multiplier of the labels. Only effective if autoscale is off.
-   * @param multi the new multiplier
-   */
-  private void setMultiplier(Object multi)
-  {
-    if (multi instanceof Double)
-    {
-      getStyle().setMultiplier((Double) multi);
-    } else if (multi instanceof Long)
-    {
-      getStyle().setMultiplier(new Double((Long) multi));
+        int a = Math.round(alpha * 100);
+
+        if (sldAlpha.getValue() != a) {
+            sldAlpha.setValue(a);
+        }
+
+        txtTransparency.setText("" + a); // NOI18N
     }
 
-    txtMultiplier.setValue(multi);
-  }
-
-  /**
-   * Returns the scaling-multiplier of the labels.
-   */
-  private double getMultiplier()
-  {
-    Object o = getStyle().getMultiplier();
-    if (o instanceof Double)
-    {
-      return (Double) o;
-    } else if (o instanceof Long)
-    {
-      long l = (Long) o;
-      double d = l;
-      return d;
-    } else
-    {
-      return 1.0d;
+    /**
+     * Changes the pointsymbol.
+     *
+     * @param  pointSymbol  name of the new pointsymbol
+     */
+    private void setPointSymbol(String pointSymbol) {
+        setPointSymbolSizeActivated(pointSymbol.equals(getStyle().AUTO_POINTSYMBOL));
+        getStyle().setPointSymbolFilename(pointSymbol);
     }
 
-  }
+    /**
+     * Returns the FeatureAnnotationSymbol.
+     *
+     * @param  size  DOCUMENT ME!
+     */
+// private FeatureAnnotationSymbol getPointSymbol()
+// {
+// return pointSymbolHM.get(getStyle().getPointSymbolFilename());
+// }
 
-  /**
-   * Changes the fontcolor of the labels.
-   * @param fontColor neue Schriftfarbe
-   */
-  private void setFontColor(Color fontColor)
-  {
-    getStyle().setFontColor(fontColor);
-    panFontColor.setBackground(fontColor);
-  }
-
-  /**
-   * Changes the font of the labels.
-   * @param fontType the new font
-   */
-  private void setFontType(Font fontType)
-  {
-    getStyle().setFont(fontType);
-    StringBuffer name = new StringBuffer(fontType.getSize() + "pt ");//NOI18N
-    name.append(fontType.getName());
-    if (fontType.isBold())
-    {
-      name.append(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.setFontType(Font).name.bold"));//NOI18N
+    /**
+     * Changes the size of the pointsymbol (if "no pointsymbol" is selected).
+     *
+     * @param  size  size of the new pointsymbol
+     */
+    private void setPointSymbolSize(int size) {
+        getStyle().setPointSymbolSize(size);
+        txtPointSymbolSize.setText(size + ""); // NOI18N
     }
 
-    if (fontType.isItalic())
-    {
-      name.append(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.setFontType(Font).name.italic"));//NOI18N
+    /**
+     * Enables or disables the components to manipulate the size of the pointsymbol.
+     *
+     * @param  flag  true to enable, false to disable
+     */
+    private void setPointSymbolSizeActivated(boolean flag) {
+        lblPointSymbolSize.setEnabled(flag);
+        sldPointSymbolSize.setEnabled(flag);
+        txtPointSymbolSize.setEnabled(flag);
     }
 
-    lblFontname.setText(name.toString());
-  }
+    /**
+     * Changes whether the features should hightlight at mouseover or not.
+     *
+     * @param  flag  true if there should be a rollover-effect
+     */
+    private void setHighlighting(boolean flag) {
+        getStyle().setHighlightFeature(flag);
 
-  /**
-   * Changes whether the label should be scaled automatically with the zoomlevel.
-   * @param flag true to activate autoscaling
-   */
-  private void setAutoscale(boolean flag)
-  {
-    getStyle().setAutoscale(flag);
-    if (chkAutoscale.isSelected() != flag)
-    {
-      chkAutoscale.setSelected(flag);
+        if (chkHighlightable.isSelected() != flag) {
+            chkHighlightable.setSelected(flag);
+        }
+
     }
 
-  }
+    /**
+     * Enables/disables the featurelabels.
+     *
+     * @param  flag  enable true if labels should be shown, else false
+     */
+    private void setLabelingEnabled(boolean flag) {
+        getStyle().setDrawLabel(flag);
 
-  /**
-   * Changes the primaryattribute.
-   * @param id the name of the new primaryattribute
-   */
-  /* private void setIdExpression(String id)
-  {
-  if (id != null)
-  {
-  //styleAttribHM.put(ATTRI_PRIMARY, id);
-  this.layerProperties.setIdExpression(id, LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-  if (cbbPrimary.getSelectedItem() == null || !cbbPrimary.getSelectedItem().equals(id))
-  {
-  cbbPrimary.setSelectedItem(id);
-  }
-  }
-  }*/
-  /**
-   * Changes the label of the features. This String provides Groovy-functionality.
-   * @param attrib the new label
-   */
-  /* private void setLabelAttribute(String attrib)
-  {
-  if (attrib == null)
-  {
-  attrib = "";
-  }
-  //this.getLayerProperties().setPrimaryAnnotationExpression(attrib, LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-  cbbAttribute.setSelectedItem(attrib);
-  }*/
-  /**
-   * Sets a string as text in the queryEditorpane.
-   * @param s querystring
-   */
-  private void setQueryString(String s)
-  {
-    queryEditor.setText(s);
-    chkUseQueryString.setSelected(false);
-  }
+        if (flag != chkActivateLabels.isSelected()) {
+            chkActivateLabels.setSelected(flag);
+        }
 
-  /**
-   * Returns the querystring of the queryEditorpane.
-   */
-  public String getQueryString()
-  {
-    if (!this.isAccepted())
-    {
-      logger.warn("supicious call to 'getQueryString()', changes not accepted");//NOI18N
     }
 
-    return queryEditor.getText();
-  }
+    /**
+     * Changes the maximum scale at which the labels still are visible.
+     *
+     * @param  max  maximum scale
+     */
+    private void setMaxScale(int max) {
+        getStyle().setMaxScale(max);
 
-  /**
-   * Returns whether the query string was changed in the queryEditorpane.
-   * @return true if changed, else false
-   */
-  public boolean isQueryStringChanged()
-  {
-    return chkUseQueryString.isSelected();
-  }
+        if (!txtMax.getText().equals(max + "")) // NOI18N
+        {
+            txtMax.setText(max + ""); // NOI18N
+        }
 
-  /**
-   * Get the value of accepted
-   *
-   * @return the value of accepted
-   */
-  public boolean isAccepted()
-  {
-    return accepted;
-  }
-
-  /**
-   * Set the value of accepted
-   *
-   * @param accepted new value of accepted
-   */
-  private void setAccepted(boolean accepted)
-  {
-    this.accepted = accepted;
-  }
-
-  /**
-   * Overrides the setVisible()-method from JDialog. Updates the UI of the historylist
-   * if the StyleDialog is shown and selects the "color and filling"-tab.
-   * @param b true to show, false to hide
-   */
-  @Override
-  public void setVisible(boolean visible)
-  {
-    if (visible)
-    {
-      lstHistory.updateUI();
-      tbpTabs.setSelectedComponent(panTabFill);
     }
 
-    super.setVisible(visible);
-  }
+    /**
+     * Changes the minimum scale at which the labels still are visible.
+     *
+     * @param  min  max minimum scale
+     */
+    private void setMinScale(int min) {
+        getStyle().setMinScale(min);
 
-// </editor-fold>    
+        if (!txtMin.getText().equals(min + "")) // NOI18N
+        {
+            txtMin.setText(min + ""); // NOI18N
+        }
+
+    }
+
+    /**
+     * Changes the horizontal alignment of the label.
+     *
+     * @param  align  float with the new alignment
+     */
+    private void setAlignment(float align) {
+        getStyle().setAlignment(align);
+
+        if (align == JLabel.LEFT_ALIGNMENT) {
+            radLeft.setSelected(true);
+        }
+        else if (align == JLabel.CENTER_ALIGNMENT) {
+            radCenter.setSelected(true);
+        }
+        else {
+            radRight.setSelected(true);
+        }
+
+    }
+
+    /**
+     * Changes the scaling-multiplier of the labels. Only effective if autoscale is off.
+     *
+     * @param  multi  the new multiplier
+     */
+    private void setMultiplier(Object multi) {
+
+        if (multi instanceof Double) {
+            getStyle().setMultiplier((Double) multi);
+        }
+        else if (multi instanceof Long) {
+            getStyle().setMultiplier(new Double((Long) multi));
+        }
+
+        txtMultiplier.setValue(multi);
+    }
+
+    /**
+     * Returns the scaling-multiplier of the labels.
+     *
+     * @return  the scaling-multiplier of the labels.
+     */
+    private double getMultiplier() {
+        Object o = getStyle().getMultiplier();
+
+        if (o instanceof Double) {
+            return (Double) o;
+        }
+        else if (o instanceof Long) {
+            long l = (Long) o;
+            double d = l;
+
+            return d;
+        }
+        else {
+            return 1.0d;
+        }
+
+    }
+
+    /**
+     * Changes the fontcolor of the labels.
+     *
+     * @param  fontColor  neue Schriftfarbe
+     */
+    private void setFontColor(Color fontColor) {
+        getStyle().setFontColor(fontColor);
+        panFontColor.setBackground(fontColor);
+    }
+
+    /**
+     * Changes the font of the labels.
+     *
+     * @param  fontType  the new font
+     */
+    private void setFontType(Font fontType) {
+        getStyle().setFont(fontType);
+
+        StringBuffer name = new StringBuffer(fontType.getSize() + "pt "); // NOI18N
+        name.append(fontType.getName());
+
+        if (fontType.isBold()) {
+            name.append(org.openide.util.NbBundle.getMessage(StyleDialog.class,
+                    "StyleDialog.setFontType(Font).name.bold")); // NOI18N
+        }
+
+        if (fontType.isItalic()) {
+            name.append(org.openide.util.NbBundle.getMessage(StyleDialog.class,
+                    "StyleDialog.setFontType(Font).name.italic")); // NOI18N
+        }
+
+        lblFontname.setText(name.toString());
+    }
+
+    /**
+     * Changes whether the label should be scaled automatically with the zoomlevel.
+     *
+     * @param  flag  true to activate autoscaling
+     */
+    private void setAutoscale(boolean flag) {
+        getStyle().setAutoscale(flag);
+
+        if (chkAutoscale.isSelected() != flag) {
+            chkAutoscale.setSelected(flag);
+        }
+
+    }
+
+    /**
+     * Changes the primaryattribute.
+     *
+     * @param  s  id the name of the new primaryattribute
+     */
+    /* private void setIdExpression(String id)
+     * { if (id != null) { //styleAttribHM.put(ATTRI_PRIMARY, id); this.layerProperties.setIdExpression(id,
+     * LayerProperties.EXPRESSIONTYPE_PROPERTYNAME); if (cbbPrimary.getSelectedItem() == null ||
+     * !cbbPrimary.getSelectedItem().equals(id)) { cbbPrimary.setSelectedItem(id); } }}*/
+    /**
+     * Changes the label of the features. This String provides Groovy-functionality.
+     *
+     * @param  s  attrib the new label
+     */
+    /* private void setLabelAttribute(String attrib)
+     * { if (attrib == null) { attrib = ""; } //this.getLayerProperties().setPrimaryAnnotationExpression(attrib,
+     * LayerProperties.EXPRESSIONTYPE_PROPERTYNAME); cbbAttribute.setSelectedItem(attrib);}*/
+    /**
+     * Sets a string as text in the queryEditorpane.
+     *
+     * @param  s  querystring
+     */
+    private void setQueryString(String s) {
+        queryEditor.setText(s);
+        chkUseQueryString.setSelected(false);
+    }
+
+    /**
+     * Returns the querystring of the queryEditorpane.
+     *
+     * @return  the querystring of the queryEditorpane.
+     */
+    public String getQueryString() {
+
+        if (!this.isAccepted()) {
+            logger.warn("supicious call to 'getQueryString()', changes not accepted"); // NOI18N
+        }
+
+        return queryEditor.getText();
+    }
+
+    /**
+     * Returns whether the query string was changed in the queryEditorpane.
+     *
+     * @return  true if changed, else false
+     */
+    public boolean isQueryStringChanged() {
+        return chkUseQueryString.isSelected();
+    }
+
+    /**
+     * Get the value of accepted.
+     *
+     * @return  the value of accepted
+     */
+    public boolean isAccepted() {
+        return accepted;
+    }
+
+    /**
+     * Set the value of accepted.
+     *
+     * @param  accepted  new value of accepted
+     */
+    private void setAccepted(boolean accepted) {
+        this.accepted = accepted;
+    }
+
+    /**
+     * Overrides the setVisible()-method from JDialog. Updates the UI of the historylist if the StyleDialog is shown and
+     * selects the "color and filling"-tab.
+     *
+     * @param  visible  b true to show, false to hide
+     */
+    @Override public void setVisible(boolean visible) {
+
+        if (visible) {
+            lstHistory.updateUI();
+            tbpTabs.setSelectedComponent(panTabFill);
+        }
+
+        super.setVisible(visible);
+    }
+
+// </editor-fold>
+
+    /**
+     * <editor-fold defaultstate="collapsed" desc="Eventhandling">.
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void closeDialog(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
+        doClose(false);
+    }//GEN-LAST:event_closeDialog
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOKActionPerformed
+
+        // setLabelAttribute((cbbAttribute.getSelectedItem() == null) ? null :
+        // cbbAttribute.getSelectedItem().toString());
+
+        // read content of textfields
+        setMinScale(Integer.parseInt(txtMin.getText()));
+        setMaxScale(Integer.parseInt(txtMax.getText()));
+
+        try {
+            txtMultiplier.commitEdit();
+        }
+        catch (ParseException ex) {
+            logger.warn("Could not perform a commitEdit()", ex); // NOI18N
+        }
+
+        setMultiplier(txtMultiplier.getValue());
+
+        // write new history
+        if (defaultHistory != null) {
+            writeHistory(defaultHistory, true);
+        }
+
+        if (isQueryStringChanged()) {
+            logger.debug("setting new Query Template"); // NOI18N
+
+            // this.layerProperties.setQueryTemplate(this.queryEditor.getText(), this.layerProperties.QUERYTYPE_XML);
+        }
+
+// // manipulate the returnfeature if (isStyleFeature) { ((StyledFeature)
+// feature).setFillingPaint(getStyle().isDrawFill() ? getStyle().getFillColor() : null); ((StyledFeature)
+// feature).setLinePaint(getStyle().isDrawLine() ? getStyle().getLineColor() : null); ((StyledFeature)
+// feature).setLineWidth(getStyle().getLineWidth()); ((StyledFeature) feature).setTransparency(getStyle().getAlpha());
+// ((StyledFeature) feature).setPointAnnotationSymbol(getPointSymbol() == null ? pointSymbol : getPointSymbol());
+// ((StyledFeature) feature).setHighlightingEnabled(getStyle().isHighlightFeature()); }
+//
+// if (isAnnotatedFeature) { ((AnnotatedFeature) feature).setPrimaryAnnotationVisible(getStyle().isDrawLabel());
+// ((AnnotatedFeature) feature).setAutoScale(getStyle().isAutoscale()); //((AnnotatedFeature)
+// feature).setMaxScaleDenominator(getStyle().getMaxScale()); ((AnnotatedFeature)
+// feature).setMinScaleDenominator(getStyle().getMinScale()); ((AnnotatedFeature)
+// feature).setPrimaryAnnotation(getStyle().getAnnotationAttribute()); ((AnnotatedFeature)
+// feature).setPrimaryAnnotationJustification(getStyle().getAlignment()); ((AnnotatedFeature)
+// feature).setPrimaryAnnotationFont(getStyle().getFont()); ((AnnotatedFeature)
+// feature).setPrimaryAnnotationPaint(getStyle().getFontColor()); ((AnnotatedFeature)
+// feature).setPrimaryAnnotationScaling(getMultiplier()); }
+//
+// if (isIdFeature) { ((FeatureWithId) feature).setIdExpression(getIdExpression()); }
+        doClose(true);
+    }//GEN-LAST:event_cmdOKActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
+        doClose(false);
+    }//GEN-LAST:event_cmdCancelActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkFillPatternItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkFillPatternItemStateChanged
+
+        // not supported or shown
+// cbbFillPattern.setEnabled((evt.getStateChange() == ItemEvent.SELECTED));
+// updatePreview();
+    }//GEN-LAST:event_chkFillPatternItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkFillItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkFillItemStateChanged
+
+        cmdFill.setEnabled(chkFill.isSelected());
+        getStyle().setDrawFill(chkFill.isSelected());
+        updatePreview();
+    }//GEN-LAST:event_chkFillItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkLineItemStateChanged(java.awt.event.ItemEvent evt) {
+        switchLineActive(chkLine.isSelected());
+        getStyle().setDrawLine(chkLine.isSelected());
+        updatePreview();
+
+    }
+
+    /**
+     * Enables/disables the components to change the lineproperties.
+     *
+     * @param  flag  true to enable, false to disable
+     */
+    private void switchLineActive(boolean flag) {
+        cmdLine.setEnabled(flag);
+        sldLineWidth.setEnabled(flag);
+        txtLineWidth.setEnabled(flag);
+        lblLineWidth.setEnabled(flag);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkLinePatternItemStateChanged(java.awt.event.ItemEvent evt) {
+
+        // not supported or shown
+// cbbLinePattern.setEnabled((evt.getStateChange() == ItemEvent.SELECTED));
+// updatePreview();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void sldLineWidthStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldLineWidthStateChanged
+
+        // only permit linewidth > 0
+        if (sldLineWidth.getValue() == 0) {
+            sldLineWidth.setValue(1);
+        }
+
+        setLineWidth(sldLineWidth.getValue());
+        updatePreview();
+    }//GEN-LAST:event_sldLineWidthStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void sldAlphaStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldAlphaStateChanged
+        setAlpha(sldAlpha.getValue() / 100.0f);
+        updatePreview();
+    }//GEN-LAST:event_sldAlphaStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdFillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdFillActionPerformed
+
+        // set current color in the ColorChooser
+        colorChooser.setColor(getStyle().getFillColor());
+
+        // show and evaluate ColorChooser (inside Actionlistener)
+        JColorChooser.createDialog(this, COLORCHOOSER_TITLE, true, colorChooser, new ActionListener() {
+
+                @Override public void actionPerformed(ActionEvent e) {
+                    logger.debug("new filling = " + colorChooser.getColor()); // NOI18N
+                    setFillColor(true, colorChooser.getColor());
+
+                    if (chkSync.isSelected()) {
+                        setLineColor(true, BasicStyle.darken(colorChooser.getColor()));
+                    }
+
+                    updatePreview();
+                }
+            }, new ActionListener() {
+
+                @Override public void actionPerformed(ActionEvent e) {
+                    logger.debug("ColorChooser cancelled"); // NOI18N
+                }
+            }).setVisible(true);
+    }//GEN-LAST:event_cmdFillActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdLineActionPerformed(java.awt.event.ActionEvent evt) {
+
+        // set current color in the colorchooser
+        colorChooser.setColor(getStyle().getLineColor());
+
+        // show and evaluate ColorChooser (inside Actionlistener)
+        JColorChooser.createDialog(this, COLORCHOOSER_TITLE, true, colorChooser, new ActionListener() {
+                @Override public void actionPerformed(ActionEvent e) {
+                    logger.debug("new line color = " + colorChooser.getColor()); // NOI18N
+                    StyleDialog.this.setLineColor(true, colorChooser.getColor());
+                    updatePreview();
+                }
+            }, new ActionListener() {
+
+                @Override public void actionPerformed(ActionEvent e) {
+                    logger.debug("ColorChooser cancelled"); // NOI18N
+                }
+            }).setVisible(true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkActivateLabelsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkActivateLabelsItemStateChanged
+
+        // enable/disable every labelling-oriented component
+        boolean flag = chkActivateLabels.isSelected();
+        setLabelingEnabled(flag);
+        lblAnnotationExpression.setEnabled(flag);
+        cbbAnnotationExpression.setEnabled(flag);
+        lblAlignment.setEnabled(flag);
+        radLeft.setEnabled(flag);
+        radCenter.setEnabled(flag);
+        radRight.setEnabled(flag);
+        lblMultiplier.setEnabled(flag);
+        txtMultiplier.setEnabled(flag);
+        chkAutoscale.setEnabled(flag);
+        lblMin.setEnabled(flag);
+        txtMin.setEnabled(flag);
+        lblMax.setEnabled(flag);
+        txtMax.setEnabled(flag);
+        lblFontname.setEnabled(flag);
+        panLabelButtons.setEnabled(flag);
+        cmdChangeTextColor.setEnabled(flag);
+        cmdChangeFont.setEnabled(flag);
+        updatePreview();
+    }//GEN-LAST:event_chkActivateLabelsItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void sldPointSymbolSizeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldPointSymbolSizeStateChanged
+        setPointSymbolSize(sldPointSymbolSize.getValue());
+        updatePreview();
+    }//GEN-LAST:event_sldPointSymbolSizeStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void sldPointSymbolSizeMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_sldPointSymbolSizeMouseWheelMoved
+
+        if (sldPointSymbolSize.isEnabled() && sldPointSymbolSize.isFocusOwner()) {
+            sldPointSymbolSize.setValue(sldPointSymbolSize.getValue() - evt.getWheelRotation());
+        }
+    }//GEN-LAST:event_sldPointSymbolSizeMouseWheelMoved
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void sldAlphaMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_sldAlphaMouseWheelMoved
+        sldAlpha.setValue(sldAlpha.getValue() - (evt.getWheelRotation() * 5));
+    }//GEN-LAST:event_sldAlphaMouseWheelMoved
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdChangeTextColorActionPerformed(java.awt.event.ActionEvent evt) {
+
+        // set current color in the colorchooser
+        colorChooser.setColor(getStyle().getFontColor());
+
+        // show and evaluate ColorChooser (inside Actionlistener)
+        JColorChooser.createDialog(this, COLORCHOOSER_TITLE, true, colorChooser, new ActionListener() {
+
+                @Override public void actionPerformed(ActionEvent e) {
+                    logger.debug("new font color = " + colorChooser.getColor()); // NOI18N
+                    setFontColor(colorChooser.getColor());
+
+                    updatePreview();
+                }
+            }, new ActionListener() {
+
+                @Override public void actionPerformed(ActionEvent e) {
+                    logger.debug("ColorChooser cancelled"); // NOI18N
+                }
+            }).setVisible(true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdChangeFontActionPerformed(java.awt.event.ActionEvent evt) {
+
+        // show and evaluate FontChooser
+        Font temp = getStyle().getFont();
+        fontChooser.setSelectedFont(temp, temp.getSize(), temp.isBold(), temp.isItalic());
+        fontChooser.setVisible(true);
+
+        if (fontChooser.getReturnStatus() != null) {
+            setFontType(fontChooser.getReturnStatus());
+            updatePreview();
+
+        }
+
+        setLineWidth(sldLineWidth.getValue());
+        updatePreview();
+
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkAutoscaleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkAutoscaleItemStateChanged
+        setAutoscale(chkAutoscale.isSelected());
+    }//GEN-LAST:event_chkAutoscaleItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cbbPointSymbolItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbbPointSymbolItemStateChanged
+
+        // evaluate the selection of the pointsymbol-ComboBox
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            String selectedPointSymbol = evt.getItem().toString();
+            logger.debug("select Point Symbol '" + selectedPointSymbol + "'"); // NOI18N
+
+            if (pointSymbolHM.containsKey(selectedPointSymbol)) {
+                this.setPointSymbol(selectedPointSymbol);
+            }
+            else {
+                logger.warn("unsupported point symbol '" + selectedPointSymbol + "'"); // NOI18N
+                setPointSymbol(Style.NO_POINTSYMBOL);
+            }
+        }
+
+        updatePreview();
+    }//GEN-LAST:event_cbbPointSymbolItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkHighlightableItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkHighlightableItemStateChanged
+        setHighlighting(chkHighlightable.isSelected());
+    }//GEN-LAST:event_chkHighlightableItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkSyncItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkSyncItemStateChanged
+
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            setLineColor(true, BasicStyle.darken(getStyle().getFillColor()));
+            updatePreview();
+
+        }
+    }//GEN-LAST:event_chkSyncItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkLinewrapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLinewrapActionPerformed
+
+        XMLEditorKit kit = (XMLEditorKit) queryEditor.getEditorKit();
+        kit.setLineWrappingEnabled(chkLinewrap.isSelected());
+        queryEditor.updateUI();
+    }//GEN-LAST:event_chkLinewrapActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkFillActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_chkFillActionPerformed
+    {//GEN-HEADEREND:event_chkFillActionPerformed
+      // TODO add your handling code here:
+    }//GEN-LAST:event_chkFillActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkHighlightableActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_chkHighlightableActionPerformed
+    {//GEN-HEADEREND:event_chkHighlightableActionPerformed
+      // TODO add your handling code here:
+    }//GEN-LAST:event_chkHighlightableActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cbbPointSymbolActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cbbPointSymbolActionPerformed
+    {//GEN-HEADEREND:event_cbbPointSymbolActionPerformed
+      // TODO add your handling code here:
+    }//GEN-LAST:event_cbbPointSymbolActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cbbAnnotationExpressionItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbbAnnotationExpressionItemStateChanged
+    {//GEN-HEADEREND:event_cbbAnnotationExpressionItemStateChanged
+
+        if (!this.ignoreSelectionEvent && (evt.getStateChange() == ItemEvent.SELECTED)) {
+            String annotationExpression = cbbAnnotationExpression.getSelectedItem().toString();
+
+            if (this.featureServiceAttributes.containsKey(annotationExpression)) {
+                logger.debug("setting annotation expression to '" + annotationExpression +
+                    "' (EXPRESSIONTYPE_PROPERTYNAME)"); // NOI18N
+                this.layerProperties.setPrimaryAnnotationExpression(annotationExpression,
+                    LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+            }
+            else {
+                logger.debug("setting annotation expression to '" + annotationExpression + "' (EXPRESSIONTYPE_GROOVY)"); // NOI18N
+                this.layerProperties.setPrimaryAnnotationExpression(annotationExpression,
+                    LayerProperties.EXPRESSIONTYPE_GROOVY);
+            }
+        }
+    }//GEN-LAST:event_cbbAnnotationExpressionItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cbbIdExpressionItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbbIdExpressionItemStateChanged
+    {//GEN-HEADEREND:event_cbbIdExpressionItemStateChanged
+
+        if (!this.ignoreSelectionEvent && (evt.getStateChange() == ItemEvent.SELECTED)) {
+            String idExpression = cbbIdExpression.getSelectedItem().toString();
+
+            if (this.featureServiceAttributes.containsKey(idExpression)) {
+                logger.debug("setting primary key to '" + idExpression + "' (EXPRESSIONTYPE_PROPERTYNAME)"); // NOI18N
+                this.layerProperties.setIdExpression(idExpression, LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+            }
+            else {
+                logger.debug("setting primary key to '" + idExpression + "' (EXPRESSIONTYPE_GROOVY)"); // NOI18N
+                this.layerProperties.setIdExpression(idExpression, LayerProperties.EXPRESSIONTYPE_GROOVY);
+            }
+        }
+    }//GEN-LAST:event_cbbIdExpressionItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddActionPerformed
+
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cmdAddActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkUseQueryStringActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkUseQueryStringActionPerformed
+
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkUseQueryStringActionPerformed
+
+    /**
+     * Changes the style of the StyleDialog if the selection of the historylist has changed.
+     *
+     * @param  evt  ListSelectionEvent
+     */
+    @Override public void valueChanged(final ListSelectionEvent evt) {
+
+        try {
+            Style restoredStyle = (Style) lstHistory.getSelectedValue();
+            this.layerProperties.setStyle((Style) restoredStyle.clone());
+
+            this.updateDialog();
+            this.updatePreview();
+
+        }
+        catch (Exception ex) {
+            logger.error("Fehler beim Auslesen des Styles", ex); // NOI18N
+        }
+    }
+
+    /**
+     * Get the value of featureServiceAttributes.
+     *
+     * @return  the value of featureServiceAttributes
+     */
+    public Map<String, FeatureServiceAttribute> getFeatureServiceAttributes() {
+
+        if (!this.isAccepted()) {
+            logger.warn("supicious call to 'getFeatureServiceAttributes()', changes not accepted"); // NOI18N
+        }
+
+        return featureServiceAttributes;
+    }
+
+    /**
+     * Set the value of featureServiceAttributes.
+     *
+     * @param  featureServiceAttributes  new value of featureServiceAttributes
+     */
+    public void setFeatureServiceAttributes(Map<String, FeatureServiceAttribute> featureServiceAttributes) {
+        this.oldFeatureServiceAttributes = featureServiceAttributes;
+        this.featureServiceAttributes = new TreeMap();
+
+        for (FeatureServiceAttribute fsa : featureServiceAttributes.values()) {
+            this.featureServiceAttributes.put(fsa.getName(), fsa.clone());
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isGeoAttributeChanged() {
+
+        for (FeatureServiceAttribute oldAttribute : this.oldFeatureServiceAttributes.values()) {
+
+            if (oldAttribute.isGeometry()) {
+                FeatureServiceAttribute newAttribute = this.featureServiceAttributes.get(oldAttribute.getName());
+
+                if (newAttribute.isSelected() != oldAttribute.isSelected()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isAttributeSelectionChanged() {
+
+        for (FeatureServiceAttribute oldAttribute : this.oldFeatureServiceAttributes.values()) {
+
+            if (!oldAttribute.isGeometry()) {
+                FeatureServiceAttribute newAttribute = this.featureServiceAttributes.get(oldAttribute.getName());
+
+                if (newAttribute.isSelected() != oldAttribute.isSelected()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // </editor-fold>
+
+    private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    private final String home = System.getProperty("user.home"); // NOI18N
+    private final String seperator = System.getProperty("file.separator"); // NOI18N
+    private final File fileToCismapFolder = new File(home + seperator + CISMAP_FOLDER);
+    private TreeMap<String, FeatureAnnotationSymbol> pointSymbolHM = new TreeMap();
+    private TreeMap<String, FeatureServiceAttribute> featureServiceAttributes;
+    private Map<String, FeatureServiceAttribute> oldFeatureServiceAttributes;
+    private FeatureAnnotationSymbol pointSymbol = null;
+    private File defaultHistory;
+    private JColorChooser colorChooser;
+    private FontChooserDialog fontChooser;
+    private JPopupMenu popupMenu;
+    private JEditorPane queryEditor = new JEditorPane();
+    private LayerProperties layerProperties;
+    private boolean accepted = false;
+    private boolean ignoreSelectionEvent = true;
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup btgAlignment;
+    private javax.swing.ButtonGroup btgGeom;
+    private javax.swing.JComboBox cbbAnnotationExpression;
+    private javax.swing.JComboBox cbbFillPattern;
+    private javax.swing.JComboBox cbbIdExpression;
+    private javax.swing.JComboBox cbbLinePattern;
+    private javax.swing.JComboBox cbbPointSymbol;
+    private javax.swing.JCheckBox chkActivateLabels;
+    private javax.swing.JCheckBox chkAutoscale;
+    private javax.swing.JCheckBox chkFill;
+    private javax.swing.JCheckBox chkFillPattern;
+    private javax.swing.JCheckBox chkHighlightable;
+    private javax.swing.JCheckBox chkLine;
+    private javax.swing.JCheckBox chkLinePattern;
+    private javax.swing.JCheckBox chkLinewrap;
+    private javax.swing.JCheckBox chkSync;
+    private javax.swing.JCheckBox chkUseQueryString;
+    private javax.swing.JButton cmdAdd;
+    private javax.swing.JButton cmdCancel;
+    private javax.swing.JButton cmdChangeFont;
+    private javax.swing.JButton cmdChangeTextColor;
+    private javax.swing.JButton cmdFill;
+    private javax.swing.JButton cmdLine;
+    private javax.swing.JButton cmdOK;
+    private javax.swing.JButton cmdRemove;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JLabel lblAlignment;
+    private javax.swing.JLabel lblAlpha;
+    private javax.swing.JLabel lblAnnotationExpression;
+    private javax.swing.JLabel lblFontname;
+    private javax.swing.JLabel lblHistory;
+    private javax.swing.JLabel lblIdExpression;
+    private javax.swing.JLabel lblLineWidth;
+    private javax.swing.JLabel lblMax;
+    private javax.swing.JLabel lblMin;
+    private javax.swing.JLabel lblMultiplier;
+    private javax.swing.JLabel lblPointSymbol;
+    private javax.swing.JLabel lblPointSymbolSize;
+    private javax.swing.JLabel lblPreview;
+    private javax.swing.JList lstHistory;
+    private javax.swing.JPanel panAlignment;
+    private javax.swing.JPanel panAttribGeo;
+    private javax.swing.JPanel panAttribNorm;
+    private javax.swing.JPanel panAttribSeparator;
+    private javax.swing.JPanel panDialogButtons;
+    private javax.swing.JPanel panFill;
+    private javax.swing.JPanel panFillColor;
+    private javax.swing.JPanel panFontColor;
+    private javax.swing.JPanel panInfo;
+    private javax.swing.JPanel panInfoComp;
+    private javax.swing.JPanel panLabelButtons;
+    private javax.swing.JPanel panLabeling;
+    private javax.swing.JPanel panLineColor;
+    private javax.swing.JPanel panMain;
+    private javax.swing.JPanel panPreview;
+    private javax.swing.JPanel panQueryCheckbox;
+    private javax.swing.JPanel panRules;
+    private javax.swing.JPanel panRulesButtons;
+    private javax.swing.JPanel panRulesScroll;
+    private javax.swing.JPanel panScale;
+    private javax.swing.JPanel panScrollpane;
+    private javax.swing.JPanel panTabAttrib;
+    private javax.swing.JPanel panTabFill;
+    private javax.swing.JPanel panTabLabeling;
+    private javax.swing.JPanel panTabQuery;
+    private javax.swing.JPanel panTabRules;
+    private javax.swing.JPanel panTabs;
+    private javax.swing.JPanel panTransColor;
+    private javax.swing.JPanel panTransWhite;
+    private javax.swing.JRadioButton radCenter;
+    private javax.swing.JRadioButton radLeft;
+    private javax.swing.JRadioButton radRight;
+    private javax.swing.JScrollPane scpQuery;
+    private javax.swing.JScrollPane scrHistory;
+    private javax.swing.JSlider sldAlpha;
+    private javax.swing.JSlider sldLineWidth;
+    private javax.swing.JSlider sldPointSymbolSize;
+    private javax.swing.JTabbedPane tbpTabs;
+    private javax.swing.JTextField txtLineWidth;
+    private javax.swing.JFormattedTextField txtMax;
+    private javax.swing.JFormattedTextField txtMin;
+    private javax.swing.JFormattedTextField txtMultiplier;
+    private javax.swing.JTextField txtPointSymbolSize;
+    private javax.swing.JTextField txtTransparency;
+    // End of variables declaration//GEN-END:variables
+
+    /**
+     * Constructor for new StyleDialog-objects.
+     *
+     * @param  parent  parent-frame of this dialog
+     * @param  modal   true, if the dialog should block the parent
+     */
+    public StyleDialog(Frame parent, boolean modal) {
+        super(parent, modal);
+
+        try {
+            logger.info("Erstelle StyleDialog"); // NOI18N
+            this.layerProperties = new DefaultLayerProperties();
+
+            createPointSymbols();
+            initComponents();
+            createXMLEditor();
+            setLocationRelativeTo(this.getParent());
+
+            colorChooser = new JColorChooser();
+            fontChooser = new FontChooserDialog(this, FONTCHOOSER_TITLE);
+
+            // create historylist
+            createHistoryListPopupMenu();
+            lstHistory.setCellRenderer(new StyleHistoryListCellRenderer());
+            lstHistory.addListSelectionListener(this);
+            lstHistory.addMouseListener(new MouseAdapter() {
+
+                    @Override public void mouseReleased(MouseEvent e) {
+
+                        if (e.isPopupTrigger() && !popupMenu.isVisible()) {
+                            popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                        }
+                    }
+
+                    @Override public void mousePressed(MouseEvent e) {
+
+                        if (e.isPopupTrigger() && !popupMenu.isVisible()) {
+                            popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                        }
+                    }
+                });
+
+            // load the defaultHistory if available
+            defaultHistory = searchDefaultHistory();
+            loadHistory(defaultHistory);
+
+            // create listener for XML-editor
+            queryEditor.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override public void insertUpdate(DocumentEvent e) {
+                        chkUseQueryString.setSelected(true);
+                        logger.debug(e.getChange(e.getDocument().getDefaultRootElement()));
+                    }
+
+                    @Override public void removeUpdate(DocumentEvent e) {
+                        chkUseQueryString.setSelected(true);
+                    }
+
+                    @Override public void changedUpdate(DocumentEvent e) {
+                        chkUseQueryString.setSelected(true);
+                    }
+                });
+
+            // hide not implemented functions
+            chkFillPattern.setVisible(false);
+            cbbFillPattern.setVisible(false);
+            chkLinePattern.setVisible(false);
+            cbbLinePattern.setVisible(false);
+
+            // not yet!
+            // this.updateDialog();
+            // this.updatePreview();
+
+        }
+        catch (Throwable t) {
+            logger.error("could not create StyleDialog: " + t.getMessage(), t); // NOI18N
+        }
+    }
+
 // <editor-fold defaultstate="collapsed" desc="Main-Methode">
-  /**
-   * @param args the command line arguments
-   */
-  public static void main(String args[])
-  {
-    // Log4J initialisieren
-    Log4JQuickConfig.configure4LumbermillOnLocalhost();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  the command line arguments
+     */
+    public static void main(String[] args) {
 
-    try
-    {
-      // Look&Feel auf das des Navigators setzen
-      UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-    } catch (Exception ex)
-    {
-    }
-    EventQueue.invokeLater(new Runnable()
-    {
+        // Log4J initialisieren
+        Log4JQuickConfig.configure4LumbermillOnLocalhost();
 
-      @Override
-      public void run()
-      {
+        try {
 
-        StyleDialog dialog;
-        try
-        {
-          dialog = new StyleDialog(new javax.swing.JFrame(), true);
-          dialog.addWindowListener(new java.awt.event.WindowAdapter()
-          {
-
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent e)
-            {
-              System.exit(0);
-            }
-          });
-          dialog.setVisible(true);
-        } catch (Exception ex)
-        {
-          ex.printStackTrace();
+            // Look&Feel auf das des Navigators setzen
+            UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+        }
+        catch (Exception ex) {
         }
 
-      }
-    });
-  }
+        EventQueue.invokeLater(new Runnable() {
+
+                @Override public void run() {
+
+                    StyleDialog dialog;
+
+                    try {
+                        dialog = new StyleDialog(new javax.swing.JFrame(), true);
+                        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+
+                                @Override public void windowClosing(java.awt.event.WindowEvent e) {
+                                    System.exit(0);
+                                }
+                            });
+                        dialog.setVisible(true);
+                    }
+                    catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+
+                }
+            });
+    }
 // </editor-fold>
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
     private void sldLineWidthMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_sldLineWidthMouseWheelMoved
-      if (sldLineWidth.isEnabled() && sldLineWidth.isFocusOwner())
-      {
-        sldLineWidth.setValue(sldLineWidth.getValue() - evt.getWheelRotation());
-      }
-}//GEN-LAST:event_sldLineWidthMouseWheelMoved
 
+        if (sldLineWidth.isEnabled() && sldLineWidth.isFocusOwner()) {
+            sldLineWidth.setValue(sldLineWidth.getValue() - evt.getWheelRotation());
+        }
+    }//GEN-LAST:event_sldLineWidthMouseWheelMoved
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
     private void radRightActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radRightActionPerformed
-      setAlignment(JLabel.RIGHT_ALIGNMENT);
-}//GEN-LAST:event_radRightActionPerformed
+        setAlignment(JLabel.RIGHT_ALIGNMENT);
+    }//GEN-LAST:event_radRightActionPerformed
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
     private void radLeftActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radLeftActionPerformed
-      setAlignment(JLabel.LEFT_ALIGNMENT);
+        setAlignment(JLabel.LEFT_ALIGNMENT);
     }//GEN-LAST:event_radLeftActionPerformed
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
     private void radCenterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radCenterActionPerformed
-      setAlignment(JLabel.CENTER_ALIGNMENT);
-}//GEN-LAST:event_radCenterActionPerformed
+        setAlignment(JLabel.CENTER_ALIGNMENT);
+    }//GEN-LAST:event_radCenterActionPerformed
 
-  /** This method is called from within the constructor to
-   * initialize the form.
-   * WARNING: Do NOT modify this code. The content of this method is
-   * always regenerated by the Form Editor.
-   */
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
+     */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
@@ -1603,7 +2322,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         lblAnnotationExpression = new javax.swing.JLabel();
         cbbAnnotationExpression = new javax.swing.JComboBox();
         panLabelButtons = new javax.swing.JPanel();
-        cmdChangeColor = new javax.swing.JButton();
+        cmdChangeTextColor = new javax.swing.JButton();
         cmdChangeFont = new javax.swing.JButton();
         lblFontname = new javax.swing.JLabel();
         panFontColor = new javax.swing.JPanel();
@@ -1640,11 +2359,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         cmdAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_add.png"))); // NOI18N
         cmdAdd.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdAdd.text")); // NOI18N
         cmdAdd.setMargin(new java.awt.Insets(2, 5, 2, 5));
-        cmdAdd.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdAddActionPerformed(evt);
-            }
-        });
         panRulesButtons.add(cmdAdd);
 
         cmdRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_remove.png"))); // NOI18N
@@ -1750,7 +2464,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         );
         panPreviewLayout.setVerticalGroup(
             panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 184, Short.MAX_VALUE)
+            .addGap(0, 185, Short.MAX_VALUE)
         );
 
         jPanel1.add(panPreview, java.awt.BorderLayout.CENTER);
@@ -1964,7 +2678,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         txtTransparency.setText("100");
         txtTransparency.setFocusable(false);
         txtTransparency.setMinimumSize(new java.awt.Dimension(35, 20));
-        txtTransparency.setOpaque(false);
         txtTransparency.setPreferredSize(new java.awt.Dimension(35, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -2272,10 +2985,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         panLabelButtons.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panLabelButtons.border.title"))); // NOI18N
         panLabelButtons.setLayout(new java.awt.GridBagLayout());
 
-        cmdChangeColor.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdChangeColor.text")); // NOI18N
-        cmdChangeColor.addActionListener(new java.awt.event.ActionListener() {
+        cmdChangeTextColor.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdChangeColor.text")); // NOI18N
+        cmdChangeTextColor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdChangeColorActionPerformed(evt);
+                cmdChangeTextColorActionPerformed(evt);
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -2284,7 +2997,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
-        panLabelButtons.add(cmdChangeColor, gridBagConstraints);
+        panLabelButtons.add(cmdChangeTextColor, gridBagConstraints);
 
         cmdChangeFont.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdChangeFont.text")); // NOI18N
         cmdChangeFont.addActionListener(new java.awt.event.ActionListener() {
@@ -2551,560 +3264,4 @@ public class StyleDialog extends JDialog implements ListSelectionListener
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-// <editor-fold defaultstate="collapsed" desc="Eventhandling">
-    private void closeDialog(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
-      doClose(false);
-    }//GEN-LAST:event_closeDialog
-
-    private void cmdOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOKActionPerformed
-
-      //setLabelAttribute((cbbAttribute.getSelectedItem() == null) ? null : cbbAttribute.getSelectedItem().toString());
-
-      // read content of textfields
-      setMinScale(Integer.parseInt(txtMin.getText()));
-      setMaxScale(Integer.parseInt(txtMax.getText()));
-
-      try
-      {
-        txtMultiplier.commitEdit();
-      } catch (ParseException ex)
-      {
-        logger.warn("Could not perform a commitEdit()", ex);//NOI18N
-      }
-
-      setMultiplier(txtMultiplier.getValue());
-
-      // write new history
-      if (defaultHistory != null)
-      {
-        writeHistory(defaultHistory, true);
-      }
-
-      if (isQueryStringChanged())
-      {
-        logger.debug("setting new Query Template");//NOI18N
-        //this.layerProperties.setQueryTemplate(this.queryEditor.getText(), this.layerProperties.QUERYTYPE_XML);
-      }
-
-//      // manipulate the returnfeature
-//      if (isStyleFeature)
-//      {
-//        ((StyledFeature) feature).setFillingPaint(getStyle().isDrawFill() ? getStyle().getFillColor() : null);
-//        ((StyledFeature) feature).setLinePaint(getStyle().isDrawLine() ? getStyle().getLineColor() : null);
-//        ((StyledFeature) feature).setLineWidth(getStyle().getLineWidth());
-//        ((StyledFeature) feature).setTransparency(getStyle().getAlpha());
-//        ((StyledFeature) feature).setPointAnnotationSymbol(getPointSymbol() == null ? pointSymbol : getPointSymbol());
-//        ((StyledFeature) feature).setHighlightingEnabled(getStyle().isHighlightFeature());
-//      }
-//
-//      if (isAnnotatedFeature)
-//      {
-//        ((AnnotatedFeature) feature).setPrimaryAnnotationVisible(getStyle().isDrawLabel());
-//        ((AnnotatedFeature) feature).setAutoScale(getStyle().isAutoscale());
-//        //((AnnotatedFeature) feature).setMaxScaleDenominator(getStyle().getMaxScale());
-//        ((AnnotatedFeature) feature).setMinScaleDenominator(getStyle().getMinScale());
-//        ((AnnotatedFeature) feature).setPrimaryAnnotation(getStyle().getAnnotationAttribute());
-//        ((AnnotatedFeature) feature).setPrimaryAnnotationJustification(getStyle().getAlignment());
-//        ((AnnotatedFeature) feature).setPrimaryAnnotationFont(getStyle().getFont());
-//        ((AnnotatedFeature) feature).setPrimaryAnnotationPaint(getStyle().getFontColor());
-//        ((AnnotatedFeature) feature).setPrimaryAnnotationScaling(getMultiplier());
-//      }
-//
-//      if (isIdFeature)
-//      {
-//        ((FeatureWithId) feature).setIdExpression(getIdExpression());
-//      }
-      doClose(true);
-    }//GEN-LAST:event_cmdOKActionPerformed
-
-    private void cmdCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
-      doClose(false);
-    }//GEN-LAST:event_cmdCancelActionPerformed
-
-    private void chkFillPatternItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkFillPatternItemStateChanged
-      // not supported or shown
-//        cbbFillPattern.setEnabled((evt.getStateChange() == ItemEvent.SELECTED));
-//        updatePreview();
-    }//GEN-LAST:event_chkFillPatternItemStateChanged
-
-    private void chkFillItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkFillItemStateChanged
-
-      cmdFill.setEnabled(chkFill.isSelected());
-      getStyle().setDrawFill(chkFill.isSelected());
-      updatePreview();
-    }//GEN-LAST:event_chkFillItemStateChanged
-
-  private void chkLineItemStateChanged(java.awt.event.ItemEvent evt)
-  {
-    switchLineActive(chkLine.isSelected());
-    getStyle().setDrawLine(chkLine.isSelected());
-    updatePreview();
-
-  }
-
-  /**
-   * Enables/disables the components to change the lineproperties.
-   * @param flag true to enable, false to disable
-   */
-  private void switchLineActive(boolean flag)
-  {
-    cmdLine.setEnabled(flag);
-    sldLineWidth.setEnabled(flag);
-    txtLineWidth.setEnabled(flag);
-    lblLineWidth.setEnabled(flag);
-  }
-
-  private void chkLinePatternItemStateChanged(java.awt.event.ItemEvent evt)
-  {
-    // not supported or shown
-//        cbbLinePattern.setEnabled((evt.getStateChange() == ItemEvent.SELECTED));
-//        updatePreview();
-    }
-
-    private void sldLineWidthStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldLineWidthStateChanged
-      // only permit linewidth > 0
-      if (sldLineWidth.getValue() == 0)
-      {
-        sldLineWidth.setValue(1);
-      }
-
-      setLineWidth(sldLineWidth.getValue());
-      updatePreview();
-    }//GEN-LAST:event_sldLineWidthStateChanged
-
-    private void sldAlphaStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldAlphaStateChanged
-      setAlpha(sldAlpha.getValue() / 100.0f);
-      updatePreview();
-    }//GEN-LAST:event_sldAlphaStateChanged
-
-    private void cmdFillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdFillActionPerformed
-      // set current color in the ColorChooser
-      colorChooser.setColor(getStyle().getFillColor());
-
-      // show and evaluate ColorChooser (inside Actionlistener)
-      JColorChooser.createDialog(this, COLORCHOOSER_TITLE, true, colorChooser, new ActionListener()
-      {
-
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          logger.debug("new filling = " + colorChooser.getColor());//NOI18N
-          setFillColor(true, colorChooser.getColor());
-          if (chkSync.isSelected())
-          {
-            setLineColor(true, BasicStyle.darken(colorChooser.getColor()));
-          }
-
-          updatePreview();
-        }
-      }, new ActionListener()
-      {
-
-        @Override
-        public void actionPerformed(ActionEvent e)
-        {
-          logger.debug("ColorChooser cancelled");//NOI18N
-        }
-      }).setVisible(true);
-    }//GEN-LAST:event_cmdFillActionPerformed
-
-  private void cmdLineActionPerformed(java.awt.event.ActionEvent evt)
-  {
-    // set current color in the colorchooser
-    colorChooser.setColor(getStyle().getLineColor());
-
-    // show and evaluate ColorChooser (inside Actionlistener)
-    JColorChooser.createDialog(this, COLORCHOOSER_TITLE, true, colorChooser, new ActionListener()
-    {
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        logger.debug("new line color = " + colorChooser.getColor());//NOI18N
-        StyleDialog.this.setLineColor(true, colorChooser.getColor());
-        updatePreview();
-      }
-    }, new ActionListener()
-    {
-
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        logger.debug("ColorChooser cancelled");//NOI18N
-      }
-    }).setVisible(true);
-  }
-
-    private void chkActivateLabelsItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkActivateLabelsItemStateChanged
-      // enable/disable every labelling-oriented component
-      boolean flag = chkActivateLabels.isSelected();
-      setLabelingEnabled(flag);
-      lblAnnotationExpression.setEnabled(flag);
-      cbbAnnotationExpression.setEnabled(flag);
-      lblAlignment.setEnabled(flag);
-      radLeft.setEnabled(flag);
-      radCenter.setEnabled(flag);
-      radRight.setEnabled(flag);
-      lblMultiplier.setEnabled(flag);
-      txtMultiplier.setEnabled(flag);
-      chkAutoscale.setEnabled(flag);
-      lblMin.setEnabled(flag);
-      txtMin.setEnabled(flag);
-      lblMax.setEnabled(flag);
-      txtMax.setEnabled(flag);
-      lblFontname.setEnabled(flag);
-      panLabelButtons.setEnabled(flag);
-      cmdChangeColor.setEnabled(flag);
-      cmdChangeFont.setEnabled(flag);
-      updatePreview();
-}//GEN-LAST:event_chkActivateLabelsItemStateChanged
-
-private void sldPointSymbolSizeStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldPointSymbolSizeStateChanged
-  setPointSymbolSize(sldPointSymbolSize.getValue());
-  updatePreview();
-}//GEN-LAST:event_sldPointSymbolSizeStateChanged
-
-private void sldPointSymbolSizeMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_sldPointSymbolSizeMouseWheelMoved
-  if (sldPointSymbolSize.isEnabled() && sldPointSymbolSize.isFocusOwner())
-  {
-    sldPointSymbolSize.setValue(sldPointSymbolSize.getValue() - evt.getWheelRotation());
-  }
-}//GEN-LAST:event_sldPointSymbolSizeMouseWheelMoved
-
-    private void sldAlphaMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_sldAlphaMouseWheelMoved
-      sldAlpha.setValue(sldAlpha.getValue() - (evt.getWheelRotation() * 5));
-    }//GEN-LAST:event_sldAlphaMouseWheelMoved
-
-  private void cmdChangeColorActionPerformed(java.awt.event.ActionEvent evt)
-  {
-    // set current color in the colorchooser
-    colorChooser.setColor(getStyle().getFontColor());
-
-    // show and evaluate ColorChooser (inside Actionlistener)
-    JColorChooser.createDialog(this, COLORCHOOSER_TITLE, true, colorChooser, new ActionListener()
-    {
-
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        logger.debug("new filling = " + colorChooser.getColor());//NOI18N
-        setFillColor(true, colorChooser.getColor());
-        if (chkSync.isSelected())
-        {
-          setLineColor(true, BasicStyle.darken(colorChooser.getColor()));
-        }
-
-        updatePreview();
-      }
-    }, new ActionListener()
-    {
-
-      @Override
-      public void actionPerformed(ActionEvent e)
-      {
-        logger.debug("ColorChooser cancelled");//NOI18N
-      }
-    }).setVisible(true);
-  }
-
-  private void cmdChangeFontActionPerformed(java.awt.event.ActionEvent evt)
-  {
-    // show and evaluate FontChooser
-    Font temp = getStyle().getFont();
-    fontChooser.setSelectedFont(temp, temp.getSize(), temp.isBold(), temp.isItalic());
-    fontChooser.setVisible(true);
-    if (fontChooser.getReturnStatus() != null)
-    {
-      setFontType(fontChooser.getReturnStatus());
-      updatePreview();
-
-    }
-
-
-    setLineWidth(sldLineWidth.getValue());
-    updatePreview();
-
-  }
-
-    private void chkAutoscaleItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkAutoscaleItemStateChanged
-      setAutoscale(chkAutoscale.isSelected());
-    }//GEN-LAST:event_chkAutoscaleItemStateChanged
-
-    private void cbbPointSymbolItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbbPointSymbolItemStateChanged
-      // evaluate the selection of the pointsymbol-ComboBox
-      if(evt.getStateChange() == ItemEvent.SELECTED)
-      {
-        String selectedPointSymbol = evt.getItem().toString();
-        logger.debug("select Point Symbol '" + selectedPointSymbol + "'");//NOI18N
-
-        if(pointSymbolHM.containsKey(selectedPointSymbol))
-        {
-          this.setPointSymbol(selectedPointSymbol);
-        }
-        else
-        {
-          logger.warn("unsupported point symbol '" + selectedPointSymbol + "'");//NOI18N
-          setPointSymbol(Style.NO_POINTSYMBOL);
-        }
-      }
-      updatePreview();
-    }//GEN-LAST:event_cbbPointSymbolItemStateChanged
-
-private void chkHighlightableItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkHighlightableItemStateChanged
-  setHighlighting(chkHighlightable.isSelected());
-}//GEN-LAST:event_chkHighlightableItemStateChanged
-
-private void chkSyncItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkSyncItemStateChanged
-  if (evt.getStateChange() == ItemEvent.SELECTED)
-  {
-    setLineColor(true, BasicStyle.darken(getStyle().getFillColor()));
-    updatePreview();
-
-  }
-}//GEN-LAST:event_chkSyncItemStateChanged
-
-    private void chkLinewrapActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLinewrapActionPerformed
-      XMLEditorKit kit = (XMLEditorKit) queryEditor.getEditorKit();
-      kit.setLineWrappingEnabled(chkLinewrap.isSelected());
-      queryEditor.updateUI();
-    }//GEN-LAST:event_chkLinewrapActionPerformed
-
-    private void chkFillActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_chkFillActionPerformed
-    {//GEN-HEADEREND:event_chkFillActionPerformed
-      // TODO add your handling code here:
-    }//GEN-LAST:event_chkFillActionPerformed
-
-    private void chkHighlightableActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_chkHighlightableActionPerformed
-    {//GEN-HEADEREND:event_chkHighlightableActionPerformed
-      // TODO add your handling code here:
-    }//GEN-LAST:event_chkHighlightableActionPerformed
-
-    private void cbbPointSymbolActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cbbPointSymbolActionPerformed
-    {//GEN-HEADEREND:event_cbbPointSymbolActionPerformed
-      // TODO add your handling code here:
-    }//GEN-LAST:event_cbbPointSymbolActionPerformed
-
-    private void cbbAnnotationExpressionItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbbAnnotationExpressionItemStateChanged
-    {//GEN-HEADEREND:event_cbbAnnotationExpressionItemStateChanged
-      if (!this.ignoreSelectionEvent && evt.getStateChange() == ItemEvent.SELECTED)
-      {
-        String annotationExpression = cbbAnnotationExpression.getSelectedItem().toString();
-        if (this.featureServiceAttributes.containsKey(annotationExpression))
-        {
-          logger.debug("setting annotation expression to '" + annotationExpression + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
-          this.layerProperties.setPrimaryAnnotationExpression(annotationExpression, LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-        } else
-        {
-          logger.debug("setting annotation expression to '" + annotationExpression + "' (EXPRESSIONTYPE_GROOVY)");//NOI18N
-          this.layerProperties.setPrimaryAnnotationExpression(annotationExpression, LayerProperties.EXPRESSIONTYPE_GROOVY);
-        }
-      }
-    }//GEN-LAST:event_cbbAnnotationExpressionItemStateChanged
-
-    private void cbbIdExpressionItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbbIdExpressionItemStateChanged
-    {//GEN-HEADEREND:event_cbbIdExpressionItemStateChanged
-      if (!this.ignoreSelectionEvent && evt.getStateChange() == ItemEvent.SELECTED)
-      {
-        String idExpression = cbbIdExpression.getSelectedItem().toString();
-        if (this.featureServiceAttributes.containsKey(idExpression))
-        {
-          logger.debug("setting primary key to '" + idExpression + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
-          this.layerProperties.setIdExpression(idExpression, LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-        } else
-        {
-          logger.debug("setting primary key to '" + idExpression + "' (EXPRESSIONTYPE_GROOVY)");//NOI18N
-          this.layerProperties.setIdExpression(idExpression, LayerProperties.EXPRESSIONTYPE_GROOVY);
-        }
-      }
-    }//GEN-LAST:event_cbbIdExpressionItemStateChanged
-
-    private void cmdAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cmdAddActionPerformed
-
-    private void chkUseQueryStringActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkUseQueryStringActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_chkUseQueryStringActionPerformed
-
-  /**
-   * Changes the style of the StyleDialog if the selection of the historylist has changed.
-   * @param evt ListSelectionEvent
-   */
-  @Override
-  public void valueChanged(final ListSelectionEvent evt)
-  {
-    try
-    {
-      Style restoredStyle = (Style) lstHistory.getSelectedValue();
-      this.layerProperties.setStyle((Style) restoredStyle.clone());
-
-      this.updateDialog();
-      this.updatePreview();
-
-    } catch (Exception ex)
-    {
-      logger.error("Fehler beim Auslesen des Styles", ex);//NOI18N
-    }
-  }
-
-  /**
-   * Get the value of featureServiceAttributes
-   *
-   * @return the value of featureServiceAttributes
-   */
-  public Map<String, FeatureServiceAttribute> getFeatureServiceAttributes()
-  {
-    if (!this.isAccepted())
-    {
-      logger.warn("supicious call to 'getFeatureServiceAttributes()', changes not accepted");//NOI18N
-    }
-
-    return featureServiceAttributes;
-  }
-
-  /**
-   * Set the value of featureServiceAttributes
-   *
-   * @param featureServiceAttributes new value of featureServiceAttributes
-   */
-  public void setFeatureServiceAttributes(Map<String, FeatureServiceAttribute> featureServiceAttributes)
-  {
-    this.oldFeatureServiceAttributes = featureServiceAttributes;
-    this.featureServiceAttributes = new TreeMap();
-    for (FeatureServiceAttribute fsa : featureServiceAttributes.values())
-    {
-      this.featureServiceAttributes.put(fsa.getName(), fsa.clone());
-    }
-  }
-
-  public boolean isGeoAttributeChanged()
-  {
-    for(FeatureServiceAttribute oldAttribute:this.oldFeatureServiceAttributes.values())
-    {
-      if(oldAttribute.isGeometry())
-      {
-        FeatureServiceAttribute newAttribute = this.featureServiceAttributes.get(oldAttribute.getName());
-        if(newAttribute.isSelected() != oldAttribute.isSelected())
-        {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  public boolean isAttributeSelectionChanged()
-  {
-    for(FeatureServiceAttribute oldAttribute:this.oldFeatureServiceAttributes.values())
-    {
-      if(!oldAttribute.isGeometry())
-      {
-        FeatureServiceAttribute newAttribute = this.featureServiceAttributes.get(oldAttribute.getName());
-        if(newAttribute.isSelected() != oldAttribute.isSelected())
-        {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  // </editor-fold>
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.ButtonGroup btgAlignment;
-    private javax.swing.ButtonGroup btgGeom;
-    private javax.swing.JComboBox cbbAnnotationExpression;
-    private javax.swing.JComboBox cbbFillPattern;
-    private javax.swing.JComboBox cbbIdExpression;
-    private javax.swing.JComboBox cbbLinePattern;
-    private javax.swing.JComboBox cbbPointSymbol;
-    private javax.swing.JCheckBox chkActivateLabels;
-    private javax.swing.JCheckBox chkAutoscale;
-    private javax.swing.JCheckBox chkFill;
-    private javax.swing.JCheckBox chkFillPattern;
-    private javax.swing.JCheckBox chkHighlightable;
-    private javax.swing.JCheckBox chkLine;
-    private javax.swing.JCheckBox chkLinePattern;
-    private javax.swing.JCheckBox chkLinewrap;
-    private javax.swing.JCheckBox chkSync;
-    private javax.swing.JCheckBox chkUseQueryString;
-    private javax.swing.JButton cmdAdd;
-    private javax.swing.JButton cmdCancel;
-    private javax.swing.JButton cmdChangeColor;
-    private javax.swing.JButton cmdChangeFont;
-    private javax.swing.JButton cmdFill;
-    private javax.swing.JButton cmdLine;
-    private javax.swing.JButton cmdOK;
-    private javax.swing.JButton cmdRemove;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel7;
-    private javax.swing.JPanel jPanel8;
-    private javax.swing.JPanel jPanel9;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JLabel lblAlignment;
-    private javax.swing.JLabel lblAlpha;
-    private javax.swing.JLabel lblAnnotationExpression;
-    private javax.swing.JLabel lblFontname;
-    private javax.swing.JLabel lblHistory;
-    private javax.swing.JLabel lblIdExpression;
-    private javax.swing.JLabel lblLineWidth;
-    private javax.swing.JLabel lblMax;
-    private javax.swing.JLabel lblMin;
-    private javax.swing.JLabel lblMultiplier;
-    private javax.swing.JLabel lblPointSymbol;
-    private javax.swing.JLabel lblPointSymbolSize;
-    private javax.swing.JLabel lblPreview;
-    private javax.swing.JList lstHistory;
-    private javax.swing.JPanel panAlignment;
-    private javax.swing.JPanel panAttribGeo;
-    private javax.swing.JPanel panAttribNorm;
-    private javax.swing.JPanel panAttribSeparator;
-    private javax.swing.JPanel panDialogButtons;
-    private javax.swing.JPanel panFill;
-    private javax.swing.JPanel panFillColor;
-    private javax.swing.JPanel panFontColor;
-    private javax.swing.JPanel panInfo;
-    private javax.swing.JPanel panInfoComp;
-    private javax.swing.JPanel panLabelButtons;
-    private javax.swing.JPanel panLabeling;
-    private javax.swing.JPanel panLineColor;
-    private javax.swing.JPanel panMain;
-    private javax.swing.JPanel panPreview;
-    private javax.swing.JPanel panQueryCheckbox;
-    private javax.swing.JPanel panRules;
-    private javax.swing.JPanel panRulesButtons;
-    private javax.swing.JPanel panRulesScroll;
-    private javax.swing.JPanel panScale;
-    private javax.swing.JPanel panScrollpane;
-    private javax.swing.JPanel panTabAttrib;
-    private javax.swing.JPanel panTabFill;
-    private javax.swing.JPanel panTabLabeling;
-    private javax.swing.JPanel panTabQuery;
-    private javax.swing.JPanel panTabRules;
-    private javax.swing.JPanel panTabs;
-    private javax.swing.JPanel panTransColor;
-    private javax.swing.JPanel panTransWhite;
-    private javax.swing.JRadioButton radCenter;
-    private javax.swing.JRadioButton radLeft;
-    private javax.swing.JRadioButton radRight;
-    private javax.swing.JScrollPane scpQuery;
-    private javax.swing.JScrollPane scrHistory;
-    private javax.swing.JSlider sldAlpha;
-    private javax.swing.JSlider sldLineWidth;
-    private javax.swing.JSlider sldPointSymbolSize;
-    private javax.swing.JTabbedPane tbpTabs;
-    private javax.swing.JTextField txtLineWidth;
-    private javax.swing.JFormattedTextField txtMax;
-    private javax.swing.JFormattedTextField txtMin;
-    private javax.swing.JFormattedTextField txtMultiplier;
-    private javax.swing.JTextField txtPointSymbolSize;
-    private javax.swing.JTextField txtTransparency;
-    // End of variables declaration//GEN-END:variables
 }
