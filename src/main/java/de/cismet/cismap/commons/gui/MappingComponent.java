@@ -176,7 +176,6 @@ import org.jdom.DataConversionException;
 import org.jdom.Element;
 import pswing.PSwingCanvas;
 
-
 /**
  *
  * @author thorsten.hell@cismet.de
@@ -2409,69 +2408,69 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * @param features array with features to add
      */
     public void addFeaturesToMap(final Feature[] features) {
-        Runnable r = new Runnable() {
+//        Runnable r = new Runnable() {
+//
+//            @Override
+//            public void run() {
+        double local_clip_offset_y = clip_offset_y;
+        double local_clip_offset_x = clip_offset_x;
 
-            @Override
-            public void run() {
-                double local_clip_offset_y = clip_offset_y;
-                double local_clip_offset_x = clip_offset_x;
-
-                /// Hier muss der layer bestimmt werdenn
-                for (int i = 0; i < features.length; ++i) {
-                    final PFeature p = new PFeature(features[i], getWtst(), local_clip_offset_x, local_clip_offset_y, MappingComponent.this);
-                    try {
-                        if (features[i] instanceof StyledFeature) {
-                            p.setTransparency(((StyledFeature) (features[i])).getTransparency());
-                        } else {
-                            p.setTransparency(cismapPrefs.getLayersPrefs().getAppFeatureLayerTranslucency());
-                        }
-                    } catch (Exception e) {
-                        p.setTransparency(0.8f);
-                        log.info("Fehler beim Setzen der Transparenzeinstellungen", e);//NOI18N
-                    }
-                    // So kann man es Piccolo überlassen (müsste nur noch ein transformation machen, die die y achse spiegelt)
-                    // PFeature p=new PFeature(features[i],(WorldToScreenTransform)null,(double)0,(double)0);
-                    // p.setViewer(this);
-                    // ((PPath)p).setStroke(new BasicStroke(0.5f));
-                    if (features[i].getGeometry() != null) {
-                        pFeatureHM.put(p.getFeature(), p);
-                        for (int j = 0; j < p.getCoordArr().length; ++j) {
-                            pFeatureHMbyCoordinate.put(p.getCoordArr()[j], new PFeatureCoordinatePosition(p, j));
-                        }
-                        final int ii = i;
-                        EventQueue.invokeLater(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                featureLayer.addChild(p);
-                                if (!(features[ii].getGeometry() instanceof com.vividsolutions.jts.geom.Point)) {
-                                    //p.moveToBack();
-                                    p.moveToFront();
-                                }
-                            }
-                        });
-                    }
+        /// Hier muss der layer bestimmt werdenn
+        for (int i = 0; i < features.length; ++i) {
+            final PFeature p = new PFeature(features[i], getWtst(), local_clip_offset_x, local_clip_offset_y, MappingComponent.this);
+            try {
+                if (features[i] instanceof StyledFeature) {
+                    p.setTransparency(((StyledFeature) (features[i])).getTransparency());
+                } else {
+                    p.setTransparency(cismapPrefs.getLayersPrefs().getAppFeatureLayerTranslucency());
                 }
+            } catch (Exception e) {
+                p.setTransparency(0.8f);
+                log.info("Fehler beim Setzen der Transparenzeinstellungen", e);//NOI18N
+            }
+            // So kann man es Piccolo überlassen (müsste nur noch ein transformation machen, die die y achse spiegelt)
+            // PFeature p=new PFeature(features[i],(WorldToScreenTransform)null,(double)0,(double)0);
+            // p.setViewer(this);
+            // ((PPath)p).setStroke(new BasicStroke(0.5f));
+            if (features[i].getGeometry() != null) {
+                pFeatureHM.put(p.getFeature(), p);
+                for (int j = 0; j < p.getCoordArr().length; ++j) {
+                    pFeatureHMbyCoordinate.put(p.getCoordArr()[j], new PFeatureCoordinatePosition(p, j));
+                }
+                final int ii = i;
                 EventQueue.invokeLater(new Runnable() {
 
                     @Override
                     public void run() {
-                        rescaleStickyNodes();
-                        repaint();
-                        fireFeaturesAddedToMap(Arrays.asList(features));
-
-                        // SuchFeatures in den Vordergrund stellen
-                        for (Feature feature : featureCollection.getAllFeatures()) {
-                            if (feature instanceof SearchFeature) {
-                                PFeature pFeature = pFeatureHM.get(feature);
-                                pFeature.moveToFront();
-                            }
+                        featureLayer.addChild(p);
+                        if (!(features[ii].getGeometry() instanceof com.vividsolutions.jts.geom.Point)) {
+                            //p.moveToBack();
+                            p.moveToFront();
                         }
                     }
                 });
             }
-        };
-        CismetThreadPool.execute(r);
+        }
+        EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                rescaleStickyNodes();
+                repaint();
+                fireFeaturesAddedToMap(Arrays.asList(features));
+
+                // SuchFeatures in den Vordergrund stellen
+                for (Feature feature : featureCollection.getAllFeatures()) {
+                    if (feature instanceof SearchFeature) {
+                        PFeature pFeature = pFeatureHM.get(feature);
+                        pFeature.moveToFront();
+                    }
+                }
+            }
+        });
+//            }
+//        };
+//        CismetThreadPool.execute(r);
 
         //check whether the feature has a rasterSupportLayer or not
         for (Feature f : features) {
@@ -2903,7 +2902,6 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                             log.warn("Unterbrechung bei getAnimating()", e);//NOI18N
                         }
                     }
-
                     if (featureCollection.areFeaturesEditable() && (getInteractionMode().equals(SELECT)
                             || getInteractionMode().equals(PAN)
                             || getInteractionMode().equals(ZOOM)
@@ -2912,10 +2910,18 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                         // Handles für alle selektierten Features der Collection hinzufügen
                         if (getHandleInteractionMode().equals(ROTATE_POLYGON)) {
                             LinkedHashSet<Feature> copy = new LinkedHashSet(featureCollection.getSelectedFeatures());
-                            for (final Object selectedFeature : copy) {
+                            for (final Feature selectedFeature : copy) {
                                 if (selectedFeature instanceof Feature && ((Feature) selectedFeature).isEditable()) {
                                     if (pFeatureHM.get(selectedFeature) != null) {
-                                        ((PFeature) pFeatureHM.get(selectedFeature)).addRotationHandles(handleLayer);
+                                        //manipulates gui -> edt
+                                        EventQueue.invokeLater(new Runnable() {
+
+                                            @Override
+                                            public void run() {
+                                                ((PFeature) pFeatureHM.get(selectedFeature)).addRotationHandles(handleLayer);
+
+                                            }
+                                        });
                                     } else {
                                         log.warn("pFeatureHM.get(" + selectedFeature + ")==null");//NOI18N
                                     }
@@ -2923,14 +2929,22 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                             }
                         } else {
                             LinkedHashSet<Feature> copy = new LinkedHashSet(featureCollection.getSelectedFeatures());
-                            for (Object selectedFeature : copy) {
-                                if (selectedFeature instanceof Feature && ((Feature) selectedFeature).isEditable()) {
+                            for (final Feature selectedFeature : copy) {
+                                if (selectedFeature != null && selectedFeature.isEditable()) {
                                     if (pFeatureHM.get(selectedFeature) != null) {
-                                        try {
-                                            ((PFeature) pFeatureHM.get(selectedFeature)).addHandles(handleLayer);
-                                        } catch (Exception e) {
-                                            log.error("Error bei addHandles: ", e);//NOI18N
-                                        }
+                                        //manipulates gui -> edt
+                                        EventQueue.invokeLater(new Runnable() {
+
+                                            @Override
+                                            public void run() {
+                                                try {
+                                                    ((PFeature) pFeatureHM.get(selectedFeature)).addHandles(handleLayer);
+
+                                                } catch (Exception e) {
+                                                    log.error("Error bei addHandles: ", e);//NOI18N
+                                                }
+                                            }
+                                        });
                                     } else {
                                         log.warn("pFeatureHM.get(" + selectedFeature + ")==null");//NOI18N
                                     }
@@ -4003,12 +4017,26 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      */
     @Override
     public void drop(DropTargetDropEvent dtde) {
-        MapDnDEvent mde = new MapDnDEvent();
-        mde.setDte(dtde);
-        Point p = dtde.getLocation();
-        mde.setXPos(getWtst().getWorldX(p.getX()));
-        mde.setYPos(getWtst().getWorldY(p.getY()));
-        CismapBroker.getInstance().fireDropOnMap(mde);
+        if (isDropEnabled(dtde)) {
+            MapDnDEvent mde = new MapDnDEvent();
+            mde.setDte(dtde);
+            Point p = dtde.getLocation();
+            mde.setXPos(getWtst().getWorldX(p.getX()));
+            mde.setYPos(getWtst().getWorldY(p.getY()));
+            CismapBroker.getInstance().fireDropOnMap(mde);
+        }
+    }
+
+    private boolean isDropEnabled(DropTargetDropEvent dtde) {
+        if (ALKIS_PRINT.equals(getInteractionMode())) {
+            for (DataFlavor flavour : dtde.getTransferable().getTransferDataFlavors()) {
+                //necessary evil, because we have no dependecy to DefaultMetaTreeNode frome here
+                if (String.valueOf(flavour.getRepresentationClass()).endsWith(".DefaultMetaTreeNode")) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -4062,7 +4090,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     /**
      * Returns the PfeatureHashmap which assigns a Feature to a PFeature.
      */
-    public ConcurrentHashMap getPFeatureHM() {
+    public ConcurrentHashMap<Feature, PFeature> getPFeatureHM() {
         return pFeatureHM;
     }
 
@@ -4717,6 +4745,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         }
     }
 }
+
 class ImageSelection implements Transferable {
 
     private Image image;

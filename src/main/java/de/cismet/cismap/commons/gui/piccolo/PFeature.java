@@ -67,6 +67,7 @@ import pswing.PSwingCanvas;
  * @author hell 
  */
 public class PFeature extends PPath implements Highlightable, Selectable, Refreshable {
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private static final String DIALOG_TEXT = org.openide.util.NbBundle.getMessage(PFeature.class, "PFeature.DIALOG_TEXT");//NOI18N
     private static final String DIALOG_TITLE = org.openide.util.NbBundle.getMessage(PFeature.class, "PFeature.DIALOG_TITLE");//NOI18N
@@ -479,7 +480,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 overridingstroke = xsf.getLineStyle();
             }
 
-            if(getFeature() instanceof RasterDocumentFeature) {
+            if (getFeature() instanceof RasterDocumentFeature) {
                 overridingstroke = FIXED_WIDTH_STROKE;
             }
 
@@ -793,14 +794,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
         final PHandle h = new TransformationPHandle(this, positionInArray);
 
-        EventQueue.invokeLater(new Runnable() {
-
-            public void run() {
+//        EventQueue.invokeLater(new Runnable() {
+//
+//            public void run() {
                 handleLayer.addChild(h);
                 h.addClientProperty("coordinate", getCoordArr()[position]);//NOI18N
                 h.addClientProperty("coordinate_position_in_arr", new Integer(position));//NOI18N
-            }
-        });
+//            }
+//        });
     }
 
     /**
@@ -873,12 +874,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             }
             if (!contains) {
-                EventQueue.invokeLater(new Runnable() {
-
-                    public void run() {
+//                EventQueue.invokeLater(new Runnable() {
+//
+//                    public void run() {
                         handleLayer.addChild(pivotHandle);
-                    }
-                });
+//                    }
+//                });
             }
         }
         // Handles einfügen
@@ -901,15 +902,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final PHandle rotHandle = new RotationPHandle(this, mid, pivotHandle, position);
 
         rotHandle.setPaint(new Color(1f, 1f, 0f, 0.7f));
-        EventQueue.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
+//        EventQueue.invokeLater(new Runnable() {
+//
+//            @Override
+//            public void run() {
                 handleLayer.addChild(rotHandle);
                 rotHandle.addClientProperty("coordinate", getCoordArr()[position]);//NOI18N
                 rotHandle.addClientProperty("coordinate_position_in_arr", new Integer(position));//NOI18N
-            }
-        });
+//            }
+//        });
     }
 
     /**
@@ -943,13 +944,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
         pivotHandle = new PivotPHandle(this, mid);
         pivotHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
-        EventQueue.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
+//        EventQueue.invokeLater(new Runnable() {
+//
+//            @Override
+//            public void run() {
                 handleLayer.addChild(pivotHandle);
-            }
-        });
+//            }
+//        });
         for (Object o : selArr) {
             PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
             pf.pivotHandle = this.pivotHandle;
@@ -964,13 +965,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         ellipseHandle = new EllipsePHandle(this);
 
         ellipseHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
-        EventQueue.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
+//        EventQueue.invokeLater(new Runnable() {
+//
+//            @Override
+//            public void run() {
                 handleLayer.addChild(ellipseHandle);
-            }
-        });
+//            }
+//        });
     }
 
     /**
