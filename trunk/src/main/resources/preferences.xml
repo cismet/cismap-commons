@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : preferences.xml
+    Created on : 4. Januar 2006, 09:23
+    Author     : hell
+    Description:
+        Purpose of the document follows.
+-->
+
+<preferences>
+    <de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget>
+        
+    </de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget>
+    <de.cismet.cismap.commons.gui.layerwidget.LayerWidget>
+    
+    </de.cismet.cismap.commons.gui.layerwidget.LayerWidget>
+    
+</preferences>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    Document   : cismapPreferences.xml
+    Created on : 17. August 2005, 10:02
+    Author     : hell
+    Description:
+    Purpose of the document follows.
+-->
+
+<cismapPreferences>
+    <cismapGlobalPreferences 
+        animationDuration="750" 
+        snappingEnabled="true" 
+        snappingPreviewEnabled="false" 
+        snappingRectSize="20" 
+        panPerformanceBooster="true"
+        startMode="ZOOM"
+        initial_x1="2628200"
+        initial_y1="5698800"
+        initial_x2="2628800"
+        initial_y2="5699400">
+    </cismapGlobalPreferences>
+    <cismapLayersPreferences>
+        <appFeatureLayer enabled="true" translucency="0.9" name="Ausgew\u00E4hltes Kassenzeichen"/>
+        <rasterLayers enabled="true">
+            <simpleWms layerPosition="1" skip="false" enabled="true" translucency="0.5" name="Luftbild">
+                <![CDATA[
+                http://www.gis2.nrw.de/wmsconnector/wms/luftbild?SERVICE=WMS&VERSION=1.1.0&REQUEST=GetMap&LAYERS=Orthophoto+Str.+2,Orthophoto+Str.+3&FORMAT=image%2Fpng&TRANSPARENT=TRUE&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&BBOX=<cismap:boundingBox>&SRS=EPSG%3A31466&STYLES=&VERSION=1.1.0
+                ]]>
+            </simpleWms>
+            <simpleWms layerPosition="0" skip="true" enabled="true" translucency="0.5" name="DGK5, Stadtgrenze, Kartenraster">
+                <![CDATA[
+                http://www.gis.nrw.de/wms/DGM50?REQUEST=getMap&VERSION=1.1.0&SERVICE=WMS&LAYERS=DGM50&FORMAT=image%2Fjpeg&TRANSPARENT=TRUE&SRS=EPSG%3A31466&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&BBOX=<cismap:boundingBox>&STYLES=
+                ]]>
+            </simpleWms>
+            <simpleWms layerPosition="2" skip="false" enabled="true" translucency="0.5" name="DGK5">
+                <![CDATA[
+                http://www.geoserver.nrw.de/GeoOgcWms1.3/servlet/DGK5?VERSION=1.1.0&REQUEST=GetMap&LAYERS=Raster%3ADGK5%3AGrundriss&STYLES=&SRS=EPSG%3A31466&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&BBOX=<cismap:boundingBox>&FORMAT=image%2Fpng&TRANSPARENT=TRUE
+                ]]>
+            </simpleWms>
+        </rasterLayers>
+        <featureLayers>
+        <simplePostgisFeatureService skip="false" name="Versiegelte Fl\u00E4chen"  layerPosition ="1" enabled="true" translucency="0.4" lineColor="0,0,0" fillingColor="100,100,100">
+            <dbConnectionInfo>
+               <driverClass>org.postgresql.Driver</driverClass>
+               <dbUrl>jdbc:postgresql://s10220:5432/verdis_beta</dbUrl>
+               <user>postgres</user>
+               <pass>crypt::55a2748c04a2758313dc65a80989ec08</pass>
+            </dbConnectionInfo>
+            <statement>
+               <![CDATA[select <cismap::AllFields> from geom, cs_all_attr_mapping where geom.id=attr_object_id and attr_class_id=0 and class_id=11 and geom.geo_field && GeomFromText('BOX3D(<cismap::x1> <cismap::y1>,<cismap::x2> <cismap::y2>)',-1)]]>
+            </statement>
+            <allFields>
+               <![CDATA['Kassenzeichen' as Type,object_id as GroupingKey, object_id as ObjectName,geo_field as Geom]]>
+            </allFields>
+            <orderBy>
+               <![CDATA[order by GroupingKey]]>
+            </orderBy>
+        </simplePostgisFeatureService>
+        <simplePostgisFeatureService skip="true" layerPosition ="2" enabled="true" translucency="0.5" lineColor="255,0,0" fillingColor="0,0,255">
+            <dbConnectionInfo>
+               <driverClass>org.postgresql.Driver</driverClass>
+               <dbUrl>jdbc:postgresql://s10220:5432/verdis_beta</dbUrl>
+               <user>postgres</user>
+               <pass>crypt::55a2748c04a2758313dc65a80989ec08</pass>
+            </dbConnectionInfo>
+            <statement>
+               <![CDATA[select <cismap::AllFields> from geom, kassenzeichen where geom.id=kassenzeichen.geometrie and geom.geo_field && GeomFromText('BOX3D(<cismap::x1> <cismap::y1>,<cismap::x2> <cismap::y2>)',-1) and area(geom.geo_field)<10000]]>
+            </statement>
+            <allFields>
+               <![CDATA['Kassenzeichen' as Type,kassenzeichen.id as GroupingKey, kassenzeichen.id as ObjectName,geo_field as Geom]]>
+            </allFields>
+            <orderBy>
+               <![CDATA[order by GroupingKey]]>
+            </orderBy>
+        </simplePostgisFeatureService>
+        </featureLayers>
+    </cismapLayersPreferences>
+</cismapPreferences>

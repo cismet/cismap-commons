@@ -1,0 +1,20 @@
+#!/bin/bash
+
+find . -type d -name CVS -exec rm -R '{}' \; 
+
+find . \( -type f ! \( -name "*.form" -o -name "*.java" \) -exec mv "{}" ../resources/"{}" \;  -o -type d -exec mkdir -p ../resources/"{}" \; \);
+
+while [[ `find ../resources/ -empty -type d -print | wc -l` -ne 0 ]]
+do
+	echo "loop 1"
+	pwd
+	find ../resources/ -empty -type d -exec rmdir "{}" \;
+done
+
+while [[ `find . -empty -type d -print | wc -l` -ne 0 ]]
+do
+	echo "loop 2"
+	pwd
+  find . -empty -type d -print
+	find . -empty -type d -exec rmdir "{}" \;
+done
