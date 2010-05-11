@@ -143,9 +143,6 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         java.awt.GridBagConstraints gridBagConstraints;
 
         cmdOk = new javax.swing.JButton();
-        panGazGUI = new javax.swing.JPanel();
-        cboHits = new javax.swing.JComboBox();
-        prbHits = new javax.swing.JProgressBar();
         chkVisualize = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
         chkLockScale = new javax.swing.JCheckBox();
@@ -153,6 +150,8 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         txtSearch = new javax.swing.JTextField();
         lblBehind = new javax.swing.JLabel();
         panFill = new javax.swing.JPanel();
+        cboHits = new javax.swing.JComboBox();
+        prbHits = new javax.swing.JProgressBar();
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
         setMinimumSize(new java.awt.Dimension(373, 1));
@@ -168,51 +167,10 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         add(cmdOk, gridBagConstraints);
-
-        panGazGUI.setMinimumSize(new java.awt.Dimension(220, 23));
-        panGazGUI.setPreferredSize(new java.awt.Dimension(220, 24));
-        panGazGUI.setLayout(new java.awt.GridBagLayout());
-
-        cboHits.setEnabled(false);
-        cboHits.setMaximumSize(new java.awt.Dimension(32767, 19));
-        cboHits.setMinimumSize(new java.awt.Dimension(10, 18));
-        cboHits.setPreferredSize(new java.awt.Dimension(27, 19));
-        cboHits.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboHitsActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 30.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
-        panGazGUI.add(cboHits, gridBagConstraints);
-
-        prbHits.setBorderPainted(false);
-        prbHits.setMaximumSize(new java.awt.Dimension(32767, 5));
-        prbHits.setMinimumSize(new java.awt.Dimension(10, 5));
-        prbHits.setPreferredSize(new java.awt.Dimension(100, 5));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 10);
-        panGazGUI.add(prbHits, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(1, 3, 0, 0);
-        add(panGazGUI, gridBagConstraints);
 
         chkVisualize.setSelected(true);
         chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.chkVisualize.toolTipText")); // NOI18N
@@ -225,8 +183,9 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 0);
         add(chkVisualize, gridBagConstraints);
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
@@ -234,8 +193,9 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(6, 7, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 0);
         add(jLabel1, gridBagConstraints);
 
         chkLockScale.setSelected(true);
@@ -244,8 +204,9 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(6, 14, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(7, 14, 0, 0);
         add(chkLockScale, gridBagConstraints);
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
@@ -253,12 +214,14 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 7, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(3, 7, 0, 0);
         add(jLabel2, gridBagConstraints);
 
-        txtSearch.setMinimumSize(new java.awt.Dimension(80, 20));
-        txtSearch.setPreferredSize(new java.awt.Dimension(80, 20));
+        txtSearch.setMaximumSize(new java.awt.Dimension(100, 19));
+        txtSearch.setMinimumSize(new java.awt.Dimension(100, 19));
+        txtSearch.setPreferredSize(new java.awt.Dimension(100, 19));
         txtSearch.addInputMethodListener(new java.awt.event.InputMethodListener() {
             public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
             }
@@ -269,15 +232,21 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
         add(txtSearch, gridBagConstraints);
 
         lblBehind.setText(org.openide.util.NbBundle.getMessage(WFSFormBPlanSearch.class, "WFSFormBPlanSearch.lblBehind.text")); // NOI18N
+        lblBehind.setMaximumSize(new java.awt.Dimension(120, 14));
+        lblBehind.setMinimumSize(new java.awt.Dimension(120, 14));
+        lblBehind.setPreferredSize(new java.awt.Dimension(120, 14));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 5, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 0);
         add(lblBehind, gridBagConstraints);
 
         panFill.setMinimumSize(new java.awt.Dimension(1, 1));
@@ -287,20 +256,51 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
         panFill.setLayout(panFillLayout);
         panFillLayout.setHorizontalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 177, Short.MAX_VALUE)
+            .add(0, 131, Short.MAX_VALUE)
         );
         panFillLayout.setVerticalGroup(
             panFillLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 34, Short.MAX_VALUE)
+            .add(0, 30, Short.MAX_VALUE)
         );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 8;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         add(panFill, gridBagConstraints);
+
+        cboHits.setEnabled(false);
+        cboHits.setMaximumSize(new java.awt.Dimension(100, 19));
+        cboHits.setMinimumSize(new java.awt.Dimension(100, 19));
+        cboHits.setPreferredSize(new java.awt.Dimension(100, 19));
+        cboHits.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboHitsActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 3, 0, 0);
+        add(cboHits, gridBagConstraints);
+
+        prbHits.setBorderPainted(false);
+        prbHits.setMaximumSize(new java.awt.Dimension(100, 5));
+        prbHits.setMinimumSize(new java.awt.Dimension(100, 5));
+        prbHits.setPreferredSize(new java.awt.Dimension(100, 5));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 10);
+        add(prbHits, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
     private void txtSearchInputMethodTextChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_txtSearchInputMethodTextChanged
     }//GEN-LAST:event_txtSearchInputMethodTextChanged
@@ -361,7 +361,6 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel lblBehind;
     private javax.swing.JPanel panFill;
-    private javax.swing.JPanel panGazGUI;
     private javax.swing.JProgressBar prbHits;
     private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables

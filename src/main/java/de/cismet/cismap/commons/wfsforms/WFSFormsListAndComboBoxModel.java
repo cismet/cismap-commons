@@ -344,8 +344,10 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
     public Object getElementAt(int index) {
         if (!finished) {
             return loadingMessage;
-        } else {
+        } else if (index > -1 && index < features.size()) {
             return features.get(index);
+        } else {
+            return "Kein Ergebnis";
         }
     }
 
