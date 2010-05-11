@@ -105,25 +105,23 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         java.awt.GridBagConstraints gridBagConstraints;
 
         cmdPos = new javax.swing.JButton();
-        panGem = new javax.swing.JPanel();
-        cboGem = new javax.swing.JComboBox();
-        prbGem = new javax.swing.JProgressBar();
-        panFlurstueck = new javax.swing.JPanel();
-        cboFlurstueck = new javax.swing.JComboBox();
-        prbFlurstueck = new javax.swing.JProgressBar();
-        panFlur = new javax.swing.JPanel();
-        cboFlur = new javax.swing.JComboBox();
-        prbFlur = new javax.swing.JProgressBar();
         chkVisualize = new javax.swing.JCheckBox();
         jLabel2 = new javax.swing.JLabel();
         chkLockScale = new javax.swing.JCheckBox();
         jLabel3 = new javax.swing.JLabel();
         panEmpty = new javax.swing.JPanel();
+        cboGem = new javax.swing.JComboBox();
+        prbGem = new javax.swing.JProgressBar();
+        cboFlurstueck = new javax.swing.JComboBox();
+        prbFlurstueck = new javax.swing.JProgressBar();
+        cboFlur = new javax.swing.JComboBox();
+        prbFlur = new javax.swing.JProgressBar();
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
         setPreferredSize(new java.awt.Dimension(400, 38));
         setLayout(new java.awt.GridBagLayout());
 
+        cmdPos.setMnemonic('P');
         cmdPos.setText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.cmdPos.text")); // NOI18N
         cmdPos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -133,128 +131,10 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         add(cmdPos, gridBagConstraints);
-
-        panGem.setMinimumSize(new java.awt.Dimension(103, 24));
-        panGem.setLayout(new java.awt.GridBagLayout());
-
-        cboGem.setEnabled(false);
-        cboGem.setMaximumSize(new java.awt.Dimension(32767, 19));
-        cboGem.setMinimumSize(new java.awt.Dimension(50, 18));
-        cboGem.setPreferredSize(new java.awt.Dimension(100, 19));
-        cboGem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboGemActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 60.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
-        panGem.add(cboGem, gridBagConstraints);
-
-        prbGem.setBorderPainted(false);
-        prbGem.setEnabled(false);
-        prbGem.setMaximumSize(new java.awt.Dimension(32767, 5));
-        prbGem.setMinimumSize(new java.awt.Dimension(10, 5));
-        prbGem.setPreferredSize(new java.awt.Dimension(1, 5));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
-        panGem.add(prbGem, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(1, 0, 0, 0);
-        add(panGem, gridBagConstraints);
-
-        panFlurstueck.setMinimumSize(new java.awt.Dimension(110, 27));
-        panFlurstueck.setPreferredSize(new java.awt.Dimension(110, 27));
-        panFlurstueck.setLayout(new java.awt.GridBagLayout());
-
-        cboFlurstueck.setEditable(true);
-        cboFlurstueck.setEnabled(false);
-        cboFlurstueck.setMaximumSize(new java.awt.Dimension(32767, 19));
-        cboFlurstueck.setPreferredSize(new java.awt.Dimension(27, 19));
-        cboFlurstueck.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboFlurstueckActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 25.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
-        panFlurstueck.add(cboFlurstueck, gridBagConstraints);
-
-        prbFlurstueck.setBorderPainted(false);
-        prbFlurstueck.setEnabled(false);
-        prbFlurstueck.setMaximumSize(new java.awt.Dimension(32767, 5));
-        prbFlurstueck.setMinimumSize(new java.awt.Dimension(10, 5));
-        prbFlurstueck.setPreferredSize(new java.awt.Dimension(1, 5));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
-        panFlurstueck.add(prbFlurstueck, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(1, 0, 0, 0);
-        add(panFlurstueck, gridBagConstraints);
-
-        panFlur.setMinimumSize(new java.awt.Dimension(50, 27));
-        panFlur.setPreferredSize(new java.awt.Dimension(50, 27));
-        panFlur.setLayout(new java.awt.GridBagLayout());
-
-        cboFlur.setEditable(true);
-        cboFlur.setEnabled(false);
-        cboFlur.setMaximumSize(new java.awt.Dimension(32767, 19));
-        cboFlur.setPreferredSize(new java.awt.Dimension(27, 19));
-        cboFlur.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboFlurActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 15.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 3);
-        panFlur.add(cboFlur, gridBagConstraints);
-
-        prbFlur.setBorderPainted(false);
-        prbFlur.setEnabled(false);
-        prbFlur.setMaximumSize(new java.awt.Dimension(32767, 5));
-        prbFlur.setMinimumSize(new java.awt.Dimension(10, 5));
-        prbFlur.setPreferredSize(new java.awt.Dimension(1, 5));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
-        panFlur.add(prbFlur, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(1, 0, 0, 0);
-        add(panFlur, gridBagConstraints);
 
         chkVisualize.setSelected(true);
         chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.chkVisualize.toolTipText")); // NOI18N
@@ -266,8 +146,9 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(3, 7, 0, 0);
         add(chkVisualize, gridBagConstraints);
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
@@ -275,6 +156,7 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(4, 7, 0, 0);
         add(jLabel2, gridBagConstraints);
@@ -284,8 +166,9 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 14, 0, 0);
+        gridBagConstraints.insets = new java.awt.Insets(3, 14, 0, 0);
         add(chkLockScale, gridBagConstraints);
 
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
@@ -293,8 +176,9 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 7, 3, 7);
+        gridBagConstraints.insets = new java.awt.Insets(1, 7, 3, 7);
         add(jLabel3, gridBagConstraints);
 
         panEmpty.setPreferredSize(new java.awt.Dimension(1, 1));
@@ -303,20 +187,117 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         panEmpty.setLayout(panEmptyLayout);
         panEmptyLayout.setHorizontalGroup(
             panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 258, Short.MAX_VALUE)
+            .add(0, 32, Short.MAX_VALUE)
         );
         panEmptyLayout.setVerticalGroup(
             panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 36, Short.MAX_VALUE)
+            .add(0, 29, Short.MAX_VALUE)
         );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 8;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weightx = 10.0;
         gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(1, 0, 0, 0);
         add(panEmpty, gridBagConstraints);
+
+        cboGem.setEnabled(false);
+        cboGem.setMaximumSize(new java.awt.Dimension(100, 19));
+        cboGem.setMinimumSize(new java.awt.Dimension(100, 19));
+        cboGem.setPreferredSize(new java.awt.Dimension(100, 19));
+        cboGem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboGemActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 50.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 3);
+        add(cboGem, gridBagConstraints);
+
+        prbGem.setBorderPainted(false);
+        prbGem.setEnabled(false);
+        prbGem.setMaximumSize(new java.awt.Dimension(100, 5));
+        prbGem.setMinimumSize(new java.awt.Dimension(100, 5));
+        prbGem.setPreferredSize(new java.awt.Dimension(100, 5));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+        add(prbGem, gridBagConstraints);
+
+        cboFlurstueck.setEditable(true);
+        cboFlurstueck.setEnabled(false);
+        cboFlurstueck.setMaximumSize(new java.awt.Dimension(27, 19));
+        cboFlurstueck.setMinimumSize(new java.awt.Dimension(27, 19));
+        cboFlurstueck.setPreferredSize(new java.awt.Dimension(27, 19));
+        cboFlurstueck.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboFlurstueckActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 25.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 3);
+        add(cboFlurstueck, gridBagConstraints);
+
+        prbFlurstueck.setBorderPainted(false);
+        prbFlurstueck.setEnabled(false);
+        prbFlurstueck.setMaximumSize(new java.awt.Dimension(1, 5));
+        prbFlurstueck.setMinimumSize(new java.awt.Dimension(1, 5));
+        prbFlurstueck.setPreferredSize(new java.awt.Dimension(1, 5));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+        add(prbFlurstueck, gridBagConstraints);
+
+        cboFlur.setEditable(true);
+        cboFlur.setEnabled(false);
+        cboFlur.setMaximumSize(new java.awt.Dimension(27, 19));
+        cboFlur.setMinimumSize(new java.awt.Dimension(27, 19));
+        cboFlur.setPreferredSize(new java.awt.Dimension(27, 19));
+        cboFlur.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cboFlurActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 25.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 3);
+        add(cboFlur, gridBagConstraints);
+
+        prbFlur.setBorderPainted(false);
+        prbFlur.setEnabled(false);
+        prbFlur.setMaximumSize(new java.awt.Dimension(1, 5));
+        prbFlur.setMinimumSize(new java.awt.Dimension(1, 5));
+        prbFlur.setPreferredSize(new java.awt.Dimension(1, 5));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
+        add(prbFlur, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
     private void cmdPosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdPosActionPerformed
         boolean history = true;
@@ -414,9 +395,6 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel panEmpty;
-    private javax.swing.JPanel panFlur;
-    private javax.swing.JPanel panFlurstueck;
-    private javax.swing.JPanel panGem;
     private javax.swing.JProgressBar prbFlur;
     private javax.swing.JProgressBar prbFlurstueck;
     private javax.swing.JProgressBar prbGem;

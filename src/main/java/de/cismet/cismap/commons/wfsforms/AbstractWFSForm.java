@@ -60,6 +60,7 @@ import org.jdom.Element;
  * @author thorsten.hell@cismet.de
  */
 public abstract class AbstractWFSForm extends JPanel {
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Vector<WFSFormQuery> queries = new Vector<WFSFormQuery>();
     protected HashMap<String, JComponent> listComponents = new HashMap<String, JComponent>();
@@ -76,7 +77,7 @@ public abstract class AbstractWFSForm extends JPanel {
     private String iconPath;
     private String className;
     private boolean inited = false;
-    private String sorter=null;
+    private String sorter = null;
     protected MappingComponent mappingComponent;
     Vector<ActionListener> actionListener = new Vector<ActionListener>();
     public static final int FEATURE_BORDER = 200;
@@ -84,6 +85,7 @@ public abstract class AbstractWFSForm extends JPanel {
     public AbstractWFSForm() {
         addHierarchyListener(new HierarchyListener() {
 
+            @Override
             public void hierarchyChanged(HierarchyEvent e) {
                 if (!isInited() && isDisplayable()) {
                     initWFSForm();
@@ -93,9 +95,6 @@ public abstract class AbstractWFSForm extends JPanel {
         pMark.setVisible(false);
         pMark.setSweetSpotX(0.5d);
         pMark.setSweetSpotY(1d);
-
-
-
     }
 
     public JComponent getListComponentByName(String name) {
@@ -107,11 +106,11 @@ public abstract class AbstractWFSForm extends JPanel {
             inited = true;
             //do the initial loading of all queries that are INITIAL
             for (final WFSFormQuery q : queries) {
-                log.debug(title+"Components:"+ listComponents);//NOI18N
+                log.debug(title + "Components:" + listComponents);//NOI18N
                 queriesByComponentName.put(q.getComponentName(), q);
                 if (q.getType().equals(WFSFormQuery.INITIAL) && listComponents.containsKey(q.getComponentName())) {
                     final JComponent c = listComponents.get(q.getComponentName());
-                    log.debug("Comp: "+q.getComponentName());//NOI18N
+                    log.debug("Comp: " + q.getComponentName());//NOI18N
                     if (c instanceof JComboBox) {
                         try {
                             JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");//NOI18N
@@ -150,7 +149,7 @@ public abstract class AbstractWFSForm extends JPanel {
 
     protected void checkCboCorrectness(JComboBox combo) {
         String itemString = String.valueOf(combo.getSelectedItem()).trim();
-        if (combo.getSelectedItem() != null && !itemString.equals("") && !itemString.equals(loadingMessage)&& !itemString.equals(errorMessage) &&combo.getSelectedIndex() == -1) {//NOI18N
+        if (combo.getSelectedItem() != null && !itemString.equals("") && !itemString.equals(loadingMessage) && !itemString.equals(errorMessage) && combo.getSelectedIndex() == -1) {//NOI18N
             combo.getEditor().getEditorComponent().setBackground(Color.red);
             garbageDuringAutoCompletion(combo);
         } else {
@@ -327,5 +326,4 @@ public abstract class AbstractWFSForm extends JPanel {
     public void setSorter(String sorter) {
         this.sorter = sorter;
     }
-    
 }

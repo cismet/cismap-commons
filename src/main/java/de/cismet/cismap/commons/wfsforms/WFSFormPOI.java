@@ -85,17 +85,15 @@ public class WFSFormPOI extends AbstractWFSForm {
         java.awt.GridBagConstraints gridBagConstraints;
 
         cmdOk = new javax.swing.JButton();
-        panPOIs = new javax.swing.JPanel();
-        cboPois = new javax.swing.JComboBox();
-        prbPois = new javax.swing.JProgressBar();
-        panLT = new javax.swing.JPanel();
-        cboLocationtypes = new javax.swing.JComboBox();
-        prbLocationtypes = new javax.swing.JProgressBar();
         chkVisualize = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
         chkLockScale = new javax.swing.JCheckBox();
         jLabel2 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
+        cboPois = new javax.swing.JComboBox();
+        prbPois = new javax.swing.JProgressBar();
+        cboLocationtypes = new javax.swing.JComboBox();
+        prbLocationtypes = new javax.swing.JProgressBar();
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
         setMinimumSize(new java.awt.Dimension(373, 1));
@@ -111,17 +109,83 @@ public class WFSFormPOI extends AbstractWFSForm {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
         add(cmdOk, gridBagConstraints);
 
-        panPOIs.setMinimumSize(new java.awt.Dimension(183, 24));
-        panPOIs.setLayout(new java.awt.GridBagLayout());
+        chkVisualize.setSelected(true);
+        chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.chkVisualize.toolTipText")); // NOI18N
+        chkVisualize.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkVisualizeActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(3, 7, 0, 0);
+        add(chkVisualize, gridBagConstraints);
+
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
+        jLabel1.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.jLabel1.toolTipText")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(4, 7, 0, 0);
+        add(jLabel1, gridBagConstraints);
+
+        chkLockScale.setSelected(true);
+        chkLockScale.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.chkLockScale.toolTipText")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(3, 14, 0, 0);
+        add(chkLockScale, gridBagConstraints);
+
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
+        jLabel2.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.jLabel2.toolTipText")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(1, 7, 0, 0);
+        add(jLabel2, gridBagConstraints);
+
+        jPanel1.setMinimumSize(new java.awt.Dimension(1, 1));
+        jPanel1.setPreferredSize(new java.awt.Dimension(1, 1));
+
+        org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 9, Short.MAX_VALUE)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(0, 30, Short.MAX_VALUE)
+        );
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 7;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 10.0;
+        gridBagConstraints.weighty = 1.0;
+        add(jPanel1, gridBagConstraints);
 
         cboPois.setEditable(true);
         cboPois.setEnabled(false);
-        cboPois.setMaximumSize(new java.awt.Dimension(32767, 19));
-        cboPois.setMinimumSize(new java.awt.Dimension(10, 18));
+        cboPois.setMaximumSize(new java.awt.Dimension(180, 19));
+        cboPois.setMinimumSize(new java.awt.Dimension(180, 19));
         cboPois.setPreferredSize(new java.awt.Dimension(180, 19));
         cboPois.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -131,16 +195,15 @@ public class WFSFormPOI extends AbstractWFSForm {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 30.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
-        panPOIs.add(cboPois, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(2, 3, 0, 0);
+        add(cboPois, gridBagConstraints);
 
         prbPois.setBorderPainted(false);
-        prbPois.setMaximumSize(new java.awt.Dimension(32767, 5));
-        prbPois.setMinimumSize(new java.awt.Dimension(10, 5));
+        prbPois.setMaximumSize(new java.awt.Dimension(100, 5));
+        prbPois.setMinimumSize(new java.awt.Dimension(100, 5));
         prbPois.setPreferredSize(new java.awt.Dimension(100, 5));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -148,20 +211,11 @@ public class WFSFormPOI extends AbstractWFSForm {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 10);
-        panPOIs.add(prbPois, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(1, 0, 0, 0);
-        add(panPOIs, gridBagConstraints);
-
-        panLT.setMinimumSize(new java.awt.Dimension(180, 24));
-        panLT.setLayout(new java.awt.GridBagLayout());
+        add(prbPois, gridBagConstraints);
 
         cboLocationtypes.setEnabled(false);
-        cboLocationtypes.setMaximumSize(new java.awt.Dimension(32767, 19));
+        cboLocationtypes.setMaximumSize(new java.awt.Dimension(180, 19));
+        cboLocationtypes.setMinimumSize(new java.awt.Dimension(180, 19));
         cboLocationtypes.setPreferredSize(new java.awt.Dimension(180, 19));
         cboLocationtypes.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -176,14 +230,15 @@ public class WFSFormPOI extends AbstractWFSForm {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.weightx = 70.0;
-        panLT.add(cboLocationtypes, gridBagConstraints);
+        gridBagConstraints.weightx = 60.0;
+        gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 0);
+        add(cboLocationtypes, gridBagConstraints);
 
         prbLocationtypes.setBorderPainted(false);
-        prbLocationtypes.setMaximumSize(new java.awt.Dimension(32767, 5));
-        prbLocationtypes.setMinimumSize(new java.awt.Dimension(10, 5));
+        prbLocationtypes.setMaximumSize(new java.awt.Dimension(100, 5));
+        prbLocationtypes.setMinimumSize(new java.awt.Dimension(100, 5));
         prbLocationtypes.setPreferredSize(new java.awt.Dimension(100, 5));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -191,77 +246,7 @@ public class WFSFormPOI extends AbstractWFSForm {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 9);
-        panLT.add(prbLocationtypes, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(1, 0, 0, 0);
-        add(panLT, gridBagConstraints);
-
-        chkVisualize.setSelected(true);
-        chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.chkVisualize.toolTipText")); // NOI18N
-        chkVisualize.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkVisualizeActionPerformed(evt);
-            }
-        });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 0);
-        add(chkVisualize, gridBagConstraints);
-
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
-        jLabel1.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.jLabel1.toolTipText")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(4, 7, 0, 0);
-        add(jLabel1, gridBagConstraints);
-
-        chkLockScale.setSelected(true);
-        chkLockScale.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.chkLockScale.toolTipText")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 14, 0, 0);
-        add(chkLockScale, gridBagConstraints);
-
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
-        jLabel2.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.jLabel2.toolTipText")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(2, 7, 0, 0);
-        add(jLabel2, gridBagConstraints);
-
-        jPanel1.setMinimumSize(new java.awt.Dimension(1, 1));
-        jPanel1.setPreferredSize(new java.awt.Dimension(1, 1));
-
-        org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 94, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 31, Short.MAX_VALUE)
-        );
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 7;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        add(jPanel1, gridBagConstraints);
+        add(prbLocationtypes, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void chkVisualizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVisualizeActionPerformed
@@ -327,8 +312,6 @@ public class WFSFormPOI extends AbstractWFSForm {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel panLT;
-    private javax.swing.JPanel panPOIs;
     private javax.swing.JProgressBar prbLocationtypes;
     private javax.swing.JProgressBar prbPois;
     // End of variables declaration//GEN-END:variables
