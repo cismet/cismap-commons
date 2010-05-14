@@ -3,6 +3,7 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.linearref.LengthLocationMap;
 import com.vividsolutions.jts.linearref.LinearLocation;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
@@ -25,9 +26,7 @@ import java.util.Collection;
 public class MeasurementMoveListener extends PBasicInputEventHandler {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-
     public static final String COORDINATES_CHANGED = "COORDINATES_CHANGED";//NOI18N
-    
     private MappingComponent mc;
     private float handleX = Float.MIN_VALUE;
     private float handleY = Float.MIN_VALUE;
@@ -60,10 +59,16 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
                             if (l == null || measurementPHandle == null) {
                                 log.debug("create newPointHandle and Locator");//NOI18N
                                 l = new PLocator() {
+
                                     @Override
-                                    public double locateX() {return handleX;}
+                                    public double locateX() {
+                                        return handleX;
+                                    }
+
                                     @Override
-                                    public double locateY() {return handleY;}
+                                    public double locateY() {
+                                        return handleY;
+                                    }
                                 };
                                 measurementPHandle = new MeasurementPHandle(l, mc);
                             }
@@ -72,10 +77,12 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
                             pf = mc.getPFeatureHM().get(sels[0]);
 
                             Geometry geom = pf.getFeature().getGeometry();
-                            if (geom instanceof LineString) {
+                            if (geom instanceof MultiLineString || geom instanceof LineString) {
+                                log.fatal("Right geometrytype:" +geom.getGeometryType());
                                 Point2D trigger = event.getPosition();
 
                                 Point2D[] neighbours = getNearestNeighbours(trigger, pf);
+                                log.fatal("Punkte: "+neighbours[0]+" ---  "+ neighbours[1]);
                                 Point2D erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
 
                                 handleX = (float) erg.getX();
@@ -100,14 +107,18 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
                                 LinearLocation ll = lil.indexOf(c);
                                 LengthLocationMap llm = new LengthLocationMap(geom);
                                 measurementPHandle.setDistanceInfo(new DecimalFormat("0.00").format(Math.round(llm.getLength(ll) * 100) / 100d));
+                            } else {
+                                log.fatal("Wrong geometrytype:" +geom.getGeometryType());
                             }
 
                         }
+
                     }
+
 
                     postCoordinateChanged();
                 } catch (Exception e) {
-                    log.info("Fehler beim Moven \u00FCber die Karte ", e);//NOI18N
+                    log.fatal("Fehler beim Moven \u00FCber die Karte ", e);//NOI18N
                 }
             }
         };
@@ -119,10 +130,10 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         Point2D start = null;
         Point2D end = null;
         double dist = Double.POSITIVE_INFINITY;
-        if (pfeature.getFeature().getGeometry() instanceof LineString) {
-            for (int i = 0; i < pfeature.getXp().length-1; i++) {
+        if (pfeature.getFeature().getGeometry() instanceof LineString||pfeature.getFeature().getGeometry() instanceof MultiLineString) {
+            for (int i = 0; i < pfeature.getXp().length - 1; i++) {
                 Point2D tmpStart = new Point2D.Double(pfeature.getXp()[i], pfeature.getYp()[i]);
-                Point2D tmpEnd = new Point2D.Double(pfeature.getXp()[i+1], pfeature.getYp()[i+1]);
+                Point2D tmpEnd = new Point2D.Double(pfeature.getXp()[i + 1], pfeature.getYp()[i + 1]);
                 double tmpDist = StaticGeometryFunctions.distanceToLine(tmpStart, tmpEnd, trigger);
                 if (tmpDist < dist) {
                     dist = tmpDist;
@@ -139,5 +150,4 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         PNotificationCenter pn = PNotificationCenter.defaultCenter();
         pn.postNotification(COORDINATES_CHANGED, this);
     }
-
 }
