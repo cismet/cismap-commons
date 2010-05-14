@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
-import pswing.PSwing;
 
 /**
  *
@@ -15,9 +14,7 @@ public class MeasurementPanel extends JPanel {
     private ImageIcon icoRuler = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/ruler-triangle.png"));//NOI18N
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private PFeature pfeature;
     private PNode pNodeParent;
-    private PSwing pSwing;
     private static final Color COLOR_BORDER = new Color(0, 0, 0);
     private static final Color COLOR_BACKGROUND = new Color(210, 210, 210);
 
@@ -50,7 +47,7 @@ public class MeasurementPanel extends JPanel {
         lblLength.setBackground(javax.swing.UIManager.getDefaults().getColor("Nb.Desktop.background"));
         lblLength.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         lblLength.setIcon(icoRuler);
-        lblLength.setText(org.openide.util.NbBundle.getMessage(MeasurementPanel.class, "InfoPanel.jLabel1.text")); // NOI18N
+        lblLength.setText("0.00"); // NOI18N
         lblLength.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 lblLengthMouseClicked(evt);
@@ -92,14 +89,6 @@ public class MeasurementPanel extends JPanel {
         repaint();
     }
 
-    public PFeature getPfeature() {
-        return pfeature;
-    }
-
-    public void setPfeature(PFeature pfeature) {
-        this.pfeature = pfeature;
-    }
-
     public PNode getPNodeParent() {
         return pNodeParent;
     }
@@ -108,11 +97,4 @@ public class MeasurementPanel extends JPanel {
         this.pNodeParent = pNodeParent;
     }
 
-    public PSwing getPSwing() {
-        return pSwing;
-    }
-
-    public void setPSwing(PSwing pSwing) {
-        this.pSwing = pSwing;
-    }
 }

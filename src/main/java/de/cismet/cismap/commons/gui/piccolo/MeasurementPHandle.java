@@ -11,6 +11,7 @@ import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolox.util.PLocator;
+import java.text.DecimalFormat;
 import pswing.PSwing;
 import pswing.PSwingCanvas;
 
@@ -41,24 +42,23 @@ public class MeasurementPHandle extends PPath {
         installHandleEventHandlers();
         startResizeBounds();
 
-        initInfo();
+        initPanel();
         
         relocateHandle();
     }
 
-    private void initInfo() {
+    private void initPanel() {
         measurementPanel = new MeasurementPanel();
 
-        pswingComp = new PSwing((PSwingCanvas) mc, measurementPanel);
-        pswingComp.resetBounds();
-
-        measurementPanel.setPSwing(pswingComp);
+        pswingComp = new PSwing((PSwingCanvas) mc, measurementPanel);        
+        measurementPanel.setPNodeParent(pswingComp);
         addChild(pswingComp);
     }
 
-    public void setDistanceInfo(String info) {
+    public void setMarkPosition(double mark) {
+        String info = new DecimalFormat("0.00").format(mark);
         measurementPanel.setLengthInfo(info);
-        startResizeBounds();
+        relocateHandle();
         repaint();
     }
 
@@ -116,8 +116,7 @@ public class MeasurementPHandle extends PPath {
 
             pswingComp.setOffset(newCenterX + DEFAULT_HANDLE_SIZE, newCenterY - pswingComp.getHeight() / 2);
 
-            if (newCenterX != b.getCenterX() ||
-                    newCenterY != b.getCenterY()) {
+            if (newCenterX != b.getCenterX() || newCenterY != b.getCenterY()) {
                 this.setBounds(0, 0, DEFAULT_HANDLE_SIZE, DEFAULT_HANDLE_SIZE);
                 centerBoundsOnPoint(newCenterX, newCenterY);
             }
