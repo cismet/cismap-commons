@@ -226,7 +226,9 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         markHandle.setMarkPosition(currentPosition);
 
         marks.add(new Mark(currentPosition, markHandle));
+        getPLayer().removeChild(measurementPHandle);
         getPLayer().addChild(markHandle);
+        getPLayer().addChild(measurementPHandle);
     }
 
     private void showMeasurementHandle(boolean show) {
