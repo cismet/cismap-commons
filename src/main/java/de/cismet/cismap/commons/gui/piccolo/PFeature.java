@@ -374,10 +374,20 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 log.debug("MultiLineString");//NOI18N
             }
             MultiLineString mls = (MultiLineString) geom;
+            Vector<Coordinate[]> coordSubArrs = new Vector<Coordinate[]>();
+            int coordArrayLength = 0;
             for (int i = 0; i < mls.getNumGeometries(); ++i) {
                 LineString ls = (LineString) mls.getGeometryN(i);
-                coordArr = ls.getCoordinates();
-                addLinearRing(coordArr);
+                Coordinate[] coordSubArr = ls.getCoordinates();
+                coordSubArrs.add(coordSubArr);
+                addLinearRing(coordSubArr);
+                coordArrayLength += coordSubArr.length;
+            }
+            coordArr = new Coordinate[coordArrayLength];
+            int arrayCopyCursor = 0;
+            for (Coordinate[] coordSubArr : coordSubArrs) {
+                System.arraycopy(coordSubArr, 0, coordArr, arrayCopyCursor, coordSubArr.length);
+                arrayCopyCursor += coordSubArr.length;
             }
 
         }
