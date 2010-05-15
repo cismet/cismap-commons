@@ -56,6 +56,9 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
     private JPopupMenu menu;
     private Mark selectedMark;
 
+    private JMenuItem cmdRemoveMark;
+    private JMenuItem cmdRemoveAllMarks;
+
     private ImageIcon icoMenRem = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/marker--minus.png"));//NOI18N
     private ImageIcon icoMenRemAll = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/marker--minus.png"));//NOI18N
 
@@ -101,6 +104,14 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         }
     }
 
+    public double getSelectedMarkPosition() {
+        if (selectedMark != null) {
+            return selectedMark.getPosition();
+        } else {
+            return 0;
+        }
+    }
+
     public void setSelectedMark(MarkPHandle markPHandle) {
         if (markPHandle == null) {
             this.selectedMark = null;
@@ -117,13 +128,23 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         return menu;
     }
 
-    public void setContextMenu(JPopupMenu menu) {
-        if(menu == null) {
-            menu = new JPopupMenu();
-        }
-        this.menu = menu;
-        JMenuItem cmdRemoveMark = new JMenuItem("entfernen");//NOI18N
-        JMenuItem cmdRemoveAllMarks = new JMenuItem("alle entfernen");//NOI18N
+    public void removeContextMenuItem(JMenuItem item) {
+        menu.remove(item);
+    }
+
+    public void addContextMenuItem(JMenuItem item) {
+        menu.remove(cmdRemoveMark);
+        menu.remove(cmdRemoveAllMarks);
+        menu.add(item);
+        menu.add(cmdRemoveMark);
+        menu.add(cmdRemoveAllMarks);
+    }
+
+    private void initContextMenu() {
+        menu = new JPopupMenu();
+
+        cmdRemoveMark = new JMenuItem("entfernen");//NOI18N
+        cmdRemoveAllMarks = new JMenuItem("alle entfernen");//NOI18N
 
         cmdRemoveMark.setIcon(icoMenRem);
         cmdRemoveAllMarks.setIcon(icoMenRemAll);
@@ -146,10 +167,6 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         }
         menu.add(cmdRemoveMark);
         menu.add(cmdRemoveAllMarks);
-    }
-
-    private void initContextMenu() {
-        setContextMenu(null);
     }
 
     public PLayer getPLayer() {
