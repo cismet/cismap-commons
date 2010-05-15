@@ -11,22 +11,38 @@ import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.MarkPHandle;
 import de.cismet.cismap.commons.gui.piccolo.MeasurementPHandle;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.math.geometry.StaticGeometryFunctions;
+import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.util.PLocator;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.Vector;
+import javax.swing.ImageIcon;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 public class MeasurementMoveListener extends PBasicInputEventHandler {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     public static final String COORDINATES_CHANGED = "COORDINATES_CHANGED";//NOI18N
+    public static enum modii {
+        MARK_SELECTION,
+        MARK_ADD,
+        MEASUREMENT,
+        SUBLINE
+    };
+
+
     private MappingComponent mc;
     private float handleX = Float.MIN_VALUE;
     private float handleY = Float.MIN_VALUE;
@@ -35,6 +51,13 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
 
     private Geometry geom;
     private Vector<Mark> marks = new Vector<Mark>();
+
+    private modii modus;
+    private JPopupMenu menu;
+    private Mark selectedMark;
+
+    private ImageIcon icoMenRem = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/marker--minus.png"));//NOI18N
+    private ImageIcon icoMenRemAll = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/marker--minus.png"));//NOI18N
 
     /**
      * Creates a new instance of SimpleMoveListener
@@ -56,24 +79,104 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
             }
         };
         measurementPHandle = new MeasurementPHandle(l, mc);
+
+        initContextMenu();
     }
 
     @Override
     public void mouseClicked(PInputEvent event) {
         if (event.isLeftMouseButton()) {
-            if (event.isControlDown()) {
-                for (Mark mark : marks) {
-                    mc.getHandleLayer().removeChild(mark.getHandle());
-                }
-                marks.removeAllElements();
-            } else {
-                Point2D trigger = event.getPosition();
-                Point2D[] neighbours = getNearestNeighbours(trigger, pf);
-                Point2D erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
+            switch (modus) {
+                case MARK_ADD:
+                    Point2D trigger = event.getPosition();
+                    Point2D[] neighbours = getNearestNeighbours(trigger, pf);
+                    Point2D erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
 
-                addMarkHandle(erg.getX(), erg.getY());
+                    addMarkHandle(erg.getX(), erg.getY());
+                    break;
+                case SUBLINE:
+                    //todo
+                    break;
             }
         }
+    }
+
+    public void setSelectedMark(MarkPHandle markPHandle) {
+        if (markPHandle == null) {
+            this.selectedMark = null;
+        } else {
+            for (Mark mark : marks) {
+                if (mark != null && mark.getPHandle().equals(markPHandle)) {
+                    this.selectedMark = mark;
+                }
+            }
+        }
+    }
+
+    public JPopupMenu getContextMenu() {
+        return menu;
+    }
+
+    public void setContextMenu(JPopupMenu menu) {
+        if(menu == null) {
+            menu = new JPopupMenu();
+        }
+        this.menu = menu;
+        JMenuItem cmdRemoveMark = new JMenuItem("entfernen");//NOI18N
+        JMenuItem cmdRemoveAllMarks = new JMenuItem("alle entfernen");//NOI18N
+
+        cmdRemoveMark.setIcon(icoMenRem);
+        cmdRemoveAllMarks.setIcon(icoMenRemAll);
+
+        cmdRemoveMark.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                removeMark(selectedMark.getPHandle());
+            }
+        });
+        cmdRemoveAllMarks.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                removeAllMarks();
+            }
+        });
+
+        if (menu.getComponentCount() > 0) {
+            menu.addSeparator();
+        }
+        menu.add(cmdRemoveMark);
+        menu.add(cmdRemoveAllMarks);
+    }
+
+    private void initContextMenu() {
+        setContextMenu(null);
+    }
+
+    public PLayer getPLayer() {
+        return mc.getHandleLayer();
+    }
+
+    public void removeMark(MarkPHandle markHandle) {
+        if (markHandle != null) {
+            Mark toRemove = null;
+            for (Mark mark : marks) {
+                if (mark.getPHandle().equals(markHandle)) {
+                    toRemove = mark;
+                    break;
+                }
+            }
+            if (toRemove != null) {
+                marks.remove(toRemove);
+                getPLayer().removeChild(toRemove.getPHandle());
+            }
+        }
+    }
+
+    public void removeAllMarks() {
+        for (Mark mark : marks) {
+            getPLayer().removeChild(mark.getPHandle());
+        }
+        marks.removeAllElements();
     }
 
     private double getCurrentPosition() {
@@ -98,15 +201,13 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         log.debug("mouse released");
     }
 
-    private void addMarkHandles() {
+    private void showMarkHandles(boolean show) {
         for (Mark mark : marks) {
-            mc.getHandleLayer().addChild(mark.getHandle());
+            showHandle(mark.getPHandle(), show);
         }
     }
 
     private void addMarkHandle(final double x, final double y) {
-
-        mc.getLayer().addChild(measurementPHandle);
         log.debug("create newPointHandle and Locator");//NOI18N
         PLocator l = new PLocator() {
 
@@ -119,13 +220,58 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
             public double locateY() {
                 return y;
             }
-        };        
-        MeasurementPHandle stationPHandle = new MeasurementPHandle(l, mc);
+        };
+        MarkPHandle markHandle = new MarkPHandle(l, this, mc);
         double currentPosition = getCurrentPosition();
-        stationPHandle.setMarkPosition(currentPosition);
-        mc.getHandleLayer().addChild(stationPHandle);
+        markHandle.setMarkPosition(currentPosition);
 
-        marks.add(new Mark(currentPosition, stationPHandle));
+        marks.add(new Mark(currentPosition, markHandle));
+        getPLayer().addChild(markHandle);
+    }
+
+    private void showMeasurementHandle(boolean show) {
+        log.debug("showMeasurementHandle " + show);
+        showHandle(measurementPHandle, show);
+    }
+
+    private void showHandle(PPath handle, boolean show) {
+        boolean found = false;
+        for (Object o : getPLayer().getChildrenReference()) {
+            if (o != null && o.equals(handle)) {
+                found = true;
+                break;
+            }
+        }
+        if (!found && show) {
+            getPLayer().addChild(handle);
+        }
+        if (found && !show) {
+            getPLayer().removeChild(handle);
+        }
+    }
+
+    private void setModus(modii modus) {
+        this.modus = modus;
+        refreshHandles();
+    }
+
+    private void refreshHandles() {
+        if (geom != null) {
+            switch (modus) {
+                case MARK_SELECTION:
+                    showMarkHandles(true);
+                    showMeasurementHandle(false);
+                    break;
+                case MARK_ADD:
+                    showMarkHandles(true);
+                    showMeasurementHandle(true);
+                    break;
+            }
+        }
+    }
+
+    public modii getModus() {
+        return modus;
     }
 
     @Override
@@ -136,29 +282,26 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
             public void run() {
                 try {
                     if (mc.getInteractionMode().equals(MappingComponent.LINEMEASUREMENT)) {
-
-                        addMarkHandles();
-                        
                         geom = getSelectedGeometry();
 
-                        if (geom != null) {
-                            mc.getHandleLayer().addChild(measurementPHandle);
+                        if (event.isControlDown()) {
+                            setModus(modii.MARK_SELECTION);
+                        } else {
+                            setModus(modii.MARK_ADD);
 
-                            if (geom instanceof MultiLineString || geom instanceof LineString) {
-                                updateHandleCoords(event.getPosition());
-                                
-                                measurementPHandle.setMarkPosition(getCurrentPosition());
-                            } else {
-                                log.debug("Wrong geometrytype:" +geom.getGeometryType());
+                            if (geom != null) {
+                                if (geom instanceof MultiLineString || geom instanceof LineString) {
+                                    updateHandleCoords(event.getPosition());
+                                    measurementPHandle.setMarkPosition(getCurrentPosition());
+                                    postCoordinateChanged();
+                                } else {
+                                    log.debug("Wrong geometry type: " + geom.getGeometryType());
+                                }
                             }
-
                         }
-
                     }
-
-                    postCoordinateChanged();
-                } catch (Exception e) {
-                    log.fatal("Fehler beim Moven \u00FCber die Karte ", e);//NOI18N
+                } catch (Throwable t) {
+                    log.fatal("Fehler in mouseMoved", t);//NOI18N
                 }
             }
         };
@@ -219,9 +362,9 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
 
     class Mark {
         private double position;
-        private MeasurementPHandle handle;
+        private MarkPHandle handle;
 
-        Mark(double position, MeasurementPHandle handle) {
+        Mark(double position, MarkPHandle handle) {
             this.handle = handle;
             this.position = position;
         }
@@ -230,7 +373,7 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
             return position;
         }
 
-        public MeasurementPHandle getHandle() {
+        public MarkPHandle getPHandle() {
             return handle;
         }
     }
