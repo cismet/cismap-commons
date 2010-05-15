@@ -65,8 +65,12 @@ public class MarkPHandle extends PPath {
 
             @Override
             public void mouseEntered(PInputEvent pInputEvent) {
-                measurementListener.getPLayer().removeChild(MarkPHandle.this);
-                measurementListener.getPLayer().addChild(MarkPHandle.this);
+                switch (measurementListener.getModus()) {
+                    case MARK_SELECTION:
+                        measurementListener.getPLayer().removeChild(MarkPHandle.this);
+                        measurementListener.getPLayer().addChild(MarkPHandle.this);
+                        break;
+                }
             }
 
         };
