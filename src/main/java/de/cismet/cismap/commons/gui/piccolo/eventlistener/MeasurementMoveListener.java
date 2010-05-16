@@ -12,16 +12,19 @@ import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.MarkPHandle;
 import de.cismet.cismap.commons.gui.piccolo.MeasurementPHandle;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.SublinePHandle;
 import de.cismet.math.geometry.StaticGeometryFunctions;
 import edu.umd.cs.piccolo.PLayer;
+import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.util.PLocator;
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,26 +38,38 @@ import javax.swing.JPopupMenu;
 public class MeasurementMoveListener extends PBasicInputEventHandler {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static final String COORDINATES_CHANGED = "COORDINATES_CHANGED";//NOI18N
     public static enum modii {
         MARK_SELECTION,
         MARK_ADD,
         MEASUREMENT,
         SUBLINE
     };
-
+    public static enum selectionTypes {
+        NONE,
+        MARK,
+        SUBLINE
+    }
+    
+    private static final Color COLOR_SUBLINE = new Color(255, 0, 255);
 
     private MappingComponent mc;
-    private float handleX = Float.MIN_VALUE;
-    private float handleY = Float.MIN_VALUE;
-    private MeasurementPHandle measurementPHandle;
+    private float cursorX = Float.MIN_VALUE;
+    private float cursorY = Float.MIN_VALUE;
+    private MeasurementPHandle cursorPHandle;
+
+    private double startPosition;
 
     private Geometry geom;
     private Vector<Mark> marks = new Vector<Mark>();
+    private Vector<Subline> sublines = new Vector<Subline>();
+    private PFeature sublinePFeature;
 
     private modii modus;
     private JPopupMenu menu;
     private Mark selectedMark;
+    private Subline selectedSubline;
+    private selectionTypes selectionType;
+    private boolean isDragging = false;
 
     private JMenuItem cmdRemoveMark;
     private JMenuItem cmdRemoveAllMarks;
@@ -73,17 +88,140 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
 
             @Override
             public double locateX() {
-                return handleX;
+                return cursorX;
             }
 
             @Override
             public double locateY() {
-                return handleY;
+                return cursorY;
             }
         };
-        measurementPHandle = new MeasurementPHandle(l, mc);
+        cursorPHandle = new MeasurementPHandle(l, mc);
 
         initContextMenu();
+    }
+
+    public selectionTypes getSelectionType() {
+        return selectionType;
+    }
+
+    private void setSelectionType(selectionTypes selectionType) {
+        this.selectionType = selectionType;
+    }
+
+    private Feature createSublineFeature() {
+        Feature feature = new Feature() {
+
+            private Geometry geom;
+
+            @Override
+            public Geometry getGeometry() {
+                return geom;
+            }
+
+            @Override
+            public void setGeometry(Geometry geom) {
+                this.geom = geom;
+            }
+
+            @Override
+            public boolean canBeSelected() {
+                return false;
+            }
+
+            @Override
+            public void setCanBeSelected(boolean canBeSelected) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public boolean isEditable() {
+                return false;
+            }
+
+            @Override
+            public void setEditable(boolean editable) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+
+            @Override
+            public boolean isHidden() {
+                return false;
+            }
+
+            @Override
+            public void hide(boolean hiding) {
+                throw new UnsupportedOperationException("Not supported yet.");
+            }
+        };
+        return feature;
+    }
+
+    private void dragStart(PInputEvent event) {
+        if (event.isShiftDown()) {
+            startSubline();
+        }
+
+    }
+
+    private void dragUpdate(PInputEvent event) {
+        if (event.isShiftDown()) {
+            updateSubline();
+        }
+    }
+
+    private void dragEnd(PInputEvent event) {
+        if (event.isShiftDown()) {
+            finishSubline();
+        }
+    }
+
+    private void startSubline() {
+        //addMarkHandle(handleX, handleY);
+        startPosition = getCurrentPosition();
+        setModus(modii.SUBLINE);
+
+        sublinePFeature = new PFeature(createSublineFeature(), mc);
+        sublinePFeature.setStroke(new CustomFixedWidthStroke(5));
+        sublinePFeature.setStrokePaint(COLOR_SUBLINE);
+
+        PFeature pf = getSelectedPFeature();
+        pf.addChild(sublinePFeature);
+        pf.repaint();
+    }
+
+    private void updateSubline() {
+        double endPosition = getCurrentPosition();
+        LengthIndexedLine lil = new LengthIndexedLine(geom);
+        LineString subline = (LineString)lil.extractLine(startPosition, endPosition);
+
+        sublinePFeature.getFeature().setGeometry(subline);
+        sublinePFeature.syncGeometry();
+        sublinePFeature.visualize();
+    }
+
+    private void finishSubline() {
+        //addMarkHandle(handleX, handleY);
+        addSublinePHandle(startPosition, getCurrentPosition());
+        setModus(modii.MARK_ADD);
+    }
+
+    @Override
+    public void mouseDragged(PInputEvent event) {
+        updateHandleCoords2(event.getPosition());
+        if (!isDragging) {
+            dragStart(event);
+        }
+        isDragging = true;
+        dragUpdate(event);
+    }
+
+    @Override
+    public void mouseReleased(PInputEvent event) {
+        if (isDragging) {
+            isDragging = false;
+            dragEnd(event);
+        }
     }
 
     @Override
@@ -97,11 +235,8 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
                         Point2D[] neighbours = getNearestNeighbours(trigger, selPFeature);
                         Point2D erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
 
-                        addMarkHandle(erg.getX(), erg.getY());
+                        addMarkPHandle(erg.getX(), erg.getY());
                     }
-                    break;
-                case SUBLINE:
-                    //todo
                     break;
             }
         }
@@ -114,6 +249,22 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
 
     public Coordinate getSelectedMarkCoordinate() {
         return getCoordinateOfPosition(getSelectedMarkPosition());
+    }
+
+    public double getSelectedSublineStart() {
+        if (selectedSubline != null) {
+            return selectedSubline.getPositionStart();
+        } else {
+            return 0;
+        }
+    }
+
+    public double getSelectedSublineEnd() {
+        if (selectedSubline != null) {
+            return selectedSubline.getPositionEnd();
+        } else {
+            return 0;
+        }
     }
 
     public double getSelectedMarkPosition() {
@@ -131,6 +282,22 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
             for (Mark mark : marks) {
                 if (mark != null && mark.getPHandle().equals(markPHandle)) {
                     this.selectedMark = mark;
+                    setSelectionType(selectionTypes.MARK);
+                    break;
+                }
+            }
+        }
+    }
+
+    public void setSelectedSubline(SublinePHandle sublinePHandle) {
+        if (sublinePHandle == null) {
+            this.selectedSubline = null;
+        } else {
+            for (Subline subline : sublines) {
+                if (subline != null && subline.getPHandle().equals(sublinePHandle)) {
+                    this.selectedSubline = subline;
+                    setSelectionType(selectionTypes.SUBLINE);
+                    break;
                 }
             }
         }
@@ -164,13 +331,21 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         cmdRemoveMark.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
-                removeMark(selectedMark.getPHandle());
+                switch (selectionType) {
+                    case MARK:
+                        removeMark(selectedMark);
+                        break;
+                    case SUBLINE:
+                        removeSubline(selectedSubline);
+                        break;
+                }
             }
         });
         cmdRemoveAllMarks.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 removeAllMarks();
+                removeAllSublines();
             }
         });
 
@@ -185,20 +360,9 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         return mc.getHandleLayer();
     }
 
-    public void removeMark(MarkPHandle markHandle) {
-        if (markHandle != null) {
-            Mark toRemove = null;
-            for (Mark mark : marks) {
-                if (mark.getPHandle().equals(markHandle)) {
-                    toRemove = mark;
-                    break;
-                }
-            }
-            if (toRemove != null) {
-                marks.remove(toRemove);
-                getPLayer().removeChild(toRemove.getPHandle());
-            }
-        }
+    private void removeMark(Mark mark) {
+        marks.remove(mark);
+        getPLayer().removeChild(mark.getPHandle());
     }
 
     public void removeAllMarks() {
@@ -208,10 +372,24 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         marks.removeAllElements();
     }
 
+    private void removeSubline(Subline subline) {
+        sublines.remove(subline);
+        getSelectedPFeature().removeChild(subline.getPFeature());
+        getPLayer().removeChild(subline.getPHandle());
+    }
+
+    public void removeAllSublines() {
+        for (Subline subline : sublines) {
+            getPLayer().removeChild(subline.getPHandle());
+            getSelectedPFeature().removeChild(subline.getPFeature());
+        }
+        sublines.removeAllElements();
+    }
+
     private double getCurrentPosition() {
         if (geom != null) {
             LocationIndexedLine lil = new LocationIndexedLine(geom);
-            Coordinate c = new Coordinate(mc.getWtst().getSourceX(handleX), mc.getWtst().getSourceY(handleY));
+            Coordinate c = new Coordinate(mc.getWtst().getSourceX(cursorX), mc.getWtst().getSourceY(cursorY));
             LinearLocation ll = lil.indexOf(c);
             LengthLocationMap llm = new LengthLocationMap(geom);
             return llm.getLength(ll);
@@ -220,13 +398,13 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         }
     }
 
-    private void showMarkHandles(boolean show) {
+    private void showMarks(boolean show) {
         for (Mark mark : marks) {
-            showHandle(mark.getPHandle(), show);
+            showOnFather(getPLayer(), mark.getPHandle(), show);
         }
     }
 
-    private void addMarkHandle(final double x, final double y) {
+    private void addMarkPHandle(final double x, final double y) {
         log.debug("create newPointHandle and Locator");//NOI18N
         PLocator l = new PLocator() {
 
@@ -250,29 +428,75 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         setSelectedMark(markHandle);
 
         //measurementPHandle wieder nach oben holen
-        getPLayer().removeChild(measurementPHandle);
-        getPLayer().addChild(measurementPHandle);
+        getPLayer().removeChild(cursorPHandle);
+        getPLayer().addChild(cursorPHandle);
     }
 
-    private void showMeasurementHandle(boolean show) {
-        showHandle(measurementPHandle, show);
+    private void showCursor(boolean show) {
+        showOnFather(getPLayer(), cursorPHandle, show);
     }
 
-    private void showHandle(PPath handle, boolean show) {
+    private void showOnFather(PNode father, PPath child, boolean show) {
         boolean found = false;
-        for (Object o : getPLayer().getChildrenReference()) {
-            if (o != null && o.equals(handle)) {
+        for (Object o : father.getChildrenReference()) {
+            if (o != null && o.equals(child)) {
                 found = true;
                 break;
             }
         }
         if (!found && show) {
-            getPLayer().addChild(handle);
+            father.addChild(child);
         }
         if (found && !show) {
-            getPLayer().removeChild(handle);
+            father.removeChild(child);
         }
     }
+
+    private void addSublinePHandle(final double startPosition, final double endPosition) {
+        double mid = startPosition + (endPosition - startPosition) / 2;
+        double length = Math.abs(endPosition - startPosition);
+        
+        final Coordinate midCoord = getCoordinateOfPosition(mid);
+        log.debug("midCoord: " + midCoord);
+
+        final double xTest = cursorX;
+        final double yTest = cursorY;
+
+        PLocator l = new PLocator() {
+
+            @Override
+            public double locateX() {
+                return xTest;
+            }
+
+            @Override
+            public double locateY() {
+                return yTest;
+            }
+        };
+
+        SublinePHandle pHandle = new SublinePHandle(l, this, mc);
+        pHandle.setMarkPosition(length);
+
+        sublines.add(new Subline(startPosition, endPosition, pHandle, sublinePFeature));
+        getPLayer().addChild(pHandle);
+
+        setSelectedSubline(pHandle);
+
+        //measurementPHandle wieder nach oben holen
+        getPLayer().removeChild(cursorPHandle);
+        getPLayer().addChild(cursorPHandle);
+
+    }
+
+    private void showSublines(boolean show) {
+        for (Subline subline : sublines) {
+            log.debug(subline.getPHandle() + " -- " + subline.getPFeature());
+            showOnFather(getPLayer(), subline.getPHandle(), show);
+            showOnFather(getSelectedPFeature(), subline.getPFeature(), show);
+        }
+    }
+
 
     private void setModus(modii modus) {
         this.modus = modus;
@@ -283,12 +507,19 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         if (geom != null) {
             switch (modus) {
                 case MARK_SELECTION:
-                    showMarkHandles(true);
-                    showMeasurementHandle(false);
+                    showCursor(false);
+                    showMarks(true);
+                    showSublines(true);
                     break;
                 case MARK_ADD:
-                    showMarkHandles(true);
-                    showMeasurementHandle(true);
+                    showCursor(true);
+                    showMarks(true);
+                    showSublines(true);
+                    break;
+                case SUBLINE:
+                    showCursor(true);
+                    showMarks(false);
+                    showSublines(true);
                     break;
             }
         }
@@ -308,21 +539,11 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
                     if (mc.getInteractionMode().equals(MappingComponent.LINEMEASUREMENT)) {
                         PFeature selPFeature = getSelectedPFeature();
                         if (selPFeature != null) {
+                            updateHandleCoords2(event.getPosition());
                             if (event.isControlDown()) {
                                 setModus(modii.MARK_SELECTION);
                             } else {
-                                setModus(modii.MARK_ADD);
-                                
-                                geom = selPFeature.getFeature().getGeometry();
-                                if (geom != null) {
-                                    if (geom instanceof MultiLineString || geom instanceof LineString) {
-                                        updateHandleCoords(event.getPosition());
-                                        measurementPHandle.setMarkPosition(getCurrentPosition());
-                                        postCoordinateChanged();
-                                    } else {
-                                        log.debug("Wrong geometry type: " + geom.getGeometryType());
-                                    }
-                                }
+                                setModus(modii.MARK_ADD);                                
                             }
                         }
                     }
@@ -335,14 +556,27 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         EventQueue.invokeLater(t);
     }
 
+    private void updateHandleCoords2(Point2D trigger) {
+        PFeature selPFeature = getSelectedPFeature();
+        geom = selPFeature.getFeature().getGeometry();
+        if (geom != null) {
+            if (geom instanceof MultiLineString || geom instanceof LineString) {
+                updateHandleCoords(trigger);
+                cursorPHandle.setMarkPosition(getCurrentPosition());
+            } else {
+                log.debug("Wrong geometry type: " + geom.getGeometryType());
+            }
+        }
+    }
+
     private void updateHandleCoords(Point2D trigger) {
         PFeature selPFeature = getSelectedPFeature();
         if (selPFeature != null) {
             Point2D[] neighbours = getNearestNeighbours(trigger, selPFeature);
             Point2D erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
 
-            handleX = (float) erg.getX();
-            handleY = (float) erg.getY();
+            cursorX = (float) erg.getX();
+            cursorY = (float) erg.getY();
         }
     }
 
@@ -384,17 +618,12 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         return new Point2D[] {start, end};
     }
 
-    private void postCoordinateChanged() {
-        PNotificationCenter pn = PNotificationCenter.defaultCenter();
-        pn.postNotification(COORDINATES_CHANGED, this);
-    }
-
     class Mark {
         private double position;
-        private MarkPHandle handle;
+        private MarkPHandle pHandle;
 
         Mark(double position, MarkPHandle handle) {
-            this.handle = handle;
+            this.pHandle = handle;
             this.position = position;
         }
 
@@ -403,8 +632,37 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         }
 
         public MarkPHandle getPHandle() {
-            return handle;
+            return pHandle;
         }
     }
 
+    class Subline {
+        private double positionStart;
+        private double positionEnd;
+        private SublinePHandle pHandle;
+        private PFeature pFeature;
+
+        Subline(double positionStart, double positionEnd, SublinePHandle pHandle, PFeature pFeature) {
+            this.pHandle = pHandle;
+            this.pFeature = pFeature;
+            this.positionStart = positionStart;
+            this.positionEnd = positionEnd;
+        }
+
+        public double getPositionStart() {
+            return positionStart;
+        }
+
+        public double getPositionEnd() {
+            return positionEnd;
+        }
+
+        public SublinePHandle getPHandle() {
+            return pHandle;
+        }
+
+        public PFeature getPFeature() {
+            return pFeature;
+        }
+    }
 }
