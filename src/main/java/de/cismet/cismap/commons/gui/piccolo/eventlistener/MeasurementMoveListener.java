@@ -50,7 +50,7 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         SUBLINE
     }
     
-    private static final Color COLOR_SUBLINE = new Color(255, 0, 255);
+    private static final Color COLOR_SUBLINE = new Color(255, 91, 0);
 
     private MappingComponent mc;
     private float cursorX = Float.MIN_VALUE;
@@ -476,7 +476,7 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         };
 
         SublinePHandle pHandle = new SublinePHandle(l, this, mc);
-        pHandle.setMarkPosition(length);
+        pHandle.setPositions(startPosition, endPosition);
 
         sublines.add(new Subline(startPosition, endPosition, pHandle, sublinePFeature));
         getPLayer().addChild(pHandle);

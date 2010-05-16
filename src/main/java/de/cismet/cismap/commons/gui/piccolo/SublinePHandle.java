@@ -29,7 +29,7 @@ public class SublinePHandle extends PPath {
 
     private PLocator locator;
     private MappingComponent mc = null;
-    private MeasurementPanel measurementPanel;
+    private SublinePanel panel;
     private MeasurementMoveListener measurementListener;
     private PSwing pswingComp;
 
@@ -92,16 +92,16 @@ public class SublinePHandle extends PPath {
     }
 
     private void initPanel() {
-        measurementPanel = new MeasurementPanel();
+        panel = new SublinePanel();
 
-        pswingComp = new PSwing((PSwingCanvas) mc, measurementPanel);
-        measurementPanel.setPNodeParent(pswingComp);
+        pswingComp = new PSwing((PSwingCanvas) mc, panel);
+        panel.setPNodeParent(pswingComp);
         addChild(pswingComp);
     }
 
-    public void setMarkPosition(double mark) {
-        String info = new DecimalFormat("0.00").format(mark);
-        measurementPanel.setLengthInfo(info);
+    public void setPositions(double start, double end) {
+        panel.setPositionStart(new DecimalFormat("0.00").format(start));
+        panel.setPositionEnd(new DecimalFormat("0.00").format(end));
         relocateHandle();
         repaint();
     }
