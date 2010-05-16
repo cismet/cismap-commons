@@ -4,6 +4,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import com.vividsolutions.jts.linearref.LengthLocationMap;
 import com.vividsolutions.jts.linearref.LinearLocation;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
@@ -46,7 +47,6 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
     private MappingComponent mc;
     private float handleX = Float.MIN_VALUE;
     private float handleY = Float.MIN_VALUE;
-    private PFeature pf = null;
     private MeasurementPHandle measurementPHandle;
 
     private Geometry geom;
@@ -91,17 +91,29 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         if (event.isLeftMouseButton()) {
             switch (modus) {
                 case MARK_ADD:
-                    Point2D trigger = event.getPosition();
-                    Point2D[] neighbours = getNearestNeighbours(trigger, pf);
-                    Point2D erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
+                    PFeature selPFeature = getSelectedPFeature();
+                    if (selPFeature != null) {
+                        Point2D trigger = event.getPosition();
+                        Point2D[] neighbours = getNearestNeighbours(trigger, selPFeature);
+                        Point2D erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
 
-                    addMarkHandle(erg.getX(), erg.getY());
+                        addMarkHandle(erg.getX(), erg.getY());
+                    }
                     break;
                 case SUBLINE:
                     //todo
                     break;
             }
         }
+    }
+
+    public Coordinate getCoordinateOfPosition(double position) {
+        LengthIndexedLine lil = new LengthIndexedLine(geom);
+        return lil.extractPoint(position);
+    }
+
+    public Coordinate getSelectedMarkCoordinate() {
+        return getCoordinateOfPosition(getSelectedMarkPosition());
     }
 
     public double getSelectedMarkPosition() {
@@ -208,16 +220,6 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         }
     }
 
-    @Override
-    public void mouseDragged(PInputEvent event) {
-        log.debug("mouse dragged");
-    }
-
-    @Override
-    public void mouseReleased(PInputEvent event) {
-        log.debug("mouse released");
-    }
-
     private void showMarkHandles(boolean show) {
         for (Mark mark : marks) {
             showHandle(mark.getPHandle(), show);
@@ -243,13 +245,16 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         markHandle.setMarkPosition(currentPosition);
 
         marks.add(new Mark(currentPosition, markHandle));
-        getPLayer().removeChild(measurementPHandle);
         getPLayer().addChild(markHandle);
+        
+        setSelectedMark(markHandle);
+
+        //measurementPHandle wieder nach oben holen
+        getPLayer().removeChild(measurementPHandle);
         getPLayer().addChild(measurementPHandle);
     }
 
     private void showMeasurementHandle(boolean show) {
-        log.debug("showMeasurementHandle " + show);
         showHandle(measurementPHandle, show);
     }
 
@@ -301,20 +306,22 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
             public void run() {
                 try {
                     if (mc.getInteractionMode().equals(MappingComponent.LINEMEASUREMENT)) {
-                        geom = getSelectedGeometry();
-
-                        if (event.isControlDown()) {
-                            setModus(modii.MARK_SELECTION);
-                        } else {
-                            setModus(modii.MARK_ADD);
-
-                            if (geom != null) {
-                                if (geom instanceof MultiLineString || geom instanceof LineString) {
-                                    updateHandleCoords(event.getPosition());
-                                    measurementPHandle.setMarkPosition(getCurrentPosition());
-                                    postCoordinateChanged();
-                                } else {
-                                    log.debug("Wrong geometry type: " + geom.getGeometryType());
+                        PFeature selPFeature = getSelectedPFeature();
+                        if (selPFeature != null) {
+                            if (event.isControlDown()) {
+                                setModus(modii.MARK_SELECTION);
+                            } else {
+                                setModus(modii.MARK_ADD);
+                                
+                                geom = selPFeature.getFeature().getGeometry();
+                                if (geom != null) {
+                                    if (geom instanceof MultiLineString || geom instanceof LineString) {
+                                        updateHandleCoords(event.getPosition());
+                                        measurementPHandle.setMarkPosition(getCurrentPosition());
+                                        postCoordinateChanged();
+                                    } else {
+                                        log.debug("Wrong geometry type: " + geom.getGeometryType());
+                                    }
                                 }
                             }
                         }
@@ -329,14 +336,17 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
     }
 
     private void updateHandleCoords(Point2D trigger) {
-        Point2D[] neighbours = getNearestNeighbours(trigger, pf);
-        Point2D erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
+        PFeature selPFeature = getSelectedPFeature();
+        if (selPFeature != null) {
+            Point2D[] neighbours = getNearestNeighbours(trigger, selPFeature);
+            Point2D erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
 
-        handleX = (float) erg.getX();
-        handleY = (float) erg.getY();
+            handleX = (float) erg.getX();
+            handleY = (float) erg.getY();
+        }
     }
 
-    private Geometry getSelectedGeometry() {
+    public PFeature getSelectedPFeature() {
         //Collection holen
         FeatureCollection fc = mc.getFeatureCollection();
         //Selektierte Features holen
@@ -347,9 +357,9 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
             // selektiertes feature holen
             Feature[] sels = sel.toArray(new Feature[0]);
             //zugehöriges pfeature holen
-            pf = mc.getPFeatureHM().get(sels[0]);
+            PFeature pf = mc.getPFeatureHM().get(sels[0]);
             //zugehörige geometrie holen
-            return pf.getFeature().getGeometry();
+            return pf;
          } else {
             return null;
          }
