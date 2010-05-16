@@ -23,11 +23,12 @@ package de.cismet.cismap.commons.util;
 public class FormatToRealWordCalculator {
 
     public static final double DEFAULT_JAVA_RESOLUTION_IN_DPI = 72d;
-    public static final double MILLIMETER_OF_AN_INCH = 25.4d;
-    public static final double INCH_OF_A_MILLIMETER = 0.039d;
+    public static final double CM_TO_INCH = 2.54d;
+    public static final double MM_TO_INCH = CM_TO_INCH * 10d;
+//    public static final double INCH_OF_A_MILLIMETER = 0.03937008d;
     public static final double MILLIMETER_OF_A_METER = 1000d;
 
     public static double toRealWorldValue(double value, double massstab) {
-        return value / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH / MILLIMETER_OF_A_METER * massstab;
+        return value * CM_TO_INCH / DEFAULT_JAVA_RESOLUTION_IN_DPI * MM_TO_INCH / MILLIMETER_OF_A_METER * massstab;
     }
 }
