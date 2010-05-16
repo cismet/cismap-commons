@@ -142,6 +142,7 @@ import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -175,6 +176,7 @@ import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
+import org.openide.util.Exceptions;
 import pswing.PSwingCanvas;
 
 /**
@@ -4023,12 +4025,17 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     @Override
     public void drop(DropTargetDropEvent dtde) {
         if (isDropEnabled(dtde)) {
-            MapDnDEvent mde = new MapDnDEvent();
-            mde.setDte(dtde);
-            Point p = dtde.getLocation();
-            mde.setXPos(getWtst().getWorldX(p.getX()));
-            mde.setYPos(getWtst().getWorldY(p.getY()));
-            CismapBroker.getInstance().fireDropOnMap(mde);
+            try {
+                MapDnDEvent mde = new MapDnDEvent();
+                mde.setDte(dtde);
+                Point p = dtde.getLocation();
+                getCamera().getViewTransform().inverseTransform(p, p);
+                mde.setXPos(getWtst().getWorldX(p.getX()));
+                mde.setYPos(getWtst().getWorldY(p.getY()));
+                CismapBroker.getInstance().fireDropOnMap(mde);
+            } catch (NoninvertibleTransformException ex) {
+                log.error(ex, ex);
+            }
         }
     }
 
@@ -4074,12 +4081,27 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      */
     @Override
     public void dragOver(DropTargetDragEvent dtde) {
-        MapDnDEvent mde = new MapDnDEvent();
-        mde.setDte(dtde);
-        Point p = dtde.getLocation();
-        mde.setXPos(getWtst().getWorldX(p.getX()));
-        mde.setYPos(getWtst().getWorldY(p.getY()));
-        CismapBroker.getInstance().fireDragOverMap(mde);
+        try {
+            MapDnDEvent mde = new MapDnDEvent();
+            mde.setDte(dtde);
+            //TODO: this seems to be buggy!
+            Point p = dtde.getLocation();
+            //            Point2D p2d;
+//            double scale = 1 / getCamera().getViewScale();
+            getCamera().getViewTransform().inverseTransform(p, p);
+            mde.setXPos(getWtst().getWorldX(p.getX()));
+            mde.setYPos(getWtst().getWorldY(p.getY()));
+            CismapBroker.getInstance().fireDragOverMap(mde);
+        } catch (NoninvertibleTransformException ex) {
+            log.error(ex, ex);
+        }
+//        MapDnDEvent mde = new MapDnDEvent();
+//        mde.setDte(dtde);
+//        Point p = dtde.getLocation();
+//        double scale = 1/getCamera().getViewScale();
+//        mde.setXPos(getWtst().getWorldX(p.getX() * scale));
+//        mde.setYPos(getWtst().getWorldY(p.getY() * scale));
+//        CismapBroker.getInstance().fireDragOverMap(mde);
     }
 
     /**
