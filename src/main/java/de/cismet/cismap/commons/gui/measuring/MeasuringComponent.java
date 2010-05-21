@@ -75,6 +75,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
         ActiveLayerModel mappingModel = new ActiveLayerModel();
         mappingModel.addHome(initialBBox);
         mappingModel.setSrs(srs);
+        map.setAnimationDuration(0);
         map.setReadOnly(false);
         map.setMappingModel(mappingModel);
         //initial positioning of the map
@@ -137,10 +138,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
     }
 
     public void zoomToFeatureCollection() {
-        int aDuration = map.getAnimationDuration();
-        map.setAnimationDuration(0);
         map.zoomToFeatureCollection();
-        map.setAnimationDuration(aDuration);
     }
 
     /** This method is called from within the constructor to
