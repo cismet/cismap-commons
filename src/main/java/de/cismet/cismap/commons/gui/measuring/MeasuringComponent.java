@@ -86,6 +86,14 @@ public class MeasuringComponent extends javax.swing.JPanel {
         map.unlock();
     }
 
+    public void dispose() {
+        //TODO:
+        //this is a quick fix for the memory leak that some mapping components can not be garbage collected
+        panCenter.remove(map);
+        map.removeInputEventListener(mapListener);
+        map = null;
+    }
+
     public void reset() {
         removeAllFeatures();
         map.setInteractionMode(MappingComponent.PAN);
