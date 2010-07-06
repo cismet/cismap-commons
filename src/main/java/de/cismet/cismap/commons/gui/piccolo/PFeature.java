@@ -21,7 +21,6 @@ import de.cismet.cismap.commons.features.Highlightable;
 import de.cismet.cismap.commons.features.Selectable;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.AnnotatedFeature;
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.RasterDocumentFeature;
 import de.cismet.cismap.commons.features.StyledFeature;
@@ -54,13 +53,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import org.jdesktop.swingx.image.ColorTintFilter;
 import pswing.PSwing;
-import pswing.PSwingCanvas;
 
 /**
  * 
@@ -102,7 +100,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     PHandle ellipseHandle = null;
     PFeature selectedOriginal = null;
     PPath splitPolygonLine;
-    Vector splitPoints = new Vector();
+    List<Point2D> splitPoints = new ArrayList<Point2D>();
     private InfoPanel infoPanel;
     private JComponent infoComponent;
     private PSwing pswingComp;
@@ -807,9 +805,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 //        EventQueue.invokeLater(new Runnable() {
 //
 //            public void run() {
-                handleLayer.addChild(h);
-                h.addClientProperty("coordinate", getCoordArr()[position]);//NOI18N
-                h.addClientProperty("coordinate_position_in_arr", new Integer(position));//NOI18N
+        handleLayer.addChild(h);
+        h.addClientProperty("coordinate", getCoordArr()[position]);//NOI18N
+        h.addClientProperty("coordinate_position_in_arr", new Integer(position));//NOI18N
 //            }
 //        });
     }
@@ -887,7 +885,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 //                EventQueue.invokeLater(new Runnable() {
 //
 //                    public void run() {
-                        handleLayer.addChild(pivotHandle);
+                handleLayer.addChild(pivotHandle);
 //                    }
 //                });
             }
@@ -916,9 +914,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 //
 //            @Override
 //            public void run() {
-                handleLayer.addChild(rotHandle);
-                rotHandle.addClientProperty("coordinate", getCoordArr()[position]);//NOI18N
-                rotHandle.addClientProperty("coordinate_position_in_arr", new Integer(position));//NOI18N
+        handleLayer.addChild(rotHandle);
+        rotHandle.addClientProperty("coordinate", getCoordArr()[position]);//NOI18N
+        rotHandle.addClientProperty("coordinate_position_in_arr", new Integer(position));//NOI18N
 //            }
 //        });
     }
@@ -958,7 +956,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 //
 //            @Override
 //            public void run() {
-                handleLayer.addChild(pivotHandle);
+        handleLayer.addChild(pivotHandle);
 //            }
 //        });
         for (Object o : selArr) {
@@ -979,7 +977,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 //
 //            @Override
 //            public void run() {
-                handleLayer.addChild(ellipseHandle);
+        handleLayer.addChild(ellipseHandle);
 //            }
 //        });
     }
@@ -1389,13 +1387,16 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if (viewer.isFeatureDebugging()) {
                     log.debug("ADD INFONODE3");//NOI18N
                 }
+                if (infoPanel != null) {
+                    viewer.getSwingWrapper().remove(infoPanel);
+                }
 
                 infoPanel = new InfoPanel(infoComponent);
                 infoPanel.setPfeature(this);
                 infoPanel.setTitleText(xsf.getName());
                 infoPanel.setTitleIcon(xsf.getIconImage());
 
-                pswingComp = new PSwing((PSwingCanvas) viewer, infoPanel);
+                pswingComp = new PSwing(viewer, infoPanel);
                 pswingComp.resetBounds();
                 pswingComp.setOffset(0, 0);
 
@@ -1470,6 +1471,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public void cleanup() {
         if (infoPanel != null) {
             infoPanel.setVisible(false);
+            log.fatal("CLEANUP!");
+            viewer.getSwingWrapper().remove(infoPanel);
         }
         this.setVisible(false);
     }
@@ -1545,7 +1548,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         return splitPolygonLine;
     }
 
-    public Vector getSplitPoints() {
+    public List<Point2D> getSplitPoints() {
         return splitPoints;
     }
 

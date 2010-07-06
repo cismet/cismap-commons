@@ -176,7 +176,6 @@ import java.util.concurrent.Future;
 import org.apache.log4j.Logger;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
-import org.openide.util.Exceptions;
 import pswing.PSwingCanvas;
 
 /**
@@ -220,7 +219,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 //    private com.vividsolutions.jts.geom.Envelope currentFeatureEnvelope = null;
     private MappingModel mappingModel;
     private ConcurrentHashMap<Feature, PFeature> pFeatureHM = TypeSafeCollections.newConcurrentHashMap();
-    private MultiMap pFeatureHMbyCoordinate = new MultiMap();
+//    private MultiMap pFeatureHMbyCoordinate = new MultiMap();
     //Attribute die zum selektieren von PNodes gebraucht werden
     //private PFeature selectedFeature=null;
 //    private Paint paint = null;
@@ -294,25 +293,25 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     private CismapPreferences cismapPrefs;
     //private NewSimpleInternalLayerWidget internalLayerWidget = null;//new NewSimpleInternalLayerWidget(this);
     boolean featureServiceLayerVisible = true;
-    final Vector<LayerControl> layerControls = TypeSafeCollections.newVector();
+    final List<LayerControl> layerControls = new ArrayList<LayerControl>();
     private DefaultHistoryModel historyModel = new DefaultHistoryModel();
 //    private Set<Feature> holdFeatures = new HashSet<Feature>();
     //Scales
-    private final Vector<Scale> scales = TypeSafeCollections.newVector();
+    private final List<Scale> scales = new ArrayList<Scale>();
     //Printing
     private PrintingSettingsWidget printingSettingsDialog;
     private PrintingWidget printingDialog;
     //Scalebar
     private double screenResolution = 100.0;
     private volatile boolean locked = true;
-    private final Vector<PNode> stickyPNodes = new Vector<PNode>();
+    private final List<PNode> stickyPNodes = new ArrayList<PNode>();
     //Undo- & Redo-Stacks
     private final MementoInterface memUndo = new Memento();
     private final MementoInterface memRedo = new Memento();
     private boolean featureDebugging = false;
     private BoundingBox fixedBoundingBox = null;
 //    Object handleFeatureServiceBlocker = new Object();
-    private final List<MapListener> mapListeners = TypeSafeCollections.newArrayList();
+    private final List<MapListener> mapListeners = new ArrayList<MapListener>();
     /**
      * Contains the internal widgets
      */
@@ -764,7 +763,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     /**
      * @return Vector<PNode> with all sticky PNodes
      */
-    public Vector<PNode> getStickyNodes() {
+    public List<PNode> getStickyNodes() {
         return stickyPNodes;
     }
 
@@ -2314,6 +2313,10 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      */
     @Override
     public void allFeaturesRemoved(FeatureCollectionEvent fce) {
+        for (PFeature feature : pFeatureHM.values()) {
+            feature.cleanup();
+        }
+        stickyPNodes.clear();
         pFeatureHM.clear();
         featureLayer.removeAllChildren();
         checkFeatureSupportingRasterServiceAfterFeatureRemoval(fce);
@@ -2440,9 +2443,9 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             // ((PPath)p).setStroke(new BasicStroke(0.5f));
             if (features[i].getGeometry() != null) {
                 pFeatureHM.put(p.getFeature(), p);
-                for (int j = 0; j < p.getCoordArr().length; ++j) {
-                    pFeatureHMbyCoordinate.put(p.getCoordArr()[j], new PFeatureCoordinatePosition(p, j));
-                }
+//                for (int j = 0; j < p.getCoordArr().length; ++j) {
+//                    pFeatureHMbyCoordinate.put(p.getCoordArr()[j], new PFeatureCoordinatePosition(p, j));
+//                }
                 final int ii = i;
                 EventQueue.invokeLater(new Runnable() {
 
@@ -2588,11 +2591,10 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * @param c Coordinate
      * @return list of PFeatureCoordinatePositions
      */
-    public List<PFeatureCoordinatePosition> getPFeaturesByCoordinates(Coordinate c) {
-        List<PFeatureCoordinatePosition> l = (List<PFeatureCoordinatePosition>) pFeatureHMbyCoordinate.get(c);
-        return l;
-    }
-
+//    public List<PFeatureCoordinatePosition> getPFeaturesByCoordinates(Coordinate c) {
+//        List<PFeatureCoordinatePosition> l = (List<PFeatureCoordinatePosition>) pFeatureHMbyCoordinate.get(c);
+//        return l;
+//    }
     /**
      * Creates an envelope around all features from the given array.
      * @param features features to create the envelope around
@@ -2781,14 +2783,12 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * @param f feature of the Pfeature that should be deleted
      */
     public void removeFromHM(Feature f) {
-        if (DEBUG) {
-            log.debug("pFeatureHM" + pFeatureHM);//NOI18N
-        }
         PFeature pf = pFeatureHM.get(f);
 
         if (pf != null) {
             pf.cleanup();
             pFeatureHM.remove(f);
+            stickyPNodes.remove(pf);
             try {
                 log.info("Entferne Feature " + f);//NOI18N
                 featureLayer.removeChild(pf);
@@ -2799,6 +2799,9 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             }
         } else {
             log.warn("Feature war nicht in pFeatureHM");//NOI18N
+        }
+        if (DEBUG) {
+            log.debug("pFeatureHM" + pFeatureHM);//NOI18N
         }
     }
 
@@ -3701,7 +3704,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
         try {
             List scalesList = prefs.getChild("printing").getChildren("scale");//NOI18N
-            scales.removeAllElements();
+            scales.clear();
 
             for (Object elem : scalesList) {
                 if (elem instanceof Element) {
@@ -4214,7 +4217,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     /**
      * Returns a vector with different scales.
      */
-    public Vector<Scale> getScales() {
+    public List<Scale> getScales() {
         return scales;
     }
 
