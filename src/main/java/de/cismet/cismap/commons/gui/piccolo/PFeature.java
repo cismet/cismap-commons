@@ -1471,7 +1471,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public void cleanup() {
         if (infoPanel != null) {
             infoPanel.setVisible(false);
-            log.fatal("CLEANUP!");
             viewer.getSwingWrapper().remove(infoPanel);
         }
         this.setVisible(false);
