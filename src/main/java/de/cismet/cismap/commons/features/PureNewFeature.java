@@ -33,16 +33,18 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
 
     public static enum geomTypes {
 
-        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON
+        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON,UNKNOWN
     };
-    private Paint fillingPaint;
-    private geomTypes geomType;
+    private Paint fillingPaint = new Color(1f, 0f, 0f, 0.4f);
+    private geomTypes geomType=geomTypes.UNKNOWN;
     static ImageIcon icoPoint = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/point.png"));//NOI18N
     static ImageIcon icoPolyline = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polyline.png"));//NOI18N
     static ImageIcon icoPolygon = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polygon.png"));//NOI18N
     static ImageIcon icoEllipse = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/ellipse.png"));//NOI18N
     static ImageIcon icoRectangle = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/rectangle.png"));//NOI18N
     private String name = "";//NOI18N
+
+
 
     public PureNewFeature(Geometry g) {
         setGeometry(g);
@@ -100,7 +102,7 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         } catch (Exception e) {
             log.warn("Error in init", e);//NOI18N
         }
-        fillingPaint = new Color(1f, 0f, 0f, 0.4f);
+        
     }
 
     public java.awt.Stroke getLineStyle() {
