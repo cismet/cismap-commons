@@ -101,8 +101,7 @@ public class TransformationPHandle extends PHandle {
                     log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
                 }
 
-                if (pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)
-                        || pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE)) {
+                if (pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE) || pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE)) {
                     //localToParent(aLocalDimension);
 //                     if (viewer.isFeatureDebugging()) log.debug("vorher.DRAG.aLocalDimension:"+aLocalDimension);
                     pfeature.getViewer().getCamera().localToView(aLocalDimension);
@@ -249,8 +248,7 @@ public class TransformationPHandle extends PHandle {
      */
     @Override
     public void startHandleDrag(Point2D aLocalPoint, PInputEvent aEvent) {
-        if ( pfeature.getFeature() instanceof PureNewFeature && (((PureNewFeature) pfeature.getFeature()).getGeometryType() == PureNewFeature.geomTypes.RECTANGLE
-                || ((PureNewFeature) pfeature.getFeature()).getGeometryType() == PureNewFeature.geomTypes.ELLIPSE)) {
+        if (pfeature.getFeature() instanceof PureNewFeature && (((PureNewFeature) pfeature.getFeature()).getGeometryType() == PureNewFeature.geomTypes.RECTANGLE || ((PureNewFeature) pfeature.getFeature()).getGeometryType() == PureNewFeature.geomTypes.ELLIPSE)) {
             Collection selArr = pfeature.getViewer().getFeatureCollection().getSelectedFeatures();
             for (Object o : selArr) {
                 PFeature pf = (PFeature) (pfeature.getViewer().getPFeatureHM().get(o));
@@ -313,8 +311,7 @@ public class TransformationPHandle extends PHandle {
             leftInfo = null;
             rightInfo = null;
 
-            if ((pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE))
-                    && (Math.abs(startX - endX) > 0.001d) || (Math.abs(startY - endY) > 0.001d)) {
+            if ((pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE)) && (Math.abs(startX - endX) > 0.001d) || (Math.abs(startY - endY) > 0.001d)) {
                 if (pfeature.getViewer().isFeatureDebugging()) {
                     log.debug("neue MoveAction erzeugen");
                 }
@@ -383,8 +380,7 @@ public class TransformationPHandle extends PHandle {
     @Override
     public void removeHandle() {
         //log.error("--- :"+getCoordArr());
-        if (pfeature.getXp().length > 4 && pfeature.getFeature().getGeometry() instanceof Polygon
-                || pfeature.getXp().length > 1 && pfeature.getFeature().getGeometry() instanceof LineString) { //DANGER und Linien ???
+        if (pfeature.getXp().length > 4 && pfeature.getFeature().getGeometry() instanceof Polygon || pfeature.getXp().length > 1 && pfeature.getFeature().getGeometry() instanceof LineString) { //DANGER und Linien ???
             pfeature.setXp(pfeature.removeCoordinateFromOutside(positionInArray, pfeature.getXp()));
             pfeature.setYp(pfeature.removeCoordinateFromOutside(positionInArray, pfeature.getYp()));
             log.debug("---vorher:" + pfeature.getCoordArr().length);
@@ -428,8 +424,7 @@ public class TransformationPHandle extends PHandle {
      * @return Koordinatenarray mit dupliziertem Punkt
      */
     private Coordinate[] duplicateCoordinate(int position, Coordinate[] original) {
-        if (pfeature.getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position
-                || pfeature.getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
+        if (pfeature.getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position || pfeature.getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
             Coordinate[] newCoordinates = new Coordinate[original.length + 1];
             //vorher
             for (int i = 0; i <= position; ++i) {
@@ -466,8 +461,7 @@ public class TransformationPHandle extends PHandle {
      * @return PCanvas-Punktarray, mit dupliziertem Punkt
      */
     private float[] duplicateCoordinate(int position, float[] original) {
-        if (pfeature.getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position
-                || pfeature.getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
+        if (pfeature.getFeature().getGeometry() instanceof Polygon && original != null && original.length - 1 > position || pfeature.getFeature().getGeometry() instanceof LineString && original != null && original.length > position && original.length > 2) {
             float[] newCoordinates = new float[original.length + 1];
             //vorher
             for (int i = 0; i <= position; ++i) {
@@ -495,7 +489,9 @@ public class TransformationPHandle extends PHandle {
 
     public void updateGeometryPoints(int positionInArray, float newX, float newY) {
         if (pfeature.getFeature() instanceof PureNewFeature) {
-            switch (((PureNewFeature) pfeature.getFeature()).getGeometryType()) {
+            final PureNewFeature.geomTypes geomType = ((PureNewFeature) pfeature.getFeature()).getGeometryType();
+
+            switch (geomType) {
                 case RECTANGLE:
                     // letzter Punkt ist gleich erster Punkt. Wir arbeiten lieber mit dem ersten
                     if (positionInArray == 4) {
@@ -530,15 +526,9 @@ public class TransformationPHandle extends PHandle {
                 case ELLIPSE:
                     // wird vom EllipseHandle transformiert
                     break;
-                case LINESTRING:
+                //POINT,LINESTRING,POLYGON, UNKNOWN
+                default:
                     pfeature.moveCoordinateToNewPiccoloPosition(positionInArray, newX, newY);
-                    break;
-                case POLYGON:
-                    pfeature.moveCoordinateToNewPiccoloPosition(positionInArray, newX, newY);
-                    break;
-                case POINT:
-                    pfeature.moveCoordinateToNewPiccoloPosition(positionInArray, newX, newY);
-                    break;
             }
         } else {
             pfeature.moveCoordinateToNewPiccoloPosition(positionInArray, newX, newY);
