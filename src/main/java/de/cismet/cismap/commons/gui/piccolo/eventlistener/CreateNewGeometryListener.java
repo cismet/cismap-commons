@@ -28,11 +28,7 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
 
     @Override
     protected Color getFillingColor() {
-        if (isInMode(POLYGON)) {
-            return new Color(1f, 0f, 0f, 0.5f);
-        } else {
-            return null;
-        }
+        return new Color(1f, 0f, 0f, 0.5f);
     }
 
     @Override
