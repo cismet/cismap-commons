@@ -164,8 +164,57 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
             }
         } else if (isInMode(RECTANGLE_FROM_LINE)) {
             if (!inProgress) {
+                inProgress = true;
                 initTempFeature(true);
                 startPoint = pInputEvent.getPosition();
+                points = new Vector<Point2D>(5);
+                points.add(startPoint);
+            } else {
+                Point2D stopPoint = pInputEvent.getPosition();
+                points.add(stopPoint);
+                points.add(stopPoint);
+                points.add(startPoint);
+                points.add(startPoint);
+
+                double distance = startPoint.distance(stopPoint);
+                Frame frame = StaticSwingTools.getParentFrame(mc);
+
+                final RectangleFromLineDialog dialog = new RectangleFromLineDialog(frame, true, distance);
+                dialog.addWidthChangedListener(new ChangeListener() {
+
+                    @Override
+                    public void stateChanged(ChangeEvent ce) {
+                        double height = dialog.getRectangleWidth();
+                        boolean isLefty = dialog.isLefty();
+
+                        Point2D startPoint = points.get(0);
+                        Point2D stopPoint = points.get(1);
+
+                        double deltaX = stopPoint.getX() - startPoint.getX();
+                        double deltaY = stopPoint.getY() - startPoint.getY();
+
+                        double alpha = Math.atan2(deltaY, deltaX);
+                        double alpha90 = alpha + Math.toRadians((isLefty) ? -90 : 90);
+
+                        double x = Math.cos(alpha90) * height;
+                        double y = Math.sin(alpha90) * height;
+
+                        points.set(2, new Point2D.Double(x + stopPoint.getX(), y + stopPoint.getY()));
+                        points.set(3, new Point2D.Double(x + startPoint.getX(), y + startPoint.getY()));
+
+                        updatePolygon(null);
+
+                    }
+
+                });
+                dialog.setLocationRelativeTo(frame);
+                dialog.setVisible(true);
+                if (dialog.getReturnStatus() == RectangleFromLineDialog.STATUS_OK) {
+                    createPureNewFeature(PureNewFeature.geomTypes.POLYGON);
+                } else {
+                    mc.getTmpFeatureLayer().removeChild(tempFeature);
+                }
+                inProgress = false;
             }
         } else if (isInMode(POLYGON) || isInMode(LINESTRING)) {
             if (pInputEvent.getClickCount() == 1) {
@@ -230,46 +279,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                 inProgress = false;
             } else if (isInMode(ELLIPSE)) {
                 createPureNewFeature(PureNewFeature.geomTypes.ELLIPSE);
-                inProgress = false;
-            } else if (isInMode(RECTANGLE_FROM_LINE)) {
-                double distance = points.get(0).distance(points.get(1));
-                Frame frame = StaticSwingTools.getParentFrame(mc);
-
-                final RectangleFromLineDialog dialog = new RectangleFromLineDialog(frame, true, distance);
-                dialog.addWidthChangedListener(new ChangeListener() {
-
-                    @Override
-                    public void stateChanged(ChangeEvent ce) {
-                        double height = dialog.getRectangleWidth();
-                        boolean isLefty = dialog.isLefty();
-
-                        Point2D startPoint = points.get(0);
-                        Point2D stopPoint = points.get(1);
-
-                        double deltaX = stopPoint.getX() - startPoint.getX();
-                        double deltaY = stopPoint.getY() - startPoint.getY();
-
-                        double alpha = Math.atan2(deltaY, deltaX);
-                        double alpha90 = alpha + Math.toRadians((isLefty) ? -90 : 90);
-
-                        double x = Math.cos(alpha90) * height;
-                        double y = Math.sin(alpha90) * height;
-
-                        points.set(2, new Point2D.Double(x + stopPoint.getX(), y + stopPoint.getY()));
-                        points.set(3, new Point2D.Double(x + startPoint.getX(), y + startPoint.getY()));
-
-                        updatePolygon(null);
-
-                    }
-
-                });
-                dialog.setLocationRelativeTo(frame);
-                dialog.setVisible(true);
-                if (dialog.getReturnStatus() == RectangleFromLineDialog.STATUS_OK) {
-                    createPureNewFeature(PureNewFeature.geomTypes.POLYGON);
-                } else {
-                    mc.getTmpFeatureLayer().removeChild(tempFeature);
-                }
                 inProgress = false;
             }
         }
@@ -456,18 +465,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
             for (int i = 0; i < coordArr.length; i++) {
                 points.add(new Point2D.Double(startX - coordArr[i].x, startY - coordArr[i].y));
             }
-
-            updatePolygon(null);
-        } else if (isInMode(RECTANGLE_FROM_LINE)) {
-            inProgress = true;
-            Point2D stopPoint = pInputEvent.getPosition();
-
-            points = new Vector<Point2D>(5);
-            points.add(startPoint);
-            points.add(stopPoint);
-            points.add(stopPoint);
-            points.add(startPoint);
-            points.add(startPoint);
 
             updatePolygon(null);
         }
