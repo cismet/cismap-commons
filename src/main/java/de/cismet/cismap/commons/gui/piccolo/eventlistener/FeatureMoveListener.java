@@ -5,7 +5,9 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -90,15 +92,25 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
         super.mouseDragged(e);
         if (feature != null) {
             dragPoint = e.getPosition();
-            //PDimension delta=e.getDeltaRelativeTo(pressPoint);
-            PDimension delta = e.getCanvasDelta();
-            dragDim.setSize((dragDim.getWidth() - e.getCanvasDelta().getWidth()), (dragDim.getHeight() - e.getCanvasDelta().getHeight()));
-            Iterator it = features.iterator();
-            while (it.hasNext()) {
-                Object o = it.next();
-                if (o instanceof PFeature) {
-                    PFeature f = (PFeature) o;
-                    f.moveFeature(delta);
+            Feature feat = feature.getFeature();
+            // bestimmt selbst wie es bewegt wird?
+            if (feat instanceof SelfManipulatingFeature) {
+                SelfManipulatingFeature smFeature = (SelfManipulatingFeature)feat;
+                Coordinate coord = new Coordinate(
+                        mc.getWtst().getSourceX(dragPoint.getX()),
+                        mc.getWtst().getSourceY(dragPoint.getY()));
+                smFeature.moveTo(coord);
+            } else {
+                //PDimension delta = e.getDeltaRelativeTo(pressPoint);
+                PDimension delta = e.getCanvasDelta();
+                dragDim.setSize((dragDim.getWidth() - e.getCanvasDelta().getWidth()), (dragDim.getHeight() - e.getCanvasDelta().getHeight()));
+                Iterator it = features.iterator();
+                while (it.hasNext()) {
+                    Object o = it.next();
+                    if (o instanceof PFeature) {
+                        PFeature f = (PFeature) o;
+                        f.moveFeature(delta);
+                    }
                 }
             }
             if (handleLayer.getChildrenCount() > 0) {

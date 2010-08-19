@@ -26,6 +26,7 @@ import de.cismet.cismap.commons.features.RasterDocumentFeature;
 import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.AdditionalGeometriesFeature;
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.collections.MultiMap;
 import edu.umd.cs.piccolo.PCamera;
@@ -269,6 +270,26 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 sweetSelY = -1.0d;
             }
             setSelected(isSelected());
+
+            // enthält noch zusätzliche Geometrien die angezeigt werden sollen?
+            if (feature instanceof AdditionalGeometriesFeature) {
+                AdditionalGeometriesFeature agf = (AdditionalGeometriesFeature) feature;
+                for (Geometry additionalGeom : agf.getAdditionalGeometries()) {
+                    Coordinate[] coords = transformCoordinateArr(additionalGeom.getCoordinates());
+                    PPath ppath = new PPath();
+                    ArrayList<Point2D> points = new ArrayList<Point2D>(coords.length);
+                    for (Coordinate coord : coords) {
+                        points.add(new Point2D.Double(coord.x, coord.y));
+                    }
+                    ppath.setPathToPolyline(points.toArray(new Point2D[points.size()]));
+                    ppath.setStroke(getStroke());
+                    ppath.setStrokePaint(getStrokePaint());
+                    if (additionalGeom instanceof Polygon || additionalGeom instanceof MultiPolygon) {
+                        ppath.setPaint(getPaint());
+                    }
+                    addChild(ppath);
+                }
+            }
         }
 
     }
