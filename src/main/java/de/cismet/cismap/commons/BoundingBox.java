@@ -1,4 +1,4 @@
-/*----------------    FILE HEADER  ------------------------------------------ 
+/*----------------    FILE HEADER  ------------------------------------------
  * This file is part of cismap (http://cismap.sourceforge.net)
  *
  * Copyright (C) 2004 by:
@@ -14,12 +14,12 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -36,7 +36,7 @@
  *
  *
  *
- * 
+ *
  */
 package de.cismet.cismap.commons;
 
@@ -47,11 +47,11 @@ import com.vividsolutions.jts.geom.Polygon;
 import edu.umd.cs.piccolo.util.PBounds;
 import java.io.Serializable;
 import org.apache.log4j.Logger;
-import org.deegree.gml.GMLGeometry;
-import org.deegree.model.geometry.GM_Envelope;
-import org.deegree.model.geometry.GM_Exception;
-import org.deegree.model.geometry.GM_Object;
-import org.deegree_impl.model.geometry.GMLAdapter;
+//import org.deegree.gml.GMLGeometry;
+//import org.deegree.model.geometry.GM_Envelope;
+//import org.deegree.model.geometry.GM_Exception;
+//import org.deegree.model.geometry.GM_Object;
+//import org.deegree_impl.model.geometry.GMLAdapter;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
@@ -125,22 +125,22 @@ public class BoundingBox implements Cloneable,Serializable{
         }
     }
 
-    
 
-    public BoundingBox(GMLGeometry geom) {
-        try {
-            GM_Object gmo=GMLAdapter.wrap(geom);
-            GM_Envelope gme=gmo.getEnvelope();
-            setX1(gme.getMin().getX());
-            setX2(gme.getMax().getX());
-            setY1(gme.getMin().getY());
-            setY2(gme.getMax().getY());
-        }
-
-        catch (GM_Exception gmEx) {
-            log.error("Error during creating BoundingBox from GML",gmEx);//NOI18N
-        }
-    }
+//  the classes GM_Object and GM_Envelope are not contained in the new cismetDeegree jar
+//    public BoundingBox(GMLGeometry geom) {
+//        try {
+//            GM_Object gmo=GMLAdapter.wrap(geom);
+//            GM_Envelope gme=gmo.getEnvelope();
+//            setX1(gme.getMin().getX());
+//            setX2(gme.getMax().getX());
+//            setY1(gme.getMin().getY());
+//            setY2(gme.getMax().getY());
+//        }
+//
+//        catch (GM_Exception gmEx) {
+//            log.error("Error during creating BoundingBox from GML",gmEx);//NOI18N
+//        }
+//    }
 
     /**
      * Empty Constructor
@@ -155,7 +155,7 @@ public class BoundingBox implements Cloneable,Serializable{
     public double getX1() {
         if (x1<=x2) {
             return x1;
-        } 
+        }
         else {
             return x2;
         }
@@ -181,7 +181,7 @@ public class BoundingBox implements Cloneable,Serializable{
             return y2;
         }
     }
-    
+
     /**
      * Setter for property y1.
      * @param y1 New value of property y1.
@@ -189,7 +189,7 @@ public class BoundingBox implements Cloneable,Serializable{
     public void setY1(double y1) {
         this.y1 = y1;
     }
-    
+
     /**
      * Getter for property x2.
      * @return Value of property x2.
@@ -202,8 +202,8 @@ public class BoundingBox implements Cloneable,Serializable{
             return x1;
         }
     }
-    
-    
+
+
     /**
      * Setter for property x2.
      * @param x2 New value of property x2.
@@ -211,7 +211,7 @@ public class BoundingBox implements Cloneable,Serializable{
     public void setX2(double x2) {
         this.x2 = x2;
     }
-    
+
     /**
      * Getter for property y2.
      * @return Value of property y2.
@@ -221,11 +221,11 @@ public class BoundingBox implements Cloneable,Serializable{
             return y2;
         }
         else {
-            return y1;            
+            return y1;
         }
 
     }
-    
+
     /**
      * Setter for property y2.
      * @param y2 New value of property y2.
@@ -233,17 +233,17 @@ public class BoundingBox implements Cloneable,Serializable{
     public void setY2(double y2) {
         this.y2 = y2;
     }
-    
-    
+
+
     /**
      * This Method return the BoundingBox like (1.11,2.22,3.33,4.44)
      * @return String value
      */
     public String toString() {
-         
+
         return "("+round(getX1())+","+round(getY1())+","+round(getX2())+","+round(getY2())+")";//NOI18N
     }
-    
+
     /**
      * This Method return the BoundingBox like -179.99999999999997,-105.48710130136223,176.35443037974682,114.6141645214226
      * @return String to assemble URL
@@ -251,7 +251,7 @@ public class BoundingBox implements Cloneable,Serializable{
     public String getURLString() {
         return getX1()+","+getY1()+","+getX2()+","+getY2();//NOI18N
     }
-    
+
     public String getGeometryFromTextLineString(){
         return "LINESTRING("+getX1()+" "+getY1()+","+getX2()+" "+getY2()+")";//NOI18N
     }
@@ -261,18 +261,18 @@ public class BoundingBox implements Cloneable,Serializable{
      */
     public String getGeometryFromTextCompatibleString() {
         return "BOX3D("+getURLString()+")";//NOI18N
-    }    
+    }
 
     public Logger getLog() {
         return log;
     }
-    
-    
+
+
     public PBounds getPBounds(WorldToScreenTransform wtst) {
         return new PBounds(wtst.getScreenX(x1),wtst.getScreenY(y2),x2-x1,wtst.getScreenY(y1)-wtst.getScreenY(y2));
     }
-    
-    
+
+
     /**
      * return true if the given boundingBox has the same values
      * @param bb BoundingBox to be checked
@@ -281,21 +281,21 @@ public class BoundingBox implements Cloneable,Serializable{
     boolean equals(BoundingBox bb) {
         return (getX1()==bb.getX1()&&getX2()==bb.getX2()&&getY1()==bb.getY1()&&getY2()==bb.getY2());
     }
-    
+
     /**
      * Clone Method
-     * @return a BoundingBox with the same values 
+     * @return a BoundingBox with the same values
      */
     public Object clone() {
         return new BoundingBox(x1,y1,x2,y2);
     }
 
     /**
-     * 
+     *
      *     Rounds a double to #.00
-     *     @param d The double 
+     *     @param d The double
      *     @return the new double
-     *     
+     *
      */
     public static String round(double d)   {
         double dd=((double)(Math.round(d*100)))/100;

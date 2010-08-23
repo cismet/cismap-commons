@@ -34,8 +34,8 @@
 
 package de.cismet.cismap.commons.gui.capabilitywidget;
 
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 import javax.swing.tree.TreePath;
-import org.deegree.services.wms.capabilities.WMSCapabilities;
 
 /**
  *

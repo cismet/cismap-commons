@@ -46,7 +46,7 @@ import java.io.IOException;
 import java.net.URL;
 import javax.swing.JComponent;
 import org.apache.commons.httpclient.HttpClient;
-import org.deegree.services.wms.capabilities.WMSCapabilities;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 /**
  *
@@ -96,7 +96,7 @@ public class ImageRetrieval extends Thread {
             listener.retrievalStarted(new RetrievalEvent());
 //            URL u = new URL(url.toString());
             if (cap != null) {
-                log.debug("Retrieve: " + url.toString() + " WMSCapability: " + cap.getCapability().getLayer().getTitle());//NOI18N
+                log.debug("Retrieve: " + url.toString() + " WMSCapability: " + cap.getLayer().getTitle());//NOI18N
             } else {
                 log.debug("Retrieve: " + url.toString());//NOI18N
             }

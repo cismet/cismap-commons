@@ -3,21 +3,22 @@
   <CismapGetCapabilities>
     <wfs:GetCapabilities service="WFS" xmlns:wfs="http://www.opengis.net/wfs" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"/>
   </CismapGetCapabilities>
-    
+
   <CismapDescribeFeatureType>
     <wfs:DescribeFeatureType version="1.1.0" service="WFS" xmlns:wfs="http://www.opengis.net/wfs" xmlns:app="http://www.deegree.org/app" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
       <wfs:TypeName>$TYPENAME$</wfs:TypeName>
     </wfs:DescribeFeatureType>
   </CismapDescribeFeatureType>
-    
+
+  <!-- The following Query is a getFeature version 1.1.0 Request -->
   <CismapQuery>
-    <wfs:GetFeature version="1.1.0"
+    <wfs:GetFeature version="1.1.0" service="WFS"
     outputFormat="text/xml; subtype=gml/3.1.1"
     xmlns:wfs="http://www.opengis.net/wfs"
     xmlns:gml="http://www.opengis.net/gml"
     xmlns:ogc="http://www.opengis.net/ogc"
     maxFeatures="3000">
-      <wfs:Query xmlns:app="http://www.deegree.org/app" typeName="$TYPENAME$">
+      <wfs:Query typeName="$TYPENAME$" srsName="SRSNAME_PLACEHOLDER">
         <ogc:Filter>
           <ogc:BBOX>
             <ogc:PropertyName>$GMLPROPERTY$</ogc:PropertyName>
@@ -27,4 +28,24 @@
       </wfs:Query>
     </wfs:GetFeature>
   </CismapQuery>
+
+  <!-- The following Query is a getFeature version 1.0.0 Request -->
+  <!-- the gml3 output format can be supported as a vendor specific format but the default format of a wfs version 1.0.0 is gml2 -->
+  <CismapQuery10>
+    <wfs:GetFeature version="1.0.0" service="WFS"
+    outputFormat="text/xml; subtype=gml/3.1.1"
+    xmlns:wfs="http://www.opengis.net/wfs"
+    xmlns:gml="http://www.opengis.net/gml"
+    xmlns:ogc="http://www.opengis.net/ogc"
+    maxFeatures="3000">
+      <wfs:Query typeName="$TYPENAME$">
+        <ogc:Filter>
+          <ogc:BBOX>
+            <ogc:PropertyName>$GMLPROPERTY$</ogc:PropertyName>
+            <cismapBoundingBoxAsGmlPlaceholder />
+          </ogc:BBOX>
+        </ogc:Filter>
+      </wfs:Query>
+    </wfs:GetFeature>
+  </CismapQuery10>
 </CismapWebFeatureService>

@@ -36,6 +36,9 @@ package de.cismet.cismap.commons.gui.capabilitywidget;
 import com.jgoodies.looks.Options;
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
@@ -46,10 +49,11 @@ import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
-import de.cismet.cismap.commons.featureservice.WFSOperator;
 import de.cismet.cismap.commons.preferences.CapabilitiesListTreeNode;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
+import de.cismet.cismap.commons.wfs.WFSFacade;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.security.AccessHandler;
 import de.cismet.security.WebAccessManager;
 import de.cismet.security.exceptions.RequestFailedException;
@@ -84,7 +88,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -117,14 +120,12 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
-import org.deegree.services.capabilities.OGCWebServiceCapabilities;
-import org.deegree.services.wms.capabilities.Layer;
-import org.deegree.services.wms.capabilities.WMSCapabilities;
-import org.deegree2.framework.xml.schema.ElementDeclaration;
-import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilities;
-import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilitiesDocument;
-import org.deegree_impl.services.wms.capabilities.OGCWMSCapabilitiesFactory;
+import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
+import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
+import java.io.ByteArrayInputStream;
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 
 /**
  *
@@ -172,6 +173,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
      * @param interactive true, falls per Drag&Drop, sonst false
      */
     private void processUrl(final String link, final String subparent, final boolean interactive) {
+        if (Thread.getDefaultUncaughtExceptionHandler() == null) {
+            log.debug("uncaught exception handler registered");
+            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+
+                @Override
+                public void uncaughtException(Thread t, Throwable e) {
+                    log.error("uncaughtException: ",e);
+                }
+            });
+        }
         log.info("processURL: " + link);//NOI18N
         // Gibts diese URL schon?
         // Text im Tab der L\u00E4nge der URL anpassen
@@ -206,7 +217,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                 }
                 tbpCapabilities.setSelectedComponent(load);
                 // setOGCWMSCapabilitiesTree(link, tbpCapabilities.getComponentCount()-1);
-
+                if (log.isDebugEnabled()) {
+                    log.debug("link.toLowerCase().contains(service=wms)" + link.toLowerCase().contains("service=wms") + " link: " + link.toLowerCase());
+                }
                 //TODO
                 //should be refactored --> coomon parts like capabilities s
                 if (link.toLowerCase().contains("service=wfs")) {//NOI18N
@@ -476,10 +489,15 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         } else {
             log.debug("kein Baum aktiv, entferne selektierten Reiter");//NOI18N
             if (tbpCapabilities.getSelectedComponent() != null) {
+                LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
+                capabilityUrls.remove(link);
+                capabilityUrlsReverse.remove(tbpCapabilities.getSelectedComponent());
                 wmsCapabilities.remove(tbpCapabilities.getSelectedComponent());
                 wfsCapabilities.remove(tbpCapabilities.getSelectedComponent());
                 wfsPostUrls.remove(tbpCapabilities.getSelectedComponent());
                 tbpCapabilities.remove(tbpCapabilities.getSelectedComponent());
+            } else {
+                log.warn("The link was not removed from the capabilitiyURLs");
             }
         }
     }
@@ -494,6 +512,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
             }
         }
     }//GEN-LAST:event_cmdCollapseActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdAddByUrl;
     private javax.swing.JButton cmdAddFromList;
@@ -692,12 +711,11 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
             public void run() {
                 try {
                     final DragTree trvCap = new DragTree();
-                    URL getCapURL = new URL(link);
-                    OGCWMSCapabilitiesFactory capFact = new OGCWMSCapabilitiesFactory();
+                    WMSCapabilitiesFactory capFact = new WMSCapabilitiesFactory();
                     CismapBroker broker = CismapBroker.getInstance();
-                    log.debug("Capability Widget: Creating WMScapabilities for URL: " + getCapURL.toString());//NOI18N
+                    log.debug("Capability Widget: Creating WMScapabilities for URL: " + link);//NOI18N
                     //final WMSCapabilities cap = capFact.createCapabilities(HttpAuthentication.getInputStreamReaderFromURL(CapabilityWidget.this, getCapURL));
-                    final WMSCapabilities cap = capFact.createCapabilities(new InputStreamReader(WebAccessManager.getInstance().doRequest(getCapURL)));
+                    final WMSCapabilities cap = capFact.createCapabilities(link);
                     log.debug("finished creating Capabilties");//NOI18N
                     //TODO for WFS
                     //ToDo funktionalität abgeschaltet steckt zur zeit in CismetGUICommons --> refactoring
@@ -727,7 +745,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
                             capabilityUrls.put(new LinkWithSubparent(link, subparent), sPane);
                             capabilityUrlsReverse.put(sPane, new LinkWithSubparent(link, subparent));
-                            String title = cap.getCapability().getLayer().getTitle().trim();
+                            String title = cap.getLayer().getTitle().trim();
                             if (subparent != null) {
                                 title = subparent;
                             }
@@ -747,7 +765,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                             }
                         }
                     });
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     log.error("Fehler währened dem erstellen des WMSCapabilties Baums", e);//NOI18N
                     String message = "";//NOI18N
 
@@ -829,26 +847,24 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 //                            final WFSCapabilities capWFS = op.parseWFSCapabilites(new BufferedReader(new InputStreamReader(result)));
 //                            log.debug("Erstelle WFSCapabilitiesTreeModel");
                              // !!!ToDo WebAccessMananger testen
-                            final FeatureServiceUtilities utilities = new FeatureServiceUtilities();
-                            WFSCapabilitiesDocument wfsDoc = utilities.getWFSCapabilitesDocument(postURL);
-                            final WFSCapabilities cap = (WFSCapabilities) wfsDoc.parseCapabilities();
-                            final String name = FeatureServiceUtilities.getServiceName(wfsDoc);
+                            WFSCapabilitiesFactory capFact = new WFSCapabilitiesFactory();
 
-                            capTreeModel = new WFSCapabilitiesTreeModel(cap, utilities.getElementDeclarations(finalPostUrl, cap.getFeatureTypeList()));
+                            final WFSCapabilities cap = capFact.createCapabilities(finalPostUrl.toString() + "?REQUEST=GetCapabilities&service=WFS");
+                            String name = FeatureServiceUtilities.getServiceName(cap);
+
+                            capTreeModel = new WFSCapabilitiesTreeModel(cap);
                             capTreeModel.setServiceName(name);
                             //((WFSCapabilitiesTreeModel) capTreeModel).setFeatureTypes(op.getElements(finalPostUrl, capWFS.getFeatureTypeList()));
                         } else if (securedServiceType.equals(WSSAccessHandler.SECURED_SERVICE_TYPE.WMS.toString())) {
                             log.debug("Gesicheter Service ist ein: " + WSSAccessHandler.SECURED_SERVICE_TYPE.WMS);//NOI18N
                             try {
-                                OGCWMSCapabilitiesFactory capFact = new OGCWMSCapabilitiesFactory();
+                                WMSCapabilitiesFactory capFact = new WMSCapabilitiesFactory();
                                 log.debug("Capability Widget: Creating WMScapabilities for URL: " + finalPostUrl.toString());//NOI18N
-                                InputStream result = WebAccessManager.getInstance().doRequest(finalPostUrl, new StringReader("REQUEST=GetCapabilities&service=WMS"), AccessHandler.ACCESS_METHODS.GET_REQUEST);//NOI18N
-                                log.debug("WMS Capabilties erstellt");//NOI18N
                                 //ToDO Langsam
-                                final WMSCapabilities capWMS = capFact.createCapabilities(new BufferedReader(new InputStreamReader(result)));
+                                final WMSCapabilities capWMS = capFact.createCapabilities(finalPostUrl.toString() + "?REQUEST=GetCapabilities&service=WMS");
                                 log.debug("Erstelle WMSCapabilitiesTreeModel");//NOI18N
                                 capTreeModel = new WMSCapabilitiesTreeModel(capWMS);
-                                capTreeModel.setServiceName(capWMS.getCapability().getLayer().getTitle().trim());
+                                capTreeModel.setServiceName(capWMS.getLayer().getTitle().trim());
                             } catch (Exception ex) {
                                 log.error("Exception during doRequest cause: ", ex);//NOI18N
                                 return;
@@ -1006,14 +1022,13 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     }
 
                     final URL finalPostUrl = postURL;
-                    final FeatureServiceUtilities utilities = new FeatureServiceUtilities();
-                    WFSCapabilitiesDocument wfsDoc = utilities.getWFSCapabilitesDocument(postURL);
-                    final WFSCapabilities cap = (WFSCapabilities) wfsDoc.parseCapabilities();
-                    final String name = FeatureServiceUtilities.getServiceName(wfsDoc);
+                    final WFSCapabilitiesFactory capFact = new WFSCapabilitiesFactory();
+                    final WFSCapabilities cap = capFact.createCapabilities(finalPostUrl.toString());
+                    final String name = FeatureServiceUtilities.getServiceName(cap);
 
                     // Hashmap mit den FeatureLayer-Attributen erzeugen
                     log.debug("create WFSCapabilitiesTreeModel");//NOI18N
-                    final WFSCapabilitiesTreeModel tm = new WFSCapabilitiesTreeModel(cap, utilities.getElementDeclarations(postURL, cap.getFeatureTypeList()));
+                    final WFSCapabilitiesTreeModel tm = new WFSCapabilitiesTreeModel(cap);
 
                     // Den WFSTree als DropTarget spezifizieren
                     DropTarget dt = new DropTarget(trvCap, acceptableActions, thisWidget);
@@ -1064,7 +1079,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
                     tbpCapabilities.setIconAt(tbpCapabilities.indexOfComponent(comp), icoError);
                     if (e.getMessage() == null || e.getMessage().equals("null")) {//NOI18N
-                        message = e.getCause().getMessage();
+                        if (e.getCause() != null) {
+                            message = e.getCause().getMessage();
+                        }
                     } else {
                         message = e.getMessage();
                     }
@@ -1286,14 +1303,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         if (t != null) {
             t.repaint();
         }
-
-
-
-
-
-
-
-
     }
 
     class ListMenuItem
@@ -1378,23 +1387,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                 WFSCapabilitiesTreeModel model = (WFSCapabilitiesTreeModel) this.getModel();
                 log.debug("create Transferable for WFS");//NOI18N
                 // TODO ein Transferable zum Testen erstellen
-                if (getSelectionModel().getSelectionPath().getLastPathComponent() instanceof ElementDeclaration) {
-                    ElementDeclaration element = (ElementDeclaration) getSelectionModel().getSelectionPath().getLastPathComponent();
-                    FeatureServiceUtilities utilities = new FeatureServiceUtilities(element.getName().getAsString());
-
-                    //TODO Heuristic HIER zur Bestimmung der Geometrie
-                    utilities.setGeometry(FeatureServiceUtilities.getFirstGeometryName(model.getChildren(element)));
-                    Vector<String> names = new Vector<String>();
-                    for (FeatureServiceAttribute fsa : model.getChildren(element)) {
-                        names.add(fsa.getName());
-                    }
-                    FeatureServiceUtilities.changePropertyNames(utilities.getQuery(), names);
-                    trans = new DefaultTransferable(new WFSSelectionAndCapabilities(
-                            element.getName().getAsString(),
-                            wfsPostUrls.get(tbpCapabilities.getSelectedComponent()).toString(),
-                            utilities.getQuery(),
-                            "",//NOI18N
-                            model.getChildren(element)));
+                if (getSelectionModel().getSelectionPath().getLastPathComponent() instanceof FeatureType) {
+                    FeatureType feature = (FeatureType) getSelectionModel().getSelectionPath().getLastPathComponent();
+                    trans = new DefaultTransferable(new WFSSelectionAndCapabilities(feature));
                 }
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
@@ -1416,7 +1411,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         public void dropActionChanged(DragSourceDragEvent e) {
         }
 
-        public OGCWebServiceCapabilities getWmsCapabilities() {
+        public WMSCapabilities getWmsCapabilities() {
             return wmsCapabilities;
         }
 

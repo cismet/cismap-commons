@@ -13,6 +13,7 @@ import java.awt.Font;
 import java.awt.Paint;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import org.apache.log4j.Logger;
 
 /**
  * Default implementation of a FeatureServiceFeature.
@@ -21,6 +22,7 @@ import java.util.LinkedHashMap;
  */
 public class DefaultFeatureServiceFeature implements FeatureServiceFeature
 {
+  protected Logger logger = Logger.getLogger(this.getClass());
 
   //private final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(DefaultFeatureServiceFeature.class);
   private int id = -1;
@@ -137,6 +139,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature
   @Override
   public Object getProperty(String propertyName)
   {
+    if (container.get(propertyName) == null) {
+      logger.error("getProperty " + propertyName, new Exception());
+    }
     return container.get(propertyName);
   }
 

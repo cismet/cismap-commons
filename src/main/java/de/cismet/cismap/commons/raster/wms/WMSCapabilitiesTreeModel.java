@@ -35,11 +35,10 @@
 package de.cismet.cismap.commons.raster.wms;
 
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
+import de.cismet.cismap.commons.wms.capabilities.Style;
 import java.util.Vector;
-import javax.swing.tree.TreeModel;
-import org.deegree.services.wms.capabilities.Layer;
-import org.deegree.services.wms.capabilities.Style;
-import org.deegree.services.wms.capabilities.WMSCapabilities;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 /**
  *
@@ -81,7 +80,7 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel{
      * @return  true if <code>node</code> is a leaf
      */
     public boolean isLeaf(Object node) {
-        if ((node instanceof Layer && ((Layer)node).getLayer().length==0 && ((Layer)node).getStyles().length==0)||
+        if ((node instanceof Layer && ((Layer)node).getChildren().length==0 && ((Layer)node).getStyles().length==0)||
             (node instanceof Style)
             ) {
             return true;
@@ -102,7 +101,7 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel{
      */
     public int getChildCount(Object parent) {
         if (parent instanceof Layer) {
-            int layerChilds=((Layer)parent).getLayer().length;
+            int layerChilds=((Layer)parent).getChildren().length;
             int styleChilds=((Layer)parent).getStyles().length;
             return layerChilds+styleChilds;
         }
@@ -157,9 +156,9 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel{
      */
     public Object getChild(Object parent, int index) {
         if (parent instanceof Layer) {
-            int layerChilds=((Layer)parent).getLayer().length;
+            int layerChilds=((Layer)parent).getChildren().length;
             if (index<layerChilds) {
-                return ((Layer)parent).getLayer()[index];
+                return ((Layer)parent).getChildren()[index];
             }
             else {
                 return ((Layer)parent).getStyles()[index-layerChilds];
@@ -176,10 +175,10 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel{
      */
     public Object getRoot() {
         if (subparent!=null) {
-            return getLayerByTitle(capabilities.getCapability().getLayer(), subparent);
+            return getLayerByTitle(capabilities.getLayer(), subparent);
         }
         else {
-            return capabilities.getCapability().getLayer();
+            return capabilities.getLayer();
         }
     }
 
@@ -189,7 +188,7 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel{
             return layer;
         }
         else {
-            Layer[] larr=layer.getLayer();
+            Layer[] larr=layer.getChildren();
             for (Layer l:larr){
                 Layer test=getLayerByTitle(l, title);
                 if (test!=null) {

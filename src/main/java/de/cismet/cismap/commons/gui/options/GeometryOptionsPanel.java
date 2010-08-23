@@ -6,6 +6,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.lookupoptions.*;
 import de.cismet.tools.configuration.NoWriteError;
 import org.jdom.Element;
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -16,7 +17,7 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     
-    private static final String OPTION_NAME = "Geometrien";
+    private static final String OPTION_NAME = NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.OPTION_NAME");
     private static final String CONFIGURATION = "GeometryOptionsPanel";
     private static final String CONF_HOLD_GEOMETRIES = "EllipseEgdes";
 

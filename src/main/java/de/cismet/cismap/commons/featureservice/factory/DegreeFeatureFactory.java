@@ -8,10 +8,10 @@ import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import java.util.Vector;
 import javax.swing.SwingWorker;
-import org.deegree2.model.feature.Feature;
-import org.deegree2.model.feature.FeatureProgressListener;
-import org.deegree2.model.feature.FeatureProperty;
-import org.deegree2.model.spatialschema.JTSAdapter;
+import org.deegree.model.feature.Feature;
+import org.deegree.model.feature.FeatureProperty;
+import org.deegree.model.spatialschema.JTSAdapter;
+import org.deegree.model.feature.FeatureProgressListener;
 
 /**
  * Abstract Base class of features factories that make use of the degree framework
@@ -96,7 +96,7 @@ public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
       {
         try
         {
-          featureServiceFeature.setGeometry(JTSAdapter.export(degreeFeature.getGeometryPropertyValues()[geometryIndex]));
+            featureServiceFeature.setGeometry(JTSAdapter.export(degreeFeature.getGeometryPropertyValues()[geometryIndex]));
         } catch (Exception e)
         {
           featureServiceFeature.setGeometry(JTSAdapter.export(degreeFeature.getDefaultGeometryPropertyValue()));

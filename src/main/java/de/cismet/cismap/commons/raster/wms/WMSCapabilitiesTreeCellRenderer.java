@@ -33,13 +33,13 @@
  */
 
 package de.cismet.cismap.commons.raster.wms;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
+import de.cismet.cismap.commons.wms.capabilities.Style;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import org.deegree.services.wms.capabilities.Layer;
-import org.deegree.services.wms.capabilities.Style;
 
 /**
  *
@@ -91,8 +91,8 @@ public class WMSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
             boolean rightScale=true;
             
             try {
-                double mxScale=tmpLayer.getScaleHint().getMax();
-                double mnScale=tmpLayer.getScaleHint().getMin();
+                double mxScale=tmpLayer.getScaleDenominationMax();
+                double mnScale=tmpLayer.getScaleDenominationMin();
                 double scale=CismapBroker.getInstance().getMappingComponent().getCurrentOGCScale();
                 if (scale<mnScale||scale>mxScale) {
                     if (!isSelected) {
@@ -107,7 +107,7 @@ public class WMSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
             }
             setText(tmpLayer.getTitle());
             if (tmpLayer.isQueryable()) {
-                if (tmpLayer.getLayer().length==0) {
+                if (tmpLayer.getChildren().length==0) {
                     if (rightScale) {
                         setIcon(layerInfoIcon);
                     }
@@ -124,7 +124,7 @@ public class WMSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                     }
                 }
             } else {
-                if (tmpLayer.getLayer().length==0) {
+                if (tmpLayer.getChildren().length==0) {
                     if (rightScale) {
                         setIcon(layerIcon);
                     }

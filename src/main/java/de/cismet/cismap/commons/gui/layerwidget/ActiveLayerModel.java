@@ -69,9 +69,7 @@ import de.cismet.tools.gui.treetable.TreeTableModel;
 import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
 import java.awt.EventQueue;
 import java.awt.Image;
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -82,8 +80,8 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import javax.swing.JTree;
 import javax.swing.tree.TreePath;
-import org.deegree.services.wms.capabilities.WMSCapabilities;
-import org.deegree_impl.services.wms.capabilities.OGCWMSCapabilitiesFactory;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
@@ -856,7 +854,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                                 if (DEBUG) {
                                     log.debug("read WMSCapabilities for " + finalPostUrl);//NOI18N
                                 }
-                                OGCWMSCapabilitiesFactory capFact = new OGCWMSCapabilitiesFactory();
+                                WMSCapabilitiesFactory capFact = new WMSCapabilitiesFactory();
                                 if (link.toLowerCase().contains("service=wss")) {//NOI18N
                                     try {
                                         if (DEBUG) {
@@ -877,9 +875,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                                         log.error("Url is not wellformed no wss authentication possible", ex);//NOI18N
                                     }
                                 }
-                                InputStream result = WebAccessManager.getInstance().doRequest(new URL(link));
                                 //ToDO Langsam
-                                WMSCapabilities cap = capFact.createCapabilities(new BufferedReader(new InputStreamReader(result)));
+                                WMSCapabilities cap = capFact.createCapabilities(link);
 //ToDo funktionalität abgeschaltet steckt zur zeit in CismetGUICommons --> refactoring
 //                                broker.addHttpCredentialProviderCapabilities(cap, broker.getHttpCredentialProviderURL(getCapURL));
 //                                if (broker.isServerSecuredByPassword(cap)) {

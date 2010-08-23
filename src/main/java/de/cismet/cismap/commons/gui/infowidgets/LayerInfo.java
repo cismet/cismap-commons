@@ -5,16 +5,15 @@
  */
 package de.cismet.cismap.commons.gui.infowidgets;
 
+import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CapabilityListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
-import de.cismet.tools.gui.StaticSwingTools;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
-import org.deegree.services.wms.capabilities.Layer;
 
 /**
  *

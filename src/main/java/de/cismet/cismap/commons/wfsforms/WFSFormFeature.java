@@ -40,11 +40,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.deegree2.datatypes.QualifiedName;
-import org.deegree2.model.feature.Feature;
-import org.deegree2.model.feature.FeatureProperty;
-import org.deegree2.model.spatialschema.GeometryException;
-import org.deegree2.model.spatialschema.JTSAdapter;
+import org.deegree.datatypes.QualifiedName;
+import org.deegree.model.feature.Feature;
+import org.deegree.model.feature.FeatureProperty;
+import org.deegree.model.spatialschema.GeometryException;
+import org.deegree.model.spatialschema.JTSAdapter;
 
 
 
@@ -151,7 +151,7 @@ public class WFSFormFeature {
     public Point getPosition() {
         try {
             FeatureProperty[] fp=feature.getProperties(new QualifiedName(query.getPropertyPrefix().toString(),query.getPositionProperty().toString(),new URI(query.getPropertyNamespace().toString())));
-            Point p=(Point)(JTSAdapter.export((org.deegree2.model.spatialschema.Geometry)(fp[0].getValue())));
+            Point p=(Point)(JTSAdapter.export((org.deegree.model.spatialschema.Geometry)(fp[0].getValue())));
             log.debug("POSITION="+p);//NOI18N
             return p;
         } catch (Exception ex) {

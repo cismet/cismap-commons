@@ -5,15 +5,14 @@
  */
 package de.cismet.cismap.commons.gui.infowidgets;
 
+import de.cismet.cismap.commons.capabilities.Service;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CapabilityListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
 import de.cismet.tools.gui.StaticSwingTools;
 import javax.swing.DefaultComboBoxModel;
-import org.deegree.ogcbasic.ContactInformation;
-import org.deegree.services.capabilities.Service;
-import org.deegree.services.wms.capabilities.WMSCapabilities;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 
 /**
@@ -219,16 +218,14 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
             
         }
         
-        ContactInformation contact = service.getContactInformation();
-        
         try {
-            v.contactName=contact.getContactPersonPrimary().getContactPerson();
+            v.contactName=service.getContactPerson();
         }         catch (Exception e) {
             
         }
         
         try {
-            v.contactOrganisation=contact.getContactPersonPrimary().getContactOrganization();
+            v.contactOrganisation=service.getContactOrganization();
         }         catch (Exception e) {
             
         }

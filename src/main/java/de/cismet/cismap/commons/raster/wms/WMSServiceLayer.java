@@ -34,6 +34,9 @@
 package de.cismet.cismap.commons.raster.wms;
 
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
+import de.cismet.cismap.commons.wms.capabilities.Operation;
+import de.cismet.cismap.commons.wms.capabilities.Style;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
@@ -45,11 +48,7 @@ import java.util.List;
 import java.util.Vector;
 import javax.swing.tree.TreePath;
 
-import org.deegree.services.wms.capabilities.Layer;
-import org.deegree.services.wms.capabilities.Operation;
-import org.deegree.services.wms.capabilities.Style;
-import org.deegree.services.wms.capabilities.WMSCapabilities;
-import org.deegree_impl.services.capabilities.HTTP_Impl;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
@@ -188,7 +187,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
       }
       if (wmsCaps != null)
       {
-        Layer l = searchForLayer(getWmsCapabilities().getCapability().getLayer(), name);
+        Layer l = searchForLayer(getWmsCapabilities().getLayer(), name);
         if (layerList.size() == 1)
         {
           setName(l.getTitle());
@@ -226,9 +225,9 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
       }
     }
 
-    for (int i = 0; i < nextLayer.getLayer().length; ++i)
+    for (int i = 0; i < nextLayer.getChildren().length; ++i)
     {
-      Layer childLayer = nextLayer.getLayer()[i];
+      Layer childLayer = nextLayer.getChildren()[i];
       addLayer(childLayer);
     }
 
@@ -376,7 +375,15 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
       url += "&BGCOLOR=" + getBackgroundColor();//NOI18N
       url += "&EXCEPTIONS=" + exceptionsFormat;//NOI18N
       url += getLayersString(wmsLayers);
-      url += getStylesString(wmsLayers);
+      if (hasEveryLayerAStyle(wmsLayers)) {
+        // the styles parameter must contain the same number of values as the layers parameter.
+        // If this requirement cannot be fulfilled, the optional style parameter should be omitted due
+        // to generate a valid request.
+        url += getStylesString(wmsLayers);
+      } else {
+        logger.warn("style parameter was not added to the getMap Request, because not every layer, " + //NOI18N
+                "which is used within the request has a selected style"); //NOI18N
+      }
       return url;
     } else
     {
@@ -412,7 +419,14 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
       url += "&BGCOLOR=" + backgroundColor;//NOI18N
       //url+="&EXCEPTIONS="+"text/html";//exceptionsFormat;
       url += getLayersString(wmsLayers);
-      url += getStylesString(wmsLayers);
+
+      if (hasEveryLayerAStyle(wmsLayers)) {
+        // the styles parameter must have the same number of values as the layers parameter.
+        // If this requirement cannot be fulfilled, the optional style parameter should be omitted due
+        // to generate a valid request.
+        url += getStylesString(wmsLayers);
+      }
+
       url += "&QUERY_LAYERS=" + l.getOgcCapabilitiesLayer().getName();//NOI18N
       url += "&INFO_FORMAT=text/html";//NOI18N
       url += "&X=" + x;//NOI18N
@@ -428,27 +442,17 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
   {
     try
     {
-      Operation op = getWmsCapabilities().getCapability().getRequest().getOperation(Operation.MAP);
-      Object o = null;
+      Operation op = getWmsCapabilities().getRequest().getMapOperation();
       String prefix = null;
-      if (op == null)
-      {
-        op = getWmsCapabilities().getCapability().getRequest().getOperation(Operation.GETMAP);
-      }
 
-      if (op != null)
-      {
-        o = op.getDCPTypes()[0].getProtocol();
-      }
-      if (o instanceof HTTP_Impl)
-      {
+      if (op != null) {
         //ToDo UGLY WINNING WSS schneidet wenn es get und post gibt das geht.
-        if (((HTTP_Impl) o).getGetOnlineResources().length != 0)
+        if (op.getGet() != null)
         {
-          prefix = ((HTTP_Impl) o).getGetOnlineResources()[0].toString();
-        } else if (((HTTP_Impl) o).getPostOnlineResources().length != 0)
+          prefix = op.getGet().toString();
+        } else if (op.getPost() != null)
         {
-          prefix = ((HTTP_Impl) o).getPostOnlineResources()[0].toString();
+          prefix = op.getPost().toString();
         } else
         {
           return null;
@@ -467,22 +471,12 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
   {
     try
     {
-      Operation op = getWmsCapabilities().getCapability().getRequest().getOperation(Operation.FEATUREINFO);
-      Object o = null;
+      Operation op = getWmsCapabilities().getRequest().getFeatureInfoOperation();
       String prefix = null;
-      if (op == null)
-      {
-        op = getWmsCapabilities().getCapability().getRequest().getOperation(Operation.GETFEATUREINFO);
-      }
 
       if (op != null)
       {
-        o = op.getDCPTypes()[0].getProtocol();
-      }
-      if (o instanceof HTTP_Impl)
-      {
-        prefix = ((HTTP_Impl) o).getGetOnlineResources()[0].toString();
-
+          prefix = op.getGet().toString();
       }
       return prefix;
     } catch (NullPointerException npe)
@@ -542,6 +536,27 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
 //        } else return "";
     return "&STYLES=" + stylesString; //LDS Bugfix//NOI18N
     }
+
+    /**
+     * @param wmsLayers
+     * @return true, if every of the given layer has a selected style
+     */
+    private boolean hasEveryLayerAStyle(Vector wmsLayers) {
+        Iterator it = wmsLayers.iterator();
+
+        while (it.hasNext()) {
+            Object o = it.next();
+
+            if (o instanceof WMSLayer && ((WMSLayer) o).isEnabled()) {
+                if (((WMSLayer) o).getSelectedStyle() == null) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
 
   public WMSCapabilities getWmsCapabilities()
   {
@@ -620,7 +635,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
       return layer;
     } else
     {
-      Layer[] lArr = layer.getLayer();
+      Layer[] lArr = layer.getChildren();
       for (int i = 0; i < lArr.length; i++)
       {
         Layer l = searchForLayer(lArr[i], name);

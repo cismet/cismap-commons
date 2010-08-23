@@ -9,11 +9,11 @@
 package de.cismet.cismap.commons.featureservice;
 
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
-import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
 import de.cismet.cismap.commons.features.WFSFeature;
-import de.cismet.cismap.commons.featureservice.style.StyleDialog;
+import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
-import java.awt.Color;
+import de.cismet.cismap.commons.wfs.WFSFacade;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import java.awt.Font;
 import java.util.HashMap;
 import java.util.Vector;
@@ -54,6 +54,12 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
   private String hostname;
 
   /**
+   * the version of the wfs
+   */
+  private String version;
+
+
+  /**
    * Protected Constructor that clones (shallow) the delivered WebFeatureService.
    * Attributes, layer properties and feature factories are not cloned deeply.
    * The WebFeatureService to be cloned should be initilaised.
@@ -80,9 +86,10 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
    * @param query the request which will be send to the WFS
    * @throws Exception if something went wrong
    */
-  public WebFeatureService(String name, String host, Element query, Vector<FeatureServiceAttribute> attributes) throws Exception
+  public WebFeatureService(String name, String host, Element query, Vector<FeatureServiceAttribute> attributes, String version) throws Exception
   {
     super(name, attributes);
+    this.version = version;
     setQueryElement(query);
     setHostname(host);
 
@@ -109,7 +116,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
     if (this.wfsQueryElement != null)
     {
       logger.debug("setting max features of WFS query to "+(maxFeatureCount+100));//NOI18N
-      FeatureServiceUtilities.setMaxFeatureCount(this.wfsQueryElement, maxFeatureCount+100);
+      WFSFacade.setMaxFeatureCount(this.wfsQueryElement, maxFeatureCount+100, getVersion());
       this.wfsQueryString = FeatureServiceUtilities.elementToString(this.wfsQueryElement);
     }
   }
@@ -119,7 +126,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
   {
     Element parentElement = super.toElement();
 
-    CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, hostname, false);
+    CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, hostname, getVersion(), false);
     parentElement.addContent(capLink.getElement());
     parentElement.addContent(getQueryElement().detach());
 
@@ -136,6 +143,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
     this.setQuery(null);
     this.setQueryElement(query);
     this.setHostname(cp.getLink());
+        this.setVersion(cp.getVersion());
   }
 
   /**
@@ -206,7 +214,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
     if (this.wfsQueryElement != null)
     {
       //+1 reich nicht aus, daher +100
-      FeatureServiceUtilities.setMaxFeatureCount(this.wfsQueryElement, maxFeatureCount+100);
+      WFSFacade.setMaxFeatureCount(this.wfsQueryElement, maxFeatureCount+100, getVersion());
       this.wfsQueryString = FeatureServiceUtilities.elementToString(wfsQuery);
     }
   }
@@ -242,7 +250,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
   @Override
   protected FeatureFactory createFeatureFactory() throws Exception
   {
-    return new WFSFeatureFactory(this.getLayerProperties(), this.getHostname());
+    return new WFSFeatureFactory(this.getLayerProperties(), this.getHostname(), this.getVersion());
   }
 
   /**
@@ -255,4 +263,18 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature,String>
     this.layerProperties = layerProperties;
     this.featureFactory.setLayerProperties(layerProperties);
   }
+
+    /**
+     * @return the version of the referenced wfs
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * @param version the version of the referenced wfs to set
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
 }

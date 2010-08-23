@@ -8,6 +8,7 @@ import de.cismet.tools.configuration.NoWriteError;
 import java.awt.Color;
 import javax.swing.JColorChooser;
 import org.jdom.Element;
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -18,7 +19,7 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     
-    private static final String OPTION_NAME = "Suche";
+    private static final String OPTION_NAME = NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.OPTION_NAME");
     private static final String CONFIGURATION = "SearchOptionsPanel";
     private static final String CONF_HOLD_GEOMETRIES = "HoldGeometries";
     private static final String CONF_GEOMETRY_COLOR = "GeometryColor";

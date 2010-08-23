@@ -22,12 +22,12 @@ import java.net.URI;
 import java.util.List;
 import java.util.Vector;
 import javax.swing.SwingWorker;
-import org.deegree2.model.feature.Feature;
-import org.deegree2.model.feature.FeatureCollection;
-import org.deegree2.model.feature.GMLFeatureCollectionDocument;
-import org.deegree2.model.feature.schema.FeatureType;
-import org.deegree2.model.feature.schema.PropertyType;
-import org.deegree2.model.spatialschema.JTSAdapter;
+import org.deegree.model.feature.Feature;
+import org.deegree.model.feature.FeatureCollection;
+import org.deegree.model.feature.GMLFeatureCollectionDocument;
+import org.deegree.model.feature.schema.FeatureType;
+import org.deegree.model.feature.schema.PropertyType;
+import org.deegree.model.spatialschema.JTSAdapter;
 
 /**
  * Feature Factory that supports of GML documents.<br/>
@@ -130,7 +130,6 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
     this.documentReader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(this.documentURI))));
     this.gmlDocument = new GMLFeatureCollectionDocument();
     this.gmlDocument.load(this.documentReader, "http://dummyID");
-    this.gmlDocument.getFeatureCount();
 
     //check if thread is canceled .........................................
     if (this.checkCancelled(workerThread, " initialising gml document "))
@@ -160,8 +159,8 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
 
     // parse features ........................................................
 
-    ParsingProgressListener progressListener = new ParsingProgressListener(workerThread, max, 100);
-    this.gmlDocument.addFeatureProgressListener(progressListener);
+//    ParsingProgressListener progressListener = new ParsingProgressListener(workerThread, max, 100);
+//    this.gmlDocument.addFeatureProgressListener(progressListener);
     FeatureCollection featureCollection = gmlDocument.parse();
     if(DEBUG) logger.debug("SW[" + workerThread + "]: " + featureCollection.size() + " features parsed");
     this.cleanup();

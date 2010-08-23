@@ -475,7 +475,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             } // Drop-Objekt war ein WFS-Element
             else if (trasferData instanceof WFSSelectionAndCapabilities) {
                 WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities) trasferData;
-                WebFeatureService wfs = new WebFeatureService(sac.getName(), sac.getHost(), sac.getQuery(), sac.getAttributes());
+                WebFeatureService wfs = new WebFeatureService(sac.getName(), sac.getHost(), sac.getQuery(), sac.getAttributes(), sac.getFeature().getWFSCapabilities().getVersion());
                 log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier() + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
                 wfs.getLayerProperties().setPrimaryAnnotationExpression(sac.getIdentifier(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
                 activeLayerModel.addLayer(wfs);
