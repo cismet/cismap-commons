@@ -11,6 +11,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -224,7 +225,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             } else if (geom instanceof MultiPolygon) {
 //                MultiPolygon mp = (MultiPolygon) geom;
                 doGeometry(geom);
-            } else if (geom instanceof Point) {
+            } else if (geom instanceof Point || geom instanceof MultiPoint) {
                 doGeometry(geom);
                 if (feature instanceof StyledFeature) {
                     if (pi == null || (pi != null && pi.equals(((StyledFeature) feature).getPointAnnotationSymbol()))) {
@@ -366,6 +367,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             coordArr = new Coordinate[1];
             coordArr[0] = ((Point) geom).getCoordinate();
+        } else if (geom instanceof MultiPoint) {
+            if (viewer.isFeatureDebugging()) {
+                log.debug("MultiPoint");//NOI18N
+            }
+            coordArr = ((MultiPoint)geom).getCoordinates();
         } else if (geom instanceof Polygon || geom instanceof LinearRing) {
             if (viewer.isFeatureDebugging()) {
                 log.debug("Polygon||LinearRing");//NOI18N
@@ -422,6 +428,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (geom instanceof Point) {
             setPathToPolyline(new float[]{xp[0], xp[0]}, new float[]{yp[0], yp[0]});
         } else if (geom instanceof LineString) {
+            setPathToPolyline(xp, yp);
+        } else if (geom instanceof MultiPoint) {
             setPathToPolyline(xp, yp);
         }
 

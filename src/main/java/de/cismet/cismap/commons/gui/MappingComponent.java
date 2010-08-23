@@ -3689,6 +3689,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                         log.warn("default hat falschen Syntax", dce);//NOI18N
                     }
                     XBoundingBox xbox = new XBoundingBox(elem, srs, metric);
+                    CismapBroker.getInstance().setSrs(srs);
 
                     alm.addHome(xbox);
                     if (defaultVal) {

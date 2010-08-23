@@ -17,11 +17,11 @@ import java.net.URI;
 import java.util.List;
 import java.util.Vector;
 import javax.swing.SwingWorker;
-import org.deegree2.model.feature.Feature;
-import org.deegree2.io.shpapi.ShapeFile;
-import org.deegree2.model.feature.schema.FeatureType;
-import org.deegree2.model.feature.schema.PropertyType;
-import org.deegree2.model.spatialschema.JTSAdapter;
+import org.deegree.model.feature.Feature;
+import org.deegree.io.shpapi.ShapeFile;
+import org.deegree.model.feature.schema.FeatureType;
+import org.deegree.model.feature.schema.PropertyType;
+import org.deegree.model.spatialschema.JTSAdapter;
 
 /**
  *

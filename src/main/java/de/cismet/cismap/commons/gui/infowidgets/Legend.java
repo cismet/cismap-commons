@@ -5,6 +5,7 @@
  */
 package de.cismet.cismap.commons.gui.infowidgets;
 
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
@@ -18,6 +19,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
@@ -31,8 +33,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
-import org.deegree.services.wms.capabilities.LegendURL;
-import org.deegree.services.wms.capabilities.WMSCapabilities;
 
 /**
  *
@@ -155,8 +155,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         String name = wl.getOgcCapabilitiesLayer().getName();
         String url = null;
         try {
-            LegendURL[] lua = wl.getSelectedStyle().getLegendURL();
-            url = lua[0].getOnlineResource().toString();
+            URL[] lua = wl.getSelectedStyle().getLegendURL();
+            url = lua[0].toString();
         } catch (Throwable t) {
             log.debug("Could not find a legend for " + title, t);//NOI18N
         }
@@ -175,7 +175,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                 layer = (WMSLayer) ((WMSServiceLayer) e.getLayer()).getWMSLayers().get(0);
             }
             try {
-                scrollToLegend(layer.getSelectedStyle().getLegendURL()[0].getOnlineResource().toString());
+                scrollToLegend(layer.getSelectedStyle().getLegendURL()[0].toString());
             } catch (Exception ex) {
                 log.debug("Cannot scroll to legend of " + e.getLayer(), ex);//NOI18N
             }
@@ -206,8 +206,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                     String name = wl.getOgcCapabilitiesLayer().getName();
                     String url = null;
                     try {
-                        LegendURL[] lua = wl.getSelectedStyle().getLegendURL();
-                        url = lua[0].getOnlineResource().toString();
+                        URL[] lua = wl.getSelectedStyle().getLegendURL();
+                        url = lua[0].toString();
                     } catch (Throwable t) {
                         log.debug("Could not find legend for " + title, t);//NOI18N
                     }
@@ -242,8 +242,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                     String name = wl.getOgcCapabilitiesLayer().getName();
                     String url = null;
                     try {
-                        LegendURL[] lua = wl.getSelectedStyle().getLegendURL();
-                        url = lua[0].getOnlineResource().toString();
+                        URL[] lua = wl.getSelectedStyle().getLegendURL();
+                        url = lua[0].toString();
                     } catch (Throwable t) {
                         log.debug("Could not find legend for " + title, t);//NOI18N
                     }

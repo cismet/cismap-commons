@@ -33,8 +33,8 @@
  */
 
 package de.cismet.cismap.commons.raster.wms;
-import org.deegree.services.wms.capabilities.Layer;
-import org.deegree.services.wms.capabilities.Style;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
+import de.cismet.cismap.commons.wms.capabilities.Style;
 
 /**
  *

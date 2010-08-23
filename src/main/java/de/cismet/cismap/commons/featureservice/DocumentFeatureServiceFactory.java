@@ -10,7 +10,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.RandomAccessFile;
-import org.deegree2.io.shpapi.FileHeader;
+import org.deegree.io.shpapi.FileHeader;
 
 /**
  *

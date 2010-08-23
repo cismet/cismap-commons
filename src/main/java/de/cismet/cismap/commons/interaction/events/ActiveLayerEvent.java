@@ -33,7 +33,7 @@
  */
 package de.cismet.cismap.commons.interaction.events;
 
-import org.deegree.services.wms.capabilities.WMSCapabilities;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 /**
  *

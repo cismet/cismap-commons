@@ -35,64 +35,43 @@ package de.cismet.cismap.commons.gui.capabilitywidget;
 
 import org.jdom.Element;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import java.util.Vector;
 
 /**
- *
+ * TODO: Diese Klasse kann entfernt werden, da sie keine
+ * zusaetzliche Funktionalitaet zur Klasse FeatureType besitzt.
  * @author nh
  */
 public class WFSSelectionAndCapabilities {
-    private String name, host, id;
-    private Element query;
-    private Vector<FeatureServiceAttribute> attributes;
+    private FeatureType feature;
 
-    // TODO WFS Attribute rausschmeissen
-    public WFSSelectionAndCapabilities(String name, String host, Element query,
-            String id, Vector<FeatureServiceAttribute> attributes) {
-        this.name = name;
-        this.host = host;
-        this.query = query;
-        this.id = id;
-        this.attributes = attributes;
+    public WFSSelectionAndCapabilities(FeatureType feature) {
+        this.feature = feature;
     }
 
     public String getName() {
-        return name;
+        return feature.getPrefixedNameString();
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-    
     public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
+        return feature.getWFSCapabilities().getURL().toString();
     }
 
     public Element getQuery() {
-        return query;
+        return feature.getWFSQuery();
     }
 
-    public void setQuery(Element query) {
-        this.query = query;
-    }
-    
-    public void setIdentifier(String id) {
-        this.id = id;
-    }
-    
     public String getIdentifier() {
-        return id;
+        return "";
     }
+
+    public FeatureType getFeature() {
+        return feature;
+    }
+
 
     public Vector<FeatureServiceAttribute> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(Vector<FeatureServiceAttribute> attributes) {
-        this.attributes = attributes;
+        return feature.getFeatureAttributes();
     }
 }

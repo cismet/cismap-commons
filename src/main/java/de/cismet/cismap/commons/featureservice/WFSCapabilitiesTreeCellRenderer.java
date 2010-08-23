@@ -33,12 +33,12 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import java.awt.Component;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import org.deegree2.framework.xml.schema.ElementDeclaration;
-import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilities;
+import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 
 /**
  * Der WFSCapabilitiesTreeCellRenderer bestimmt, wie ein WFSCapabilitiesTree-Knoten
@@ -87,8 +87,8 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                     setText("Web Feature Service");//NOI18N
                 }
                 setIcon(serverIcon);
-            } else if (value instanceof ElementDeclaration) {
-                ElementDeclaration e = (ElementDeclaration) value;
+            } else if (value instanceof FeatureType) {
+                FeatureType e = (FeatureType) value;
 //                if (!e.getType().isResolved()) {
 //                    if (e.getType().getName().getLocalName().equals(FeatureServiceUtilities.STRING_PROPERTY_TYPE)) {
 //                        setIcon(stringIcon);
@@ -103,7 +103,7 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
 //                    setIcon(featureIcon);
 //                }
                 setIcon(featureIcon);
-                setText(e.getName().getLocalName());
+                setText(e.getName().getLocalPart());
             } else if (value instanceof FeatureServiceAttribute) {
                 FeatureServiceAttribute fsf = (FeatureServiceAttribute) value;
                 String type;
@@ -116,7 +116,7 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                     setIcon(stringIcon);
                 } else if (type.equals(FeatureServiceUtilities.INTEGER_PROPERTY_TYPE)) {
                     setIcon(integerIcon);
-                } else if (type.equals(FeatureServiceUtilities.GEO_PROPERTY_TYPE)) {
+                } else if ( FeatureServiceUtilities.isElementOfGeometryType(type) ) {
                     setIcon(geomIcon);
                 } else {
                     setIcon(elementIcon);

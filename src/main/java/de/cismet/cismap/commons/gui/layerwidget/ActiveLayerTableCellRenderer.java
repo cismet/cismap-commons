@@ -35,6 +35,7 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.wms.capabilities.Style;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget;
@@ -63,7 +64,6 @@ import javax.swing.Timer;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import org.deegree.services.wms.capabilities.Style;
 
 /**
  *

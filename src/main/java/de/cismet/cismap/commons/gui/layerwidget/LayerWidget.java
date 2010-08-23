@@ -34,6 +34,7 @@
 package de.cismet.cismap.commons.gui.layerwidget;
 
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
@@ -553,7 +554,8 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 else if (o instanceof WFSSelectionAndCapabilities) {
                     WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities) o;
 
-                    WebFeatureService wfs = new WebFeatureService(sac.getName(), sac.getHost(), sac.getQuery(), sac.getAttributes());
+                    WebFeatureService wfs = new WebFeatureService(sac.getName(), sac.getHost(), sac.getQuery()
+                            , sac.getAttributes(), sac.getFeature().getWFSCapabilities().getVersion());
                     if (sac.getIdentifier() != null && sac.getIdentifier().length() > 0) {
                         log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier() + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
                         wfs.getLayerProperties().setPrimaryAnnotationExpression(sac.getIdentifier(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);

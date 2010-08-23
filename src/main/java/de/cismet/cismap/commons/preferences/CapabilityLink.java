@@ -13,6 +13,8 @@ public class CapabilityLink {
     private String subparent;
     private String link;
     private String title;
+    // contains the version of the represented capabilities document
+    private String version;
     private boolean active = false;
 
     public CapabilityLink(String type, String link, boolean active, String subparent) {
@@ -24,6 +26,11 @@ public class CapabilityLink {
 
     public CapabilityLink(String type, String link, boolean active) {
         this(type, link, active, null);
+    }
+
+    public CapabilityLink(String type, String link, String version, boolean active) {
+        this(type, link, active, null);
+        this.version = version;
     }
 
     public CapabilityLink(String type, String link, String title) {
@@ -45,6 +52,9 @@ public class CapabilityLink {
         } catch (Exception notHandled) {
         }
         link = e.getTextTrim();
+        if (e.getAttribute("version") != null) {
+            version = e.getAttribute("version").getValue();//NOI18N
+        }
     }
 
     public String getType() {
@@ -72,6 +82,9 @@ public class CapabilityLink {
             elem.setAttribute(new Attribute("subparent", subparent));//NOI18N
         }
         elem.setAttribute(new Attribute("active", new Boolean(active).toString()));//NOI18N
+        if (version != null) {
+            elem.setAttribute(new Attribute("version", version));//NOI18N
+        }
         return elem;
     }
 
@@ -83,6 +96,9 @@ public class CapabilityLink {
         elem.setAttribute(new Attribute("type", type));//NOI18N
         if (subparent != null) {
             elem.setAttribute(new Attribute("subparent", subparent));//NOI18N
+        }
+        if (version != null) {
+            elem.setAttribute(new Attribute("version", version));//NOI18N
         }
         return elem;
     }
@@ -109,5 +125,19 @@ public class CapabilityLink {
 
     public void setSubparent(String subparent) {
         this.subparent = subparent;
+    }
+
+    /**
+     * @return the version
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * @param version the version to set
+     */
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

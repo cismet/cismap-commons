@@ -8,18 +8,20 @@ import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
+import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.tools.StaticHtmlTools;
 import java.io.BufferedInputStream;
 import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.util.Vector;
 import javax.swing.SwingWorker;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.deegree2.model.feature.Feature;
-import org.deegree2.model.feature.FeatureCollection;
-import org.deegree2.model.feature.GMLFeatureCollectionDocument;
+import org.deegree.model.feature.Feature;
+import org.deegree.model.feature.FeatureCollection;
+import org.deegree.model.feature.GMLFeatureCollectionDocument;
 
 /**
  * A FeatureFactory that creates WFSFeatures obtained from a Web Feature Service.<br/>
@@ -32,25 +34,25 @@ import org.deegree2.model.feature.GMLFeatureCollectionDocument;
  */
 public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String>
 {
-  /* XML-constant of the querypart that should be replaced by a boundingbox */
-
-  public static final String CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER = "<cismapBoundingBoxAsGmlPlaceholder />";
   protected String hostname = null;
+  protected String wfsVersion;
 
   protected WFSFeatureFactory(WFSFeatureFactory wfsff)
   {
     super(wfsff);
     this.hostname = wfsff.hostname;
+    this.wfsVersion = wfsff.wfsVersion;
   }
 
   //private Vector<WFSFeature> wfsFeatureVector = new Vector();
   //private PostMethod httppost;
   //private InputStreamReader reader;
-  public WFSFeatureFactory(LayerProperties layerProperties, String hostname)
+  public WFSFeatureFactory(LayerProperties layerProperties, String hostname, String wfsVersion)
   {
     logger.info("initialising WFSFeatureFactory with hostname: '" + hostname + "'");
     this.layerProperties = layerProperties;
     this.hostname = hostname;
+    this.wfsVersion = wfsVersion;
   }
 
   public void setHostname(String hostname)
@@ -69,8 +71,8 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String>
       return null;
     }
     // check if canceled .......................................................
-
-    String postString = query.toString().replaceAll(CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER, boundingBox.toGmlString());
+    String postString = WFSFacade.setGetFeatureBoundingBox(query, boundingBox, wfsVersion);
+//    postString = postString.replaceAll(SRS_NAME_PLACEHOLDER, "EPSG:31466");
 
     // check if canceled .......................................................
     if (this.checkCancelled(workerThread, "creating post string"))
@@ -193,6 +195,8 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String>
         logger.debug("FRW[" + workerThread + "]: parsing " + featureCollectionDocument.getFeatureCount() + " features");
       }
 
+//      StringWriter sw = new StringWriter();
+//      featureCollectionDocument.write(sw);
       featureCollection = featureCollectionDocument.parse();
 
       // check if canceled .......................................................

@@ -17,10 +17,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
-import org.deegree2.ogcwebservices.wfs.capabilities.FeatureTypeList;
-import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilities;
-import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilitiesDocument;
-import org.deegree2.ogcwebservices.wfs.capabilities.WFSFeatureType;
+import org.deegree.ogcwebservices.wfs.capabilities.FeatureTypeList;
+import org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilities;
+import org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilitiesDocument;
+import org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -28,7 +28,8 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
 /**
- *
+ * @deprecated This class should not be used, because the methods do not consider
+ * the request version, when they change queries.
  * @author nh
  */
 public class WFSOperator {

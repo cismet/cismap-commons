@@ -35,6 +35,7 @@
 package de.cismet.cismap.commons.gui.layerwidget;
 
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.featureservice.GMLFeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
@@ -51,7 +52,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import org.deegree.services.wms.capabilities.Layer;
 
 /**
  *
@@ -215,10 +215,10 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer{
                 tmpLayer=((WMSLayer)value).getOgcCapabilitiesLayer();
             }
             
-            if (tmpLayer!=null&&tmpLayer.getScaleHint()!=null) {
+            if (tmpLayer!=null) {
                 boolean rightScale=true;
-                double mxScale=tmpLayer.getScaleHint().getMax();
-                double mnScale=tmpLayer.getScaleHint().getMin();
+                double mxScale=tmpLayer.getScaleDenominationMax();
+                double mnScale=tmpLayer.getScaleDenominationMin();
                 double scale=CismapBroker.getInstance().getMappingComponent().getCurrentOGCScale();
                 if (scale<mnScale||scale>mxScale) {
                     if (!isSelected) {

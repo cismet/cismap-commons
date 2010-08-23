@@ -6,10 +6,11 @@ package de.cismet.cismap.commons.featureservice;
 
 import java.util.HashMap;
 import org.apache.log4j.Logger;
-import org.deegree2.model.feature.Feature;
-import org.deegree2.model.feature.schema.FeatureType;
-import org.deegree2.model.feature.schema.GeometryPropertyType;
-import org.deegree2.model.spatialschema.Geometry;
+import org.deegree.model.feature.Feature;
+import org.deegree.model.feature.schema.FeatureType;
+import org.deegree.model.feature.schema.GeometryPropertyType;
+import org.deegree.model.spatialschema.Geometry;
+
 
 /**
  * 
@@ -18,15 +19,21 @@ import org.deegree2.model.spatialschema.Geometry;
 public class GeometryHeuristics {
     private static final Logger log = Logger.getLogger("de.cismet.cismap.commons.featureservice.GeometryHeuristics");//NOI18N
     private static final String POINT = "Point";//NOI18N
+    private static final String MULTIPOINT = "MultiPoint";//NOI18N
     private static final String LINESTRING = "LineString";//NOI18N
+    private static final String MULTILINESTRING = "MultiLineString";//NOI18N
     private static final String POLYGON = "Polygon";//NOI18N
     private static final String MULTIPOLYGON = "MultiPolygon";//NOI18N
     private static final HashMap<String, Integer> geomOrder = new HashMap<String, Integer>();
+
+    //TODO: geomOrder vervollstaendigen
     static {
         geomOrder.put(POINT, 1);
-        geomOrder.put(LINESTRING, 2);
-        geomOrder.put(POLYGON, 3);
-        geomOrder.put(MULTIPOLYGON, 4);
+        geomOrder.put(MULTIPOINT, 2);
+        geomOrder.put(LINESTRING, 3);
+        geomOrder.put(MULTILINESTRING, 4);
+        geomOrder.put(POLYGON, 5);
+        geomOrder.put(MULTIPOLYGON, 6);
     }
 
     /**

@@ -50,7 +50,7 @@ public class XBoundingBox extends BoundingBox{
         this.srs=srs;
         this.metric=metric;
     }
-    
+
     public XBoundingBox(Element boundingBoxElementParent,String srs, boolean metric) throws DataConversionException{
         super(boundingBoxElementParent);
         this.srs=srs;
@@ -72,5 +72,5 @@ public class XBoundingBox extends BoundingBox{
     public void setMetric(boolean metric) {
         this.metric = metric;
     }
-    
+
 }

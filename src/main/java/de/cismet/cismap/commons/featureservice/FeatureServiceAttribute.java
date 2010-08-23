@@ -5,6 +5,7 @@
 package de.cismet.cismap.commons.featureservice;
 
 import de.cismet.cismap.commons.ConvertableToXML;
+import java.util.Arrays;
 import org.jdom.Element;
 
 /**
@@ -28,8 +29,8 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable
   public FeatureServiceAttribute(String name, String type, boolean isSelected)
   {
     setName(name);
-    if (type.equals(FeatureServiceUtilities.GEO_PROPERTY_TYPE_WITH_NS) ||
-            type.equals(Integer.toString(DocumentFeatureService.GML_GEOMETRY_TYPE)))
+    //type.substring(4) removes the namespace gml:
+    if ( FeatureServiceUtilities.isElementOfGeometryType(type) ) 
     {
       setGeometry(true);
     }
@@ -156,7 +157,7 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable
     boolean newSelected = element.getAttributeValue(IS_SELECTED) != null ? Boolean.valueOf(element.getAttributeValue(IS_SELECTED)) : true;
     this.setSelected(newSelected);
     
-    boolean newGeometry = this.getType() != null && (this.getType().equals(FeatureServiceUtilities.GEO_PROPERTY_TYPE_WITH_NS) || this.getType().equals(Integer.toString(DocumentFeatureService.GML_GEOMETRY_TYPE)));
+    boolean newGeometry = this.getType() != null && ( FeatureServiceUtilities.isElementOfGeometryType(type) );
     this.setGeometry(newGeometry);
   }
 

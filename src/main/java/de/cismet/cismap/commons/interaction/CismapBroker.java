@@ -65,7 +65,6 @@ import java.util.concurrent.Executors;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.SwingWorker;
-import org.deegree.services.wms.capabilities.WMSCapabilities;
 
 /**
  *
@@ -296,6 +295,10 @@ public class CismapBroker {
     }
 
     public String getSrs() {
+        if (srs == null) {
+            log.error("srs is not set. Use EPSG:4326 ");
+            srs = "EPSG:31466";
+        }
         return srs;
     }
 

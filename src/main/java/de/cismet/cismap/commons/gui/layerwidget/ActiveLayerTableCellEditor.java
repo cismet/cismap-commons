@@ -35,8 +35,7 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
-import de.cismet.cismap.commons.features.CloneableFeature;
-import de.cismet.cismap.commons.features.StyledFeature;
+import de.cismet.cismap.commons.wms.capabilities.Style;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.QueryEditorDialog;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
@@ -46,6 +45,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.gui.StaticSwingTools;
 import edu.umd.cs.piccolo.PNode;
@@ -70,7 +70,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -84,7 +83,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
-import org.deegree.services.wms.capabilities.Style;
 import org.jdom.Element;
 
 
@@ -325,8 +323,11 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                     {
                       if(DEBUG)logger.debug("Attributes changed, updating the QUERY Element");//NOI18N
                       Element query = ((WebFeatureService) selectedService).getQueryElement();
-                      FeatureServiceUtilities.setGeometry(query, styleDialog.getSelectedGeoAttribute());
-                      ((WebFeatureService) selectedService).setQueryElement(FeatureServiceUtilities.changePropertyNames(query, styleDialog.getSelectedAttributes()));
+                      WebFeatureService service = ((WebFeatureService) selectedService);
+                      WFSFacade.setGeometry(query, styleDialog.getSelectedGeoAttribute(), service.getVersion());
+                      WFSFacade.changePropertyNames(query, styleDialog.getSelectedAttributes(), service.getVersion());
+
+                      service.setQueryElement(query);
                       forceUpdate = true;
                     }
 

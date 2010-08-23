@@ -34,10 +34,12 @@
 package de.cismet.cismap.commons.featureservice;
 
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
+import de.cismet.cismap.commons.exceptions.BadHttpStatusCodeException;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
-import org.deegree2.framework.xml.schema.ElementDeclaration;
-import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilities;
 
 /**
  * Das WFSCapabilitiesTreeModel liegt hinter dem WFSCapabilitiesTree und gibt vor
@@ -45,17 +47,19 @@ import org.deegree2.ogcwebservices.wfs.capabilities.WFSCapabilities;
  * @author nh
  */
 public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
+    private transient final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private WFSCapabilities capabilities;
-    private HashMap<ElementDeclaration, Vector<FeatureServiceAttribute>> nodes;
+    private HashMap<FeatureType, Vector<FeatureServiceAttribute>> nodes;
     private Vector listener = new Vector();
 
     /**
      * Erzeugt ein neues WFSCapabilitiesTreeModel.
      * @param capabilities WFSCapabilites-Objekt
      */
-    public WFSCapabilitiesTreeModel(WFSCapabilities capabilities, HashMap<ElementDeclaration, Vector<FeatureServiceAttribute>> nodes) {
-        this.nodes = nodes;
+    public WFSCapabilitiesTreeModel(WFSCapabilities capabilities) throws IOException, BadHttpStatusCodeException {
+        this.nodes = FeatureServiceUtilities.getElementDeclarations(capabilities);
         this.capabilities = capabilities;
+        log.debug("nodes: " + nodes.size());
     }
 
     /**
@@ -63,8 +67,8 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
      * @param dec ElementDeclaration which childs are requested
      * @return ElementDeclaration-array or null
      */
-    public Vector<FeatureServiceAttribute> getChildren(ElementDeclaration dec) {
-        return nodes.get(dec);
+    public Vector<FeatureServiceAttribute> getChildren(FeatureType feature) {
+        return nodes.get(feature);
     }
 
     /**

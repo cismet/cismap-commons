@@ -30,9 +30,9 @@ import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import org.deegree2.datatypes.QualifiedName;
-import org.deegree2.model.feature.DefaultFeature;
-import org.deegree2.model.feature.FeatureProperty;
+import org.deegree.datatypes.QualifiedName;
+import org.deegree.model.feature.DefaultFeature;
+import org.deegree.model.feature.FeatureProperty;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 /**
