@@ -787,8 +787,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     log.error("Error while loading server capabilities: " + message, e);//NOI18N
                     tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
 
-                    JComponent jc = capabilityUrls.get(link);
-                    capabilityUrls.remove(new LinkWithSubparent(link, subparent));
+                    JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
+                    capabilityUrls.remove(new LinkWithSubparent(link, null));
                     capabilityUrlsReverse.remove(jc);
                 }
             }
@@ -963,7 +963,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                             }
                         }
                     });
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     String message = "";//NOI18N
 
                     tbpCapabilities.setIconAt(tbpCapabilities.indexOfComponent(comp), icoError);
@@ -982,8 +982,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     log.error("Error during the loading of the capabilities of the server. " + message, e);//NOI18N
                     tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
 
-                    JComponent jc = capabilityUrls.get(link);
-                    capabilityUrls.remove(link);
+                    JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
+                    capabilityUrls.remove(new LinkWithSubparent(link, null));
                     capabilityUrlsReverse.remove(jc);
                 }
             }
@@ -1074,7 +1074,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
 
                         }
                     });
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     String message = "";//NOI18N
 
                     tbpCapabilities.setIconAt(tbpCapabilities.indexOfComponent(comp), icoError);
@@ -1096,8 +1096,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     log.error("Loading of the server capabilities failed. " + message, e);//NOI18N
                     tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
 
-                    JComponent jc = capabilityUrls.get(link);
-                    capabilityUrls.remove(link);
+                    JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
+                    capabilityUrls.remove(new LinkWithSubparent(link, null));
                     capabilityUrlsReverse.remove(jc);
                 }
 
