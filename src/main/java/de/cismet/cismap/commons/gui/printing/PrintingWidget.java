@@ -719,6 +719,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
       }
 
       //Add Existing Features as TopLevelLayer
+      if(mappingComponent.isFeatureCollectionVisible()){
       try
       {
         Graphics2D g2d = (Graphics2D) map.getGraphics();
@@ -740,6 +741,11 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
       } catch (Throwable t)
       {
         log.error("Error while adding local features to the map", t);//NOI18N
+      }
+      } else {
+         final String localFeaturesNotAddedMessage = org.openide.util.NbBundle.getMessage(PrintingWidget.class, "PrintingWidget.retrievalComplete(RetrievalEvent).msg9");
+         addMessageToProgressPane(localFeaturesNotAddedMessage, INFO);//NOI18N
+         log.debug(localFeaturesNotAddedMessage);
       }
 
       if (erroneous.size() < results.size())
