@@ -18,6 +18,7 @@
 package de.cismet.cismap.commons.wfs.capabilities;
 
 import de.cismet.cismap.commons.capabilities.AbstractVersionNegotiator;
+import de.cismet.cismap.commons.exceptions.ParserException;
 import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeWFSCapabilities;
 import de.cismet.security.exceptions.AccessMethodIsNotSupportedException;
 import de.cismet.security.exceptions.MissingArgumentException;
@@ -43,16 +44,18 @@ public class WFSCapabilitiesFactory extends AbstractVersionNegotiator {
 
     public WFSCapabilities createCapabilities(String link) throws MalformedURLException,
             MissingArgumentException, AccessMethodIsNotSupportedException, RequestFailedException,
-            NoHandlerForURLException, Exception {
+            NoHandlerForURLException, ParserException, Exception {
         String document = getCapabilitiesDocument(link);
         ByteArrayInputStream docStream = new ByteArrayInputStream(document.getBytes());
         WFSCapabilities result = null;
+        String errorMsg = "";
 
         do {
             try {
                 result = new DeegreeWFSCapabilities(docStream, link);
             } catch (Throwable th) {
                 logger.warn("cannot parse the Getcapabilities document try to use an other version.", th);//NOI18N
+                errorMsg = th.getMessage();
                 // try to parse an older version of the GetCapabilities Document
                 docStream.close();
                 document = getOlderCapabilitiesDocument(link);
@@ -64,6 +67,7 @@ public class WFSCapabilitiesFactory extends AbstractVersionNegotiator {
 
         if (result == null) {
             logger.error("cannot parse the GetCapabilities document of the wfs" + link);//NOI18N
+            throw new ParserException(errorMsg);
         }
         docStream.close();
 
