@@ -149,8 +149,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
 
     this.setLayerPosition(afs.getLayerPosition());
     this.setName(afs.getName());
-    this.setEncoding(afs.getEncoding());
-    this.setPNode(afs.getPNode() != null ? (PNode) afs.getPNode().clone() : null);
+    this.setEncoding(afs.getEncoding());    
+    this.setPNode(afs.getPNode());
     this.setTranslucency(afs.getTranslucency());
     this.setEncoding(afs.getEncoding());
     this.setEnabled(afs.isEnabled());
