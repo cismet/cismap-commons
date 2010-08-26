@@ -439,8 +439,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature
 
   @Override
   public void setSecondaryAnnotation(String secondaryAnnotation)
-  {
-    this.layerProperties.setSecondaryAnnotationExpression(secondaryAnnotation, this.layerProperties.getSecondaryAnnotationExpressionType());
+  {    
+      this.secondaryAnnotation = secondaryAnnotation;
   }
 
   @Override
