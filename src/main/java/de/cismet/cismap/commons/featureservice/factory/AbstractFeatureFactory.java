@@ -318,6 +318,12 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     try
     {
       groovyShell.getContext().getVariables().clear();
+      /** Groovy keeps references to former scripts. This circumstance leads to
+       * a steady growing of permGen space and in the worst case to 
+       * OutOfMemoryException. The method resetLoadedClasses() removes this 
+       * references.
+       */
+      groovyShell.resetLoadedClasses();
       for (Object key : feature.getProperties().keySet())
       {
         Object property = feature.getProperty(key.toString());
