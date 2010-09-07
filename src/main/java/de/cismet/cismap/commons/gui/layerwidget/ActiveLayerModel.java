@@ -35,6 +35,8 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.ConvertableToXML;
+import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.MappingModelListener;
@@ -69,7 +71,6 @@ import de.cismet.tools.gui.treetable.TreeTableModel;
 import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
 import java.awt.EventQueue;
 import java.awt.Image;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -97,13 +98,14 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     Vector<MappingModelListener> mappingModelListeners = new Vector();
     BoundingBox initialBoundingBox;
     private HashMap<String, XBoundingBox> homes = new HashMap<String, XBoundingBox>();
-    private String srs;
+    private Crs srs;
     private String preferredRasterFormat;
     private String preferredTransparentPref;
     private String preferredBGColor;
     private String preferredExceptionsFormat;
     private CyclicBarrier currentBarrier = null;
     private TreeTableModelAdapter tableModel;
+    private Crs defaultSrs;
 
     /**
      * Erstellt eine neue ActiveLayerModel-Instanz.
@@ -156,7 +158,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             if (wmsLayer.getImageFormat() == null) {
                 wmsLayer.setImageFormat(preferredRasterFormat);
             }
-            ((WMSServiceLayer) layer).setSrs(srs);
+            wmsLayer.setSrs(srs.getCode());
         }
 
         layer.addRetrievalListener(new RetrievalListener() {
@@ -606,14 +608,52 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
     @Override
     public de.cismet.cismap.commons.BoundingBox getInitialBoundingBox() {
-        return homes.get(srs);
+        if (srs == null || defaultSrs == null) {
+            log.warn("SRS is not set or default SRS is not set, yet");
+            return null;
+        }
+        XBoundingBox homeBox = homes.get(srs.getCode());
+
+        if (homeBox == null) {
+            log.debug("No home found for srs " + srs.getCode());
+
+            XBoundingBox defaultBox = homes.get(defaultSrs.getCode());
+
+            if (defaultBox != null) {
+                try {
+                    CrsTransformer transformer = new CrsTransformer(srs.getCode());
+                    homeBox = transformer.transformBoundingBox(defaultBox);
+                    homes.put(srs.getCode(), homeBox);
+                } catch (Exception e) {
+                    log.error("Error while transforming coordinates from " + defaultBox.getSrs() + " to " + srs);
+                }
+            } else {
+                log.debug("No default bunding box (home) found. ");
+            }
+        }
+
+        if (homeBox == null) {
+            log.error("home bounding box == null for srs " + srs.getCode());
+        }
+        
+        return homeBox;
     }
 
-    public String getSrs() {
+    public Crs getSrs() {
         return srs;
     }
 
-    public void setSrs(String srs) {
+    public void setSrs(Crs srs) {
+        if (this.defaultSrs == null) {
+            this.defaultSrs = srs;
+        }
+
+        for (Object layer : this.layers) {
+            if (layer instanceof WMSServiceLayer) {
+                ((WMSServiceLayer)layer).setSrs(srs.getCode());
+            }
+        }
+
         this.srs = srs;
     }
 
@@ -1146,5 +1186,19 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     @Override
     public java.util.TreeMap getFeatureServices() {
         return new TreeMap();
+    }
+
+    /**
+     * @return the defaultSrs
+     */
+    public Crs getDefaultSrs() {
+        return defaultSrs;
+    }
+
+    /**
+     * @param defaultSrs the defaultSrs to set
+     */
+    public void setDefaultSrs(Crs defaultSrs) {
+        this.defaultSrs = defaultSrs;
     }
 }

@@ -198,7 +198,7 @@ public class WFSFacade {
         }
         
         request = query.toString().replaceAll(CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER, envelope);
-        request = request.replaceAll(SRS_NAME_PLACEHOLDER, CismapBroker.getInstance().getSrs());
+        request = request.replaceAll(SRS_NAME_PLACEHOLDER, CismapBroker.getInstance().getSrs().getCode());
 
         return request;
     }

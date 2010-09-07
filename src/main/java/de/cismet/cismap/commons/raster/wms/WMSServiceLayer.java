@@ -34,6 +34,7 @@
 package de.cismet.cismap.commons.raster.wms;
 
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.Operation;
 import de.cismet.cismap.commons.wms.capabilities.Style;
@@ -413,7 +414,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
       url += "&BBOX=" + bb.getURLString();//NOI18N
       url += "&WIDTH=" + width;//NOI18N
       url += "&HEIGHT=" + height;//NOI18N
-      url += "&SRS=" + srs;//NOI18N
+      url += "&SRS=" + CismapBroker.getInstance().getSrs().getCode();//NOI18N
       url += "&FORMAT=" + imageFormat;//NOI18N
       url += "&TRANSPARENT=" + new Boolean(transparentImage).toString().toUpperCase();//NOI18N
       url += "&BGCOLOR=" + backgroundColor;//NOI18N
