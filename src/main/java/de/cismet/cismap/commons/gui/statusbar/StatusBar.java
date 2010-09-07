@@ -5,6 +5,7 @@
  */
 package de.cismet.cismap.commons.gui.statusbar;
 
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
@@ -19,9 +20,16 @@ import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.tools.StaticDecimalTools;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Collection;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
+import org.deegree.model.crs.CRSFactory;
+import org.deegree.model.crs.CoordinateSystem;
+import org.deegree.model.crs.GeoTransformer;
+import org.deegree.model.spatialschema.GeometryFactory;
+import org.deegree.model.spatialschema.Point;
 
 /**
  *
@@ -29,6 +37,8 @@ import javax.swing.JMenuItem;
  */
 public class StatusBar extends javax.swing.JPanel implements StatusListener, FeatureCollectionListener {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private GeoTransformer transformer = null;
+    private DecimalFormat df = new DecimalFormat("0.000000");//NOI18N
     String mode;
     ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/map.png"));//NOI18N
     MappingComponent mappingComponent;
@@ -40,7 +50,28 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         lblStatusImage.setText("");//NOI18N
         lblCoordinates.setText("");//NOI18N
         lblStatusImage.setIcon(defaultIcon);
+        lblCrs.setText(CismapBroker.getInstance().getSrs().getCode());
+        lblWgs84Coordinates.setToolTipText("WGS84");
+        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        dfs.setDecimalSeparator('.');
+        df.setDecimalFormatSymbols(dfs);
+        
+        try {
+            // initialises the geo transformer that transforms the coordinates from the current
+            // coordinate system to EPSG:4326
+            this.transformer = new GeoTransformer("EPSG:4326");
+        } catch (Exception e) {
+            log.error("cannot create a transformer for EPSG:4326.", e);
+        }
     }
+
+
+    public void addCrsPopups() {
+        for (Crs c : mappingComponent.getCrsList()) {
+            addCrsPopup(c);
+        }
+    }
+
 
     public void addScalePopups() {
         for (Scale s : mappingComponent.getScales()) {
@@ -52,7 +83,8 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
 
     public void statusValueChanged(StatusEvent e) {
         if (e.getName().equals(StatusEvent.COORDINATE_STRING)) {
-            lblCoordinates.setText(e.getValue().toString());
+            lblCoordinates.setText( e.getValue().toString() );
+            lblWgs84Coordinates.setText( transformToWGS84Coords( e.getValue().toString() ) );
         } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
             lblStatus.setText(e.getValue().toString());
         } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
@@ -80,6 +112,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         } else if (e.getName().equals(StatusEvent.SCALE)) {
             int sd = (int) (mappingComponent.getScaleDenominator() + 0.5);
             lblScale.setText("1:" + sd);//NOI18N
+        } else if (e.getName().equals(StatusEvent.CRS)) {
+            lblCrs.setText( ((Crs)e.getValue()).getShortname() );
+            lblCoordinates.setToolTipText(e.getValue().toString());
         }
     }
 
@@ -94,6 +129,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
 
         jSeparator1 = new javax.swing.JSeparator();
         pomScale = new javax.swing.JPopupMenu();
+        pomCrs = new javax.swing.JPopupMenu();
         lblCoordinates = new javax.swing.JLabel();
         lblStatusImage = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
@@ -102,20 +138,22 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         lblScale = new javax.swing.JLabel();
         jSeparator4 = new javax.swing.JSeparator();
         lblMeasurement = new javax.swing.JLabel();
+        jSeparator5 = new javax.swing.JSeparator();
+        lblWgs84Coordinates = new javax.swing.JLabel();
+        jSeparator6 = new javax.swing.JSeparator();
+        lblCrs = new javax.swing.JLabel();
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         setLayout(new java.awt.GridBagLayout());
 
         lblCoordinates.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblCoordinates.setText(null);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 7;
+        gridBagConstraints.gridx = 11;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         add(lblCoordinates, gridBagConstraints);
 
-        lblStatusImage.setText(null);
         lblStatusImage.setMaximumSize(new java.awt.Dimension(17, 17));
         lblStatusImage.setMinimumSize(new java.awt.Dimension(17, 17));
         lblStatusImage.setPreferredSize(new java.awt.Dimension(17, 17));
@@ -127,7 +165,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
 
         jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridx = 10;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
@@ -141,13 +179,12 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
 
         jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
         add(jSeparator3, gridBagConstraints);
 
-        lblScale.setText(null);
         lblScale.setComponentPopupMenu(pomScale);
         lblScale.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
@@ -155,7 +192,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
             }
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
         add(lblScale, gridBagConstraints);
 
@@ -170,6 +207,40 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         add(lblMeasurement, gridBagConstraints);
+
+        jSeparator5.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 8;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+        add(jSeparator5, gridBagConstraints);
+
+        lblWgs84Coordinates.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 9;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        add(lblWgs84Coordinates, gridBagConstraints);
+
+        jSeparator6.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+        add(jSeparator6, gridBagConstraints);
+
+        lblCrs.setComponentPopupMenu(pomCrs);
+        lblCrs.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                lblCrsMousePressed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 0;
+        add(lblCrs, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void lblScaleMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblScaleMousePressed
@@ -178,6 +249,25 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         }
     }//GEN-LAST:event_lblScaleMousePressed
 
+    private void lblCrsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCrsMousePressed
+        if (evt.isPopupTrigger()) {
+            pomCrs.setVisible(true);
+        }
+    }//GEN-LAST:event_lblCrsMousePressed
+
+
+    private void addCrsPopup(final Crs crs) {
+        JMenuItem jmi = new JMenuItem(crs.getShortname());
+        jmi.setToolTipText(crs.getName());
+        jmi.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                CismapBroker.getInstance().setSrs(crs);
+            }
+        });
+        pomCrs.add(jmi);
+    }
+
+    
     private void addScalePopupMenu(String text,final double scaleDenominator) {
         JMenuItem jmi=new JMenuItem(text);
         jmi.addActionListener(new ActionListener() {
@@ -241,18 +331,48 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
     }
 
     public void featureCollectionChanged() {}
-    
-    
+
+    private String transformToWGS84Coords(String coords) {
+        String result = "";
+
+        try {
+            String tmp = coords.substring(1, coords.length() -1);
+            int commaPosition = tmp.indexOf(",");
+
+            if (commaPosition != -1 && transformer != null) {
+                double xCoord = Double.parseDouble( tmp.substring(0, commaPosition) );
+                double yCoord = Double.parseDouble( tmp.substring(commaPosition + 1) );
+
+                CoordinateSystem coordSystem = CRSFactory.create(CismapBroker.getInstance().getSrs().getCode());
+                Point currentPoint = GeometryFactory.createPoint(xCoord, yCoord, coordSystem);
+                currentPoint = (Point)transformer.transform(currentPoint);
+                result = "(" + df.format(currentPoint.getX()) + "," + df.format(currentPoint.getY()) + ")";//NOI18N
+            } else {
+                log.error("Cannot transform the current coordinates: " + coords);
+            }
+        } catch (Exception e) {
+            log.error("Cannot transform the current coordinates: " + coords, e);
+        }
+
+        return result;
+    }
+
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
+    private javax.swing.JSeparator jSeparator5;
+    private javax.swing.JSeparator jSeparator6;
     private javax.swing.JLabel lblCoordinates;
+    private javax.swing.JLabel lblCrs;
     private javax.swing.JLabel lblMeasurement;
     private javax.swing.JLabel lblScale;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JLabel lblStatusImage;
+    private javax.swing.JLabel lblWgs84Coordinates;
+    private javax.swing.JPopupMenu pomCrs;
     private javax.swing.JPopupMenu pomScale;
     // End of variables declaration//GEN-END:variables
     

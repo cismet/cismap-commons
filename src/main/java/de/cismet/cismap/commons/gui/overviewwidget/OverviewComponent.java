@@ -7,10 +7,13 @@ package de.cismet.cismap.commons.gui.overviewwidget;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
@@ -24,6 +27,7 @@ import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JFrame;
+import org.deegree.model.crs.GeoTransformer;
 import org.jdom.Element;
 
 /**
@@ -37,7 +41,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
     ActiveLayerModel model = new ActiveLayerModel();
     private String url = "http://geoportal.wuppertal.de/deegree/wms?&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&BBOX=<cismap:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:stadtplan2007&STYLES=default";//NOI18N
     SimpleWMS backgroundService = new SimpleWMS(new SimpleWmsGetMapUrl(url));
-    String srs = "EPSG:31466";//NOI18N
+    Crs srs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, true);//NOI18N
     BoundingBox home = new BoundingBox(2567799, 5670041, 2594650, 5688258);
 
     /** Creates new form OverviewComponent */
@@ -47,7 +51,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         add(overviewMap, BorderLayout.CENTER);
         overviewMap.setInteractionMode(MappingComponent.OVERVIEW);
         overviewMap.setReadOnly(true);
-        XBoundingBox extent = new XBoundingBox(home.getX1(), home.getY1(), home.getX2(), home.getY2(), srs, true);
+        XBoundingBox extent = new XBoundingBox(home.getX1(), home.getY1(), home.getX2(), home.getY2(), srs.getCode(), true);
         overviewMap.setFixedBoundingBox(extent);
         model.setSrs(srs);
         model.addHome(extent);
@@ -59,9 +63,10 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         log.debug("initBackgroundService");//NOI18N
         model = new ActiveLayerModel();
 
-        XBoundingBox extent = new XBoundingBox(home.getX1(), home.getY1(), home.getX2(), home.getY2(), srs, true);
+        XBoundingBox extent = new XBoundingBox(home.getX1(), home.getY1(), home.getX2(), home.getY2(), srs.getCode(), true);
         overviewMap.setFixedBoundingBox(extent);
         model.setSrs(srs);
+        model.setDefaultSrs(srs);
         model.addHome(extent);
         overviewMap.setMappingModel(model);
         model.removeAllLayers();
@@ -116,13 +121,23 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         final Color fill = new Color(255, 0, 0, 100);
         masterMap.getCamera().addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent evt) {
-                overviewMap.outlineArea(masterMap.getCurrentBoundingBox(), fill);
+                try {
+                    BoundingBox bb = masterMap.getCurrentBoundingBox();
 
-                BoundingBox bb = masterMap.getCurrentBoundingBox();
-                double x = bb.getX1() + bb.getWidth() / 2.0;
-                double y = bb.getY2() - bb.getHeight() / 2.0;
-                //overviewMap.crossHairPoint(new Coordinate(2583781, 5682540));
-                overviewMap.crossHairPoint(new Coordinate(x, y));
+                    if (!CismapBroker.getInstance().getSrs().getCode().equals(srs.getCode())) {
+                        CrsTransformer transformer = new CrsTransformer(srs.getCode());
+                        bb = transformer.transformBoundingBox(bb, CismapBroker.getInstance().getSrs().getCode());
+                    }
+
+                    double x = bb.getX1() + bb.getWidth() / 2.0;
+                    double y = bb.getY2() - bb.getHeight() / 2.0;
+                    overviewMap.outlineArea(bb, fill);
+                    //overviewMap.crossHairPoint(new Coordinate(2583781, 5682540));
+                    overviewMap.crossHairPoint(new Coordinate(x, y));
+                } catch (Exception e) {
+                    log.error("Cannot transform the current boundingbox from " + 
+                            CismapBroker.getInstance().getSrs().getCode() + " to " + srs.getCode(), e);
+                }
             }
         });
     }
@@ -139,7 +154,10 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         try {
             Element prefs = parent.getChild("cismapOverviewComponentPreferences");//NOI18N
             try {
-                srs = prefs.getAttributeValue("srs");//NOI18N
+                // the following crs object is incomplete and should only be used within the OverviewComponent
+                Crs tmp = new Crs();
+                tmp.setCode(prefs.getAttributeValue("srs"));
+                srs = tmp;
             } catch (Exception skip) {}
             
             try {

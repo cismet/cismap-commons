@@ -19,4 +19,6 @@ public interface Layer {
     public Style getStyleResource(String name);
     public Style[] getStyles();
     public Layer[] getChildren();
+    public LayerBoundingBox[] getBoundingBoxes();
+    public Envelope getLatLonBoundingBoxes();
 }
