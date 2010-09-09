@@ -93,8 +93,6 @@ import java.util.TreeMap;
  */
 public class StyleDialog extends JDialog implements ListSelectionListener {
 
-    /** Use serialVersionUID for interoperability. */
-    private final static long serialVersionUID = 2128299309127723684L;
 
     // constants: filesystem
     private static final String CISMAP_FOLDER = ".cismap"; // NOI18N
