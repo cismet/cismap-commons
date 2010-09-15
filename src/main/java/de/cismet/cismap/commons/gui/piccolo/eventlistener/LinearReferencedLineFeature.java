@@ -63,22 +63,24 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
             public void featureSelectionChanged(FeatureCollectionEvent fce) {
                 Collection<Feature> features = fce.getEventFeatures();
 
+                FeatureCollection collection = CismapBroker.getInstance().getMappingComponent().getFeatureCollection();
                 if (!featCollLock) {
                     featCollLock = true;
-                    boolean addFeaturesToCollection = false;
-                    for (Feature feature : features) {
-                        if (feature instanceof LinearReferencedLineFeature && ((LinearReferencedLineFeature) feature) == LinearReferencedLineFeature.this) {
-                            addFeaturesToCollection = true;
+                    try {
+                        boolean addFeaturesToCollection = false;
+                        for (Feature feature : features) {
+                            if (collection.isSelected(feature) && feature instanceof LinearReferencedLineFeature && ((LinearReferencedLineFeature) feature) == LinearReferencedLineFeature.this) {
+                                addFeaturesToCollection = true;
+                            }
                         }
+                        if (addFeaturesToCollection) {
+                            features.add(fromFeature);
+                            features.add(toFeature);
+                            collection.select(features);
+                        }
+                    } finally {
+                        featCollLock = false;
                     }
-                    if (addFeaturesToCollection) {
-                        features.remove(LinearReferencedLineFeature.this);
-                        features.add(fromFeature);
-                        features.add(toFeature);
-                        FeatureCollection collection = CismapBroker.getInstance().getMappingComponent().getFeatureCollection();
-                        collection.select(features);
-                    }
-                    featCollLock = false;
                 }
             }
         };
