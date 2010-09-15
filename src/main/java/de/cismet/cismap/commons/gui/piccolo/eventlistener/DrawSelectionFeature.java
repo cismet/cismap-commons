@@ -17,15 +17,12 @@
 
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import com.vividsolutions.jts.geom.Geometry;
-import java.util.Collection;
-
 /**
  *
  * @author jruiz
  */
-public interface AdditionalGeometriesFeature {
+public interface DrawSelectionFeature {
 
-    public Collection<Geometry> getAdditionalGeometries();
-    
+    public boolean isDrawingSelection();
+
 }
