@@ -165,6 +165,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         }
     }
 
+    @Override
     public void layerSelectionChanged(ActiveLayerEvent e) {
         log.debug("layerSelectionChanged() fired");//NOI18N
         if (e.getLayer() instanceof WMSLayer || e.getLayer() instanceof WMSServiceLayer) {
