@@ -83,6 +83,7 @@ import de.cismet.cismap.commons.featureservice.*;
 
 import java.util.Map;
 import java.util.TreeMap;
+import org.jdom.output.Format;
 
 
 /**
@@ -410,8 +411,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                                 ((StyleHistoryListModel) lstHistory.getModel()).addStyle((Style) getStyle().clone());
                             }
 
-                            XMLOutputter out = new XMLOutputter("\t", true); // NOI18N
-                            out.setTextTrim(true);
+                            XMLOutputter out = new XMLOutputter(Format.getPrettyFormat()); // NOI18N
 
                             Document doc = new Document(((StyleHistoryListModel) lstHistory.getModel()).toElement());
                             writer = new FileWriter(f);
