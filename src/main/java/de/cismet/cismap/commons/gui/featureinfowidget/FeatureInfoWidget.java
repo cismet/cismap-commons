@@ -80,9 +80,7 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
             FeatureInfoDisplay d = displays.get(layer);
             if (d != null && (layer.isQuerySelected() == false || remove)) {
                 try {
-                    synchronized (this) {
-                        tbpFeatureInfos.remove(d);
-                    }
+                    tbpFeatureInfos.remove(d);
                     displays.remove(layer);
                 } catch (Exception ex) {
                     log.warn("Workaround for style changes(there is no refresh, but only remove/add)", ex);//NOI18N I dont understand this
