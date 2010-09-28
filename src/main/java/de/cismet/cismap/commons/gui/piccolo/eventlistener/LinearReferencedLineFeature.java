@@ -74,9 +74,8 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
                             }
                         }
                         if (addFeaturesToCollection) {
-                            features.add(fromFeature);
-                            features.add(toFeature);
-                            collection.select(features);
+                            collection.addToSelection(fromFeature);
+                            collection.addToSelection(toFeature);
                         }
                     } finally {
                         featCollLock = false;
