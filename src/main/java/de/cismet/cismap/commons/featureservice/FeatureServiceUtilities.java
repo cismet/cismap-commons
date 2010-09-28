@@ -15,6 +15,7 @@ import java.util.Vector;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
+import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 /**
@@ -94,8 +95,7 @@ public class FeatureServiceUtilities
         if (e == null) {
             return "";//NOI18N
         } else {
-            XMLOutputter out = new XMLOutputter("    ", true);//NOI18N
-            out.setTextTrim(true);
+            XMLOutputter out = new XMLOutputter(Format.getPrettyFormat());//NOI18N
             return out.outputString(e);
         }
     }

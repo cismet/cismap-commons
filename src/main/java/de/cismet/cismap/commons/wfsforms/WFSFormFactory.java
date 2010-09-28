@@ -92,7 +92,7 @@ public class WFSFormFactory implements Configurable {
     public void masterConfigure(Element parent) {
         forms.clear();
         try {
-            configuration = ((Element) parent.clone()).getChild("cismapWFSFormsPreferences").detach();//NOI18N
+            configuration = (Element)((Element) parent.clone()).getChild("cismapWFSFormsPreferences").detach();//NOI18N
             List list = configuration.getChildren("wfsForm");//NOI18N
             for (Object o : list) {
                 try {
