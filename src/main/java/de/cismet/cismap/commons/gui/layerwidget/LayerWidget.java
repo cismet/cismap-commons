@@ -33,6 +33,8 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import de.cismet.cismap.commons.MappingModelEvent;
+import de.cismet.cismap.commons.MappingModelListener;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
@@ -55,6 +57,7 @@ import de.cismet.tools.gui.imagetooltip.ImageToolTip;
 import de.cismet.tools.gui.treetable.JTreeTable;
 import de.cismet.tools.gui.treetable.TreeTableCellEditor;
 import de.cismet.tools.gui.treetable.TreeTableModel;
+import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
 import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
@@ -76,6 +79,7 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolTip;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -117,6 +121,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 }
             }
         };
+
 
         treeTable.setAutoCreateColumnsFromModel(true);
         treeTable.setShowGrid(true);
@@ -184,6 +189,24 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             }
 
             public void componentShown(ComponentEvent e) {
+            }
+        });
+        activeLayerModel.addMappingModelListener(new MappingModelListener() {
+
+            @Override
+            public void mapServiceLayerStructureChanged(MappingModelEvent mme) {
+                treeTable.getColumnModel().getColumn(3).getCellEditor().stopCellEditing();
+
+            }
+
+            @Override
+            public void mapServiceAdded(MapService mapService) {
+                treeTable.getColumnModel().getColumn(3).getCellEditor().stopCellEditing();
+            }
+
+            @Override
+            public void mapServiceRemoved(MapService mapService) {
+                treeTable.getColumnModel().getColumn(3).getCellEditor().stopCellEditing();
             }
         });
     }
@@ -301,7 +324,6 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         add(jPanel1, java.awt.BorderLayout.NORTH);
     }// </editor-fold>//GEN-END:initComponents
 
-
     public void removeAllLayers() {
         activeLayerModel.removeAllLayers();
     }
@@ -314,7 +336,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         } else if (tp != null && tp.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer) {
             ((RetrievalServiceLayer) tp.getParentPath().getLastPathComponent()).retrieve(true);
         }
-        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
+        if (EventQueue.isDispatchThread()) {
+            log.warn("InvokeLater in EDT");
+        }//NOI18N
         EventQueue.invokeLater(new Runnable() {
 
             public void run() {
@@ -329,7 +353,10 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         if (tp != null) {
             activeLayerModel.moveLayerDown(tp);
         }
-        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
+        if (EventQueue.isDispatchThread()) {
+            log.warn("InvokeLater in EDT");
+        }//NOI18N
+
         EventQueue.invokeLater(new Runnable() {
 
             public void run() {
@@ -344,7 +371,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         if (tp != null) {
             activeLayerModel.moveLayerUp(tp);
         }
-        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
+        if (EventQueue.isDispatchThread()) {
+            log.warn("InvokeLater in EDT");
+        }//NOI18N
         EventQueue.invokeLater(new Runnable() {
 
             public void run() {
@@ -359,7 +388,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         if (tp != null) {
             activeLayerModel.handleVisibility(tp);
         }
-        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
+        if (EventQueue.isDispatchThread()) {
+            log.warn("InvokeLater in EDT");
+        }//NOI18N
         EventQueue.invokeLater(new Runnable() {
 
             public void run() {
@@ -373,7 +404,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         if (tp != null) {
             activeLayerModel.disableLayer(tp);
         }
-        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
+        if (EventQueue.isDispatchThread()) {
+            log.warn("InvokeLater in EDT");
+        }//NOI18N
         EventQueue.invokeLater(new Runnable() {
 
             public void run() {
@@ -383,22 +416,54 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     }//GEN-LAST:event_cmdDisableActionPerformed
 
     private void cmdTreeCollapseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdTreeCollapseActionPerformed
-        StaticSwingTools.jTreeCollapseAllNodes(treeTable.getTree());
+        //StaticSwingTools.jTreeCollapseAllNodes(treeTable.getTree());
+//        int sel = treeTable.getSelectionModel().getMinSelectionIndex();
+//        if (treeTable.getRowCount() > 0) {
+//            treeTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+//            treeTable.getSelectionModel().setSelectionInterval(0, treeTable.getRowCount() - 1);
+//            if (sel == -1) {
+//                treeTable.getSelectionModel().setSelectionInterval(0, 0);
+//            } else {
+//                treeTable.getSelectionModel().setSelectionInterval(sel, sel);
+//            }
+//            treeTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+//        }
+
+        treeTable.getColumnModel().getColumn(3).getCellEditor().stopCellEditing();
+
+
+
+
+
     }//GEN-LAST:event_cmdTreeCollapseActionPerformed
 
     private void cmdRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
-        TreePath tp = treeTable.getTree().getSelectionPath();
-        final int row = treeTable.getSelectedRow();
-        if (tp != null) {
-            activeLayerModel.removeLayer(tp);
-        }
-        if (EventQueue.isDispatchThread()){log.fatal("InvokeLater in EDT");}//NOI18N
-        EventQueue.invokeLater(new Runnable() {
+        try {
+            TreePath tp = treeTable.getTree().getSelectionPath();
+            final int row = treeTable.getSelectedRow();
 
-            public void run() {
-                treeTable.getSelectionModel().setSelectionInterval(row, row);
+            if (tp != null) {
+                activeLayerModel.removeLayer(tp);
             }
-        });
+
+            Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    treeTable.getSelectionModel().setSelectionInterval(row, row);
+                }
+            };
+
+            if (EventQueue.isDispatchThread()) {
+                log.debug("try to do InvokeLater in EDT. I will fix that");//NOI18N
+                r.run();
+            } else {
+                EventQueue.invokeLater(r);
+            }
+        } catch (Exception e) {
+            log.error("Error during romaval of layer", e);
+        }
+
     }//GEN-LAST:event_cmdRemoveActionPerformed
 
     public ActiveLayerModel getMappingModel() {
@@ -538,9 +603,8 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     if (l.getWMSLayers().size() > 0) {
                         if (treeTable.getEditingRow() != -1 && treeTable.getEditingColumn() != -1) {
                             try {
-                            treeTable.getCellEditor(treeTable.getEditingRow(), treeTable.getEditingColumn()).stopCellEditing();
-                            }
-                            catch (Exception e){
+                                treeTable.getCellEditor(treeTable.getEditingRow(), treeTable.getEditingColumn()).stopCellEditing();
+                            } catch (Exception e) {
                                 //stopCellEditing went wrong. I don't care ;-)
                             }
                         }
@@ -554,8 +618,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 else if (o instanceof WFSSelectionAndCapabilities) {
                     WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities) o;
 
-                    WebFeatureService wfs = new WebFeatureService(sac.getName(), sac.getHost(), sac.getQuery()
-                            , sac.getAttributes(), sac.getFeature().getWFSCapabilities().getVersion());
+                    WebFeatureService wfs = new WebFeatureService(sac.getName(), sac.getHost(), sac.getQuery(), sac.getAttributes(), sac.getFeature().getWFSCapabilities().getVersion());
                     if (sac.getIdentifier() != null && sac.getIdentifier().length() > 0) {
                         log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier() + "' (EXPRESSIONTYPE_PROPERTYNAME)");//NOI18N
                         wfs.getLayerProperties().setPrimaryAnnotationExpression(sac.getIdentifier(), LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
