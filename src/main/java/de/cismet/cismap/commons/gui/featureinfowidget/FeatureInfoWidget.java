@@ -139,12 +139,13 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
         }
 
         int selectedindex = tbpFeatureInfos.getSelectedIndex();
-        try {
-            tbpFeatureInfos.setForegroundAt(selectedindex, Color.blue);
-        } catch (Exception ex) {
-            log.debug("Error. Feeling not blue.", ex);
+        if (selectedindex >= 0 && tbpFeatureInfos.getTabCount() != 0) {
+            try {
+                tbpFeatureInfos.setForegroundAt(selectedindex, Color.blue);
+            } catch (Exception ex) {
+                log.debug("Error. Feeling not blue.", ex);
+            }
         }
-
 
 
     }//GEN-LAST:event_tbpFeatureInfosStateChanged

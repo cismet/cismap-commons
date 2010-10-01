@@ -41,6 +41,7 @@ import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
 import java.awt.BasicStroke;
@@ -158,13 +159,27 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
      */
     @Override
     public Component getTableCellRendererComponent(final JTable table, final Object value, boolean isSelected, boolean hasFocus, final int row, final int column) {
+        if (DEBUG) {
+            log.debug(value + ": column=" + column);
+        }
 
+
+
+        if (DEBUG) {
+            log.debug(value + ": column=" + column + ", crw=" + row, new CurrentStackTrace());
+        }
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         final int realColumn = table.convertColumnIndexToModel(column);
         final int realRow = table.convertRowIndexToModel(row);
         final TableCellRenderer booleanRenderer = table.getDefaultRenderer(Boolean.class);
         final TableCellRenderer stringRenderer = table.getDefaultRenderer(String.class);
-        //if(DEBUG)log.debug(value+": realColumn="+realColumn+", realRow="+realRow);
+
+        if (DEBUG) {
+            log.debug(value + ": realColumn=" + realColumn + ", realRow=" + realRow, new CurrentStackTrace());
+        }
+
+
+
 
         setToolTipText(null);
         if (!isWidgetTable) {
@@ -384,7 +399,10 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
             setIcon(null);
             setText("");//NOI18N
         }
+
+
         return this;
+
 
 
 
