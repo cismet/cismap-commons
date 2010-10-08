@@ -776,7 +776,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     final WebFeatureService wfs = new WebFeatureService(layerelement);
                     return getKeyForRetrievalService(wfs);
                 } else if (layerelement.getName().equals("DocumentFeatureServiceLayer")) {//NOI18N
-                    log.error("DocumentFeatureServiceLayer not supported");//NOI18N
+                    log.warn("Sollte nicht vorkommen. Die sollten alle von der XMLObjectFactory geladen werden.");//NOI18N
                 } else if (layerelement.getName().equals("simpleWms")) {//NOI18N
                     final SimpleWMS simpleWMS = new SimpleWMS(layerelement);
                     return getKeyForRetrievalService(simpleWMS);
@@ -812,7 +812,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     final WebFeatureService wfs = (WebFeatureService) layer;
                     return wfs.getName() + "#" + wfs.getHostname();
                 } else if (layer instanceof DocumentFeatureService) {//NOI18N
-                    log.error("DocumentFeatureServiceLayer not supported");//NOI18N
+                    final DocumentFeatureService dfs = (DocumentFeatureService) layer;
+                    return dfs.getName() + dfs.getDocumentURI();
                 } else if (layer instanceof SimpleWMS) {//NOI18N
                     final SimpleWMS simpleWMS = (SimpleWMS) layer;
                     return simpleWMS.getName() + "#" + simpleWMS.getGmUrl().getUrlTemplate();
