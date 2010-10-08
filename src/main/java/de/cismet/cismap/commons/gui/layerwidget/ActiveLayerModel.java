@@ -42,6 +42,9 @@ import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import de.cismet.tools.gui.Static2DTools;
 import de.cismet.tools.gui.treetable.AbstractTreeTableModel;
 import java.util.TreeMap;
 import javax.swing.event.TableModelEvent;
@@ -58,8 +61,6 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupportingRasterLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
-import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.security.AccessHandler;
 import de.cismet.security.WebAccessManager;
 import de.cismet.tools.configuration.Configurable;
@@ -67,6 +68,8 @@ import de.cismet.tools.configuration.NoWriteError;
 import de.cismet.tools.gui.treetable.TreeTableModel;
 import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
 import java.awt.EventQueue;
+import java.awt.Image;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -79,12 +82,8 @@ import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
-import de.cismet.tools.gui.Static2DTools;
-import java.awt.Image;
-import java.util.ArrayList;
 import org.jdom.Attribute;
 import org.jdom.Element;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -95,7 +94,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     protected final static boolean DEBUG = Debug.DEBUG;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     Vector layers = new Vector();
-    HashMap<String, RetrievalServiceLayer> capToLayerMap = new HashMap<String, RetrievalServiceLayer>();
     Vector<MappingModelListener> mappingModelListeners = new Vector();
     BoundingBox initialBoundingBox;
     private HashMap<String, XBoundingBox> homes = new HashMap<String, XBoundingBox>();
@@ -104,13 +102,10 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     private String preferredTransparentPref;
     private String preferredBGColor;
     private String preferredExceptionsFormat;
-//    private CyclicBarrier currentBarrier = null;
+    private CyclicBarrier currentBarrier = null;
     private TreeTableModelAdapter tableModel;
     private boolean initalLayerConfigurationFromServer = false;
-    private HashMap<String, RetrievalServiceLayer> serverLayerHashmap;
-    private Element serverConfiguration = null;
-    private Runnable masterRunnable = null;
-    private CyclicBarrier masterBarrier = null;
+    private HashMap<String, Element> masterLayerHashmap = new HashMap<String, Element>();
 
     /**
      * Erstellt eine neue ActiveLayerModel-Instanz.
@@ -133,26 +128,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 //        preferredBGColor="0xF0F0F0";
 //        preferredExceptionsFormat="application/vnd.ogc.se_inimage";
 //        initialBoundingBox=new BoundingBox(2569442.79,5668858.33,2593744.91,5688416.22);
-    }
-
-    public synchronized void addAllLayer(ArrayList<RetrievalServiceLayer> layersToAdd) {
-        if (DEBUG) {
-            log.debug("Anzahl layer to add: " + layersToAdd.size());//NOI18N
-        }
-        for (final RetrievalServiceLayer curLayer : layersToAdd) {
-            EventQueue.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        log.info("addLayer addlayer (" + curLayer.getName() + ")");//NOI18N
-                        addLayer(curLayer);
-                    } catch (IllegalArgumentException schonVorhanden) {
-                        log.warn("Layer" + curLayer.getName() + "' already existed. Do not add the Layer. \n" + schonVorhanden.getMessage());//NOI18N
-                    }
-                }
-            });
-        }
     }
 
     /**
@@ -280,9 +255,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     }
 
     public void removeAllLayers() {
-        if (DEBUG) {
-            log.debug("removing all existing layers");//NOI18N
-        } 
         Object[] oa = layers.toArray();
         for (int i = 0; i < oa.length; i++) {
             Object elem = oa[i];
@@ -790,20 +762,110 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         return conf;
     }
 
+    /*ToDo abstract class or interface for all layer should implement a key string method
+     * then every layer developer has to define a string which uniquely identifies the developed layer.
+     */
+    private String getKeyforLayerElement(final Element layerelement) {
+        String keyString = null;
+        if (layerelement != null) {
+            try {
+                if (layerelement.getName().equals("WMSServiceLayer")) {//NOI18N
+                    final WMSServiceLayer wmsServiceLayer = new WMSServiceLayer(layerelement, new HashMap<String, WMSCapabilities>());
+                    return getKeyForRetrievalService(wmsServiceLayer);
+                } else if (layerelement.getName().equals(WebFeatureService.WFS_FEATURELAYER_TYPE)) {
+                    final WebFeatureService wfs = new WebFeatureService(layerelement);
+                    return getKeyForRetrievalService(wfs);
+                } else if (layerelement.getName().equals("DocumentFeatureServiceLayer")) {//NOI18N
+                    log.error("DocumentFeatureServiceLayer not supported");//NOI18N
+                } else if (layerelement.getName().equals("simpleWms")) {//NOI18N
+                    final SimpleWMS simpleWMS = new SimpleWMS(layerelement);
+                    return getKeyForRetrievalService(simpleWMS);
+                } else if (layerelement.getName().equals("simplePostgisFeatureService")) {//NOI18N
+                    SimplePostgisFeatureService spfs;
+                    if (layerelement.getAttributeValue("updateable") != null && layerelement.getAttributeValue("updateable").equals("true")) {//NOI18N
+                        spfs = new SimpleUpdateablePostgisFeatureService(layerelement);
+                    } else {
+                        spfs = new SimplePostgisFeatureService(layerelement);
+                    }
+                    return getKeyforLayerElement(layerelement);
+                } else {
+                    final RetrievalServiceLayer layer = (RetrievalServiceLayer) XMLObjectFactory.restoreObjectfromElement(layerelement);
+                    return getKeyForRetrievalService(layer);
+                }
+            } catch (Exception ex) {
+                log.error("Konnte keinen Key für das layerelement erstellen", ex);
+            }
+        }
+        return null;
+    }
+
+    /* Same as above if this is done directly by the retrievalservicelayer no instanceof is needed
+     */
+    private String getKeyForRetrievalService(final RetrievalServiceLayer layer) {
+        String keyString = null;
+        if (layer != null) {
+            try {
+                if (layer instanceof WMSServiceLayer) {//NOI18N
+                    final WMSServiceLayer wmsServiceLayer = (WMSServiceLayer) layer;
+                    return wmsServiceLayer.getName() + "#" + wmsServiceLayer.getCapabilitiesUrl();
+                } else if (layer instanceof WebFeatureService) {
+                    final WebFeatureService wfs = (WebFeatureService) layer;
+                    return wfs.getName() + "#" + wfs.getHostname();
+                } else if (layer instanceof DocumentFeatureService) {//NOI18N
+                    log.error("DocumentFeatureServiceLayer not supported");//NOI18N
+                } else if (layer instanceof SimpleWMS) {//NOI18N
+                    final SimpleWMS simpleWMS = (SimpleWMS) layer;
+                    return simpleWMS.getName() + "#" + simpleWMS.getGmUrl().getUrlTemplate();
+                } else if (layer instanceof SimplePostgisFeatureService) {//NOI18N
+                    final SimplePostgisFeatureService spfs = (SimplePostgisFeatureService) layer;
+                    return spfs.getName() + "#" + spfs.getConnectionInfo().getUrl();
+                } else {
+                    final RetrievalServiceLayer rsl = (RetrievalServiceLayer) layer;
+                    return rsl.getName() + "#" + rsl.getClass();
+                }
+            } catch (Exception ex) {
+                log.error("Konnte keinen Key für das layerelement erstellen", ex);
+            }
+        }
+        return null;
+    }
+
     @Override
-    synchronized public void masterConfigure(Element e) {
-        serverConfiguration = e;
+    public void masterConfigure(final Element e) {
         if (DEBUG) {
             log.debug("MasterConfigure(): " + this.getClass().getName());
         }
+        masterLayerHashmap.clear();
         if (initalLayerConfigurationFromServer) {
             if (DEBUG) {
-                log.debug("Layer werden initial vom Server geladen");
+                log.debug("Layerkonfiguration vom Server wird geladen");
             }
-            createLayers(e, true);
+            try {
+                Element layersElement = e.getChild("cismapActiveLayerConfiguration").getChild("Layers");//NOI18N
+                if (layersElement == null) {
+                    log.warn("LayerElement nicht gefunden! Suche nach altem Kind \"RasterLayers\"");//NOI18N
+                    layersElement = e.getChild("cismapActiveLayerConfiguration").getChild("RasterLayers");//NOI18N
+                    if (layersElement == null) {
+                        log.error("Kein valides Layerelement gefunden.");//NOI18N
+                        return;
+                    }
+                }
+                final Element[] orderedLayers = orderLayers(layersElement);
+                for (final Element curLayerElement : orderedLayers) {
+                    final String curKeyString = getKeyforLayerElement(curLayerElement);
+                    if (curKeyString != null) {
+                        log.debug("Adding element: " + curLayerElement + " with key: " + curKeyString);
+                        masterLayerHashmap.put(curKeyString, curLayerElement);
+                    } else {
+                        log.warn("Es war nicht möglich einen Keystring für das Element: " + curLayerElement + " zu erzeugen");
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("Kann die Layerkonfiguration des Servers nicht laden", ex);
+            }
         } else {
             if (DEBUG) {
-                log.debug("Es werden keine Layer vom Server geladen ");
+                log.debug("Es wird keine Layerkonfiguration vom Server geladen ");
             }
         }
     }
@@ -811,29 +873,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     @Override
     synchronized public void configure(Element e) {
         if (DEBUG) {
-            log.debug("Configure(): " + this.getClass().getName());//NOI18N
+            log.debug("ActiveLayerModel configure(" + e.getName() + ")");//NOI18N
         }
-        if (!initalLayerConfigurationFromServer) {
-            if (DEBUG) {
-                log.debug("Lokale laden der Layer");
-            }
-            createLayers(e, false);
-        } else {
-            if (DEBUG) {
-                log.debug("Server Layer werden abgeglichen mit lokaler Konfiguration");
-            }
-            createLayers(e, false);
-        }
-    }
-
-    private synchronized void createLayers(final Element e, final boolean masterConfigure) {
         try {
             final Element conf = e.getChild("cismapActiveLayerConfiguration");//NOI18N
             final Vector<String> links = LayerWidget.getCapabilities(conf, new Vector<String>());
-
             if (DEBUG) {
                 log.debug("Capabilties links: " + links);//NOI18N
-                log.debug(conf);
             }
             //Laden der Capabilities vom Server und Speichern in einer HashMap<String url,Capabilities>;
             final HashMap<String, WMSCapabilities> capabilities = new HashMap<String, WMSCapabilities>();
@@ -841,72 +887,26 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             if (DEBUG) {
                 log.debug("vor CyclicBarrier");//NOI18N
             }
-            //ToDo Problem wenn nur Simple wms drinn sind dann ist link.size leer
+
             if (links.size() > 0) {
                 //Das Runnable Objekt wird ausgef\u00FChrt wenn alle Capabilities geladen worden sind oder ein Fehler aufgetreten ist
-//                if (currentBarrier != null) {
-//                    if (DEBUG) {
-//                        log.debug("reseting cyclicBarrier");//NOI18N
-//                    }
-//                    currentBarrier.reset();
-//                }
+                if (currentBarrier != null) {
+                    if (DEBUG) {
+                        log.debug("reseting cyclicBarrier");//NOI18N
+                    }
+                    currentBarrier.reset();
+                }
 
-                //ToDo problem wenn configure vor masterconfigure fertig ist muss gesynced werden
-                final Runnable barrierRunnable = new Runnable() {
+                currentBarrier = new CyclicBarrier(links.size(), new Runnable() {
 
                     @Override
                     public void run() {
-                        if (DEBUG) {
-                            log.debug("cyclic barrier gestarted: "+masterConfigure+", "+initalLayerConfigurationFromServer);//NOI18N
-                        }
-                        if(masterRunnable != null && !this.equals(masterRunnable)){
-                            log.debug("warte auf Masterbarrier");
-                            try {
-                                masterBarrier.await();
-                                log.debug("Masterbarrier finished");
-                            } catch (InterruptedException ex) {
-                                log.warn("warten auf master barrier nicht möglich",ex);
-                            } catch (BrokenBarrierException ex) {
-                                log.warn("warten auf master barrier nicht möglich",ex);
-                            }
-                        }
-                        if (masterConfigure && initalLayerConfigurationFromServer) {
-                            log.debug("Erstelle Serverlayer Hashmap.");
-                            serverLayerHashmap = createCapabillityToLayerMap(conf, capabilities);
-                            return;
-                        }
-                        if (!masterConfigure && initalLayerConfigurationFromServer) {
-                            log.debug("Gleiche Serverlayer mit lokalen Layern ab");
-                            if (serverLayerHashmap == null) {
-                                log.info("Abgleich nicht möglich");
-                                //ToDo
-                            }
-                            HashMap<String, RetrievalServiceLayer> localLayer = createCapabillityToLayerMap(conf, capabilities);
-                            ArrayList<RetrievalServiceLayer> checkedLayers = new ArrayList<RetrievalServiceLayer>();
-                            for (String curCapabilities : localLayer.keySet()) {
-                                if (serverLayerHashmap.containsKey(curCapabilities)) {
-                                    checkedLayers.add(localLayer.get(curCapabilities));
-                                } else {
-                                    log.info("Lokaler layer ist nicht in Configfile vorhanden und wird nicht hinzugefügt: " + curCapabilities);
-                                }
-                            }
-                            removeAllLayers();
-                            addAllLayer(checkedLayers);
-                        } else if (!masterConfigure) {
-                            log.debug("füge lokale layer hinzu");
-                            removeAllLayers();
-                            addAllLayer(createLayers(conf, capabilities));
-                        } else {
-                            log.warn("Achtung fall nicht vorgehsen");
-                        }
-
+                        createLayers(conf, capabilities);
                     }
-                };
-                final CyclicBarrier currentBarrier = new CyclicBarrier(links.size(),barrierRunnable);
-                if(masterConfigure){
-                    masterRunnable=barrierRunnable;
-                    masterBarrier=currentBarrier;
-                } 
+                });
+
+
+
                 // <editor-fold defaultstate="collapsed" desc="Laden der Capabilities">
 
                 //Zuerst werden alle Capabilities geladen und in eine HashMap gesteckt
@@ -1067,25 +1067,31 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         return orderedLayerElements;
     }
 
-    //Krücke weil es schwierig ist wenn ich nur die Layer erstelle nachher noch an die capabillities zu kommen
-    private HashMap<String, RetrievalServiceLayer> createCapabillityToLayerMap(final Element conf, final HashMap<String, WMSCapabilities> capabilities) {
-        final HashMap<String, RetrievalServiceLayer> capsToLayer = new HashMap<String, RetrievalServiceLayer>();               
+    private void createLayers(final Element conf, final HashMap<String, WMSCapabilities> capabilities) {
+        if (DEBUG) {
+            log.debug("removing all existing layers");//NOI18N
+        }
+        removeAllLayers();
         Element layerElement = conf.getChild("Layers");//NOI18N
         if (layerElement == null) {
             log.warn("LayerElement not found! Check for old version child \"RasterLayers\"");//NOI18N
             layerElement = conf.getChild("RasterLayers");//NOI18N
             if (layerElement == null) {
                 log.error("no vlaid layers element found");//NOI18N
-                return capsToLayer;
+                return;
             }
         }
-
         log.info("restoring " + layerElement.getChildren().size() + " layers from xml configuration");//NOI18N
         Element[] orderedLayers = orderLayers(layerElement);
-
         for (final Element element : orderedLayers) {
             if (DEBUG) {
-                log.debug("trying to create Layer '" + element.getName() + "'");//NOI18N
+                log.debug("trying to add Layer '" + element.getName() + "'");//NOI18N
+            }
+            String currentKeyString = getKeyforLayerElement(element);
+            if (isInitalLayerConfigurationFromServer() &&
+                    !masterLayerHashmap.containsKey(currentKeyString)) {
+                log.info("Layer in Serverkonfiguration nicht vorhanden, wird nicht hinzugefügt KeyString: "+currentKeyString);
+                continue;
             }
             try {
                 // <editor-fold defaultstate="collapsed" desc="WMSServiceLayer">
@@ -1095,7 +1101,18 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                         if (EventQueue.isDispatchThread()) {
                             log.fatal("InvokeLater in EDT");//NOI18N
                         }
-                        capsToLayer.put(element.getTextTrim(), wmsServiceLayer);
+                        EventQueue.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    log.info("addLayer WMSServiceLayer (" + wmsServiceLayer.getName() + ")");//NOI18N
+                                    addLayer(wmsServiceLayer);
+                                } catch (IllegalArgumentException schonVorhanden) {
+                                    log.warn("Layer WMSServiceLayer '" + wmsServiceLayer.getName() + "' already existed. Do not add the Layer. \n" + schonVorhanden.getMessage());//NOI18N
+                                }
+                            }
+                        });
+
                     }
                 } //</editor-fold>
                 // <editor-fold defaultstate="collapsed" desc="WebFeatureServiceLayer">
@@ -1104,10 +1121,18 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     if (EventQueue.isDispatchThread()) {
                         log.fatal("InvokeLater in EDT");//NOI18N
                     }
+                    EventQueue.invokeLater(new Runnable() {
 
-                    log.info("create Layer " + WebFeatureService.WFS_FEATURELAYER_TYPE + " (" + wfs.getName() + ")");//NOI18N
-                    capsToLayer.put(element.getTextTrim(), wfs);
-
+                        @Override
+                        public void run() {
+                            try {
+                                log.info("addLayer " + WebFeatureService.WFS_FEATURELAYER_TYPE + " (" + wfs.getName() + ")");//NOI18N
+                                addLayer(wfs);
+                            } catch (IllegalArgumentException schonVorhanden) {
+                                log.warn("Layer " + WebFeatureService.WFS_FEATURELAYER_TYPE + " '" + wfs.getName() + "' already existed. Do not add the Layer. \n" + schonVorhanden.getMessage());//NOI18N
+                            }
+                        }
+                    });
                 } //</editor-fold>
                 // <editor-fold defaultstate="collapsed" desc="DocumentFeatureServiceLayer">
                 else if (element.getName().equals("DocumentFeatureServiceLayer")) {//NOI18N
@@ -1149,7 +1174,19 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     if (EventQueue.isDispatchThread()) {
                         log.fatal("InvokeLater in EDT");//NOI18N
                     }
-                    capsToLayer.put(element.getTextTrim(), simpleWMS);
+                    EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            log.info("addLayer SimpleWMS (" + simpleWMS.getName() + ")");//NOI18N
+                            try {
+                                addLayer(simpleWMS);
+                            } catch (IllegalArgumentException schonVorhanden) {
+                                log.warn("Layer SimpleWMS '" + simpleWMS.getName() + "' already existed. Do not add the Layer. \n" + schonVorhanden.getMessage());//NOI18N
+                            }
+                        }
+                    });
+
                 } //</editor-fold>
                 // <editor-fold defaultstate="collapsed" desc="SimplePostgisFeatureService und SimpleUpdateablePostgisFeatureService">
                 else if (element.getName().equals("simplePostgisFeatureService")) {//NOI18N
@@ -1164,7 +1201,18 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     if (EventQueue.isDispatchThread()) {
                         log.fatal("InvokeLater in EDT");//NOI18N
                     }
-                    capsToLayer.put(element.getTextTrim(), simplePostgisFeatureService);
+                    EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                log.info("addLayer SimplePostgisFeatureService (" + simplePostgisFeatureService.getName() + ")");//NOI18N
+                                addLayer(simplePostgisFeatureService);
+                            } catch (IllegalArgumentException schonVorhanden) {
+                                log.warn("Layer SimplePostgisFeatureService '" + simplePostgisFeatureService.getName() + "' already existed. Do not add the Layer. \n" + schonVorhanden.getMessage());//NOI18N
+                            } //</editor-fold>
+                        }
+                    });
                 } else {
                     try {
                         if (DEBUG) {
@@ -1175,7 +1223,18 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                         if (EventQueue.isDispatchThread()) {
                             log.fatal("InvokeLater in EDT");//NOI18N
                         }
-                        capsToLayer.put(element.getTextTrim(), layer);
+                        EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                try {
+                                    log.info("addLayer generic layer configuration (" + layer.getName() + ")");//NOI18N
+                                    addLayer(layer);
+                                } catch (IllegalArgumentException schonVorhanden) {
+                                    log.warn("Layer SimplePostgisFeatureService '" + layer.getName() + "' already existed. Do not add the Layer. \n" + schonVorhanden.getMessage());//NOI18N
+                                } //</editor-fold>
+                            }
+                        });
                     } catch (Throwable t) {
                         log.error("unsupported xml configuration, layer '" + element.getName() + "' could not be created: \n" + t.getLocalizedMessage(), t);//NOI18N
                     }
@@ -1184,11 +1243,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 log.error("Layer layer '" + element.getName() + "' could not be created: \n" + t.getMessage(), t);//NOI18N
             }
         }
-        return capsToLayer;
-    }
-
-    private ArrayList<RetrievalServiceLayer> createLayers(final Element conf, final HashMap<String, WMSCapabilities> capabilities) {
-        return new ArrayList(createCapabillityToLayerMap(conf, capabilities).values());
     }
 
     @Deprecated
