@@ -787,7 +787,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     } else {
                         spfs = new SimplePostgisFeatureService(layerelement);
                     }
-                    return getKeyforLayerElement(layerelement);
+                    return getKeyForRetrievalService(spfs);
                 } else {
                     final RetrievalServiceLayer layer = (RetrievalServiceLayer) XMLObjectFactory.restoreObjectfromElement(layerelement);
                     return getKeyForRetrievalService(layer);
