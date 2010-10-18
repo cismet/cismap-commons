@@ -266,6 +266,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 if (DEBUG) {
                     log.debug(value + " getStyleLabel (" + realRow + ", " + realColumn + ")");//NOI18N
                 }
+                log.debug("is it null? " + ((AbstractFeatureService) value).getLayerProperties());
                 styleLabel.style = ((AbstractFeatureService) value).getLayerProperties().getStyle();
                 styleLabel.repaint();
                 return styleLabel;
