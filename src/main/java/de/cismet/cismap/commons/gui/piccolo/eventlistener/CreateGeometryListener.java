@@ -432,6 +432,11 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     public void mouseDragged(PInputEvent pInputEvent) {
         super.mouseDragged(pInputEvent);
 
+
+        if (startPoint==null){
+            startPoint=pInputEvent.getPosition();
+        }
+
         if (isInMode(RECTANGLE)) {
             inProgress = true;
 

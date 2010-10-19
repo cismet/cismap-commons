@@ -3668,6 +3668,15 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         currentPosition.addContent(currentBoundingBox.getJDOMElement());
         //currentPosition.addContent(getCurrentBoundingBox().getJDOMElement());
         ret.addContent(currentPosition);
+
+        //Crs
+        Element crsListElement = new Element("crsList");
+
+        for (Crs tmp : crsList) {
+            crsListElement.addContent(tmp.getJDOMElement());
+        }
+
+        ret.addContent(crsListElement);
         if (printingSettingsDialog != null) {
             ret.addContent(printingSettingsDialog.getConfiguration());
         }
@@ -3761,7 +3770,8 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                         }
                         if (crsObject == null) {
                             log.error("CRS " + srs + " from the default home is not found in the crs list");
-                            crsObject = new Crs(srs, srs, srs, false, false);
+                            crsObject = new Crs(srs, srs, srs, true, false);
+                            crsList.add(crsObject);
                         }
 
                         alm.setSrs(crsObject);
@@ -3802,6 +3812,31 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     @Override
     public void configure(Element e) {
         Element prefs = e.getChild("cismapMappingPreferences");//NOI18N
+        
+        try {
+            List crsElements = prefs.getChild("crsList").getChildren("crs");//NOI18N
+            crsList.clear();
+
+            for (Object elem : crsElements) {
+                if (elem instanceof Element) {
+                    Crs s = new Crs((Element) elem);
+                    if ( !crsList.contains(s) ) {
+                        crsList.add(s);
+                    }
+                    
+                    if (s.isSelected() && s.isMetric()) {
+                        try {
+                            transformer = new CrsTransformer(s.getCode());
+                        } catch (Exception ex) {
+                            log.error("Cannot create a GeoTransformer for the crs " + s.getCode(), ex);
+                        }
+                    }
+                }
+            }
+        } catch (Exception skip) {
+            log.error("Error while reading the crs list", skip);//NOI18N
+        }
+
         // InteractionMode
         try {
             String interactMode = prefs.getAttribute("interactionMode").getValue();//NOI18N

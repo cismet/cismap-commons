@@ -27,7 +27,8 @@ import de.cismet.cismap.commons.features.RasterDocumentFeature;
 import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.AdditionalGeometriesFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.DrawSelectionFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.collections.MultiMap;
 import edu.umd.cs.piccolo.PCamera;
@@ -272,27 +273,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             setSelected(isSelected());
 
-            // enthält noch zusätzliche Geometrien die angezeigt werden sollen?
-            if (feature instanceof AdditionalGeometriesFeature) {
-                AdditionalGeometriesFeature agf = (AdditionalGeometriesFeature) feature;
-                for (Geometry additionalGeom : agf.getAdditionalGeometries()) {
-                    Coordinate[] coords = transformCoordinateArr(additionalGeom.getCoordinates());
-                    PPath ppath = new PPath();
-                    ArrayList<Point2D> points = new ArrayList<Point2D>(coords.length);
-                    for (Coordinate coord : coords) {
-                        points.add(new Point2D.Double(coord.x, coord.y));
-                    }
-                    ppath.setPathToPolyline(points.toArray(new Point2D[points.size()]));
-                    ppath.setStroke(getStroke());
-                    ppath.setStrokePaint(getStrokePaint());
-                    if (additionalGeom instanceof Polygon || additionalGeom instanceof MultiPolygon) {
-                        ppath.setPaint(getPaint());
-                    }
-                    addChild(ppath);
-                }
-            }
         }
-
     }
 
     /**
@@ -807,7 +788,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (viewer.isFeatureDebugging()) {
             log.debug("addHandles(): " + yp[0] + "--" + yp[yp.length - 1]);//NOI18N
         }
-        if ((getFeature() instanceof PureNewFeature) && ((PureNewFeature) getFeature()).getGeometryType() == PureNewFeature.geomTypes.ELLIPSE) {
+        if (getFeature() instanceof LinearReferencedPointFeature) {
+            addLinearReferencedPointPHandle(handleLayer);
+        } else if ((getFeature() instanceof PureNewFeature) && ((PureNewFeature) getFeature()).getGeometryType() == PureNewFeature.geomTypes.ELLIPSE) {
             addEllipseHandle(handleLayer);
         } else {
             int length = xp.length;
@@ -992,6 +975,22 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             PFeature pf = (PFeature) (getViewer().getPFeatureHM().get(o));
             pf.pivotHandle = this.pivotHandle;
         }
+    }
+
+    public void addLinearReferencedPointPHandle(final PNode handleLayer) {
+        if (viewer.isFeatureDebugging()) {
+            log.debug("addLinearReferencingHandle()");//NOI18N
+        }
+
+        final PHandle h = new LinearReferencedPointFeaturePHandle(this);
+
+//        EventQueue.invokeLater(new Runnable() {
+//
+//            public void run() {
+        handleLayer.addChild(h);
+//            }
+//        });
+
     }
 
     public void addEllipseHandle(final PNode handleLayer) {
@@ -1640,6 +1639,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             log.debug("setSelected(" + selected + ")");//NOI18N
         }
 
+        this.selected = selected;
+
+        boolean showSelected = true;
+        if (getFeature() instanceof DrawSelectionFeature) {
+            showSelected = (((DrawSelectionFeature) getFeature()).isDrawingSelection());
+        }
+        if (showSelected) {
+            showSelected(selected);
+        }
+    }
+
+    private void showSelected(boolean selected) {
         splitPolygonFromHandle = null;
         splitPolygonToHandle = null;
         if (this.selected && !selected) {
