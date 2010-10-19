@@ -83,6 +83,7 @@ import de.cismet.cismap.commons.featureservice.*;
 
 import java.util.Map;
 import java.util.TreeMap;
+import org.jdom.output.Format;
 
 
 /**
@@ -93,8 +94,6 @@ import java.util.TreeMap;
  */
 public class StyleDialog extends JDialog implements ListSelectionListener {
 
-    /** Use serialVersionUID for interoperability. */
-    private final static long serialVersionUID = 2128299309127723684L;
 
     // constants: filesystem
     private static final String CISMAP_FOLDER = ".cismap"; // NOI18N
@@ -412,8 +411,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                                 ((StyleHistoryListModel) lstHistory.getModel()).addStyle((Style) getStyle().clone());
                             }
 
-                            XMLOutputter out = new XMLOutputter("\t", true); // NOI18N
-                            out.setTextTrim(true);
+                            XMLOutputter out = new XMLOutputter(Format.getPrettyFormat()); // NOI18N
 
                             Document doc = new Document(((StyleHistoryListModel) lstHistory.getModel()).toElement());
                             writer = new FileWriter(f);

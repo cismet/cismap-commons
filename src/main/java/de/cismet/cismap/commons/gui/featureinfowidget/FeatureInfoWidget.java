@@ -13,6 +13,7 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.tools.CurrentStackTrace;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Set;
@@ -52,6 +53,8 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
         } else if (o instanceof WMSServiceLayer && ((WMSServiceLayer) o).getWMSLayers().size() == 1) {
             tbpFeatureInfos.setSelectedComponent(displays.get(((WMSServiceLayer) o).getWMSLayers().get(0)));
         }
+
+
     }
 
     public void layerRemoved(ActiveLayerEvent e) {
@@ -80,7 +83,7 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
                     tbpFeatureInfos.remove(d);
                     displays.remove(layer);
                 } catch (Exception ex) {
-                    log.warn("Workaround for style changes(there is no refresh, but only remove/add)", ex);//NOI18N
+                    log.warn("Workaround for style changes(there is no refresh, but only remove/add)", ex);//NOI18N I dont understand this
                 }
             } else if (d == null && layer.isQuerySelected()) {
                 d = new FeatureInfoDisplay(layer, tbpFeatureInfos);
@@ -129,13 +132,21 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
             .add(org.jdesktop.layout.GroupLayout.TRAILING, tbpFeatureInfos, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
-    int selectedIndex = -1;
+
     private void tbpFeatureInfosStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpFeatureInfosStateChanged
-        if (selectedIndex > -1) {
-            tbpFeatureInfos.setForegroundAt(selectedIndex, null);
+        for (int i = 0; i < tbpFeatureInfos.getTabCount(); ++i) {
+            tbpFeatureInfos.setForegroundAt(i, null);
         }
-        selectedIndex = tbpFeatureInfos.getSelectedIndex();
-        tbpFeatureInfos.setForegroundAt(selectedIndex, Color.blue);
+
+        int selectedindex = tbpFeatureInfos.getSelectedIndex();
+        if (selectedindex >= 0 && tbpFeatureInfos.getTabCount() != 0) {
+            try {
+                tbpFeatureInfos.setForegroundAt(selectedindex, Color.blue);
+            } catch (Exception ex) {
+                log.debug("Error. Feeling not blue.", ex);
+            }
+        }
+
 
     }//GEN-LAST:event_tbpFeatureInfosStateChanged
 

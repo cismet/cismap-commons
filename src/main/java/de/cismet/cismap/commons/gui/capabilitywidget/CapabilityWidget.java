@@ -127,6 +127,8 @@ import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
 import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
+import java.awt.AWTException;
+import java.awt.Robot;
 import java.awt.event.MouseListener;
 import java.io.ByteArrayInputStream;
 import javax.swing.event.TreeModelListener;
@@ -1427,6 +1429,13 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
             if (e.getButton() == MouseEvent.BUTTON3) {
                 if (e.getSource() instanceof DragTree) {
                     if (e.isPopupTrigger()) {
+                        try {
+                            Robot robot = new Robot();
+                            robot.mousePress(InputEvent.BUTTON1_MASK);
+                            robot.mouseRelease(InputEvent.BUTTON1_MASK);
+                        } catch (AWTException ex) {
+                            log.warn("Cannot simulate a left click on the DragTree", ex);
+                        }
                         ((DragTree)e.getSource()).getComponentPopupMenu().show(e.getComponent(), e.getX(), e.getY());
                     }
                 }

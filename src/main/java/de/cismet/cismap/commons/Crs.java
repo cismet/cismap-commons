@@ -47,9 +47,18 @@ public class Crs {
         }
     }
 
-//    public Element toElement() {
-//
-//    }
+
+
+    public Element getJDOMElement() {
+        Element e=new Element("crs");//NOI18N
+        e.setAttribute("shortname", shortname);//NOI18N
+        e.setAttribute("name", name);//NOI18N
+        e.setAttribute("code", code);//NOI18N
+        e.setAttribute("metric", String.valueOf(metric));//NOI18N
+        e.setAttribute("selected", String.valueOf(selected));//NOI18N
+        return e;
+    }
+
 
     /**
      * @return the srs code (for example: EPSG:31466)
@@ -124,5 +133,22 @@ public class Crs {
     @Override
     public String toString() {
         return code;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Crs) {
+            Crs other = (Crs)obj;
+            return other.code.equals(code);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + (this.code != null ? this.code.hashCode() : 0);
+        return hash;
     }
 }

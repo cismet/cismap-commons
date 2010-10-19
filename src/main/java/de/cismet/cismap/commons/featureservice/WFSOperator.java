@@ -25,6 +25,7 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
+import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 /**
@@ -200,8 +201,7 @@ public class WFSOperator {
         if (e == null) {
             return "";//NOI18N
         } else {
-            XMLOutputter out = new XMLOutputter("    ", true);//NOI18N
-            out.setTextTrim(true);
+            XMLOutputter out = new XMLOutputter(Format.getPrettyFormat());
             return out.outputString(e);
         }
     }
@@ -378,7 +378,7 @@ public class WFSOperator {
                             // Wenn ja, dann gib die Attribute des complexTypes zur\u00FCck
                             List l = comp.getChild("complexContent", xsd).getChild("extension", xsd).getChild("sequence", xsd).getChildren("element", xsd);//NOI18N
                             while (l.size() > 0) {
-                                Element neu = ((Element) l.get(0)).detach();
+                                Element neu = (Element)((Element) l.get(0)).detach();
                                 neu.setAttribute("name", prefix + neu.getAttributeValue("name"));//NOI18N
                                 result.addContent(neu);
                             }

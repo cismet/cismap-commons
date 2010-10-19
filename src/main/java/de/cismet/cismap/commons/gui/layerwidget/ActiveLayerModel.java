@@ -105,6 +105,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     private String preferredExceptionsFormat;
     private CyclicBarrier currentBarrier = null;
     private TreeTableModelAdapter tableModel;
+    private boolean initalLayerConfigurationFromServer = false;
+    private HashMap<String, Element> masterLayerHashmap = new HashMap<String, Element>();
     private Crs defaultSrs;
 
     /**
@@ -174,7 +176,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
             @Override
             public void retrievalProgress(RetrievalEvent e) {
-                
+
                 //currentLayer.setProgress((int) (e.getPercentageDone() * 100));
                 fireProgressChanged(currentLayer);
             }
@@ -221,9 +223,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                         String message = (String) e.getRetrievedObject();
 //                        message=message.replaceAll("<.*>","");
                         if (e.getErrorType().equals(RetrievalEvent.SERVERERROR)) {
-                            errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError(RetrievalEvent).errorObject.servererror", new Object[] {message});//NOI18N
+                            errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError(RetrievalEvent).errorObject.servererror", new Object[]{message});//NOI18N
                         } else {
-                            errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError(RetrievalEvent).errorObject.noServererror", new Object[] {});//NOI18N
+                            errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError(RetrievalEvent).errorObject.noServererror", new Object[]{});//NOI18N
                         }
                     }// Hier kommt jetzt HTML Fehlermeldung, Internal und XML. Das muss reichen
                     //else if ()
@@ -800,9 +802,113 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         return conf;
     }
 
+    /*ToDo abstract class or interface for all layer should implement a key string method
+     * then every layer developer has to define a string which uniquely identifies the developed layer.
+     */
+    private String getKeyforLayerElement(final Element layerelement) {
+        String keyString = null;
+        if (layerelement != null) {
+            try {
+                if (layerelement.getName().equals("WMSServiceLayer")) {//NOI18N
+                    final WMSServiceLayer wmsServiceLayer = new WMSServiceLayer(layerelement, new HashMap<String, WMSCapabilities>());
+                    return getKeyForRetrievalService(wmsServiceLayer);
+                } else if (layerelement.getName().equals(WebFeatureService.WFS_FEATURELAYER_TYPE)) {
+                    final WebFeatureService wfs = new WebFeatureService(layerelement);
+                    return getKeyForRetrievalService(wfs);
+                } else if (layerelement.getName().equals("DocumentFeatureServiceLayer")) {//NOI18N
+                    log.warn("Sollte nicht vorkommen. Die sollten alle von der XMLObjectFactory geladen werden.");//NOI18N
+                } else if (layerelement.getName().equals("simpleWms")) {//NOI18N
+                    final SimpleWMS simpleWMS = new SimpleWMS(layerelement);
+                    return getKeyForRetrievalService(simpleWMS);
+                } else if (layerelement.getName().equals("simplePostgisFeatureService")) {//NOI18N
+                    SimplePostgisFeatureService spfs;
+                    if (layerelement.getAttributeValue("updateable") != null && layerelement.getAttributeValue("updateable").equals("true")) {//NOI18N
+                        spfs = new SimpleUpdateablePostgisFeatureService(layerelement);
+                    } else {
+                        spfs = new SimplePostgisFeatureService(layerelement);
+                    }
+                    return getKeyForRetrievalService(spfs);
+                } else {
+                    final RetrievalServiceLayer layer = (RetrievalServiceLayer) XMLObjectFactory.restoreObjectfromElement(layerelement);
+                    return getKeyForRetrievalService(layer);
+                }
+            } catch (Exception ex) {
+                log.error("Konnte keinen Key für das layerelement erstellen", ex);
+            }
+        }
+        return null;
+    }
+
+    /* Same as above if this is done directly by the retrievalservicelayer no instanceof is needed
+     */
+    private String getKeyForRetrievalService(final RetrievalServiceLayer layer) {
+        String keyString = null;
+        if (layer != null) {
+            try {
+                if (layer instanceof WMSServiceLayer) {//NOI18N
+                    final WMSServiceLayer wmsServiceLayer = (WMSServiceLayer) layer;
+                    return wmsServiceLayer.getName() + "#" + wmsServiceLayer.getCapabilitiesUrl();
+                } else if (layer instanceof WebFeatureService) {
+                    final WebFeatureService wfs = (WebFeatureService) layer;
+                    return wfs.getName() + "#" + wfs.getHostname();
+                } else if (layer instanceof DocumentFeatureService) {//NOI18N
+                    final DocumentFeatureService dfs = (DocumentFeatureService) layer;
+                    return dfs.getName() + dfs.getDocumentURI();
+                } else if (layer instanceof SimpleWMS) {//NOI18N
+                    final SimpleWMS simpleWMS = (SimpleWMS) layer;
+                    return simpleWMS.getName() + "#" + simpleWMS.getGmUrl().getUrlTemplate();
+                } else if (layer instanceof SimplePostgisFeatureService) {//NOI18N
+                    final SimplePostgisFeatureService spfs = (SimplePostgisFeatureService) layer;
+                    return spfs.getName() + "#" + spfs.getConnectionInfo().getUrl();
+                } else {
+                    final RetrievalServiceLayer rsl = (RetrievalServiceLayer) layer;
+                    return rsl.getName() + "#" + rsl.getClass();
+                }
+            } catch (Exception ex) {
+                log.error("Konnte keinen Key für das layerelement erstellen", ex);
+            }
+        }
+        return null;
+    }
+
     @Override
-    public void masterConfigure(Element e) {
-        //wird alles lokal gespeichert und auch wieder abgerufen
+    public void masterConfigure(final Element e) {
+        if (DEBUG) {
+            log.debug("MasterConfigure(): " + this.getClass().getName());
+        }
+        masterLayerHashmap.clear();
+        if (initalLayerConfigurationFromServer) {
+            if (DEBUG) {
+                log.debug("Layerkonfiguration vom Server wird geladen");
+            }
+            try {
+                Element layersElement = e.getChild("cismapActiveLayerConfiguration").getChild("Layers");//NOI18N
+                if (layersElement == null) {
+                    log.warn("LayerElement nicht gefunden! Suche nach altem Kind \"RasterLayers\"");//NOI18N
+                    layersElement = e.getChild("cismapActiveLayerConfiguration").getChild("RasterLayers");//NOI18N
+                    if (layersElement == null) {
+                        log.error("Kein valides Layerelement gefunden.");//NOI18N
+                        return;
+                    }
+                }
+                final Element[] orderedLayers = orderLayers(layersElement);
+                for (final Element curLayerElement : orderedLayers) {
+                    final String curKeyString = getKeyforLayerElement(curLayerElement);
+                    if (curKeyString != null) {
+                        log.debug("Adding element: " + curLayerElement + " with key: " + curKeyString);
+                        masterLayerHashmap.put(curKeyString, curLayerElement);
+                    } else {
+                        log.warn("Es war nicht möglich einen Keystring für das Element: " + curLayerElement + " zu erzeugen");
+                    }
+                }
+            } catch (Exception ex) {
+                log.warn("Kann die Layerkonfiguration des Servers nicht laden", ex);
+            }
+        } else {
+            if (DEBUG) {
+                log.debug("Es wird keine Layerkonfiguration vom Server geladen ");
+            }
+        }
     }
 
     @Override
@@ -1016,13 +1122,17 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 return;
             }
         }
-
         log.info("restoring " + layerElement.getChildren().size() + " layers from xml configuration");//NOI18N
         Element[] orderedLayers = orderLayers(layerElement);
-
         for (final Element element : orderedLayers) {
             if (DEBUG) {
                 log.debug("trying to add Layer '" + element.getName() + "'");//NOI18N
+            }
+            String currentKeyString = getKeyforLayerElement(element);
+            if (isInitalLayerConfigurationFromServer() &&
+                    !masterLayerHashmap.containsKey(currentKeyString)) {
+                log.info("Layer in Serverkonfiguration nicht vorhanden, wird nicht hinzugefügt KeyString: "+currentKeyString);
+                continue;
             }
             try {
                 // <editor-fold defaultstate="collapsed" desc="WMSServiceLayer">
@@ -1033,7 +1143,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                             log.fatal("InvokeLater in EDT");//NOI18N
                         }
                         EventQueue.invokeLater(new Runnable() {
-
                             @Override
                             public void run() {
                                 try {
@@ -1186,6 +1295,14 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     @Override
     public java.util.TreeMap getFeatureServices() {
         return new TreeMap();
+    }
+
+    public boolean isInitalLayerConfigurationFromServer() {
+        return initalLayerConfigurationFromServer;
+    }
+
+    public void setInitalLayerConfigurationFromServer(boolean initalLayerConfigurationFromServer) {
+        this.initalLayerConfigurationFromServer = initalLayerConfigurationFromServer;
     }
 
     /**
