@@ -35,7 +35,9 @@ package de.cismet.cismap.commons.gui.capabilitywidget;
 
 import com.jgoodies.looks.Options;
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
+import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
+import de.cismet.cismap.commons.exceptions.ConvertException;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
@@ -117,15 +119,23 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
+import de.cismet.cismap.commons.wms.capabilities.Envelope;
+import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
+import java.awt.AWTException;
+import java.awt.Robot;
+import java.awt.event.MouseListener;
 import java.io.ByteArrayInputStream;
+import javax.swing.event.TreeModelListener;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
+import org.openide.util.NbBundle;
 
 /**
  *
@@ -729,6 +739,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     EventQueue.invokeLater(new Runnable() {
 
                         public void run() {
+                            addPopupMenu(trvCap);
                             trvCap.setModel(tm);
                             trvCap.setBorder(new EmptyBorder(1, 1, 1, 1));
                             trvCap.setCellRenderer(new WMSCapabilitiesTreeCellRenderer());
@@ -766,7 +777,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                         }
                     });
                 } catch (Throwable e) {
-                    log.error("Fehler währened dem erstellen des WMSCapabilties Baums", e);//NOI18N
+                    log.error("Fehler während dem Erstellen des WMSCapabilties Baums", e);//NOI18N
                     String message = "";//NOI18N
 
                     tbpCapabilities.setIconAt(tbpCapabilities.indexOfComponent(comp), icoError);
@@ -1035,6 +1046,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
                     EventQueue.invokeLater(new Runnable() {
 
                         public void run() {
+                            addPopupMenu(trvCap);
                             trvCap.setModel(tm);
                             trvCap.setBorder(new EmptyBorder(1, 1, 1, 1));
                             trvCap.setCellRenderer(new WFSCapabilitiesTreeCellRenderer(name));
@@ -1305,6 +1317,92 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
         }
     }
 
+
+    private void addPopupMenu(final DragTree trvCap) {
+        trvCap.addMouseListener(new LayerMouseListener());
+        JPopupMenu popMenu = new JPopupMenu();
+        JMenuItem pmenuItem = new JMenuItem(NbBundle.getMessage(CapabilityWidget.class,
+                "CapabilityWidget.CapabilityWidget().pmenuItem.text"));
+        pmenuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                zoomToExtent(trvCap);
+            }
+        });
+        popMenu.add(pmenuItem);
+        trvCap.setComponentPopupMenu(popMenu);
+    }
+
+    
+    private void zoomToExtent(DragTree currentTrvCap) {
+        log.debug("zoom to extent.");
+
+        if (currentTrvCap != null) {
+            WMSCapabilities wmsCap = currentTrvCap.getWmsCapabilities();
+            LayerBoundingBox[] boxes = wmsCap.getLayer().getBoundingBoxes();
+            Envelope bestEnvelope = null;
+            String currentCrs = CismapBroker.getInstance().getSrs().getCode();
+
+            // search for a bounding box with the right CRS
+            if (boxes != null) {
+                for (LayerBoundingBox tmp : boxes) {
+                    if (tmp.getSRS().equals(CismapBroker.getInstance().getSrs().getCode())) {
+                        bestEnvelope = tmp;
+                    }
+                }
+            }
+            
+            if (bestEnvelope == null) {
+                // if no suitable bounding box was found, take the latlon box or an arbitrary bounding box
+                if (wmsCap.getLayer().getLatLonBoundingBoxes() != null) {
+                    bestEnvelope = wmsCap.getLayer().getLatLonBoundingBoxes();
+                } else {
+                    if (boxes != null && boxes.length > 0) {
+                        bestEnvelope = boxes[0];
+                    }
+                }
+
+                if (bestEnvelope == null) {
+                    log.warn("no envelope found in the capabilities document");
+                    JOptionPane.showMessageDialog(null, 
+                        NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.zoomToExtent().JOptionPane.msg"),
+                        NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.zoomToExtent().JOptionPane.title"),
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                log.debug("envelope with the current srs found.");
+            }
+
+            try {
+                if (bestEnvelope != null) {
+                    BoundingBox bb = null;
+
+                    if (bestEnvelope instanceof LayerBoundingBox) {
+                        if (((LayerBoundingBox)bestEnvelope).getSRS().equals( currentCrs )) {
+                            bb = new BoundingBox(bestEnvelope.getMin().getX(), bestEnvelope.getMin().getY(),
+                                bestEnvelope.getMax().getX(), bestEnvelope.getMax().getY());
+                        } else {
+                                Envelope env = bestEnvelope.transform(currentCrs, ((LayerBoundingBox)bestEnvelope).getSRS());
+                                bb = new BoundingBox(env.getMin().getX(), env.getMin().getY(), env.getMax().getX(), env.getMax().getY());
+                        }
+                    } else {
+                        Envelope env = bestEnvelope.transform(currentCrs, "EPSG:4326");
+                        bb = new BoundingBox(env.getMin().getX(), env.getMin().getY(), env.getMax().getX(), env.getMax().getY());
+                    }
+
+                    if (bb != null) {
+                        CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(bb);
+                    } else {
+                        log.warn("no valid bounding box found.");
+                    }
+                }
+            } catch (ConvertException e) {
+                log.error("Cannot transform coordinates", e);
+            }
+        }
+    }
+
+
     class ListMenuItem
             extends JMenuItem {
 
@@ -1323,6 +1421,28 @@ public class CapabilityWidget extends JPanel implements DropTargetListener, Chan
             this.capabilityLink = capabilityLink;
         }
     }
+
+
+    class LayerMouseListener extends MouseAdapter {
+        @Override
+        public void mousePressed(MouseEvent e) {
+            if (e.getButton() == MouseEvent.BUTTON3) {
+                if (e.getSource() instanceof DragTree) {
+                    if (e.isPopupTrigger()) {
+                        try {
+                            Robot robot = new Robot();
+                            robot.mousePress(InputEvent.BUTTON1_MASK);
+                            robot.mouseRelease(InputEvent.BUTTON1_MASK);
+                        } catch (AWTException ex) {
+                            log.warn("Cannot simulate a left click on the DragTree", ex);
+                        }
+                        ((DragTree)e.getSource()).getComponentPopupMenu().show(e.getComponent(), e.getX(), e.getY());
+                    }
+                }
+            }
+        }
+    }
+
 
     class DragTree extends JTree implements DragGestureListener, DragSourceListener {
 

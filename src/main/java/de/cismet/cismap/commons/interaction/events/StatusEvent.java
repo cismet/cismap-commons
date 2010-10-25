@@ -46,6 +46,7 @@ public class StatusEvent {
     public static final String MEASUREMENT_INFOS="measurement";//NOI18N
     public static final String OBJECT_INFOS="object_infos";//NOI18N
     public static final String SCALE="scale";//NOI18N
+    public static final String CRS="crs";//NOI18N
     
     private String name;
     private Object value;
