@@ -26,6 +26,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.DefaultRasterDocumentFeature;
@@ -56,18 +57,14 @@ public class MeasuringComponent extends javax.swing.JPanel {
     /** Creates new form MeasuringComponent */
     public MeasuringComponent() {
         //Wupp home
-        this(new XBoundingBox(2583621.251964098d, 5682507.032498134d, 2584022.9413952776d, 5682742.852810634d, "EPSG:31466", false));
-    }
-
-    public MeasuringComponent(XBoundingBox initialBBox) {
-        this(initialBBox, initialBBox.getSrs());
+        this(new XBoundingBox(2583621.251964098d, 5682507.032498134d, 2584022.9413952776d, 5682742.852810634d, "EPSG:31466", false), new Crs("EPSG:31466","EPSG:31466","EPSG:31466", false, true));
     }
 
     public MessenGeometryListener getMessenInputListener() {
         return mapListener;
     }
 
-    public MeasuringComponent(XBoundingBox initialBBox, String srs) {
+    public MeasuringComponent(XBoundingBox initialBBox, Crs srs) {
         initComponents();
         this.mapListener = new MessenGeometryListener(map);
         this.initialBoundingBox = initialBBox;
@@ -75,6 +72,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
         ActiveLayerModel mappingModel = new ActiveLayerModel();
         mappingModel.addHome(initialBBox);
         mappingModel.setSrs(srs);
+        mappingModel.setDefaultSrs(srs);
         map.setAnimationDuration(0);
         map.setReadOnly(false);
         map.setMappingModel(mappingModel);

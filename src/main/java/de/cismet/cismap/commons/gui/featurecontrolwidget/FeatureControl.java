@@ -5,6 +5,9 @@
  */
 package de.cismet.cismap.commons.gui.featurecontrolwidget;
 
+import com.vividsolutions.jts.geom.Geometry;
+import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
@@ -17,6 +20,7 @@ import de.cismet.cismap.commons.features.SubFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDecimalTools;
@@ -24,8 +28,6 @@ import de.cismet.tools.collections.TypeSafeCollections;
 import de.cismet.tools.configuration.Configurable;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PDimension;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -33,11 +35,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Set;
 import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
@@ -57,6 +57,9 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     private ImageIcon icoGreenled = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/greenled.png"));//NOI18N
     boolean wizardMode = false;
     private MappingComponent mappingComponent = null;
+    // the transformer should transform geometries to a metric srs. This allows the calculation of the length
+    // and the area of a geometry
+    private CrsTransformer transformer;
     private ListSelectionListener theListSelectionListener = new ListSelectionListener() {
         public void valueChanged(ListSelectionEvent e) {
             if (!e.getValueIsAdjusting()) {
@@ -131,6 +134,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                 }
             }
         });
+
+        transformer = mappingComponent.getMetricTransformer();
     }
 
     /** This method is called from within the constructor to
@@ -635,6 +640,10 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
          */
         public Object getValueAt(int rowIndex, int columnIndex) {
             try {
+                if (transformer == null) {
+                    transformer = mappingComponent.getMetricTransformer();
+                }
+                
                 Feature f = (Feature) getFeatureCollection().getFeature(rowIndex);
                 switch (columnIndex) {
                     case 0: //Icon
@@ -665,13 +674,30 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                         }
                     case 4: //Gr\u00F6\u00DFe
                         if (f.getGeometry() != null) {
-                            return StaticDecimalTools.round(f.getGeometry().getArea());
+                            Geometry geom = null;
+
+                            if ( transformer != null && !CismapBroker.getInstance().getSrs().isMetric() ) {
+                                geom = transformer.transformGeometry( f.getGeometry(),
+                                        CismapBroker.getInstance().getSrs().getCode() );
+                            } else {
+                                geom = f.getGeometry();
+                            }
+                            return StaticDecimalTools.round(geom.getArea());
                         } else {
                             return 0.0;
                         }
                     case 5: //L\u00E4nge
                         if (f.getGeometry() != null) {
-                            return StaticDecimalTools.round(f.getGeometry().getLength());
+                            Geometry geom = null;
+
+                            if ( transformer != null && !CismapBroker.getInstance().getSrs().isMetric() ) {
+                                geom = transformer.transformGeometry( f.getGeometry(),
+                                        CismapBroker.getInstance().getSrs().getCode() );
+                            } else {
+                                geom = f.getGeometry();
+                            }
+
+                            return StaticDecimalTools.round(geom.getLength());
                         } else {
                             return 0.0;
                         }

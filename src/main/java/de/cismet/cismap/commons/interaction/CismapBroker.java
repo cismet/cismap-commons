@@ -36,6 +36,7 @@ package de.cismet.cismap.commons.interaction;
 import de.cismet.cismap.commons.security.AbstractCredentialsProvider;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.MappingModelListener;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -45,10 +46,12 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.MeasurementListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
+import de.cismet.cismap.commons.interaction.events.CrsChangedEvent;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.interaction.events.MapDnDEvent;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
+import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDecimalTools;
 import de.cismet.tools.gui.historybutton.HistoryModelListener;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
@@ -56,7 +59,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
@@ -93,8 +95,9 @@ public class CismapBroker {
     private Vector<MapDnDListener> mapDnDListeners = new Vector<MapDnDListener>();
     private Vector<FeatureCollectionListener> featureCollectionListeners = new Vector<FeatureCollectionListener>();
     private Vector<MapBoundsListener> mapBoundsListeners = new Vector<MapBoundsListener>();
+    private Vector<CrsChangeListener> crsChangeListeners = new Vector<CrsChangeListener>();
     //private Hashtable<WMSCapabilities, GUICredentialsProvider> httpCredentialsForCapabilities = new Hashtable<WMSCapabilities, GUICredentialsProvider>();
-    private String srs;
+    private Crs srs;
     private String preferredRasterFormat;
     private String preferredTransparentPref;
     private String preferredBGColor;
@@ -198,6 +201,14 @@ public class CismapBroker {
         mapBoundsListeners.remove(mbl);
     }
 
+    public void addCrsChangeListener(CrsChangeListener mbl) {
+        crsChangeListeners.add(mbl);
+    }
+
+    public void removeCrsChangeListener(CrsChangeListener mbl) {
+        crsChangeListeners.remove(mbl);
+    }
+
     public void fireCapabilityServerChanged(CapabilityEvent ce) {
         for (Iterator<CapabilityListener> it = capabilityListeners.iterator(); it.hasNext();) {
             CapabilityListener listener = it.next();
@@ -294,16 +305,30 @@ public class CismapBroker {
         }
     }
 
-    public String getSrs() {
+
+    public void fireCrsChanged(CrsChangedEvent event) {
+        for (Iterator<CrsChangeListener> it = crsChangeListeners.iterator(); it.hasNext();) {
+            it.next().crsChanged(event);
+        }
+    }
+
+    public Crs getSrs() {
         if (srs == null) {
-            log.error("srs is not set. Use EPSG:4326 ");
-            srs = "EPSG:31466";
+            log.error("srs is not set. Use EPSG:31466 ", new CurrentStackTrace());
+            Crs crs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, false);
+            return crs;
         }
         return srs;
     }
 
-    public void setSrs(String srs) {
-        this.srs = srs;
+    public void setSrs(Crs srs) {
+        if (this.srs == null || !this.srs.equals( srs ) ) {
+            StatusEvent event = new StatusEvent(StatusEvent.CRS, srs);
+            CrsChangedEvent ce = new CrsChangedEvent(this.srs, srs);
+            this.srs = srs;
+            fireCrsChanged(ce);
+            fireStatusValueChanged(event);
+        }
     }
 
     public String getPreferredRasterFormat() {
