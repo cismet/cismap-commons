@@ -22,12 +22,18 @@ import org.deegree.model.spatialschema.Point;
 public class CrsTransformer {
     private GeoTransformer transformer;
     private CoordinateSystem crs;
+    private String destCrsAsString;
 
     public CrsTransformer(String destCrs) throws UnknownCRSException, InvalidParameterException {
+        this.destCrsAsString = destCrs;
         transformer = new GeoTransformer(destCrs);
         crs = CRSFactory.create(destCrs);
     }
 
+
+    public String getDestinationCrs() {
+        return destCrsAsString;
+    }
 
     public BoundingBox transformBoundingBox(BoundingBox bbox, String sourceCrs)
             throws UnknownCRSException, CRSTransformationException, IllegalArgumentException{
