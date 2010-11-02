@@ -179,6 +179,7 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import javax.swing.SwingWorker;
 import org.apache.log4j.Logger;
+import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 import pswing.PSwingCanvas;
@@ -3666,6 +3667,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 //            gotoInitialBoundingBox();
 //        }
         currentPosition.addContent(currentBoundingBox.getJDOMElement());
+        currentPosition.setAttribute("CRS", CismapBroker.getInstance().getSrs().getCode());
         //currentPosition.addContent(getCurrentBoundingBox().getJDOMElement());
         ret.addContent(currentPosition);
 
@@ -3891,6 +3893,32 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 addToHistory(new PBoundsWithCleverToString(new PBounds(currentBoundingBox.getPBounds(wtst)), wtst));
 
             } else {
+                // set the current crs
+                Attribute crsAtt = pos.getAttribute("CRS");
+                if (crsAtt != null) {
+                    String currentCrs = crsAtt.getValue();
+                    Crs crsObject = null;
+
+                    for ( Crs tmp : crsList) {
+                        if (tmp.getCode().equals(currentCrs)) {
+                            crsObject = tmp;
+                            break;
+                        }
+                    }
+
+                    if (crsObject == null) {
+                        log.error("CRS " + currentCrs + " from the position element is not found in the crs list");
+                    }
+
+                    ActiveLayerModel alm = (ActiveLayerModel) getMappingModel();
+                    if (alm instanceof ActiveLayerModel) {
+                        alm.setSrs(crsObject);
+                    }
+                    CismapBroker.getInstance().setSrs(crsObject);
+                    wtst = null;
+                    getWtst();
+                }
+
                 this.currentBoundingBox = b;
                 if (DEBUG) {
                     log.debug("added to History" + b);//NOI18N
