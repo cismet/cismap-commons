@@ -370,7 +370,12 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
       url += "&BBOX=" + bb.getURLString();//NOI18N
       url += "&WIDTH=" + width;//NOI18N
       url += "&HEIGHT=" + height;//NOI18N
-      url += "&SRS=" + srs;//NOI18N
+
+      if (version.trim().equals("1.3") || version.trim().equals("1.3.0")) {
+        url += "&CRS=" + srs;//NOI18N
+      } else {
+        url += "&SRS=" + srs;//NOI18N
+      }
       url += "&FORMAT=" + imageFormat;//NOI18N
       url += "&TRANSPARENT=" + new Boolean(transparentImage).toString().toUpperCase();//NOI18N
       url += "&BGCOLOR=" + getBackgroundColor();//NOI18N
@@ -378,12 +383,13 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
       url += getLayersString(wmsLayers);
       if (hasEveryLayerAStyle(wmsLayers)) {
         // the styles parameter must contain the same number of values as the layers parameter.
-        // If this requirement cannot be fulfilled, the optional style parameter should be omitted due
+        // If this requirement cannot be fulfilled, the style parameter should be sent without a value due
         // to generate a valid request.
         url += getStylesString(wmsLayers);
       } else {
-        logger.warn("style parameter was not added to the getMap Request, because not every layer, " + //NOI18N
+        logger.debug("style parameter was added without a value to the getMap Request, because not every layer, " + //NOI18N
                 "which is used within the request has a selected style"); //NOI18N
+        url += "&STYLES=";
       }
       return url;
     } else
