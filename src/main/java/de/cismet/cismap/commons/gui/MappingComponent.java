@@ -4063,9 +4063,31 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
         double realWorldWidthInMeter = screenWidthInMeter * scaleDenominator;
         double realWorldHeightInMeter = screenHeightInMeter * scaleDenominator;
+
+        if ( !CismapBroker.getInstance().getSrs().isMetric() && transformer != null) {
+            try {
+                //transform the given bounding box to a metric coordinate system
+                bb = transformer.transformBoundingBox( bb, CismapBroker.getInstance().getSrs().getCode() );
+            } catch (Exception e) {
+                log.error("Cannot transform the current bounding box.", e);
+            }
+        }
+
         double midX = bb.getX1() + (bb.getX2() - bb.getX1()) / 2;
         double midY = bb.getY1() + (bb.getY2() - bb.getY1()) / 2;
-        return new BoundingBox(midX - realWorldWidthInMeter / 2, midY - realWorldHeightInMeter / 2, midX + realWorldWidthInMeter / 2, midY + realWorldHeightInMeter / 2);
+        BoundingBox scaledBox = new BoundingBox(midX - realWorldWidthInMeter / 2, midY - realWorldHeightInMeter / 2, midX + realWorldWidthInMeter / 2, midY + realWorldHeightInMeter / 2);
+        
+        if ( !CismapBroker.getInstance().getSrs().isMetric() && transformer != null) {
+            try {
+                //transform the scaled bounding box to the current coordinate system
+                CrsTransformer trans = new CrsTransformer(CismapBroker.getInstance().getSrs().getCode());
+                scaledBox = trans.transformBoundingBox( scaledBox, transformer.getDestinationCrs());
+            } catch (Exception e) {
+                log.error("Cannot transform the current bounding box.", e);
+            }
+        }
+        
+        return scaledBox;
     }
 
     /**
