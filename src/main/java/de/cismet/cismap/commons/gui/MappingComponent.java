@@ -177,6 +177,7 @@ import java.awt.geom.Point2D;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 import org.apache.log4j.Logger;
 import org.jdom.Attribute;
@@ -361,6 +362,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     private DocumentProgressListener documentProgressListener = null;
     private List<Crs> crsList = new ArrayList<Crs>();
     private CrsTransformer transformer;
+    private boolean resetCrs = false;
 
     /**
      * If a document exceeds the criticalDocumentSize, the document progress widget
@@ -4462,11 +4464,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
     @Override
     public void crsChanged(final CrsChangedEvent event) {
-        if (event.getFormerCrs() != null && fixedBoundingBox == null) {
+        if (event.getFormerCrs() != null && fixedBoundingBox == null && !resetCrs) {
             BoundingBox bbox = getCurrentBoundingBox();
             try {
-                final CrsTransformer transformer = new CrsTransformer(event.getCurrentCrs().getCode());
-                BoundingBox newBbox = transformer.transformBoundingBox(bbox, event.getFormerCrs().getCode());
+                final CrsTransformer crsTransformer = new CrsTransformer(event.getCurrentCrs().getCode());
+                BoundingBox newBbox = crsTransformer.transformBoundingBox(bbox, event.getFormerCrs().getCode());
 
                 if (getMappingModel() instanceof ActiveLayerModel) {
                     ActiveLayerModel alm = (ActiveLayerModel) getMappingModel();
@@ -4478,12 +4480,12 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
                 // transform all features
                 for (Feature f : featureCollection.getAllFeatures()) {
-                    Geometry geom = transformer.transformGeometry(f.getGeometry(), event.getFormerCrs().getCode());
+                    Geometry geom = crsTransformer.transformGeometry(f.getGeometry(), event.getFormerCrs().getCode());
                     f.setGeometry( geom );
                     PFeature feature = pFeatureHM.get(f);
                     feature.setFeature(f);
                     Coordinate[] coordArray = feature.getCoordArr();
-                    coordArray = transformer.transformGeometry(coordArray,  event.getFormerCrs().getCode());
+                    coordArray = crsTransformer.transformGeometry(coordArray,  event.getFormerCrs().getCode());
                     feature.setCoordArr(coordArray);
                 }
 
@@ -4492,11 +4494,16 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 removeFeatures(list);
                 addFeaturesToMap( list.toArray( new Feature[list.size()] ) );
             } catch (Exception e) {
-                // therter TODO: Ausgabe an den User hinzufuegen. Außerdem muss verhindert werden, dass im
-                // Fehlerfall eine endlosschleife entsteht.
+                JOptionPane.showMessageDialog(this,
+                   org.openide.util.NbBundle.getMessage(MappingComponent.class, "MappingComponent.crsChanged(CrsChangedEvent).JOptionPane.message"),
+                   org.openide.util.NbBundle.getMessage(MappingComponent.class, "MappingComponent.crsChanged(CrsChangedEvent).JOptionPane.title"),
+                   JOptionPane.ERROR_MESSAGE);
                 log.error("Cannot transform the current bounding box to the CRS " + event.getCurrentCrs(), e);
+                resetCrs = true;
                 CismapBroker.getInstance().setSrs(event.getFormerCrs());
             }
+        } else {
+            resetCrs = false;
         }
     }
 
