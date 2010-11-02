@@ -645,6 +645,18 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         return srs;
     }
 
+
+    /**
+     * @deprecated the method setSrs(Crs srs) should be used instead. This method only exists for
+     * compatibility with cids_custom_wuppertal
+     *
+     * @param srs
+     */
+    public void setSrs(String srs) {
+        setSrs(new Crs(srs, srs, srs, true, false));
+    }
+
+
     public void setSrs(Crs srs) {
         if (this.defaultSrs == null) {
             this.defaultSrs = srs;
