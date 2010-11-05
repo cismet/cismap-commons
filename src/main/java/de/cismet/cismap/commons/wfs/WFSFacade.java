@@ -22,17 +22,16 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
-import de.cismet.tools.StaticHtmlTools;
+import de.cismet.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.security.WebAccessManager;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Collection;
 import javax.xml.namespace.QName;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.log4j.Logger;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -103,7 +102,7 @@ public class WFSFacade {
      * @return the wfs response as FeatureTypeDescription object
      * @throws IOException
      */
-    public FeatureTypeDescription describeFeatureType(FeatureType feature) throws IOException, BadHttpStatusCodeException {
+    public FeatureTypeDescription describeFeatureType(FeatureType feature) throws IOException, Exception {
         String version = cap.getVersion();
         String request;
         XMLOutputter out = new XMLOutputter();
@@ -354,66 +353,21 @@ public class WFSFacade {
      * @param request Request-String
      * @return server response as string or null, if an error occurs
      */
-    private String postRequest(URL serverURL, String request) throws IOException, BadHttpStatusCodeException {
+    private String postRequest(URL serverURL, String request) throws IOException, Exception {
         logger.info("post request (" + serverURL + ")");//NOI18N
-        // create HTTP-client
-        HttpClient client = new HttpClient();
 
-        // is currently a proxy set
-        String proxySet = System.getProperty("proxySet");//NOI18N
+        InputStream resp = WebAccessManager.getInstance().doRequest(serverURL, request, ACCESS_METHODS.POST_REQUEST);
+        char[] buffer = new char[256];
+        StringBuilder response = new StringBuilder();
+        BufferedReader br = new BufferedReader( new InputStreamReader(resp) );
+        int count = br.read(buffer, 0, buffer.length);
 
-        // if proxy exists ...
-        if (proxySet != null && proxySet.equals("true")) {//NOI18N
-            logger.debug("Proxy existent");//NOI18N
-            logger.debug("ProxyHost:" + System.getProperty("http.proxyHost"));//NOI18N
-            logger.debug("ProxyPort:" + System.getProperty("http.proxyPort"));//NOI18N
-            try {
-                // add existing proxy to HTTP-client
-                client.getHostConfiguration().setProxy(System.getProperty("http.proxyHost"),//NOI18N
-                        Integer.parseInt(System.getProperty("http.proxyPort")));//NOI18N
-            } catch (Exception ex) {
-                logger.error("Set proxy in HTTP-Client failed", ex);//NOI18N
-            }
-
-        } else { // do nothing
-            logger.debug("no Proxy");//NOI18N
+        while ( count != -1 ) {
+            response.append(buffer, 0, count);
+            count = br.read(buffer, 0, buffer.length);
         }
+        br.close();
 
-        // create new POST-method with the server-URL
-        PostMethod httppost = new PostMethod(serverURL.toString());
-        logger.debug("ServerURL = " + httppost.getURI().toString());//NOI18N
-
-        // create HTML from request & change charset to ISO-8859-1
-        logger.debug("WFS Query = " + StaticHtmlTools.stringToHTMLString(request));//NOI18N
-        String modifiedString = new String(request.getBytes("UTF-8"), "ISO-8859-1");//NOI18N
-        httppost.setRequestEntity(new StringRequestEntity(modifiedString));
-
-        try {
-            // send POST-method to server
-            client.executeMethod(httppost);
-
-            // if response == OK
-            if (httppost.getStatusCode() == HttpStatus.SC_OK) {
-                logger.debug("Server handled the request and sends the response");//NOI18N
-                logger.debug("read InputStream");//NOI18N
-                char[] buffer = new char[256];
-                StringBuilder response = new StringBuilder();
-                BufferedReader br = new BufferedReader( new InputStreamReader(httppost.getResponseBodyAsStream()) );
-                int count = br.read(buffer, 0, buffer.length);
-
-                while ( count != -1 ) {
-                    response.append(buffer, 0, count);
-                    count = br.read(buffer, 0, buffer.length);
-                }
-                br.close();
-
-                return response.toString();
-            } else {
-                logger.error("Unexpected failure: " + httppost.getStatusLine().toString());//NOI18N
-                throw new BadHttpStatusCodeException("Unexpected failure: " + httppost.getStatusLine().toString());
-            }
-        } finally {
-            httppost.releaseConnection();
-        }
+        return response.toString();
     }
 }

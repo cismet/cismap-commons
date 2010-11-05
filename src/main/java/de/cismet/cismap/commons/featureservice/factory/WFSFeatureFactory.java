@@ -9,16 +9,15 @@ import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.wfs.WFSFacade;
-import de.cismet.tools.StaticHtmlTools;
+import de.cismet.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.security.WebAccessManager;
 import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
+import java.net.URL;
 import java.util.Vector;
 import javax.swing.SwingWorker;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.GMLFeatureCollectionDocument;
@@ -71,8 +70,8 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String>
       return null;
     }
     // check if canceled .......................................................
+
     String postString = WFSFacade.setGetFeatureBoundingBox(query, boundingBox, wfsVersion);
-//    postString = postString.replaceAll(SRS_NAME_PLACEHOLDER, "EPSG:31466");
 
     // check if canceled .......................................................
     if (this.checkCancelled(workerThread, "creating post string"))
@@ -82,70 +81,26 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String>
     // check if canceled .......................................................
 
     logger.debug("FRW[" + workerThread + "]: WFS Query: \n"+postString);
-    PostMethod httppost = new PostMethod(hostname);
-    httppost.setRequestEntity(new StringRequestEntity(postString));
-    if (DEBUG)
-    {
-      logger.debug("FRW[" + workerThread + "]: Feature post request: <br><pre>" + StaticHtmlTools.stringToHTMLString(postString) + "</pre>");
-    }
-
-    // check if canceled .......................................................
-    if (this.checkCancelled(workerThread, "creating http request"))
-    {
-      this.cleanup(null, httppost);
-      return null;
-    }
-    // check if canceled .......................................................
 
     long start = System.currentTimeMillis();
 
-    HttpClient client = new HttpClient();
-    String proxySet = System.getProperty("proxySet");
-    if (proxySet != null && proxySet.equals("true"))
-    {
-      if (DEBUG)
-      {
-        logger.debug("proxyIs Set");
-        logger.debug("ProxyHost:" + System.getProperty("http.proxyHost"));
-        logger.debug("ProxyPort:" + System.getProperty("http.proxyPort"));
-      }
-
-      try
-      {
-        client.getHostConfiguration().setProxy(System.getProperty("http.proxyHost"), Integer.parseInt(System.getProperty("http.proxyPort")));
-      } catch (Exception e)
-      {
-        logger.warn("Problem while setting proxy: " + e.getMessage(), e);
-      }
-    }
-    client.executeMethod(httppost);
+    InputStream respIs = WebAccessManager.getInstance().doRequest(new URL(hostname), postString, ACCESS_METHODS.POST_REQUEST);
 
     // check if canceled .......................................................
     if (this.checkCancelled(workerThread, "executing http request"))
     {
-      this.cleanup(null, httppost);
       return null;
     }
     // check if canceled .......................................................
 
     logger.info("FRW[" + workerThread + "]: WFS request took " + ((System.currentTimeMillis() - start)) + " ms");
-    int code = httppost.getStatusCode();
 
-    if (httppost.getStatusCode() != HttpStatus.SC_OK)
-    {
-      logger.error("FRW[" + workerThread + "]: connection failed with HTTP Status Code '" + httppost.getStatusCode() + "'");
-      httppost.releaseConnection();
-      Exception ex = new Exception("FRW[" + workerThread + "]: Statuscode: " + code + " nicht bekannt transaktion abgebrochen");
-      ex.initCause(new Throwable("FRW[" + workerThread + "]: Statuscode: " + code + " nicht bekannt transaktion abgebrochen"));
-      throw ex;
-    }
 
-    InputStreamReader reader = new InputStreamReader(new BufferedInputStream(httppost.getResponseBodyAsStream()));
+    InputStreamReader reader = new InputStreamReader(new BufferedInputStream(respIs));
 
     // check if canceled .......................................................
     if (this.checkCancelled(workerThread, "creating InputStreamReader"))
     {
-      this.cleanup(reader, httppost);
       return null;
     }
     // check if canceled .......................................................
@@ -160,7 +115,6 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String>
       // check if canceled .......................................................
       if (this.checkCancelled(workerThread, "creating GMLFeatureCollectionDocument"))
       {
-        this.cleanup(reader, httppost);
         return null;
       }
       // check if canceled .......................................................
@@ -170,7 +124,6 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String>
       // check if canceled .......................................................
       if (this.checkCancelled(workerThread, "loading features"))
       {
-        this.cleanup(reader, httppost);
         return null;
       }
       // check if canceled .......................................................
@@ -186,7 +139,6 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String>
       {
         logger.warn("FRW[" + workerThread + "]: no features found before parsing");
         //if(DEBUG)logger.debug(featureCollectionDocument.getAsString());
-        this.cleanup(reader, httppost);
         return null;
       }
 
@@ -202,13 +154,11 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String>
       // check if canceled .......................................................
       if (this.checkCancelled(workerThread, "parsing features"))
       {
-        this.cleanup(reader, httppost);
         return null;
       }
       // check if canceled .......................................................
 
       logger.info("FRW[" + workerThread + "]: parsing " + featureCollection.size() + " features took " + ((System.currentTimeMillis() - start)) + " ms");
-      this.cleanup(reader, httppost);
 
       if (featureCollection.size() > this.getMaxFeatureCount())
       {

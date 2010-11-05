@@ -1,6 +1,5 @@
 package de.cismet.cismap.commons.wfs.capabilities.deegree;
 
-import de.cismet.cismap.commons.exceptions.BadHttpStatusCodeException;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.wfs.FeatureTypeDescription;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
@@ -31,7 +30,7 @@ public class DeegreeFeatureType implements FeatureType {
     private String geometryName;
 
     public DeegreeFeatureType(org.deegree.ogcwebservices.wfs.capabilities.WFSFeatureType feature, WFSCapabilities caps) 
-            throws IOException, BadHttpStatusCodeException {
+            throws IOException, Exception {
         this.feature = feature;
         this.caps = caps;
         analyseStructure();
@@ -148,7 +147,7 @@ public class DeegreeFeatureType implements FeatureType {
     }
 
 
-    private void analyseStructure() throws IOException, BadHttpStatusCodeException {
+    private void analyseStructure() throws IOException, Exception {
         logger.debug("analyseStructure " + getName().toString());//NOI18N
         FeatureTypeDescription featTypeDesc = caps.getServiceFacade().describeFeatureType(this);
 
