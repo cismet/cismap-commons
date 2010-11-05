@@ -49,7 +49,7 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
 
 
     @Override
-    public FeatureTypeList getFeatureTypeList() throws IOException, BadHttpStatusCodeException {
+    public FeatureTypeList getFeatureTypeList() throws IOException, Exception {
         if (list == null) {
             list = new FeatureTypeList();
             org.deegree.ogcwebservices.wfs.capabilities.FeatureTypeList tmpList = cap.getFeatureTypeList();

@@ -34,7 +34,6 @@
 package de.cismet.cismap.commons.featureservice;
 
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
-import de.cismet.cismap.commons.exceptions.BadHttpStatusCodeException;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import java.io.IOException;
@@ -56,7 +55,7 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
      * Erzeugt ein neues WFSCapabilitiesTreeModel.
      * @param capabilities WFSCapabilites-Objekt
      */
-    public WFSCapabilitiesTreeModel(WFSCapabilities capabilities) throws IOException, BadHttpStatusCodeException {
+    public WFSCapabilitiesTreeModel(WFSCapabilities capabilities) throws IOException, Exception {
         this.nodes = FeatureServiceUtilities.getElementDeclarations(capabilities);
         this.capabilities = capabilities;
         log.debug("nodes: " + nodes.size());

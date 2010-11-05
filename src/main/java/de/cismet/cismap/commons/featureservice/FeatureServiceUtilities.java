@@ -4,7 +4,6 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
-import de.cismet.cismap.commons.exceptions.BadHttpStatusCodeException;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import java.io.IOException;
@@ -136,7 +135,7 @@ public class FeatureServiceUtilities
     * @param featTypes FeatureTypeList from the WFSCapabilties
     * @return List all FeatureTypes as element with their attributes as children
     */
-    public static HashMap<FeatureType, Vector<FeatureServiceAttribute>> getElementDeclarations(WFSCapabilities cap) throws BadHttpStatusCodeException, IOException {
+    public static HashMap<FeatureType, Vector<FeatureServiceAttribute>> getElementDeclarations(WFSCapabilities cap) throws IOException, Exception {
         log.debug("getElementDeclarations(" + cap.getURL() + ")");//NOI18N
         // create hashmap that will be returned
         HashMap<FeatureType, Vector<FeatureServiceAttribute>> result = new HashMap<FeatureType, Vector<FeatureServiceAttribute>>();

@@ -19,7 +19,6 @@ package de.cismet.cismap.commons.wfs.capabilities;
 
 import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.capabilities.Service;
-import de.cismet.cismap.commons.exceptions.BadHttpStatusCodeException;
 import de.cismet.cismap.commons.wms.capabilities.FeatureTypeList;
 import java.io.IOException;
 import java.net.URL;
@@ -29,7 +28,7 @@ import java.net.URL;
  * @author therter
  */
 public interface WFSCapabilities {
-    public FeatureTypeList getFeatureTypeList() throws IOException, BadHttpStatusCodeException;
+    public FeatureTypeList getFeatureTypeList() throws IOException, Exception;
     public Service getService();
     public String getVersion();
     public URL getURL();
