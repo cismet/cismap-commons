@@ -12,6 +12,8 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.Vector;
 import javax.swing.DefaultComboBoxModel;
 
@@ -22,11 +24,18 @@ import javax.swing.DefaultComboBoxModel;
 public class LayerInfo extends javax.swing.JPanel implements CapabilityListener, ActiveLayerListener {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private boolean splitPaneInitialized=false;
+    private ResourceBundle srsMapping = null;
+
     /** Creates new form LayerInfo */
     public LayerInfo() {
         initComponents();
         sppMain.setDividerLocation(0.75d);
 
+        try {
+            srsMapping = ResourceBundle.getBundle("cismapCrsMapping", Locale.getDefault());
+        } catch (Exception e) {
+            log.error("Cannot open the resource bundle for the crs mapping.", e);
+        }
     }
 
     public void serverChanged(CapabilityEvent e) {
@@ -107,8 +116,9 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
 
         jLabel3.setText(null);
 
+        lblFeatureInfo.setFont(new java.awt.Font("DejaVu Sans", 1, 13)); // NOI18N
         lblFeatureInfo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/layerInfo.png"))); // NOI18N
-        lblFeatureInfo.setText(null);
+        lblFeatureInfo.setText(org.openide.util.NbBundle.getMessage(LayerInfo.class, "lblFeatureInfo.text")); // NOI18N
 
         lstSrs.setBackground(panMain.getBackground());
         jScrollPane2.setViewportView(lstSrs);
@@ -117,7 +127,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 418, Short.MAX_VALUE)
+            .add(0, 420, Short.MAX_VALUE)
             .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel2Layout.createSequentialGroup()
                     .addContainerGap()
@@ -125,7 +135,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
                         .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)
                         .add(jPanel2Layout.createSequentialGroup()
                             .add(lblFeatureInfo)
-                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 1582, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 174, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                         .add(jLabel3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE))
                     .addContainerGap()))
         );
@@ -139,7 +149,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
                     .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                     .add(jLabel3)
                     .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                    .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
+                    .add(jScrollPane2, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 173, Short.MAX_VALUE)
                     .addContainerGap()))
         );
 
@@ -226,12 +236,36 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         lblFeatureInfo.setEnabled(v.featureInfo);
 
         if (v.srs != null && v.srs.length > 0) {
+            Vector<String> srs = new Vector<String>();
             lstSrs.setVisible(true);
-            lstSrs.setModel(new DefaultComboBoxModel(v.srs));
+            for (String s : v.srs) {
+                s = getSrsDescription(s);
+                if (!srs.contains(s)) {
+                    srs.add(s);
+                }
+            }
+
+            lstSrs.setModel(new DefaultComboBoxModel(srs));
         } else {
             lstSrs.setVisible(false);
         }
     }
+
+
+    private String getSrsDescription(String srs) {
+        try {
+            String srsName = srsMapping.getString(srs);
+            if (srsName != null) {
+                return srs + " (" + srsName + ")";
+            }
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("no srs name found for " + srs, e);
+            }
+        }
+        return srs;
+    }
+
 
     public void layerVisibilityChanged(ActiveLayerEvent e) {
     }
