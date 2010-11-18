@@ -627,7 +627,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     homeBox = transformer.transformBoundingBox(defaultBox);
                     homes.put(srs.getCode(), homeBox);
                 } catch (Exception e) {
-                    log.error("Error while transforming coordinates from " + defaultBox.getSrs() + " to " + srs);
+                    log.error("Error while transforming coordinates from " + defaultBox.getSrs() + " to " + srs, e);
                 }
             } else {
                 log.debug("No default bunding box (home) found. ");

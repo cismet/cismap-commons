@@ -4035,7 +4035,6 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
             final Rectangle2D pos = new Rectangle2D.Double();
             pos.setRect(x1, y2, x2 - x1, y1 - y2);
-            log.error("current ", new Exception());
             getCamera().animateViewToCenterBounds(pos, x1 != x2 && y1 != y2 && scaleToFit, animationDuration);
             if (getCamera().getViewTransform().getScaleY() < 0) {
                 log.fatal("gotoBoundingBox: Problem :-( mit getViewTransform");//NOI18N
