@@ -861,6 +861,22 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 bounds.setSize(bounds.getWidth(), bounds.getHeight() * (-1));
             }
 
+            if ( bounds instanceof PBoundsWithCleverToString ) {
+                PBoundsWithCleverToString boundWCTS = (PBoundsWithCleverToString)bounds;
+                if ( !boundWCTS.getCrsCode().equals( CismapBroker.getInstance().getSrs().getCode() ) ) {
+                    try {
+                        Rectangle2D pos = new Rectangle2D.Double();
+                        XBoundingBox bbox = boundWCTS.getWorldCoordinates();
+                        CrsTransformer trans = new CrsTransformer(CismapBroker.getInstance().getSrs().getCode());
+                        bbox = trans.transformBoundingBox(bbox);
+                        bounds = bbox.getPBounds(getWtst());
+                    } catch (Exception e) {
+                        log.error("Cannot transform the bounding box from " + boundWCTS.getCrsCode() + " to " + CismapBroker.getInstance().getSrs().getCode() );
+                    }
+                }
+            }
+
+
             if (DEBUG) {
                 log.debug("before animateView");//NOI18N
             }
@@ -1751,7 +1767,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      */
     public void queryServices() {
         if (newViewBounds != null) {
-            addToHistory(new PBoundsWithCleverToString(new PBounds(newViewBounds), wtst));
+            addToHistory(new PBoundsWithCleverToString(new PBounds(newViewBounds), wtst, CismapBroker.getInstance().getSrs().getCode()));
             queryServicesWithoutHistory();
             if (DEBUG) {
                 log.debug("queryServices()");//NOI18N
@@ -3892,8 +3908,8 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 log.fatal("BUGFINDER:Es war ein Wert in der BoundingBox NaN. Setze auf HOME");//NOI18N
 //                gotoInitialBoundingBox();
                 this.currentBoundingBox = getMappingModel().getInitialBoundingBox();
-                addToHistory(new PBoundsWithCleverToString(new PBounds(currentBoundingBox.getPBounds(wtst)), wtst));
-
+                String crsCode = ( pos.getAttribute("CRS") != null ? pos.getAttribute("CRS").getValue() : null);
+                addToHistory(new PBoundsWithCleverToString(new PBounds(currentBoundingBox.getPBounds(wtst)), wtst, crsCode ));
             } else {
                 // set the current crs
                 Attribute crsAtt = pos.getAttribute("CRS");
@@ -3925,7 +3941,9 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 if (DEBUG) {
                     log.debug("added to History" + b);//NOI18N
                 }
-                addToHistory(new PBoundsWithCleverToString(new PBounds(b.getPBounds(wtst)), wtst));
+
+                String crsCode = ( pos.getAttribute("CRS") != null ? pos.getAttribute("CRS").getValue() : null);
+//                addToHistory(new PBoundsWithCleverToString(new PBounds(currentBoundingBox.getPBounds(wtst)), wtst, crsCode ));
 //                final BoundingBox bb=b;
 //                EventQueue.invokeLater(new Runnable() {
 //                    public void run() {
@@ -4017,6 +4035,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
             final Rectangle2D pos = new Rectangle2D.Double();
             pos.setRect(x1, y2, x2 - x1, y1 - y2);
+            log.error("current ", new Exception());
             getCamera().animateViewToCenterBounds(pos, x1 != x2 && y1 != y2 && scaleToFit, animationDuration);
             if (getCamera().getViewTransform().getScaleY() < 0) {
                 log.fatal("gotoBoundingBox: Problem :-( mit getViewTransform");//NOI18N
@@ -4465,8 +4484,9 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     @Override
     public void crsChanged(final CrsChangedEvent event) {
         if (event.getFormerCrs() != null && fixedBoundingBox == null && !resetCrs) {
-            BoundingBox bbox = getCurrentBoundingBox();
+
             try {
+                BoundingBox bbox = getCurrentBoundingBox();// getCurrentBoundingBox();
                 final CrsTransformer crsTransformer = new CrsTransformer(event.getCurrentCrs().getCode());
                 BoundingBox newBbox = crsTransformer.transformBoundingBox(bbox, event.getFormerCrs().getCode());
 
@@ -4476,7 +4496,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 }
                 wtst = null;
                 getWtst();
-                gotoBoundingBoxWithHistory(newBbox);
+                gotoBoundingBoxWithoutHistory(newBbox);
 
                 // transform all features
                 for (Feature f : featureCollection.getAllFeatures()) {
