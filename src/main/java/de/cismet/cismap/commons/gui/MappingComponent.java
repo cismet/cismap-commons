@@ -4484,7 +4484,10 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     @Override
     public void crsChanged(final CrsChangedEvent event) {
         if (event.getFormerCrs() != null && fixedBoundingBox == null && !resetCrs) {
-
+            if (locked) {
+                return;
+            }
+            
             try {
                 BoundingBox bbox = getCurrentBoundingBox();// getCurrentBoundingBox();
                 final CrsTransformer crsTransformer = new CrsTransformer(event.getCurrentCrs().getCode());
