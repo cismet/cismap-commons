@@ -35,6 +35,7 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.tools.StaticDecimalTools;
 import edu.umd.cs.piccolo.util.PBounds;
 
@@ -43,11 +44,14 @@ import edu.umd.cs.piccolo.util.PBounds;
  * @author thorsten.hell@cismet.de
  */
 public class PBoundsWithCleverToString extends PBounds{
-    WorldToScreenTransform wtst;
+    private WorldToScreenTransform wtst;
+    private String crsCode;
+
     /** Creates a new instance of PBoundsWithCleverToString */
-    public PBoundsWithCleverToString(PBounds aBounds,WorldToScreenTransform wtst) {
+    public PBoundsWithCleverToString(PBounds aBounds,WorldToScreenTransform wtst, String crsCode) {
         super(aBounds);
-        this.wtst=wtst;
+        this.wtst = wtst;
+        this.crsCode = crsCode;
     }
     public String toString() {
         //x,y ist der Punkt links oben
@@ -55,8 +59,30 @@ public class PBoundsWithCleverToString extends PBounds{
         double y2=wtst.getWorldY(y);
         double x2=x1+width;
         double y1=y2-height;
-        return StaticDecimalTools.round("0.00",x1)+","+StaticDecimalTools.round("0.00",y1)+","+StaticDecimalTools.round("0.00",x2)+","+StaticDecimalTools.round("0.00",y2);//NOI18N
+        return StaticDecimalTools.round("0.00",x1)+","+StaticDecimalTools.round("0.00",y1)+","+StaticDecimalTools.round("0.00",x2)+","+StaticDecimalTools.round("0.00",y2) + " (" + crsCode + ")";//NOI18N
         
     }
-    
+
+
+    public String getCrsCode() {
+        return crsCode;
+    }
+
+    public WorldToScreenTransform getWtst() {
+        return wtst;
+    }
+
+    /**
+     *
+     * @return a bounding box with the world coordinates of this PBounds object.
+     * The metric value of the resulting bounding box is not correct
+     */
+    public XBoundingBox getWorldCoordinates() {
+        double x1=wtst.getWorldX(x);
+        double y2=wtst.getWorldY(y);
+        double x2=x1+width;
+        double y1=y2-height;
+
+        return new XBoundingBox(x1, y1, x2, y2, crsCode, false);
+    }
 }
