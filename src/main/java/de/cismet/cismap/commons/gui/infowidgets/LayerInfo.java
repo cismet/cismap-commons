@@ -12,6 +12,8 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Vector;
@@ -25,6 +27,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private boolean splitPaneInitialized=false;
     private ResourceBundle srsMapping = null;
+    private HashMap<String,String> srsMap = new HashMap<String,String>();
 
     /** Creates new form LayerInfo */
     public LayerInfo() {
@@ -33,6 +36,14 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
 
         try {
             srsMapping = ResourceBundle.getBundle("cismapCrsMapping", Locale.getDefault());
+            Enumeration<String> en = srsMapping.getKeys();
+            while ( en.hasMoreElements() ) {
+                String key = en.nextElement();
+                String value = srsMapping.getString(key);
+                if (value != null) {
+                    srsMap.put(key, value);
+                }
+            }
         } catch (Exception e) {
             log.error("Cannot open the resource bundle for the crs mapping.", e);
         }
@@ -253,15 +264,9 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
 
 
     private String getSrsDescription(String srs) {
-        try {
-            String srsName = srsMapping.getString(srs);
-            if (srsName != null) {
-                return srs + " (" + srsName + ")";
-            }
-        } catch (Exception e) {
-            if (log.isDebugEnabled()) {
-                log.debug("no srs name found for " + srs, e);
-            }
+        String srsName = srsMap.get(srs);
+        if (srsName != null) {
+            return srs + " (" + srsName + ")";
         }
         return srs;
     }
