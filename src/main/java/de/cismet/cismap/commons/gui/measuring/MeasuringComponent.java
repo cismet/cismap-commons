@@ -89,6 +89,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
         //this is a quick fix for the memory leak that some mapping components can not be garbage collected
         panCenter.remove(map);
         map.removeInputEventListener(mapListener);
+        map.dispose();
         map = null;
     }
 
@@ -269,6 +270,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
     public void actionZoom() {
         map.setInteractionMode(MappingComponent.ZOOM);
     }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private de.cismet.cismap.commons.gui.MappingComponent map;
     private javax.swing.JPanel panCenter;
