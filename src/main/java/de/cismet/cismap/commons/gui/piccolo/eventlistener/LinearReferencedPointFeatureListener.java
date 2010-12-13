@@ -17,16 +17,14 @@
 
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import com.vividsolutions.jts.geom.Coordinate;
-
 /**
  *
  * @author jruiz
  */
-public interface SelfManipulatingFeature {
+public interface LinearReferencedPointFeatureListener {
 
-    public void moveTo(Coordinate coord);
-
-    public void moveFinished();
+    public void featureMoved(LinearReferencedPointFeature pointFeature);
+    
+    public void featureMerged(LinearReferencedPointFeature withPoint, LinearReferencedPointFeature mergePoint);
 
 }

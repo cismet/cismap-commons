@@ -127,6 +127,12 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
         //endDrag
         if (drag) {
             drag = false;
+
+            Feature feat = feature.getFeature();
+            if (feat instanceof SelfManipulatingFeature) {
+                ((SelfManipulatingFeature) feat).moveFinished();
+            }
+
             mc.getMemUndo().addAction(new FeatureMoveAction(mc, features, dragDim, true));
             mc.getMemRedo().clear();
             Iterator it = features.iterator();
