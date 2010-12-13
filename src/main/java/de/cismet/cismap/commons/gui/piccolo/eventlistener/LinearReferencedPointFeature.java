@@ -12,6 +12,7 @@ import com.vividsolutions.jts.util.GeometricShapeFactory;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
@@ -20,10 +21,9 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.math.geometry.StaticGeometryFunctions;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
@@ -38,8 +38,7 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     public static final String PROPERTY_FEATURE_COORDINATE = "featureCoordinate";
 
     private Geometry baseLineGeom;
-    private Collection<PropertyChangeListener> listeners = new ArrayList<PropertyChangeListener>();
-    private Collection<Feature> subFeatures = new ArrayList<Feature>(1);
+    private Collection<LinearReferencedPointFeatureListener> listeners = new ArrayList<LinearReferencedPointFeatureListener>();
     private ImageIcon ico = new javax.swing.ImageIcon(LinearReferencedPointFeature.class.getResource("/de/cismet/cismap/commons/gui/res/linRefPointIcon.png"));//NOI18N
     private ImageIcon annotationIco = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/linRefPoint.png"));//NOI18N
     private ImageIcon annotationSelectedIco = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/linRefPointSelected.png"));//NOI18N
@@ -70,11 +69,11 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         return baseLineGeom;
     }
     
-    public void addListener(PropertyChangeListener listener) {
+    public void addListener(LinearReferencedPointFeatureListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(PropertyChangeListener listener) {
+    public void removeListener(LinearReferencedPointFeatureListener listener) {
         listeners.remove(listener);
     }
 
@@ -98,8 +97,6 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         PFeature pFeature = mc.getPFeatureHM().get(this);
 
         if (pFeature != null) {
-            Coordinate oldCoord = pFeature.getCoordArr()[0];
-
             float[] xp = new float[] { (float) coordinate.x };
             float[] yp = new float[] { (float) coordinate.y };
 
@@ -108,10 +105,21 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
             pFeature.syncGeometry();
             pFeature.resetInfoNodePosition();
             pFeature.visualize();
+            fireFeatureMoved();
+        }
+    }
 
-            for(PropertyChangeListener listener : listeners) {
-                listener.propertyChange(new PropertyChangeEvent(this, PROPERTY_FEATURE_COORDINATE, oldCoord, coordinate));
-            }
+    private void fireFeatureMoved() {
+        Collection<LinearReferencedPointFeatureListener> listenersCopy = new CopyOnWriteArrayList<LinearReferencedPointFeatureListener>(listeners);
+        for(LinearReferencedPointFeatureListener listener : listenersCopy) {
+            listener.featureMoved(this);
+        }
+    }
+
+    private void fireFeatureMerged(LinearReferencedPointFeature mergePoint, LinearReferencedPointFeature withPoint) {
+        Collection<LinearReferencedPointFeatureListener> listenersCopy = new CopyOnWriteArrayList<LinearReferencedPointFeatureListener>(listeners);
+        for(LinearReferencedPointFeatureListener listener : listenersCopy) {
+            listener.featureMerged(mergePoint, withPoint);
         }
     }
 
@@ -217,4 +225,31 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         return null;
     }
 
+    @Override
+    public void moveFinished() {
+        LinearReferencedPointFeature snappingPoint = getSnappingPoint();
+        if (snappingPoint != null) {
+            fireFeatureMerged(this, snappingPoint);
+            snappingPoint.fireFeatureMerged(this, snappingPoint);
+        }
+    }
+
+    public LinearReferencedPointFeature getSnappingPoint() {
+        boolean snapping = CismapBroker.getInstance().getMappingComponent().isSnappingEnabled();
+        if (snapping) {
+            FeatureCollection fc = CismapBroker.getInstance().getMappingComponent().getFeatureCollection();
+            Feature[] features = fc.getAllFeatures().toArray(new Feature[0]); // nicht die originalcollection, weil diese sich in der schleife verändern kann
+            LinearReferencedPointFeature mergePoint = this;
+            for (Feature feature : features) {
+                if (feature instanceof LinearReferencedPointFeature &&  feature != mergePoint) {
+                    LinearReferencedPointFeature withPoint = (LinearReferencedPointFeature) feature;
+                    boolean isInSnappingDistance = Math.abs(withPoint.getCurrentPosition() - mergePoint.getCurrentPosition()) < 0.002 * CismapBroker.getInstance().getMappingComponent().getScaleDenominator();
+                    if (isInSnappingDistance) {
+                        return withPoint;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

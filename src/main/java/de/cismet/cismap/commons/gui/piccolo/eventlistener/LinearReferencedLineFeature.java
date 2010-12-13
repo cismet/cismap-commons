@@ -16,8 +16,6 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import java.awt.Color;
 import java.awt.Stroke;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -29,6 +27,8 @@ import javax.swing.JComponent;
 public class LinearReferencedLineFeature extends DefaultStyledFeature implements  DrawSelectionFeature, /*FeatureGroup,*/ XStyledFeature {
 
     public final static Color DEFAULT_COLOR = new Color(255, 91, 0);
+    public final static boolean FROM = true;
+    public final static boolean TO = false;
 
     private final static org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(LinearReferencedLineFeature.class);
     private final static ImageIcon ico = new javax.swing.ImageIcon(LinearReferencedLineFeature.class.getResource("/de/cismet/cismap/commons/gui/res/linRefPointIcon.png"));//NOI18N
@@ -38,22 +38,43 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
     private Geometry baseLineGeom;
     private FeatureCollectionListener featureCollectionListener;
     private boolean featCollLock = false;
+    private StationListener fromStationListener;
+    private StationListener toStationListener;
 
-    public LinearReferencedLineFeature(final LinearReferencedPointFeature from, final LinearReferencedPointFeature to) {
-        this.fromFeature = from;
-        this.toFeature = to;
-
-        this.baseLineGeom = from.getLineGeometry();
+    public LinearReferencedLineFeature(final LinearReferencedPointFeature fromFeature, final LinearReferencedPointFeature toFeature) {
+        this.baseLineGeom = fromFeature.getLineGeometry();
 
         setLineWidth(4);
         setLinePaint(DEFAULT_COLOR);
+        setPrimaryAnnotationVisible(false);
 
-        from.addListener(new StationListener());
-        to.addListener(new StationListener());
+        fromStationListener = new StationListener(FROM);
+        toStationListener = new StationListener(TO);
+
+        setPointFeature(fromFeature, FROM);
+        setPointFeature(toFeature, TO);
 
         initFeatureCollectionListener();
 
         updateGeometry();
+    }
+
+    public final void setPointFeature(LinearReferencedPointFeature feature, boolean isFrom) {
+        LinearReferencedPointFeature oldFeature = (isFrom) ? fromFeature : toFeature;
+        StationListener listener = (isFrom) ? fromStationListener : toStationListener;
+        if (oldFeature != null) {
+            oldFeature.removeListener(listener);
+        }
+        feature.addListener(listener);
+        if (isFrom)  {
+            this.fromFeature = feature;
+        } else {
+            this.toFeature = feature;
+        }
+    }
+
+    public LinearReferencedPointFeature getStationFeature(boolean isFrom) {
+        return (isFrom) ? fromFeature : toFeature;
     }
 
     private void initFeatureCollectionListener() {
@@ -93,7 +114,13 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
     }
 
     public final void updateGeometry() {
-        Geometry sublineGeom = createSubline(fromFeature.getCurrentPosition(), toFeature.getCurrentPosition(), baseLineGeom);
+        LOG.debug("update Geometry");
+        Geometry sublineGeom;
+        if (fromFeature != toFeature) {
+            sublineGeom = createSubline(fromFeature.getCurrentPosition(), toFeature.getCurrentPosition(), baseLineGeom);
+        } else {
+            sublineGeom = fromFeature.getGeometry();
+        }
         setGeometry(sublineGeom);
 
         Coordinate[] coordinates = sublineGeom.getCoordinates();
@@ -113,7 +140,7 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
             pFeature.setPathToPolyline(xp, yp);
             pFeature.syncGeometry();
             pFeature.visualize();
-            pFeature.resetInfoNodePosition();
+//            pFeature.resetInfoNodePosition();
         }
     }
 
@@ -147,10 +174,22 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
         return false;
     }
 
-    class StationListener implements PropertyChangeListener {
+    class StationListener implements LinearReferencedPointFeatureListener {
+
+        private boolean isFrom;
+
+        StationListener(boolean isFrom) {
+            this.isFrom = isFrom;
+        }
+        
+        @Override
+        public void featureMerged(LinearReferencedPointFeature mergePoint, LinearReferencedPointFeature withPoint) {
+            setPointFeature(withPoint, isFrom);
+            updateGeometry();
+        }
 
         @Override
-        public void propertyChange(PropertyChangeEvent pce) {
+        public void featureMoved(LinearReferencedPointFeature pointFeature) {
             updateGeometry();
         }
 

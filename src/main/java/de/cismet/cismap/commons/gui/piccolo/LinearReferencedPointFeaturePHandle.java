@@ -9,6 +9,7 @@ import de.cismet.cismap.commons.WorldToScreenTransform;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeatureListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 
 import edu.umd.cs.piccolo.event.PInputEvent;
@@ -16,8 +17,6 @@ import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PDimension;
 import edu.umd.cs.piccolox.util.PLocator;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 import pswing.PSwing;
 import pswing.PSwingCanvas;
@@ -60,13 +59,18 @@ public class LinearReferencedPointFeaturePHandle extends PHandle {
 
         initPanel();
 
-        ((LinearReferencedPointFeature) pfeature.getFeature()).addListener(new PropertyChangeListener() {
+        ((LinearReferencedPointFeature) pfeature.getFeature()).addListener(new LinearReferencedPointFeatureListener() {
 
             @Override
-            public void propertyChange(PropertyChangeEvent pce) {
+            public void featureMoved(LinearReferencedPointFeature pointFeature) {
                 relocateHandle();
             }
-        });        
+
+            @Override
+            public void featureMerged(LinearReferencedPointFeature withPoint, LinearReferencedPointFeature mergePoint) {
+                
+            }
+        });
     }
 
     private void initPanel() {
@@ -108,6 +112,15 @@ public class LinearReferencedPointFeaturePHandle extends PHandle {
             }
         }
     }
+
+    @Override
+    public void endHandleDrag(Point2D aLocalPoint, PInputEvent aEvent) {
+        super.endHandleDrag(aLocalPoint, aEvent);
+        LinearReferencedPointFeature linref = (LinearReferencedPointFeature) pfeature.getFeature();
+        linref.moveFinished();
+    }
+
+
 
     @Override
     public void relocateHandle() {
