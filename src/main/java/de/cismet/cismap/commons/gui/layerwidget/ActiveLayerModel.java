@@ -225,7 +225,11 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                         if (e.getErrorType().equals(RetrievalEvent.SERVERERROR)) {
                             errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError(RetrievalEvent).errorObject.servererror", new Object[]{message});//NOI18N
                         } else {
-                            errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError(RetrievalEvent).errorObject.noServererror", new Object[]{});//NOI18N
+                            if (message != null) {
+                                errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError(RetrievalEvent).errorObject.noServererror", new Object[]{message});//NOI18N
+                            } else {
+                                errorObject = org.openide.util.NbBundle.getMessage(ActiveLayerModel.class, "ActiveLayerModel.retrievalError(RetrievalEvent).errorObject.noServererror", new Object[]{});//NOI18N
+                            }
                         }
                     }// Hier kommt jetzt HTML Fehlermeldung, Internal und XML. Das muss reichen
                     //else if ()
