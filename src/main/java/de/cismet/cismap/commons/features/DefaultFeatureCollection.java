@@ -415,7 +415,8 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     public void fireFeaturesAdded(Collection<Feature> cf) {
-        for (FeatureCollectionListener curListener : listeners) {
+        Vector<FeatureCollectionListener> listenersCopy = new Vector<FeatureCollectionListener>(listeners); //No concurrentModification possible
+        for (FeatureCollectionListener curListener : listenersCopy) {
             if (curListener instanceof MappingComponent) {
                 log.debug("adding featuresTo Map");//NOI18N
                 ((MappingComponent) curListener).addFeaturesToMap(cf.toArray(new Feature[0]));
