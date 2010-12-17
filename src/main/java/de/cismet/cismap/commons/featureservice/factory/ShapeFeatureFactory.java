@@ -137,7 +137,11 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     }
 
     //this.tempFeatureCollection = new Feature[max];
-    this.degreeFeaturesTree = new STRtree(max);
+    if (max >= 4) {
+        this.degreeFeaturesTree = new STRtree(max);
+    } else {
+        this.degreeFeaturesTree = new STRtree();
+    }
 
     // parse features ........................................................
     int currentProgress = 0;
@@ -167,7 +171,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
       if (workerThread != null && newProgress > currentProgress && newProgress >= 5 && newProgress % 5 == 0)
       {
         // set to progress to -1 (indeterminate progress bar)
-        currentProgress = newProgress < 100 ? newProgress : -1;
+        currentProgress = newProgress <= 100 ? newProgress : -1;
         if (DEBUG)
         {
           logger.debug("SW[" + workerThread + "]: parsing progress: " + currentProgress + "%");
