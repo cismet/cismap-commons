@@ -554,7 +554,8 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 List<File> data = null;
                 Transferable transferable = dtde.getTransferable();
                 if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
-                    data = (java.util.List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                        data = DnDUtils.textURIListToFileList((String) transferable.getTransferData(DnDUtils.URI_LIST_FLAVOR));
+//                    data = (java.util.List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
                 } else {
                     if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
                         log.debug("Drop is unix drop xxx " + transferable.getTransferData(DataFlavor.javaFileListFlavor));//NOI18N
