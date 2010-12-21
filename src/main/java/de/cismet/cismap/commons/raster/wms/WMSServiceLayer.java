@@ -495,7 +495,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
 
   private String getLayersString(Vector wmsLayers)
   {
-    String layerString = "";//NOI18N
+    StringBuilder layerString = new StringBuilder("");//NOI18N
     int counter = 0;
     Iterator it = wmsLayers.iterator();
     while (it.hasNext())
@@ -506,14 +506,14 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
         counter++;
         if (counter > 1)
         {
-          layerString += ",";//NOI18N
+          layerString.append(",");//NOI18N
         }
-        layerString += ((WMSLayer) o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20");//NOI18N
+        layerString.append(((WMSLayer) o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20"));//NOI18N
       }
     }
     if (counter > 0)
     {
-      return "&LAYERS=" + layerString;//NOI18N
+      return "&LAYERS=" + layerString.toString();//NOI18N
     } else
     {
       return "";//NOI18N
@@ -522,7 +522,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
 
   private String getStylesString(Vector wmsLayers)
   {
-    String stylesString = "";//NOI18N
+    StringBuilder stylesString = new StringBuilder("");//NOI18N
     int counter = 0;
     Iterator it = wmsLayers.iterator();
     while (it.hasNext())
@@ -533,15 +533,15 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
         counter++;
         if (counter > 1)
         {
-          stylesString += ",";//NOI18N
+          stylesString.append(",");//NOI18N
         }
-        stylesString += ((WMSLayer) o).getSelectedStyle().getName().replaceAll(" ", "%20");//NOI18N
+        stylesString.append( ((WMSLayer) o).getSelectedStyle().getName().replaceAll(" ", "%20") );//NOI18N
       }
     }
 //        if (counter>0){
 //            return "&STYLES="+stylesString;
 //        } else return "";
-    return "&STYLES=" + stylesString; //LDS Bugfix//NOI18N
+    return "&STYLES=" + stylesString.toString(); //LDS Bugfix//NOI18N
     }
 
     /**
@@ -747,12 +747,15 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
     if (obj instanceof WMSServiceLayer)
     {
       WMSServiceLayer tester = (WMSServiceLayer) obj;
-      return (getName() + getGetMapPrefix() + getLayersString(wmsLayers) + getStylesString(wmsLayers)).equals(
-              tester.getName() + tester.getGetMapPrefix() + tester.getLayersString(tester.wmsLayers) + tester.getStylesString(tester.wmsLayers));
-    } else
-    {
-      return false;
+      if (getName().equals(tester.getName()) &&
+              getGetMapPrefix().equals(tester.getGetMapPrefix()) &&
+              getLayersString(wmsLayers).equals(tester.getLayersString(tester.wmsLayers)) && 
+              getStylesString(wmsLayers).equals(tester.getStylesString(tester.wmsLayers))) {
+          return true;
+      }
     }
+
+    return false;
   }
 
   @Override
