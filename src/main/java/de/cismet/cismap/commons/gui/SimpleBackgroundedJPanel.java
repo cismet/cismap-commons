@@ -71,7 +71,7 @@ public class SimpleBackgroundedJPanel extends JPanel implements java.beans.Prope
                     viewer.getCamera().animateToTransparency(0,1000);
                 }
                 else {
-                    viewer.getCamera().animateToTransparency(0.1f,1000);
+                    viewer.getCamera().animateToTransparency(0.3f,1000);
                 }
 //            }
         }
