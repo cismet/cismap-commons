@@ -135,8 +135,11 @@ public class PFeatureTools {
         Point2D myPosition=mc.getCamera().viewToLocal(canvasPosition);
         return getNearestPointInArea(mc,new PBounds(d2d), myPosition, vetoPoint);
     }
-    
     public static Object getFirstValidObjectUnderPointer(PInputEvent pInputEvent,Class[] validClasses) {
+        return getFirstValidObjectUnderPointer(pInputEvent, validClasses, 0.001d);
+    }
+
+    public static Object getFirstValidObjectUnderPointer(PInputEvent pInputEvent,Class[] validClasses,double halo) {
         //Dieses Konstrukt sorgt daf\u00FCr das uninteressante Objekte die oberhalb dem Mauszeiger liegen
         //einfach ignoriert werden
         Object o=null;
@@ -147,7 +150,7 @@ public class PFeatureTools {
         double xPos=pInputEvent.getPosition().getX();
         double yPos=pInputEvent.getPosition().getY();
         
-        PPickPath pp=((MappingComponent)pInputEvent.getComponent()).getCamera().pick(pInputEvent.getCanvasPosition().getX(),pInputEvent.getCanvasPosition().getY(),0.001d);
+        PPickPath pp=((MappingComponent)pInputEvent.getComponent()).getCamera().pick(pInputEvent.getCanvasPosition().getX(),pInputEvent.getCanvasPosition().getY(),halo);
         
         do {
             if (first) {
