@@ -83,6 +83,7 @@ import javax.swing.JTree;
 import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
+import de.cismet.tools.PropertyEqualsProvider;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
@@ -141,8 +142,18 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         if (DEBUG) {
             log.debug("addLayer: " + layer.getName());//NOI18N
         }
+
+
+
+
         if (layers.contains(layer)) {
             throw new IllegalArgumentException("Layer '" + layer.getName() + "' already exists");//NOI18N
+        } else if (layer instanceof PropertyEqualsProvider) {
+            for (Object o : layers) {
+                if (o instanceof PropertyEqualsProvider && ((PropertyEqualsProvider) o).propertyEquals(layer)) {
+                    throw new IllegalArgumentException("Layer '" + layer.getName() + "' already exists");//NOI18N
+                }
+            }
         }
         final RetrievalServiceLayer currentLayer = layer;
         ActiveLayerEvent ale = new ActiveLayerEvent();
@@ -521,8 +532,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             case 2:
                 if (node instanceof WMSServiceLayer && ((WMSServiceLayer) node).getWMSLayers().size() > 1) {
                     return false;
-                } else if (node instanceof WMSServiceLayer && ((WMSServiceLayer) node).getWMSLayers().size() == 1 &&
-                        ((WMSLayer) ((WMSServiceLayer) node).getWMSLayers().get(0)).getOgcCapabilitiesLayer().getStyles().length > 1) {
+                } else if (node instanceof WMSServiceLayer && ((WMSServiceLayer) node).getWMSLayers().size() == 1
+                        && ((WMSLayer) ((WMSServiceLayer) node).getWMSLayers().get(0)).getOgcCapabilitiesLayer().getStyles().length > 1) {
                     return true;
                 } else if (node instanceof WMSLayer && ((WMSLayer) node).getOgcCapabilitiesLayer().getStyles().length > 1) {
                     return true;
@@ -641,14 +652,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         if (homeBox == null) {
             log.error("home bounding box == null for srs " + srs.getCode());
         }
-        
+
         return homeBox;
     }
 
     public Crs getSrs() {
         return srs;
     }
-
 
     /**
      * @deprecated the method setSrs(Crs srs) should be used instead. This method only exists for
@@ -660,7 +670,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         setSrs(new Crs(srs, srs, srs, true, false));
     }
 
-
     public void setSrs(Crs srs) {
         if (this.defaultSrs == null) {
             this.defaultSrs = srs;
@@ -668,7 +677,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
         for (Object layer : this.layers) {
             if (layer instanceof WMSServiceLayer) {
-                ((WMSServiceLayer)layer).setSrs(srs.getCode());
+                ((WMSServiceLayer) layer).setSrs(srs.getCode());
             }
         }
 
@@ -1145,9 +1154,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 log.debug("trying to add Layer '" + element.getName() + "'");//NOI18N
             }
             String currentKeyString = getKeyforLayerElement(element);
-            if (isInitalLayerConfigurationFromServer() &&
-                    !masterLayerHashmap.containsKey(currentKeyString)) {
-                log.info("Layer in Serverkonfiguration nicht vorhanden, wird nicht hinzugefügt KeyString: "+currentKeyString);
+            if (isInitalLayerConfigurationFromServer()
+                    && !masterLayerHashmap.containsKey(currentKeyString)) {
+                log.info("Layer in Serverkonfiguration nicht vorhanden, wird nicht hinzugefügt KeyString: " + currentKeyString);
                 continue;
             }
             try {
@@ -1159,6 +1168,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                             log.fatal("InvokeLater in EDT");//NOI18N
                         }
                         EventQueue.invokeLater(new Runnable() {
+
                             @Override
                             public void run() {
                                 try {
