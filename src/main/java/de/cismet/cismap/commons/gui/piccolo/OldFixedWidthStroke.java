@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * FixedWidthStroke.java
  *
@@ -6,28 +13,41 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.util.PPaintContext;
+
 import java.awt.BasicStroke;
 
 /**
+ * DOCUMENT ME!
  *
- * @author hell
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
 public class OldFixedWidthStroke extends BasicStroke {
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    //~ Instance fields --------------------------------------------------------
+
     protected float multiplyer = 1.0f;
+
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
+    //~ Methods ----------------------------------------------------------------
 
     @Override
     public float getLineWidth() {
         if (PPaintContext.CURRENT_PAINT_CONTEXT != null) {
-            //log.fatal("LineWidth:"+super.getLineWidth() / (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale());
-            return super.getLineWidth() * multiplyer / (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+            // log.fatal("LineWidth:"+super.getLineWidth() / (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale());
+            return super.getLineWidth() * multiplyer / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
         } else {
             return super.getLineWidth() * multiplyer;
         }
     }
 
-    public void setMultiplyer(float multiplyer) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  multiplyer  DOCUMENT ME!
+     */
+    public void setMultiplyer(final float multiplyer) {
         this.multiplyer = multiplyer;
     }
 
@@ -40,5 +60,4 @@ public class OldFixedWidthStroke extends BasicStroke {
     public int getLineJoin() {
         return this.JOIN_ROUND;
     }
-    
 }

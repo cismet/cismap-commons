@@ -1,112 +1,117 @@
-/*
- * XPImage.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 20. April 2006, 17:13
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.nodes.PImage;
+
 import java.awt.EventQueue;
 import java.awt.Image;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class XPImage extends PImage {
+
+    //~ Instance fields --------------------------------------------------------
+
     private final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private int animationDuration;
 
-    public void setImage(String fileName, int animationDuration) {
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fileName           DOCUMENT ME!
+     * @param  animationDuration  DOCUMENT ME!
+     */
+    public void setImage(final String fileName, final int animationDuration) {
         this.animationDuration = animationDuration;
         if (getImage() != null) {
-            float t = super.getTransparency();
-            final XPImage old = (XPImage) this.clone();
+            final float t = super.getTransparency();
+            final XPImage old = (XPImage)this.clone();
             old.setImage(getImage());
             this.getParent().addChild(old);
             old.moveInFrontOf(this);
             this.setTransparency(0);
             super.setImage(fileName);
-            animateToTransparency(t,animationDuration);
-            old.animateToTransparency(0,animationDuration);
-            TimerTask task = new TimerTask() {
-                public void run() {
-                //XPImage.this.getParent().removeChild(old);
-                }
-            };
-            Timer timer = new Timer();
-            timer.schedule(task, (long) (animationDuration * 1.5));
+            animateToTransparency(t, animationDuration);
+            old.animateToTransparency(0, animationDuration);
+            final TimerTask task = new TimerTask() {
+
+                    @Override
+                    public void run() {
+                        // XPImage.this.getParent().removeChild(old);
+                    }
+                };
+
+            final Timer timer = new Timer();
+            timer.schedule(task, (long)(animationDuration * 1.5));
         } else {
-            float t = super.getTransparency();
+            final float t = super.getTransparency();
             setTransparency(0);
             setImage(fileName);
             animateToTransparency(t, animationDuration);
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  newImage           DOCUMENT ME!
+     * @param  animationDuration  DOCUMENT ME!
+     */
     public void setImage(final Image newImage, int animationDuration) {
         if (!getVisible()) {
             animationDuration = 0;
         }
-        if (getImage() != null&&this.getParent()!=null) {
-            float t = super.getTransparency();
-            XPImage oldX = new XPImage();
-            final XPImage old = (XPImage) this.clone();
+        if ((getImage() != null) && (this.getParent() != null)) {
+            final float t = super.getTransparency();
+            final XPImage oldX = new XPImage();
+            final XPImage old = (XPImage)this.clone();
             old.setImage(getImage());
-            log.debug("this.getParent() in setImage():" + this.getParent());//NOI18N
+            if (log.isDebugEnabled()) {
+                log.debug("this.getParent() in setImage():" + this.getParent()); // NOI18N
+            }
             this.getParent().addChild(old);
             old.moveInFrontOf(this);
             this.setTransparency(0);
             super.setImage(newImage);
             animateToTransparency(t, animationDuration);
             old.animateToTransparency(0, animationDuration);
-            TimerTask task = new TimerTask() {
-                public void run() {
-                    EventQueue.invokeLater(new Runnable() {
-                        public void run() {
-                            try {
-                                XPImage.this.getParent().removeChild(old);
-                            } catch (Exception e) {
-                                log.info("Removal of the temporary image failed. It was already removed.", e);//NOI18N
-                            }
-                        }
-                    });
-                }
-            };
-            Timer timer = new Timer();
-            timer.schedule(task, (long) (animationDuration * 4.5));
+            final TimerTask task = new TimerTask() {
+
+                    @Override
+                    public void run() {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    try {
+                                        XPImage.this.getParent().removeChild(old);
+                                    } catch (Exception e) {
+                                        log.info("Removal of the temporary image failed. It was already removed.", e); // NOI18N
+                                    }
+                                }
+                            });
+                    }
+                };
+
+            final Timer timer = new Timer();
+            timer.schedule(task, (long)(animationDuration * 4.5));
         } else {
-            float t = super.getTransparency();
+            final float t = super.getTransparency();
             setTransparency(0);
             setImage(newImage);
             animateToTransparency(t, animationDuration);
@@ -115,7 +120,7 @@ public class XPImage extends PImage {
 
     @Override
     public Object clone() {
-        XPImage cl = new XPImage();
+        final XPImage cl = new XPImage();
         cl.setImage(this.getImage());
         cl.setBounds(this.getBounds());
         cl.setOffset(getOffset());

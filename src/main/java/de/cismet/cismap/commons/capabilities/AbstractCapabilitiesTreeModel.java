@@ -1,28 +1,49 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package de.cismet.cismap.commons.capabilities;
 
 import javax.swing.tree.TreeModel;
 
 /**
+ * DOCUMENT ME!
  *
- * @author spuhl
+ * @author   spuhl
+ * @version  $Revision$, $Date$
  */
 public abstract class AbstractCapabilitiesTreeModel implements TreeModel {
 
-private String serviceName;
+    //~ Instance fields --------------------------------------------------------
 
+    private String serviceName;
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getServiceName() {
         return serviceName;
     }
 
-    public void setServiceName(String serviceName) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  serviceName  DOCUMENT ME!
+     */
+    public void setServiceName(final String serviceName) {
         this.serviceName = serviceName;
     }
-
 
 // TODO MUST BE REFACTORED ONE DERIVATION IS USING DEEGREE 1 THE OTHER DEEGREE 2
 //     /**
@@ -39,5 +60,5 @@ private String serviceName;
 //     */
 //    public void setCapabilities(WFSCapabilities capabilities) {
 //        this.capabilities = capabilities;
-//    }    
+//    }
 }

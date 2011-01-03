@@ -1,67 +1,75 @@
-/*
- * FeatureCollectionEvent.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 17. Mai 2006, 14:13
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.features;
 
 import java.util.Collection;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class FeatureCollectionEvent {
+
+    //~ Instance fields --------------------------------------------------------
+
     private Collection<Feature> eventFeatures;
     private FeatureCollection featureCollection;
-    /** Creates a new instance of FeatureCollectionEvent */
-    public FeatureCollectionEvent(FeatureCollection fc,Collection<Feature> features) {
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of FeatureCollectionEvent.
+     *
+     * @param  fc        DOCUMENT ME!
+     * @param  features  DOCUMENT ME!
+     */
+    public FeatureCollectionEvent(final FeatureCollection fc, final Collection<Feature> features) {
         this.setEventFeatures(features);
         this.setFeatureCollection(fc);
     }
 
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Collection<Feature> getEventFeatures() {
         return eventFeatures;
     }
 
-    public void setEventFeatures(Collection<Feature> features) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  features  DOCUMENT ME!
+     */
+    public void setEventFeatures(final Collection<Feature> features) {
         this.eventFeatures = features;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public FeatureCollection getFeatureCollection() {
         return featureCollection;
     }
 
-    public void setFeatureCollection(FeatureCollection featureCollection) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureCollection  DOCUMENT ME!
+     */
+    public void setFeatureCollection(final FeatureCollection featureCollection) {
         this.featureCollection = featureCollection;
     }
 }

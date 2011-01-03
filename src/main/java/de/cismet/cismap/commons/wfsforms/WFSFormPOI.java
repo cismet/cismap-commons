@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * WFSFormTester.java
  *
@@ -6,79 +13,114 @@
 package de.cismet.cismap.commons.wfsforms;
 
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
+
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+
 import java.awt.BorderLayout;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+
 import java.util.Vector;
+
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+
+import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+
+import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
+ * DOCUMENT ME!
  *
- * @author  thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class WFSFormPOI extends AbstractWFSForm {
+
+    //~ Instance fields --------------------------------------------------------
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private WFSFormFeature locationtype = null;
     private WFSFormFeature poi = null;
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox cboLocationtypes;
+    private javax.swing.JComboBox cboPois;
+    private javax.swing.JCheckBox chkLockScale;
+    private javax.swing.JCheckBox chkVisualize;
+    private javax.swing.JButton cmdOk;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JProgressBar prbLocationtypes;
+    private javax.swing.JProgressBar prbPois;
+    // End of variables declaration//GEN-END:variables
 
-    /** Creates new form WFSFormTester */
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates new form WFSFormTester.
+     */
     public WFSFormPOI() {
-        log.debug("new WFSFormPOI");//NOI18N
+        if (log.isDebugEnabled()) {
+            log.debug("new WFSFormPOI"); // NOI18N
+        }
         try {
             initComponents();
 //        cboStreets.setEditable(true);
 //        cboNr.setEditable(true);
-
 
             AutoCompleteDecorator.decorate(cboLocationtypes);
             AutoCompleteDecorator.decorate(cboPois);
             prbLocationtypes.setPreferredSize(new java.awt.Dimension(1, 5));
             prbPois.setPreferredSize(new java.awt.Dimension(1, 5));
 
-            listComponents.put("cboAllLocationtypes", cboLocationtypes);//NOI18N
-            listComponents.put("cboAllLocationtypesProgress", prbLocationtypes);//NOI18N
-            listComponents.put("cboPoisOfALocationtype", cboPois);//NOI18N
-            listComponents.put("cboPoisOfALocationtypeProgress", prbPois);//NOI18N
+            listComponents.put("cboAllLocationtypes", cboLocationtypes);         // NOI18N
+            listComponents.put("cboAllLocationtypesProgress", prbLocationtypes); // NOI18N
+            listComponents.put("cboPoisOfALocationtype", cboPois);               // NOI18N
+            listComponents.put("cboPoisOfALocationtypeProgress", prbPois);       // NOI18N
 
-            JTextField poiEditor = (JTextField) cboPois.getEditor().getEditorComponent();
+            final JTextField poiEditor = (JTextField)cboPois.getEditor().getEditorComponent();
             poiEditor.getDocument().addDocumentListener(new DocumentListener() {
 
-                public void insertUpdate(DocumentEvent e) {
-                    log.fatal(cboPois.getSelectedIndex());
-                    checkCboCorrectness(cboPois);
-                }
+                    @Override
+                    public void insertUpdate(final DocumentEvent e) {
+                        log.fatal(cboPois.getSelectedIndex());
+                        checkCboCorrectness(cboPois);
+                    }
 
-                public void removeUpdate(DocumentEvent e) {
-                    checkCboCorrectness(cboPois);
-                }
+                    @Override
+                    public void removeUpdate(final DocumentEvent e) {
+                        checkCboCorrectness(cboPois);
+                    }
 
-                public void changedUpdate(DocumentEvent e) {
-                    checkCboCorrectness(cboPois);
-                }
-            });
-            //CismapBroker.getInstance().getMappingComponent().getHighlightingLayer().addChild(pMark);
+                    @Override
+                    public void changedUpdate(final DocumentEvent e) {
+                        checkCboCorrectness(cboPois);
+                    }
+                });
+            // CismapBroker.getInstance().getMappingComponent().getHighlightingLayer().addChild(pMark);
         } catch (Exception e) {
-            log.error("Could not Create WFForm", e);//NOI18N
+            log.error("Could not Create WFForm", e); // NOI18N
         }
     }
-    public void garbageDuringAutoCompletion(JComboBox box){
-        poi=null;
+
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public void garbageDuringAutoCompletion(final JComboBox box) {
+        poi = null;
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -102,10 +144,12 @@ public class WFSFormPOI extends AbstractWFSForm {
         cmdOk.setMnemonic('P');
         cmdOk.setText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.cmdOk.text")); // NOI18N
         cmdOk.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdOkActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cmdOkActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -115,12 +159,16 @@ public class WFSFormPOI extends AbstractWFSForm {
         add(cmdOk, gridBagConstraints);
 
         chkVisualize.setSelected(true);
-        chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.chkVisualize.toolTipText")); // NOI18N
+        chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(
+                WFSFormPOI.class,
+                "WFSFormPOI.chkVisualize.toolTipText")); // NOI18N
         chkVisualize.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkVisualizeActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    chkVisualizeActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
@@ -129,8 +177,11 @@ public class WFSFormPOI extends AbstractWFSForm {
         gridBagConstraints.insets = new java.awt.Insets(3, 7, 0, 0);
         add(chkVisualize, gridBagConstraints);
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
-        jLabel1.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.jLabel1.toolTipText")); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
+        jLabel1.setToolTipText(org.openide.util.NbBundle.getMessage(
+                WFSFormPOI.class,
+                "WFSFormPOI.jLabel1.toolTipText"));                                          // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
@@ -140,7 +191,9 @@ public class WFSFormPOI extends AbstractWFSForm {
         add(jLabel1, gridBagConstraints);
 
         chkLockScale.setSelected(true);
-        chkLockScale.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.chkLockScale.toolTipText")); // NOI18N
+        chkLockScale.setToolTipText(org.openide.util.NbBundle.getMessage(
+                WFSFormPOI.class,
+                "WFSFormPOI.chkLockScale.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
@@ -149,8 +202,11 @@ public class WFSFormPOI extends AbstractWFSForm {
         gridBagConstraints.insets = new java.awt.Insets(3, 14, 0, 0);
         add(chkLockScale, gridBagConstraints);
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
-        jLabel2.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormPOI.class, "WFSFormPOI.jLabel2.toolTipText")); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
+        jLabel2.setToolTipText(org.openide.util.NbBundle.getMessage(
+                WFSFormPOI.class,
+                "WFSFormPOI.jLabel2.toolTipText"));                                            // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
@@ -162,16 +218,12 @@ public class WFSFormPOI extends AbstractWFSForm {
         jPanel1.setMinimumSize(new java.awt.Dimension(1, 1));
         jPanel1.setPreferredSize(new java.awt.Dimension(1, 1));
 
-        org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
+        final org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 9, Short.MAX_VALUE)
-        );
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 9, Short.MAX_VALUE));
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 30, Short.MAX_VALUE)
-        );
+            jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 30, Short.MAX_VALUE));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
@@ -188,10 +240,12 @@ public class WFSFormPOI extends AbstractWFSForm {
         cboPois.setMinimumSize(new java.awt.Dimension(180, 19));
         cboPois.setPreferredSize(new java.awt.Dimension(180, 19));
         cboPois.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboPoisActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cboPoisActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -218,15 +272,19 @@ public class WFSFormPOI extends AbstractWFSForm {
         cboLocationtypes.setMinimumSize(new java.awt.Dimension(180, 19));
         cboLocationtypes.setPreferredSize(new java.awt.Dimension(180, 19));
         cboLocationtypes.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboLocationtypesActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cboLocationtypesActionPerformed(evt);
+                }
+            });
         cboLocationtypes.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                cboLocationtypesKeyTyped(evt);
-            }
-        });
+
+                @Override
+                public void keyTyped(final java.awt.event.KeyEvent evt) {
+                    cboLocationtypesKeyTyped(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -247,9 +305,14 @@ public class WFSFormPOI extends AbstractWFSForm {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 9);
         add(prbLocationtypes, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
-    private void chkVisualizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVisualizeActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkVisualizeActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkVisualizeActionPerformed
         MappingComponent mc = getMappingComponent();
         if (mc == null) {
             mc = CismapBroker.getInstance().getMappingComponent();
@@ -261,29 +324,46 @@ public class WFSFormPOI extends AbstractWFSForm {
         if (poi != null) {
             visualizePosition(poi, chkVisualize.isSelected());
         }
-    }//GEN-LAST:event_chkVisualizeActionPerformed
+    } //GEN-LAST:event_chkVisualizeActionPerformed
 
-    private void cboLocationtypesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboLocationtypesActionPerformed
-        log.debug("cboStreetsActionPerformed()");//NOI18N
-        if (cboLocationtypes.getSelectedItem() instanceof WFSFormFeature) {
-            locationtype = (WFSFormFeature) cboLocationtypes.getSelectedItem();
-            poi = null;
-            requestRefresh("cboPoisOfALocationtype", (WFSFormFeature) cboLocationtypes.getSelectedItem());//NOI18N
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cboLocationtypesActionPerformed(final java.awt.event.ActionEvent evt) {                  //GEN-FIRST:event_cboLocationtypesActionPerformed
+        if (log.isDebugEnabled()) {
+            log.debug("cboStreetsActionPerformed()");                                                     // NOI18N
         }
-    }//GEN-LAST:event_cboLocationtypesActionPerformed
+        if (cboLocationtypes.getSelectedItem() instanceof WFSFormFeature) {
+            locationtype = (WFSFormFeature)cboLocationtypes.getSelectedItem();
+            poi = null;
+            requestRefresh("cboPoisOfALocationtype", (WFSFormFeature)cboLocationtypes.getSelectedItem()); // NOI18N
+        }
+    }                                                                                                     //GEN-LAST:event_cboLocationtypesActionPerformed
 
-    private void cboLocationtypesKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cboLocationtypesKeyTyped
-    }//GEN-LAST:event_cboLocationtypesKeyTyped
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cboLocationtypesKeyTyped(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_cboLocationtypesKeyTyped
+    }                                                                          //GEN-LAST:event_cboLocationtypesKeyTyped
 
-    private void cmdOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
-        boolean history = true;
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
+        final boolean history = true;
         MappingComponent mc = getMappingComponent();
         if (mc == null) {
             mc = CismapBroker.getInstance().getMappingComponent();
         }
-        boolean scaling = !(mc.isFixedMapScale()) && !(chkLockScale.isSelected());
+        final boolean scaling = !(mc.isFixedMapScale()) && !(chkLockScale.isSelected());
         BoundingBox bb = null;
-        int animation = mc.getAnimationDuration();
+        final int animation = mc.getAnimationDuration();
         if (poi != null) {
             if (scaling) {
                 bb = new BoundingBox(poi.getJTSGeometry());
@@ -295,65 +375,66 @@ public class WFSFormPOI extends AbstractWFSForm {
         }
         mc.gotoBoundingBox(bb, history, scaling, animation);
         chkVisualizeActionPerformed(null);
-    }//GEN-LAST:event_cmdOkActionPerformed
+    }                                                                         //GEN-LAST:event_cmdOkActionPerformed
 
-    private void cboPoisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboPoisActionPerformed
-        log.debug("cboPoisActionPerformed()");//NOI18N
-        if (cboPois.getSelectedItem() instanceof WFSFormFeature) {
-            poi = (WFSFormFeature) cboPois.getSelectedItem();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cboPoisActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboPoisActionPerformed
+        if (log.isDebugEnabled()) {
+            log.debug("cboPoisActionPerformed()");                              // NOI18N
         }
-    }//GEN-LAST:event_cboPoisActionPerformed
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox cboLocationtypes;
-    private javax.swing.JComboBox cboPois;
-    private javax.swing.JCheckBox chkLockScale;
-    private javax.swing.JCheckBox chkVisualize;
-    private javax.swing.JButton cmdOk;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JProgressBar prbLocationtypes;
-    private javax.swing.JProgressBar prbPois;
-    // End of variables declaration//GEN-END:variables
+        if (cboPois.getSelectedItem() instanceof WFSFormFeature) {
+            poi = (WFSFormFeature)cboPois.getSelectedItem();
+        }
+    }                                                                           //GEN-LAST:event_cboPoisActionPerformed
 
-    public static void main(String[] args) throws Exception {
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   args  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public static void main(final String[] args) throws Exception {
         try {
-            //javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()) ;
-            //javax.swing.UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-            //javax.swing.UIManager.setLookAndFeel(new PlasticLookAndFeel());
+            // javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()) ;
+            // javax.swing.UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+            // javax.swing.UIManager.setLookAndFeel(new PlasticLookAndFeel());
             javax.swing.UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
-            //javax.swing.UIManager.setLookAndFeel(new com.sun.java.swing.plaf.windows.WindowsLookAndFeel());
-            // UIManager.setLookAndFeel(new PlasticLookAndFeel());
-            //javax.swing.UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
+            // javax.swing.UIManager.setLookAndFeel(new com.sun.java.swing.plaf.windows.WindowsLookAndFeel());
+            // UIManager.setLookAndFeel(new PlasticLookAndFeel()); javax.swing.UIManager.setLookAndFeel(new
+            // PlasticXPLookAndFeel());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        WFSFormQuery allStreets = new WFSFormQuery();
-        allStreets.setComponentName("cboAllStreets");//NOI18N
-        allStreets.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");//NOI18N
-        allStreets.setDisplayTextProperty("geographicIdentifier");//NOI18N
-        allStreets.setExtentProperty("geographicExtent");//NOI18N
-        allStreets.setFilename("/request_all_streets.xml");//NOI18N
-        allStreets.setId("all_streets");//NOI18N
-        allStreets.setIdProperty("identifier");//NOI18N
-        allStreets.setTitle("Strassen");//NOI18N
+        final WFSFormQuery allStreets = new WFSFormQuery();
+        allStreets.setComponentName("cboAllStreets");                                                     // NOI18N
+        allStreets.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");                                      // NOI18N
+        allStreets.setDisplayTextProperty("geographicIdentifier");                                        // NOI18N
+        allStreets.setExtentProperty("geographicExtent");                                                 // NOI18N
+        allStreets.setFilename("/request_all_streets.xml");                                               // NOI18N
+        allStreets.setId("all_streets");                                                                  // NOI18N
+        allStreets.setIdProperty("identifier");                                                           // NOI18N
+        allStreets.setTitle("Strassen");                                                                  // NOI18N
         allStreets.setType(WFSFormQuery.INITIAL);
-        allStreets.setWfsQueryString(readFileAsString(new File("C:\\request_alle_strassen_extent.xml")));//NOI18N
+        allStreets.setWfsQueryString(readFileAsString(new File("C:\\request_alle_strassen_extent.xml"))); // NOI18N
 
-        WFSFormQuery numbers = new WFSFormQuery();
-        numbers.setComponentName("cboNumbersOfAStreet");//NOI18N
-        numbers.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");//NOI18N
-        numbers.setDisplayTextProperty("geographicIdentifier");//NOI18N
-        numbers.setExtentProperty("geographicExtent");//NOI18N
-        numbers.setFilename("/request_all_numbers.xml");//NOI18N
-        numbers.setId("numbers");//NOI18N
-        numbers.setIdProperty("identifier");//NOI18N
-        numbers.setTitle("Nr");//NOI18N
+        final WFSFormQuery numbers = new WFSFormQuery();
+        numbers.setComponentName("cboNumbersOfAStreet");                                                          // NOI18N
+        numbers.setServerUrl("http://s103bdc-a1/deegreewfs/wfs");                                                 // NOI18N
+        numbers.setDisplayTextProperty("geographicIdentifier");                                                   // NOI18N
+        numbers.setExtentProperty("geographicExtent");                                                            // NOI18N
+        numbers.setFilename("/request_all_numbers.xml");                                                          // NOI18N
+        numbers.setId("numbers");                                                                                 // NOI18N
+        numbers.setIdProperty("identifier");                                                                      // NOI18N
+        numbers.setTitle("Nr");                                                                                   // NOI18N
         numbers.setType(WFSFormQuery.FOLLOWUP);
-        numbers.setQueryPlaceholder("@@strasse_id@@");//NOI18N
-        numbers.setWfsQueryString(readFileAsString(new File("C:\\request_hausnummern_from_strasse_extent.xml")));//NOI18N
-        Vector<WFSFormQuery> v = new Vector<WFSFormQuery>();
+        numbers.setQueryPlaceholder("@@strasse_id@@");                                                            // NOI18N
+        numbers.setWfsQueryString(readFileAsString(new File("C:\\request_hausnummern_from_strasse_extent.xml"))); // NOI18N
+        final Vector<WFSFormQuery> v = new Vector<WFSFormQuery>();
         v.add(allStreets);
         v.add(numbers);
 
@@ -361,27 +442,36 @@ public class WFSFormPOI extends AbstractWFSForm {
         tester.setQueries(v);
         java.awt.EventQueue.invokeLater(new Runnable() {
 
-            public void run() {
-                JFrame f = new JFrame();
-                f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                f.getContentPane().setLayout(new BorderLayout());
-                f.getContentPane().add(tester, BorderLayout.CENTER);
-                f.setVisible(true);
-                f.setSize(365, 65);
-            }
-        });
-
+                @Override
+                public void run() {
+                    final JFrame f = new JFrame();
+                    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    f.getContentPane().setLayout(new BorderLayout());
+                    f.getContentPane().add(tester, BorderLayout.CENTER);
+                    f.setVisible(true);
+                    f.setSize(365, 65);
+                }
+            });
     }
 
-    private static String readFileAsString(File file) throws java.io.IOException {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   file  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  java.io.IOException  DOCUMENT ME!
+     */
+    private static String readFileAsString(final File file) throws java.io.IOException {
         Log4JQuickConfig.configure4LumbermillOnLocalhost();
-        StringBuffer fileData = new StringBuffer(1000);
-        BufferedReader reader = new BufferedReader(
+        final StringBuffer fileData = new StringBuffer(1000);
+        final BufferedReader reader = new BufferedReader(
                 new FileReader(file));
         char[] buf = new char[1024];
         int numRead = 0;
         while ((numRead = reader.read(buf)) != -1) {
-            String readData = String.valueOf(buf, 0, numRead);
+            final String readData = String.valueOf(buf, 0, numRead);
             fileData.append(readData);
             buf = new char[1024];
         }

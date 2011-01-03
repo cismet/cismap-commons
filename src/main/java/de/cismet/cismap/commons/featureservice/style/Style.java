@@ -1,92 +1,298 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package de.cismet.cismap.commons.featureservice.style;
 
-import de.cismet.cismap.commons.ConvertableToXML;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import java.awt.Color;
 import java.awt.Font;
 
+import de.cismet.cismap.commons.ConvertableToXML;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+
 /**
- * The Style interface provides miscellaneous constants that are needed by different
- * style-oriented classes. 
- * It extends the interfaces ConvertableToXML and Comparable that are mandatory for a 
- * working BasicStyle.
- * @author haffkeatcismet
+ * The Style interface provides miscellaneous constants that are needed by different style-oriented classes. It extends
+ * the interfaces ConvertableToXML and Comparable that are mandatory for a working BasicStyle.
+ *
+ * @author   haffkeatcismet
+ * @version  $Revision$, $Date$
  */
 public interface Style extends ConvertableToXML, Comparable, Cloneable {
-    // JDOM-elementconstants
-    //TODO: use english String constants instead of "Keins", "Punkt" and so on
-    public static final String STYLE_ELEMENT = "StyleHistoryElement";//NOI18N
-    public static final String FILL = "Fill";//NOI18N
-    public static final String LINE = "Line";//NOI18N
-    public static final String LABEL = "Label";//NOI18N
-    public static final String POINTSYMBOL = "Pointsymbol";//NOI18N
-    public static final String NO_POINTSYMBOL = "Keins";//NOI18N
-    public static final String AUTO_POINTSYMBOL = "Punkt";//NOI18N
-    public static final int MIN_POINTSYMBOLSIZE = 5;
-    public static final int MAX_POINTSYMBOLSIZE = 50;
-    
-    // JDOM-attributes
-    public static final String NAME = "name";//NOI18N
-    public static final String PAINT = "paint";//NOI18N
-    public static final String COLOR = "color";//NOI18N
-    public static final String WIDTH = "width";//NOI18N
-    public static final String ALPHA = "alpha";//NOI18N
-    public static final String HIGHLIGHT = "highlight";//NOI18N
-    public static final String SIZE = "size";//NOI18N
-    public static final String FAMILY = "family";//NOI18N
-    public static final String STYLE = "style";//NOI18N
-    public static final String ATTRIBUTE = "attribute";//NOI18N
-    public static final String ALIGNMENT = "alignment";//NOI18N
-    public static final String MIN_SCALE = "minscale";//NOI18N
-    public static final String MAX_SCALE = "maxscale";//NOI18N
-    public static final String MULTIPLIER = "multiplier";//NOI18N
-    public static final String AUTOSCALE = "autoscale";//NOI18N
-    
-    public Object clone() throws CloneNotSupportedException;
-    
-    public boolean isDrawFill();
-    public void setDrawFill(boolean drawFill);
-    public boolean isDrawLine();
-    public void setDrawLine(boolean drawLine);
-    public boolean isHighlightFeature();
-    public void setHighlightFeature(boolean highlight);
-    public Color getFillColor();
-    public void setFillColor(Color colorFill);
-    public Color getLineColor();
-    public void setLineColor(Color colorLine);
-    public int getLineWidth();
-    public void setLineWidth(int lineWidth);
-    public float getAlpha();
-    public void setAlpha(float alpha);
-    public FeatureAnnotationSymbol getPointSymbol();
-    @Deprecated
-    public void setPointSymbol(FeatureAnnotationSymbol pointSymbol);
-    public String getPointSymbolFilename();
-    public void setPointSymbolFilename(String pointSymbolFilename);
-    public int getPointSymbolSize();
-    public void setPointSymbolSize(int pointSymbolSize);
 
-    public boolean isDrawLabel();
-    public void setDrawLabel(boolean drawLabel);
-    public Font getFont();
-    public void setFont(Font font);
-    public Color getFontColor();
-    public void setFontColor(Color fontColor);
-    public String getLabel();
-    public void setLabel(String label);
-    public float getAlignment();
-    public void setAlignment(float alignment);
-    public int getMinScale();
-    public void setMinScale(int minScale);
-    public int getMaxScale();
-    public void setMaxScale(int maxScale);
-    public double getMultiplier();
-    public void setMultiplier(double multiplier);
-    public boolean isAutoscale();
-    public void setAutoscale(boolean autoscale);
+    //~ Instance fields --------------------------------------------------------
+
+    // JDOM-elementconstants
+    // TODO: use english String constants instead of "Keins", "Punkt" and so on
+    String STYLE_ELEMENT = "StyleHistoryElement"; // NOI18N
+    String FILL = "Fill";                         // NOI18N
+    String LINE = "Line";                         // NOI18N
+    String LABEL = "Label";                       // NOI18N
+    String POINTSYMBOL = "Pointsymbol";           // NOI18N
+    String NO_POINTSYMBOL = "Keins";              // NOI18N
+    String AUTO_POINTSYMBOL = "Punkt";            // NOI18N
+    int MIN_POINTSYMBOLSIZE = 5;
+    int MAX_POINTSYMBOLSIZE = 50;
+
+    // JDOM-attributes
+    String NAME = "name";             // NOI18N
+    String PAINT = "paint";           // NOI18N
+    String COLOR = "color";           // NOI18N
+    String WIDTH = "width";           // NOI18N
+    String ALPHA = "alpha";           // NOI18N
+    String HIGHLIGHT = "highlight";   // NOI18N
+    String SIZE = "size";             // NOI18N
+    String FAMILY = "family";         // NOI18N
+    String STYLE = "style";           // NOI18N
+    String ATTRIBUTE = "attribute";   // NOI18N
+    String ALIGNMENT = "alignment";   // NOI18N
+    String MIN_SCALE = "minscale";    // NOI18N
+    String MAX_SCALE = "maxscale";    // NOI18N
+    String MULTIPLIER = "multiplier"; // NOI18N
+    String AUTOSCALE = "autoscale";   // NOI18N
+
+    //~ Methods ----------------------------------------------------------------
+
+    // jalopy cannot handle this "fake" override
+
+    //J-
+    Object clone() throws CloneNotSupportedException;
+    //J+
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isDrawFill();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  drawFill  DOCUMENT ME!
+     */
+    void setDrawFill(boolean drawFill);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isDrawLine();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  drawLine  DOCUMENT ME!
+     */
+    void setDrawLine(boolean drawLine);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isHighlightFeature();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  highlight  DOCUMENT ME!
+     */
+    void setHighlightFeature(boolean highlight);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Color getFillColor();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  colorFill  DOCUMENT ME!
+     */
+    void setFillColor(Color colorFill);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Color getLineColor();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  colorLine  DOCUMENT ME!
+     */
+    void setLineColor(Color colorLine);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    int getLineWidth();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  lineWidth  DOCUMENT ME!
+     */
+    void setLineWidth(int lineWidth);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    float getAlpha();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  alpha  DOCUMENT ME!
+     */
+    void setAlpha(float alpha);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    FeatureAnnotationSymbol getPointSymbol();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pointSymbol  DOCUMENT ME!
+     */
+    @Deprecated
+    void setPointSymbol(FeatureAnnotationSymbol pointSymbol);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    String getPointSymbolFilename();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pointSymbolFilename  DOCUMENT ME!
+     */
+    void setPointSymbolFilename(String pointSymbolFilename);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    int getPointSymbolSize();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pointSymbolSize  DOCUMENT ME!
+     */
+    void setPointSymbolSize(int pointSymbolSize);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isDrawLabel();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  drawLabel  DOCUMENT ME!
+     */
+    void setDrawLabel(boolean drawLabel);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Font getFont();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  font  DOCUMENT ME!
+     */
+    void setFont(Font font);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Color getFontColor();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fontColor  DOCUMENT ME!
+     */
+    void setFontColor(Color fontColor);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    String getLabel();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  label  DOCUMENT ME!
+     */
+    void setLabel(String label);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    float getAlignment();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  alignment  DOCUMENT ME!
+     */
+    void setAlignment(float alignment);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    int getMinScale();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  minScale  DOCUMENT ME!
+     */
+    void setMinScale(int minScale);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    int getMaxScale();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  maxScale  DOCUMENT ME!
+     */
+    void setMaxScale(int maxScale);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    double getMultiplier();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  multiplier  DOCUMENT ME!
+     */
+    void setMultiplier(double multiplier);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isAutoscale();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  autoscale  DOCUMENT ME!
+     */
+    void setAutoscale(boolean autoscale);
 }

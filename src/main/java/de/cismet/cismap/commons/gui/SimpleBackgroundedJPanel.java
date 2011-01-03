@@ -1,81 +1,123 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * SimpleBackgroundedJPanel.java
  *
  * Created on 4. April 2005, 18:09
  */
-
 package de.cismet.cismap.commons.gui;
 
 import edu.umd.cs.piccolo.PCanvas;
+
 import javax.swing.JPanel;
 
 /**
+ * DOCUMENT ME!
  *
- * @author hell
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
-public class SimpleBackgroundedJPanel extends JPanel implements java.beans.PropertyChangeListener{
+public class SimpleBackgroundedJPanel extends JPanel implements java.beans.PropertyChangeListener {
+
+    //~ Instance fields --------------------------------------------------------
+
     PCanvas viewer;
     private boolean backgroundEnabled;
-    /** Creates a new instance of SimpleBackgroundedJPanel */
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of SimpleBackgroundedJPanel.
+     */
     public SimpleBackgroundedJPanel() {
         addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentResized(java.awt.event.ComponentEvent evt) {
-                formComponentResized(evt);
-            }
-        });
-        
+
+                @Override
+                public void componentResized(final java.awt.event.ComponentEvent evt) {
+                    formComponentResized(evt);
+                }
+            });
     }
-    
-    public void formComponentResized(java.awt.event.ComponentEvent evt){
-        if (viewer!=null) {
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    public void formComponentResized(final java.awt.event.ComponentEvent evt) {
+        if (viewer != null) {
             viewer.setSize(evt.getComponent().getSize());
         }
     }
-    
-    public void setPCanvas(PCanvas v) {
-        viewer=v;
-        //viewer.addPropertyChangeListener(this);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  v  DOCUMENT ME!
+     */
+    public void setPCanvas(final PCanvas v) {
+        viewer = v;
+        // viewer.addPropertyChangeListener(this);
         viewer.getCamera().addPropertyChangeListener(this);
-        
     }
 
-    public void paint(java.awt.Graphics g) {
+    @Override
+    public void paint(final java.awt.Graphics g) {
         super.paintComponent(g);
-        if (viewer!=null){//&&backgroundEnabled==true) {
+        if (viewer != null) { // &&backgroundEnabled==true) {
             try {
                 viewer.paint(g);
+            } catch (Exception e) {
             }
-            catch (Exception e) {}
         }
-        //g.setColor(new Color(g.getColor().getRed(),g.getColor().getGreen(),g.getColor().getBlue(),200));
+        // g.setColor(new Color(g.getColor().getRed(),g.getColor().getGreen(),g.getColor().getBlue(),200));
         super.paintChildren(g);
-        //super.paint(g);
-    }
-    
-    public void propertyChange(java.beans.PropertyChangeEvent evt){
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                repaint();
-            }
-        });
+        // super.paint(g);
     }
 
+    @Override
+    public void propertyChange(final java.beans.PropertyChangeEvent evt) {
+        java.awt.EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    repaint();
+                }
+            });
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public boolean isBackgroundEnabled() {
         return backgroundEnabled;
     }
 
-    public void setBackgroundEnabled(boolean enabled) {
-        if (viewer!=null) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  enabled  DOCUMENT ME!
+     */
+    public void setBackgroundEnabled(final boolean enabled) {
+        if (viewer != null) {
 //            if (enabled!=backgroundEnabled) {
-                if (!enabled) {
-                    viewer.getCamera().animateToTransparency(0,1000);
-                }
-                else {
-                    viewer.getCamera().animateToTransparency(0.3f,1000);
-                }
+            if (!enabled) {
+                viewer.getCamera().animateToTransparency(0, 1000);
+            } else {
+                viewer.getCamera().animateToTransparency(0.3f, 1000);
+            }
 //            }
         }
-        backgroundEnabled=enabled;
+        backgroundEnabled = enabled;
 //        this.backgroundEnabled = enabled;
 //        java.awt.EventQueue.invokeLater(new Runnable() {
 //            public void run() {
@@ -83,6 +125,4 @@ public class SimpleBackgroundedJPanel extends JPanel implements java.beans.Prope
 //            }
 //        });
     }
-    
-    
 }

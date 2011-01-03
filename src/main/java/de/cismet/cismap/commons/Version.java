@@ -1,7 +1,14 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons;
 /*
  * Version.java
- * 
+ *
  * Created on 18. M\u00E4rz 2005, 12:44
  *
  * 1.2
@@ -13,7 +20,7 @@ package de.cismet.cismap.commons;
  * 1.4
  * MultiPointSplitting
  * 1.5
- * 1.6 
+ * 1.6
  * Cursorkram
  * 1.7
  * Zeitverschiebung eingetragen
@@ -30,24 +37,43 @@ package de.cismet.cismap.commons;
  * test
  */
 
-
-
 /**
  * -
- * @author hell
+ *
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
-public class Version  {
-    private  final static String VERSION="cismapCommons.jar Version:2 ($Date: 2009/10/15 09:02:50 $(+2) $Revision: 1.15 $";//NOI18N
-    /** Creates a new instance of Version */
+public class Version {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final String VERSION =
+        "cismapCommons.jar Version:2 ($Date: 2009/10/15 09:02:50 $(+2) $Revision: 1.15 $"; // NOI18N
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of Version.
+     */
     public Version() {
-        
     }
-    
-    public static void main(String[] args) {
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
         System.out.println(getVersion());
     }
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public static String getVersion() {
         return VERSION;
     }
-    
 }

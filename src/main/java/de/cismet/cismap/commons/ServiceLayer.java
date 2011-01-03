@@ -1,57 +1,83 @@
-/*
- * ServiceLayer.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 15. Juni 2005, 16:42
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons;
 
 import java.util.HashMap;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
-public interface ServiceLayer {    
-    public static final int LAYER_ENABLED_VISIBLE=0;
-    public static final int LAYER_DISABLED_VISIBLE=1;
-    public static final int LAYER_ENABLED_INVISIBLE=2;
-    public static final int LAYER_DISABLED_INVISIBLE=3;
-    public boolean isEnabled();
-    public void setEnabled(boolean enabled);
-    public boolean canBeDisabled();
-    public int getLayerPosition();
-    public void setLayerPosition(int layerPosition);
-    public float getTranslucency();
-    public void setTranslucency(float t);
-    public String getName();
-    public void setName(String name);    
+public interface ServiceLayer {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    int LAYER_ENABLED_VISIBLE = 0;
+    int LAYER_DISABLED_VISIBLE = 1;
+    int LAYER_ENABLED_INVISIBLE = 2;
+    int LAYER_DISABLED_INVISIBLE = 3;
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isEnabled();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  enabled  DOCUMENT ME!
+     */
+    void setEnabled(boolean enabled);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean canBeDisabled();
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    int getLayerPosition();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layerPosition  DOCUMENT ME!
+     */
+    void setLayerPosition(int layerPosition);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    float getTranslucency();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  t  DOCUMENT ME!
+     */
+    void setTranslucency(float t);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    String getName();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  name  DOCUMENT ME!
+     */
+    void setName(String name);
 }

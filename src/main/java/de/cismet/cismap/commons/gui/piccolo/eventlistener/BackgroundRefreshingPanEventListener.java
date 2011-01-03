@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * BackgroundRefreshingPanEventListener.java
  *
@@ -5,46 +12,57 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import de.cismet.cismap.commons.ServiceLayer;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.event.PPanEventHandler;
 import edu.umd.cs.piccolo.nodes.PImage;
+
 import java.awt.Image;
 
+import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+
 /**
+ * DOCUMENT ME!
  *
- * @author hell
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
 public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
+    //~ Instance fields --------------------------------------------------------
+
     PImage pi;
     boolean rasterServiceLayerVisible = true;
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
+    //~ Methods ----------------------------------------------------------------
 
     @Override
-    protected void dragActivityFinalStep(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        //TODO
-        //1. DragBild unsichtbar machen
-        //2. Alle FeatureLayer die sichtbar sein sollen wieder sichtbar machen
+    protected void dragActivityFinalStep(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+        // TODO
+        // 1. DragBild unsichtbar machen
+        // 2. Alle FeatureLayer die sichtbar sein sollen wieder sichtbar machen
         super.dragActivityFinalStep(pInputEvent);
 //        if (pInputEvent.getComponent() instanceof SimpleFeatureViewer) {
-//            ((SimpleFeatureViewer)pInputEvent.getComponent()).refreshBackground();                            
+//            ((SimpleFeatureViewer)pInputEvent.getComponent()).refreshBackground();
 //        }
         if (pInputEvent.getComponent() instanceof MappingComponent) {
-            MappingComponent mc = (MappingComponent) pInputEvent.getComponent();
-            //mc.showHandles(false);
-            if (mc.getCismapPrefs() != null && mc.getCismapPrefs().getGlobalPrefs() != null && mc.getCismapPrefs().getGlobalPrefs().isPanPerformanceBoosterEnabled() && mc.getMappingModel().getFeatureServices().size() > 0) {
+            final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
+            // mc.showHandles(false);
+            if ((mc.getCismapPrefs() != null) && (mc.getCismapPrefs().getGlobalPrefs() != null)
+                        && mc.getCismapPrefs().getGlobalPrefs().isPanPerformanceBoosterEnabled()
+                        && (mc.getMappingModel().getFeatureServices().size() > 0)) {
                 mc.getRasterServiceLayer().setVisible(rasterServiceLayerVisible);
                 mc.getDragPerformanceImproverLayer().setVisible(false);
                 mc.getDragPerformanceImproverLayer().removeAllChildren();
                 for (int i = 0; i < mc.getFeatureServiceLayer().getChildrenCount(); ++i) {
-                    Object o = mc.getFeatureServiceLayer().getChild(i).getClientProperty("serviceLayer");//NOI18N
+                    final Object o = mc.getFeatureServiceLayer().getChild(i).getClientProperty("serviceLayer");      // NOI18N
                     boolean enabled = true;
-                    if (o != null && o instanceof ServiceLayer) {
-                        enabled = ((ServiceLayer) o).isEnabled() && mc.isBackgroundEnabled();
+                    if ((o != null) && (o instanceof ServiceLayer)) {
+                        enabled = ((ServiceLayer)o).isEnabled() && mc.isBackgroundEnabled();
                     } else {
-                        log.warn("konnte nicht feststellen ob ServiceLayer enabled war, deswegen auf true gesetzt");//NOI18N
+                        log.warn("konnte nicht feststellen ob ServiceLayer enabled war, deswegen auf true gesetzt"); // NOI18N
                     }
                     mc.getFeatureServiceLayer().getChild(i).setVisible(enabled);
                 }
@@ -56,19 +74,24 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
     }
 
     /**
-     * Override this method to get notified when the drag activity
-     * starts stepping.
+     * Override this method to get notified when the drag activity starts stepping.
+     *
+     * @param  aEvent  DOCUMENT ME!
      */
     @Override
-    protected void dragActivityFirstStep(edu.umd.cs.piccolo.event.PInputEvent aEvent) {
-        //1. Schritt ein Bild des aktuellen PCanvas schiessen
-        //2. Dieses Bild als obersten Layer einblenden und richtig positionieren 
-        //3. Alle FeatureLayer unsichtbar machen
+    protected void dragActivityFirstStep(final edu.umd.cs.piccolo.event.PInputEvent aEvent) {
+        // 1. Schritt ein Bild des aktuellen PCanvas schiessen
+        // 2. Dieses Bild als obersten Layer einblenden und richtig positionieren
+        // 3. Alle FeatureLayer unsichtbar machen
         if (aEvent.getComponent() instanceof MappingComponent) {
-            MappingComponent mc = (MappingComponent) aEvent.getComponent();
+            final MappingComponent mc = (MappingComponent)aEvent.getComponent();
 //            mc.getHandleLayer().removeAllChildren();
-            if (mc.getCismapPrefs() != null && mc.getCismapPrefs().getGlobalPrefs() != null && mc.getCismapPrefs().getGlobalPrefs().isPanPerformanceBoosterEnabled() && mc.getMappingModel().getFeatureServices().size() > 0) {
-                log.debug("isPanPerformanceBoosterEnabled");//NOI18N
+            if ((mc.getCismapPrefs() != null) && (mc.getCismapPrefs().getGlobalPrefs() != null)
+                        && mc.getCismapPrefs().getGlobalPrefs().isPanPerformanceBoosterEnabled()
+                        && (mc.getMappingModel().getFeatureServices().size() > 0)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("isPanPerformanceBoosterEnabled"); // NOI18N
+                }
                 refreshImage(mc);
                 mc.getDragPerformanceImproverLayer().setVisible(true);
                 mc.getRasterServiceLayer().setVisible(false);
@@ -82,17 +105,22 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
     }
 
     @Override
-    public void mouseMoved(edu.umd.cs.piccolo.event.PInputEvent event) {
+    public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent event) {
         super.mouseMoved(event);
     }
 
-    private void refreshImage(MappingComponent mc) {
-        //Hier gibts bei gro\u00DFen Bildern noch ein Performanceproblem
-        // kann dadurch gel\u00F6st werden indem man diese Bild schon vorher erzeugt und 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mc  DOCUMENT ME!
+     */
+    private void refreshImage(final MappingComponent mc) {
+        // Hier gibts bei gro\u00DFen Bildern noch ein Performanceproblem
+        // kann dadurch gel\u00F6st werden indem man diese Bild schon vorher erzeugt und
         // hier nur noch \u00FCberpr\u00FCft ob es aktualisiert werden muss.
         // evtl auch nur einen einfachen Layer nehmen. Vielleicht bringts das auch schon
         rasterServiceLayerVisible = mc.getRasterServiceLayer().getVisible();
-        Image i = mc.getCamera().toImage();
+        final Image i = mc.getCamera().toImage();
         pi = new PImage(i);
         mc.getDragPerformanceImproverLayer().removeAllChildren();
         mc.getDragPerformanceImproverLayer().addChild(pi);
@@ -104,7 +132,7 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
     }
 
     @Override
-    public void mouseDragged(PInputEvent e) {
+    public void mouseDragged(final PInputEvent e) {
         super.mouseDragged(e);
         CismapBroker.getInstance().fireMapBoundsChanged();
     }

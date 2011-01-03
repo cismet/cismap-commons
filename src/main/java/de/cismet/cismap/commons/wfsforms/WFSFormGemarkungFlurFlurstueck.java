@@ -1,32 +1,65 @@
- /*
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
+/*
  * WFSFormGemarkungFlurFlurstueck.java
  *
  * Created on 2. August 2006, 14:45
  */
 package de.cismet.cismap.commons.wfsforms;
 
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.interaction.CismapBroker;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+
 import java.util.Vector;
+
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+
+import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
+ * DOCUMENT ME!
  *
- * @author  thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
+
+    //~ Instance fields --------------------------------------------------------
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private WFSFormFeature gemarkung = null;
     private WFSFormFeature flur = null;
     private WFSFormFeature flurstueck = null;
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JComboBox cboFlur;
+    private javax.swing.JComboBox cboFlurstueck;
+    private javax.swing.JComboBox cboGem;
+    private javax.swing.JCheckBox chkLockScale;
+    private javax.swing.JCheckBox chkVisualize;
+    private javax.swing.JButton cmdPos;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JPanel panEmpty;
+    private javax.swing.JProgressBar prbFlur;
+    private javax.swing.JProgressBar prbFlurstueck;
+    private javax.swing.JProgressBar prbGem;
+    // End of variables declaration//GEN-END:variables
 
-    /** Creates new form WFSFormGemarkungFlurFlurstueck */
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates new form WFSFormGemarkungFlurFlurstueck.
+     */
     public WFSFormGemarkungFlurFlurstueck() {
         try {
             initComponents();
@@ -36,69 +69,71 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
             AutoCompleteDecorator.decorate(cboGem);
             AutoCompleteDecorator.decorate(cboFlur);
             AutoCompleteDecorator.decorate(cboFlurstueck);
-            listComponents.put("cboGem", cboGem);//NOI18N
-            listComponents.put("cboGemProgress", prbGem);//NOI18N
-            listComponents.put("cboFlur", cboFlur);//NOI18N
-            listComponents.put("cboFlurProgress", prbFlur);//NOI18N
-            listComponents.put("cboFlurstueck", cboFlurstueck);//NOI18N
-            listComponents.put("cboFlurstueckProgress", prbFlurstueck);//NOI18N
+            listComponents.put("cboGem", cboGem);                       // NOI18N
+            listComponents.put("cboGemProgress", prbGem);               // NOI18N
+            listComponents.put("cboFlur", cboFlur);                     // NOI18N
+            listComponents.put("cboFlurProgress", prbFlur);             // NOI18N
+            listComponents.put("cboFlurstueck", cboFlurstueck);         // NOI18N
+            listComponents.put("cboFlurstueckProgress", prbFlurstueck); // NOI18N
 
-            
-            JTextField flurEditor = (JTextField) cboFlur.getEditor().getEditorComponent();
+            final JTextField flurEditor = (JTextField)cboFlur.getEditor().getEditorComponent();
             flurEditor.getDocument().addDocumentListener(new DocumentListener() {
 
-                public void insertUpdate(DocumentEvent e) {
-                    //log.fatal(cboFlur.getSelectedIndex());
-                    checkCboCorrectness(cboFlur);
-                }
+                    @Override
+                    public void insertUpdate(final DocumentEvent e) {
+                        // log.fatal(cboFlur.getSelectedIndex());
+                        checkCboCorrectness(cboFlur);
+                    }
 
-                public void removeUpdate(DocumentEvent e) {
-                    checkCboCorrectness(cboFlur);
-                }
+                    @Override
+                    public void removeUpdate(final DocumentEvent e) {
+                        checkCboCorrectness(cboFlur);
+                    }
 
-                public void changedUpdate(DocumentEvent e) {
-                    checkCboCorrectness(cboFlur);
-                }
-            });
+                    @Override
+                    public void changedUpdate(final DocumentEvent e) {
+                        checkCboCorrectness(cboFlur);
+                    }
+                });
 
-
-
-            JTextField flurstueckEditor = (JTextField) cboFlurstueck.getEditor().getEditorComponent();
+            final JTextField flurstueckEditor = (JTextField)cboFlurstueck.getEditor().getEditorComponent();
             flurstueckEditor.getDocument().addDocumentListener(new DocumentListener() {
 
-                public void insertUpdate(DocumentEvent e) {
-                   // log.fatal(cboFlurstueck.getSelectedIndex());
-                    checkCboCorrectness(cboFlurstueck);
-                }
+                    @Override
+                    public void insertUpdate(final DocumentEvent e) {
+                        // log.fatal(cboFlurstueck.getSelectedIndex());
+                        checkCboCorrectness(cboFlurstueck);
+                    }
 
-                public void removeUpdate(DocumentEvent e) {
-                    checkCboCorrectness(cboFlurstueck);
-                }
+                    @Override
+                    public void removeUpdate(final DocumentEvent e) {
+                        checkCboCorrectness(cboFlurstueck);
+                    }
 
-                public void changedUpdate(DocumentEvent e) {
-                    checkCboCorrectness(cboFlurstueck);
-                }
-            });
-
-
+                    @Override
+                    public void changedUpdate(final DocumentEvent e) {
+                        checkCboCorrectness(cboFlurstueck);
+                    }
+                });
         } catch (Exception e) {
-            log.error("Could not Create WFForm", e);//NOI18N
+            log.error("Could not Create WFForm", e); // NOI18N
         }
     }
 
-    public void garbageDuringAutoCompletion(JComboBox box){
-        if (box == cboFlur){
-            flur=null;
-        }
-        else if(box==cboFlurstueck){
-            flurstueck=null;
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public void garbageDuringAutoCompletion(final JComboBox box) {
+        if (box == cboFlur) {
+            flur = null;
+        } else if (box == cboFlurstueck) {
+            flurstueck = null;
         }
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -122,12 +157,16 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         setLayout(new java.awt.GridBagLayout());
 
         cmdPos.setMnemonic('P');
-        cmdPos.setText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.cmdPos.text")); // NOI18N
+        cmdPos.setText(org.openide.util.NbBundle.getMessage(
+                WFSFormGemarkungFlurFlurstueck.class,
+                "WFSFormGemarkungFlurFlurstueck.cmdPos.text")); // NOI18N
         cmdPos.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdPosActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cmdPosActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
@@ -137,12 +176,16 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         add(cmdPos, gridBagConstraints);
 
         chkVisualize.setSelected(true);
-        chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.chkVisualize.toolTipText")); // NOI18N
+        chkVisualize.setToolTipText(org.openide.util.NbBundle.getMessage(
+                WFSFormGemarkungFlurFlurstueck.class,
+                "WFSFormGemarkungFlurFlurstueck.chkVisualize.toolTipText")); // NOI18N
         chkVisualize.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                chkVisualizeActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    chkVisualizeActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
@@ -151,8 +194,11 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         gridBagConstraints.insets = new java.awt.Insets(3, 7, 0, 0);
         add(chkVisualize, gridBagConstraints);
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
-        jLabel2.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.jLabel2.toolTipText")); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"))); // NOI18N
+        jLabel2.setToolTipText(org.openide.util.NbBundle.getMessage(
+                WFSFormGemarkungFlurFlurstueck.class,
+                "WFSFormGemarkungFlurFlurstueck.jLabel2.toolTipText"));                      // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
@@ -162,7 +208,9 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         add(jLabel2, gridBagConstraints);
 
         chkLockScale.setSelected(true);
-        chkLockScale.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.chkLockScale.toolTipText")); // NOI18N
+        chkLockScale.setToolTipText(org.openide.util.NbBundle.getMessage(
+                WFSFormGemarkungFlurFlurstueck.class,
+                "WFSFormGemarkungFlurFlurstueck.chkLockScale.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
@@ -171,8 +219,11 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         gridBagConstraints.insets = new java.awt.Insets(3, 14, 0, 0);
         add(chkLockScale, gridBagConstraints);
 
-        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
-        jLabel3.setToolTipText(org.openide.util.NbBundle.getMessage(WFSFormGemarkungFlurFlurstueck.class, "WFSFormGemarkungFlurFlurstueck.jLabel3.toolTipText")); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/fixMapScale.png"))); // NOI18N
+        jLabel3.setToolTipText(org.openide.util.NbBundle.getMessage(
+                WFSFormGemarkungFlurFlurstueck.class,
+                "WFSFormGemarkungFlurFlurstueck.jLabel3.toolTipText"));                        // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
@@ -183,16 +234,12 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
 
         panEmpty.setPreferredSize(new java.awt.Dimension(1, 1));
 
-        org.jdesktop.layout.GroupLayout panEmptyLayout = new org.jdesktop.layout.GroupLayout(panEmpty);
+        final org.jdesktop.layout.GroupLayout panEmptyLayout = new org.jdesktop.layout.GroupLayout(panEmpty);
         panEmpty.setLayout(panEmptyLayout);
         panEmptyLayout.setHorizontalGroup(
-            panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 32, Short.MAX_VALUE)
-        );
+            panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 32, Short.MAX_VALUE));
         panEmptyLayout.setVerticalGroup(
-            panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 29, Short.MAX_VALUE)
-        );
+            panEmptyLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 29, Short.MAX_VALUE));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 8;
@@ -209,10 +256,12 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         cboGem.setMinimumSize(new java.awt.Dimension(100, 19));
         cboGem.setPreferredSize(new java.awt.Dimension(100, 19));
         cboGem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboGemActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cboGemActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -241,10 +290,12 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         cboFlurstueck.setMinimumSize(new java.awt.Dimension(27, 19));
         cboFlurstueck.setPreferredSize(new java.awt.Dimension(27, 19));
         cboFlurstueck.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboFlurstueckActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cboFlurstueckActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -273,10 +324,12 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         cboFlur.setMinimumSize(new java.awt.Dimension(27, 19));
         cboFlur.setPreferredSize(new java.awt.Dimension(27, 19));
         cboFlur.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboFlurActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cboFlurActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -298,78 +351,101 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 10);
         add(prbFlur, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
-    private void cmdPosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdPosActionPerformed
-        boolean history = true;
+    } // </editor-fold>//GEN-END:initComponents
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdPosActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdPosActionPerformed
+        final boolean history = true;
         MappingComponent mc = getMappingComponent();
         if (mc == null) {
             mc = CismapBroker.getInstance().getMappingComponent();
         }
 
-        boolean scaling = !(mc.isFixedMapScale())&& !(chkLockScale.isSelected());
-        
+        final boolean scaling = !(mc.isFixedMapScale()) && !(chkLockScale.isSelected());
+
         BoundingBox bb = null;
-        int animation = mc.getAnimationDuration();
+        final int animation = mc.getAnimationDuration();
         if (flurstueck != null) {
             if (scaling) {
                 bb = new BoundingBox(flurstueck.getJTSGeometry());
-            }
-            else {
-                bb=new BoundingBox(flurstueck.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
+            } else {
+                bb = new BoundingBox(flurstueck.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
             }
         } else if (flur != null) {
             if (scaling) {
                 bb = new BoundingBox(flur.getJTSGeometry());
+            } else {
+                bb = new BoundingBox(flur.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
             }
-            else {
-                bb=new BoundingBox(flur.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
-            }
-            
         } else if (gemarkung != null) {
             if (scaling) {
-            bb = new BoundingBox(gemarkung.getJTSGeometry());
-            }
-            else {
-                bb=new BoundingBox(gemarkung.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
+                bb = new BoundingBox(gemarkung.getJTSGeometry());
+            } else {
+                bb = new BoundingBox(gemarkung.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
             }
         } else {
             return;
         }
         mc.gotoBoundingBox(bb, history, scaling, animation);
         chkVisualizeActionPerformed(null);
-    }//GEN-LAST:event_cmdPosActionPerformed
+    } //GEN-LAST:event_cmdPosActionPerformed
 
-    private void cboFlurstueckActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFlurstueckActionPerformed
-        Object selected = cboFlurstueck.getSelectedItem();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cboFlurstueckActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboFlurstueckActionPerformed
+        final Object selected = cboFlurstueck.getSelectedItem();
         if (selected instanceof WFSFormFeature) {
-            flurstueck = (WFSFormFeature) selected;
+            flurstueck = (WFSFormFeature)selected;
         }
-    }//GEN-LAST:event_cboFlurstueckActionPerformed
+    }                                                                                 //GEN-LAST:event_cboFlurstueckActionPerformed
 
-    private void cboFlurActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFlurActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cboFlurActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboFlurActionPerformed
 
-        Object selected = cboFlur.getSelectedItem();
-        log.debug("cboFlurActionPerformed selected=" + selected);//NOI18N
+        final Object selected = cboFlur.getSelectedItem();
+        if (log.isDebugEnabled()) {
+            log.debug("cboFlurActionPerformed selected=" + selected);  // NOI18N
+        }
         if (selected instanceof WFSFormFeature) {
-            flur = (WFSFormFeature) selected;
+            flur = (WFSFormFeature)selected;
             flurstueck = null;
-            requestRefresh("cboFlurstueck", (WFSFormFeature) selected);//NOI18N
+            requestRefresh("cboFlurstueck", (WFSFormFeature)selected); // NOI18N
         }
-    }//GEN-LAST:event_cboFlurActionPerformed
+    }                                                                  //GEN-LAST:event_cboFlurActionPerformed
 
-    private void cboGemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboGemActionPerformed
-        Object selected = cboGem.getSelectedItem();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cboGemActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboGemActionPerformed
+        final Object selected = cboGem.getSelectedItem();
         if (selected instanceof WFSFormFeature) {
-            gemarkung = (WFSFormFeature) selected;
+            gemarkung = (WFSFormFeature)selected;
             flur = null;
             flurstueck = null;
-            requestRefresh("cboFlur", (WFSFormFeature) selected);//NOI18N
+            requestRefresh("cboFlur", (WFSFormFeature)selected);               // NOI18N
             cboFlurstueck.setEnabled(false);
             cboFlurstueck.setModel(new DefaultComboBoxModel(new Vector()));
         }
-    }//GEN-LAST:event_cboGemActionPerformed
+    }                                                                          //GEN-LAST:event_cboGemActionPerformed
 
-    private void chkVisualizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVisualizeActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkVisualizeActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkVisualizeActionPerformed
         if (mappingComponent == null) {
             mappingComponent = CismapBroker.getInstance().getMappingComponent();
         }
@@ -384,19 +460,5 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         } else if (gemarkung != null) {
             visualizePosition(gemarkung, chkVisualize.isSelected());
         }
-    }//GEN-LAST:event_chkVisualizeActionPerformed
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox cboFlur;
-    private javax.swing.JComboBox cboFlurstueck;
-    private javax.swing.JComboBox cboGem;
-    private javax.swing.JCheckBox chkLockScale;
-    private javax.swing.JCheckBox chkVisualize;
-    private javax.swing.JButton cmdPos;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JPanel panEmpty;
-    private javax.swing.JProgressBar prbFlur;
-    private javax.swing.JProgressBar prbFlurstueck;
-    private javax.swing.JProgressBar prbGem;
-    // End of variables declaration//GEN-END:variables
+    } //GEN-LAST:event_chkVisualizeActionPerformed
 }

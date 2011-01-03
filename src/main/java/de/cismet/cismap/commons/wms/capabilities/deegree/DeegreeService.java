@@ -1,51 +1,73 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  *  Copyright (C) 2010 therter
- * 
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.cismet.cismap.commons.wms.capabilities.deegree;
 
-import de.cismet.cismap.commons.capabilities.Service;
-import java.util.ArrayList;
-import java.util.List;
 import org.deegree.model.metadata.iso19115.Constraints;
 import org.deegree.model.metadata.iso19115.Keywords;
 import org.deegree.owscommon_new.ServiceIdentification;
 import org.deegree.owscommon_new.ServiceProvider;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import de.cismet.cismap.commons.capabilities.Service;
 
 /**
+ * DOCUMENT ME!
  *
- * @author therter
+ * @author   therter
+ * @version  $Revision$, $Date$
  */
 public class DeegreeService implements Service {
+
+    //~ Instance fields --------------------------------------------------------
+
     private ServiceProvider service;
     private ServiceIdentification ident;
 
-    public DeegreeService(ServiceProvider service, ServiceIdentification ident) {
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new DeegreeService object.
+     *
+     * @param  service  DOCUMENT ME!
+     * @param  ident    DOCUMENT ME!
+     */
+    public DeegreeService(final ServiceProvider service, final ServiceIdentification ident) {
         this.service = service;
         this.ident = ident;
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     @Override
     public String[] getKeywordList() {
-        List<Keywords> list = ident.getKeywords();
-        ArrayList<String> resultList = new ArrayList<String>();
+        final List<Keywords> list = ident.getKeywords();
+        final ArrayList<String> resultList = new ArrayList<String>();
 
-        for (Keywords word : list) {
-            for (String tmp : word.getKeywords()) {
+        for (final Keywords word : list) {
+            for (final String tmp : word.getKeywords()) {
                 resultList.add(tmp);
             }
         }
@@ -75,44 +97,50 @@ public class DeegreeService implements Service {
 
     @Override
     public String getContactOrganization() {
-        return stringArrayToString( service.getServiceContact().getOrganisationName() );
+        return stringArrayToString(service.getServiceContact().getOrganisationName());
     }
 
     @Override
     public String getFees() {
-        List<Constraints> list = ident.getAccessConstraints();
-        ArrayList<String> resultList = new ArrayList<String>();
+        final List<Constraints> list = ident.getAccessConstraints();
+        final ArrayList<String> resultList = new ArrayList<String>();
 
-        for (Constraints constraint : list) {
-            String fees = constraint.getFees();
+        for (final Constraints constraint : list) {
+            final String fees = constraint.getFees();
             if (fees != null) {
                 resultList.add(fees);
             }
         }
 
-        return stringArrayToString( resultList.toArray(new String[resultList.size()]) );
+        return stringArrayToString(resultList.toArray(new String[resultList.size()]));
     }
 
     @Override
     public String getAccessConstraints() {
-        List<Constraints> list = ident.getAccessConstraints();
-        ArrayList<String> resultList = new ArrayList<String>();
+        final List<Constraints> list = ident.getAccessConstraints();
+        final ArrayList<String> resultList = new ArrayList<String>();
 
-        for (Constraints constraint : list) {
-            List<String> constraintStrings = constraint.getAccessConstraints();
+        for (final Constraints constraint : list) {
+            final List<String> constraintStrings = constraint.getAccessConstraints();
             if (constraintStrings != null) {
                 resultList.addAll(constraintStrings);
             }
         }
 
-        return stringArrayToString( resultList.toArray(new String[resultList.size()]) );
+        return stringArrayToString(resultList.toArray(new String[resultList.size()]));
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   array  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String stringArrayToString(final String[] array) {
+        final StringBuffer buffer = new StringBuffer("");
 
-    private String stringArrayToString(String[] array) {
-        StringBuffer buffer = new StringBuffer("");
-
-        for (String tmp : array) {
+        for (final String tmp : array) {
             if (buffer.length() != 0) {
                 buffer.append(", " + tmp);
             } else {

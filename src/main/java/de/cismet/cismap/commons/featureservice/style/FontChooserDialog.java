@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * FontChooserDialog.java
  *
@@ -5,109 +12,173 @@
  */
 package de.cismet.cismap.commons.featureservice.style;
 
-import de.cismet.tools.CismetThreadPool;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
+
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 
+import de.cismet.tools.CismetThreadPool;
+
 /**
+ * DOCUMENT ME!
  *
- * @author  nh
+ * @author   nh
+ * @version  $Revision$, $Date$
  */
 public class FontChooserDialog extends JDialog {
-    /** Display text */
-    private static final String SAMPLE_TEXT = org.openide.util.NbBundle.getMessage(FontChooserDialog.class, "FontChooserDialog.SAMPLE_TEXT");//NOI18N
-    /** Selected index of the default fontsize */
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    /** Display text. */
+    private static final String SAMPLE_TEXT = org.openide.util.NbBundle.getMessage(
+            FontChooserDialog.class,
+            "FontChooserDialog.SAMPLE_TEXT"); // NOI18N
+    /** Selected index of the default fontsize. */
     private static final int DEFAULT_SIZE = 4;
-    /** The font the user has chosen */
+
+    //~ Instance fields --------------------------------------------------------
+
+    /** The font the user has chosen. */
     private Font resultFont;
-    /** The resulting font name */
+    /** The resulting font name. */
     private String resultName;
-    /** The resulting font size */
+    /** The resulting font size. */
     private int resultSize;
-    /** The resulting boldness */
+    /** The resulting boldness. */
     private boolean isBold;
-    /** The resulting italicness */
+    /** The resulting italicness. */
     private boolean isItalic;
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox chkBold;
+    private javax.swing.JCheckBox chkItalic;
+    private javax.swing.JButton cmdCancel;
+    private javax.swing.JButton cmdOK;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel lblPreview;
+    private javax.swing.JList lstFontName;
+    private javax.swing.JList lstFontSize;
+    private javax.swing.JPanel panDialogButtons;
+    private javax.swing.JPanel panFontAttrib;
+    private javax.swing.JPanel panPreview;
+    private javax.swing.JPanel panPreviewLabel;
+    private javax.swing.JScrollPane scrFontName;
+    private javax.swing.JScrollPane scrFontSize;
+    private javax.swing.JScrollPane scrPreview;
+    // End of variables declaration//GEN-END:variables
 
-    /** Creates new form FontChooserDialog */
-    public FontChooserDialog(JDialog parent, String title) {
-        super(parent, title, true);
-        initComponents();
-        setLocationRelativeTo(parent);
-    }
+    //~ Constructors -----------------------------------------------------------
 
-    /** Creates new form FontChooserDialog */
-    public FontChooserDialog(JFrame parent) {
+    /**
+     * Creates new form FontChooserDialog.
+     *
+     * @param  parent  DOCUMENT ME!
+     */
+    public FontChooserDialog(final JFrame parent) {
         super(parent, true);
         initComponents();
         setLocationRelativeTo(parent);
     }
 
     /**
-     * Called from the action handlers to get the font info, build a font, and
-     * set it.
+     * Creates new form FontChooserDialog.
+     *
+     * @param  parent  DOCUMENT ME!
+     * @param  title   DOCUMENT ME!
+     */
+    public FontChooserDialog(final JDialog parent, final String title) {
+        super(parent, title, true);
+        initComponents();
+        setLocationRelativeTo(parent);
+    }
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * Called from the action handlers to get the font info, build a font, and set it.
      */
     protected void previewFont() {
-        Runnable r = new Runnable() {
-            public void run() {
-                resultName = (String) lstFontName.getSelectedValue();
-                String resultSizeName = (String) lstFontSize.getSelectedValue();
-                int size = Integer.parseInt(resultSizeName);
-                isItalic = chkItalic.isSelected();
-                isBold = chkBold.isSelected();
-                int attrs = Font.PLAIN;
-                if (isBold) {
-                    attrs = Font.BOLD;
-                }
-                if (isItalic) {
-                    attrs |= Font.ITALIC;
-                }
-                resultFont = new Font(resultName, attrs, size);
-                EventQueue.invokeLater(new Runnable() {
-                    public void run() {
-                        lblPreview.setFont(resultFont);
+        final Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    resultName = (String)lstFontName.getSelectedValue();
+                    final String resultSizeName = (String)lstFontSize.getSelectedValue();
+                    final int size = Integer.parseInt(resultSizeName);
+                    isItalic = chkItalic.isSelected();
+                    isBold = chkBold.isSelected();
+                    int attrs = Font.PLAIN;
+                    if (isBold) {
+                        attrs = Font.BOLD;
                     }
-                });
-            }
-        };
+                    if (isItalic) {
+                        attrs |= Font.ITALIC;
+                    }
+                    resultFont = new Font(resultName, attrs, size);
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                lblPreview.setFont(resultFont);
+                            }
+                        });
+                }
+            };
         CismetThreadPool.execute(r);
     }
 
-    /** Retrieve the selected font name. */
+    /**
+     * Retrieve the selected font name.
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getSelectedName() {
         return resultName;
     }
 
-    /** Retrieve the selected size */
+    /**
+     * Retrieve the selected size.
+     *
+     * @return  DOCUMENT ME!
+     */
     public int getSelectedSize() {
         return resultSize;
     }
 
-    /** Returns the new Font */
+    /**
+     * Returns the new Font.
+     *
+     * @return  DOCUMENT ME!
+     */
     public Font getReturnStatus() {
         return resultFont;
     }
 
-    /** Selects the given font if available, the given size and style */
-    public void setSelectedFont(Font font, int size, boolean bold, boolean italic) {
+    /**
+     * Selects the given font if available, the given size and style.
+     *
+     * @param  font    DOCUMENT ME!
+     * @param  size    DOCUMENT ME!
+     * @param  bold    DOCUMENT ME!
+     * @param  italic  DOCUMENT ME!
+     */
+    public void setSelectedFont(final Font font, final int size, final boolean bold, final boolean italic) {
         lstFontName.setSelectedValue(font.getName(), true);
         lstFontSize.setSelectedValue(new Integer(size).toString(), true);
         chkBold.setSelected(bold);
         chkItalic.setSelected(italic);
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
      */
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -127,23 +198,26 @@ public class FontChooserDialog extends JDialog {
         scrPreview = new javax.swing.JScrollPane();
         panPreviewLabel = new javax.swing.JPanel();
         lblPreview = new JLabel(SAMPLE_TEXT, JLabel.CENTER) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                super.paintComponent(g2d);
-            }
-        };
+
+                @Override
+                protected void paintComponent(final Graphics g) {
+                    final Graphics2D g2d = (Graphics2D)g;
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    super.paintComponent(g2d);
+                }
+            };
         ;
         panDialogButtons = new javax.swing.JPanel();
         cmdOK = new javax.swing.JButton();
         cmdCancel = new javax.swing.JButton();
 
         addWindowListener(new java.awt.event.WindowAdapter() {
-            public void windowClosing(java.awt.event.WindowEvent evt) {
-                closeDialog(evt);
-            }
-        });
+
+                @Override
+                public void windowClosing(final java.awt.event.WindowEvent evt) {
+                    closeDialog(evt);
+                }
+            });
 
         panFontAttrib.setLayout(new java.awt.GridBagLayout());
 
@@ -153,10 +227,12 @@ public class FontChooserDialog extends JDialog {
 
         lstFontName.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         lstFontName.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                lstFontNameValueChanged(evt);
-            }
-        });
+
+                @Override
+                public void valueChanged(final javax.swing.event.ListSelectionEvent evt) {
+                    lstFontNameValueChanged(evt);
+                }
+            });
         scrFontName.setViewportView(lstFontName);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -172,17 +248,43 @@ public class FontChooserDialog extends JDialog {
         scrFontSize.setPreferredSize(new java.awt.Dimension(50, 130));
 
         lstFontSize.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "8", "9", "10", "11", "12", "14", "16", "18", "20", "24", "30", "36", "48", "60", "72" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
+
+                String[] strings = {
+                        "8",
+                        "9",
+                        "10",
+                        "11",
+                        "12",
+                        "14",
+                        "16",
+                        "18",
+                        "20",
+                        "24",
+                        "30",
+                        "36",
+                        "48",
+                        "60",
+                        "72"
+                    };
+
+                @Override
+                public int getSize() {
+                    return strings.length;
+                }
+                @Override
+                public Object getElementAt(final int i) {
+                    return strings[i];
+                }
+            });
         lstFontSize.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         lstFontSize.setSelectedIndex(DEFAULT_SIZE);
         lstFontSize.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                lstFontSizeValueChanged(evt);
-            }
-        });
+
+                @Override
+                public void valueChanged(final javax.swing.event.ListSelectionEvent evt) {
+                    lstFontSizeValueChanged(evt);
+                }
+            });
         scrFontSize.setViewportView(lstFontSize);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -193,12 +295,16 @@ public class FontChooserDialog extends JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 10);
         panFontAttrib.add(scrFontSize, gridBagConstraints);
 
-        chkBold.setText(org.openide.util.NbBundle.getMessage(FontChooserDialog.class, "FontChooserDialog.chkBold.text") ); // NOI18N
+        chkBold.setText(org.openide.util.NbBundle.getMessage(
+                FontChooserDialog.class,
+                "FontChooserDialog.chkBold.text")); // NOI18N
         chkBold.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                chkBoldItemStateChanged(evt);
-            }
-        });
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    chkBoldItemStateChanged(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
@@ -206,12 +312,16 @@ public class FontChooserDialog extends JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 10);
         panFontAttrib.add(chkBold, gridBagConstraints);
 
-        chkItalic.setText(org.openide.util.NbBundle.getMessage(FontChooserDialog.class, "FontChooserDialog.chkItalic.text") ); // NOI18N
+        chkItalic.setText(org.openide.util.NbBundle.getMessage(
+                FontChooserDialog.class,
+                "FontChooserDialog.chkItalic.text")); // NOI18N
         chkItalic.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                chkItalicItemStateChanged(evt);
-            }
-        });
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    chkItalicItemStateChanged(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
@@ -220,7 +330,9 @@ public class FontChooserDialog extends JDialog {
         panFontAttrib.add(chkItalic, gridBagConstraints);
 
         jLabel1.setLabelFor(lstFontName);
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(FontChooserDialog.class, "FontChooserDialog.jLabel1.text")); // NOI18N
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(
+                FontChooserDialog.class,
+                "FontChooserDialog.jLabel1.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -229,7 +341,9 @@ public class FontChooserDialog extends JDialog {
         panFontAttrib.add(jLabel1, gridBagConstraints);
 
         jLabel2.setLabelFor(lstFontSize);
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(FontChooserDialog.class, "FontChooserDialog.jLabel2.text")); // NOI18N
+        jLabel2.setText(org.openide.util.NbBundle.getMessage(
+                FontChooserDialog.class,
+                "FontChooserDialog.jLabel2.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -265,95 +379,125 @@ public class FontChooserDialog extends JDialog {
         cmdOK.setMinimumSize(new java.awt.Dimension(90, 23));
         cmdOK.setPreferredSize(new java.awt.Dimension(90, 23));
         cmdOK.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdOKActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cmdOKActionPerformed(evt);
+                }
+            });
         panDialogButtons.add(cmdOK);
 
-        cmdCancel.setText(org.openide.util.NbBundle.getMessage(FontChooserDialog.class, "FontChooserDialog.cmdCancel.text") ); // NOI18N
+        cmdCancel.setText(org.openide.util.NbBundle.getMessage(
+                FontChooserDialog.class,
+                "FontChooserDialog.cmdCancel.text")); // NOI18N
         cmdCancel.setMaximumSize(new java.awt.Dimension(90, 23));
         cmdCancel.setMinimumSize(new java.awt.Dimension(90, 23));
         cmdCancel.setPreferredSize(new java.awt.Dimension(90, 23));
         cmdCancel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdCancelActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cmdCancelActionPerformed(evt);
+                }
+            });
         panDialogButtons.add(cmdCancel);
 
         getContentPane().add(panDialogButtons, java.awt.BorderLayout.SOUTH);
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
-    private void closeDialog(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
+    } // </editor-fold>//GEN-END:initComponents
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void closeDialog(final java.awt.event.WindowEvent evt) { //GEN-FIRST:event_closeDialog
         doClose();
-    }//GEN-LAST:event_closeDialog
+    }                                                                //GEN-LAST:event_closeDialog
 
-    private void cmdOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOKActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOKActionPerformed
         doClose();
-    }//GEN-LAST:event_cmdOKActionPerformed
+    }                                                                         //GEN-LAST:event_cmdOKActionPerformed
 
-    private void cmdCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
         resultFont = null;
         doClose();
-    }//GEN-LAST:event_cmdCancelActionPerformed
+    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
 
-    private void lstFontSizeValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstFontSizeValueChanged
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void lstFontSizeValueChanged(final javax.swing.event.ListSelectionEvent evt) { //GEN-FIRST:event_lstFontSizeValueChanged
         previewFont();
-    }//GEN-LAST:event_lstFontSizeValueChanged
+    }                                                                                      //GEN-LAST:event_lstFontSizeValueChanged
 
-    private void lstFontNameValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_lstFontNameValueChanged
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void lstFontNameValueChanged(final javax.swing.event.ListSelectionEvent evt) { //GEN-FIRST:event_lstFontNameValueChanged
         previewFont();
-    }//GEN-LAST:event_lstFontNameValueChanged
+    }                                                                                      //GEN-LAST:event_lstFontNameValueChanged
 
-    private void chkBoldItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkBoldItemStateChanged
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkBoldItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkBoldItemStateChanged
         previewFont();
-}//GEN-LAST:event_chkBoldItemStateChanged
+    }                                                                          //GEN-LAST:event_chkBoldItemStateChanged
 
-    private void chkItalicItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkItalicItemStateChanged
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkItalicItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkItalicItemStateChanged
         previewFont();
-}//GEN-LAST:event_chkItalicItemStateChanged
+    }                                                                            //GEN-LAST:event_chkItalicItemStateChanged
 
+    /**
+     * DOCUMENT ME!
+     */
     private void doClose() {
         setVisible(false);
         dispose();
     }
 
     /**
-     * @param args the command line arguments
+     * DOCUMENT ME!
+     *
+     * @param  args  the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(final String[] args) {
         EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                FontChooserDialog dialog = new FontChooserDialog(new javax.swing.JFrame());
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox chkBold;
-    private javax.swing.JCheckBox chkItalic;
-    private javax.swing.JButton cmdCancel;
-    private javax.swing.JButton cmdOK;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel lblPreview;
-    private javax.swing.JList lstFontName;
-    private javax.swing.JList lstFontSize;
-    private javax.swing.JPanel panDialogButtons;
-    private javax.swing.JPanel panFontAttrib;
-    private javax.swing.JPanel panPreview;
-    private javax.swing.JPanel panPreviewLabel;
-    private javax.swing.JScrollPane scrFontName;
-    private javax.swing.JScrollPane scrFontSize;
-    private javax.swing.JScrollPane scrPreview;
-    // End of variables declaration//GEN-END:variables
-}
 
+                @Override
+                public void run() {
+                    final FontChooserDialog dialog = new FontChooserDialog(new javax.swing.JFrame());
+                    dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+
+                            @Override
+                            public void windowClosing(final java.awt.event.WindowEvent e) {
+                                System.exit(0);
+                            }
+                        });
+                    dialog.setVisible(true);
+                }
+            });
+    }
+}

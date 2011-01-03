@@ -1,36 +1,70 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.options;
+
+import org.jdom.Element;
+
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+
 import de.cismet.lookupoptions.*;
+
 import de.cismet.tools.configuration.NoWriteError;
-import org.jdom.Element;
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
- * @author jruiz
+ * DOCUMENT ME!
+ *
+ * @author   jruiz
+ * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = OptionsPanelController.class)
 public class GeometryOptionsPanel extends AbstractOptionsPanel implements OptionsPanelController {
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    
-    private static final String OPTION_NAME = NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.OPTION_NAME");
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final String OPTION_NAME = NbBundle.getMessage(
+            GeometryOptionsPanel.class,
+            "GeometryOptionsPanel.OPTION_NAME");
     private static final String CONFIGURATION = "GeometryOptionsPanel";
     private static final String CONF_HOLD_GEOMETRIES = "EllipseEgdes";
 
+    //~ Instance fields --------------------------------------------------------
+
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
     private boolean stillConfigured = false;
-    
+
     private int numOfEllipseEdges;
 
-    private CreateGeometryListener listener = ((CreateGeometryListener)CismapBroker.getInstance().getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
+    private CreateGeometryListener listener = ((CreateGeometryListener)CismapBroker.getInstance().getMappingComponent()
+                    .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
 
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JTextField jTextField1;
+    // End of variables declaration//GEN-END:variables
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new GeometryOptionsPanel object.
+     */
     public GeometryOptionsPanel() {
         super(OPTION_NAME, CismapOptionsCategory.class);
         initComponents();
     }
+
+    //~ Methods ----------------------------------------------------------------
 
     @Override
     public int getOrder() {
@@ -59,7 +93,7 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
         } catch (NumberFormatException ex) {
             intEdges = 0;
         }
-        
+
         return numOfEllipseEdges != intEdges;
     }
 
@@ -69,9 +103,11 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
     }
 
     @Override
-    public void configure(Element parent) {
+    public void configure(final Element parent) {
         if (!stillConfigured) {
-            log.debug("Configure GeometryOptionsPanel");
+            if (log.isDebugEnabled()) {
+                log.debug("Configure GeometryOptionsPanel");
+            }
             try {
                 String elementNumOfEllipseEdges = "";
                 if (parent != null) {
@@ -81,8 +117,7 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
                     }
                 }
                 numOfEllipseEdges = new Integer(elementNumOfEllipseEdges);
-
-           } catch (Exception ex) {
+            } catch (Exception ex) {
                 log.error("Fehler beim Konfigurieren des GeometryOptionsPanel", ex);
             }
 
@@ -91,7 +126,9 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
             stillConfigured = true;
         } else {
-            log.debug("skip Configure GeometryOptionsPanel - still configured");
+            if (log.isDebugEnabled()) {
+                log.debug("skip Configure GeometryOptionsPanel - still configured");
+            }
         }
 
         // Änderungen anwenden
@@ -100,9 +137,9 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
     @Override
     public Element getConfiguration() throws NoWriteError {
-        Element conf = new Element(CONFIGURATION);
+        final Element conf = new Element(CONFIGURATION);
 
-        Element holdSearchGeometriesElement = new Element(CONF_HOLD_GEOMETRIES);
+        final Element holdSearchGeometriesElement = new Element(CONF_HOLD_GEOMETRIES);
 
         holdSearchGeometriesElement.addContent(Integer.toString(numOfEllipseEdges));
 
@@ -111,56 +148,52 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
         return conf;
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
 
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.jLabel1.text")); // NOI18N
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(
+                GeometryOptionsPanel.class,
+                "GeometryOptionsPanel.jLabel1.text")); // NOI18N
 
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.jLabel2.text")); // NOI18N
+        jLabel2.setText(org.openide.util.NbBundle.getMessage(
+                GeometryOptionsPanel.class,
+                "GeometryOptionsPanel.jLabel2.text")); // NOI18N
 
-        jTextField1.setText(org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class, "GeometryOptionsPanel.jTextField1.text")); // NOI18N
+        jTextField1.setText(org.openide.util.NbBundle.getMessage(
+                GeometryOptionsPanel.class,
+                "GeometryOptionsPanel.jTextField1.text")); // NOI18N
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel1))
-                .addContainerGap(40, Short.MAX_VALUE))
-        );
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                layout.createSequentialGroup().addContainerGap().addGroup(
+                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                        layout.createSequentialGroup().addGap(12, 12, 12).addComponent(jLabel2).addPreferredGap(
+                            javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(
+                            jTextField1,
+                            javax.swing.GroupLayout.PREFERRED_SIZE,
+                            49,
+                            javax.swing.GroupLayout.PREFERRED_SIZE)).addComponent(jLabel1)).addContainerGap(
+                    40,
+                    Short.MAX_VALUE)));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(36, Short.MAX_VALUE))
-        );
-    }// </editor-fold>//GEN-END:initComponents
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JTextField jTextField1;
-    // End of variables declaration//GEN-END:variables
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                layout.createSequentialGroup().addContainerGap().addComponent(jLabel1).addPreferredGap(
+                    javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(
+                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE).addComponent(jLabel2)
+                                .addComponent(
+                                    jTextField1,
+                                    javax.swing.GroupLayout.PREFERRED_SIZE,
+                                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                                    javax.swing.GroupLayout.PREFERRED_SIZE)).addContainerGap(36, Short.MAX_VALUE)));
+    } // </editor-fold>//GEN-END:initComponents
 }

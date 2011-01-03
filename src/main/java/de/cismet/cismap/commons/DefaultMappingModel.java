@@ -1,37 +1,19 @@
-/*
- * DefaultMappingModel.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 23. Juni 2005, 12:50
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons;
+
+import org.jdom.DataConversionException;
+import org.jdom.Element;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.Vector;
 
 import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
@@ -39,56 +21,96 @@ import de.cismet.cismap.commons.featureservice.SimpleUpdateablePostgisFeatureSer
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.MapService;
+
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.Vector;
-import org.jdom.DataConversionException;
-import org.jdom.Element;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 @Deprecated
 public class DefaultMappingModel implements MappingModel, Configurable {
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public final static int UP = -1;
-    public final static int DOWN = 1;
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final int UP = -1;
+    public static final int DOWN = 1;
+
+    //~ Instance fields --------------------------------------------------------
+
     TreeMap mapServices = new TreeMap();
     TreeMap featureServices = new TreeMap();
     FeatureCollection featureCollection;
     Vector mappingModelListeners = new Vector();
     BoundingBox initialBoundingBox;
 
-    /** Creates a new instance of DefaultMappingModel */
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of DefaultMappingModel.
+     */
     public DefaultMappingModel() {
     }
 
-    
+    //~ Methods ----------------------------------------------------------------
 
-    public int moveRasterServiceUp(MapService rs) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   rs  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int moveRasterServiceUp(final MapService rs) {
         return moveRasterService(rs, UP);
     }
 
-    public int moveRasterServiceDown(MapService rs) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   rs  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int moveRasterServiceDown(final MapService rs) {
         return moveRasterService(rs, DOWN);
     }
 
-    public int moveRasterService(MapService rs, int step) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   rs    DOCUMENT ME!
+     * @param   step  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int moveRasterService(final MapService rs, final int step) {
         return moveObjectInTreeMap(mapServices, rs, step);
     }
 
-    private int moveObjectInTreeMap(TreeMap tm, Object o, int step) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   tm    DOCUMENT ME!
+     * @param   o     DOCUMENT ME!
+     * @param   step  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private int moveObjectInTreeMap(final TreeMap tm, final Object o, final int step) {
         try {
-            log.debug("moveObjectInTreeMap");//NOI18N
-            Vector v = new Vector(tm.values());
-            int currentPosition = v.indexOf(o);
-            int newPosition = currentPosition + step;
-            Object objectToBeShifted = v.get(newPosition);
+            if (log.isDebugEnabled()) {
+                log.debug("moveObjectInTreeMap"); // NOI18N
+            }
+            final Vector v = new Vector(tm.values());
+            final int currentPosition = v.indexOf(o);
+            final int newPosition = currentPosition + step;
+            final Object objectToBeShifted = v.get(newPosition);
             v.set(newPosition, o);
             v.set(currentPosition, objectToBeShifted);
             tm.clear();
@@ -97,10 +119,9 @@ public class DefaultMappingModel implements MappingModel, Configurable {
             }
             return newPosition;
         } catch (Exception e) {
-            log.warn("No moving", e);//NOI18N
+            log.warn("No moving", e);             // NOI18N
             return -1;
         }
-
     }
 
 //    public static void main(String[] args) {
@@ -121,8 +142,8 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //        featureServices.put(new Integer(position), featureService);
 //    }
 
-  @Override
-    public void addMappingModelListener(MappingModelListener mml) {
+    @Override
+    public void addMappingModelListener(final MappingModelListener mml) {
         if (!(mappingModelListeners.contains(mml))) {
             mappingModelListeners.add(mml);
         }
@@ -131,43 +152,65 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //    public void removeFeatureService(de.cismet.cismap.commons.featureservice.FeatureService featureService) {
 //    }
 
-  @Override
-    public void removeMappingModelListener(MappingModelListener mml) {
+    @Override
+    public void removeMappingModelListener(final MappingModelListener mml) {
         mappingModelListeners.remove(mml);
     }
-
-//    public void setFeatureCollection(de.cismet.cismap.commons.features.FeatureCollection featureCollection) {
-//        this.featureCollection=featureCollection;
-//       featureCollection.addFeatureCollectionListener(this);
-//    }
-    public void setInitialBoundingBox(BoundingBox bb) {
+    /**
+     * public void setFeatureCollection(de.cismet.cismap.commons.features.FeatureCollection featureCollection) {
+     * this.featureCollection=featureCollection; featureCollection.addFeatureCollectionListener(this); }.
+     *
+     * @param  bb  DOCUMENT ME!
+     */
+    public void setInitialBoundingBox(final BoundingBox bb) {
         initialBoundingBox = bb;
     }
 
-    public void removeMapService(de.cismet.cismap.commons.rasterservice.MapService rasterService) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  rasterService  DOCUMENT ME!
+     */
+    public void removeMapService(final de.cismet.cismap.commons.rasterservice.MapService rasterService) {
         mapServices.remove(rasterService);
     }
 
-    public void putMapService(int position, de.cismet.cismap.commons.rasterservice.MapService rasterService) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  position       DOCUMENT ME!
+     * @param  rasterService  DOCUMENT ME!
+     */
+    public void putMapService(final int position,
+            final de.cismet.cismap.commons.rasterservice.MapService rasterService) {
         mapServices.put(new Integer(position), rasterService);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Deprecated
     public de.cismet.cismap.commons.features.FeatureCollection getFeatureCollection() {
         return featureCollection;
     }
 
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public TreeMap getMapServices() {
         return featureServices;
     }
 
-  @Override
+    @Override
     public BoundingBox getInitialBoundingBox() {
         return initialBoundingBox;
     }
 
-  @Override
+    @Override
     public TreeMap getRasterServices() {
         return mapServices;
     }
@@ -199,23 +242,23 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //            }
 //        }
 //    }
-    //TODO
-  @Override
-    public void addLayer(RetrievalServiceLayer layer) {
+    // TODO
+    @Override
+    public void addLayer(final RetrievalServiceLayer layer) {
     }
 
-  @Override
-    public void removeLayer(RetrievalServiceLayer layer) {
+    @Override
+    public void removeLayer(final RetrievalServiceLayer layer) {
     }
 
-  @Override
-    public void configure(Element parent) {
-        Element prefs = parent.getChild("cismapMappingPreferences");//NOI18N
+    @Override
+    public void configure(final Element parent) {
+        final Element prefs = parent.getChild("cismapMappingPreferences"); // NOI18N
 
-        XBoundingBox xBox = null;
+        final XBoundingBox xBox = null;
 
-//        
-//        
+//
+//
 //        while (it.hasNext()) {
 //
 //            //SimpleRasterServices
@@ -253,85 +296,94 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //        }
     }
 
-  @Override
-    public void masterConfigure(Element parent) {
-        log.debug("masterConfigure im DefaultmappingModel:" + parent);//NOI18N
+    @Override
+    public void masterConfigure(final Element parent) {
+        if (log.isDebugEnabled()) {
+            log.debug("masterConfigure im DefaultmappingModel:" + parent); // NOI18N
+        }
 
-        Element prefs = parent.getChild("cismapMappingPreferences");//NOI18N
+        Element prefs = parent.getChild("cismapMappingPreferences"); // NOI18N
 
-        Iterator<Element> it = prefs.getChildren("home").iterator();//NOI18N
+        Iterator<Element> it = prefs.getChildren("home").iterator(); // NOI18N
         XBoundingBox xBox = null;
 
         while (it.hasNext()) {
-            Element elem = it.next();
-            String srs = elem.getAttribute("srs").getValue();//NOI18N
+            final Element elem = it.next();
+            final String srs = elem.getAttribute("srs").getValue();                                   // NOI18N
             boolean metric = false;
             try {
-                metric = elem.getAttribute("metric").getBooleanValue();//NOI18N
+                metric = elem.getAttribute("metric").getBooleanValue();                               // NOI18N
             } catch (DataConversionException dce) {
-                log.warn("Metric has invalid syntax", dce);//NOI18N
+                log.warn("Metric has invalid syntax", dce);                                           // NOI18N
             }
             boolean defaultVal = false;
             try {
-                defaultVal = elem.getAttribute("default").getBooleanValue();//NOI18N
+                defaultVal = elem.getAttribute("default").getBooleanValue();                          // NOI18N
             } catch (DataConversionException dce) {
-                log.warn("defaulthas invalid syntax", dce);//NOI18N
+                log.warn("defaulthas invalid syntax", dce);                                           // NOI18N
             }
             if (defaultVal) {
                 try {
                     xBox = new XBoundingBox(elem, srs, metric);
                     setInitialBoundingBox(xBox);
                 } catch (Throwable t) {
-                    log.fatal("The home bounding box cannot be set. This will probably fail :-7", t);//NOI18N
+                    log.fatal("The home bounding box cannot be set. This will probably fail :-7", t); // NOI18N
                 }
             }
         }
-        //failure because there could be several boundingBoxes
+        // failure because there could be several boundingBoxes
 
         getInitialBoundingBox();
-        //SimpleRasterServices
-        prefs = parent.getChild("cismapActiveLayerConfiguration");//NOI18N
-        List simpleWmsList = prefs.getChild("rasterLayers").getChildren("simpleWms");//NOI18N
+        // SimpleRasterServices
+        prefs = parent.getChild("cismapActiveLayerConfiguration");                                          // NOI18N
+        final List simpleWmsList = prefs.getChild("rasterLayers").getChildren("simpleWms");                 // NOI18N
         it = simpleWmsList.iterator();
         while (it.hasNext()) {
-            Object o = it.next();
+            final Object o = it.next();
             if (o instanceof Element) {
-                Element el = (Element) o;
+                final Element el = (Element)o;
                 try {
                     boolean skip = false;
                     try {
-                        skip = el.getAttribute("skip").getBooleanValue();//NOI18N
+                        skip = el.getAttribute("skip").getBooleanValue();                                   // NOI18N
                     } catch (Exception skipException) {
                     }
                     if (!skip) {
-                        SimpleWMS swms = new SimpleWMS(el);
+                        final SimpleWMS swms = new SimpleWMS(el);
                         mapServices.put(new Integer(swms.getLayerPosition()), swms);
-                        log.debug("Rasterservice added:" + swms + "(" + swms.getLayerPosition() + ")");//NOI18N
+                        if (log.isDebugEnabled()) {
+                            log.debug("Rasterservice added:" + swms + "(" + swms.getLayerPosition() + ")"); // NOI18N
+                        }
                     }
                 } catch (Exception ex) {
-                    log.warn("Read Preferences. Error. create SimpleWMS  ", ex);//NOI18N
+                    log.warn("Read Preferences. Error. create SimpleWMS  ", ex);                            // NOI18N
                 }
             }
         }
 
-        //SimplePostgisServices
-        List simplePostgisFeatureServiceList = prefs.getChild("featureLayers").getChildren("simplePostgisFeatureService");//NOI18N
+        // SimplePostgisServices
+        final List simplePostgisFeatureServiceList = prefs.getChild("featureLayers")
+                    .getChildren("simplePostgisFeatureService");                      // NOI18N
         it = simplePostgisFeatureServiceList.iterator();
         while (it.hasNext()) {
-            log.debug("new SimplePostgisService");//NOI18N
-            Object o = it.next();
+            if (log.isDebugEnabled()) {
+                log.debug("new SimplePostgisService");                                // NOI18N
+            }
+            final Object o = it.next();
             if (o instanceof Element) {
-                Element el = (Element) o;
+                final Element el = (Element)o;
                 try {
-                    log.debug("SimplePostgisFeatureService added");//NOI18N
+                    if (log.isDebugEnabled()) {
+                        log.debug("SimplePostgisFeatureService added");               // NOI18N
+                    }
                     boolean skip = false;
                     boolean updateable = false;
                     try {
-                        skip = el.getAttribute("skip").getBooleanValue();//NOI18N
+                        skip = el.getAttribute("skip").getBooleanValue();             // NOI18N
                     } catch (Exception skipException) {
                     }
                     try {
-                        updateable = el.getAttribute("updateable").getBooleanValue();//NOI18N
+                        updateable = el.getAttribute("updateable").getBooleanValue(); // NOI18N
                     } catch (Exception skipException) {
                     }
                     if (!skip) {
@@ -345,7 +397,7 @@ public class DefaultMappingModel implements MappingModel, Configurable {
                         featureServices.put(new Integer(spfs.getLayerPosition()), spfs);
                     }
                 } catch (Exception ex) {
-                    log.warn("Read Preferences. Error. Create SimplePostgisFeatureService ", ex);//NOI18N
+                    log.warn("Read Preferences. Error. Create SimplePostgisFeatureService ", ex); // NOI18N
                 }
             }
         }
@@ -386,17 +438,15 @@ public class DefaultMappingModel implements MappingModel, Configurable {
 //            }
 //        }
 
-
     }
 
-  @Override
+    @Override
     public Element getConfiguration() throws NoWriteError {
         return null;
     }
 
-  @Override
-  public TreeMap getFeatureServices()
-  {
-    return this.featureServices;
-  }
+    @Override
+    public TreeMap getFeatureServices() {
+        return this.featureServices;
+    }
 }

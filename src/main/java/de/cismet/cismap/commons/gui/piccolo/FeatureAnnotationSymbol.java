@@ -1,76 +1,98 @@
-/*
- * FeatureAnnotationSymbol.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 11. Mai 2006, 17:44
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import java.awt.Image;
+
 import java.net.URL;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIsAPFeature {
 
+    //~ Static fields/initializers ---------------------------------------------
+
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(FeatureAnnotationSymbol.class);
+
+    //~ Instance fields --------------------------------------------------------
+
     private Image selectedFeatureAnnotationSymbol = null;
 
-    /** Creates a new instance of FeatureAnnotationSymbol */
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of FeatureAnnotationSymbol.
+     */
     public FeatureAnnotationSymbol() {
         super();
     }
 
-    public FeatureAnnotationSymbol(Image newImage) {
+    /**
+     * Creates a new FeatureAnnotationSymbol object.
+     *
+     * @param  newImage  DOCUMENT ME!
+     */
+    public FeatureAnnotationSymbol(final Image newImage) {
         super(newImage);
     }
 
-    public FeatureAnnotationSymbol(String fileName) {
+    /**
+     * Creates a new FeatureAnnotationSymbol object.
+     *
+     * @param  fileName  DOCUMENT ME!
+     */
+    public FeatureAnnotationSymbol(final String fileName) {
         super(fileName);
     }
 
-    public FeatureAnnotationSymbol(URL url) {
+    /**
+     * Creates a new FeatureAnnotationSymbol object.
+     *
+     * @param  url  DOCUMENT ME!
+     */
+    public FeatureAnnotationSymbol(final URL url) {
         super(url);
     }
 
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Image getSelectedFeatureAnnotationSymbol() {
         return selectedFeatureAnnotationSymbol;
     }
 
-    public void setSelectedFeatureAnnotationSymbol(Image selectedFeatureAnnotationSymbol) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectedFeatureAnnotationSymbol  DOCUMENT ME!
+     */
+    public void setSelectedFeatureAnnotationSymbol(final Image selectedFeatureAnnotationSymbol) {
         this.selectedFeatureAnnotationSymbol = selectedFeatureAnnotationSymbol;
     }
 
-    public static FeatureAnnotationSymbol newCenteredFeatureAnnotationSymbol(Image unselected, Image selected) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   unselected  DOCUMENT ME!
+     * @param   selected    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static FeatureAnnotationSymbol newCenteredFeatureAnnotationSymbol(final Image unselected,
+            final Image selected) {
         final FeatureAnnotationSymbol tmpSymbol = new FeatureAnnotationSymbol(unselected);
         tmpSymbol.setSelectedFeatureAnnotationSymbol(selected);
         tmpSymbol.setSweetSpotX(0.5d);
@@ -78,8 +100,20 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
         return tmpSymbol;
     }
 
-    public static FeatureAnnotationSymbol newCustomSweetSpotFeatureAnnotationSymbol(Image unselected, Image selected,
-            double sweetSpotX, double sweetSpotY) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   unselected  DOCUMENT ME!
+     * @param   selected    DOCUMENT ME!
+     * @param   sweetSpotX  DOCUMENT ME!
+     * @param   sweetSpotY  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static FeatureAnnotationSymbol newCustomSweetSpotFeatureAnnotationSymbol(final Image unselected,
+            final Image selected,
+            final double sweetSpotX,
+            final double sweetSpotY) {
         final FeatureAnnotationSymbol tmpSymbol = new FeatureAnnotationSymbol(unselected);
         tmpSymbol.setSelectedFeatureAnnotationSymbol(selected);
         tmpSymbol.setSweetSpotX(sweetSpotX);

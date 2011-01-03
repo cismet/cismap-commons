@@ -1,105 +1,116 @@
-/*
- * WFSFormFeature.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 27. Juli 2006, 14:13
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.wfsforms;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.deegree.datatypes.QualifiedName;
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.FeatureProperty;
 import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class WFSFormFeature {
+
+    //~ Instance fields --------------------------------------------------------
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Feature feature;
     private WFSFormQuery query;
-    /** Creates a new instance of WFSFormFeature */
-    public WFSFormFeature(Feature feature, WFSFormQuery query) {
-        
-        this.feature=feature;
-        this.query=query;
-        
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of WFSFormFeature.
+     *
+     * @param  feature  DOCUMENT ME!
+     * @param  query    DOCUMENT ME!
+     */
+    public WFSFormFeature(final Feature feature, final WFSFormQuery query) {
+        this.feature = feature;
+        this.query = query;
     }
-    
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getIdentifier() {
         try {
 //return feature.getAttribute(query.getIdProperty()).toString();
-            //return feature.getProperty(query.getIdProperty()).toString();
-            //return feature.getProperties( new QualifiedName(query.getIdProperty().toString()) );
-            //return
-            return feature.getProperties(new QualifiedName(query.getPropertyPrefix().toString(),query.getIdProperty().toString(),new URI(query.getPropertyNamespace().toString())))[0].getValue().toString();
+            // return feature.getProperty(query.getIdProperty()).toString();
+            // return feature.getProperties( new QualifiedName(query.getIdProperty().toString()) );
+            // return
+            return feature
+                        .getProperties(new QualifiedName(
+                                query.getPropertyPrefix().toString(),
+                                query.getIdProperty().toString(),
+                                new URI(query.getPropertyNamespace().toString())))[0].getValue()
+                        .toString();
         } catch (Exception e) {
-            log.error("Error in toIdentifier()",e);//NOI18N
+            log.error("Error in toIdentifier()", e); // NOI18N
             return null;
         }
     }
-    
-    
-    public FeatureProperty[] getRawFeatureArray(String prefix,String identifier,String namespace) throws Exception{
-        return feature.getProperties(new QualifiedName(prefix,identifier,new URI(namespace)));
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   prefix      DOCUMENT ME!
+     * @param   identifier  DOCUMENT ME!
+     * @param   namespace   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public FeatureProperty[] getRawFeatureArray(final String prefix, final String identifier, final String namespace)
+            throws Exception {
+        return feature.getProperties(new QualifiedName(prefix, identifier, new URI(namespace)));
     }
-    
-    
-    
+
+    @Override
     public String toString() {
-        try {//return feature.getAttribute(query.getDisplayTextProperty()).toString();
-            //return feature.getProperty(query.getDisplayTextProperty()).toString();
-            if (query.getPropertyPrefix()!=null) {
-                String s= feature.getProperties(new QualifiedName(query.getPropertyPrefix().toString(),query.getDisplayTextProperty().toString(),new URI(query.getPropertyNamespace().toString())))[0].getValue().toString();
+        try { // return feature.getAttribute(query.getDisplayTextProperty()).toString();
+            // return feature.getProperty(query.getDisplayTextProperty()).toString();
+            if (query.getPropertyPrefix() != null) {
+                final String s = feature
+                            .getProperties(new QualifiedName(
+                                    query.getPropertyPrefix().toString(),
+                                    query.getDisplayTextProperty().toString(),
+                                    new URI(query.getPropertyNamespace().toString())))[0].getValue()
+                            .toString();
                 return s;
             } else {
-                String s=feature.getProperties(new QualifiedName(query.getDisplayTextProperty().toString()))[0].getValue().toString();
+                final String s = feature.getProperties(new QualifiedName(query.getDisplayTextProperty().toString()))[0]
+                            .getValue().toString();
                 return s;
-                
             }
-            
+
 //        ByteBuffer bb = ByteBuffer.wrap(ret.getBytes());
 //        return Charset.forName("utf-8").decode(bb).toString();
-            
-            
+
 //        try {
 //            return new String (feature.getProperties(new QualifiedName(query.getDisplayTextProperty().toString()))[0].getValue().toString().getBytes(),"ISO-8859-1");
 //        }
@@ -112,60 +123,95 @@ public class WFSFormFeature {
 //                return ret;
 //            } catch (Exception ex) {
             try {
-                log.error("Error in toString() angefragt wurde: "+new QualifiedName(query.getPropertyPrefix().toString(),query.getDisplayTextProperty().toString(),new URI(query.getPropertyNamespace().toString())).toString(),e);//NOI18N
+                log.error("Error in toString() angefragt wurde: "
+                            + new QualifiedName(
+                                query.getPropertyPrefix().toString(),
+                                query.getDisplayTextProperty().toString(),
+                                new URI(query.getPropertyNamespace().toString())).toString(),
+                    e);                                                            // NOI18N
             } catch (Exception never) {
-                log.error("Error in toString()",e);//NOI18N
+                log.error("Error in toString()", e);                               // NOI18N
             }
-            for (FeatureProperty fp:feature.getProperties()) {
-                log.fatal(fp.getName().getPrefix()+"."+fp.getName().getLocalName()+"."+fp.getName().getNamespace()+"->"+fp.getValue());//NOI18N
+            for (final FeatureProperty fp : feature.getProperties()) {
+                log.fatal(fp.getName().getPrefix() + "." + fp.getName().getLocalName() + "."
+                            + fp.getName().getNamespace() + "->" + fp.getValue()); // NOI18N
             }
             return null;
 //            }
-            
         }
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Feature getFeature() {
         return feature;
     }
-    
-    public void setFeature(Feature feature) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  feature  DOCUMENT ME!
+     */
+    public void setFeature(final Feature feature) {
         this.feature = feature;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public WFSFormQuery getQuery() {
         return query;
     }
-    
-    
-    public Geometry getJTSGeometry(){
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Geometry getJTSGeometry() {
         try {
             return JTSAdapter.export(feature.getDefaultGeometryPropertyValue());
         } catch (GeometryException ex) {
-            log.error("Error in getJTSGeometry()",ex);//NOI18N
+            log.error("Error in getJTSGeometry()", ex); // NOI18N
         }
         return null;
     }
-    
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Point getPosition() {
         try {
-            FeatureProperty[] fp=feature.getProperties(new QualifiedName(query.getPropertyPrefix().toString(),query.getPositionProperty().toString(),new URI(query.getPropertyNamespace().toString())));
-            Point p=(Point)(JTSAdapter.export((org.deegree.model.spatialschema.Geometry)(fp[0].getValue())));
-            log.debug("POSITION="+p);//NOI18N
+            final FeatureProperty[] fp = feature.getProperties(new QualifiedName(
+                        query.getPropertyPrefix().toString(),
+                        query.getPositionProperty().toString(),
+                        new URI(query.getPropertyNamespace().toString())));
+            final Point p = (Point)(JTSAdapter.export((org.deegree.model.spatialschema.Geometry)(fp[0].getValue())));
+            if (log.isDebugEnabled()) {
+                log.debug("POSITION=" + p);                                                              // NOI18N
+            }
             return p;
         } catch (Exception ex) {
-            log.debug("Feature has no POSITION. Calculate the centroid from getJTSGeometry() ",ex) ;//NOI18N
-            Point p=getJTSGeometry().getCentroid();
+            if (log.isDebugEnabled()) {
+                log.debug("Feature has no POSITION. Calculate the centroid from getJTSGeometry() ", ex); // NOI18N
+            }
+            final Point p = getJTSGeometry().getCentroid();
             return p;
         }
     }
-    public void setQuery(WFSFormQuery query) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  query  DOCUMENT ME!
+     */
+    public void setQuery(final WFSFormQuery query) {
         this.query = query;
     }
-    
-    
-    
-    
-    
 }

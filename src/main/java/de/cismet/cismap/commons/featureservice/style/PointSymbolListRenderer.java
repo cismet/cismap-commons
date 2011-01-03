@@ -1,35 +1,52 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice.style;
 
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import java.awt.Component;
+
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+
 /**
+ * DOCUMENT ME!
  *
- * @author nh
+ * @author   nh
+ * @version  $Revision$, $Date$
  */
 public class PointSymbolListRenderer implements ListCellRenderer {
 
-    public Component getListCellRendererComponent(JList list, Object value, int index,
-            boolean isSelected, boolean cellHasFocus) {
-        JLabel label = new JLabel();
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public Component getListCellRendererComponent(final JList list,
+            final Object value,
+            final int index,
+            final boolean isSelected,
+            final boolean cellHasFocus) {
+        final JLabel label = new JLabel();
         label.setOpaque(true);
         if (value instanceof String) {
             try {
-                label.setIcon(new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/pointsymbols/"+value)));//NOI18N
+                label.setIcon(new ImageIcon(
+                        getClass().getResource("/de/cismet/cismap/commons/featureservice/res/pointsymbols/" + value))); // NOI18N
             } catch (Exception ex) {
                 label.setText((String)value);
             }
         }
-        
+
         if (isSelected) {
             label.setBackground(list.getSelectionBackground());
         } else {

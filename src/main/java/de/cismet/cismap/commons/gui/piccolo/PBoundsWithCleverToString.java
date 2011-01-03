@@ -1,87 +1,90 @@
-/*
- * PBoundsWithCleverToString.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 21. M\u00E4rz 2006, 15:00
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
+
+import edu.umd.cs.piccolo.util.PBounds;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.XBoundingBox;
+
 import de.cismet.tools.StaticDecimalTools;
-import edu.umd.cs.piccolo.util.PBounds;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
-public class PBoundsWithCleverToString extends PBounds{
+public class PBoundsWithCleverToString extends PBounds {
+
+    //~ Instance fields --------------------------------------------------------
+
     private WorldToScreenTransform wtst;
     private String crsCode;
 
-    /** Creates a new instance of PBoundsWithCleverToString */
-    public PBoundsWithCleverToString(PBounds aBounds,WorldToScreenTransform wtst, String crsCode) {
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of PBoundsWithCleverToString.
+     *
+     * @param  aBounds  DOCUMENT ME!
+     * @param  wtst     DOCUMENT ME!
+     * @param  crsCode  DOCUMENT ME!
+     */
+    public PBoundsWithCleverToString(final PBounds aBounds, final WorldToScreenTransform wtst, final String crsCode) {
         super(aBounds);
         this.wtst = wtst;
         this.crsCode = crsCode;
     }
+
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
     public String toString() {
-        //x,y ist der Punkt links oben
-        double x1=wtst.getWorldX(x); 
-        double y2=wtst.getWorldY(y);
-        double x2=x1+width;
-        double y1=y2-height;
-        return StaticDecimalTools.round("0.00",x1)+","+StaticDecimalTools.round("0.00",y1)+","+StaticDecimalTools.round("0.00",x2)+","+StaticDecimalTools.round("0.00",y2) + " (" + crsCode + ")";//NOI18N
-        
+        // x,y ist der Punkt links oben
+        final double x1 = wtst.getWorldX(x);
+        final double y2 = wtst.getWorldY(y);
+        final double x2 = x1 + width;
+        final double y1 = y2 - height;
+        return StaticDecimalTools.round("0.00", x1) + "," + StaticDecimalTools.round("0.00", y1) + ","
+                    + StaticDecimalTools.round("0.00", x2) + "," + StaticDecimalTools.round("0.00", y2) + " (" + crsCode
+                    + ")"; // NOI18N
     }
 
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getCrsCode() {
         return crsCode;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public WorldToScreenTransform getWtst() {
         return wtst;
     }
 
     /**
+     * DOCUMENT ME!
      *
-     * @return a bounding box with the world coordinates of this PBounds object.
-     * The metric value of the resulting bounding box is not correct
+     * @return  a bounding box with the world coordinates of this PBounds object. The metric value of the resulting
+     *          bounding box is not correct
      */
     public XBoundingBox getWorldCoordinates() {
-        double x1=wtst.getWorldX(x);
-        double y2=wtst.getWorldY(y);
-        double x2=x1+width;
-        double y1=y2-height;
+        final double x1 = wtst.getWorldX(x);
+        final double y2 = wtst.getWorldY(y);
+        final double x2 = x1 + width;
+        final double y1 = y2 - height;
 
         return new XBoundingBox(x1, y1, x2, y2, crsCode, false);
     }

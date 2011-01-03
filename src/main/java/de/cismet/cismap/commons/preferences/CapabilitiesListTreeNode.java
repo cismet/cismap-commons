@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -9,14 +16,20 @@ import java.util.List;
 import java.util.TreeMap;
 
 /**
+ * DOCUMENT ME!
  *
- * @author jruiz
+ * @author   jruiz
+ * @version  $Revision$, $Date$
  */
 public class CapabilitiesListTreeNode {
+
+    //~ Instance fields --------------------------------------------------------
 
     private TreeMap<Integer, CapabilityLink> capabilitiesList = new TreeMap<Integer, CapabilityLink>();
     private LinkedList<CapabilitiesListTreeNode> subnodes = new LinkedList<CapabilitiesListTreeNode>();
     private String title = null;
+
+    //~ Constructors -----------------------------------------------------------
 
     /**
      * Erzeugt einen CapabilitiesList-Knoten.
@@ -24,9 +37,12 @@ public class CapabilitiesListTreeNode {
     public CapabilitiesListTreeNode() {
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     /**
      * Gibt die CapabilitiesList des Knotens zurück.
-     * @return CapabilitiesList des Knotens
+     *
+     * @return  CapabilitiesList des Knotens
      */
     public TreeMap<Integer, CapabilityLink> getCapabilitiesList() {
         return capabilitiesList;
@@ -34,23 +50,26 @@ public class CapabilitiesListTreeNode {
 
     /**
      * Setzt die CapabilitiesList des Knotens.
-     * @param capabilitiesList
+     *
+     * @param  capabilitiesList  DOCUMENT ME!
      */
-    public void setCapabilitiesList(TreeMap<Integer, CapabilityLink> capabilitiesList) {
+    public void setCapabilitiesList(final TreeMap<Integer, CapabilityLink> capabilitiesList) {
         this.capabilitiesList = capabilitiesList;
     }
 
     /**
      * Fügt dem Knoten einen Unterknoten hinzu.
-     * @param subnode Unterknoten
+     *
+     * @param  subnode  Unterknoten
      */
-    public void addSubnode(CapabilitiesListTreeNode subnode) {
+    public void addSubnode(final CapabilitiesListTreeNode subnode) {
         subnodes.add(subnode);
     }
 
     /**
      * Gibt die Liste der Unterknoten zurück.
-     * @return Liste der Unterknoten
+     *
+     * @return  Liste der Unterknoten
      */
     public List<CapabilitiesListTreeNode> getSubnodes() {
         return (List<CapabilitiesListTreeNode>)subnodes.clone();
@@ -58,7 +77,8 @@ public class CapabilitiesListTreeNode {
 
     /**
      * Gibt den Titel des CapabilitiesList-Knotens zurück.
-     * @return Titel des CapabilitiesList-Knotens
+     *
+     * @return  Titel des CapabilitiesList-Knotens
      */
     public String getTitle() {
         return title;
@@ -66,9 +86,10 @@ public class CapabilitiesListTreeNode {
 
     /**
      * Setzt den Titel des CapabilitiesList-Knotens.
-     * @param title Title des Knotens
+     *
+     * @param  title  Title des Knotens
      */
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 }

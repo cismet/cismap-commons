@@ -1,37 +1,10 @@
-/*
- * SimpleFeatureSupportingRasterLayer.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 18. Juli 2006, 15:50
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.raster.wms.featuresupportlayer;
 
 import de.cismet.cismap.commons.features.FeatureCollection;
@@ -39,49 +12,65 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
-public class SimpleFeatureSupportingRasterLayer extends SimpleWMS implements FeatureAwareRasterService{
+public class SimpleFeatureSupportingRasterLayer extends SimpleWMS implements FeatureAwareRasterService {
+
+    //~ Instance fields --------------------------------------------------------
+
     FeatureCollection featureCollection;
     SimpleFeatureSupporterRasterServiceUrl sfu;
+
+    //~ Constructors -----------------------------------------------------------
+
     /**
-     * Creates a new instance of SimpleFeatureSupportingRasterLayer
+     * Creates a new SimpleFeatureSupportingRasterLayer object.
+     *
+     * @param  s  DOCUMENT ME!
      */
-    public SimpleFeatureSupportingRasterLayer(SimpleFeatureSupporterRasterServiceUrl sfu) {
-        super(sfu);
-        this.sfu=sfu;
-    }
-    
-    public SimpleFeatureSupportingRasterLayer(SimpleFeatureSupportingRasterLayer s) {
+    public SimpleFeatureSupportingRasterLayer(final SimpleFeatureSupportingRasterLayer s) {
         super(s);
-        featureCollection=s.featureCollection;
-        sfu=s.sfu;
+        featureCollection = s.featureCollection;
+        sfu = s.sfu;
+    }
+    /**
+     * Creates a new instance of SimpleFeatureSupportingRasterLayer.
+     *
+     * @param  sfu  DOCUMENT ME!
+     */
+    public SimpleFeatureSupportingRasterLayer(final SimpleFeatureSupporterRasterServiceUrl sfu) {
+        super(sfu);
+        this.sfu = sfu;
     }
 
-    public void setFeatureCollection(FeatureCollection featureCollection) {
-        this.featureCollection=featureCollection;
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public void setFeatureCollection(final FeatureCollection featureCollection) {
+        this.featureCollection = featureCollection;
     }
 
+    @Override
     public FeatureCollection getFeatureCollection() {
         return featureCollection;
     }
-    
-    public boolean equals( Object o) {
-        return o instanceof SimpleFeatureSupportingRasterLayer && ((SimpleFeatureSupportingRasterLayer)o).sfu.equals(sfu);
+
+    @Override
+    public boolean equals(final Object o) {
+        return (o instanceof SimpleFeatureSupportingRasterLayer)
+                    && ((SimpleFeatureSupportingRasterLayer)o).sfu.equals(sfu);
     }
 
+    @Override
     public int hashCode() {
         return sfu.hashCode();
     }
-    
+
+    @Override
     public Object clone() {
-         return new SimpleFeatureSupportingRasterLayer(this);
+        return new SimpleFeatureSupportingRasterLayer(this);
     }
-    
-    
-    
-    
-    
-    
 }

@@ -1,53 +1,36 @@
-/*
- * WMSCapabilitiesTreeCellRenderer.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 14. Oktober 2005, 13:16
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.featureservice;
 
-import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import java.awt.Component;
+
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
+
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 
 /**
- * Der WFSCapabilitiesTreeCellRenderer bestimmt, wie ein WFSCapabilitiesTree-Knoten
- * dargestellt wird.
- * @author nh
+ * Der WFSCapabilitiesTreeCellRenderer bestimmt, wie ein WFSCapabilitiesTree-Knoten dargestellt wird.
+ *
+ * @author   nh
+ * @version  $Revision$, $Date$
  */
 public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger("de.cismet.cismap.commons.raster.wfs.WFSCapabilitiesTreeCellRenderer");//NOI18N
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
+            "de.cismet.cismap.commons.raster.wfs.WFSCapabilitiesTreeCellRenderer"); // NOI18N
+
+    //~ Instance fields --------------------------------------------------------
+
     private ImageIcon serverIcon;
     private ImageIcon featureIcon;
     private ImageIcon elementIcon;
@@ -56,26 +39,40 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
     private ImageIcon geomIcon;
     private String altRootName = null;
 
+    //~ Constructors -----------------------------------------------------------
+
     /**
-     * Creates a new instance of WMSCapabilitiesTreeCellRenderer
+     * Creates a new instance of WMSCapabilitiesTreeCellRenderer.
      */
     public WFSCapabilitiesTreeCellRenderer() {
-        serverIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/server.png"));//NOI18N
-        featureIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/layer.png"));//NOI18N
-        elementIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/attr.png"));//NOI18N
-        stringIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/string.png"));//NOI18N
-        integerIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/integer.png"));//NOI18N
-        geomIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/geom.png"));//NOI18N
+        serverIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/server.png"));   // NOI18N
+        featureIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/layer.png"));   // NOI18N
+        elementIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/attr.png"));    // NOI18N
+        stringIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/string.png"));   // NOI18N
+        integerIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/integer.png")); // NOI18N
+        geomIcon = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/geom.png"));       // NOI18N
     }
 
-    public WFSCapabilitiesTreeCellRenderer(String name) {
+    /**
+     * Creates a new WFSCapabilitiesTreeCellRenderer object.
+     *
+     * @param  name  DOCUMENT ME!
+     */
+    public WFSCapabilitiesTreeCellRenderer(final String name) {
         this();
         this.altRootName = name;
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     @Override
-    public Component getTreeCellRendererComponent(JTree tree, Object value, boolean isSelected,
-            boolean expanded, boolean leaf, int row, boolean hasFocus) {
+    public Component getTreeCellRendererComponent(final JTree tree,
+            final Object value,
+            final boolean isSelected,
+            final boolean expanded,
+            final boolean leaf,
+            final int row,
+            final boolean hasFocus) {
         super.getTreeCellRendererComponent(tree, value, isSelected, expanded, leaf, row, hasFocus);
 
         try {
@@ -84,11 +81,11 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                 if (altRootName != null) {
                     setText(altRootName);
                 } else {
-                    setText("Web Feature Service");//NOI18N
+                    setText("Web Feature Service"); // NOI18N
                 }
                 setIcon(serverIcon);
             } else if (value instanceof FeatureType) {
-                FeatureType e = (FeatureType) value;
+                final FeatureType e = (FeatureType)value;
 //                if (!e.getType().isResolved()) {
 //                    if (e.getType().getName().getLocalName().equals(FeatureServiceUtilities.STRING_PROPERTY_TYPE)) {
 //                        setIcon(stringIcon);
@@ -105,10 +102,10 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                 setIcon(featureIcon);
                 setText(e.getName().getLocalPart());
             } else if (value instanceof FeatureServiceAttribute) {
-                FeatureServiceAttribute fsf = (FeatureServiceAttribute) value;
+                final FeatureServiceAttribute fsf = (FeatureServiceAttribute)value;
                 String type;
-                if(fsf.getType() != null && fsf.getType().lastIndexOf(":") != -1){//NOI18N
-                    type = fsf.getType().substring(fsf.getType().lastIndexOf(":")+1);//NOI18N
+                if ((fsf.getType() != null) && (fsf.getType().lastIndexOf(":") != -1)) {  // NOI18N
+                    type = fsf.getType().substring(fsf.getType().lastIndexOf(":") + 1);   // NOI18N
                 } else {
                     type = fsf.getType();
                 }
@@ -116,19 +113,19 @@ public class WFSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
                     setIcon(stringIcon);
                 } else if (type.equals(FeatureServiceUtilities.INTEGER_PROPERTY_TYPE)) {
                     setIcon(integerIcon);
-                } else if ( FeatureServiceUtilities.isElementOfGeometryType(type) ) {
+                } else if (FeatureServiceUtilities.isElementOfGeometryType(type)) {
                     setIcon(geomIcon);
                 } else {
                     setIcon(elementIcon);
                 }
-                if(fsf.getName() != null && fsf.getName().lastIndexOf(":") != -1){//NOI18N
-                    setText(fsf.getName().substring(fsf.getName().lastIndexOf(":")+1));//NOI18N
+                if ((fsf.getName() != null) && (fsf.getName().lastIndexOf(":") != -1)) {  // NOI18N
+                    setText(fsf.getName().substring(fsf.getName().lastIndexOf(":") + 1)); // NOI18N
                 } else {
                     setText(fsf.getName());
                 }
             }
         } catch (Exception ex) {
-            log.error("error in WFSCapabilitiesTreeCellRenderer", ex);//NOI18N
+            log.error("error in WFSCapabilitiesTreeCellRenderer", ex);                    // NOI18N
         }
         return this;
     }

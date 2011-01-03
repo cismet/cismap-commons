@@ -1,57 +1,38 @@
-/*
- * WFSFormQuery.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 24. Juli 2006, 11:17
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.wfsforms;
 
 import org.jdom.Element;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class WFSFormQuery {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String INITIAL = "INITIAL"; // NOI18N
+    public static final String FOLLOWUP = "FOLLOWUP"; // NOI18N
+
+    //~ Instance fields --------------------------------------------------------
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static final String INITIAL="INITIAL";//NOI18N
-    public static final String FOLLOWUP="FOLLOWUP";//NOI18N
-    
+
     private String serverUrl;
     private String filename;
     private String wfsQueryString;
     private String title;
     private String id;
     private String displayTextProperty;
-    
+
     private String propertyPrefix;
     private String propertyNamespace;
     private String idProperty;
@@ -60,142 +41,290 @@ public class WFSFormQuery {
     private String type;
     private String componentName;
     private String queryPlaceholder;
-    
-    
-    /** Creates a new instance of WFSFormQuery */
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of WFSFormQuery.
+     */
     public WFSFormQuery() {
     }
-    
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getFilename() {
         return filename;
     }
-    
-    public void setFilename(String filename) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  filename  DOCUMENT ME!
+     */
+    public void setFilename(final String filename) {
         this.filename = filename;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getTitle() {
         return title;
     }
-    
-    public void setTitle(String title) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  title  DOCUMENT ME!
+     */
+    public void setTitle(final String title) {
         this.title = title;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getId() {
         return id;
     }
-    
-    public void setId(String id) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  id  DOCUMENT ME!
+     */
+    public void setId(final String id) {
         this.id = id;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getDisplayTextProperty() {
         return displayTextProperty;
     }
-    
-    public void setDisplayTextProperty(String displayTextProperty) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  displayTextProperty  DOCUMENT ME!
+     */
+    public void setDisplayTextProperty(final String displayTextProperty) {
         this.displayTextProperty = displayTextProperty;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getIdProperty() {
         return idProperty;
     }
-    
-    public void setIdProperty(String idProperty) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  idProperty  DOCUMENT ME!
+     */
+    public void setIdProperty(final String idProperty) {
         this.idProperty = idProperty;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getExtentProperty() {
         return extentProperty;
     }
-    
-    public void setExtentProperty(String positionProperty) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  positionProperty  DOCUMENT ME!
+     */
+    public void setExtentProperty(final String positionProperty) {
         this.extentProperty = extentProperty;
     }
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getPositionProperty() {
         return positionProperty;
     }
-    
-    public void setPositionProperty(String positionProperty) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  positionProperty  DOCUMENT ME!
+     */
+    public void setPositionProperty(final String positionProperty) {
         this.positionProperty = positionProperty;
     }
-    
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getType() {
         return type;
     }
-    
-    public void setType(String type) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  type  DOCUMENT ME!
+     */
+    public void setType(final String type) {
         this.type = type;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getComponentName() {
         return componentName;
     }
-    
-    public void setComponentName(String componentName) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  componentName  DOCUMENT ME!
+     */
+    public void setComponentName(final String componentName) {
         this.componentName = componentName;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getQueryPlaceholder() {
         return queryPlaceholder;
     }
-    
-    public void setQueryPlaceholder(String queryPlaceholder) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  queryPlaceholder  DOCUMENT ME!
+     */
+    public void setQueryPlaceholder(final String queryPlaceholder) {
         this.queryPlaceholder = queryPlaceholder;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getServerUrl() {
         return serverUrl;
     }
-    
-    public void setServerUrl(String serverUrl) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  serverUrl  DOCUMENT ME!
+     */
+    public void setServerUrl(final String serverUrl) {
         this.serverUrl = serverUrl;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getWfsQueryString() {
         return wfsQueryString;
     }
-    
-    public void setWfsQueryString(String wfsQueryString) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  wfsQueryString  DOCUMENT ME!
+     */
+    public void setWfsQueryString(final String wfsQueryString) {
         this.wfsQueryString = wfsQueryString;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Element getElement() {
-        Element ret=new Element("wfsFormQuery");//NOI18N
-        ret.setAttribute("id",getId());//NOI18N
-        ret.setAttribute("title",getTitle());//NOI18N
-        ret.setAttribute("server",getServerUrl());//NOI18N
-        ret.setAttribute("queryFile",getFilename());//NOI18N
-         ret.setAttribute("propertyPrefix",getFilename());//NOI18N
-          ret.setAttribute("propertyNamespace",getFilename());//NOI18N
-        ret.setAttribute("displayTextProperty",getDisplayTextProperty());//NOI18N
-        ret.setAttribute("extentProperty",getExtentProperty());//NOI18N
-        ret.setAttribute("positionProperty",getExtentProperty());//NOI18N
-        ret.setAttribute("idProperty",getIdProperty());//NOI18N
-        ret.setAttribute("type",getType());//NOI18N
-        ret.setAttribute("componentName",getComponentName());//NOI18N
-        if (getQueryPlaceholder()!=null) {
-            ret.setAttribute("queryPlaceholder",getQueryPlaceholder());//NOI18N
+        final Element ret = new Element("wfsFormQuery");                   // NOI18N
+        ret.setAttribute("id", getId());                                   // NOI18N
+        ret.setAttribute("title", getTitle());                             // NOI18N
+        ret.setAttribute("server", getServerUrl());                        // NOI18N
+        ret.setAttribute("queryFile", getFilename());                      // NOI18N
+        ret.setAttribute("propertyPrefix", getFilename());                 // NOI18N
+        ret.setAttribute("propertyNamespace", getFilename());              // NOI18N
+        ret.setAttribute("displayTextProperty", getDisplayTextProperty()); // NOI18N
+        ret.setAttribute("extentProperty", getExtentProperty());           // NOI18N
+        ret.setAttribute("positionProperty", getExtentProperty());         // NOI18N
+        ret.setAttribute("idProperty", getIdProperty());                   // NOI18N
+        ret.setAttribute("type", getType());                               // NOI18N
+        ret.setAttribute("componentName", getComponentName());             // NOI18N
+        if (getQueryPlaceholder() != null) {
+            ret.setAttribute("queryPlaceholder", getQueryPlaceholder());   // NOI18N
         }
         return ret;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getPropertyPrefix() {
         return propertyPrefix;
     }
 
-    public void setPropertyPrefix(String propertyPrefix) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  propertyPrefix  DOCUMENT ME!
+     */
+    public void setPropertyPrefix(final String propertyPrefix) {
         this.propertyPrefix = propertyPrefix;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getPropertyNamespace() {
         return propertyNamespace;
     }
 
-    public void setPropertyNamespace(String propertyNamespace) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  propertyNamespace  DOCUMENT ME!
+     */
+    public void setPropertyNamespace(final String propertyNamespace) {
         this.propertyNamespace = propertyNamespace;
     }
-    
 }

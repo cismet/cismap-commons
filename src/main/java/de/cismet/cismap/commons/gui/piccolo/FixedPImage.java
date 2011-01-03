@@ -1,106 +1,136 @@
-/*
- * FixedPImage.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 9. Mai 2006, 11:13
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.nodes.PImage;
+
 import java.awt.Image;
 import java.awt.geom.Point2D;
+
 import java.net.URL;
 
 /**
- * 
- * @author thorsten.hell@cismet.de
+ * DOCUMENT ME!
+ *
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class FixedPImage extends PImage implements PSticky {
+
+    //~ Instance fields --------------------------------------------------------
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private double sweetSpotX = 0d;
     private double sweetSpotY = 0d;
     private double originalOffsetX = 0;
     private double originalOffsetY = 0;
 
-    /** Creates a new instance of FixedPImage */
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of FixedPImage.
+     */
     public FixedPImage() {
         super();
     }
 
-    public FixedPImage(Image newImage) {
+    /**
+     * Creates a new FixedPImage object.
+     *
+     * @param  newImage  DOCUMENT ME!
+     */
+    public FixedPImage(final Image newImage) {
         super(newImage);
     }
 
-    public FixedPImage(String fileName) {
+    /**
+     * Creates a new FixedPImage object.
+     *
+     * @param  fileName  DOCUMENT ME!
+     */
+    public FixedPImage(final String fileName) {
         super(fileName);
     }
 
-    public FixedPImage(URL url) {
+    /**
+     * Creates a new FixedPImage object.
+     *
+     * @param  url  DOCUMENT ME!
+     */
+    public FixedPImage(final URL url) {
         super(url);
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     @Override
-    public void setOffset(double x, double y) {
+    public void setOffset(final double x, final double y) {
         originalOffsetX = x;
         originalOffsetY = y;
         setOffsetWithoutTouchingOriginalOffset(x, y);
     }
 
     @Override
-    public void setOffset(Point2D point) {
+    public void setOffset(final Point2D point) {
         setOffset(point.getX(), point.getY());
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public double getSweetSpotX() {
         return sweetSpotX;
     }
 
-    public void setSweetSpotX(double sweetSpotX) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  sweetSpotX  DOCUMENT ME!
+     */
+    public void setSweetSpotX(final double sweetSpotX) {
         this.sweetSpotX = sweetSpotX;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public double getSweetSpotY() {
         return sweetSpotY;
     }
 
-    public void setSweetSpotY(double sweetSpotY) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  sweetSpotY  DOCUMENT ME!
+     */
+    public void setSweetSpotY(final double sweetSpotY) {
         this.sweetSpotY = sweetSpotY;
     }
 
     @Override
-    public void setScale(double scale) {
+    public void setScale(final double scale) {
         super.setScale(scale);
         setOffsetWithoutTouchingOriginalOffset(originalOffsetX, originalOffsetY);
     }
 
-    private void setOffsetWithoutTouchingOriginalOffset(double x, double y) {
-        super.setOffset(x - getGlobalBounds().getWidth() * sweetSpotX, y - getGlobalBounds().getHeight() * sweetSpotY);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  x  DOCUMENT ME!
+     * @param  y  DOCUMENT ME!
+     */
+    private void setOffsetWithoutTouchingOriginalOffset(final double x, final double y) {
+        super.setOffset(x - (getGlobalBounds().getWidth() * sweetSpotX),
+            y
+                    - (getGlobalBounds().getHeight() * sweetSpotY));
     }
 }

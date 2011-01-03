@@ -1,51 +1,32 @@
-/*
- * DefaultStyledFeature.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 12. Juli 2005, 12:43
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Paint;
 import java.awt.Stroke;
+
 import javax.swing.JLabel;
 
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class DefaultStyledFeature implements StyledFeature, CloneableFeature, AnnotatedFeature {
+
+    //~ Instance fields --------------------------------------------------------
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private com.vividsolutions.jts.geom.Geometry geom = null;
@@ -69,12 +50,20 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
     private float justification = JLabel.LEFT_ALIGNMENT;
     private boolean primaryAnnotationVisible = true;
 
-    /** Creates a new instance of DefaultStyledFeature */
-    public DefaultStyledFeature() {
+    //~ Constructors -----------------------------------------------------------
 
+    /**
+     * Creates a new instance of DefaultStyledFeature.
+     */
+    public DefaultStyledFeature() {
     }
 
-    public DefaultStyledFeature(DefaultStyledFeature dsf) {
+    /**
+     * Creates a new DefaultStyledFeature object.
+     *
+     * @param  dsf  DOCUMENT ME!
+     */
+    public DefaultStyledFeature(final DefaultStyledFeature dsf) {
         geom = dsf.geom;
         fillingStyle = dsf.fillingStyle;
         linePaint = dsf.linePaint;
@@ -86,7 +75,7 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
         secondaryAnnotation = dsf.secondaryAnnotation;
         primaryAnnotationFont = dsf.primaryAnnotationFont;
         primaryAnnotationScale = dsf.primaryAnnotationScale;
-        primaryAnnotationVisible=dsf.primaryAnnotationVisible;
+        primaryAnnotationVisible = dsf.primaryAnnotationVisible;
         featureAnnotationSymbol = dsf.featureAnnotationSymbol;
         lineWidth = dsf.lineWidth;
         autoScale = dsf.autoScale;
@@ -97,10 +86,13 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
         justification = dsf.justification;
     }
 
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
     public Object clone() {
-        DefaultStyledFeature copy = new DefaultStyledFeature();
+        final DefaultStyledFeature copy = new DefaultStyledFeature();
         if (geom != null) {
-            copy.geom = (Geometry) (geom.clone());
+            copy.geom = (Geometry)(geom.clone());
         }
         copy.fillingStyle = fillingStyle;
         copy.linePaint = linePaint;
@@ -112,7 +104,7 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
         copy.secondaryAnnotation = secondaryAnnotation;
         copy.primaryAnnotationFont = primaryAnnotationFont;
         copy.primaryAnnotationScale = primaryAnnotationScale;
-        copy.primaryAnnotationVisible=primaryAnnotationVisible;
+        copy.primaryAnnotationVisible = primaryAnnotationVisible;
         copy.featureAnnotationSymbol = featureAnnotationSymbol;
         copy.autoScale = autoScale;
         copy.lineWidth = lineWidth;
@@ -124,170 +116,212 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
         return copy;
     }
 
+    @Override
     public Paint getFillingPaint() {
         return fillingStyle;
     }
 
-    public void setFillingPaint(Paint fillingStyle) {
+    @Override
+    public void setFillingPaint(final Paint fillingStyle) {
         this.fillingStyle = fillingStyle;
     }
 
+    @Override
     public float getTransparency() {
         return transparency;
     }
 
-    public void setTransparency(float transparency) {
+    @Override
+    public void setTransparency(final float transparency) {
         this.transparency = transparency;
     }
 
-    public void setGeometry(com.vividsolutions.jts.geom.Geometry geom) {
+    @Override
+    public void setGeometry(final com.vividsolutions.jts.geom.Geometry geom) {
         this.geom = geom;
     }
 
+    @Override
     public com.vividsolutions.jts.geom.Geometry getGeometry() {
         return geom;
     }
 
+    @Override
     public java.awt.Paint getLinePaint() {
         return linePaint;
     }
 
-    public void setLinePaint(java.awt.Paint p) {
+    @Override
+    public void setLinePaint(final java.awt.Paint p) {
         linePaint = p;
     }
 
+    @Override
     public boolean canBeSelected() {
         return canBeSelected;
     }
 
-    public void setCanBeSelected(boolean canBeSelected) {
+    @Override
+    public void setCanBeSelected(final boolean canBeSelected) {
         this.canBeSelected = canBeSelected;
     }
 
+    @Override
     public boolean isEditable() {
         return editable;
     }
 
-    public void setEditable(boolean editable) {
+    @Override
+    public void setEditable(final boolean editable) {
         this.editable = editable;
     }
 
-  @Override
-    public void hide(boolean hiding) {
+    @Override
+    public void hide(final boolean hiding) {
         this.hiding = hiding;
     }
 
+    @Override
     public boolean isHidden() {
         return hiding;
     }
 
-    public void setFeatureAnnotationSymbol(FeatureAnnotationSymbol featureAnnotationSymbol) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureAnnotationSymbol  DOCUMENT ME!
+     */
+    public void setFeatureAnnotationSymbol(final FeatureAnnotationSymbol featureAnnotationSymbol) {
         this.featureAnnotationSymbol = featureAnnotationSymbol;
     }
 
+    @Override
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
         return featureAnnotationSymbol;
     }
 
+    @Override
     public String getPrimaryAnnotation() {
         return primaryAnnotation;
     }
 
+    @Override
     public Font getPrimaryAnnotationFont() {
         return primaryAnnotationFont;
     }
 
+    @Override
     public double getPrimaryAnnotationScaling() {
         return primaryAnnotationScale;
     }
 
+    @Override
     public String getSecondaryAnnotation() {
         return secondaryAnnotation;
     }
 
-    public void setPrimaryAnnotation(String primaryAnnotation) {
+    @Override
+    public void setPrimaryAnnotation(final String primaryAnnotation) {
         this.primaryAnnotation = primaryAnnotation;
     }
 
-    public void setPrimaryAnnotationFont(Font primaryAnnotationFont) {
+    @Override
+    public void setPrimaryAnnotationFont(final Font primaryAnnotationFont) {
         this.primaryAnnotationFont = primaryAnnotationFont;
     }
 
-    public void setPrimaryAnnotationScaling(double primaryAnnotationSize) {
+    @Override
+    public void setPrimaryAnnotationScaling(final double primaryAnnotationSize) {
         this.primaryAnnotationScale = primaryAnnotationSize;
     }
 
-    public void setSecondaryAnnotation(String secondaryAnnotation) {
+    @Override
+    public void setSecondaryAnnotation(final String secondaryAnnotation) {
         this.secondaryAnnotation = secondaryAnnotation;
     }
 
+    @Override
     public int getLineWidth() {
         return lineWidth;
     }
 
-    public void setLineWidth(int width) {
+    @Override
+    public void setLineWidth(final int width) {
         lineWidth = width;
     }
 
-    public void setPointAnnotationSymbol(FeatureAnnotationSymbol featureAnnotationSymbol) {
+    @Override
+    public void setPointAnnotationSymbol(final FeatureAnnotationSymbol featureAnnotationSymbol) {
         this.featureAnnotationSymbol = featureAnnotationSymbol;
     }
 
+    @Override
     public Integer getMaxScaleDenominator() {
         return maxScaleDenominator;
     }
 
+    @Override
     public Integer getMinScaleDenominator() {
         return minScaleDenominator;
     }
 
+    @Override
     public boolean isAutoscale() {
         return autoScale;
     }
 
-    public void setAutoScale(boolean autoScale) {
+    @Override
+    public void setAutoScale(final boolean autoScale) {
         this.autoScale = autoScale;
     }
 
-    public void setMaxScaleDenominator(Integer max) {
+    @Override
+    public void setMaxScaleDenominator(final Integer max) {
         this.maxScaleDenominator = max;
     }
 
-    public void setMinScaleDenominator(Integer min) {
+    @Override
+    public void setMinScaleDenominator(final Integer min) {
         this.minScaleDenominator = min;
     }
 
+    @Override
     public Paint getPrimaryAnnotationPaint() {
         return annotationPaint;
     }
 
-    public void setPrimaryAnnotationPaint(Paint primaryAnnotationPaint) {
+    @Override
+    public void setPrimaryAnnotationPaint(final Paint primaryAnnotationPaint) {
         annotationPaint = primaryAnnotationPaint;
     }
 
+    @Override
     public boolean isHighlightingEnabled() {
         return highlightingEnabled;
     }
 
-    public void setHighlightingEnabled(boolean enabled) {
+    @Override
+    public void setHighlightingEnabled(final boolean enabled) {
         highlightingEnabled = enabled;
     }
 
+    @Override
     public float getPrimaryAnnotationJustification() {
-
         return justification;
     }
 
-    public void setPrimaryAnnotationJustification(float just) {        
+    @Override
+    public void setPrimaryAnnotationJustification(final float just) {
         justification = just;
     }
 
-    public boolean isPrimaryAnnotationVisible() {        
+    @Override
+    public boolean isPrimaryAnnotationVisible() {
         return primaryAnnotationVisible;
     }
 
-  @Override
-    public void setPrimaryAnnotationVisible(boolean visible) {        
+    @Override
+    public void setPrimaryAnnotationVisible(final boolean visible) {
         primaryAnnotationVisible = visible;
     }
 }

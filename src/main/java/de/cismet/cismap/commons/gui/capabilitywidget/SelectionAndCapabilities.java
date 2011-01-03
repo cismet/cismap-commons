@@ -1,76 +1,98 @@
-/*
- * SelectionAndCapabilities.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 29. November 2005, 10:44
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.capabilitywidget;
 
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 import javax.swing.tree.TreePath;
 
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class SelectionAndCapabilities {
-    public SelectionAndCapabilities(TreePath[] s,WMSCapabilities c,String url) {
-        selection=s;
-        capabilities=c;
-        this.url=url;
-    }
+
+    //~ Instance fields --------------------------------------------------------
+
     private TreePath[] selection;
     private WMSCapabilities capabilities;
     private String url;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new SelectionAndCapabilities object.
+     *
+     * @param  s    DOCUMENT ME!
+     * @param  c    DOCUMENT ME!
+     * @param  url  DOCUMENT ME!
+     */
+    public SelectionAndCapabilities(final TreePath[] s, final WMSCapabilities c, final String url) {
+        selection = s;
+        capabilities = c;
+        this.url = url;
+    }
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public TreePath[] getSelection() {
         return selection;
     }
 
-    public void setSelection(TreePath[] selection) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selection  DOCUMENT ME!
+     */
+    public void setSelection(final TreePath[] selection) {
         this.selection = selection;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public WMSCapabilities getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(WMSCapabilities capabilities) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  capabilities  DOCUMENT ME!
+     */
+    public void setCapabilities(final WMSCapabilities capabilities) {
         this.capabilities = capabilities;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  url  DOCUMENT ME!
+     */
+    public void setUrl(final String url) {
         this.url = url;
     }
 }

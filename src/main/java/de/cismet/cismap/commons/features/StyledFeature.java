@@ -1,71 +1,107 @@
-/*----------------    FILE HEADER  ------------------------------------------
- * This file is part of cismap (http://cismap.sourceforge.net)
- *
- * Copyright (C) 2004 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- * StyledFeature.java
- *
- * Created on 4. M\u00E4rz 2005, 14:31
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.features;
 
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import java.awt.Paint;
 
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+
 /**
+ * DOCUMENT ME!
  *
- * @author hell
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
-public interface StyledFeature extends Feature{
+public interface StyledFeature extends Feature {
 
-    //public java.awt.Stroke getLineStyle();
-    public java.awt.Paint getLinePaint();
+    //~ Methods ----------------------------------------------------------------
 
-    public void setLinePaint(Paint linePaint);
+    /**
+     * public java.awt.Stroke getLineStyle();
+     *
+     * @return  DOCUMENT ME!
+     */
+    java.awt.Paint getLinePaint();
 
-    public int getLineWidth();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  linePaint  DOCUMENT ME!
+     */
+    void setLinePaint(Paint linePaint);
 
-    public void setLineWidth(int width);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    int getLineWidth();
 
-    public java.awt.Paint getFillingPaint();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  width  DOCUMENT ME!
+     */
+    void setLineWidth(int width);
 
-    public void setFillingPaint(Paint fillingStyle);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    java.awt.Paint getFillingPaint();
 
-    public float getTransparency();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fillingStyle  DOCUMENT ME!
+     */
+    void setFillingPaint(Paint fillingStyle);
 
-    public void setTransparency(float transparrency);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    float getTransparency();
 
-    public FeatureAnnotationSymbol getPointAnnotationSymbol();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  transparrency  DOCUMENT ME!
+     */
+    void setTransparency(float transparrency);
 
-    public void setPointAnnotationSymbol(FeatureAnnotationSymbol featureAnnotationSymbol);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    FeatureAnnotationSymbol getPointAnnotationSymbol();
 
-    public boolean isHighlightingEnabled();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureAnnotationSymbol  DOCUMENT ME!
+     */
+    void setPointAnnotationSymbol(FeatureAnnotationSymbol featureAnnotationSymbol);
 
-    public void setHighlightingEnabled(boolean enabled);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isHighlightingEnabled();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  enabled  DOCUMENT ME!
+     */
+    void setHighlightingEnabled(boolean enabled);
 }

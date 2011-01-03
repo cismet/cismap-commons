@@ -1,76 +1,94 @@
-/*
- * SelectionAndCapabilities.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 29. November 2005, 10:44
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.capabilitywidget;
 
 import org.jdom.Element;
-import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
-import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+
 import java.util.Vector;
 
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+
 /**
- * TODO: Diese Klasse kann entfernt werden, da sie keine
- * zusaetzliche Funktionalitaet zur Klasse FeatureType besitzt.
- * @author nh
+ * TODO: Diese Klasse kann entfernt werden, da sie keine zusaetzliche Funktionalitaet zur Klasse FeatureType besitzt.
+ *
+ * @author   nh
+ * @version  $Revision$, $Date$
  */
 public class WFSSelectionAndCapabilities {
+
+    //~ Instance fields --------------------------------------------------------
+
     private FeatureType feature;
 
-    public WFSSelectionAndCapabilities(FeatureType feature) {
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new WFSSelectionAndCapabilities object.
+     *
+     * @param  feature  DOCUMENT ME!
+     */
+    public WFSSelectionAndCapabilities(final FeatureType feature) {
         this.feature = feature;
     }
 
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getName() {
         return feature.getPrefixedNameString();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getHost() {
         return feature.getWFSCapabilities().getURL().toString();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Element getQuery() {
         return feature.getWFSQuery();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getIdentifier() {
         return "";
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public FeatureType getFeature() {
         return feature;
     }
 
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Vector<FeatureServiceAttribute> getAttributes() {
         return feature.getFeatureAttributes();
     }

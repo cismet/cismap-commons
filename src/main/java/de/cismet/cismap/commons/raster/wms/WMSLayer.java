@@ -1,113 +1,155 @@
-/*
- * WMSLayer.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 22. November 2005, 12:51
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.raster.wms;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.Style;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class WMSLayer {
+
+    //~ Instance fields --------------------------------------------------------
+
     private boolean enabled;
     private Style selectedStyle;
     private boolean querySelected;
     private Layer ogcCapabilitiesLayer;
-    private WMSServiceLayer parentServiceLayer=null;
-    
-    /** Creates a new instance of WMSLayer */
-    public WMSLayer(Layer ogcCapabilitiesLayer,Style selectedStyle) {
-        this.ogcCapabilitiesLayer=ogcCapabilitiesLayer;
-        this.selectedStyle=selectedStyle;
+    private WMSServiceLayer parentServiceLayer = null;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of WMSLayer.
+     *
+     * @param  ogcCapabilitiesLayer  DOCUMENT ME!
+     * @param  selectedStyle         DOCUMENT ME!
+     */
+    public WMSLayer(final Layer ogcCapabilitiesLayer, final Style selectedStyle) {
+        this.ogcCapabilitiesLayer = ogcCapabilitiesLayer;
+        this.selectedStyle = selectedStyle;
         setEnabled(true);
-        querySelected=false;
-        this.selectedStyle=selectedStyle;
+        querySelected = false;
+        this.selectedStyle = selectedStyle;
     }
-    
+
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
     public String toString() {
-        if (ogcCapabilitiesLayer!=null) {
+        if (ogcCapabilitiesLayer != null) {
             return ogcCapabilitiesLayer.getTitle();
-        }
-        else {
+        } else {
             return super.toString();
         }
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  enabled  DOCUMENT ME!
+     */
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Style getSelectedStyle() {
         return selectedStyle;
     }
 
-    public void setSelectedStyle(Style selectedStyle) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectedStyle  DOCUMENT ME!
+     */
+    public void setSelectedStyle(final Style selectedStyle) {
         this.selectedStyle = selectedStyle;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public boolean isQuerySelected() {
         return querySelected;
     }
 
-    public void setQuerySelected(boolean querySelected) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  querySelected  DOCUMENT ME!
+     */
+    public void setQuerySelected(final boolean querySelected) {
         this.querySelected = querySelected;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Layer getOgcCapabilitiesLayer() {
         return ogcCapabilitiesLayer;
     }
 
-    public void setOgcCapabilitiesLayer(Layer ogcCapabilitiesLayer) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ogcCapabilitiesLayer  DOCUMENT ME!
+     */
+    public void setOgcCapabilitiesLayer(final Layer ogcCapabilitiesLayer) {
         this.ogcCapabilitiesLayer = ogcCapabilitiesLayer;
     }
-    
-    public boolean isSrsSupported(String srs) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   srs  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isSrsSupported(final String srs) {
         return ogcCapabilitiesLayer.isSrsSupported(srs);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public WMSServiceLayer getParentServiceLayer() {
         return parentServiceLayer;
     }
 
-    public void setParentServiceLayer(WMSServiceLayer parentServiceLayer) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  parentServiceLayer  DOCUMENT ME!
+     */
+    public void setParentServiceLayer(final WMSServiceLayer parentServiceLayer) {
         this.parentServiceLayer = parentServiceLayer;
     }
-    
-    
 }

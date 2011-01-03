@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * Created 27.10.2005 15:33:24 by nash
  *
@@ -8,20 +15,6 @@
  * License: GPL (see http://www.gnu.org/licenses/gpl.txt)
  */
 package de.preagro.jts2gmldom;
-
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
-import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.DOMException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -34,34 +27,44 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
+import java.util.Locale;
+import java.util.logging.Logger;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.FactoryConfigurationError;
+import javax.xml.parsers.ParserConfigurationException;
+
 /**
- * <p>
- * Class for creating DOM Elements containing valid GML representations of JTS
- * geometries
- * </p>
- * <p>
- * TODO currently doesn't do anything about reference systems
- * </p>
- * 
- * @author nash
- * 
- * @version 0.1
+ * <p>Class for creating DOM Elements containing valid GML representations of JTS geometries</p>
+ *
+ * <p>TODO currently doesn't do anything about reference systems</p>
+ *
+ * @author   nash
+ * @version  0.1
  */
 public class Jts2GmlDOM {
-    /**
-     * logger for debugging purposes
-     */
-    protected static final Logger LOGGER = Logger
-            .getLogger("de.preagro.jts2gmldom");
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    /** logger for debugging purposes. */
+    protected static final Logger LOGGER = Logger.getLogger("de.preagro.jts2gmldom");
 
     private static final String EMPTY_STRING = "";
-    
+
     public static final String EIGHT_DP_NUMBER_FORMAT = "0.########";
-    
+
     public static final String GML_NAMESPACE = "http://www.opengis.net/gml";
 
     public static final String GML_PREFIX = "gml";
-    
+
     public static final String PREFIX_SEPARATOR = ":";
 
     public static final String DEFAULT_LIST_SEPARATOR = " ";
@@ -100,179 +103,368 @@ public class Jts2GmlDOM {
 
     public static final String SURFACEMEMBER = "surfaceMember";
 
+    //~ Instance fields --------------------------------------------------------
+
     private Document doc;
 
+    //~ Constructors -----------------------------------------------------------
+
     /**
-     *  
+     * Creates a new Jts2GmlDOM object.
+     *
+     * @throws  ParserConfigurationException  DOCUMENT ME!
+     * @throws  FactoryConfigurationError     DOCUMENT ME!
      */
-    public Jts2GmlDOM() throws ParserConfigurationException,
-            FactoryConfigurationError {
+    public Jts2GmlDOM() throws ParserConfigurationException, FactoryConfigurationError {
         super();
-        doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                .newDocument();
+        doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
     }
 
-    public Element geometryToGmlElement(Geometry theGeom) throws DOMException {
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theGeom  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    public Element geometryToGmlElement(final Geometry theGeom) throws DOMException {
         // first we need to know the type of the Geometry
-        int geomType = GeomTypes.classifyGeometry(theGeom);
+        final int geomType = GeomTypes.classifyGeometry(theGeom);
         // then do the handling
         switch (geomType) {
-        case GeomTypes.POINT:
-            return pointToGmlElement((Point) theGeom);
-        case GeomTypes.LINESTRING:
-            return lineStringToGmlElement((LineString) theGeom);
-        case GeomTypes.LINEARRING:
-            return linearRingToGmlElement((LinearRing) theGeom);
-        case GeomTypes.POLYGON:
-            return polygonToGmlElement((Polygon) theGeom);
-        case GeomTypes.GEOMETRYCOLLECTION:
-            return geometryCollectionToGmlElement((GeometryCollection) theGeom);
-        case GeomTypes.MULTIPOINT:
-            return multiPointToGmlElement((MultiPoint) theGeom);
-        case GeomTypes.MULTILINESTRING:
-            return multiLineStringToGmlElement((MultiLineString) theGeom);
-        case GeomTypes.MULTIPOLYGON:
-            return multiPolygonToGmlElement((MultiPolygon) theGeom);
-        case GeomTypes.UNKNOWN:
-        default:
-            return null;
+            case GeomTypes.POINT: {
+                return pointToGmlElement((Point)theGeom);
+            }
+            case GeomTypes.LINESTRING: {
+                return lineStringToGmlElement((LineString)theGeom);
+            }
+            case GeomTypes.LINEARRING: {
+                return linearRingToGmlElement((LinearRing)theGeom);
+            }
+            case GeomTypes.POLYGON: {
+                return polygonToGmlElement((Polygon)theGeom);
+            }
+            case GeomTypes.GEOMETRYCOLLECTION: {
+                return geometryCollectionToGmlElement((GeometryCollection)theGeom);
+            }
+            case GeomTypes.MULTIPOINT: {
+                return multiPointToGmlElement((MultiPoint)theGeom);
+            }
+            case GeomTypes.MULTILINESTRING: {
+                return multiLineStringToGmlElement((MultiLineString)theGeom);
+            }
+            case GeomTypes.MULTIPOLYGON: {
+                return multiPolygonToGmlElement((MultiPolygon)theGeom);
+            }
+            case GeomTypes.UNKNOWN:
+            default: {
+                return null;
+            }
         }
     }
 
-    public static String gmlQualifiedTag(String localName) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   localName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static String gmlQualifiedTag(final String localName) {
         return GML_PREFIX.concat(PREFIX_SEPARATOR).concat(localName);
     }
 
-    protected Element createElement(String elementName) throws DOMException {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   elementName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    protected Element createElement(final String elementName) throws DOMException {
         return doc.createElementNS(GML_NAMESPACE, gmlQualifiedTag(elementName));
     }
 
-    protected void addTextToElement(Element el, String text)
-            throws DOMException {
-        Node n = doc.createTextNode(text);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   el    DOCUMENT ME!
+     * @param   text  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    protected void addTextToElement(final Element el, final String text) throws DOMException {
+        final Node n = doc.createTextNode(text);
         el.appendChild(n);
     }
 
-    protected String getFormattedCoord(Coordinate thePoint) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   thePoint  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected String getFormattedCoord(final Coordinate thePoint) {
         return getFormattedCoord(thePoint, DEFAULT_LIST_SEPARATOR);
     }
 
-    protected String getFormattedCoord(Coordinate theCoord, String separator) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theCoord   DOCUMENT ME!
+     * @param   separator  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected String getFormattedCoord(final Coordinate theCoord, final String separator) {
         // force non-scientific notation and up to 8 decimal places (should be
         // enough!)
         // HACK: also force ENGLISH locale
         // TODO internationalisation: should be able to specify locale (but then
         // also need to sort out separators and so on for the lists based on
         // locale)
-        DecimalFormat formatter = new DecimalFormat(EIGHT_DP_NUMBER_FORMAT,
+        final DecimalFormat formatter = new DecimalFormat(
+                EIGHT_DP_NUMBER_FORMAT,
                 new DecimalFormatSymbols(Locale.ENGLISH));
         return (formatter.format(theCoord.x) + separator
-                + formatter.format(theCoord.y) + (Double.isNaN(theCoord.z) ? ""
-                : separator + formatter.format(theCoord.z)));
+                        + formatter.format(theCoord.y)
+                        + (Double.isNaN(theCoord.z) ? "" : (separator + formatter.format(theCoord.z))));
     }
 
-    protected String getFormattedCoordList(Coordinate[] theCoords) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theCoords  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected String getFormattedCoordList(final Coordinate[] theCoords) {
         return getFormattedCoordList(theCoords, DEFAULT_TUPLE_SEPARATOR,
                 DEFAULT_LIST_SEPARATOR);
     }
 
-    protected String getFormattedCoordList(Coordinate[] theCoords,
-            String tupleSeparator) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theCoords       DOCUMENT ME!
+     * @param   tupleSeparator  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected String getFormattedCoordList(final Coordinate[] theCoords, final String tupleSeparator) {
         return getFormattedCoordList(theCoords, tupleSeparator,
                 DEFAULT_LIST_SEPARATOR);
     }
 
-    protected String getFormattedCoordList(Coordinate[] theCoords,
-            String tupleSeparator, String listSeparator) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theCoords       DOCUMENT ME!
+     * @param   tupleSeparator  DOCUMENT ME!
+     * @param   listSeparator   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected String getFormattedCoordList(final Coordinate[] theCoords,
+            final String tupleSeparator,
+            final String listSeparator) {
         String coordList = EMPTY_STRING;
         for (int i = 0; i < theCoords.length; i++) {
             coordList += ((i > 0) ? listSeparator : EMPTY_STRING)
-                    + getFormattedCoord(theCoords[i], tupleSeparator);
+                        + getFormattedCoord(theCoords[i], tupleSeparator);
         }
         return coordList;
     }
 
-    public Element pointToGmlElement(Point thePoint) throws DOMException {
-        Element pointElement = createElement(POINT);
-        Element posElement = createElement(POS);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   thePoint  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    public Element pointToGmlElement(final Point thePoint) throws DOMException {
+        final Element pointElement = createElement(POINT);
+        final Element posElement = createElement(POS);
         addTextToElement(posElement,
-                getFormattedCoord(thePoint.getCoordinate()));
+            getFormattedCoord(thePoint.getCoordinate()));
         pointElement.appendChild(posElement);
         return pointElement;
     }
 
-    public Element lineStringToGmlElement(LineString theLineString)
-            throws DOMException {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theLineString  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    public Element lineStringToGmlElement(final LineString theLineString) throws DOMException {
         return linearThingToGmlElement(theLineString, LINESTRING);
     }
 
-    public Element linearRingToGmlElement(LinearRing theLinearRing)
-            throws DOMException {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theLinearRing  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    public Element linearRingToGmlElement(final LinearRing theLinearRing) throws DOMException {
         return linearThingToGmlElement(theLinearRing, LINEARRING);
     }
 
-    protected Element linearThingToGmlElement(LineString theLinearThing,
-            String elementName) throws DOMException {
-        Element lineStringElement = createElement(elementName);
-        Element posListElement = createElement(POSLIST);
-        addTextToElement(posListElement, getFormattedCoordList(theLinearThing
-                .getCoordinates()));
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theLinearThing  DOCUMENT ME!
+     * @param   elementName     DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    protected Element linearThingToGmlElement(final LineString theLinearThing, final String elementName)
+            throws DOMException {
+        final Element lineStringElement = createElement(elementName);
+        final Element posListElement = createElement(POSLIST);
+        addTextToElement(posListElement, getFormattedCoordList(theLinearThing.getCoordinates()));
         lineStringElement.appendChild(posListElement);
         return lineStringElement;
     }
 
-    public Element polygonToGmlElement(Polygon thePolygon) throws DOMException {
-        Element polygonElement = createElement(POLYGON);
-        polygonElement.appendChild(createMemberElement(thePolygon
-                .getExteriorRing(), EXTERIOR));
-        int numInteriors = thePolygon.getNumInteriorRing();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   thePolygon  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    public Element polygonToGmlElement(final Polygon thePolygon) throws DOMException {
+        final Element polygonElement = createElement(POLYGON);
+        polygonElement.appendChild(createMemberElement(thePolygon.getExteriorRing(), EXTERIOR));
+        final int numInteriors = thePolygon.getNumInteriorRing();
         for (int i = 0; i < numInteriors; i++) {
-            polygonElement.appendChild(createMemberElement(thePolygon
-                    .getInteriorRingN(i), INTERIOR));
+            polygonElement.appendChild(createMemberElement(thePolygon.getInteriorRingN(i), INTERIOR));
         }
         return polygonElement;
     }
 
-    public Element geometryCollectionToGmlElement(GeometryCollection theGeoms)
-            throws DOMException {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theGeoms  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    public Element geometryCollectionToGmlElement(final GeometryCollection theGeoms) throws DOMException {
         return collectionToGmlElement(theGeoms, MULTIGEOMETRY, GEOMETRYMEMBER);
     }
 
-    public Element multiPointToGmlElement(MultiPoint theGeoms)
-            throws DOMException {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theGeoms  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    public Element multiPointToGmlElement(final MultiPoint theGeoms) throws DOMException {
         return collectionToGmlElement(theGeoms, MULTIPOINT, POINTMEMBER);
     }
 
-    public Element multiLineStringToGmlElement(MultiLineString theGeoms)
-            throws DOMException {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theGeoms  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    public Element multiLineStringToGmlElement(final MultiLineString theGeoms) throws DOMException {
         return collectionToGmlElement(theGeoms, MULTICURVE, CURVEMEMBER);
     }
 
-    public Element multiPolygonToGmlElement(MultiPolygon theGeoms)
-            throws DOMException {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theGeoms  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    public Element multiPolygonToGmlElement(final MultiPolygon theGeoms) throws DOMException {
         return collectionToGmlElement(theGeoms, MULTISURFACE, SURFACEMEMBER);
     }
 
-    protected Element collectionToGmlElement(GeometryCollection theGeoms,
-            String elementName, String associationName) throws DOMException {
-        Element collectionElement = createElement(elementName);
-        int numGeoms = theGeoms.getNumGeometries();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theGeoms         DOCUMENT ME!
+     * @param   elementName      DOCUMENT ME!
+     * @param   associationName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  DOMException  DOCUMENT ME!
+     */
+    protected Element collectionToGmlElement(final GeometryCollection theGeoms,
+            final String elementName,
+            final String associationName) throws DOMException {
+        final Element collectionElement = createElement(elementName);
+        final int numGeoms = theGeoms.getNumGeometries();
         for (int i = 0; i < numGeoms; i++) {
-            collectionElement.appendChild(createMemberElement(theGeoms
-                    .getGeometryN(i), associationName));
+            collectionElement.appendChild(createMemberElement(theGeoms.getGeometryN(i), associationName));
         }
         return collectionElement;
     }
 
-    protected Element createMemberElement(Geometry theGeom,
-            String associationName) {
-        Element geometryElement = geometryToGmlElement(theGeom);
-        Element associationElement = createElement(associationName);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   theGeom          DOCUMENT ME!
+     * @param   associationName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected Element createMemberElement(final Geometry theGeom, final String associationName) {
+        final Element geometryElement = geometryToGmlElement(theGeom);
+        final Element associationElement = createElement(associationName);
         associationElement.appendChild(geometryElement);
         return associationElement;
     }
 
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
     private static class GeomTypes {
+
+        //~ Static fields/initializers -----------------------------------------
+
         public static final int UNKNOWN = 0;
 
         public static final String POINT_NAME = "Point";
@@ -307,8 +499,17 @@ public class Jts2GmlDOM {
 
         public static final int MULTIPOLYGON = 43;
 
-        public static int classifyGeometry(Geometry theGeom) {
-            String geomType = theGeom.getGeometryType();
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   theGeom  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public static int classifyGeometry(final Geometry theGeom) {
+            final String geomType = theGeom.getGeometryType();
             if (geomType.equals(POINT_NAME)) {
                 return POINT;
             } else if (geomType.equals(LINESTRING_NAME)) {
@@ -329,6 +530,5 @@ public class Jts2GmlDOM {
                 return UNKNOWN;
             }
         }
-
     }
 }

@@ -1,92 +1,140 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * SimpleMappingClient.java
  *
  * Created on 23. Juni 2005, 10:12
  */
-
 package de.cismet.cismap.commons.demo;
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.jtsgeometryfactories.PostGisGeometryFactory;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
-import de.cismet.cismap.commons.preferences.CismapPreferences;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
+
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolox.event.PNotification;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
+
+import org.postgis.PGgeometry;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+
 import java.util.ResourceBundle;
 import java.util.Vector;
-import org.postgis.PGgeometry;
+
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
+import de.cismet.cismap.commons.jtsgeometryfactories.PostGisGeometryFactory;
+import de.cismet.cismap.commons.preferences.CismapPreferences;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
 /**
+ * DOCUMENT ME!
  *
- * @author  thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
-public class SimpleMappingClient extends javax.swing.JFrame implements RetrievalListener{
+public class SimpleMappingClient extends javax.swing.JFrame implements RetrievalListener {
+
+    //~ Instance fields --------------------------------------------------------
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
-    /** Creates new form SimpleMappingClient */
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem aboutMenuItem;
+    private javax.swing.JComboBox cboMode;
+    private javax.swing.JButton cmdBack;
+    private javax.swing.JButton cmdFwd;
+    private javax.swing.JButton cmdShowFeatureCollection;
+    private javax.swing.JMenuItem contentsMenuItem;
+    private javax.swing.JMenuItem copyMenuItem;
+    private javax.swing.JMenuItem cutMenuItem;
+    private javax.swing.JMenuItem deleteMenuItem;
+    private javax.swing.JMenu editMenu;
+    private javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenu fileMenu;
+    private javax.swing.JMenu helpMenu;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel lblCoord;
+    private de.cismet.cismap.commons.gui.MappingComponent mapC;
+    private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem openMenuItem;
+    private javax.swing.JPanel panStatus;
+    private javax.swing.JPanel panToolbar;
+    private javax.swing.JMenuItem pasteMenuItem;
+    private javax.swing.JMenuItem saveAsMenuItem;
+    private javax.swing.JMenuItem saveMenuItem;
+    private javax.swing.JTextField txtKZ;
+    // End of variables declaration//GEN-END:variables
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates new form SimpleMappingClient.
+     */
     public SimpleMappingClient() {
-       try {
-            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource("de/cismet/cismap/commons/demo/log4j.properties"));//NOI18N
-        }
-        catch (Exception e) {
+        try {
+            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource(
+                    "de/cismet/cismap/commons/demo/log4j.properties")); // NOI18N
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        log.info("Simple Mapping Client started");//NOI18N
-        //ClearLookManager.setMode(ClearLookMode.ON);
-        //PlasticLookAndFeel.setMyCurrentTheme(new DesertBlue());
+        log.info("Simple Mapping Client started");                      // NOI18N
+        // ClearLookManager.setMode(ClearLookMode.ON);
+        // PlasticLookAndFeel.setMyCurrentTheme(new DesertBlue());
         try {
-            //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()) ;
+            // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()) ;
             javax.swing.UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-            //javax.swing.UIManager.setLookAndFeel(new PlasticLookAndFeel());
-            //javax.swing.UIManager.setLookAndFeel(new com.jgoodies.plaf.plastic.PlasticXPLookAndFeel());
-            //UIManager.setLookAndFeel(new com.sun.java.swing.plaf.windows.WindowsLookAndFeel());
-           // UIManager.setLookAndFeel(new PlasticLookAndFeel());
+            // javax.swing.UIManager.setLookAndFeel(new PlasticLookAndFeel()); javax.swing.UIManager.setLookAndFeel(new
+            // com.jgoodies.plaf.plastic.PlasticXPLookAndFeel()); UIManager.setLookAndFeel(new
+            // com.sun.java.swing.plaf.windows.WindowsLookAndFeel()); UIManager.setLookAndFeel(new
+            // PlasticLookAndFeel());
         } catch (Exception e) {
-            log.warn("Error during the configuration of the Look&Feel!",e);//NOI18N
+            log.warn("Error during the configuration of the Look&Feel!", e); // NOI18N
         }
 
         initComponents();
-        
-        CismapPreferences cismapPrefs=new CismapPreferences(getClass().getResource("/cismapPreferences.xml"));//NOI18N
-        
 
+        final CismapPreferences cismapPrefs = new CismapPreferences(getClass().getResource("/cismapPreferences.xml")); // NOI18N
 
         validateTree();
-        
+
         mapC.setPreferences(cismapPrefs);
 
-        
-        PNotificationCenter.defaultCenter().addListener(this, 
-                                   "coordinatesChanged", //NOI18N
-                                   SimpleMoveListener.COORDINATES_CHANGED, 
-                                   mapC.getInputListener(MappingComponent.MOTION));
-        
-        
-        
+        PNotificationCenter.defaultCenter()
+                .addListener(
+                    this,
+                    "coordinatesChanged", // NOI18N
+                    SimpleMoveListener.COORDINATES_CHANGED,
+                    mapC.getInputListener(MappingComponent.MOTION));
     }
-    
-    public void coordinatesChanged(PNotification notification) {
-        Object o=notification.getObject();
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  notification  DOCUMENT ME!
+     */
+    public void coordinatesChanged(final PNotification notification) {
+        final Object o = notification.getObject();
         if (o instanceof SimpleMoveListener) {
-            double x=((SimpleMoveListener)o).getXCoord();
-            double y=((SimpleMoveListener)o).getYCoord();
-            lblCoord.setText(MappingComponent.getCoordinateString(x,y));
+            final double x = ((SimpleMoveListener)o).getXCoord();
+            final double y = ((SimpleMoveListener)o).getYCoord();
+            lblCoord.setText(MappingComponent.getCoordinateString(x, y));
         }
     }
 
-    
-    
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -125,30 +173,40 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 
         cboMode.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Zoom", "Pan" }));
         cboMode.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cboModeActionPerformed(evt);
-                jComboBox1ActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cboModeActionPerformed(evt);
+                    jComboBox1ActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.weightx = 1.0;
         panStatus.add(cboMode, gridBagConstraints);
 
-        cmdShowFeatureCollection.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.cmdShowFeatureCollection.text")); // NOI18N
+        cmdShowFeatureCollection.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.cmdShowFeatureCollection.text")); // NOI18N
         cmdShowFeatureCollection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdShowFeatureCollectionActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cmdShowFeatureCollectionActionPerformed(evt);
+                }
+            });
         panStatus.add(cmdShowFeatureCollection, new java.awt.GridBagConstraints());
 
-        txtKZ.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.txtKZ.text")); // NOI18N
+        txtKZ.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.txtKZ.text")); // NOI18N
         txtKZ.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtKZActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    txtKZActionPerformed(evt);
+                }
+            });
         panStatus.add(txtKZ, new java.awt.GridBagConstraints());
 
         lblCoord.setText(" ");
@@ -160,33 +218,47 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
         gridBagConstraints.weightx = 1.0;
         panStatus.add(lblCoord, gridBagConstraints);
 
-        jButton1.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.jButton1.text")); // NOI18N
+        jButton1.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton1ActionPerformed(evt);
+                }
+            });
         panStatus.add(jButton1, new java.awt.GridBagConstraints());
 
-        cmdBack.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.cmdBack.text")); // NOI18N
+        cmdBack.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.cmdBack.text")); // NOI18N
         cmdBack.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdBackActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cmdBackActionPerformed(evt);
+                }
+            });
         panStatus.add(cmdBack, new java.awt.GridBagConstraints());
 
-        cmdFwd.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.cmdFwd.text")); // NOI18N
+        cmdFwd.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.cmdFwd.text")); // NOI18N
         cmdFwd.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdFwdActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cmdFwdActionPerformed(evt);
+                }
+            });
         panStatus.add(cmdFwd, new java.awt.GridBagConstraints());
 
         getContentPane().add(panStatus, java.awt.BorderLayout.SOUTH);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1), javax.swing.BorderFactory.createEtchedBorder()));
+        jPanel1.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1),
+                javax.swing.BorderFactory.createEtchedBorder()));
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
         mapC.setBackground(new java.awt.Color(236, 233, 216));
@@ -199,84 +271,135 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
 
-        fileMenu.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.fileMenu.text")); // NOI18N
+        fileMenu.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.fileMenu.text")); // NOI18N
 
-        openMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.openMenuItem.text")); // NOI18N
+        openMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.openMenuItem.text")); // NOI18N
         fileMenu.add(openMenuItem);
 
-        saveMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.saveMenuItem.text")); // NOI18N
+        saveMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.saveMenuItem.text")); // NOI18N
         fileMenu.add(saveMenuItem);
 
-        saveAsMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.saveAsMenuItem.text")); // NOI18N
+        saveAsMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.saveAsMenuItem.text")); // NOI18N
         fileMenu.add(saveAsMenuItem);
 
-        exitMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.exitMenuItem.text")); // NOI18N
+        exitMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.exitMenuItem.text")); // NOI18N
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitMenuItemActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    exitMenuItemActionPerformed(evt);
+                }
+            });
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
 
-        editMenu.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.editMenu.text")); // NOI18N
+        editMenu.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.editMenu.text")); // NOI18N
 
-        cutMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.cutMenuItem.text")); // NOI18N
+        cutMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.cutMenuItem.text")); // NOI18N
         editMenu.add(cutMenuItem);
 
-        copyMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.copyMenuItem.text")); // NOI18N
+        copyMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.copyMenuItem.text")); // NOI18N
         editMenu.add(copyMenuItem);
 
-        pasteMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.pasteMenuItem.text")); // NOI18N
+        pasteMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.pasteMenuItem.text")); // NOI18N
         editMenu.add(pasteMenuItem);
 
-        deleteMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.deleteMenuItem.text")); // NOI18N
+        deleteMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.deleteMenuItem.text")); // NOI18N
         editMenu.add(deleteMenuItem);
 
         menuBar.add(editMenu);
 
-        helpMenu.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.helpMenu.text")); // NOI18N
+        helpMenu.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.helpMenu.text")); // NOI18N
 
-        contentsMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.contentsMenuItem.text")); // NOI18N
+        contentsMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.contentsMenuItem.text")); // NOI18N
         helpMenu.add(contentsMenuItem);
 
-        aboutMenuItem.setText(org.openide.util.NbBundle.getMessage(SimpleMappingClient.class, "SimpleMappingClient.aboutMenuItem.text")); // NOI18N
+        aboutMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                SimpleMappingClient.class,
+                "SimpleMappingClient.aboutMenuItem.text")); // NOI18N
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
 
         setJMenuBar(menuBar);
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-800)/2, (screenSize.height-600)/2, 800, 600);
-    }// </editor-fold>//GEN-END:initComponents
+        final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width - 800) / 2, (screenSize.height - 600) / 2, 800, 600);
+    } // </editor-fold>//GEN-END:initComponents
 
-    private void cmdFwdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdFwdActionPerformed
-        Object o=mapC.forward(true);
-        if (o!=null && o instanceof PBounds) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdFwdActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdFwdActionPerformed
+        final Object o = mapC.forward(true);
+        if ((o != null) && (o instanceof PBounds)) {
             mapC.gotoBoundsWithoutHistory((PBounds)o);
         }
+    }                                                                          //GEN-LAST:event_cmdFwdActionPerformed
 
-    }//GEN-LAST:event_cmdFwdActionPerformed
-
-    private void cmdBackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBackActionPerformed
-        Object o=mapC.back(true);
-        if (o!=null && o instanceof PBounds) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdBackActionPerformed
+        final Object o = mapC.back(true);
+        if ((o != null) && (o instanceof PBounds)) {
             mapC.gotoBoundsWithoutHistory((PBounds)o);
         }
-    }//GEN-LAST:event_cmdBackActionPerformed
+    }                                                                           //GEN-LAST:event_cmdBackActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        mapC.showInternalLayerWidget(!mapC.isInternalLayerWidgetVisible(),500);
-        
-    }//GEN-LAST:event_jButton1ActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
+        mapC.showInternalLayerWidget(!mapC.isInternalLayerWidgetVisible(), 500);
+    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
 
-    private void txtKZActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtKZActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void txtKZActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_txtKZActionPerformed
 // TODO add your handling code here:
-    }//GEN-LAST:event_txtKZActionPerformed
+    } //GEN-LAST:event_txtKZActionPerformed
 
-    private void cmdShowFeatureCollectionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdShowFeatureCollectionActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdShowFeatureCollectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdShowFeatureCollectionActionPerformed
 //       try {
 //            Connection conn;
 //            System.out.println("Creating JDBC connection...");
@@ -298,7 +421,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 //            ResultSet r = s.executeQuery("select kassenzeichen_reference,flaechenart,geo_field,geom.id,flaechenbezeichnung from flaechen,flaeche,flaecheninfo,geom where flaechen.flaeche=flaeche.id and flaeche.flaecheninfo=flaecheninfo.id and flaecheninfo.geometrie=geom.id and kassenzeichen_reference in ("+kassenzeichen+")");
 //            //ResultSet r = s.executeQuery("select kassenzeichen_reference,flaechenart,geo_field,geom.id,flaechenbezeichnung from flaechen,flaeche,flaecheninfo,geom where flaechen.flaeche=flaeche.id and flaeche.flaecheninfo=flaecheninfo.id and flaecheninfo.geometrie=geom.id and geom.id<10000");
 //            Vector v=new Vector();
-//            while( r.next() ) 
+//            while( r.next() )
 //            {
 //                FeatureExample fe=new FeatureExample();
 //                fe.setName(r.getString(5));
@@ -311,7 +434,7 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 //            Feature[] fa=new Feature[v.size()];
 //            fa=(Feature[])v.toArray(fa);
 //            mapC.showFeatureCollection(fa);
-//            System.out.println("...ready");            
+//            System.out.println("...ready");
 //            s.close();
 //            conn.close();
 //        }
@@ -336,81 +459,73 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 //                fa[0]=f;
 //                mapC.showFeatureCollection(fa);
 //        }
-        
 
-    }//GEN-LAST:event_cmdShowFeatureCollectionActionPerformed
+    } //GEN-LAST:event_cmdShowFeatureCollectionActionPerformed
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-// TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
-
-    private void cboModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboModeActionPerformed
-        if (cboMode.getSelectedItem().equals("Zoom")) {//NOI18N
-            mapC.setInteractionMode("ZOOM");//NOI18N
-        }
-        else if(cboMode.getSelectedItem().equals("Pan")) {//NOI18N
-            mapC.setInteractionMode("PAN");//NOI18N
-        }
-    }//GEN-LAST:event_cboModeActionPerformed
-    
-    private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
-        System.exit(0);
-    }//GEN-LAST:event_exitMenuItemActionPerformed
-    
     /**
-     * @param args the command line arguments
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
      */
-    public static void main(String args[]) {
+    private void jComboBox1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jComboBox1ActionPerformed
+// TODO add your handling code here:
+    } //GEN-LAST:event_jComboBox1ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cboModeActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboModeActionPerformed
+        if (cboMode.getSelectedItem().equals("Zoom")) {                         // NOI18N
+            mapC.setInteractionMode("ZOOM");                                    // NOI18N
+        } else if (cboMode.getSelectedItem().equals("Pan")) {                   // NOI18N
+            mapC.setInteractionMode("PAN");                                     // NOI18N
+        }
+    }                                                                           //GEN-LAST:event_cboModeActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void exitMenuItemActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_exitMenuItemActionPerformed
+        System.exit(0);
+    }                                                                                //GEN-LAST:event_exitMenuItemActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  the command line arguments
+     */
+    public static void main(final String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new SimpleMappingClient().setVisible(true);
-            }
-        });
+
+                @Override
+                public void run() {
+                    new SimpleMappingClient().setVisible(true);
+                }
+            });
     }
 
-    public void retrievalStarted(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
+    @Override
+    public void retrievalStarted(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
     }
 
-    public void retrievalProgress(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
+    @Override
+    public void retrievalProgress(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
     }
 
-    public void retrievalError(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        log.error("Retrieve error message\n"+e.getRetrievedObject());//NOI18N
-    
+    @Override
+    public void retrievalError(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
+        log.error("Retrieve error message\n" + e.getRetrievedObject()); // NOI18N
     }
 
-    public void retrievalComplete(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
+    @Override
+    public void retrievalComplete(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
     }
 
-    public void retrievalAborted(de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
+    @Override
+    public void retrievalAborted(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
     }
-    
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenuItem aboutMenuItem;
-    private javax.swing.JComboBox cboMode;
-    private javax.swing.JButton cmdBack;
-    private javax.swing.JButton cmdFwd;
-    private javax.swing.JButton cmdShowFeatureCollection;
-    private javax.swing.JMenuItem contentsMenuItem;
-    private javax.swing.JMenuItem copyMenuItem;
-    private javax.swing.JMenuItem cutMenuItem;
-    private javax.swing.JMenuItem deleteMenuItem;
-    private javax.swing.JMenu editMenu;
-    private javax.swing.JMenuItem exitMenuItem;
-    private javax.swing.JMenu fileMenu;
-    private javax.swing.JMenu helpMenu;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JLabel lblCoord;
-    private de.cismet.cismap.commons.gui.MappingComponent mapC;
-    private javax.swing.JMenuBar menuBar;
-    private javax.swing.JMenuItem openMenuItem;
-    private javax.swing.JPanel panStatus;
-    private javax.swing.JPanel panToolbar;
-    private javax.swing.JMenuItem pasteMenuItem;
-    private javax.swing.JMenuItem saveAsMenuItem;
-    private javax.swing.JMenuItem saveMenuItem;
-    private javax.swing.JTextField txtKZ;
-    // End of variables declaration//GEN-END:variables
-    
 }

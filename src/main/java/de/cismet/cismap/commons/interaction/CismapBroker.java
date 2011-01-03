@@ -1,40 +1,30 @@
-/*
- * CismapBroker.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 20. Februar 2006, 10:33
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.interaction;
 
-import de.cismet.cismap.commons.security.AbstractCredentialsProvider;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
+
+import javax.swing.SwingWorker;
+
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.MappingModelListener;
@@ -51,35 +41,35 @@ import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.interaction.events.MapDnDEvent;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
+import de.cismet.cismap.commons.security.AbstractCredentialsProvider;
+
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDecimalTools;
+
 import de.cismet.tools.gui.historybutton.HistoryModelListener;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
-import javax.swing.SwingWorker;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class CismapBroker {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final String FS = System.getProperty("file.separator");                       // NOI18N
+    private static final String USER_HOME_DIRECTORY = System.getProperty("user.home");           // NOI18N
+    private static final String SERVERALIAS_FILE_NAME = "serverAliases.properties";              // NOI18N
+    private static final String DEFAULT_CISMAP_FOLDER = ".cismap";                               // NOI18N
+    private static final String DEFAULT_ALIAS_FILE_PATH = "appLib" + FS + SERVERALIAS_FILE_NAME; // NOI18N
+    private static CismapBroker instance = null;
+
+    //~ Instance fields --------------------------------------------------------
+
+    PFeature oldPfeature = null;
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private static final String FS = System.getProperty("file.separator");//NOI18N
-    private static final String USER_HOME_DIRECTORY = System.getProperty("user.home");//NOI18N
-    private static final String SERVERALIAS_FILE_NAME = "serverAliases.properties";//NOI18N
-    private static final String DEFAULT_CISMAP_FOLDER = ".cismap";//NOI18N
-    private static final String DEFAULT_ALIAS_FILE_PATH = "appLib" + FS + SERVERALIAS_FILE_NAME;//NOI18N
     private Properties userProperties = new Properties();
     private Properties defaultProperties;
     private String cismapFolderPath = USER_HOME_DIRECTORY + FS + DEFAULT_CISMAP_FOLDER;
@@ -96,7 +86,8 @@ public class CismapBroker {
     private Vector<FeatureCollectionListener> featureCollectionListeners = new Vector<FeatureCollectionListener>();
     private Vector<MapBoundsListener> mapBoundsListeners = new Vector<MapBoundsListener>();
     private Vector<CrsChangeListener> crsChangeListeners = new Vector<CrsChangeListener>();
-    //private Hashtable<WMSCapabilities, GUICredentialsProvider> httpCredentialsForCapabilities = new Hashtable<WMSCapabilities, GUICredentialsProvider>();
+    // private Hashtable<WMSCapabilities, GUICredentialsProvider> httpCredentialsForCapabilities = new
+    // Hashtable<WMSCapabilities, GUICredentialsProvider>();
     private Crs srs;
     private String preferredRasterFormat;
     private String preferredTransparentPref;
@@ -105,15 +96,25 @@ public class CismapBroker {
     private MappingComponent mappingComponent = null;
     private LayerWidget layerWidget = null;
     private BoundingBox initialBoundingBox;
-    private static CismapBroker instance = null;
-    PFeature oldPfeature = null;
     private ExecutorService execService = null;
     private boolean serverAliasesInited = false;
 
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new CismapBroker object.
+     */
     private CismapBroker() {
         execService = Executors.newCachedThreadPool();
     }
 
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public static CismapBroker getInstance() {
         if (instance == null) {
             instance = new CismapBroker();
@@ -121,275 +122,512 @@ public class CismapBroker {
         return instance;
     }
 
-    public void addCapabilityListener(CapabilityListener cl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cl  DOCUMENT ME!
+     */
+    public void addCapabilityListener(final CapabilityListener cl) {
         capabilityListeners.add(cl);
     }
 
-    public void removeCapabilityListener(CapabilityListener cl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cl  DOCUMENT ME!
+     */
+    public void removeCapabilityListener(final CapabilityListener cl) {
         capabilityListeners.remove(cl);
     }
 
-    public void addMappingModelListener(MappingModelListener ml) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ml  DOCUMENT ME!
+     */
+    public void addMappingModelListener(final MappingModelListener ml) {
         mappingModelListeners.add(ml);
     }
 
-    public void removeMappingModelListener(MappingModelListener ml) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ml  DOCUMENT ME!
+     */
+    public void removeMappingModelListener(final MappingModelListener ml) {
         mappingModelListeners.remove(ml);
     }
 
-    public void addStatusListener(StatusListener sl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  sl  DOCUMENT ME!
+     */
+    public void addStatusListener(final StatusListener sl) {
         statusListeners.add(sl);
     }
 
-    public void removeStatusListener(StatusListener sl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  sl  DOCUMENT ME!
+     */
+    public void removeStatusListener(final StatusListener sl) {
         statusListeners.remove(sl);
     }
 
-    public void addHistoryModelListener(HistoryModelListener hml) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  hml  DOCUMENT ME!
+     */
+    public void addHistoryModelListener(final HistoryModelListener hml) {
         historyModelListeners.add(hml);
     }
 
-    public void removeHistoryModelListener(HistoryModelListener hml) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  hml  DOCUMENT ME!
+     */
+    public void removeHistoryModelListener(final HistoryModelListener hml) {
         historyModelListeners.remove(hml);
     }
 
-    public void addActiveLayerListener(ActiveLayerListener all) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  all  DOCUMENT ME!
+     */
+    public void addActiveLayerListener(final ActiveLayerListener all) {
         activeLayerListeners.add(all);
     }
 
-    public void removeActiveLayerListener(ActiveLayerListener all) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  all  DOCUMENT ME!
+     */
+    public void removeActiveLayerListener(final ActiveLayerListener all) {
         activeLayerListeners.remove(all);
     }
 
-    public void addMapClickListener(MapClickListener mcl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mcl  DOCUMENT ME!
+     */
+    public void addMapClickListener(final MapClickListener mcl) {
         mapClickListeners.add(mcl);
     }
 
-    public void removeMapClickListener(MapClickListener mcl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mcl  DOCUMENT ME!
+     */
+    public void removeMapClickListener(final MapClickListener mcl) {
         mapClickListeners.remove(mcl);
     }
 
-    public void addMapSearchListener(MapSearchListener msl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  msl  DOCUMENT ME!
+     */
+    public void addMapSearchListener(final MapSearchListener msl) {
         mapSearchListeners.add(msl);
     }
 
-    public void removeMapSearchListener(MapSearchListener msl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  msl  DOCUMENT ME!
+     */
+    public void removeMapSearchListener(final MapSearchListener msl) {
         mapSearchListeners.remove(msl);
     }
 
-    public void addMapDnDListener(MapDnDListener mdl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mdl  DOCUMENT ME!
+     */
+    public void addMapDnDListener(final MapDnDListener mdl) {
         mapDnDListeners.add(mdl);
     }
 
-    public void removeMapDnDListener(MapDnDListener mdl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mdl  DOCUMENT ME!
+     */
+    public void removeMapDnDListener(final MapDnDListener mdl) {
         mapDnDListeners.remove(mdl);
     }
 
-    public void addFeatureCollectionListener(FeatureCollectionListener fcl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fcl  DOCUMENT ME!
+     */
+    public void addFeatureCollectionListener(final FeatureCollectionListener fcl) {
         featureCollectionListeners.add(fcl);
     }
 
-    public void removeFeatureCollectionListener(FeatureCollectionListener fcl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fcl  DOCUMENT ME!
+     */
+    public void removeFeatureCollectionListener(final FeatureCollectionListener fcl) {
         featureCollectionListeners.remove(fcl);
     }
 
-    public void addMapBoundsListener(MapBoundsListener mbl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mbl  DOCUMENT ME!
+     */
+    public void addMapBoundsListener(final MapBoundsListener mbl) {
         mapBoundsListeners.add(mbl);
     }
 
-    public void removeFMapBoundsListener(MapBoundsListener mbl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mbl  DOCUMENT ME!
+     */
+    public void removeFMapBoundsListener(final MapBoundsListener mbl) {
         mapBoundsListeners.remove(mbl);
     }
 
-    public void addCrsChangeListener(CrsChangeListener mbl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mbl  DOCUMENT ME!
+     */
+    public void addCrsChangeListener(final CrsChangeListener mbl) {
         crsChangeListeners.add(mbl);
     }
 
-    public void removeCrsChangeListener(CrsChangeListener mbl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mbl  DOCUMENT ME!
+     */
+    public void removeCrsChangeListener(final CrsChangeListener mbl) {
         crsChangeListeners.remove(mbl);
     }
 
-    public void fireCapabilityServerChanged(CapabilityEvent ce) {
-        for (Iterator<CapabilityListener> it = capabilityListeners.iterator(); it.hasNext();) {
-            CapabilityListener listener = it.next();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ce  DOCUMENT ME!
+     */
+    public void fireCapabilityServerChanged(final CapabilityEvent ce) {
+        for (final Iterator<CapabilityListener> it = capabilityListeners.iterator(); it.hasNext();) {
+            final CapabilityListener listener = it.next();
             listener.serverChanged(ce);
         }
     }
 
-    public void fireCapabilityLayerChanged(CapabilityEvent ce) {
-        for (Iterator<CapabilityListener> it = capabilityListeners.iterator(); it.hasNext();) {
-            CapabilityListener listener = it.next();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ce  DOCUMENT ME!
+     */
+    public void fireCapabilityLayerChanged(final CapabilityEvent ce) {
+        for (final Iterator<CapabilityListener> it = capabilityListeners.iterator(); it.hasNext();) {
+            final CapabilityListener listener = it.next();
             listener.layerChanged(ce);
         }
     }
 
-    public void fireLayerAdded(ActiveLayerEvent ale) {
-        for (Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ale  DOCUMENT ME!
+     */
+    public void fireLayerAdded(final ActiveLayerEvent ale) {
+        for (final Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
             it.next().layerAdded(ale);
         }
     }
 
-    public void fireLayerRemoved(ActiveLayerEvent ale) {
-        for (Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ale  DOCUMENT ME!
+     */
+    public void fireLayerRemoved(final ActiveLayerEvent ale) {
+        for (final Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
             it.next().layerRemoved(ale);
         }
     }
 
-    public void fireLayerPositionChanged(ActiveLayerEvent ale) {
-        for (Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ale  DOCUMENT ME!
+     */
+    public void fireLayerPositionChanged(final ActiveLayerEvent ale) {
+        for (final Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
             it.next().layerPositionChanged(ale);
         }
     }
 
-    public void fireLayerVisibilityChanged(ActiveLayerEvent ale) {
-        for (Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ale  DOCUMENT ME!
+     */
+    public void fireLayerVisibilityChanged(final ActiveLayerEvent ale) {
+        for (final Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
             it.next().layerVisibilityChanged(ale);
         }
     }
 
-    public void fireLayerInformationStatusChanged(ActiveLayerEvent ale) {
-        for (Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ale  DOCUMENT ME!
+     */
+    public void fireLayerInformationStatusChanged(final ActiveLayerEvent ale) {
+        for (final Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
             it.next().layerInformationStatusChanged(ale);
         }
     }
 
-    public void fireLayerSelectionChanged(ActiveLayerEvent ale) {
-        for (Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ale  DOCUMENT ME!
+     */
+    public void fireLayerSelectionChanged(final ActiveLayerEvent ale) {
+        for (final Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
             it.next().layerSelectionChanged(ale);
         }
     }
 
-    public void fireStatusValueChanged(StatusEvent se) {
-        for (Iterator<StatusListener> it = statusListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  se  DOCUMENT ME!
+     */
+    public void fireStatusValueChanged(final StatusEvent se) {
+        for (final Iterator<StatusListener> it = statusListeners.iterator(); it.hasNext();) {
             it.next().statusValueChanged(se);
         }
     }
 
-    public void fireClickOnMap(MapClickedEvent mce) {
-        for (Iterator<MapClickListener> it = mapClickListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mce  DOCUMENT ME!
+     */
+    public void fireClickOnMap(final MapClickedEvent mce) {
+        for (final Iterator<MapClickListener> it = mapClickListeners.iterator(); it.hasNext();) {
             it.next().clickedOnMap(mce);
         }
     }
 
-    public void fireMapSearchInited(MapSearchEvent mse) {
-        for (Iterator<MapSearchListener> it = mapSearchListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mse  DOCUMENT ME!
+     */
+    public void fireMapSearchInited(final MapSearchEvent mse) {
+        for (final Iterator<MapSearchListener> it = mapSearchListeners.iterator(); it.hasNext();) {
             it.next().mapSearchStarted(mse);
         }
     }
 
-    public void fireDropOnMap(MapDnDEvent mde) {
-        for (Iterator<MapDnDListener> it = mapDnDListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mde  DOCUMENT ME!
+     */
+    public void fireDropOnMap(final MapDnDEvent mde) {
+        for (final Iterator<MapDnDListener> it = mapDnDListeners.iterator(); it.hasNext();) {
             it.next().dropOnMap(mde);
         }
     }
 
-    public void fireDragOverMap(MapDnDEvent mde) {
-        for (Iterator<MapDnDListener> it = mapDnDListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mde  DOCUMENT ME!
+     */
+    public void fireDragOverMap(final MapDnDEvent mde) {
+        for (final Iterator<MapDnDListener> it = mapDnDListeners.iterator(); it.hasNext();) {
             it.next().dragOverMap(mde);
         }
     }
-
-//    public void fireFeatureCollectionChanged(MappingModelEvent mme) {
-//        for (Iterator<FeatureCollectionListener> it = featureCollectionListeners.iterator(); it.hasNext();) {
-//            it.next().featureCollectionChanged(mme);
-//        }
-//    }
-//    public void fireFeatureSelectionChanged(MappingModelEvent mme) {
-//        for (Iterator<FeatureCollectionListener> it = featureCollectionListeners.iterator(); it.hasNext();) {
-//            it.next().selectionChanged(mme);
-//        }
-//    }
+    /**
+     * public void fireFeatureCollectionChanged(MappingModelEvent mme) { for (Iterator<FeatureCollectionListener> it =
+     * featureCollectionListeners.iterator(); it.hasNext();) { it.next().featureCollectionChanged(mme); } } public void
+     * fireFeatureSelectionChanged(MappingModelEvent mme) { for (Iterator<FeatureCollectionListener> it =
+     * featureCollectionListeners.iterator(); it.hasNext();) { it.next().selectionChanged(mme); } }.
+     */
     public void fireMapBoundsChanged() {
-        for (Iterator<MapBoundsListener> it = mapBoundsListeners.iterator(); it.hasNext();) {
+        for (final Iterator<MapBoundsListener> it = mapBoundsListeners.iterator(); it.hasNext();) {
             it.next().shownMapBoundsChanged();
         }
     }
 
-
-    public void fireCrsChanged(CrsChangedEvent event) {
-        for (Iterator<CrsChangeListener> it = crsChangeListeners.iterator(); it.hasNext();) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  event  DOCUMENT ME!
+     */
+    public void fireCrsChanged(final CrsChangedEvent event) {
+        for (final Iterator<CrsChangeListener> it = crsChangeListeners.iterator(); it.hasNext();) {
             it.next().crsChanged(event);
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Crs getSrs() {
         if (srs == null) {
             log.error("srs is not set. Use EPSG:31466 ", new CurrentStackTrace());
-            Crs crs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, false);
+            final Crs crs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, false);
             return crs;
         }
         return srs;
     }
 
-    public void setSrs(Crs srs) {
-        if (this.srs == null || !this.srs.equals( srs ) ) {
-            StatusEvent event = new StatusEvent(StatusEvent.CRS, srs);
-            CrsChangedEvent ce = new CrsChangedEvent(this.srs, srs);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  srs  DOCUMENT ME!
+     */
+    public void setSrs(final Crs srs) {
+        if ((this.srs == null) || !this.srs.equals(srs)) {
+            final StatusEvent event = new StatusEvent(StatusEvent.CRS, srs);
+            final CrsChangedEvent ce = new CrsChangedEvent(this.srs, srs);
             this.srs = srs;
             fireCrsChanged(ce);
             fireStatusValueChanged(event);
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getPreferredRasterFormat() {
         return preferredRasterFormat;
     }
 
-    public void setPreferredRasterFormat(String preferredRasterFormat) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  preferredRasterFormat  DOCUMENT ME!
+     */
+    public void setPreferredRasterFormat(final String preferredRasterFormat) {
         this.preferredRasterFormat = preferredRasterFormat;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getPreferredTransparentPref() {
         return preferredTransparentPref;
     }
 
-    public void setPreferredTransparentPref(String preferredTransparentPref) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  preferredTransparentPref  DOCUMENT ME!
+     */
+    public void setPreferredTransparentPref(final String preferredTransparentPref) {
         this.preferredTransparentPref = preferredTransparentPref;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getPreferredBGColor() {
         return preferredBGColor;
     }
 
-    public void setPreferredBGColor(String preferredBGColor) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  preferredBGColor  DOCUMENT ME!
+     */
+    public void setPreferredBGColor(final String preferredBGColor) {
         this.preferredBGColor = preferredBGColor;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getPreferredExceptionsFormat() {
         return preferredExceptionsFormat;
     }
 
-    public void setPreferredExceptionsFormat(String preferredExceptionsFormat) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  preferredExceptionsFormat  DOCUMENT ME!
+     */
+    public void setPreferredExceptionsFormat(final String preferredExceptionsFormat) {
         this.preferredExceptionsFormat = preferredExceptionsFormat;
     }
-
-//    public MappingComponent getMappingComponent() {
-//        return mappingComponent;
-//    }
-//
-    public void setMappingComponent(MappingComponent mappingComponent) {
+    /**
+     * public MappingComponent getMappingComponent() { return mappingComponent; }.
+     *
+     * @param  mappingComponent  DOCUMENT ME!
+     */
+    public void setMappingComponent(final MappingComponent mappingComponent) {
         this.mappingComponent = mappingComponent;
-        PNotificationCenter.defaultCenter().addListener(this,
-                "coordinatesChanged",                               //NOI18N
-                SimpleMoveListener.COORDINATES_CHANGED,
-                mappingComponent.getInputListener(MappingComponent.MOTION));
-        PNotificationCenter.defaultCenter().addListener(this,
-                "lengthChanged",                                    //NOI18N
-                MeasurementListener.LENGTH_CHANGED,
-                mappingComponent.getInputListener(MappingComponent.MEASUREMENT));
-        PNotificationCenter.defaultCenter().addListener(this,
-                "selectionChanged",                                 //NOI18N
-                PSelectionEventHandler.SELECTION_CHANGED_NOTIFICATION,
-                mappingComponent.getInputListener(MappingComponent.SELECT));
+        PNotificationCenter.defaultCenter()
+                .addListener(
+                    this,
+                    "coordinatesChanged", // NOI18N
+                    SimpleMoveListener.COORDINATES_CHANGED,
+                    mappingComponent.getInputListener(MappingComponent.MOTION));
+        PNotificationCenter.defaultCenter()
+                .addListener(
+                    this,
+                    "lengthChanged", // NOI18N
+                    MeasurementListener.LENGTH_CHANGED,
+                    mappingComponent.getInputListener(MappingComponent.MEASUREMENT));
+        PNotificationCenter.defaultCenter()
+                .addListener(
+                    this,
+                    "selectionChanged", // NOI18N
+                    PSelectionEventHandler.SELECTION_CHANGED_NOTIFICATION,
+                    mappingComponent.getInputListener(MappingComponent.SELECT));
     }
 
-    public void coordinatesChanged(edu.umd.cs.piccolox.event.PNotification notification) {
-        Object o = notification.getObject();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  notification  DOCUMENT ME!
+     */
+    public void coordinatesChanged(final edu.umd.cs.piccolox.event.PNotification notification) {
+        final Object o = notification.getObject();
         if (o instanceof SimpleMoveListener) {
-            double x = ((SimpleMoveListener) o).getXCoord();
-            double y = ((SimpleMoveListener) o).getYCoord();
-            fireStatusValueChanged(new StatusEvent(StatusEvent.COORDINATE_STRING, MappingComponent.getCoordinateString(x, y)));
-            PFeature pf = ((SimpleMoveListener) o).getUnderlyingPFeature();
+            final double x = ((SimpleMoveListener)o).getXCoord();
+            final double y = ((SimpleMoveListener)o).getYCoord();
+            fireStatusValueChanged(new StatusEvent(
+                    StatusEvent.COORDINATE_STRING,
+                    MappingComponent.getCoordinateString(x, y)));
+            final PFeature pf = ((SimpleMoveListener)o).getUnderlyingPFeature();
             if (pf != oldPfeature) {
                 fireStatusValueChanged(new StatusEvent(StatusEvent.OBJECT_INFOS, pf));
                 oldPfeature = pf;
@@ -397,48 +635,58 @@ public class CismapBroker {
         }
     }
 
-    public void lengthChanged(edu.umd.cs.piccolox.event.PNotification notification) {
-        Object o = notification.getObject();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  notification  DOCUMENT ME!
+     */
+    public void lengthChanged(final edu.umd.cs.piccolox.event.PNotification notification) {
+        final Object o = notification.getObject();
         if (o instanceof MeasurementListener) {
-            double length = ((MeasurementListener) o).getMeasuredLength();
-            fireStatusValueChanged(new StatusEvent(StatusEvent.MEASUREMENT_INFOS, StaticDecimalTools.round("0.00", length) + " m"));//NOI18N
+            final double length = ((MeasurementListener)o).getMeasuredLength();
+            fireStatusValueChanged(new StatusEvent(
+                    StatusEvent.MEASUREMENT_INFOS,
+                    StaticDecimalTools.round("0.00", length)
+                            + " m")); // NOI18N
         }
     }
 
-    public void selectionChanged(edu.umd.cs.piccolox.event.PNotification notification) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  notification  DOCUMENT ME!
+     */
+    public void selectionChanged(final edu.umd.cs.piccolox.event.PNotification notification) {
     }
-
-//    public LayerWidget getLayerWidget() {
-//        return layerWidget;
-//    }
-//
-//    public void setLayerWidget(LayerWidget layerWidget) {
-//        this.layerWidget = layerWidget;
-//    }
-//
-//    public BoundingBox getInitialBoundingBox() {
-//        return initialBoundingBox;
-//    }
-//
-//    public void setInitialBoundingBox(BoundingBox initialBoundingBox) {
-//        this.initialBoundingBox = initialBoundingBox;
-//    }
+    /**
+     * public LayerWidget getLayerWidget() { return layerWidget; } public void setLayerWidget(LayerWidget layerWidget) {
+     * this.layerWidget = layerWidget; } public BoundingBox getInitialBoundingBox() { return initialBoundingBox; }
+     * public void setInitialBoundingBox(BoundingBox initialBoundingBox) { this.initialBoundingBox = initialBoundingBox;
+     * }.
+     *
+     * @return  DOCUMENT ME!
+     */
     public MappingComponent getMappingComponent() {
         return mappingComponent;
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     private void initAliases() {
-        log.debug("initializing server aliases property");//NOI18N
+        if (log.isDebugEnabled()) {
+            log.debug("initializing server aliases property"); // NOI18N
+        }
         try {
             userAliasFile = new File(getCismapFolderPath() + FS + SERVERALIAS_FILE_NAME);
-            File cismapFolder = new File(getCismapFolderPath());
+            final File cismapFolder = new File(getCismapFolderPath());
 
             if (!cismapFolder.exists()) {
                 cismapFolder.mkdir();
             }
 
             if (userAliasFile.exists()) {
-                FileInputStream in = new FileInputStream(userAliasFile);
+                final FileInputStream in = new FileInputStream(userAliasFile);
                 userProperties.load(in);
                 in.close();
             } else {
@@ -448,82 +696,129 @@ public class CismapBroker {
             defaultAliasFile = new File(DEFAULT_ALIAS_FILE_PATH);
             defaultProperties = new Properties(userProperties);
             if (defaultAliasFile.exists()) {
-                FileInputStream in = new FileInputStream(defaultAliasFile);
+                final FileInputStream in = new FileInputStream(defaultAliasFile);
                 defaultProperties.load(in);
                 in.close();
             }
         } catch (IOException ex) {
-            log.error("Error during reading the server aliases from file", ex);//NOI18N
+            log.error("Error during reading the server aliases from file", ex); // NOI18N
         }
         serverAliasesInited = true;
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     public void cleanUpSystemRegistry() {
-        Preferences appPrefs = Preferences.userNodeForPackage(AbstractCredentialsProvider.class);
+        final Preferences appPrefs = Preferences.userNodeForPackage(AbstractCredentialsProvider.class);
         try {
-            log.debug("Try to delete preferences of the password dialog");//NOI18N
+            if (log.isDebugEnabled()) {
+                log.debug("Try to delete preferences of the password dialog"); // NOI18N
+            }
             appPrefs.removeNode();
-            log.debug("deletion of the preferences successfully");//NOI18N
+            if (log.isDebugEnabled()) {
+                log.debug("deletion of the preferences successfully");         // NOI18N
+            }
         } catch (BackingStoreException ex) {
-            log.debug("Error during the deletion of the preferences");//NOI18N
+            if (log.isDebugEnabled()) {
+                log.debug("Error during the deletion of the preferences");     // NOI18N
+            }
             ex.printStackTrace();
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     public void writePropertyFile() {
-        log.debug("writing server Aliases to File");//NOI18N
+        if (log.isDebugEnabled()) {
+            log.debug("writing server Aliases to File");                      // NOI18N
+        }
         if (!serverAliasesInited) {
             initAliases();
         }
         try {
             if (userAliasFile.exists()) {
-                FileOutputStream out = new FileOutputStream(userAliasFile);
-                userProperties.store(out, "Server Aliases URL <---> Alias");//NOI18N
+                final FileOutputStream out = new FileOutputStream(userAliasFile);
+                userProperties.store(out, "Server Aliases URL <---> Alias");  // NOI18N
             }
         } catch (IOException ex) {
-            log.error("Error during writing the server aliases to file", ex);//NOI18N
+            log.error("Error during writing the server aliases to file", ex); // NOI18N
         }
-        log.debug("Server Aliases wrote to File");//NOI18N
+        if (log.isDebugEnabled()) {
+            log.debug("Server Aliases wrote to File");                        // NOI18N
+        }
     }
 
-    public void addProperty(String key, String value) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  key    DOCUMENT ME!
+     * @param  value  DOCUMENT ME!
+     */
+    public void addProperty(final String key, final String value) {
         if (!serverAliasesInited) {
             initAliases();
         }
         userProperties.setProperty(key, value);
-        log.debug("Server alias added  key: " + key + " value: " + value);//NOI18N
+        if (log.isDebugEnabled()) {
+            log.debug("Server alias added  key: " + key + " value: " + value); // NOI18N
+        }
     }
 
-    public String getProperty(String key) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   key  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getProperty(final String key) {
         if (!serverAliasesInited) {
             initAliases();
         }
         return defaultProperties.getProperty(key);
     }
 
-    public void execute(SwingWorker workerThread) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  workerThread  DOCUMENT ME!
+     */
+    public void execute(final SwingWorker workerThread) {
         try {
             execService.submit(workerThread);
-            log.debug("SwingWorker submitted to Threadpool");//NOI18N
+            if (log.isDebugEnabled()) {
+                log.debug("SwingWorker submitted to Threadpool"); // NOI18N
+            }
         } catch (Exception ex) {
-            log.fatal("SwingWorker Error", ex);//NOI18N
+            log.fatal("SwingWorker Error", ex);                   // NOI18N
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getCismapFolderPath() {
         return cismapFolderPath;
     }
 
-    public void setCismapFolderPath(String cismapFolderPath) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cismapFolderPath  DOCUMENT ME!
+     */
+    public void setCismapFolderPath(final String cismapFolderPath) {
         try {
-            File cismapFolder = new File(cismapFolderPath);
+            final File cismapFolder = new File(cismapFolderPath);
             if (!cismapFolder.exists()) {
                 cismapFolder.mkdir();
             }
         } catch (Exception e) {
-            log.fatal("Error during the creation of "+cismapFolderPath,e);//NOI18N
+            log.fatal("Error during the creation of " + cismapFolderPath, e); // NOI18N
         }
         this.cismapFolderPath = cismapFolderPath;
     }
-    
 }
