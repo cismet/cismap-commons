@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * HandleMoveAction.java
  *
@@ -8,40 +15,57 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
-import de.cismet.cismap.commons.features.DefaultFeatureCollection;
-import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import de.cismet.tools.collections.MultiMap;
 import edu.umd.cs.piccolo.PLayer;
+
 import java.util.Collection;
 import java.util.Set;
 import java.util.Vector;
 
+import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
+
+import de.cismet.tools.collections.MultiMap;
+
 /**
- * Implementiert das CustomAction-Interface und wird von der Memento-Klasse
- * verwendet, um ein Handle, das vom Benutzer bewegt wurde wieder an den
- * Uersprungsort zur\u00FCckverschoben wird.
- * @author nh
+ * Implementiert das CustomAction-Interface und wird von der Memento-Klasse verwendet, um ein Handle, das vom Benutzer
+ * bewegt wurde wieder an den Uersprungsort zur\u00FCckverschoben wird.
+ *
+ * @author   nh
+ * @version  $Revision$, $Date$
  */
 public class HandleMoveAction implements CustomAction {
+
+    //~ Instance fields --------------------------------------------------------
+
     private MultiMap gluedCoordinates;
     private PFeature pf;
     private int posInArray;
-    private float startX,  startY,  endX,  endY;
+    private float startX;
+    private float startY;
+    private float endX;
+    private float endY;
     private boolean isGluedAction;
+
+    //~ Constructors -----------------------------------------------------------
 
     /**
      * Erzeugt eine HandleMoveAction-Instanz.
-     * @param position Position der HandleKoordinaten im Koordinatenarray des PFeatures
-     * @param pf PFeature dem das Handle zugeordnet ist
-     * @param handle das Handle selbst
-     * @param startX X-Koordinate des Anfangspunkts
-     * @param startY Y-Koordinate des Anfangspunkts
-     * @param endX X-Koordinate des Endpunkts
-     * @param endY Y-Koordinate des Endpunkts
-     * @param isGlued Waren beim Verschieben mehrere Handles gekoppelt?
+     *
+     * @param  position  Position der HandleKoordinaten im Koordinatenarray des PFeatures
+     * @param  pf        PFeature dem das Handle zugeordnet ist
+     * @param  startX    X-Koordinate des Anfangspunkts
+     * @param  startY    Y-Koordinate des Anfangspunkts
+     * @param  endX      X-Koordinate des Endpunkts
+     * @param  endY      Y-Koordinate des Endpunkts
+     * @param  isGlued   Waren beim Verschieben mehrere Handles gekoppelt?
      */
-    public HandleMoveAction(int position, PFeature pf, float startX, float startY,
-            float endX, float endY, boolean isGlued) {
+    public HandleMoveAction(final int position,
+            final PFeature pf,
+            final float startX,
+            final float startY,
+            final float endX,
+            final float endY,
+            final boolean isGlued) {
         this.gluedCoordinates = null;
         this.posInArray = position;
         this.pf = pf;
@@ -52,11 +76,14 @@ public class HandleMoveAction implements CustomAction {
         this.isGluedAction = isGlued;
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     /**
      * Bewegt das gespeicherte PHandle von der Start- zur Zielkoordinate.
      */
+    @Override
     public void doAction() {
-        if (isGluedAction) { //werden mehrere Punkte bewegt?
+        if (isGluedAction) { // werden mehrere Punkte bewegt?
             gluedCoordinates = pf.checkforGlueCoords(posInArray);
         }
         // Bewege das Handle
@@ -64,13 +91,13 @@ public class HandleMoveAction implements CustomAction {
 
         // Falls zusammengeh\u00F6rige Punkte gefunden wurden, bewege diese ebenfalls
         if (gluedCoordinates != null) {
-            Set<PFeature> pFeatureSet = gluedCoordinates.keySet();
-            for (PFeature gluePFeature : pFeatureSet) {
+            final Set<PFeature> pFeatureSet = gluedCoordinates.keySet();
+            for (final PFeature gluePFeature : pFeatureSet) {
                 if (gluePFeature.getFeature().isEditable()) {
-                    Collection coordinates = (Collection) gluedCoordinates.get(gluePFeature);
+                    final Collection coordinates = (Collection)gluedCoordinates.get(gluePFeature);
                     if (coordinates != null) {
-                        for (Object o : coordinates) {
-                            int oIndex = (Integer) o;
+                        for (final Object o : coordinates) {
+                            final int oIndex = (Integer)o;
                             gluePFeature.moveCoordinateToNewPiccoloPosition(oIndex, startX, startY);
                         }
                     }
@@ -80,28 +107,35 @@ public class HandleMoveAction implements CustomAction {
         // Aktualisiere Handles durch entfernen und neu erstellen
         // (nur wenn das PFeature auch selektiert ist)
         if (pf.isSelected()) {
-            PLayer handleLayer = pf.getViewer().getHandleLayer();
+            final PLayer handleLayer = pf.getViewer().getHandleLayer();
             handleLayer.removeAllChildren();
             pf.addHandles(handleLayer);
         }
         pf.syncGeometry();
-        Vector v = new Vector();
+        final Vector v = new Vector();
         v.add(pf.getFeature());
-        ((DefaultFeatureCollection) pf.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
+        ((DefaultFeatureCollection)pf.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
     }
 
     /**
      * Liefert eine Beschreibung der Aktion als String.
-     * @return Beschreibungsstring
+     *
+     * @return  Beschreibungsstring
      */
+    @Override
     public String info() {
-        return org.openide.util.NbBundle.getMessage(HandleMoveAction.class, "HandleMoveAction.info().return", new Object[]{new Float(startX).intValue(), new Float(startY).intValue()});//NOI18N
+        return org.openide.util.NbBundle.getMessage(
+                HandleMoveAction.class,
+                "HandleMoveAction.info().return",
+                new Object[] { new Float(startX).intValue(), new Float(startY).intValue() }); // NOI18N
     }
 
     /**
      * Liefert als Gegenteil die Bewegung des Handles in die andere Richtung.
-     * @return gegenteilige HandleMoveAction
+     *
+     * @return  gegenteilige HandleMoveAction
      */
+    @Override
     public CustomAction getInverse() {
         return new HandleMoveAction(posInArray, pf, endX, endY, startX, startY, isGluedAction);
     }

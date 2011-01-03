@@ -1,76 +1,89 @@
-/*
- * MapDnDEvent.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 25. April 2006, 11:14
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.interaction.events;
 
 import java.awt.dnd.DropTargetEvent;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class MapDnDEvent {
+
+    //~ Instance fields --------------------------------------------------------
+
     private DropTargetEvent dte;
     private double xPos;
     private double yPos;
-    
-    /** Creates a new instance of MapDnDEvent */
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of MapDnDEvent.
+     */
     public MapDnDEvent() {
     }
 
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public DropTargetEvent getDte() {
         return dte;
     }
 
-    public void setDte(DropTargetEvent dte) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  dte  DOCUMENT ME!
+     */
+    public void setDte(final DropTargetEvent dte) {
         this.dte = dte;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public double getXPos() {
         return xPos;
     }
 
-    public void setXPos(double xPos) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  xPos  DOCUMENT ME!
+     */
+    public void setXPos(final double xPos) {
         this.xPos = xPos;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public double getYPos() {
         return yPos;
     }
 
-    public void setYPos(double yPos) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  yPos  DOCUMENT ME!
+     */
+    public void setYPos(final double yPos) {
         this.yPos = yPos;
     }
-    
 }

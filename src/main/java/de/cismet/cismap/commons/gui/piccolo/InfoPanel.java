@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * InfoPanel.java
  *
@@ -5,86 +12,112 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
-import de.cismet.tools.CismetThreadPool;
 import edu.umd.cs.piccolo.PNode;
+
+import pswing.PSwing;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import pswing.PSwing;
+
+import de.cismet.tools.CismetThreadPool;
 
 /**
+ * DOCUMENT ME!
  *
- * @author  hell
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
 public class InfoPanel extends JPanel {
+
+    //~ Instance fields --------------------------------------------------------
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private ImageIcon icoMore = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/more.png"));//NOI18N
-    private ImageIcon icoShrink = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/shrink.png"));//NOI18N
+    private ImageIcon icoMore = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/more.png"));     // NOI18N
+    private ImageIcon icoShrink = new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/shrink.png")); // NOI18N
     private PFeature pfeature;
     private PNode pNodeParent;
     private PSwing pSwing;
     private JComponent more;
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton cmdMore;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JLabel lblTitle;
+    // End of variables declaration//GEN-END:variables
 
-    /** Creates new form InfoPanel */
-    public InfoPanel(JComponent more) {
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates new form InfoPanel.
+     *
+     * @param  more  DOCUMENT ME!
+     */
+    public InfoPanel(final JComponent more) {
         super();
         try {
             initComponents();
             cmdMore.setIcon(icoMore);
-            cmdMore.setText("");//NOI18N
+            cmdMore.setText(""); // NOI18N
             this.more = more;
             if (more == null) {
-                //cmdMore.setVisible(false); //macht die Komponente zu klein
+                // cmdMore.setVisible(false); //macht die Komponente zu klein
                 cmdMore.setEnabled(false);
             } else {
                 this.add(more, BorderLayout.CENTER);
                 more.setVisible(false);
                 more.addComponentListener(new ComponentListener() {
 
-                    public void componentHidden(ComponentEvent e) {
-                    }
+                        @Override
+                        public void componentHidden(final ComponentEvent e) {
+                        }
 
-                    public void componentMoved(ComponentEvent e) {
-                    }
+                        @Override
+                        public void componentMoved(final ComponentEvent e) {
+                        }
 
-                    public void componentResized(ComponentEvent e) {
-                        //TODO: calling revalidate outside the EDT looks like an error!
-                        Runnable t = new Runnable() {
+                        @Override
+                        public void componentResized(final ComponentEvent e) {
+                            // TODO: calling revalidate outside the EDT looks like an error!
+                            final Runnable t = new Runnable() {
 
-                            public void run() {
-                                revalidate();
-                            }
-                        };
-                        CismetThreadPool.execute(t);
-                        pSwing.reshape();
-                    //pNodeParent.repaint();
-                    //pfeature.ensureFullVisibility();
-                    }
+                                    @Override
+                                    public void run() {
+                                        revalidate();
+                                    }
+                                };
+                            CismetThreadPool.execute(t);
+                            pSwing.reshape();
+                            // pNodeParent.repaint();
+                            // pfeature.ensureFullVisibility();
+                        }
 
-                    public void componentShown(ComponentEvent e) {
-                    }
-                });
+                        @Override
+                        public void componentShown(final ComponentEvent e) {
+                        }
+                    });
             }
         } catch (Throwable t) {
-            log.error("Error in InfoPanel");//NOI18N
+            log.error("Error in InfoPanel"); // NOI18N
         }
-    //scptest.setVisible(false);
+        // scptest.setVisible(false);
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-
         jPanel1 = new javax.swing.JPanel();
         lblTitle = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
@@ -100,13 +133,15 @@ public class InfoPanel extends JPanel {
         jPanel1.setLayout(new java.awt.BorderLayout());
 
         lblTitle.setBackground(javax.swing.UIManager.getDefaults().getColor("Nb.Desktop.background"));
-        lblTitle.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        lblTitle.setFont(new java.awt.Font("Tahoma", 0, 12));                                              // NOI18N
         lblTitle.setText(org.openide.util.NbBundle.getMessage(InfoPanel.class, "InfoPanel.jLabel1.text")); // NOI18N
         lblTitle.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                lblTitleMouseClicked(evt);
-            }
-        });
+
+                @Override
+                public void mouseClicked(final java.awt.event.MouseEvent evt) {
+                    lblTitleMouseClicked(evt);
+                }
+            });
         jPanel1.add(lblTitle, java.awt.BorderLayout.CENTER);
 
         jPanel2.setOpaque(false);
@@ -115,33 +150,61 @@ public class InfoPanel extends JPanel {
         cmdMore.setBorderPainted(false);
         cmdMore.setFocusPainted(false);
         cmdMore.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cmdMoreActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    cmdMoreActionPerformed(evt);
+                }
+            });
         jPanel2.add(cmdMore);
 
         jPanel1.add(jPanel2, java.awt.BorderLayout.LINE_END);
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
-    }// </editor-fold>//GEN-END:initComponents
-    private void lblTitleMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblTitleMouseClicked
+    } // </editor-fold>//GEN-END:initComponents
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void lblTitleMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblTitleMouseClicked
         cmdMoreActionPerformed(null);
-    }//GEN-LAST:event_lblTitleMouseClicked
+    }                                                                        //GEN-LAST:event_lblTitleMouseClicked
 
-    private void cmdMoreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMoreActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdMoreActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdMoreActionPerformed
         setExpanded(!isExpanded());
-    }//GEN-LAST:event_cmdMoreActionPerformed
+    }                                                                           //GEN-LAST:event_cmdMoreActionPerformed
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public boolean isExpanded() {
-        return more != null && more.isVisible();
+        return (more != null) && more.isVisible();
     }
 
-    public void setExpanded(boolean expanded) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  expanded  DOCUMENT ME!
+     */
+    public void setExpanded(final boolean expanded) {
         setExpanded(expanded, true);
     }
 
-    public void setExpanded(boolean expanded, boolean rescale) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  expanded  DOCUMENT ME!
+     * @param  rescale   DOCUMENT ME!
+     */
+    public void setExpanded(final boolean expanded, final boolean rescale) {
         if (more != null) {
             more.setVisible(expanded);
 
@@ -160,9 +223,9 @@ public class InfoPanel extends JPanel {
     }
 
     @Override
-    public void paintComponent(Graphics g) {
+    public void paintComponent(final Graphics g) {
         super.paintComponent(g);
-        Color myGrey = new Color(210, 210, 210);
+        final Color myGrey = new Color(210, 210, 210);
         g.setColor(myGrey);
         g.fillRoundRect(2, 1, getWidth() - 4, getHeight() - 2, 10, 10);
         if (pNodeParent != null) {
@@ -170,43 +233,76 @@ public class InfoPanel extends JPanel {
             pNodeParent.setHeight(this.getHeight());
         }
     }
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton cmdMore;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
-    private javax.swing.JLabel lblTitle;
-    // End of variables declaration//GEN-END:variables
-// <editor-fold defaultstate="collapsed" desc="Setters & Getters">
-    public void setTitleText(String text) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  text  DOCUMENT ME!
+     */
+    public void setTitleText(final String text) {
         lblTitle.setText(text);
     }
 
-    public void setTitleIcon(Icon icon) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  icon  DOCUMENT ME!
+     */
+    public void setTitleIcon(final Icon icon) {
         lblTitle.setIcon(icon);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public PFeature getPfeature() {
         return pfeature;
     }
 
-    public void setPfeature(PFeature pfeature) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pfeature  DOCUMENT ME!
+     */
+    public void setPfeature(final PFeature pfeature) {
         this.pfeature = pfeature;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public PNode getPNodeParent() {
         return pNodeParent;
     }
 
-    public void setPNodeParent(PNode pNodeParent) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pNodeParent  DOCUMENT ME!
+     */
+    public void setPNodeParent(final PNode pNodeParent) {
         this.pNodeParent = pNodeParent;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public PSwing getPSwing() {
         return pSwing;
     }
 
-    public void setPSwing(PSwing pSwing) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pSwing  DOCUMENT ME!
+     */
+    public void setPSwing(final PSwing pSwing) {
         this.pSwing = pSwing;
     }
-// </editor-fold>
 }

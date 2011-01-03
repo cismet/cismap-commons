@@ -1,85 +1,108 @@
-/*
- * ActiveLayerEvent.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 23. Februar 2006, 12:46
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.interaction.events;
 
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class ActiveLayerEvent {
+
+    //~ Instance fields --------------------------------------------------------
+
     private int oldPosition;
     private int absolutePosition;
     private Object layer;
     private WMSCapabilities wmsCapabilities;
 
+    //~ Constructors -----------------------------------------------------------
+
     /**
-     * Creates a new instance of ActiveLayerEvent
+     * Creates a new instance of ActiveLayerEvent.
      */
     public ActiveLayerEvent() {
     }
 
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public int getOldPosition() {
         return oldPosition;
     }
 
-    public void setOldPosition(int oldPosition) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  oldPosition  DOCUMENT ME!
+     */
+    public void setOldPosition(final int oldPosition) {
         this.oldPosition = oldPosition;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public int getAbsolutePosition() {
         return absolutePosition;
     }
 
-    public void setAbsolutePosition(int absolutePosition) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  absolutePosition  DOCUMENT ME!
+     */
+    public void setAbsolutePosition(final int absolutePosition) {
         this.absolutePosition = absolutePosition;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Object getLayer() {
         return layer;
     }
 
-    public void setLayer(Object layer) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     */
+    public void setLayer(final Object layer) {
         this.layer = layer;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public WMSCapabilities getCapabilities() {
         return wmsCapabilities;
     }
 
-    public void setCapabilities(WMSCapabilities capabilities) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  capabilities  DOCUMENT ME!
+     */
+    public void setCapabilities(final WMSCapabilities capabilities) {
         this.wmsCapabilities = capabilities;
     }
 }

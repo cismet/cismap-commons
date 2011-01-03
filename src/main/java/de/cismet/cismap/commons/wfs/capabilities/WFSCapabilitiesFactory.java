@@ -1,50 +1,87 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  *  Copyright (C) 2010 therter
- * 
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.cismet.cismap.commons.wfs.capabilities;
+
+import org.apache.log4j.Logger;
+
+import java.io.ByteArrayInputStream;
+
+import java.net.MalformedURLException;
 
 import de.cismet.cismap.commons.capabilities.AbstractVersionNegotiator;
 import de.cismet.cismap.commons.exceptions.ParserException;
 import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeWFSCapabilities;
+
 import de.cismet.security.exceptions.AccessMethodIsNotSupportedException;
 import de.cismet.security.exceptions.MissingArgumentException;
 import de.cismet.security.exceptions.NoHandlerForURLException;
 import de.cismet.security.exceptions.RequestFailedException;
-import java.io.ByteArrayInputStream;
-import java.net.MalformedURLException;
-import org.apache.log4j.Logger;
 
 /**
+ * DOCUMENT ME!
  *
- * @author therter
+ * @author   therter
+ * @version  $Revision$, $Date$
  */
 public class WFSCapabilitiesFactory extends AbstractVersionNegotiator {
+
+    //~ Static fields/initializers ---------------------------------------------
+
     private static final Logger logger = Logger.getLogger(WFSCapabilitiesFactory.class);
     private static boolean geotools = false;
 
+    //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     */
     public static void toggleGeotools() {
         geotools = !geotools;
     }
 
-
-    public WFSCapabilities createCapabilities(String link) throws MalformedURLException,
-            MissingArgumentException, AccessMethodIsNotSupportedException, RequestFailedException,
-            NoHandlerForURLException, ParserException, Exception {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   link  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  MalformedURLException                DOCUMENT ME!
+     * @throws  MissingArgumentException             DOCUMENT ME!
+     * @throws  AccessMethodIsNotSupportedException  DOCUMENT ME!
+     * @throws  RequestFailedException               DOCUMENT ME!
+     * @throws  NoHandlerForURLException             DOCUMENT ME!
+     * @throws  ParserException                      DOCUMENT ME!
+     * @throws  Exception                            DOCUMENT ME!
+     */
+    public WFSCapabilities createCapabilities(final String link) throws MalformedURLException,
+        MissingArgumentException,
+        AccessMethodIsNotSupportedException,
+        RequestFailedException,
+        NoHandlerForURLException,
+        ParserException,
+        Exception {
         String document = getCapabilitiesDocument(link);
         ByteArrayInputStream docStream = new ByteArrayInputStream(document.getBytes());
         WFSCapabilities result = null;
@@ -54,7 +91,7 @@ public class WFSCapabilitiesFactory extends AbstractVersionNegotiator {
             try {
                 result = new DeegreeWFSCapabilities(docStream, link);
             } catch (Throwable th) {
-                logger.warn("cannot parse the Getcapabilities document try to use an other version.", th);//NOI18N
+                logger.warn("cannot parse the Getcapabilities document try to use an other version.", th); // NOI18N
                 errorMsg = th.getMessage();
                 // try to parse an older version of the GetCapabilities Document
                 docStream.close();
@@ -63,10 +100,10 @@ public class WFSCapabilitiesFactory extends AbstractVersionNegotiator {
                     docStream = new ByteArrayInputStream(document.getBytes());
                 }
             }
-        } while (result == null && currentVersion != null && document != null);
+        } while ((result == null) && (currentVersion != null) && (document != null));
 
         if (result == null) {
-            logger.error("cannot parse the GetCapabilities document of the wfs" + link);//NOI18N
+            logger.error("cannot parse the GetCapabilities document of the wfs" + link); // NOI18N
             throw new ParserException(errorMsg);
         }
         docStream.close();
@@ -74,7 +111,6 @@ public class WFSCapabilitiesFactory extends AbstractVersionNegotiator {
         return result;
     }
 
-    
     @Override
     protected void initVersion() {
         supportedVersions = new String[2];

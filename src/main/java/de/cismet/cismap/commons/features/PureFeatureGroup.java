@@ -1,31 +1,69 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-import de.cismet.tools.collections.TypeSafeCollections;
+
 import java.awt.Paint;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+
+import de.cismet.tools.collections.TypeSafeCollections;
+
 /**
+ * DOCUMENT ME!
  *
- * @author srichter
+ * @author   srichter
+ * @version  $Revision$, $Date$
  */
 public class PureFeatureGroup implements FeatureGroup, StyledFeature {
+
+    //~ Instance fields --------------------------------------------------------
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private String myAttributeStringInParentFeature = null;
     private FeatureGroup parentFeature = null;
+    private final Set<Feature> groupFeatures;
+    private final Collection<Feature> readOnlyGroupFeatures;
+    private Geometry enclosingGeometry;
+//    private boolean canBeSelected;
 
-    public PureFeatureGroup(Feature feature) {
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new PureFeatureGroup object.
+     */
+    public PureFeatureGroup() {
+        this(Collections.EMPTY_LIST);
+    }
+
+    /**
+     * Creates a new PureFeatureGroup object.
+     *
+     * @param  feature  DOCUMENT ME!
+     */
+    public PureFeatureGroup(final Feature feature) {
         this();
         groupFeatures.add(feature);
     }
 
-    public PureFeatureGroup(Collection<? extends Feature> features) {
-        if (features == null || features.size() <= 0) {
+    /**
+     * Creates a new PureFeatureGroup object.
+     *
+     * @param  features  DOCUMENT ME!
+     */
+    public PureFeatureGroup(final Collection<? extends Feature> features) {
+        if ((features == null) || (features.size() <= 0)) {
             this.groupFeatures = TypeSafeCollections.newHashSet();
         } else {
             this.groupFeatures = TypeSafeCollections.newHashSet(features);
@@ -33,16 +71,10 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
         this.readOnlyGroupFeatures = Collections.unmodifiableCollection(groupFeatures);
     }
 
-    public PureFeatureGroup() {
-        this(Collections.EMPTY_LIST);
-    }
-    private final Set<Feature> groupFeatures;
-    private final Collection<Feature> readOnlyGroupFeatures;
-    private Geometry enclosingGeometry;
-//    private boolean canBeSelected;
+    //~ Methods ----------------------------------------------------------------
 
     @Override
-    public boolean addFeature(Feature toAdd) {
+    public boolean addFeature(final Feature toAdd) {
         final boolean changeHappened = groupFeatures.add(toAdd);
         if (changeHappened) {
             enclosingGeometry = null;
@@ -51,7 +83,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public boolean addFeatures(Collection<? extends Feature> toAdd) {
+    public boolean addFeatures(final Collection<? extends Feature> toAdd) {
         final boolean changeHappened = groupFeatures.addAll(toAdd);
         if (changeHappened) {
             enclosingGeometry = null;
@@ -60,7 +92,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public boolean removeFeature(Feature toRemove) {
+    public boolean removeFeature(final Feature toRemove) {
         final boolean changeHappened = groupFeatures.remove(toRemove);
         if (changeHappened) {
             enclosingGeometry = null;
@@ -69,7 +101,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public boolean removeFeatures(Collection<? extends Feature> toRemove) {
+    public boolean removeFeatures(final Collection<? extends Feature> toRemove) {
         final boolean changeHappened = groupFeatures.removeAll(toRemove);
         if (changeHappened) {
             enclosingGeometry = null;
@@ -80,15 +112,15 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     @Override
     public Geometry getGeometry() {
         if (enclosingGeometry == null) {
-            //lazy refresh, bei parallelem zugriff duch mehrere threads muesste
-            //hier auf enclosingGeometry syncronisiert werden!
+            // lazy refresh, bei parallelem zugriff duch mehrere threads muesste
+            // hier auf enclosingGeometry syncronisiert werden!
             refreshEnclosingGeometry();
         }
         return enclosingGeometry;
     }
 
     @Override
-    public void setGeometry(Geometry geom) {
+    public void setGeometry(final Geometry geom) {
         log.warn("Call for setGeometry(...) on FeatureGroup has no effects");
     }
 
@@ -98,8 +130,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setCanBeSelected(boolean canBeSelected) {
-        
+    public void setCanBeSelected(final boolean canBeSelected) {
     }
 
     @Override
@@ -108,7 +139,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setEditable(boolean editable) {
+    public void setEditable(final boolean editable) {
         log.warn("Call for setEditable(...) on FeatureGroup has no effects");
     }
 
@@ -118,7 +149,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void hide(boolean hiding) {
+    public void hide(final boolean hiding) {
     }
 
     @Override
@@ -126,21 +157,35 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
         return new IteratorWrapper(groupFeatures.iterator());
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Feature[] toArray() {
         return groupFeatures.toArray(new Feature[groupFeatures.size()]);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public int getSize() {
         return groupFeatures.size();
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     private void refreshEnclosingGeometry() {
         this.enclosingGeometry = FeatureGroups.getEnclosingGeometry(groupFeatures);
     }
 
     /**
+     * DOCUMENT ME!
      *
-     * @return read-only view of all contained features
+     * @return  read-only view of all contained features
      */
     @Override
     public Collection<? extends Feature> getFeatures() {
@@ -149,9 +194,9 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         if (parentFeature instanceof XStyledFeature) {
-            sb.append(((XStyledFeature) parentFeature).getName());
+            sb.append(((XStyledFeature)parentFeature).getName());
         } else {
             sb.append(parentFeature);
         }
@@ -166,7 +211,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setLinePaint(Paint linePaint) {
+    public void setLinePaint(final Paint linePaint) {
     }
 
     @Override
@@ -175,7 +220,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setLineWidth(int width) {
+    public void setLineWidth(final int width) {
     }
 
     @Override
@@ -184,7 +229,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setFillingPaint(Paint fillingStyle) {
+    public void setFillingPaint(final Paint fillingStyle) {
     }
 
     @Override
@@ -193,7 +238,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setTransparency(float transparrency) {
+    public void setTransparency(final float transparrency) {
     }
 
     @Override
@@ -202,7 +247,7 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setPointAnnotationSymbol(FeatureAnnotationSymbol featureAnnotationSymbol) {
+    public void setPointAnnotationSymbol(final FeatureAnnotationSymbol featureAnnotationSymbol) {
     }
 
     @Override
@@ -211,36 +256,71 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
     }
 
     @Override
-    public void setHighlightingEnabled(boolean enabled) {
+    public void setHighlightingEnabled(final boolean enabled) {
     }
 
-//    private static final String TO_STRING_HEAD = "Gruppe [";
-//    private static final String TO_STRING_SEPARATOR = ", ";
-//    private static final String TO_STRING_END = "]";
-//
-//    @Override
-//    public String toString() {
-//        StringBuilder sb = new StringBuilder(TO_STRING_HEAD);
-//        if (groupFeatures.size() > 0) {
-//            for (Feature f : groupFeatures) {
-//                if (f instanceof XStyledFeature) {
-//                    sb.append(((XStyledFeature) f).getName());
-//                } else {
-//                    sb.append(f.getGeometry());
-//                }
-//                sb.append(TO_STRING_SEPARATOR);
-//            }
-//            sb.delete(sb.length() - TO_STRING_SEPARATOR.length(), sb.length());
-//        }
-//        sb.append(TO_STRING_END);
-//        return sb.toString();
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Geometry getEnclosingGeometry() {
+        return enclosingGeometry;
+    }
+
+//    public void setEnclosingGeometry(Geometry enclosingGeometry) {
+//        this.enclosingGeometry = enclosingGeometry;
 //    }
+    @Override
+    public String getMyAttributeStringInParentFeature() {
+        return myAttributeStringInParentFeature;
+    }
+
+    @Override
+    public void setMyAttributeStringInParentFeature(final String myAttributeStringInParentFeature) {
+        this.myAttributeStringInParentFeature = myAttributeStringInParentFeature;
+    }
+
+    @Override
+    public FeatureGroup getParentFeature() {
+        return parentFeature;
+    }
+
+    @Override
+    public void setParentFeature(final FeatureGroup parentFeature) {
+        this.parentFeature = parentFeature;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * private static final String TO_STRING_HEAD = "Gruppe ["; private static final String TO_STRING_SEPARATOR = ", ";
+     * private static final String TO_STRING_END = "]"; @Override public String toString() { StringBuilder sb = new
+     * StringBuilder(TO_STRING_HEAD); if (groupFeatures.size() > 0) { for (Feature f : groupFeatures) { if (f instanceof
+     * XStyledFeature) { sb.append(((XStyledFeature) f).getName()); } else { sb.append(f.getGeometry()); }
+     * sb.append(TO_STRING_SEPARATOR); } sb.delete(sb.length() - TO_STRING_SEPARATOR.length(), sb.length()); }
+     * sb.append(TO_STRING_END); return sb.toString(); }
+     *
+     * @version  $Revision$, $Date$
+     */
     final class IteratorWrapper implements Iterator<Feature> {
 
-        public IteratorWrapper(Iterator<Feature> delegate) {
+        //~ Instance fields ----------------------------------------------------
+
+        private final Iterator<Feature> delegate;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new IteratorWrapper object.
+         *
+         * @param  delegate  DOCUMENT ME!
+         */
+        public IteratorWrapper(final Iterator<Feature> delegate) {
             this.delegate = delegate;
         }
-        private final Iterator<Feature> delegate;
+
+        //~ Methods ------------------------------------------------------------
 
         @Override
         public boolean hasNext() {
@@ -257,32 +337,5 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
             enclosingGeometry = null;
             delegate.remove();
         }
-    }
-
-    public Geometry getEnclosingGeometry() {
-        return enclosingGeometry;
-    }
-
-//    public void setEnclosingGeometry(Geometry enclosingGeometry) {
-//        this.enclosingGeometry = enclosingGeometry;
-//    }
-    @Override
-    public String getMyAttributeStringInParentFeature() {
-        return myAttributeStringInParentFeature;
-    }
-
-    @Override
-    public void setMyAttributeStringInParentFeature(String myAttributeStringInParentFeature) {
-        this.myAttributeStringInParentFeature = myAttributeStringInParentFeature;
-    }
-
-    @Override
-    public FeatureGroup getParentFeature() {
-        return parentFeature;
-    }
-
-    @Override
-    public void setParentFeature(FeatureGroup parentFeature) {
-        this.parentFeature = parentFeature;
     }
 }

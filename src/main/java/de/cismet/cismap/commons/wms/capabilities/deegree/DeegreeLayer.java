@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.wms.capabilities.deegree;
 
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
@@ -6,17 +13,30 @@ import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
 import de.cismet.cismap.commons.wms.capabilities.Style;
 
-
 /**
+ * DOCUMENT ME!
  *
- * @author therter
+ * @author   therter
+ * @version  $Revision$, $Date$
  */
 public class DeegreeLayer implements Layer {
+
+    //~ Instance fields --------------------------------------------------------
+
     private org.deegree.ogcwebservices.wms.capabilities.Layer layer;
 
-    public DeegreeLayer(org.deegree.ogcwebservices.wms.capabilities.Layer layer) {
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new DeegreeLayer object.
+     *
+     * @param  layer  DOCUMENT ME!
+     */
+    public DeegreeLayer(final org.deegree.ogcwebservices.wms.capabilities.Layer layer) {
         this.layer = layer;
     }
+
+    //~ Methods ----------------------------------------------------------------
 
     @Override
     public String getTitle() {
@@ -39,7 +59,7 @@ public class DeegreeLayer implements Layer {
     }
 
     @Override
-    public boolean isSrsSupported(String srs) {
+    public boolean isSrsSupported(final String srs) {
         return layer.isSrsSupported(srs);
     }
 
@@ -67,7 +87,7 @@ public class DeegreeLayer implements Layer {
     }
 
     @Override
-    public Style getStyleResource(String name) {
+    public Style getStyleResource(final String name) {
         return new DeegreeStyle(layer.getStyleResource(name));
     }
 
@@ -76,10 +96,10 @@ public class DeegreeLayer implements Layer {
         if (layer.getStyles() == null) {
             return null;
         }
-        org.deegree.ogcwebservices.wms.capabilities.Style[] deegreeStyles = layer.getStyles();
-        Style[] result = new Style[deegreeStyles.length];
+        final org.deegree.ogcwebservices.wms.capabilities.Style[] deegreeStyles = layer.getStyles();
+        final Style[] result = new Style[deegreeStyles.length];
 
-        for ( int i = 0; i < deegreeStyles.length; ++i ) {
+        for (int i = 0; i < deegreeStyles.length; ++i) {
             result[i] = new DeegreeStyle(deegreeStyles[i]);
         }
 
@@ -91,11 +111,11 @@ public class DeegreeLayer implements Layer {
         if (layer.getLayer() == null) {
             return null;
         }
-        org.deegree.ogcwebservices.wms.capabilities.Layer[] deegreeLayer = layer.getLayer();
-        Layer[] result = new Layer[deegreeLayer.length];
+        final org.deegree.ogcwebservices.wms.capabilities.Layer[] deegreeLayer = layer.getLayer();
+        final Layer[] result = new Layer[deegreeLayer.length];
 
-        for ( int i = 0; i < deegreeLayer.length; ++i ) {
-            result[i] = new DeegreeLayer( deegreeLayer[i] );
+        for (int i = 0; i < deegreeLayer.length; ++i) {
+            result[i] = new DeegreeLayer(deegreeLayer[i]);
         }
 
         return result;
@@ -106,9 +126,9 @@ public class DeegreeLayer implements Layer {
         if (this.layer.getBoundingBoxes() == null) {
             return null;
         }
-        
-        org.deegree.ogcwebservices.wms.capabilities.LayerBoundingBox[] origBoxes = layer.getBoundingBoxes();
-        LayerBoundingBox[] boxes = new LayerBoundingBox[origBoxes.length];
+
+        final org.deegree.ogcwebservices.wms.capabilities.LayerBoundingBox[] origBoxes = layer.getBoundingBoxes();
+        final LayerBoundingBox[] boxes = new LayerBoundingBox[origBoxes.length];
 
         for (int i = 0; i < origBoxes.length; ++i) {
             boxes[i] = new DeegreeLayerBoundingBox(origBoxes[i]);
@@ -122,6 +142,6 @@ public class DeegreeLayer implements Layer {
         if (this.layer.getLatLonBoundingBox() == null) {
             return null;
         }
-        return new DeegreeEnvelope( this.layer.getLatLonBoundingBox() );
+        return new DeegreeEnvelope(this.layer.getLatLonBoundingBox());
     }
 }

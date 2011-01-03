@@ -1,36 +1,10 @@
-/*
- * MeasurementListener.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 23. M\u00E4rz 2006, 15:25
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -38,46 +12,66 @@ import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.impl.PackedCoordinateSequenceFactory;
+
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+
+import java.awt.Color;
+import java.awt.geom.Point2D;
+
+import java.util.Vector;
+
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.tools.PFeatureTools;
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolo.nodes.PPath;
-import java.awt.Color;
-import java.awt.geom.Point2D;
-import java.util.Vector;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class MeasurementListener extends PBasicInputEventHandler {
-    public static final String LENGTH_CHANGED = "LENGTH_CHANGED";//NOI18N
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String LENGTH_CHANGED = "LENGTH_CHANGED"; // NOI18N
+
+    //~ Instance fields --------------------------------------------------------
+
     protected Point2D startPoint;
     protected PPath tempFeature;
     protected MappingComponent mc;
     protected boolean inProgress;
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Vector points;
     private SimpleMoveListener moveListener;
     private double measuredLength = 0;
 
-    /** Creates a new instance of CreatePolygonFeatureListener */
-    public MeasurementListener(MappingComponent mc) {
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of CreatePolygonFeatureListener.
+     *
+     * @param  mc  DOCUMENT ME!
+     */
+    public MeasurementListener(final MappingComponent mc) {
         this.mc = mc;
-        moveListener = (SimpleMoveListener) mc.getInputListener(MappingComponent.MOTION);
+        moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     @Override
-    public void mouseMoved(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+    public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
         if (moveListener != null) {
             moveListener.mouseMoved(pInputEvent);
         } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");//NOI18N
+            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
         }
-        
+
         if (inProgress) {
             Point2D point = null;
             if (mc.isSnappingEnabled()) {
@@ -96,9 +90,9 @@ public class MeasurementListener extends PBasicInputEventHandler {
 //         mouseMoved(pInputEvent);
 //    }
     @Override
-    public void mouseClicked(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+    public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseClicked(pInputEvent);
-        if (pInputEvent.getButton() == 1) { //Linke Maustaste: TODO: konnte die piccolo Konstanten nicht finden
+        if (pInputEvent.getButton() == 1) { // Linke Maustaste: TODO: konnte die piccolo Konstanten nicht finden
             if (pInputEvent.getClickCount() == 1) {
                 Point2D point = null;
                 if (mc.isSnappingEnabled()) {
@@ -108,65 +102,90 @@ public class MeasurementListener extends PBasicInputEventHandler {
                     point = pInputEvent.getPosition();
                 }
                 if (!inProgress) {
-                    //Polygon erzeugen
+                    // Polygon erzeugen
                     tempFeature = new PPath();
                     points = new Vector();
-                    FixedWidthStroke fws = new FixedWidthStroke();
+                    final FixedWidthStroke fws = new FixedWidthStroke();
                     fws.setMultiplyer(3f);
                     tempFeature.setStroke(fws);
-                    //tempFeature.setPaint(getFillingColor());
+                    // tempFeature.setPaint(getFillingColor());
                     mc.getTmpFeatureLayer().removeAllChildren();
                     mc.getTmpFeatureLayer().addChild(tempFeature);
-                    //Ersten Punkt anlegen
+                    // Ersten Punkt anlegen
                     startPoint = point;
                     points.add(startPoint);
                     inProgress = true;
                 } else {
-                    //Zus\u00E4tzlichen Punkt anlegen
+                    // Zus\u00E4tzlichen Punkt anlegen
                     points.add(point);
                     updatePolygon(null);
                 }
             } else if (pInputEvent.getClickCount() == 2) {
-                //Anlegen des neuen PFeatures
+                // Anlegen des neuen PFeatures
                 mc.getTmpFeatureLayer().removeAllChildren();
                 measuredLength = getLength(getPoints(null));
                 postLength();
-                //PFeature newFeature=new PFeature(getPoints(null),mc.getWtst(),mc.getClip_offset_x(),mc.getClip_offset_y());
-                //newFeature.setViewer(mc);
-                //mc.getFeatureLayer().addChild(newFeature);
+                // PFeature newFeature=new
+                // PFeature(getPoints(null),mc.getWtst(),mc.getClip_offset_x(),mc.getClip_offset_y());
+                // newFeature.setViewer(mc); mc.getFeatureLayer().addChild(newFeature);
                 inProgress = false;
             }
         }
     }
 
-    private double getLength(Point2D[] canvasPoints) {
-        Coordinate[] coordArr = new Coordinate[canvasPoints.length];
-        float[] xp = new float[canvasPoints.length];
-        float[] yp = new float[canvasPoints.length];
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   canvasPoints  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private double getLength(final Point2D[] canvasPoints) {
+        final Coordinate[] coordArr = new Coordinate[canvasPoints.length];
+        final float[] xp = new float[canvasPoints.length];
+        final float[] yp = new float[canvasPoints.length];
         for (int i = 0; i < canvasPoints.length; ++i) {
-            xp[i] = (float) (canvasPoints[i].getX());
-            yp[i] = (float) (canvasPoints[i].getY());
-            coordArr[i] = new Coordinate(mc.getWtst().getSourceX(xp[i] - mc.getClip_offset_x()), mc.getWtst().getSourceY(yp[i] - mc.getClip_offset_y()));
+            xp[i] = (float)(canvasPoints[i].getX());
+            yp[i] = (float)(canvasPoints[i].getY());
+            coordArr[i] = new Coordinate(mc.getWtst().getSourceX(xp[i] - mc.getClip_offset_x()),
+                    mc.getWtst().getSourceY(yp[i] - mc.getClip_offset_y()));
         }
-        CoordinateSequence cs = new PackedCoordinateSequenceFactory().create(coordArr);
-        LineString ls = new LineString(cs, new GeometryFactory());
-        double l = ls.getLength();
+        final CoordinateSequence cs = new PackedCoordinateSequenceFactory().create(coordArr);
+        final LineString ls = new LineString(cs, new GeometryFactory());
+        final double l = ls.getLength();
         return l;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     protected Color getFillingColor() {
         return new Color(1f, 0f, 0f, 0.5f);
     }
 
-    protected void updatePolygon(Point2D lastPoint) {
-        Point2D[] p = getPoints(lastPoint);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  lastPoint  DOCUMENT ME!
+     */
+    protected void updatePolygon(final Point2D lastPoint) {
+        final Point2D[] p = getPoints(lastPoint);
         tempFeature.setPathToPolyline(p);
         tempFeature.repaint();
         measuredLength = getLength(p);
         postLength();
     }
 
-    protected Point2D[] getPoints(Point2D lastPoint) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   lastPoint  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected Point2D[] getPoints(final Point2D lastPoint) {
         int plus;
         boolean movin = false;
         if (lastPoint != null) {
@@ -176,9 +195,9 @@ public class MeasurementListener extends PBasicInputEventHandler {
             plus = 0;
             movin = false;
         }
-        Point2D[] p = new Point2D[points.size() + plus];
+        final Point2D[] p = new Point2D[points.size() + plus];
         for (int i = 0; i < points.size(); ++i) {
-            p[i] = (Point2D) (points.get(i));
+            p[i] = (Point2D)(points.get(i));
         }
         if (movin) {
             p[points.size()] = lastPoint;
@@ -186,17 +205,29 @@ public class MeasurementListener extends PBasicInputEventHandler {
         return p;
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     protected void postLength() {
-        PNotificationCenter pn = PNotificationCenter.defaultCenter();
+        final PNotificationCenter pn = PNotificationCenter.defaultCenter();
         pn.postNotification(LENGTH_CHANGED, this);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public double getMeasuredLength() {
         return measuredLength;
     }
 
-    public void setMeasuredLength(double measuredLength) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  measuredLength  DOCUMENT ME!
+     */
+    public void setMeasuredLength(final double measuredLength) {
         this.measuredLength = measuredLength;
     }
 }
-

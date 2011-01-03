@@ -1,80 +1,194 @@
-/*
- * FeatureCollection.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 15. Juni 2005, 16:23
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.features;
-import de.cismet.cismap.commons.*;
 import java.util.Collection;
 import java.util.Vector;
 
+import de.cismet.cismap.commons.*;
+
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
-public interface FeatureCollection extends ServiceLayer{
-    public void addFeatureCollectionListener(FeatureCollectionListener l);
-    public void removeFeatureCollectionListener(FeatureCollectionListener l);
-    
-    public int getFeatureCount();
-    public Vector<Feature> getAllFeatures();
-    public Feature getFeature(int index);
-    public boolean areFeaturesEditable();
-    
-    
-    public void select(Feature f);
-    public void select(Collection<Feature> cf);
-    public void addToSelection(Feature f);
-    public void addToSelection(Collection<Feature> cf);
-     
-    public void unselect(Feature f);
-    public void unselect(Collection<Feature> cf);
-    public void unselectAll();
-    public void unselectAll(boolean quiet);
-    public Collection getSelectedFeatures();
-    public boolean isSelected(Feature f);
-    
-    public void addFeature(Feature f);
-    public void addFeatures(Collection<Feature> cf);
-    public void removeFeatures(Collection<Feature> cf);
-    public void removeFeature(Feature f);
-    public void substituteFeatures(Collection<Feature> cf);
-    public void removeAllFeatures();
-    
-    public void holdFeature(Feature f);
-    public void unholdFeature(Feature f);
-    public boolean isHoldFeature(Feature f);
-    public void setHoldAll(boolean holdAll);
-    
-    public void reconsiderFeature(Feature f);
-    
+public interface FeatureCollection extends ServiceLayer {
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    void addFeatureCollectionListener(FeatureCollectionListener l);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    void removeFeatureCollectionListener(FeatureCollectionListener l);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    int getFeatureCount();
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Vector<Feature> getAllFeatures();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   index  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Feature getFeature(int index);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean areFeaturesEditable();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    void select(Feature f);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cf  DOCUMENT ME!
+     */
+    void select(Collection<Feature> cf);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    void addToSelection(Feature f);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cf  DOCUMENT ME!
+     */
+    void addToSelection(Collection<Feature> cf);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    void unselect(Feature f);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cf  DOCUMENT ME!
+     */
+    void unselect(Collection<Feature> cf);
+    /**
+     * DOCUMENT ME!
+     */
+    void unselectAll();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  quiet  DOCUMENT ME!
+     */
+    void unselectAll(boolean quiet);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Collection getSelectedFeatures();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   f  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isSelected(Feature f);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    void addFeature(Feature f);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cf  DOCUMENT ME!
+     */
+    void addFeatures(Collection<Feature> cf);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cf  DOCUMENT ME!
+     */
+    void removeFeatures(Collection<Feature> cf);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    void removeFeature(Feature f);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cf  DOCUMENT ME!
+     */
+    void substituteFeatures(Collection<Feature> cf);
+    /**
+     * DOCUMENT ME!
+     */
+    void removeAllFeatures();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    void holdFeature(Feature f);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    void unholdFeature(Feature f);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   f  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isHoldFeature(Feature f);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  holdAll  DOCUMENT ME!
+     */
+    void setHoldAll(boolean holdAll);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    void reconsiderFeature(Feature f);
 }

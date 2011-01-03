@@ -1,20 +1,56 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.wms.capabilities;
 
 import de.cismet.cismap.commons.exceptions.ConvertException;
 
 /**
+ * DOCUMENT ME!
  *
- * @author therter
+ * @author   therter
+ * @version  $Revision$, $Date$
  */
 public interface Unit {
-    public double convert(double value, Unit targetUnit) throws ConvertException;
+
+    //~ Methods ----------------------------------------------------------------
+
     /**
-     * the scale to convert to the base unit. This is metre for length units, seconds for time units
-     * and radian for angle units
+     * DOCUMENT ME!
+     *
+     * @param   value       DOCUMENT ME!
+     * @param   targetUnit  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  ConvertException  DOCUMENT ME!
      */
-    public double getScale();
-    public double toBaseUnit(double value);
-    public boolean isBaseType();
+    double convert(double value, Unit targetUnit) throws ConvertException;
+    /**
+     * the scale to convert to the base unit. This is metre for length units, seconds for time units and radian for
+     * angle units
+     *
+     * @return  DOCUMENT ME!
+     */
+    double getScale();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   value  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    double toBaseUnit(double value);
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isBaseType();
     @Override
-    public String toString();
+    String toString();
 }

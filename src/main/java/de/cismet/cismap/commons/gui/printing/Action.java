@@ -1,85 +1,104 @@
-/*
- * Action.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 10. Juli 2006, 17:35
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
 import org.jdom.Element;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class Action {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String PRINTPREVIEW = "PRINTPREVIEW"; // NOI18N
+    public static final String PDF = "PDF";                   // NOI18N
+    public static final String PRINT = "PRINT";               // NOI18N
+
+    //~ Instance fields --------------------------------------------------------
+
     private String id;
     private String title;
-    
-    public static final String PRINTPREVIEW="PRINTPREVIEW";//NOI18N
-    public static final String PDF="PDF";//NOI18N
-    public static final String PRINT="PRINT";//NOI18N
-    /** Creates a new instance of Action */
-    public Action(Element e) throws Exception{
-        id=e.getAttribute("id").getValue();//NOI18N
-        title=e.getText();
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of Action.
+     *
+     * @param   e  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public Action(final Element e) throws Exception {
+        id = e.getAttribute("id").getValue(); // NOI18N
+        title = e.getText();
     }
+
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
     public String toString() {
         return getTitle();
     }
-    public Element getElement(boolean selected) {
-        Element e=new Element("action");//NOI18N
-        e.setAttribute("selected",String.valueOf(selected));//NOI18N
-        e.setAttribute("id",id);//NOI18N
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   selected  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Element getElement(final boolean selected) {
+        final Element e = new Element("action");              // NOI18N
+        e.setAttribute("selected", String.valueOf(selected)); // NOI18N
+        e.setAttribute("id", id);                             // NOI18N
         e.setText(getTitle());
         return e;
-             
     }
-    public boolean equals(Object obj) {
-        return obj instanceof Action && ((Action)obj).id.equals(id);
+    @Override
+    public boolean equals(final Object obj) {
+        return (obj instanceof Action) && ((Action)obj).id.equals(id);
     }
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  title  DOCUMENT ME!
+     */
+    public void setTitle(final String title) {
         this.title = title;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  id  DOCUMENT ME!
+     */
+    public void setId(final String id) {
         this.id = id;
     }
-    
 }

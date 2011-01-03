@@ -1,100 +1,184 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * SimpleWmsGetMapUrl.java
  *
  * Created on 14. M\u00E4rz 2005, 16:00
  */
-
 package de.cismet.cismap.commons.raster.wms.simple;
 
 import de.cismet.cismap.commons.rasterservice.*;
 
 /**
- * Einfache Klasse um einen WMS Aufruf zu parametrisieren
- * nur eine WMS String mitschneiden und dann einfach die Breite, Hoehe und <br>
- * die Bounding Box durch eindeutige (und nicht zu kurze) Token ersetzen. Fertig :-)
- * <br><br>
- *Bsp:<br>
- *<code> http://geoportal.wuppertal.de/wms/wms?null&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cids:width>&HEIGHT=<cids:height>&BBOX=<cids:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=false&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:DGK5</code>
+ * Einfache Klasse um einen WMS Aufruf zu parametrisieren nur eine WMS String mitschneiden und dann einfach die Breite,
+ * Hoehe und<br>
+ * die Bounding Box durch eindeutige (und nicht zu kurze) Token ersetzen. Fertig :-)<br>
+ * <br>
+ * Bsp:<br>
+ * <code>
+ * http://geoportal.wuppertal.de/wms/wms?null&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cids:width>&HEIGHT=<cids:height>&BBOX=<cids:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=false&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:DGK5</code>
  *
- * @author hell
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
 public class SimpleWmsGetMapUrl {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String WIDTH_TOKEN = "<cismap:width>";              // NOI18N
+    public static final String HEIGHT_TOKEN = "<cismap:height>";            // NOI18N
+    public static final String BOUNDING_BOX_TOKEN = "<cismap:boundingBox>"; // NOI18N
+
+    //~ Instance fields --------------------------------------------------------
+
     protected String urlTemplate;
-    
+
+    double x1 = 0.0;
+    double y1 = 0.0;
+    double x2 = 0.0;
+    double y2 = 0.0;
+
     private String widthToken;
     private String heightToken;
     private String boundingBoxToken;
-    
-    private int width=0;
-    private int height=0;
-    
-    double x1=0.0;
-    double y1=0.0;
-    double x2=0.0;
-    double y2=0.0;
-    
-    public static final String WIDTH_TOKEN="<cismap:width>";//NOI18N
-    public static final String HEIGHT_TOKEN="<cismap:height>";//NOI18N
-    public static final String BOUNDING_BOX_TOKEN="<cismap:boundingBox>";//NOI18N
-    
-    
-    /** Creates a new instance of SimpleWmsGetMapUrl */
-    public SimpleWmsGetMapUrl(String urlTemplate,String widthToken,String heightToken,String boundingBoxToken) {
-        this.urlTemplate=urlTemplate;
-        this.widthToken=widthToken;
-        this.heightToken=heightToken;
-        this.boundingBoxToken=boundingBoxToken;
-    }
-    public SimpleWmsGetMapUrl(String urlTemplate) {
-        this.urlTemplate=urlTemplate;
-        this.widthToken=WIDTH_TOKEN;
-        this.heightToken=HEIGHT_TOKEN;
-        this.boundingBoxToken=BOUNDING_BOX_TOKEN;
-    }
-    
-    public void setWidth(int width) {
-        this.width=width;
-    }
-    
-    public void setHeight(int height) {
-        this.height=height;
-    }
-    
-    public void setX1(double coord) {
-        x1=coord;
-    }
-    public void setY1(double coord) {
-        y1=coord;
-    }
-    public void setX2(double coord) {
-        x2=coord;
-    }
-    public void setY2(double coord) {
-        y2=coord;
+
+    private int width = 0;
+    private int height = 0;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new SimpleWmsGetMapUrl object.
+     *
+     * @param  urlTemplate  DOCUMENT ME!
+     */
+    public SimpleWmsGetMapUrl(final String urlTemplate) {
+        this.urlTemplate = urlTemplate;
+        this.widthToken = WIDTH_TOKEN;
+        this.heightToken = HEIGHT_TOKEN;
+        this.boundingBoxToken = BOUNDING_BOX_TOKEN;
     }
 
+    /**
+     * Creates a new instance of SimpleWmsGetMapUrl.
+     *
+     * @param  urlTemplate       DOCUMENT ME!
+     * @param  widthToken        DOCUMENT ME!
+     * @param  heightToken       DOCUMENT ME!
+     * @param  boundingBoxToken  DOCUMENT ME!
+     */
+    public SimpleWmsGetMapUrl(final String urlTemplate,
+            final String widthToken,
+            final String heightToken,
+            final String boundingBoxToken) {
+        this.urlTemplate = urlTemplate;
+        this.widthToken = widthToken;
+        this.heightToken = heightToken;
+        this.boundingBoxToken = boundingBoxToken;
+    }
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  width  DOCUMENT ME!
+     */
+    public void setWidth(final int width) {
+        this.width = width;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  height  DOCUMENT ME!
+     */
+    public void setHeight(final int height) {
+        this.height = height;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  coord  DOCUMENT ME!
+     */
+    public void setX1(final double coord) {
+        x1 = coord;
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  coord  DOCUMENT ME!
+     */
+    public void setY1(final double coord) {
+        y1 = coord;
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  coord  DOCUMENT ME!
+     */
+    public void setX2(final double coord) {
+        x2 = coord;
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  coord  DOCUMENT ME!
+     */
+    public void setY2(final double coord) {
+        y2 = coord;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getUrlTemplate() {
         return urlTemplate;
     }
-    public void setUrlTemplate(String urlTemplate) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  urlTemplate  DOCUMENT ME!
+     */
+    public void setUrlTemplate(final String urlTemplate) {
         this.urlTemplate = urlTemplate;
     }
-    
+
+    @Override
     public String toString() {
-        String url=urlTemplate.replaceAll(widthToken, new Integer(width).toString());
-        url=url.replaceAll(heightToken, new Integer(height).toString());
-        url=url.replaceAll(boundingBoxToken, 
-                new Double(x1).toString()+","+//NOI18N
-                new Double(y1).toString()+","+//NOI18N
-                new Double(x2).toString()+","+//NOI18N
-                new Double(y2).toString());
+        String url = urlTemplate.replaceAll(widthToken, new Integer(width).toString());
+        url = url.replaceAll(heightToken, new Integer(height).toString());
+        url = url.replaceAll(
+                boundingBoxToken,
+                new Double(x1).toString()
+                        + "," // NOI18N
+                        + new Double(y1).toString()
+                        + "," // NOI18N
+                        + new Double(x2).toString()
+                        + "," // NOI18N
+                        + new Double(y2).toString());
         return url;
-    
     }
-    
-    public static void main(String[] args) {
-        SimpleWmsGetMapUrl test=new SimpleWmsGetMapUrl("http://geoportal.wuppertal.de/wms/wms?null&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cids:width>&HEIGHT=<cids:height>&BBOX=<cids:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=false&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:DGK5", //NOI18N
-                "<cids:width>","<cids:height>","<cids:boundingBox>");//NOI18N
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        final SimpleWmsGetMapUrl test = new SimpleWmsGetMapUrl(
+                "http://geoportal.wuppertal.de/wms/wms?null&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cids:width>&HEIGHT=<cids:height>&BBOX=<cids:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=false&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:DGK5", // NOI18N
+                "<cids:width>",
+                "<cids:height>",
+                "<cids:boundingBox>"); // NOI18N
         test.setWidth(47);
         test.setHeight(11);
         test.setX1(1.1);
@@ -104,10 +188,20 @@ public class SimpleWmsGetMapUrl {
         System.out.println(test);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public int getWidth() {
         return width;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public int getHeight() {
         return height;
     }

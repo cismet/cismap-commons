@@ -1,105 +1,149 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.featureservice;
 
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
-import java.net.URI;
-import java.util.Vector;
 import org.jdom.Element;
 
+import java.net.URI;
+
+import java.util.Vector;
+
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
+
 /**
- * Base class for document-based feature services
+ * Base class for document-based feature services.
  *
- * @author Sebastian Puhl
- * @author Pascal Dihé
+ * @author   Sebastian Puhl
+ * @author   Pascal Dihé
+ * @version  $Revision$, $Date$
  */
-public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, QT>  extends AbstractFeatureService<FT, QT>
-{
-  // <editor-fold defaultstate="collapsed" desc="Declaration ">
+public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, QT>
+        extends AbstractFeatureService<FT, QT> {
 
-  /**
-   * URI of the feature document
-   */
-  protected URI documentURI;
+    //~ Static fields/initializers ---------------------------------------------
 
-  /**
-   * Max number of featurews the underlying factory will parse. If the document
-   * contains more features they will be ignored.
-   */
-  protected int maxSupportedFeatureCount = 150000;
-  
+    // public static String DOCUMENT_FEATURELAYER_TYPE = "DocumentFeatureServiceLayer";
 
-  /**
-   * Document Size in Kilobytes
-   */
-  protected long documentSize = -1;
+    // TODO where are the deegree Constants
+    public static final int GML_GEOMETRY_TYPE = 10012;
 
-  //public static String DOCUMENT_FEATURELAYER_TYPE = "DocumentFeatureServiceLayer";
+    //~ Instance fields --------------------------------------------------------
 
-  //TODO where are the deegree Constants
-  public static final int GML_GEOMETRY_TYPE = 10012;
+    /** URI of the feature document. */
+    protected URI documentURI;
 
-  public DocumentFeatureService(Element e) throws Exception
-  {
-    super(e);
-  }
+    /**
+     * Max number of featurews the underlying factory will parse. If the document contains more features they will be
+     * ignored.
+     */
+    protected int maxSupportedFeatureCount = 150000;
 
-  protected DocumentFeatureService(DocumentFeatureService dfs)
-  {
-    super(dfs);
-    this.setDocumentURI(dfs.getDocumentURI());
-    this.documentSize = dfs.getDocumentSize();
-  }
+    /** Document Size in Kilobytes. */
+    protected long documentSize = -1;
 
-  public DocumentFeatureService(String name, URI documentURI, long documentSize, Vector<FeatureServiceAttribute> attributes) throws Exception
-  {
-    super(name, attributes);
-    this.setDocumentURI(documentURI);
-    this.documentSize = documentSize;
-    logger.info("creating new DocumentFeatureService from URI: " + this.getDocumentURI());//NOI18N
-  }
+    //~ Constructors -----------------------------------------------------------
 
-  @Override
-  public Element toElement()
-  {
-    Element parentElement = super.toElement();
-    Element docURI = new Element("documentURI");//NOI18N
-    docURI.setText(documentURI.toString());
-    parentElement.addContent(docURI);
-    parentElement.setAttribute("maxSupportedFeatureCount", String.valueOf(this.maxSupportedFeatureCount));//NOI18N
-    parentElement.setAttribute("documentSize", String.valueOf(this.documentSize));//NOI18N
-    return parentElement;
-  }
-
-
-  @Override
-  public void initFromElement(Element element) throws Exception
-  {
-    super.initFromElement(element);
-    this.setDocumentURI(new URI(element.getChildText("documentURI").trim()));//NOI18N
-    if(element.getAttribute("maxSupportedFeatureCount") != null){//NOI18N
-      this.maxSupportedFeatureCount = element.getAttribute("maxSupportedFeatureCount").getIntValue();//NOI18N
+    /**
+     * Creates a new DocumentFeatureService object.
+     *
+     * @param   e  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public DocumentFeatureService(final Element e) throws Exception {
+        super(e);
     }
 
-    if(element.getAttribute("documentSize") != null){//NOI18N
-      this.documentSize = element.getAttribute("documentSize").getIntValue();//NOI18N
+    /**
+     * Creates a new DocumentFeatureService object.
+     *
+     * @param   name          DOCUMENT ME!
+     * @param   documentURI   DOCUMENT ME!
+     * @param   documentSize  DOCUMENT ME!
+     * @param   attributes    DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public DocumentFeatureService(final String name,
+            final URI documentURI,
+            final long documentSize,
+            final Vector<FeatureServiceAttribute> attributes) throws Exception {
+        super(name, attributes);
+        this.setDocumentURI(documentURI);
+        this.documentSize = documentSize;
+        logger.info("creating new DocumentFeatureService from URI: " + this.getDocumentURI()); // NOI18N
     }
-  }
 
-  public URI getDocumentURI()
-  {
-    return documentURI;
-  }
+    /**
+     * Creates a new DocumentFeatureService object.
+     *
+     * @param  dfs  DOCUMENT ME!
+     */
+    protected DocumentFeatureService(final DocumentFeatureService dfs) {
+        super(dfs);
+        this.setDocumentURI(dfs.getDocumentURI());
+        this.documentSize = dfs.getDocumentSize();
+    }
 
-  public void setDocumentURI(URI documentURI)
-  {
-    this.documentURI = documentURI;
-  }
+    //~ Methods ----------------------------------------------------------------
 
-  public long getDocumentSize()
-  {
-    return this.documentSize;
-  }
+    @Override
+    public Element toElement() {
+        final Element parentElement = super.toElement();
+        final Element docURI = new Element("documentURI");                                                     // NOI18N
+        docURI.setText(documentURI.toString());
+        parentElement.addContent(docURI);
+        parentElement.setAttribute("maxSupportedFeatureCount", String.valueOf(this.maxSupportedFeatureCount)); // NOI18N
+        parentElement.setAttribute("documentSize", String.valueOf(this.documentSize));                         // NOI18N
+        return parentElement;
+    }
+
+    @Override
+    public void initFromElement(final Element element) throws Exception {
+        super.initFromElement(element);
+        this.setDocumentURI(new URI(element.getChildText("documentURI").trim()));                           // NOI18N
+        if (element.getAttribute("maxSupportedFeatureCount") != null) {                                     // NOI18N
+            this.maxSupportedFeatureCount = element.getAttribute("maxSupportedFeatureCount").getIntValue(); // NOI18N
+        }
+
+        if (element.getAttribute("documentSize") != null) {                         // NOI18N
+            this.documentSize = element.getAttribute("documentSize").getIntValue(); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public URI getDocumentURI() {
+        return documentURI;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  documentURI  DOCUMENT ME!
+     */
+    public void setDocumentURI(final URI documentURI) {
+        this.documentURI = documentURI;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public long getDocumentSize() {
+        return this.documentSize;
+    }
 }

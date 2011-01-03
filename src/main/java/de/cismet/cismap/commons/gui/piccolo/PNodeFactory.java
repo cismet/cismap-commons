@@ -1,39 +1,67 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * PNodeFactory.java
  *
  * Created on 4. M\u00E4rz 2005, 14:51
  */
-
 package de.cismet.cismap.commons.gui.piccolo;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 
-
-
 /**
+ * DOCUMENT ME!
  *
- * @author hell
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
 public class PNodeFactory {
-    
-    public static edu.umd.cs.piccolo.PNode createPFeature(Feature feature,MappingComponent viewer) {
-        return createPFeature(feature,null,0,0,viewer);
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   feature  DOCUMENT ME!
+     * @param   viewer   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static edu.umd.cs.piccolo.PNode createPFeature(final Feature feature, final MappingComponent viewer) {
+        return createPFeature(feature, null, 0, 0, viewer);
     }
-//    public static FeaturePNode updatePNode(PNode pnode,org.deegree_impl.graphics.transformation.WorldToScreenTransform wtst,double x_offset,double y_offset) {
-//        return null;
-//    }
-    public static PFeature createPFeature(Feature feature,WorldToScreenTransform wtst,double x_offset,double y_offset,MappingComponent viewer) {
+    /**
+     * public static FeaturePNode updatePNode(PNode
+     * pnode,org.deegree_impl.graphics.transformation.WorldToScreenTransform wtst,double x_offset,double y_offset) {
+     * return null; }.
+     *
+     * @param   feature   DOCUMENT ME!
+     * @param   wtst      DOCUMENT ME!
+     * @param   x_offset  DOCUMENT ME!
+     * @param   y_offset  DOCUMENT ME!
+     * @param   viewer    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static PFeature createPFeature(final Feature feature,
+            final WorldToScreenTransform wtst,
+            final double x_offset,
+            final double y_offset,
+            final MappingComponent viewer) {
         if (feature != null) {
-            return new PFeature(feature,wtst,x_offset,y_offset,viewer);
-        }
-        else {
+            return new PFeature(feature, wtst, x_offset, y_offset, viewer);
+        } else {
             return null;
         }
     }
-    
-    
+
 //    public static FeaturePNode createPNode(de.cismet.mapping.Feature feature,org.deegree_impl.graphics.transformation.WorldToScreenTransform wtst,double x_offset,double y_offset) {
 //        if (feature != null) {
 //            Geometry geom=feature.getGeometry();
@@ -92,5 +120,5 @@ public class PNodeFactory {
 //            return null;
 //        }
 //    }
-    
+
 }

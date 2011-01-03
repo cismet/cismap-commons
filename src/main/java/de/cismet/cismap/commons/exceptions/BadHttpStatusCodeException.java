@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * BadHttpStatusCodeException.java
  *
@@ -6,42 +13,66 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package de.cismet.cismap.commons.exceptions;
 
 import java.awt.EventQueue;
+
 import javax.swing.SwingUtilities;
 
 /**
+ * DOCUMENT ME!
  *
- * @author Sebastian
+ * @author   Sebastian
+ * @version  $Revision$, $Date$
  */
-public class BadHttpStatusCodeException extends Exception{
-    
+public class BadHttpStatusCodeException extends Exception {
+
+    //~ Instance fields --------------------------------------------------------
+
     int statuscode;
-    
-    /** Creates a new instance of BadHttpStatusCodeException */
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of BadHttpStatusCodeException.
+     */
     public BadHttpStatusCodeException() {
-        super();        
+        super();
     }
-    
-    public BadHttpStatusCodeException(String message) {
+
+    /**
+     * Creates a new BadHttpStatusCodeException object.
+     *
+     * @param  message  DOCUMENT ME!
+     */
+    public BadHttpStatusCodeException(final String message) {
         super(message);
     }
-    
-    public BadHttpStatusCodeException(String message, int statuscode) {
+
+    /**
+     * Creates a new BadHttpStatusCodeException object.
+     *
+     * @param  message     DOCUMENT ME!
+     * @param  statuscode  DOCUMENT ME!
+     */
+    public BadHttpStatusCodeException(final String message, final int statuscode) {
         super(message);
         this.statuscode = statuscode;
     }
-    
-    public int getHttpStatuscode(){
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getHttpStatuscode() {
         return statuscode;
     }
 
     @Override
     public String getMessage() {
-        return super.getMessage()+": "+statuscode;//NOI18N
+        return super.getMessage() + ": " + statuscode; // NOI18N
     }
-    
-    
 }

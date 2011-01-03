@@ -1,51 +1,25 @@
-/*
- * AbstractWFSForm.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 25. Juli 2006, 17:26
- *
- *
- *
- * 
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.wfsforms;
 
 import com.vividsolutions.jts.geom.Point;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
+
+import org.jdom.Element;
+
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
+
 import java.util.HashMap;
 import java.util.Vector;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
@@ -53,23 +27,41 @@ import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import org.jdom.Element;
+
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public abstract class AbstractWFSForm extends JPanel {
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private Vector<WFSFormQuery> queries = new Vector<WFSFormQuery>();
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final int FEATURE_BORDER = 200;
+
+    //~ Instance fields --------------------------------------------------------
+
     protected HashMap<String, JComponent> listComponents = new HashMap<String, JComponent>();
     protected HashMap<String, WFSFormQuery> queriesByComponentName = new HashMap<String, WFSFormQuery>();
-    private final String loadingMessage = org.openide.util.NbBundle.getMessage(AbstractWFSForm.class, "AbstractWFSForm.loadingMessage");//NOI18N
-    private final String errorMessage = org.openide.util.NbBundle.getMessage(WFSFormsListAndComboBoxModel.class, "WFSFormsListAndComboBoxModel.errorMessage"); // NOI18N
-    private WFSFormFeature lastFeature = null;
-    protected ImageIcon mark = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/markPoint.png"));//NOI18N
+    protected ImageIcon mark = new javax.swing.ImageIcon(getClass().getResource(
+                "/de/cismet/cismap/commons/gui/res/markPoint.png")); // NOI18N
     protected FixedPImage pMark = new FixedPImage(mark.getImage());
+    protected MappingComponent mappingComponent;
+    Vector<ActionListener> actionListener = new Vector<ActionListener>();
+
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private Vector<WFSFormQuery> queries = new Vector<WFSFormQuery>();
+    private final String loadingMessage = org.openide.util.NbBundle.getMessage(
+            AbstractWFSForm.class,
+            "AbstractWFSForm.loadingMessage");            // NOI18N
+    private final String errorMessage = org.openide.util.NbBundle.getMessage(
+            WFSFormsListAndComboBoxModel.class,
+            "WFSFormsListAndComboBoxModel.errorMessage"); // NOI18N
+    private WFSFormFeature lastFeature = null;
     private String title;
     private String id;
     private String menuString;
@@ -78,78 +70,107 @@ public abstract class AbstractWFSForm extends JPanel {
     private String className;
     private boolean inited = false;
     private String sorter = null;
-    protected MappingComponent mappingComponent;
-    Vector<ActionListener> actionListener = new Vector<ActionListener>();
-    public static final int FEATURE_BORDER = 200;
 
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new AbstractWFSForm object.
+     */
     public AbstractWFSForm() {
         addHierarchyListener(new HierarchyListener() {
 
-            @Override
-            public void hierarchyChanged(HierarchyEvent e) {
-                if (!isInited() && isDisplayable()) {
-                    initWFSForm();
+                @Override
+                public void hierarchyChanged(final HierarchyEvent e) {
+                    if (!isInited() && isDisplayable()) {
+                        initWFSForm();
+                    }
                 }
-            }
-        });
+            });
         pMark.setVisible(false);
         pMark.setSweetSpotX(0.5d);
         pMark.setSweetSpotY(1d);
     }
 
-    public JComponent getListComponentByName(String name) {
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   name  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public JComponent getListComponentByName(final String name) {
         return listComponents.get(name);
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     public void initWFSForm() {
         try {
             inited = true;
-            //do the initial loading of all queries that are INITIAL
+            // do the initial loading of all queries that are INITIAL
             for (final WFSFormQuery q : queries) {
-                log.debug(title + "Components:" + listComponents);//NOI18N
+                if (log.isDebugEnabled()) {
+                    log.debug(title + "Components:" + listComponents); // NOI18N
+                }
                 queriesByComponentName.put(q.getComponentName(), q);
                 if (q.getType().equals(WFSFormQuery.INITIAL) && listComponents.containsKey(q.getComponentName())) {
                     final JComponent c = listComponents.get(q.getComponentName());
-                    log.debug("Comp: " + q.getComponentName());//NOI18N
+                    if (log.isDebugEnabled()) {
+                        log.debug("Comp: " + q.getComponentName());    // NOI18N
+                    }
                     if (c instanceof JComboBox) {
                         try {
-                            JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");//NOI18N
-                            WFSFormsListAndComboBoxModel w = new WFSFormsListAndComboBoxModel(q, c, bar);
+                            final JProgressBar bar = (JProgressBar)listComponents.get(q.getComponentName()
+                                            + "Progress");             // NOI18N
+                            final WFSFormsListAndComboBoxModel w = new WFSFormsListAndComboBoxModel(q, c, bar);
                             w.addActionListener(new ActionListener() {
 
-                                public void actionPerformed(ActionEvent e) {
-                                    fireActionPerformed(e);
-                                }
-                            });
-                            ((JComboBox) c).setModel(w);
+                                    @Override
+                                    public void actionPerformed(final ActionEvent e) {
+                                        fireActionPerformed(e);
+                                    }
+                                });
+                            ((JComboBox)c).setModel(w);
                         } catch (Exception ex) {
-                            log.error("Error in initWFSForm", ex);//NOI18N
+                            log.error("Error in initWFSForm", ex); // NOI18N
                         }
                     } else if (c instanceof JList) {
                         try {
-                            JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");//NOI18N
-                            WFSFormsListAndComboBoxModel w = new WFSFormsListAndComboBoxModel(q, c, bar);
+                            final JProgressBar bar = (JProgressBar)listComponents.get(q.getComponentName()
+                                            + "Progress");         // NOI18N
+                            final WFSFormsListAndComboBoxModel w = new WFSFormsListAndComboBoxModel(q, c, bar);
                             w.addActionListener(new ActionListener() {
 
-                                public void actionPerformed(ActionEvent e) {
-                                    fireActionPerformed(e);
-                                }
-                            });
-                            ((JList) c).setModel(w);
+                                    @Override
+                                    public void actionPerformed(final ActionEvent e) {
+                                        fireActionPerformed(e);
+                                    }
+                                });
+                            ((JList)c).setModel(w);
                         } catch (Exception ex) {
-                            log.error("Error in initWFSForm", ex);//NOI18N
+                            log.error("Error in initWFSForm", ex); // NOI18N
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            log.error("Error during initWFSForm", e);//NOI18N
+            log.error("Error during initWFSForm", e);              // NOI18N
         }
     }
 
-    protected void checkCboCorrectness(JComboBox combo) {
-        String itemString = String.valueOf(combo.getSelectedItem()).trim();
-        if (combo.getSelectedItem() != null && !itemString.equals("") && !itemString.equals(loadingMessage) && !itemString.equals(errorMessage) && combo.getSelectedIndex() == -1) {//NOI18N
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  combo  DOCUMENT ME!
+     */
+    protected void checkCboCorrectness(final JComboBox combo) {
+        final String itemString = String.valueOf(combo.getSelectedItem()).trim();
+        if ((combo.getSelectedItem() != null) && !itemString.equals("") && !itemString.equals(loadingMessage)
+                    && !itemString.equals(errorMessage)
+                    && (combo.getSelectedIndex() == -1)) { // NOI18N
             combo.getEditor().getEditorComponent().setBackground(Color.red);
             garbageDuringAutoCompletion(combo);
         } else {
@@ -157,173 +178,327 @@ public abstract class AbstractWFSForm extends JPanel {
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  box  DOCUMENT ME!
+     */
     public abstract void garbageDuringAutoCompletion(JComboBox box);
 
-    public void requestRefresh(String component, HashMap<String, String> replacingValues) {
-        log.debug("requestRefresh: Queries=" + queries);//NOI18N
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  component        DOCUMENT ME!
+     * @param  replacingValues  DOCUMENT ME!
+     */
+    public void requestRefresh(final String component, final HashMap<String, String> replacingValues) {
+        if (log.isDebugEnabled()) {
+            log.debug("requestRefresh: Queries=" + queries);                                                          // NOI18N
+        }
         for (final WFSFormQuery q : queries) {
             if (component.equals(q.getComponentName()) && listComponents.containsKey(q.getComponentName())) {
                 final JComponent c = listComponents.get(q.getComponentName());
-                log.debug("requestRefresh JComponent=" + c);//NOI18N
+                if (log.isDebugEnabled()) {
+                    log.debug("requestRefresh JComponent=" + c);                                                      // NOI18N
+                }
                 if (c instanceof JComboBox) {
                     try {
-                        JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");//NOI18N
-                        WFSFormsListAndComboBoxModel model = new WFSFormsListAndComboBoxModel(q, replacingValues, c, bar);
+                        final JProgressBar bar = (JProgressBar)listComponents.get(q.getComponentName() + "Progress"); // NOI18N
+                        final WFSFormsListAndComboBoxModel model = new WFSFormsListAndComboBoxModel(
+                                q,
+                                replacingValues,
+                                c,
+                                bar);
                         model.addActionListener(new ActionListener() {
 
-                            public void actionPerformed(ActionEvent e) {
-                                fireActionPerformed(e);
-                            }
-                        });
-                        ((JComboBox) c).setModel(model);
+                                @Override
+                                public void actionPerformed(final ActionEvent e) {
+                                    fireActionPerformed(e);
+                                }
+                            });
+                        ((JComboBox)c).setModel(model);
                     } catch (Exception ex) {
-                        log.error("Error in requestRefresh", ex);//NOI18N
+                        log.error("Error in requestRefresh", ex); // NOI18N
                     }
                 } else if (c instanceof JList) {
                     try {
-                        JProgressBar bar = (JProgressBar) listComponents.get(q.getComponentName() + "Progress");//NOI18N
-                        WFSFormsListAndComboBoxModel model = new WFSFormsListAndComboBoxModel(q, replacingValues, c, bar);
+                        final JProgressBar bar = (JProgressBar)listComponents.get(q.getComponentName() + "Progress"); // NOI18N
+                        final WFSFormsListAndComboBoxModel model = new WFSFormsListAndComboBoxModel(
+                                q,
+                                replacingValues,
+                                c,
+                                bar);
                         model.addActionListener(new ActionListener() {
 
-                            public void actionPerformed(ActionEvent e) {
-                                fireActionPerformed(e);
-                            }
-                        });
-                        ((JList) c).setModel(model);
+                                @Override
+                                public void actionPerformed(final ActionEvent e) {
+                                    fireActionPerformed(e);
+                                }
+                            });
+                        ((JList)c).setModel(model);
                     } catch (Exception ex) {
-                        log.error("Error in requestRefresh", ex);//NOI18N
+                        log.error("Error in requestRefresh", ex); // NOI18N
                     }
                 }
             }
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Element getElement() {
-        Element ret = new Element("wfsForm");//NOI18N
-        ret.setAttribute("id", getId());//NOI18N
-        ret.setAttribute("title", getTitle());//NOI18N
-        ret.setAttribute("icon", getIconPath());//NOI18N
-        ret.setAttribute("className", getClassName());//NOI18N
-        ret.setAttribute("menu", getMenuString());//NOI18N
-        for (WFSFormQuery query : queries) {
+        final Element ret = new Element("wfsForm");    // NOI18N
+        ret.setAttribute("id", getId());               // NOI18N
+        ret.setAttribute("title", getTitle());         // NOI18N
+        ret.setAttribute("icon", getIconPath());       // NOI18N
+        ret.setAttribute("className", getClassName()); // NOI18N
+        ret.setAttribute("menu", getMenuString());     // NOI18N
+        for (final WFSFormQuery query : queries) {
             ret.addContent(query.getElement());
         }
         return ret;
     }
 
-    public void requestRefresh(String component, WFSFormFeature value) {
-        log.debug("requestRefresh(+" + component + "," + value + ")");//NOI18N
-        if (lastFeature == null || !(value.getIdentifier().equals(lastFeature.getIdentifier()))) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  component  DOCUMENT ME!
+     * @param  value      DOCUMENT ME!
+     */
+    public void requestRefresh(final String component, final WFSFormFeature value) {
+        if (log.isDebugEnabled()) {
+            log.debug("requestRefresh(+" + component + "," + value + ")"); // NOI18N
+        }
+        if ((lastFeature == null) || !(value.getIdentifier().equals(lastFeature.getIdentifier()))) {
             lastFeature = value;
-            WFSFormQuery q = queriesByComponentName.get(component);
+            final WFSFormQuery q = queriesByComponentName.get(component);
             if (q != null) {
-                HashMap<String, String> hm = new HashMap<String, String>();
+                final HashMap<String, String> hm = new HashMap<String, String>();
                 hm.put(q.getQueryPlaceholder(), value.getIdentifier());
                 requestRefresh(component, hm);
             }
         }
     }
 
-    public void visualizePosition(WFSFormFeature feature, boolean showMarker) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  feature     DOCUMENT ME!
+     * @param  showMarker  DOCUMENT ME!
+     */
+    public void visualizePosition(final WFSFormFeature feature, final boolean showMarker) {
         mappingComponent.getHighlightingLayer().removeAllChildren();
         mappingComponent.getHighlightingLayer().addChild(pMark);
         mappingComponent.addStickyNode(pMark);
-        Point p = feature.getPosition();
-        double x = mappingComponent.getWtst().getScreenX(p.getCoordinate().x);
-        double y = mappingComponent.getWtst().getScreenY(p.getCoordinate().y);
+        final Point p = feature.getPosition();
+        final double x = mappingComponent.getWtst().getScreenX(p.getCoordinate().x);
+        final double y = mappingComponent.getWtst().getScreenY(p.getCoordinate().y);
         pMark.setOffset(x, y);
         pMark.setVisible(showMarker);
         mappingComponent.rescaleStickyNodes();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Vector<WFSFormQuery> getQueries() {
         return queries;
     }
 
-    public void setQueries(Vector<WFSFormQuery> queries) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  queries  DOCUMENT ME!
+     */
+    public void setQueries(final Vector<WFSFormQuery> queries) {
         this.queries = queries;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  title  DOCUMENT ME!
+     */
+    public void setTitle(final String title) {
         this.title = title;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  id  DOCUMENT ME!
+     */
+    public void setId(final String id) {
         this.id = id;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getMenuString() {
         return menuString;
     }
 
-    public void setMenuString(String menuString) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  menuString  DOCUMENT ME!
+     */
+    public void setMenuString(final String menuString) {
         this.menuString = menuString;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Icon getIcon() {
         return icon;
     }
 
-    public void setIcon(Icon icon) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  icon  DOCUMENT ME!
+     */
+    public void setIcon(final Icon icon) {
         this.icon = icon;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public boolean isInited() {
         return inited;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getIconPath() {
         return iconPath;
     }
 
-    public void setIconPath(String iconPath) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  iconPath  DOCUMENT ME!
+     */
+    public void setIconPath(final String iconPath) {
         this.iconPath = iconPath;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getClassName() {
         return className;
     }
 
-    public void setClassName(String className) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  className  DOCUMENT ME!
+     */
+    public void setClassName(final String className) {
         this.className = className;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public MappingComponent getMappingComponent() {
         return mappingComponent;
     }
 
-    public void setMappingComponent(MappingComponent mappingComponent) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mappingComponent  DOCUMENT ME!
+     */
+    public void setMappingComponent(final MappingComponent mappingComponent) {
         this.mappingComponent = mappingComponent;
         mappingComponent.addStickyNode(pMark);
     }
 
-    public void addActionListener(ActionListener a) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  a  DOCUMENT ME!
+     */
+    public void addActionListener(final ActionListener a) {
         actionListener.add(a);
     }
 
-    public void removeActionListener(ActionListener a) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  a  DOCUMENT ME!
+     */
+    public void removeActionListener(final ActionListener a) {
         actionListener.remove(a);
     }
 
-    public void fireActionPerformed(ActionEvent e) {
-        for (ActionListener a : actionListener) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    public void fireActionPerformed(final ActionEvent e) {
+        for (final ActionListener a : actionListener) {
             a.actionPerformed(e);
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getSorter() {
         return sorter;
     }
 
-    public void setSorter(String sorter) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  sorter  DOCUMENT ME!
+     */
+    public void setSorter(final String sorter) {
         this.sorter = sorter;
     }
 }

@@ -1,84 +1,103 @@
-/*
- * MapClickedEvent.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 7. April 2006, 11:36
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.interaction.events;
 
 import edu.umd.cs.piccolo.event.PInputEvent;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class MapClickedEvent {
-    private PInputEvent pInputEvent=null;
-    private Object objectUnderClick=null;
-    private String mode=null;
-    /** Creates a new instance of MapClickedEvent */
-    public MapClickedEvent(String mode, PInputEvent pInputEvent) {
-        this.pInputEvent=pInputEvent;
-        this.mode=mode;
+
+    //~ Instance fields --------------------------------------------------------
+
+    private PInputEvent pInputEvent = null;
+    private Object objectUnderClick = null;
+    private String mode = null;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of MapClickedEvent.
+     *
+     * @param  mode         DOCUMENT ME!
+     * @param  pInputEvent  DOCUMENT ME!
+     */
+    public MapClickedEvent(final String mode, final PInputEvent pInputEvent) {
+        this.pInputEvent = pInputEvent;
+        this.mode = mode;
     }
 
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public double getX() {
         return pInputEvent.getCanvasPosition().getX();
     }
 
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public double getY() {
         return pInputEvent.getCanvasPosition().getY();
     }
 
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public int getClickCount() {
         return pInputEvent.getClickCount();
     }
 
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Object getObjectUnderClick() {
         return objectUnderClick;
     }
 
-    public void setObjectUnderClick(Object objectUnderClick) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  objectUnderClick  DOCUMENT ME!
+     */
+    public void setObjectUnderClick(final Object objectUnderClick) {
         this.objectUnderClick = objectUnderClick;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getMode() {
         return mode;
     }
 
-    public void setMode(String mode) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mode  DOCUMENT ME!
+     */
+    public void setMode(final String mode) {
         this.mode = mode;
     }
-    
 }

@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * SimpleSelectionEventHandler.java
  *
@@ -8,39 +15,62 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
+
 import java.awt.Color;
 import java.awt.Paint;
+
 import java.util.List;
 
 /**
+ * DOCUMENT ME!
  *
- * @author hell
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
 public class SimpleSelectionEventHandler extends PSelectionEventHandler {
+
+    //~ Instance fields --------------------------------------------------------
+
     Paint notSelectedStrokePaint = null;
     Paint selectedStrokePaint = Color.red;
 
-    public SimpleSelectionEventHandler(PNode marqueeParent, PNode selectableParent) {
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new SimpleSelectionEventHandler object.
+     *
+     * @param  marqueeParent     DOCUMENT ME!
+     * @param  selectableParent  DOCUMENT ME!
+     */
+    public SimpleSelectionEventHandler(final PNode marqueeParent, final PNode selectableParent) {
         super(marqueeParent, selectableParent);
     }
 
-    public SimpleSelectionEventHandler(PNode marqueeParent, List selectableParents) {
+    /**
+     * Creates a new SimpleSelectionEventHandler object.
+     *
+     * @param  marqueeParent      DOCUMENT ME!
+     * @param  selectableParents  DOCUMENT ME!
+     */
+    public SimpleSelectionEventHandler(final PNode marqueeParent, final List selectableParents) {
         super(marqueeParent, selectableParents);
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     @Override
-    public void decorateSelectedNode(PNode node) {
+    public void decorateSelectedNode(final PNode node) {
         node.moveToFront();
         if (node instanceof PPath) {
-            notSelectedStrokePaint = ((PPath) node).getStrokePaint();
-            ((PPath) node).setStrokePaint(selectedStrokePaint);
+            notSelectedStrokePaint = ((PPath)node).getStrokePaint();
+            ((PPath)node).setStrokePaint(selectedStrokePaint);
         }
     }
 
     @Override
-    public void undecorateSelectedNode(PNode node) {
+    public void undecorateSelectedNode(final PNode node) {
         if (node instanceof PPath) {
-            ((PPath) node).setStrokePaint(notSelectedStrokePaint);
+            ((PPath)node).setStrokePaint(notSelectedStrokePaint);
         }
     }
 }

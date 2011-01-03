@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * PureNewFeature.java
  *
@@ -12,169 +19,268 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+
+import java.awt.Color;
+import java.awt.Paint;
+import java.awt.geom.Point2D;
+
+import java.util.Vector;
+
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import java.awt.Color;
-import java.awt.Paint;
-import java.awt.geom.Point2D;
-import java.util.Vector;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
 
 /**
+ * DOCUMENT ME!
  *
- * @author hell
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
 public class PureNewFeature extends DefaultStyledFeature implements Cloneable, XStyledFeature {
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    //~ Static fields/initializers ---------------------------------------------
 
+    static ImageIcon icoPoint = new javax.swing.ImageIcon(PureNewFeature.class.getResource(
+                "/de/cismet/cismap/commons/gui/res/point.png"));     // NOI18N
+    static ImageIcon icoPolyline = new javax.swing.ImageIcon(PureNewFeature.class.getResource(
+                "/de/cismet/cismap/commons/gui/res/polyline.png"));  // NOI18N
+    static ImageIcon icoPolygon = new javax.swing.ImageIcon(PureNewFeature.class.getResource(
+                "/de/cismet/cismap/commons/gui/res/polygon.png"));   // NOI18N
+    static ImageIcon icoEllipse = new javax.swing.ImageIcon(PureNewFeature.class.getResource(
+                "/de/cismet/cismap/commons/gui/res/ellipse.png"));   // NOI18N
+    static ImageIcon icoRectangle = new javax.swing.ImageIcon(PureNewFeature.class.getResource(
+                "/de/cismet/cismap/commons/gui/res/rectangle.png")); // NOI18N
+
+    //~ Enums ------------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
     public static enum geomTypes {
 
-        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON,UNKNOWN
-    };
+        //~ Enum constants -----------------------------------------------------
+
+        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON, UNKNOWN
+    }
+
+    //~ Instance fields --------------------------------------------------------
+
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Paint fillingPaint = new Color(1f, 0f, 0f, 0.4f);
-    private geomTypes geomType=geomTypes.UNKNOWN;
-    static ImageIcon icoPoint = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/point.png"));//NOI18N
-    static ImageIcon icoPolyline = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polyline.png"));//NOI18N
-    static ImageIcon icoPolygon = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/polygon.png"));//NOI18N
-    static ImageIcon icoEllipse = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/ellipse.png"));//NOI18N
-    static ImageIcon icoRectangle = new javax.swing.ImageIcon(PureNewFeature.class.getResource("/de/cismet/cismap/commons/gui/res/rectangle.png"));//NOI18N
-    private String name = "";//NOI18N
+    private geomTypes geomType = geomTypes.UNKNOWN;
+    private String name = ""; // NOI18N
 
+    //~ Constructors -----------------------------------------------------------
 
-
-    public PureNewFeature(Geometry g) {
+    /**
+     * Creates a new PureNewFeature object.
+     *
+     * @param  g  DOCUMENT ME!
+     */
+    public PureNewFeature(final Geometry g) {
         setGeometry(g);
     }
 
-    public PureNewFeature(Point2D point, WorldToScreenTransform wtst) {
-        Coordinate[] coordArr = new Coordinate[1];
+    /**
+     * Creates a new PureNewFeature object.
+     *
+     * @param  point  DOCUMENT ME!
+     * @param  wtst   DOCUMENT ME!
+     */
+    public PureNewFeature(final Point2D point, final WorldToScreenTransform wtst) {
+        final Coordinate[] coordArr = new Coordinate[1];
         coordArr[0] = new Coordinate(wtst.getSourceX(point.getX()), wtst.getSourceY(point.getY()));
         init(coordArr, wtst);
     }
 
-    public PureNewFeature(final Point2D[] canvasPoints, WorldToScreenTransform wtst) {
+    /**
+     * Creates a new PureNewFeature object.
+     *
+     * @param  canvasPoints  DOCUMENT ME!
+     * @param  wtst          DOCUMENT ME!
+     */
+    public PureNewFeature(final Point2D[] canvasPoints, final WorldToScreenTransform wtst) {
         synchronized (canvasPoints) {
             try {
-                log.debug("canvasPoints " + canvasPoints);//NOI18N
-                Coordinate[] coordArr = new Coordinate[canvasPoints.length];
-                float[] xp = new float[canvasPoints.length];
-                float[] yp = new float[canvasPoints.length];
+                if (log.isDebugEnabled()) {
+                    log.debug("canvasPoints " + canvasPoints);                   // NOI18N
+                }
+                final Coordinate[] coordArr = new Coordinate[canvasPoints.length];
+                final float[] xp = new float[canvasPoints.length];
+                final float[] yp = new float[canvasPoints.length];
                 for (int i = 0; i < canvasPoints.length; ++i) {
-                    log.debug("canvasPoints[" + i + "]:" + canvasPoints[i]);//NOI18N
-                    xp[i] = (float) (canvasPoints[i].getX());
-                    yp[i] = (float) (canvasPoints[i].getY());
+                    if (log.isDebugEnabled()) {
+                        log.debug("canvasPoints[" + i + "]:" + canvasPoints[i]); // NOI18N
+                    }
+                    xp[i] = (float)(canvasPoints[i].getX());
+                    yp[i] = (float)(canvasPoints[i].getY());
                     coordArr[i] = new Coordinate(wtst.getSourceX(xp[i]), wtst.getSourceY(yp[i]));
                 }
                 init(coordArr, wtst);
-                log.debug("pureNewFeature created");//NOI18N
+                if (log.isDebugEnabled()) {
+                    log.debug("pureNewFeature created");                         // NOI18N
+                }
             } catch (Exception e) {
-                log.error("Error during creating a PureNewfeatures", e);//NOI18N
+                log.error("Error during creating a PureNewfeatures", e);         // NOI18N
             }
         }
     }
 
-    public PureNewFeature(Coordinate[] coordArr, WorldToScreenTransform wtst) {
+    /**
+     * Creates a new PureNewFeature object.
+     *
+     * @param  coordArr  DOCUMENT ME!
+     * @param  wtst      DOCUMENT ME!
+     */
+    public PureNewFeature(final Coordinate[] coordArr, final WorldToScreenTransform wtst) {
         init(coordArr, wtst);
     }
 
-    private void init(Coordinate[] coordArr, WorldToScreenTransform wtst) {
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  coordArr  DOCUMENT ME!
+     * @param  wtst      DOCUMENT ME!
+     */
+    private void init(final Coordinate[] coordArr, final WorldToScreenTransform wtst) {
         try {
-            GeometryFactory gf = new GeometryFactory();
-            //TODO Im Moment nur f�r einfache Polygone ohne L�cher
+            final GeometryFactory gf = new GeometryFactory();
+            // TODO Im Moment nur f�r einfache Polygone ohne L�cher
             if (coordArr.length == 1) {
-                //Point
-                Point p = gf.createPoint(coordArr[0]);
+                // Point
+                final Point p = gf.createPoint(coordArr[0]);
                 setGeometry(p);
-            } else if (coordArr[0].equals(coordArr[coordArr.length - 1]) && coordArr.length > 3) {
-                //simple Polygon
-                LinearRing shell = gf.createLinearRing(coordArr);
-                Polygon poly = gf.createPolygon(shell, null);
+            } else if (coordArr[0].equals(coordArr[coordArr.length - 1]) && (coordArr.length > 3)) {
+                // simple Polygon
+                final LinearRing shell = gf.createLinearRing(coordArr);
+                final Polygon poly = gf.createPolygon(shell, null);
                 setGeometry(poly);
             } else {
-                //Linestring
-                LineString line = gf.createLineString(coordArr);
+                // Linestring
+                final LineString line = gf.createLineString(coordArr);
                 setGeometry(line);
             }
         } catch (Exception e) {
-            log.warn("Error in init", e);//NOI18N
+            log.warn("Error in init", e); // NOI18N
         }
-        
     }
 
+    @Override
     public java.awt.Stroke getLineStyle() {
         return null;
     }
 
+    @Override
     public java.awt.Paint getFillingPaint() {
         return fillingPaint;
     }
 
     @Override
-    public void setFillingPaint(Paint fillingStyle) {
+    public void setFillingPaint(final Paint fillingStyle) {
         this.fillingPaint = fillingStyle;
     }
 
+    @Override
     public float getTransparency() {
         return 1f;
     }
 
+    @Override
     public String getType() {
-        return "";//NOI18N
+        return ""; // NOI18N
     }
 
     @Override
     public String getName() {
         if (getGeometryType() != null) {
-            if (name!=null&&name.trim().equals("")) {
+            if ((name != null) && name.trim().equals("")) {
                 switch (getGeometryType()) {
-                    case RECTANGLE:
-                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newRectangle");//NOI18N
-                    case LINESTRING:
-                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolyline");//NOI18N
-                    case ELLIPSE:
-                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newEllipse");//NOI18N
-                    case POINT:
-                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPoint");//NOI18N
-                    case POLYGON:
-                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolygon");//NOI18N
-                    default:
-                        return org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().errorInGetName");//NOI18N
+                    case RECTANGLE: {
+                        return org.openide.util.NbBundle.getMessage(
+                                PureNewFeature.class,
+                                "PureNewFeature.getName().newRectangle");   // NOI18N
+                    }
+                    case LINESTRING: {
+                        return org.openide.util.NbBundle.getMessage(
+                                PureNewFeature.class,
+                                "PureNewFeature.getName().newPolyline");    // NOI18N
+                    }
+                    case ELLIPSE: {
+                        return org.openide.util.NbBundle.getMessage(
+                                PureNewFeature.class,
+                                "PureNewFeature.getName().newEllipse");     // NOI18N
+                    }
+                    case POINT: {
+                        return org.openide.util.NbBundle.getMessage(
+                                PureNewFeature.class,
+                                "PureNewFeature.getName().newPoint");       // NOI18N
+                    }
+                    case POLYGON: {
+                        return org.openide.util.NbBundle.getMessage(
+                                PureNewFeature.class,
+                                "PureNewFeature.getName().newPolygon");     // NOI18N
+                    }
+                    default: {
+                        return org.openide.util.NbBundle.getMessage(
+                                PureNewFeature.class,
+                                "PureNewFeature.getName().errorInGetName"); // NOI18N
+                    }
                 }
             } else {
                 return name;
             }
         } else {
             try {
-                Vector<Feature> allFeatures = CismapBroker.getInstance().getMappingComponent().getFeatureCollection().getAllFeatures();
-                if (name.trim().equals("")) {   //NOI18N
+                final Vector<Feature> allFeatures = CismapBroker.getInstance()
+                            .getMappingComponent()
+                            .getFeatureCollection()
+                            .getAllFeatures();
+                if (name.trim().equals("")) {                               // NOI18N
                     if (getGeometry() instanceof Point) {
-                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPoint");//NOI18N
+                        name = org.openide.util.NbBundle.getMessage(
+                                PureNewFeature.class,
+                                "PureNewFeature.getName().newPoint");       // NOI18N
                     } else if (getGeometry() instanceof LineString) {
-                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolyline"); //NOI18N
+                        name = org.openide.util.NbBundle.getMessage(
+                                PureNewFeature.class,
+                                "PureNewFeature.getName().newPolyline");    // NOI18N
                     } else {
-                        name = org.openide.util.NbBundle.getMessage(PureNewFeature.class, "PureNewFeature.getName().newPolygon");//NOI18N
+                        name = org.openide.util.NbBundle.getMessage(
+                                PureNewFeature.class,
+                                "PureNewFeature.getName().newPolygon");     // NOI18N
                     }
                 }
                 return name;
             } catch (Exception e) {
-                log.fatal("getName() error", e);//NOI18N
-                return "Error in getName()";//NOI18N
+                log.fatal("getName() error", e);                            // NOI18N
+                return "Error in getName()";                                // NOI18N
             }
         }
     }
 
-    public void setName(String name) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  name  DOCUMENT ME!
+     */
+    public void setName(final String name) {
         this.name = name;
     }
 
-    public JComponent getInfoComponent(Refreshable refresh) {
+    @Override
+    public JComponent getInfoComponent(final Refreshable refresh) {
         return null;
     }
 
+    @Override
     public ImageIcon getIconImage() {
         if (getGeometry() instanceof Point) {
             return icoPoint;
@@ -191,25 +297,42 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         }
     }
 
+    @Override
     public Paint getLinePaint() {
-        Paint retValue;
+        final Paint retValue;
 
         retValue = super.getLinePaint();
         return retValue;
     }
 
+    @Override
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
         return null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public float getInfoComponentTransparency() {
         return getTransparency();
     }
 
-    public void setGeometryType(geomTypes geomType) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  geomType  DOCUMENT ME!
+     */
+    public void setGeometryType(final geomTypes geomType) {
         this.geomType = geomType;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public geomTypes getGeometryType() {
         return geomType;
     }

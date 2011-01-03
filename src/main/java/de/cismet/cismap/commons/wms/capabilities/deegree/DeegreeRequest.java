@@ -1,30 +1,53 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.wms.capabilities.deegree;
+
+import org.apache.log4j.Logger;
+
+import org.deegree.owscommon_new.OperationsMetadata;
 
 import de.cismet.cismap.commons.wms.capabilities.Operation;
 import de.cismet.cismap.commons.wms.capabilities.Request;
-import org.apache.log4j.Logger;
-import org.deegree.owscommon_new.OperationsMetadata;
-
-
 
 /**
+ * DOCUMENT ME!
  *
- * @author therter
+ * @author   therter
+ * @version  $Revision$, $Date$
  */
 public class DeegreeRequest implements Request {
+
+    //~ Static fields/initializers ---------------------------------------------
+
     private static final Logger log = Logger.getLogger(DeegreeRequest.class);
+
+    //~ Instance fields --------------------------------------------------------
+
     private OperationsMetadata req;
 
+    //~ Constructors -----------------------------------------------------------
 
-    public DeegreeRequest(OperationsMetadata req) {
+    /**
+     * Creates a new DeegreeRequest object.
+     *
+     * @param  req  DOCUMENT ME!
+     */
+    public DeegreeRequest(final OperationsMetadata req) {
         this.req = req;
     }
 
+    //~ Methods ----------------------------------------------------------------
 
     @Override
     public Operation getMapOperation() {
-        for ( org.deegree.owscommon_new.Operation op : req.getOperations() ) {
-            if (op.getName().getLocalName().indexOf("getMap") != -1 || op.getName().getLocalName().indexOf("GetMap") != -1) {
+        for (final org.deegree.owscommon_new.Operation op : req.getOperations()) {
+            if ((op.getName().getLocalName().indexOf("getMap") != -1)
+                        || (op.getName().getLocalName().indexOf("GetMap") != -1)) {
                 return new DeegreeOperation(op);
             }
         }
@@ -33,11 +56,11 @@ public class DeegreeRequest implements Request {
         return null;
     }
 
-
     @Override
     public Operation getFeatureInfoOperation() {
-        for ( org.deegree.owscommon_new.Operation op : req.getOperations() ) {
-            if (op.getName().getLocalName().indexOf("getFeatureInfo") != -1 || op.getName().getLocalName().indexOf("GetFeatureInfo") != -1) {
+        for (final org.deegree.owscommon_new.Operation op : req.getOperations()) {
+            if ((op.getName().getLocalName().indexOf("getFeatureInfo") != -1)
+                        || (op.getName().getLocalName().indexOf("GetFeatureInfo") != -1)) {
                 return new DeegreeOperation(op);
             }
         }

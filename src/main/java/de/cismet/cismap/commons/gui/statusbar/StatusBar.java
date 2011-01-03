@@ -1,9 +1,33 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * StatusBar.java
  *
  * Created on 23. März 2006, 14:23
  */
 package de.cismet.cismap.commons.gui.statusbar;
+
+import org.deegree.model.crs.CRSFactory;
+import org.deegree.model.crs.CoordinateSystem;
+import org.deegree.model.crs.GeoTransformer;
+import org.deegree.model.spatialschema.GeometryFactory;
+import org.deegree.model.spatialschema.Point;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
+import java.util.Collection;
+
+import javax.swing.ImageIcon;
+import javax.swing.JMenuItem;
 
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
@@ -17,45 +41,64 @@ import de.cismet.cismap.commons.gui.printing.Scale;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
+
 import de.cismet.tools.StaticDecimalTools;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Collection;
-import javax.swing.ImageIcon;
-import javax.swing.JMenuItem;
-import org.deegree.model.crs.CRSFactory;
-import org.deegree.model.crs.CoordinateSystem;
-import org.deegree.model.crs.GeoTransformer;
-import org.deegree.model.spatialschema.GeometryFactory;
-import org.deegree.model.spatialschema.Point;
 
 /**
+ * DOCUMENT ME!
  *
- * @author  thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class StatusBar extends javax.swing.JPanel implements StatusListener, FeatureCollectionListener {
+
+    //~ Instance fields --------------------------------------------------------
+
+    String mode;
+    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource(
+                "/de/cismet/cismap/commons/gui/res/map.png")); // NOI18N
+    MappingComponent mappingComponent;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private GeoTransformer transformer = null;
-    private DecimalFormat df = new DecimalFormat("0.000000");//NOI18N
-    String mode;
-    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/res/map.png"));//NOI18N
-    MappingComponent mappingComponent;
+    private DecimalFormat df = new DecimalFormat("0.000000");  // NOI18N
 
-    /** Creates new form StatusBar */
-    public StatusBar(MappingComponent mappingComponent) {
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JSeparator jSeparator4;
+    private javax.swing.JSeparator jSeparator5;
+    private javax.swing.JSeparator jSeparator6;
+    private javax.swing.JLabel lblCoordinates;
+    private javax.swing.JLabel lblCrs;
+    private javax.swing.JLabel lblMeasurement;
+    private javax.swing.JLabel lblScale;
+    private javax.swing.JLabel lblStatus;
+    private javax.swing.JLabel lblStatusImage;
+    private javax.swing.JLabel lblWgs84Coordinates;
+    private javax.swing.JPopupMenu pomCrs;
+    private javax.swing.JPopupMenu pomScale;
+    // End of variables declaration//GEN-END:variables
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates new form StatusBar.
+     *
+     * @param  mappingComponent  DOCUMENT ME!
+     */
+    public StatusBar(final MappingComponent mappingComponent) {
         initComponents();
         this.mappingComponent = mappingComponent;
-        lblStatusImage.setText("");//NOI18N
-        lblCoordinates.setText("");//NOI18N
+        lblStatusImage.setText(""); // NOI18N
+        lblCoordinates.setText(""); // NOI18N
         lblStatusImage.setIcon(defaultIcon);
         lblCrs.setText(CismapBroker.getInstance().getSrs().getCode());
         lblWgs84Coordinates.setToolTipText("WGS84");
-        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+        final DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
-        
+
         try {
             // initialises the geo transformer that transforms the coordinates from the current
             // coordinate system to EPSG:4326
@@ -65,63 +108,75 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         }
     }
 
+    //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     */
     public void addCrsPopups() {
-        for (Crs c : mappingComponent.getCrsList()) {
+        for (final Crs c : mappingComponent.getCrsList()) {
             addCrsPopup(c);
         }
     }
 
-
+    /**
+     * DOCUMENT ME!
+     */
     public void addScalePopups() {
-        for (Scale s : mappingComponent.getScales()) {
+        for (final Scale s : mappingComponent.getScales()) {
             if (s.getDenominator() > 0) {
                 addScalePopupMenu(s.getText(), s.getDenominator());
             }
         }
     }
 
-    public void statusValueChanged(StatusEvent e) {
+    @Override
+    public void statusValueChanged(final StatusEvent e) {
         if (e.getName().equals(StatusEvent.COORDINATE_STRING)) {
-            lblCoordinates.setText( e.getValue().toString() );
-            lblWgs84Coordinates.setText( transformToWGS84Coords( e.getValue().toString() ) );
+            lblCoordinates.setText(e.getValue().toString());
+            lblWgs84Coordinates.setText(transformToWGS84Coords(e.getValue().toString()));
         } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
             lblStatus.setText(e.getValue().toString());
         } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
-            lblStatus.setText("");//NOI18N
-            mode = ((String) e.getValue());
+            lblStatus.setText("");         // NOI18N
+            mode = ((String)e.getValue());
         } else if (e.getName().equals(StatusEvent.OBJECT_INFOS)) {
-            if (e.getValue() != null && e.getValue() instanceof PFeature && ((PFeature) e.getValue()).getFeature() != null && ((PFeature) e.getValue()).getFeature() instanceof XStyledFeature) {
-                lblStatus.setText(((XStyledFeature) ((PFeature) e.getValue()).getFeature()).getName());
-                ImageIcon ico = ((XStyledFeature) ((PFeature) e.getValue()).getFeature()).getIconImage();
-                if (ico != null && ico.getIconWidth() > 0 && ico.getIconHeight() > 0) {
+            if ((e.getValue() != null) && (e.getValue() instanceof PFeature)
+                        && (((PFeature)e.getValue()).getFeature() != null)
+                        && (((PFeature)e.getValue()).getFeature() instanceof XStyledFeature)) {
+                lblStatus.setText(((XStyledFeature)((PFeature)e.getValue()).getFeature()).getName());
+                final ImageIcon ico = ((XStyledFeature)((PFeature)e.getValue()).getFeature()).getIconImage();
+                if ((ico != null) && (ico.getIconWidth() > 0) && (ico.getIconHeight() > 0)) {
                     lblStatusImage.setIcon(ico);
                 } else {
                     lblStatusImage.setIcon(defaultIcon);
                 }
-            } else if (e.getValue() != null && e.getValue() instanceof PFeature && ((PFeature) e.getValue()).getFeature() != null && ((PFeature) e.getValue()).getFeature() instanceof DefaultFeatureServiceFeature) {
-                if (((DefaultFeatureServiceFeature) ((PFeature) e.getValue()).getFeature()).getSecondaryAnnotation() != null) {
-                    lblStatus.setText(((DefaultFeatureServiceFeature) ((PFeature) e.getValue()).getFeature()).getSecondaryAnnotation());
+            } else if ((e.getValue() != null) && (e.getValue() instanceof PFeature)
+                        && (((PFeature)e.getValue()).getFeature() != null)
+                        && (((PFeature)e.getValue()).getFeature() instanceof DefaultFeatureServiceFeature)) {
+                if (((DefaultFeatureServiceFeature)((PFeature)e.getValue()).getFeature()).getSecondaryAnnotation()
+                            != null) {
+                    lblStatus.setText(((DefaultFeatureServiceFeature)((PFeature)e.getValue()).getFeature())
+                                .getSecondaryAnnotation());
                 } else {
-                    lblStatus.setText("");//NOI18N
+                    lblStatus.setText(""); // NOI18N
                 }
             } else {
-                lblStatus.setText("");//NOI18N
+                lblStatus.setText("");     // NOI18N
                 lblStatusImage.setIcon(defaultIcon);
             }
         } else if (e.getName().equals(StatusEvent.SCALE)) {
-            int sd = (int) (mappingComponent.getScaleDenominator() + 0.5);
-            lblScale.setText("1:" + sd);//NOI18N
+            final int sd = (int)(mappingComponent.getScaleDenominator() + 0.5);
+            lblScale.setText("1:" + sd);   // NOI18N
         } else if (e.getName().equals(StatusEvent.CRS)) {
-            lblCrs.setText( ((Crs)e.getValue()).getShortname() );
+            lblCrs.setText(((Crs)e.getValue()).getShortname());
             lblCoordinates.setToolTipText(e.getValue().toString());
         }
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -187,10 +242,12 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
 
         lblScale.setComponentPopupMenu(pomScale);
         lblScale.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                lblScaleMousePressed(evt);
-            }
-        });
+
+                @Override
+                public void mousePressed(final java.awt.event.MouseEvent evt) {
+                    lblScaleMousePressed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
@@ -233,120 +290,182 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
 
         lblCrs.setComponentPopupMenu(pomCrs);
         lblCrs.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                lblCrsMousePressed(evt);
-            }
-        });
+
+                @Override
+                public void mousePressed(final java.awt.event.MouseEvent evt) {
+                    lblCrsMousePressed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
         add(lblCrs, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
-    private void lblScaleMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblScaleMousePressed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblScaleMousePressed
         if (evt.isPopupTrigger()) {
             pomScale.setVisible(true);
         }
-    }//GEN-LAST:event_lblScaleMousePressed
+    }                                                                        //GEN-LAST:event_lblScaleMousePressed
 
-    private void lblCrsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCrsMousePressed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblCrsMousePressed
         if (evt.isPopupTrigger()) {
             pomCrs.setVisible(true);
         }
-    }//GEN-LAST:event_lblCrsMousePressed
+    }                                                                      //GEN-LAST:event_lblCrsMousePressed
 
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crs  DOCUMENT ME!
+     */
     private void addCrsPopup(final Crs crs) {
-        JMenuItem jmi = new JMenuItem(crs.getShortname());
+        final JMenuItem jmi = new JMenuItem(crs.getShortname());
         jmi.setToolTipText(crs.getName());
         jmi.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                CismapBroker.getInstance().setSrs(crs);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    CismapBroker.getInstance().setSrs(crs);
+                }
+            });
         pomCrs.add(jmi);
     }
 
-    
-    private void addScalePopupMenu(String text,final double scaleDenominator) {
-        JMenuItem jmi=new JMenuItem(text);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  text              DOCUMENT ME!
+     * @param  scaleDenominator  DOCUMENT ME!
+     */
+    private void addScalePopupMenu(final String text, final double scaleDenominator) {
+        final JMenuItem jmi = new JMenuItem(text);
         jmi.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                mappingComponent.gotoBoundingBoxWithHistory(mappingComponent.getBoundingBoxFromScale(scaleDenominator));
-            }
-        });
+
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    mappingComponent.gotoBoundingBoxWithHistory(
+                        mappingComponent.getBoundingBoxFromScale(scaleDenominator));
+                }
+            });
         pomScale.add(jmi);
     }
-    
-    private  void refreshMeasurementsInStatus() {
-        try{
-        Collection<Feature> cf=mappingComponent.getFeatureCollection().getSelectedFeatures();
-        refreshMeasurementsInStatus(cf);
-        }catch(NullPointerException ex){
-            log.error("Error while refreshing measurements",ex);//NOI18N
-        }
-    }
-    
-    private  void refreshMeasurementsInStatus(Collection<Feature> cf) {
-        double umfang=0.0;
-        double area=0.0;
-        for (Feature f: cf) {
-            if (f!=null && f.getGeometry() !=null) {
-                area+=f.getGeometry().getArea();
-                umfang+=f.getGeometry().getLength();
-            }
-        }
-        if ((area==0.0 && umfang==0.0)||cf.size()==0){
-            lblMeasurement.setText("");//NOI18N
-        } else {
-            lblMeasurement.setText(
-                    org.openide.util.NbBundle.getMessage(StatusBar.class,"StatusBar.lblMeasurement.text", new Object[]{ StaticDecimalTools.round(area), StaticDecimalTools.round(umfang) }));//NOI18N
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void refreshMeasurementsInStatus() {
+        try {
+            final Collection<Feature> cf = mappingComponent.getFeatureCollection().getSelectedFeatures();
+            refreshMeasurementsInStatus(cf);
+        } catch (NullPointerException ex) {
+            log.error("Error while refreshing measurements", ex); // NOI18N
         }
     }
 
-    public void featuresRemoved(FeatureCollectionEvent fce) {}
-    
-    public void featuresChanged(FeatureCollectionEvent fce) {
-        log.debug("FeatureChanged");//NOI18N
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  cf  DOCUMENT ME!
+     */
+    private void refreshMeasurementsInStatus(final Collection<Feature> cf) {
+        double umfang = 0.0;
+        double area = 0.0;
+        for (final Feature f : cf) {
+            if ((f != null) && (f.getGeometry() != null)) {
+                area += f.getGeometry().getArea();
+                umfang += f.getGeometry().getLength();
+            }
+        }
+        if (((area == 0.0) && (umfang == 0.0)) || (cf.size() == 0)) {
+            lblMeasurement.setText("");                                                                  // NOI18N
+        } else {
+            lblMeasurement.setText(
+                org.openide.util.NbBundle.getMessage(
+                    StatusBar.class,
+                    "StatusBar.lblMeasurement.text",
+                    new Object[] { StaticDecimalTools.round(area), StaticDecimalTools.round(umfang) })); // NOI18N
+        }
+    }
+
+    @Override
+    public void featuresRemoved(final FeatureCollectionEvent fce) {
+    }
+
+    @Override
+    public void featuresChanged(final FeatureCollectionEvent fce) {
+        if (log.isDebugEnabled()) {
+            log.debug("FeatureChanged"); // NOI18N
+        }
         if (mappingComponent.getInteractionMode().equals(MappingComponent.NEW_POLYGON)) {
             refreshMeasurementsInStatus(fce.getEventFeatures());
-        }
-        else {
+        } else {
             refreshMeasurementsInStatus();
         }
     }
-    
-    public void featuresAdded(FeatureCollectionEvent fce) {}
-    
-    public void featureSelectionChanged(FeatureCollectionEvent fce) {
-         refreshMeasurementsInStatus();
+
+    @Override
+    public void featuresAdded(final FeatureCollectionEvent fce) {
     }
 
-    public void featureReconsiderationRequested(FeatureCollectionEvent fce) {}
+    @Override
+    public void featureSelectionChanged(final FeatureCollectionEvent fce) {
+        refreshMeasurementsInStatus();
+    }
 
-    public void allFeaturesRemoved(FeatureCollectionEvent fce) {}
+    @Override
+    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
+    }
 
+    @Override
+    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public javax.swing.JPopupMenu getPomScale() {
         return pomScale;
     }
 
-    public void featureCollectionChanged() {}
+    @Override
+    public void featureCollectionChanged() {
+    }
 
-    private String transformToWGS84Coords(String coords) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   coords  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String transformToWGS84Coords(final String coords) {
         String result = "";
 
         try {
-            String tmp = coords.substring(1, coords.length() -1);
-            int commaPosition = tmp.indexOf(",");
+            final String tmp = coords.substring(1, coords.length() - 1);
+            final int commaPosition = tmp.indexOf(",");
 
-            if (commaPosition != -1 && transformer != null) {
-                double xCoord = Double.parseDouble( tmp.substring(0, commaPosition) );
-                double yCoord = Double.parseDouble( tmp.substring(commaPosition + 1) );
+            if ((commaPosition != -1) && (transformer != null)) {
+                final double xCoord = Double.parseDouble(tmp.substring(0, commaPosition));
+                final double yCoord = Double.parseDouble(tmp.substring(commaPosition + 1));
 
-                CoordinateSystem coordSystem = CRSFactory.create(CismapBroker.getInstance().getSrs().getCode());
+                final CoordinateSystem coordSystem = CRSFactory.create(CismapBroker.getInstance().getSrs().getCode());
                 Point currentPoint = GeometryFactory.createPoint(xCoord, yCoord, coordSystem);
                 currentPoint = (Point)transformer.transform(currentPoint);
-                result = "(" + df.format(currentPoint.getX()) + "," + df.format(currentPoint.getY()) + ")";//NOI18N
+                result = "(" + df.format(currentPoint.getX()) + "," + df.format(currentPoint.getY()) + ")"; // NOI18N
             } else {
                 log.error("Cannot transform the current coordinates: " + coords);
             }
@@ -356,26 +475,4 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
 
         return result;
     }
-
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JSeparator jSeparator4;
-    private javax.swing.JSeparator jSeparator5;
-    private javax.swing.JSeparator jSeparator6;
-    private javax.swing.JLabel lblCoordinates;
-    private javax.swing.JLabel lblCrs;
-    private javax.swing.JLabel lblMeasurement;
-    private javax.swing.JLabel lblScale;
-    private javax.swing.JLabel lblStatus;
-    private javax.swing.JLabel lblStatusImage;
-    private javax.swing.JLabel lblWgs84Coordinates;
-    private javax.swing.JPopupMenu pomCrs;
-    private javax.swing.JPopupMenu pomScale;
-    // End of variables declaration//GEN-END:variables
-    
-    
-    
 }

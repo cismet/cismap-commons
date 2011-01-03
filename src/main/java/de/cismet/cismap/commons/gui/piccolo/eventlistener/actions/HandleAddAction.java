@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * HandleAddAction.java
  *
@@ -9,32 +16,50 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
 import com.vividsolutions.jts.geom.Coordinate;
+
+import java.util.Vector;
+
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import java.util.Vector;
 
 /**
- * Implementiert das CustomAction-Interface und wird von der Memento-Klasse
- * verwendet, um ein gel\u00F6schtes Handle eines Features wiederherzustellen.
- * @author nh
+ * Implementiert das CustomAction-Interface und wird von der Memento-Klasse verwendet, um ein gel\u00F6schtes Handle
+ * eines Features wiederherzustellen.
+ *
+ * @author   nh
+ * @version  $Revision$, $Date$
  */
 public class HandleAddAction implements CustomAction {
+
+    //~ Instance fields --------------------------------------------------------
+
     private MappingComponent mc;
     private Feature f;
     private int posInArray;
-    private float x,  y;
+    private float x;
+    private float y;
     private Coordinate c;
+
+    //~ Constructors -----------------------------------------------------------
 
     /**
      * Erzeugt eine HandleAddAction-Instanz.
-     * @param pf PFeature dem das Handle zugeordnet ist
-     * @param h das Handle selbst
-     * @param pos Position der HandleKoordinaten im Koordinatenarray des PFeatures
-     * @param c Coordinate-Instanz der Handle-Koordinaten
+     *
+     * @param  mc   h das Handle selbst
+     * @param  f    PFeature dem das Handle zugeordnet ist
+     * @param  pos  Position der HandleKoordinaten im Koordinatenarray des PFeatures
+     * @param  c    Coordinate-Instanz der Handle-Koordinaten
+     * @param  x    DOCUMENT ME!
+     * @param  y    DOCUMENT ME!
      */
-    public HandleAddAction(MappingComponent mc, Feature f, int pos, Coordinate c, float x, float y) {
+    public HandleAddAction(final MappingComponent mc,
+            final Feature f,
+            final int pos,
+            final Coordinate c,
+            final float x,
+            final float y) {
         this.mc = mc;
         this.f = f;
         this.posInArray = pos;
@@ -43,33 +68,43 @@ public class HandleAddAction implements CustomAction {
         this.y = y;
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     /**
      * Legt das gespeicherte PHandle neu an.
      */
+    @Override
     public void doAction() {
-        PFeature pf = (PFeature) mc.getPFeatureHM().get(f);
+        final PFeature pf = (PFeature)mc.getPFeatureHM().get(f);
         pf.setXp(pf.insertCoordinate(posInArray, pf.getXp(), x));
         pf.setYp(pf.insertCoordinate(posInArray, pf.getYp(), y));
         pf.setCoordArr(pf.insertCoordinate(posInArray, pf.getCoordArr(), c));
         pf.syncGeometry();
         pf.setPathToPolyline(pf.getXp(), pf.getYp());
-        Vector v = new Vector();
+        final Vector v = new Vector();
         v.add(pf.getFeature());
-        ((DefaultFeatureCollection) pf.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
+        ((DefaultFeatureCollection)pf.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
     }
 
     /**
      * Liefert eine Beschreibung der Aktion als String.
-     * @return Beschreibungsstring
+     *
+     * @return  Beschreibungsstring
      */
+    @Override
     public String info() {
-        return org.openide.util.NbBundle.getMessage(HandleAddAction.class, "HandleAddAction.info().return", new Object[]{posInArray, x, y});//NOI18N
+        return org.openide.util.NbBundle.getMessage(
+                HandleAddAction.class,
+                "HandleAddAction.info().return",
+                new Object[] { posInArray, x, y }); // NOI18N
     }
 
     /**
      * Liefert als Gegenteil die L\u00F6schaktion des Handles.
-     * @return HandleDeleteAction
+     *
+     * @return  HandleDeleteAction
      */
+    @Override
     public CustomAction getInverse() {
         return new HandleDeleteAction(mc, f, posInArray, c, x, y);
     }

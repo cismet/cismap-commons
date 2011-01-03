@@ -1,8 +1,17 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.text.MessageFormat;
+
 import java.util.Vector;
 
 import javax.swing.Icon;
@@ -11,57 +20,79 @@ import javax.swing.filechooser.FileSystemView;
 
 /**
  * Fallback implementation of a FileSystemView.
- * <p>
- * Intendend usage:<br>
+ *
+ * <p>Intendend usage:<br>
  * If the standard JFileChooser cannot open due to an exception, as described in <a
- * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6544857">http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6544857</a>
- * <p>
- * Example:
- * 
+ * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6544857">
+ * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6544857</a></p>
+ *
+ * <p>Example:</p>
+ *
  * <pre>
- *   File currentDir = ...;
- *   JFrame parentFrame = ...;
- *   JFileChooser chooser;
- *   try {
- *       chooser = new JFileChooser(currentDir);
- *   } catch (Exception e) {
- *       chooser = new JFileChooser(currentDir, new RestrictedFileSystemView());
- *   }
- *   int returnValue = chooser.showOpenDialog(parentFrame);
+     File currentDir = ...;
+     JFrame parentFrame = ...;
+     JFileChooser chooser;
+     try {
+         chooser = new JFileChooser(currentDir);
+     } catch (Exception e) {
+         chooser = new JFileChooser(currentDir, new RestrictedFileSystemView());
+     }
+     int returnValue = chooser.showOpenDialog(parentFrame);
  * </pre>
- * 
- * This FileSystemView only provides basic functionality (and probably a poor look & feel), but it can be a life saver
- * if otherwise no dialog pops up in your application.
- * <p>
- * The implementation does <strong>not</strong> use <code>sun.awt.shell.*</code> classes.
- * 
+ *
+ * <p>This FileSystemView only provides basic functionality (and probably a poor look & feel), but it can be a life
+ * saver if otherwise no dialog pops up in your application.</p>
+ *
+ * <p>The implementation does <strong>not</strong> use <code>sun.awt.shell.*</code> classes.</p>
+ *
+ * @version  $Revision$, $Date$
  */
 public class RestrictedFileSystemView extends FileSystemView {
-    private static final String newFolderString = UIManager.getString("FileChooser.other.newFolder");//NOI18N
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final String newFolderString = UIManager.getString("FileChooser.other.newFolder"); // NOI18N
+
+    //~ Instance fields --------------------------------------------------------
+
     private File _defaultDirectory;
 
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new RestrictedFileSystemView object.
+     */
     public RestrictedFileSystemView() {
         this(null);
     }
 
-    public RestrictedFileSystemView(File defaultDirectory) {
+    /**
+     * Creates a new RestrictedFileSystemView object.
+     *
+     * @param  defaultDirectory  DOCUMENT ME!
+     */
+    public RestrictedFileSystemView(final File defaultDirectory) {
         _defaultDirectory = defaultDirectory;
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     /**
      * Determines if the given file is a root in the navigatable tree(s).
-     *  
-     * @param f a <code>File</code> object representing a directory
-     * @return <code>true</code> if <code>f</code> is a root in the navigatable tree.
-     * @see #isFileSystemRoot
+     *
+     * @param   f  a <code>File</code> object representing a directory
+     *
+     * @return  <code>true</code> if <code>f</code> is a root in the navigatable tree.
+     *
+     * @see     #isFileSystemRoot
      */
     @Override
-    public boolean isRoot(File f) {
-        if (f == null || !f.isAbsolute()) {
+    public boolean isRoot(final File f) {
+        if ((f == null) || !f.isAbsolute()) {
             return false;
         }
 
-        File[] roots = getRoots();
+        final File[] roots = getRoots();
         for (int i = 0; i < roots.length; i++) {
             if (roots[i].equals(f)) {
                 return true;
@@ -72,24 +103,30 @@ public class RestrictedFileSystemView extends FileSystemView {
 
     /**
      * Returns true if the file (directory) can be visited. Returns false if the directory cannot be traversed.
-     * 
-     * @param f the <code>File</code>
-     * @return <code>true</code> if the file/directory can be traversed, otherwise <code>false</code>
-     * @see JFileChooser#isTraversable
-     * @see FileView#isTraversable
+     *
+     * @param   f  the <code>File</code>
+     *
+     * @return  <code>true</code> if the file/directory can be traversed, otherwise <code>false</code>
+     *
+     * @see     JFileChooser#isTraversable
+     * @see     FileView#isTraversable
      */
-    public Boolean isTraversable(File f) {
+    @Override
+    public Boolean isTraversable(final File f) {
         return Boolean.valueOf(f.isDirectory());
     }
 
     /**
-     * Name of a file, directory, or folder as it would be displayed in a system file browser
-     *  
-     * @param f a <code>File</code> object
-     * @return the file name as it would be displayed by a native file chooser
-     * @see JFileChooser#getName
+     * Name of a file, directory, or folder as it would be displayed in a system file browser.
+     *
+     * @param   f  a <code>File</code> object
+     *
+     * @return  the file name as it would be displayed by a native file chooser
+     *
+     * @see     JFileChooser#getName
      */
-    public String getSystemDisplayName(File f) {
+    @Override
+    public String getSystemDisplayName(final File f) {
         String name = null;
         if (f != null) {
             if (isRoot(f)) {
@@ -103,39 +140,48 @@ public class RestrictedFileSystemView extends FileSystemView {
 
     /**
      * Type description for a file, directory, or folder as it would be displayed in a system file browser.
-     * 
-     * @param f a <code>File</code> object
-     * @return the file type description as it would be displayed by a native file chooser or null if no native
-     * information is available.
-     * @see JFileChooser#getTypeDescription
+     *
+     * @param   f  a <code>File</code> object
+     *
+     * @return  the file type description as it would be displayed by a native file chooser or null if no native
+     *          information is available.
+     *
+     * @see     JFileChooser#getTypeDescription
      */
-    public String getSystemTypeDescription(File f) {
+    @Override
+    public String getSystemTypeDescription(final File f) {
         return null;
     }
 
     /**
      * Icon for a file, directory, or folder as it would be displayed in a system file browser.
-     * 
-     * @param f a <code>File</code> object
-     * @return an icon as it would be displayed by a native file chooser, null if not available
-     * @see JFileChooser#getIcon
+     *
+     * @param   f  a <code>File</code> object
+     *
+     * @return  an icon as it would be displayed by a native file chooser, null if not available
+     *
+     * @see     JFileChooser#getIcon
      */
-    public Icon getSystemIcon(File f) {
+    @Override
+    public Icon getSystemIcon(final File f) {
         if (f != null) {
-            return UIManager.getIcon(f.isDirectory() ? "FileView.directoryIcon" : "FileView.fileIcon");//NOI18N
+            return UIManager.getIcon(f.isDirectory() ? "FileView.directoryIcon" : "FileView.fileIcon"); // NOI18N
         } else {
             return null;
         }
     }
 
     /**
-     * @param folder a <code>File</code> object repesenting a directory
-     * @param file a <code>File</code> object
-     * @return <code>true</code> if <code>folder</code> is a directory and contains
-     * <code>file</code>.
+     * DOCUMENT ME!
+     *
+     * @param   folder  a <code>File</code> object repesenting a directory
+     * @param   file    a <code>File</code> object
+     *
+     * @return  <code>true</code> if <code>folder</code> is a directory and contains <code>file</code>.
      */
-    public boolean isParent(File folder, File file) {
-        if (folder == null || file == null) {
+    @Override
+    public boolean isParent(final File folder, final File file) {
+        if ((folder == null) || (file == null)) {
             return false;
         } else {
             return folder.equals(file.getParentFile());
@@ -143,85 +189,107 @@ public class RestrictedFileSystemView extends FileSystemView {
     }
 
     /**
-     * @param parent a <code>File</code> object repesenting a directory
-     * @param fileName a name of a file or folder which exists in <code>parent</code>
-     * @return a File object. This is normally constructed with <code>new
-     * File(parent, fileName)</code>.
+     * DOCUMENT ME!
+     *
+     * @param   parent    a <code>File</code> object repesenting a directory
+     * @param   fileName  a name of a file or folder which exists in <code>parent</code>
+     *
+     * @return  a File object. This is normally constructed with <code>new File(parent, fileName)</code>.
      */
-    public File getChild(File parent, String fileName) {
+    @Override
+    public File getChild(final File parent, final String fileName) {
         return createFileObject(parent, fileName);
     }
 
     /**
-     * Checks if <code>f</code> represents a real directory or file as opposed to a special folder such as
-     * <code>"Desktop"</code>. Used by UI classes to decide if a folder is selectable when doing directory choosing.
-     * 
-     * @param f a <code>File</code> object
-     * @return <code>true</code> if <code>f</code> is a real file or directory.
+     * Checks if <code>f</code> represents a real directory or file as opposed to a special folder such as <code>
+     * "Desktop"</code>. Used by UI classes to decide if a folder is selectable when doing directory choosing.
+     *
+     * @param   f  a <code>File</code> object
+     *
+     * @return  <code>true</code> if <code>f</code> is a real file or directory.
      */
-    public boolean isFileSystem(File f) {
+    @Override
+    public boolean isFileSystem(final File f) {
         return true;
     }
 
     /**
      * Returns whether a file is hidden or not.
+     *
+     * @param   f  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    public boolean isHiddenFile(File f) {
+    @Override
+    public boolean isHiddenFile(final File f) {
         return f.isHidden();
     }
 
     /**
      * Is dir the root of a tree in the file system, such as a drive or partition.
-     * 
-     * @param f a <code>File</code> object representing a directory
-     * @return <code>true</code> if <code>f</code> is a root of a filesystem
-     * @see #isRoot
+     *
+     * @param   dir  f a <code>File</code> object representing a directory
+     *
+     * @return  <code>true</code> if <code>f</code> is a root of a filesystem
+     *
+     * @see     #isRoot
      */
-    public boolean isFileSystemRoot(File dir) {
+    @Override
+    public boolean isFileSystemRoot(final File dir) {
         return isRoot(dir);
     }
 
     /**
      * Used by UI classes to decide whether to display a special icon for drives or partitions, e.g. a "hard disk" icon.
-     * 
-     * The default implementation has no way of knowing, so always returns false.
-     * 
-     * @param dir a directory
-     * @return <code>false</code> always
+     *
+     * <p>The default implementation has no way of knowing, so always returns false.</p>
+     *
+     * @param   dir  a directory
+     *
+     * @return  <code>false</code> always
      */
-    public boolean isDrive(File dir) {
+    @Override
+    public boolean isDrive(final File dir) {
         return false;
     }
 
     /**
      * Used by UI classes to decide whether to display a special icon for a floppy disk. Implies isDrive(dir).
-     * 
-     * The default implementation has no way of knowing, so always returns false.
-     * 
-     * @param dir a directory
-     * @return <code>false</code> always
+     *
+     * <p>The default implementation has no way of knowing, so always returns false.</p>
+     *
+     * @param   dir  a directory
+     *
+     * @return  <code>false</code> always
      */
-    public boolean isFloppyDrive(File dir) {
+    @Override
+    public boolean isFloppyDrive(final File dir) {
         return false;
     }
 
     /**
      * Used by UI classes to decide whether to display a special icon for a computer node, e.g. "My Computer" or a
      * network server.
-     * 
-     * The default implementation has no way of knowing, so always returns false.
-     * 
-     * @param dir a directory
-     * @return <code>false</code> always
+     *
+     * <p>The default implementation has no way of knowing, so always returns false.</p>
+     *
+     * @param   dir  a directory
+     *
+     * @return  <code>false</code> always
      */
-    public boolean isComputerNode(File dir) {
+    @Override
+    public boolean isComputerNode(final File dir) {
         return false;
     }
 
     /**
      * Returns all root partitions on this system. For example, on Windows, this would be the "Desktop" folder, while on
      * DOS this would be the A: through Z: drives.
+     *
+     * @return  DOCUMENT ME!
      */
+    @Override
     public File[] getRoots() {
         return File.listRoots();
     }
@@ -230,19 +298,21 @@ public class RestrictedFileSystemView extends FileSystemView {
     // because most OS file systems will likely be able to use this
     // code. If a given OS can't, override these methods in its
     // implementation.
+    @Override
     public File getHomeDirectory() {
-        return createFileObject(System.getProperty("user.home"));//NOI18N
+        return createFileObject(System.getProperty("user.home")); // NOI18N
     }
 
     /**
      * Return the user's default starting directory for the file chooser.
-     * 
-     * @return a <code>File</code> object representing the default starting folder
+     *
+     * @return  a <code>File</code> object representing the default starting folder
      */
+    @Override
     public File getDefaultDirectory() {
         if (_defaultDirectory == null) {
             try {
-                File tempFile = File.createTempFile("filesystemview", "restricted");//NOI18N
+                final File tempFile = File.createTempFile("filesystemview", "restricted"); // NOI18N
                 tempFile.deleteOnExit();
                 _defaultDirectory = tempFile.getParentFile();
             } catch (IOException e) {
@@ -254,8 +324,14 @@ public class RestrictedFileSystemView extends FileSystemView {
 
     /**
      * Returns a File object constructed in dir from the given filename.
+     *
+     * @param   dir       DOCUMENT ME!
+     * @param   filename  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    public File createFileObject(File dir, String filename) {
+    @Override
+    public File createFileObject(final File dir, final String filename) {
         if (dir == null) {
             return new File(filename);
         } else {
@@ -265,8 +341,13 @@ public class RestrictedFileSystemView extends FileSystemView {
 
     /**
      * Returns a File object constructed from the given path string.
+     *
+     * @param   path  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    public File createFileObject(String path) {
+    @Override
+    public File createFileObject(final String path) {
         File f = new File(path);
         if (isFileSystemRoot(f)) {
             f = createFileSystemRoot(f);
@@ -276,16 +357,22 @@ public class RestrictedFileSystemView extends FileSystemView {
 
     /**
      * Gets the list of shown (i.e. not hidden) files.
+     *
+     * @param   dir            DOCUMENT ME!
+     * @param   useFileHiding  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    public File[] getFiles(File dir, boolean useFileHiding) {
-        Vector files = new Vector();
+    @Override
+    public File[] getFiles(final File dir, final boolean useFileHiding) {
+        final Vector files = new Vector();
 
         // add all files in dir
-        File[] names;
+        final File[] names;
         names = dir.listFiles();
         File f;
 
-        int nameCount = (names == null) ? 0 : names.length;
+        final int nameCount = (names == null) ? 0 : names.length;
         for (int i = 0; i < nameCount; i++) {
             if (Thread.currentThread().isInterrupted()) {
                 break;
@@ -296,26 +383,27 @@ public class RestrictedFileSystemView extends FileSystemView {
             }
         }
 
-        return (File[]) files.toArray(new File[files.size()]);
+        return (File[])files.toArray(new File[files.size()]);
     }
 
     /**
      * Returns the parent directory of <code>dir</code>.
-     * 
-     * @param dir the <code>File</code> being queried
-     * @return the parent directory of <code>dir</code>, or <code>null</code> if <code>dir</code> is
-     * <code>null</code>
+     *
+     * @param   dir  the <code>File</code> being queried
+     *
+     * @return  the parent directory of <code>dir</code>, or <code>null</code> if <code>dir</code> is <code>null</code>
      */
-    public File getParentDirectory(File dir) {
-        if (dir != null && dir.exists()) {
-            File psf = dir.getParentFile();
+    @Override
+    public File getParentDirectory(final File dir) {
+        if ((dir != null) && dir.exists()) {
+            final File psf = dir.getParentFile();
             if (psf != null) {
                 if (isFileSystem(psf)) {
                     File f = psf;
-                    if (f != null && !f.exists()) {
+                    if ((f != null) && !f.exists()) {
                         // This could be a node under "Network Neighborhood".
-                        File ppsf = psf.getParentFile();
-                        if (ppsf == null || !isFileSystem(ppsf)) {
+                        final File ppsf = psf.getParentFile();
+                        if ((ppsf == null) || !isFileSystem(ppsf)) {
                             // We're mostly after the exists() override for windows below.
                             f = createFileSystemRoot(f);
                         }
@@ -330,54 +418,82 @@ public class RestrictedFileSystemView extends FileSystemView {
     }
 
     /**
-     * Creates a new <code>File</code> object for <code>f</code> with correct behavior for a file system root
-     * directory.
-     * 
-     * @param f a <code>File</code> object representing a file system root directory, for example "/" on Unix or "C:\"
-     * on Windows.
-     * @return a new <code>File</code> object
+     * Creates a new <code>File</code> object for <code>f</code> with correct behavior for a file system root directory.
+     *
+     * @param   f  a <code>File</code> object representing a file system root directory, for example "/" on Unix or
+     *             "C:\" on Windows.
+     *
+     * @return  a new <code>File</code> object
      */
-    protected File createFileSystemRoot(File f) {
+    @Override
+    protected File createFileSystemRoot(final File f) {
         return new FileSystemRoot(f);
     }
 
-    static class FileSystemRoot extends File {
-        public FileSystemRoot(File f) {
-            super(f, "");//NOI18N
-        }
-
-        public FileSystemRoot(String s) {
-            super(s);
-        }
-
-        public boolean isDirectory() {
-            return true;
-        }
-
-        public String getName() {
-            return getPath();
-        }
-    }
-
-    public File createNewFolder(File containingDir) throws IOException {
+    @Override
+    public File createNewFolder(final File containingDir) throws IOException {
         if (containingDir == null) {
-            throw new IOException("Containing directory is null:");//NOI18N
+            throw new IOException("Containing directory is null:"); // NOI18N
         }
         File newFolder = null;
         newFolder = createFileObject(containingDir, newFolderString);
         int i = 2;
         while (newFolder.exists() && (i < 100)) {
-            newFolder = createFileObject(containingDir, MessageFormat.format(newFolderString,
-                    new Object[]{new Integer(i)}));
+            newFolder = createFileObject(
+                    containingDir,
+                    MessageFormat.format(newFolderString,
+                        new Object[] { new Integer(i) }));
             i++;
         }
 
         if (newFolder.exists()) {
-            throw new IOException("Directory already exists:" + newFolder.getAbsolutePath());//NOI18N
+            throw new IOException("Directory already exists:" + newFolder.getAbsolutePath()); // NOI18N
         } else {
             newFolder.mkdirs();
         }
 
         return newFolder;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    static class FileSystemRoot extends File {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new FileSystemRoot object.
+         *
+         * @param  f  DOCUMENT ME!
+         */
+        public FileSystemRoot(final File f) {
+            super(f, ""); // NOI18N
+        }
+
+        /**
+         * Creates a new FileSystemRoot object.
+         *
+         * @param  s  DOCUMENT ME!
+         */
+        public FileSystemRoot(final String s) {
+            super(s);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public boolean isDirectory() {
+            return true;
+        }
+
+        @Override
+        public String getName() {
+            return getPath();
+        }
     }
 }

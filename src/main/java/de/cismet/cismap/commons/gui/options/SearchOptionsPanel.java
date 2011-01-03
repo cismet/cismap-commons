@@ -1,40 +1,83 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.options;
+
+import org.jdom.Element;
+
+import org.openide.util.NbBundle;
+import org.openide.util.lookup.ServiceProvider;
+
+import java.awt.Color;
+
+import javax.swing.JColorChooser;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateSearchGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+
 import de.cismet.lookupoptions.*;
+
 import de.cismet.tools.configuration.NoWriteError;
-import java.awt.Color;
-import javax.swing.JColorChooser;
-import org.jdom.Element;
-import org.openide.util.NbBundle;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
- * @author jruiz
+ * DOCUMENT ME!
+ *
+ * @author   jruiz
+ * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = OptionsPanelController.class)
 public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsPanelController {
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    
-    private static final String OPTION_NAME = NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.OPTION_NAME");
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final String OPTION_NAME = NbBundle.getMessage(
+            SearchOptionsPanel.class,
+            "SearchOptionsPanel.OPTION_NAME");
     private static final String CONFIGURATION = "SearchOptionsPanel";
     private static final String CONF_HOLD_GEOMETRIES = "HoldGeometries";
     private static final String CONF_GEOMETRY_COLOR = "GeometryColor";
     private static final String CONF_GEOMETRY_TRANSPARENCY = "GeometryTransparency";
 
+    //~ Instance fields --------------------------------------------------------
+
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
     private boolean stillConfigured = false;
     private boolean holdGeometries;
     private float geometryTransparency;
     private Color geometryColor;
-    private CreateSearchGeometryListener listener = ((CreateSearchGeometryListener)CismapBroker.getInstance().getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
+    private CreateSearchGeometryListener listener = ((CreateSearchGeometryListener)CismapBroker.getInstance()
+                    .getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
 
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSlider jSlider1;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
+    // End of variables declaration//GEN-END:variables
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new SearchOptionsPanel object.
+     */
     public SearchOptionsPanel() {
         super(OPTION_NAME, CismapOptionsCategory.class);
         initComponents();
     }
+
+    //~ Methods ----------------------------------------------------------------
 
     @Override
     public int getOrder() {
@@ -65,10 +108,9 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
     @Override
     public boolean isChanged() {
-        return 
-                holdGeometries != jCheckBox1.isSelected() ||
-                geometryColor.getRGB() != jPanel1.getBackground().getRGB() ||
-                geometryTransparency != jSlider1.getValue() / 100f;
+        return (holdGeometries != jCheckBox1.isSelected())
+                    || (geometryColor.getRGB() != jPanel1.getBackground().getRGB())
+                    || (geometryTransparency != (jSlider1.getValue() / 100f));
     }
 
     @Override
@@ -77,9 +119,11 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
     }
 
     @Override
-    public void configure(Element parent) {
+    public void configure(final Element parent) {
         if (!stillConfigured) {
-            log.debug("Configure SearchOptionsPanel");
+            if (log.isDebugEnabled()) {
+                log.debug("Configure SearchOptionsPanel");
+            }
             try {
                 String elementHoldGeometries = "";
                 String elementGeometryColor = "";
@@ -103,8 +147,7 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
                 } catch (NumberFormatException ex) {
                     geometryTransparency = 0.5f;
                 }
-
-           } catch (Exception ex) {
+            } catch (Exception ex) {
                 log.error("Fehler beim Konfigurieren des SearchOptionsPanel", ex);
             }
 
@@ -115,7 +158,9 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
             stillConfigured = true;
         } else {
-            log.debug("skip Configure SearchOptionsPanel - still configured");
+            if (log.isDebugEnabled()) {
+                log.debug("skip Configure SearchOptionsPanel - still configured");
+            }
         }
 
         // Änderungen anwenden
@@ -124,11 +169,11 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
     @Override
     public Element getConfiguration() throws NoWriteError {
-        Element conf = new Element(CONFIGURATION);
+        final Element conf = new Element(CONFIGURATION);
 
-        Element holdSearchGeometriesElement = new Element(CONF_HOLD_GEOMETRIES);
-        Element searchGeometryColorElement = new Element(CONF_GEOMETRY_COLOR);
-        Element searchGeometryTransparencyElement = new Element(CONF_GEOMETRY_TRANSPARENCY);
+        final Element holdSearchGeometriesElement = new Element(CONF_HOLD_GEOMETRIES);
+        final Element searchGeometryColorElement = new Element(CONF_GEOMETRY_COLOR);
+        final Element searchGeometryTransparencyElement = new Element(CONF_GEOMETRY_TRANSPARENCY);
 
         holdSearchGeometriesElement.addContent(Boolean.toString(holdGeometries));
         searchGeometryColorElement.addContent(String.valueOf(geometryColor.getRGB()));
@@ -141,10 +186,9 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         return conf;
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -165,12 +209,16 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         setAlignmentY(0.0F);
         setLayout(new java.awt.GridBagLayout());
 
-        jCheckBox1.setText(org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jCheckBox1.text")); // NOI18N
+        jCheckBox1.setText(org.openide.util.NbBundle.getMessage(
+                SearchOptionsPanel.class,
+                "SearchOptionsPanel.jCheckBox1.text")); // NOI18N
         jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox1ActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jCheckBox1ActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -180,12 +228,16 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         gridBagConstraints.insets = new java.awt.Insets(8, 5, 3, 5);
         add(jCheckBox1, gridBagConstraints);
 
-        jButton1.setText(org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jButton1.text")); // NOI18N
+        jButton1.setText(org.openide.util.NbBundle.getMessage(
+                SearchOptionsPanel.class,
+                "SearchOptionsPanel.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton1ActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
@@ -202,7 +254,9 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         add(jSeparator1, gridBagConstraints);
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jLabel2.text")); // NOI18N
+        jLabel2.setText(org.openide.util.NbBundle.getMessage(
+                SearchOptionsPanel.class,
+                "SearchOptionsPanel.jLabel2.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -218,16 +272,18 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
         jPanel1.setPreferredSize(new java.awt.Dimension(58, 29));
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        final javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 58, Short.MAX_VALUE)
-        );
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
+                0,
+                58,
+                Short.MAX_VALUE));
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 29, Short.MAX_VALUE)
-        );
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
+                0,
+                29,
+                Short.MAX_VALUE));
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -236,7 +292,9 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         add(jPanel1, gridBagConstraints);
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jLabel1.text")); // NOI18N
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(
+                SearchOptionsPanel.class,
+                "SearchOptionsPanel.jLabel1.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -245,7 +303,12 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
         jLabel3.setPreferredSize(new java.awt.Dimension(50, 17));
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, jSlider1, org.jdesktop.beansbinding.ELProperty.create("${value}%"), jLabel3, org.jdesktop.beansbinding.BeanProperty.create("text"));
+        final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                jSlider1,
+                org.jdesktop.beansbinding.ELProperty.create("${value}%"),
+                jLabel3,
+                org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -255,7 +318,9 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 0);
         add(jLabel3, gridBagConstraints);
 
-        jLabel4.setText(org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class, "SearchOptionsPanel.jLabel4.text")); // NOI18N
+        jLabel4.setText(org.openide.util.NbBundle.getMessage(
+                SearchOptionsPanel.class,
+                "SearchOptionsPanel.jLabel4.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
@@ -265,41 +330,50 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         add(jLabel4, gridBagConstraints);
 
         bindingGroup.bind();
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
-    private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jCheckBox1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jCheckBox1ActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jCheckBox1ActionPerformed
+    } //GEN-LAST:event_jCheckBox1ActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        Color color = JColorChooser.showDialog(
-             this,
-             "Farbe der Such-Geometrien wählen.",
-             getColor());
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
+        final Color color = JColorChooser.showDialog(
+                this,
+                "Farbe der Such-Geometrien wählen.",
+                getColor());
         if (color != null) {
             setColor(color);
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     private Color getColor() {
         return jPanel1.getBackground();
     }
 
-    private void setColor(Color newColor) {
-        log.debug("newColor: " + newColor);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  newColor  DOCUMENT ME!
+     */
+    private void setColor(final Color newColor) {
+        if (log.isDebugEnabled()) {
+            log.debug("newColor: " + newColor);
+        }
         jPanel1.setBackground(newColor);
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JCheckBox jCheckBox1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSlider jSlider1;
-    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
-    // End of variables declaration//GEN-END:variables
 }

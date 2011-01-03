@@ -1,25 +1,46 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.wms.capabilities.deegree;
+
+import org.deegree.model.crs.GeoTransformer;
+import org.deegree.model.crs.UnknownCRSException;
+
+import java.security.InvalidParameterException;
 
 import de.cismet.cismap.commons.exceptions.ConvertException;
 import de.cismet.cismap.commons.wms.capabilities.CoordinateSystem;
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
 import de.cismet.cismap.commons.wms.capabilities.Position;
-import java.security.InvalidParameterException;
-import org.deegree.model.crs.GeoTransformer;
-import org.deegree.model.crs.UnknownCRSException;
 
 /**
+ * DOCUMENT ME!
  *
- * @author therter
+ * @author   therter
+ * @version  $Revision$, $Date$
  */
 public class DeegreeEnvelope implements Envelope {
+
+    //~ Instance fields --------------------------------------------------------
+
     private org.deegree.model.spatialschema.Envelope envelope;
 
+    //~ Constructors -----------------------------------------------------------
 
-    public DeegreeEnvelope(org.deegree.model.spatialschema.Envelope envelope) {
+    /**
+     * Creates a new DeegreeEnvelope object.
+     *
+     * @param  envelope  DOCUMENT ME!
+     */
+    public DeegreeEnvelope(final org.deegree.model.spatialschema.Envelope envelope) {
         this.envelope = envelope;
     }
 
+    //~ Methods ----------------------------------------------------------------
 
     @Override
     public Position getMax() {
@@ -30,7 +51,6 @@ public class DeegreeEnvelope implements Envelope {
         }
     }
 
-
     @Override
     public Position getMin() {
         if (envelope.getMin() == null) {
@@ -40,18 +60,15 @@ public class DeegreeEnvelope implements Envelope {
         }
     }
 
-
     @Override
     public double getWidth() {
         return envelope.getWidth();
     }
 
-
     @Override
     public double getHeight() {
         return envelope.getHeight();
     }
-
 
     @Override
     public CoordinateSystem getCoordinateSystem() {
@@ -63,9 +80,9 @@ public class DeegreeEnvelope implements Envelope {
     }
 
     @Override
-    public Envelope transform(String destCrs, String sourceCrs) throws ConvertException {
+    public Envelope transform(final String destCrs, final String sourceCrs) throws ConvertException {
         try {
-            GeoTransformer transformer = new GeoTransformer(destCrs);
+            final GeoTransformer transformer = new GeoTransformer(destCrs);
             return new DeegreeEnvelope(transformer.transform(envelope, sourceCrs));
         } catch (Exception e) {
             throw new ConvertException(e.getMessage(), e);

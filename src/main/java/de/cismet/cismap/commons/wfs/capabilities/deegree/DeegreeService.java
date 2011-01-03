@@ -1,48 +1,71 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  *  Copyright (C) 2010 therter
- * 
+ *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- * 
+ *
  *  This program is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.cismet.cismap.commons.wfs.capabilities.deegree;
 
-import de.cismet.cismap.commons.capabilities.Service;
-import java.util.ArrayList;
 import org.deegree.model.metadata.iso19115.Keywords;
 import org.deegree.ogcwebservices.getcapabilities.ServiceIdentification;
 import org.deegree.ogcwebservices.getcapabilities.ServiceProvider;
 
+import java.util.ArrayList;
+
+import de.cismet.cismap.commons.capabilities.Service;
+
 /**
+ * DOCUMENT ME!
  *
- * @author therter
+ * @author   therter
+ * @version  $Revision$, $Date$
  */
 public class DeegreeService implements Service {
+
+    //~ Instance fields --------------------------------------------------------
+
     private ServiceProvider service;
     private ServiceIdentification ident;
 
-    public DeegreeService(ServiceProvider service, ServiceIdentification ident) {
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new DeegreeService object.
+     *
+     * @param  service  DOCUMENT ME!
+     * @param  ident    DOCUMENT ME!
+     */
+    public DeegreeService(final ServiceProvider service, final ServiceIdentification ident) {
         this.service = service;
         this.ident = ident;
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     @Override
     public String[] getKeywordList() {
-        Keywords[] list = ident.getKeywords();
-        ArrayList<String> resultList = new ArrayList<String>();
+        final Keywords[] list = ident.getKeywords();
+        final ArrayList<String> resultList = new ArrayList<String>();
 
-        for (Keywords word : list) {
-            for (String tmp : word.getKeywords()) {
+        for (final Keywords word : list) {
+            for (final String tmp : word.getKeywords()) {
                 resultList.add(tmp);
             }
         }
@@ -50,7 +73,6 @@ public class DeegreeService implements Service {
         return resultList.toArray(new String[resultList.size()]);
     }
 
-    
     @Override
     public String getAbstract() {
         return ident.getAbstract();
@@ -83,14 +105,20 @@ public class DeegreeService implements Service {
 
     @Override
     public String getAccessConstraints() {
-        return stringArrayToString( ident.getAccessConstraints() );
+        return stringArrayToString(ident.getAccessConstraints());
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   array  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String stringArrayToString(final String[] array) {
+        final StringBuffer buffer = new StringBuffer("");
 
-    private String stringArrayToString(String[] array) {
-        StringBuffer buffer = new StringBuffer("");
-
-        for (String tmp : array) {
+        for (final String tmp : array) {
             if (buffer.length() != 0) {
                 buffer.append(", " + tmp);
             } else {

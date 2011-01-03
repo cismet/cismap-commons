@@ -1,51 +1,31 @@
-/*
- * WMSCapabilitiesTreeCellRenderer.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 14. Oktober 2005, 13:16
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.raster.wms;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
-import de.cismet.cismap.commons.wms.capabilities.Style;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 import java.awt.Color;
 import java.awt.Component;
+
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
+import de.cismet.cismap.commons.wms.capabilities.Style;
+
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class WMSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
+
+    //~ Instance fields --------------------------------------------------------
+
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private javax.swing.ImageIcon layersIcon;
     private javax.swing.ImageIcon layerIcon;
@@ -59,98 +39,115 @@ public class WMSCapabilitiesTreeCellRenderer extends DefaultTreeCellRenderer {
     private javax.swing.ImageIcon disabledLayerIcon;
     private javax.swing.ImageIcon disabledLayerInfoIcon;
 
-    
+    //~ Constructors -----------------------------------------------------------
+
     /**
-     * Creates a new instance of WMSCapabilitiesTreeCellRenderer
+     * Creates a new instance of WMSCapabilitiesTreeCellRenderer.
      */
     public WMSCapabilitiesTreeCellRenderer() {
-        layersIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers.png"));//NOI18N
-        layerIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layer.png"));//NOI18N
-        layersInfoIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layers_i.png"));//NOI18N
-        layerInfoIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/layer_i.png"));//NOI18N
-        styleIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/style.png"));//NOI18N
-        unselectedStyleIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/style.png"));//NOI18N
-        serverIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/server.png"));//NOI18N
+        layersIcon = new javax.swing.ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/layers.png"));   // NOI18N
+        layerIcon = new javax.swing.ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/layer.png"));    // NOI18N
+        layersInfoIcon = new javax.swing.ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/layers_i.png")); // NOI18N
+        layerInfoIcon = new javax.swing.ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/layer_i.png"));  // NOI18N
+        styleIcon = new javax.swing.ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/style.png"));    // NOI18N
+        unselectedStyleIcon = new javax.swing.ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/style.png"));    // NOI18N
+        serverIcon = new javax.swing.ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/server.png"));   // NOI18N
 
-        disabledLayersIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/disabledLayers.png"));//NOI18N
-        disabledLayerIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/disabledLayer.png"));//NOI18N
-        disabledLayerInfoIcon=new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/raster/wms/res/disabledLayer_i.png"));//NOI18N
+        disabledLayersIcon = new javax.swing.ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/disabledLayers.png"));  // NOI18N
+        disabledLayerIcon = new javax.swing.ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/disabledLayer.png"));   // NOI18N
+        disabledLayerInfoIcon = new javax.swing.ImageIcon(getClass().getResource(
+                    "/de/cismet/cismap/commons/raster/wms/res/disabledLayer_i.png")); // NOI18N
     }
-    public Component getTreeCellRendererComponent(JTree tree, Object value,
-            boolean isSelected, boolean expanded,
-            boolean leaf, int row, boolean hasFocus) {
+
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public Component getTreeCellRendererComponent(final JTree tree,
+            final Object value,
+            final boolean isSelected,
+            final boolean expanded,
+            final boolean leaf,
+            final int row,
+            final boolean hasFocus) {
         super.getTreeCellRendererComponent(
-                tree, value, isSelected,
-                expanded, leaf, row,
-                hasFocus);
-        //setForeground(Color.black);
-        
-        
+            tree,
+            value,
+            isSelected,
+            expanded,
+            leaf,
+            row,
+            hasFocus);
+        // setForeground(Color.black);
+
         if (value instanceof Layer) {
-            Layer tmpLayer=(Layer)value;
-            boolean rightScale=true;
-            
+            final Layer tmpLayer = (Layer)value;
+            boolean rightScale = true;
+
             try {
-                double mxScale=tmpLayer.getScaleDenominationMax();
-                double mnScale=tmpLayer.getScaleDenominationMin();
-                double scale=CismapBroker.getInstance().getMappingComponent().getCurrentOGCScale();
-                if (scale<mnScale||scale>mxScale) {
+                final double mxScale = tmpLayer.getScaleDenominationMax();
+                final double mnScale = tmpLayer.getScaleDenominationMin();
+                final double scale = CismapBroker.getInstance().getMappingComponent().getCurrentOGCScale();
+                if ((scale < mnScale) || (scale > mxScale)) {
                     if (!isSelected) {
                         setForeground(Color.GRAY);
                     }
-                    rightScale=false;
+                    rightScale = false;
                     // setTooltip("Im momentanen Ma\u00DFstab nicht darstellbar");
                 }
             } catch (Exception e) {
-                //TODO logging last
-                //log.debug("Fehler bei der ScaleHint Verarbeitung.Kein Problem",e);
+                // TODO logging last
+                // log.debug("Fehler bei der ScaleHint Verarbeitung.Kein Problem",e);
             }
             setText(tmpLayer.getTitle());
             if (tmpLayer.isQueryable()) {
-                if (tmpLayer.getChildren().length==0) {
+                if (tmpLayer.getChildren().length == 0) {
                     if (rightScale) {
                         setIcon(layerInfoIcon);
-                    }
-                    else {
+                    } else {
                         setIcon(disabledLayerInfoIcon);
                     }
                 } else {
                     if (rightScale) {
                         setIcon(layersInfoIcon);
-                    }
-                    else {
-                        //TODO
+                    } else {
+                        // TODO
                         setIcon(layersInfoIcon);
                     }
                 }
             } else {
-                if (tmpLayer.getChildren().length==0) {
+                if (tmpLayer.getChildren().length == 0) {
                     if (rightScale) {
                         setIcon(layerIcon);
-                    }
-                    else {
+                    } else {
                         setIcon(disabledLayerIcon);
                     }
                 } else {
                     if (rightScale) {
                         setIcon(layersIcon);
-                    }
-                    else {
+                    } else {
                         setIcon(disabledLayersIcon);
                     }
                 }
             }
         } else if (value instanceof Style) {
-            Style tmpStyle=(Style)value;
-            if (tmpStyle.getTitle()!=null&&tmpStyle.getTitle().trim().length()>0) {
+            final Style tmpStyle = (Style)value;
+            if ((tmpStyle.getTitle() != null) && (tmpStyle.getTitle().trim().length() > 0)) {
                 setText(tmpStyle.getTitle());
             } else {
                 setText(tmpStyle.getName());
             }
             setIcon(styleIcon);
         }
-        
-        
+
         return this;
     }
 }

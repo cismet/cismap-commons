@@ -1,68 +1,53 @@
-/*
- * WMSServiceLayer.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 22. November 2005, 12:21
- *
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.raster.wms;
 
-import de.cismet.cismap.commons.RetrievalServiceLayer;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
-import de.cismet.cismap.commons.wms.capabilities.Operation;
-import de.cismet.cismap.commons.wms.capabilities.Style;
-import de.cismet.cismap.commons.preferences.CapabilityLink;
-import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
-import de.cismet.cismap.commons.rasterservice.RasterMapService;
-import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import edu.umd.cs.piccolo.PNode;
+
+import org.jdom.DataConversionException;
+import org.jdom.Element;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+
 import javax.swing.tree.TreePath;
 
+import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.preferences.CapabilityLink;
+import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
+import de.cismet.cismap.commons.rasterservice.RasterMapService;
+import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
+import de.cismet.cismap.commons.wms.capabilities.Operation;
+import de.cismet.cismap.commons.wms.capabilities.Style;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
 import de.cismet.tools.PropertyEqualsProvider;
-import org.jdom.DataConversionException;
-import org.jdom.Element;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
-public class WMSServiceLayer extends AbstractWMSServiceLayer implements RetrievalServiceLayer, RasterMapService, PropertyEqualsProvider {
+public class WMSServiceLayer extends AbstractWMSServiceLayer implements RetrievalServiceLayer,
+    RasterMapService,
+    PropertyEqualsProvider {
 
-    //private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    //~ Instance fields --------------------------------------------------------
+
+    // private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     Vector wmsLayers = new Vector();
     Vector ogcLayers = new Vector();
+    Object retrievalBlocker = new Object();
     private PNode imageObject = new PNode();
     private String imageFormat = null;
     private String backgroundColor = null;
@@ -71,36 +56,48 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
     private String srs;
     private WMSCapabilities wmsCapabilities;
     private String capabilitiesUrl;
-    //Used by clone()
+    // Used by clone()
     private Vector treePaths;
     private Element wmsServiceLayerElement;
     private HashMap<String, WMSCapabilities> capabilities;
 
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new WMSServiceLayer object.
+     */
     public WMSServiceLayer() {
     }
 
-    public WMSServiceLayer(Vector treePaths) {
+    /**
+     * Creates a new WMSServiceLayer object.
+     *
+     * @param  treePaths  DOCUMENT ME!
+     */
+    public WMSServiceLayer(final Vector treePaths) {
         this.treePaths = treePaths;
         if (treePaths != null) {
-            Iterator it = treePaths.iterator();
+            final Iterator it = treePaths.iterator();
             if (treePaths.size() > 1) {
-                setName("Layerzusammenstellung");//NOI18N
+                setName("Layerzusammenstellung"); // NOI18N
             }
 
             while (it.hasNext()) {
-                Object next = it.next();
+                final Object next = it.next();
                 if (next instanceof TreePath) {
-                    TreePath nextTreePath = (TreePath) next;
+                    final TreePath nextTreePath = (TreePath)next;
                     if (nextTreePath.getLastPathComponent() instanceof Layer) {
-                        Layer nextLayer = (Layer) nextTreePath.getLastPathComponent();
+                        final Layer nextLayer = (Layer)nextTreePath.getLastPathComponent();
                         addLayer(nextLayer);
                         if (getName() == null) {
                             setName(nextLayer.getTitle());
                         }
                     } else if (nextTreePath.getLastPathComponent() instanceof Style) {
-                        Style nextStyle = (Style) nextTreePath.getLastPathComponent();
+                        final Style nextStyle = (Style)nextTreePath.getLastPathComponent();
                         if (nextTreePath.getPathComponent(nextTreePath.getPathCount() - 2) instanceof Layer) {
-                            Layer nextLayer = ((Layer) nextTreePath.getPathComponent(nextTreePath.getPathCount() - 2));
+                            final Layer nextLayer = ((Layer)nextTreePath.getPathComponent(
+                                        nextTreePath.getPathCount()
+                                                - 2));
                             addLayer(nextLayer, nextStyle);
                             if (getName() == null) {
                                 setName(nextLayer.getTitle());
@@ -112,56 +109,62 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
         }
     }
 
-    public WMSServiceLayer(Element wmsServiceLayerElement, HashMap<String, WMSCapabilities> capabilities) {
+    /**
+     * Creates a new WMSServiceLayer object.
+     *
+     * @param  wmsServiceLayerElement  DOCUMENT ME!
+     * @param  capabilities            DOCUMENT ME!
+     */
+    public WMSServiceLayer(final Element wmsServiceLayerElement, final HashMap<String, WMSCapabilities> capabilities) {
         this.wmsServiceLayerElement = wmsServiceLayerElement;
         this.capabilities = capabilities;
 
-        setName(wmsServiceLayerElement.getAttribute("name").getValue());//NOI18N
+        setName(wmsServiceLayerElement.getAttribute("name").getValue()); // NOI18N
 
         try {
-            setEnabled(wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());//NOI18N
+            setEnabled(wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());         // NOI18N
         } catch (DataConversionException ex) {
         }
         try {
-            setTranslucency(wmsServiceLayerElement.getAttribute("translucency").getFloatValue());//NOI18N
+            setTranslucency(wmsServiceLayerElement.getAttribute("translucency").getFloatValue()); // NOI18N
         } catch (DataConversionException ex) {
         }
         try {
-            setVisible(wmsServiceLayerElement.getAttribute("visible").getBooleanValue());//NOI18N
+            setVisible(wmsServiceLayerElement.getAttribute("visible").getBooleanValue());         // NOI18N
         } catch (DataConversionException ex) {
         }
-        setBackgroundColor(wmsServiceLayerElement.getAttribute("bgColor").getValue());//NOI18N
-        setImageFormat(wmsServiceLayerElement.getAttribute("imageFormat").getValue());//NOI18N
-        setExceptionsFormat(wmsServiceLayerElement.getAttribute("exceptionFormat").getValue());//NOI18N
-        CapabilityLink cp = new CapabilityLink(wmsServiceLayerElement);
-        WMSCapabilities wmsCaps = capabilities.get(cp.getLink());
+        setBackgroundColor(wmsServiceLayerElement.getAttribute("bgColor").getValue());            // NOI18N
+        setImageFormat(wmsServiceLayerElement.getAttribute("imageFormat").getValue());            // NOI18N
+        setExceptionsFormat(wmsServiceLayerElement.getAttribute("exceptionFormat").getValue());   // NOI18N
+        final CapabilityLink cp = new CapabilityLink(wmsServiceLayerElement);
+        final WMSCapabilities wmsCaps = capabilities.get(cp.getLink());
         setWmsCapabilities(wmsCaps);
         setCapabilitiesUrl(cp.getLink());
 
-        //Grundeinstellungen sind gemacht, Jetzt fehlen noch die Layer
+        // Grundeinstellungen sind gemacht, Jetzt fehlen noch die Layer
 
-        List layerList = wmsServiceLayerElement.getChildren("wmsLayer");//NOI18N
-        Iterator<Element> it = layerList.iterator();
+        final List layerList = wmsServiceLayerElement.getChildren("wmsLayer"); // NOI18N
+        final Iterator<Element> it = layerList.iterator();
         while (it.hasNext()) {
-            Element elem = it.next();
-            String name = elem.getAttribute("name").getValue();//NOI18N
+            final Element elem = it.next();
+            final String name = elem.getAttribute("name").getValue();          // NOI18N
             String styleName = null;
             boolean enabled = true;
             boolean info = false;
             try {
-                enabled = elem.getAttribute("enabled").getBooleanValue();//NOI18N
+                enabled = elem.getAttribute("enabled").getBooleanValue();      // NOI18N
             } catch (Exception ex) {
             }
             try {
-                info = elem.getAttribute("info").getBooleanValue();//NOI18N
+                info = elem.getAttribute("info").getBooleanValue();            // NOI18N
             } catch (Exception ex) {
             }
             try {
-                styleName = elem.getAttribute("style").getValue();//NOI18N
+                styleName = elem.getAttribute("style").getValue();             // NOI18N
             } catch (Exception ex) {
             }
             if (wmsCaps != null) {
-                Layer l = searchForLayer(getWmsCapabilities().getLayer(), name);
+                final Layer l = searchForLayer(getWmsCapabilities().getLayer(), name);
                 if (layerList.size() == 1) {
                     setName(l.getTitle());
                 }
@@ -175,15 +178,26 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
         }
     }
 
-    private void addLayer(Layer nextLayer, Style selectedStyle, boolean enabled, boolean info) {
-        if (nextLayer.getName() != null && !nextLayer.getName().equals(""))//NOI18N
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  nextLayer      DOCUMENT ME!
+     * @param  selectedStyle  DOCUMENT ME!
+     * @param  enabled        DOCUMENT ME!
+     * @param  info           DOCUMENT ME!
+     */
+    private void addLayer(final Layer nextLayer, Style selectedStyle, final boolean enabled, final boolean info) {
+        if ((nextLayer.getName() != null) && !nextLayer.getName().equals("")) // NOI18N
         {
             if (selectedStyle == null) {
-                if (nextLayer.getStyles() != null && nextLayer.getStyles().length > 0 && nextLayer.getStyles()[0] != null) {
+                if ((nextLayer.getStyles() != null) && (nextLayer.getStyles().length > 0)
+                            && (nextLayer.getStyles()[0] != null)) {
                     selectedStyle = nextLayer.getStyles()[0];
                 }
             }
-            WMSLayer wmsLayer = new WMSLayer(nextLayer, selectedStyle);
+            final WMSLayer wmsLayer = new WMSLayer(nextLayer, selectedStyle);
             wmsLayer.setEnabled(enabled);
             wmsLayer.setParentServiceLayer(this);
             wmsLayer.setQuerySelected(info);
@@ -194,21 +208,36 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
         }
 
         for (int i = 0; i < nextLayer.getChildren().length; ++i) {
-            Layer childLayer = nextLayer.getChildren()[i];
+            final Layer childLayer = nextLayer.getChildren()[i];
             addLayer(childLayer);
         }
-
     }
 
-    private void addLayer(Layer nextLayer, Style selectedStyle) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  nextLayer      DOCUMENT ME!
+     * @param  selectedStyle  DOCUMENT ME!
+     */
+    private void addLayer(final Layer nextLayer, final Style selectedStyle) {
         addLayer(nextLayer, selectedStyle, true, false);
     }
 
-    private void addLayer(Layer nextLayer) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  nextLayer  DOCUMENT ME!
+     */
+    private void addLayer(final Layer nextLayer) {
         addLayer(nextLayer, null);
     }
 
-    public void removeLayer(WMSLayer layer) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     */
+    public void removeLayer(final WMSLayer layer) {
         wmsLayers.remove(layer);
         ogcLayers.remove(layer.getOgcCapabilitiesLayer());
     }
@@ -218,29 +247,37 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
         if (name != null) {
             return name;
         } else {
-            return "...";//NOI18N
+            return "..."; // NOI18N
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Vector getWMSLayers() {
         return wmsLayers;
     }
-    Object retrievalBlocker = new Object();
 
     @Override
-    public void retrieve(boolean forced) {
+    public void retrieve(final boolean forced) {
 //        synchronized(retrievalBlocker) {
         if (DEBUG) {
-            logger.debug("retrieve()");//NOI18N
+            if (logger.isDebugEnabled()) {
+                logger.debug("retrieve()"); // NOI18N
+            }
         }
         setRefreshNeeded(false);
-        if (ir != null && ir.isAlive() && ir.getUrl().equals(getGetMapUrl()) && !forced) {
-            //macht nix
-            //mehrfachaufruf mit der gleichen url = unsinn
-            logger.debug("multiple invocations with the same url = humbug");//NOI18N
+        if ((ir != null) && ir.isAlive() && ir.getUrl().equals(getGetMapUrl()) && !forced) {
+            if (logger.isDebugEnabled()) {
+                // macht nix
+                // mehrfachaufruf mit der gleichen url = unsinn
+                logger.debug("multiple invocations with the same url = humbug"); // NOI18N
+            }
         } else {
-            if (ir != null && ir.isAlive()) {
-                //logger.fatal("Versuche den vorherigen Retrievalprozess zu stoppen. (interrupt())");
+            if ((ir != null) && ir.isAlive()) {
+                // logger.fatal("Versuche den vorherigen Retrievalprozess zu stoppen. (interrupt())");
                 ir.youngerWMSCall();
                 ir.interrupt();
 
@@ -248,13 +285,17 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
             }
             ir = new ImageRetrieval(this);
             if (DEBUG) {
-                logger.debug("getMapURL(): " + getGetMapUrl());//NOI18N
+                if (logger.isDebugEnabled()) {
+                    logger.debug("getMapURL(): " + getGetMapUrl()); // NOI18N
+                }
             }
             ir.setUrl(getGetMapUrl());
-            //new
+            // new
             ir.setWMSCapabilities(getWmsCapabilities());
             if (DEBUG) {
-                logger.debug("ir.start();");//NOI18N
+                if (logger.isDebugEnabled()) {
+                    logger.debug("ir.start();"); // NOI18N
+                }
             }
             ir.setPriority(Thread.NORM_PRIORITY);
             ir.start();
@@ -262,72 +303,117 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
 //        }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getImageFormat() {
         return imageFormat;
     }
 
-    public void setImageFormat(String imageFormat) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  imageFormat  DOCUMENT ME!
+     */
+    public void setImageFormat(final String imageFormat) {
         this.imageFormat = imageFormat;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getBackgroundColor() {
         if (backgroundColor != null) {
             return backgroundColor;
         } else {
-            logger.warn("backgroundcolor was null. Set it to 0xF0F0F0");//NOI18N
-            backgroundColor = "0xF0F0F0";//NOI18N
+            logger.warn("backgroundcolor was null. Set it to 0xF0F0F0"); // NOI18N
+            backgroundColor = "0xF0F0F0";                                // NOI18N
             return backgroundColor;
         }
     }
 
-    public void setBackgroundColor(String backgroundColor) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  backgroundColor  DOCUMENT ME!
+     */
+    public void setBackgroundColor(final String backgroundColor) {
         this.backgroundColor = backgroundColor;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getExceptionsFormat() {
         return exceptionsFormat;
     }
 
-    public void setExceptionsFormat(String exceptionsFormat) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  exceptionsFormat  DOCUMENT ME!
+     */
+    public void setExceptionsFormat(final String exceptionsFormat) {
         this.exceptionsFormat = exceptionsFormat;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getSrs() {
         return srs;
     }
 
-    public void setSrs(String srs) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  srs  DOCUMENT ME!
+     */
+    public void setSrs(final String srs) {
         this.srs = srs;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     private String getGetMapUrl() {
         String url = getGetMapPrefix();
 
-        if (bb != null && url != null) {
-            if (url.indexOf("?") < 0)//NOI18N
+        if ((bb != null) && (url != null)) {
+            if (url.indexOf("?") < 0)                                                                         // NOI18N
             {
-                url += "?";//NOI18N
+                url += "?";                                                                                   // NOI18N
             }
-            String version = getWmsCapabilities().getVersion();
-            if (version.trim().equals("1.0.0") || version.trim().equals("1.0") || version.trim().equals("1"))//NOI18N
+            final String version = getWmsCapabilities().getVersion();
+            if (version.trim().equals("1.0.0") || version.trim().equals("1.0") || version.trim().equals("1")) // NOI18N
             {
-                url += "&WMTVER=1.0.0&REQUEST=map";//NOI18N
+                url += "&WMTVER=1.0.0&REQUEST=map";                                                           // NOI18N
             } else {
-                url += "&VERSION=" + version + "&REQUEST=GetMap";//NOI18N
+                url += "&VERSION=" + version + "&REQUEST=GetMap";                                             // NOI18N
             }
-            url += "&BBOX=" + bb.getURLString();//NOI18N
-            url += "&WIDTH=" + width;//NOI18N
-            url += "&HEIGHT=" + height;//NOI18N
+            url += "&BBOX=" + bb.getURLString();                                                              // NOI18N
+            url += "&WIDTH=" + width;                                                                         // NOI18N
+            url += "&HEIGHT=" + height;                                                                       // NOI18N
 
             if (version.trim().equals("1.3") || version.trim().equals("1.3.0")) {
-                url += "&CRS=" + srs;//NOI18N
+                url += "&CRS=" + srs;                                                        // NOI18N
             } else {
-                url += "&SRS=" + srs;//NOI18N
+                url += "&SRS=" + srs;                                                        // NOI18N
             }
-            url += "&FORMAT=" + imageFormat;//NOI18N
-            url += "&TRANSPARENT=" + new Boolean(transparentImage).toString().toUpperCase();//NOI18N
-            url += "&BGCOLOR=" + getBackgroundColor();//NOI18N
-            url += "&EXCEPTIONS=" + exceptionsFormat;//NOI18N
+            url += "&FORMAT=" + imageFormat;                                                 // NOI18N
+            url += "&TRANSPARENT=" + new Boolean(transparentImage).toString().toUpperCase(); // NOI18N
+            url += "&BGCOLOR=" + getBackgroundColor();                                       // NOI18N
+            url += "&EXCEPTIONS=" + exceptionsFormat;                                        // NOI18N
             url += getLayersString(wmsLayers);
             if (hasEveryLayerAStyle(wmsLayers)) {
                 // the styles parameter must contain the same number of values as the layers parameter.
@@ -335,40 +421,51 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
                 // to generate a valid request.
                 url += getStylesString(wmsLayers);
             } else {
-                logger.debug("style parameter was added without a value to the getMap Request, because not every layer, " + //NOI18N
-                        "which is used within the request has a selected style"); //NOI18N
+                if (logger.isDebugEnabled()) {
+                    logger.debug(
+                        "style parameter was added without a value to the getMap Request, because not every layer, " // NOI18N
+                                + "which is used within the request has a selected style");                          // NOI18N
+                }
                 url += "&STYLES=";
             }
             return url;
         } else {
             return null;
         }
-
     }
 
-    public String getGetFeatureInfoUrl(int x, int y, WMSLayer l) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   x  DOCUMENT ME!
+     * @param   y  DOCUMENT ME!
+     * @param   l  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getGetFeatureInfoUrl(final int x, final int y, final WMSLayer l) {
         String url = getGetFeatureInfoPrefix();
 
-        if (bb != null && url != null) {
-            if (url.indexOf("?") < 0)//NOI18N
+        if ((bb != null) && (url != null)) {
+            if (url.indexOf("?") < 0)                                                                         // NOI18N
             {
-                url += "?";//NOI18N
+                url += "?";                                                                                   // NOI18N
             }
-            String version = getWmsCapabilities().getVersion();
-            if (version.trim().equals("1.0.0") || version.trim().equals("1.0") || version.trim().equals("1"))//NOI18N
+            final String version = getWmsCapabilities().getVersion();
+            if (version.trim().equals("1.0.0") || version.trim().equals("1.0") || version.trim().equals("1")) // NOI18N
             {
-                url += "&WMTVER=1.0.0&REQUEST=feature_info";//NOI18N
+                url += "&WMTVER=1.0.0&REQUEST=feature_info";                                                  // NOI18N
             } else {
-                url += "&VERSION=" + version + "&REQUEST=GetFeatureInfo";//NOI18N
+                url += "&VERSION=" + version + "&REQUEST=GetFeatureInfo";                                     // NOI18N
             }
-            url += "&BBOX=" + bb.getURLString();//NOI18N
-            url += "&WIDTH=" + width;//NOI18N
-            url += "&HEIGHT=" + height;//NOI18N
-            url += "&SRS=" + CismapBroker.getInstance().getSrs().getCode();//NOI18N
-            url += "&FORMAT=" + imageFormat;//NOI18N
-            url += "&TRANSPARENT=" + new Boolean(transparentImage).toString().toUpperCase();//NOI18N
-            url += "&BGCOLOR=" + backgroundColor;//NOI18N
-            //url+="&EXCEPTIONS="+"text/html";//exceptionsFormat;
+            url += "&BBOX=" + bb.getURLString();                                                              // NOI18N
+            url += "&WIDTH=" + width;                                                                         // NOI18N
+            url += "&HEIGHT=" + height;                                                                       // NOI18N
+            url += "&SRS=" + CismapBroker.getInstance().getSrs().getCode();                                   // NOI18N
+            url += "&FORMAT=" + imageFormat;                                                                  // NOI18N
+            url += "&TRANSPARENT=" + new Boolean(transparentImage).toString().toUpperCase();                  // NOI18N
+            url += "&BGCOLOR=" + backgroundColor;                                                             // NOI18N
+            // url+="&EXCEPTIONS="+"text/html";//exceptionsFormat;
             url += getLayersString(wmsLayers);
 
             if (hasEveryLayerAStyle(wmsLayers)) {
@@ -378,23 +475,28 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
                 url += getStylesString(wmsLayers);
             }
 
-            url += "&QUERY_LAYERS=" + l.getOgcCapabilitiesLayer().getName();//NOI18N
-            url += "&INFO_FORMAT=text/html";//NOI18N
-            url += "&X=" + x;//NOI18N
-            url += "&Y=" + y;//NOI18N
+            url += "&QUERY_LAYERS=" + l.getOgcCapabilitiesLayer().getName(); // NOI18N
+            url += "&INFO_FORMAT=text/html";                                 // NOI18N
+            url += "&X=" + x;                                                // NOI18N
+            url += "&Y=" + y;                                                // NOI18N
             return url;
         } else {
             return null;
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     private String getGetMapPrefix() {
         try {
-            Operation op = getWmsCapabilities().getRequest().getMapOperation();
+            final Operation op = getWmsCapabilities().getRequest().getMapOperation();
             String prefix = null;
 
             if (op != null) {
-                //ToDo UGLY WINNING WSS schneidet wenn es get und post gibt das geht.
+                // ToDo UGLY WINNING WSS schneidet wenn es get und post gibt das geht.
                 if (op.getGet() != null) {
                     prefix = op.getGet().toString();
                 } else if (op.getPost() != null) {
@@ -405,15 +507,19 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
             }
             return prefix;
         } catch (Throwable npe) {
-            logger.warn("Throwable in getMapPrefix", npe);//NOI18N
+            logger.warn("Throwable in getMapPrefix", npe); // NOI18N
             return null;
         }
-
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     private String getGetFeatureInfoPrefix() {
         try {
-            Operation op = getWmsCapabilities().getRequest().getFeatureInfoOperation();
+            final Operation op = getWmsCapabilities().getRequest().getFeatureInfoOperation();
             String prefix = null;
 
             if (op != null) {
@@ -421,64 +527,81 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
             }
             return prefix;
         } catch (NullPointerException npe) {
-            logger.warn("NPE in getGetMapPrefix()", npe);//NOI18N
+            logger.warn("NPE in getGetMapPrefix()", npe); // NOI18N
             return null;
         }
     }
 
-    private String getLayersString(Vector wmsLayers) {
-        StringBuilder layerString = new StringBuilder("");//NOI18N
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   wmsLayers  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String getLayersString(final Vector wmsLayers) {
+        final StringBuilder layerString = new StringBuilder("");                                              // NOI18N
         int counter = 0;
-        Iterator it = wmsLayers.iterator();
+        final Iterator it = wmsLayers.iterator();
         while (it.hasNext()) {
-            Object o = it.next();
-            if (o instanceof WMSLayer && ((WMSLayer) o).isEnabled()) {
+            final Object o = it.next();
+            if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
                 counter++;
                 if (counter > 1) {
-                    layerString.append(",");//NOI18N
+                    layerString.append(",");                                                                  // NOI18N
                 }
-                layerString.append(((WMSLayer) o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20"));//NOI18N
+                layerString.append(((WMSLayer)o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20")); // NOI18N
             }
         }
         if (counter > 0) {
-            return "&LAYERS=" + layerString.toString();//NOI18N
+            return "&LAYERS=" + layerString.toString();                                                       // NOI18N
         } else {
-            return "";//NOI18N
+            return "";                                                                                        // NOI18N
         }
     }
 
-    private String getStylesString(Vector wmsLayers) {
-        StringBuilder stylesString = new StringBuilder("");//NOI18N
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   wmsLayers  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String getStylesString(final Vector wmsLayers) {
+        final StringBuilder stylesString = new StringBuilder("");                                       // NOI18N
         int counter = 0;
-        Iterator it = wmsLayers.iterator();
+        final Iterator it = wmsLayers.iterator();
         while (it.hasNext()) {
-            Object o = it.next();
-            if (o instanceof WMSLayer && ((WMSLayer) o).getSelectedStyle() != null && ((WMSLayer) o).isEnabled()) {
+            final Object o = it.next();
+            if ((o instanceof WMSLayer) && (((WMSLayer)o).getSelectedStyle() != null) && ((WMSLayer)o).isEnabled()) {
                 counter++;
                 if (counter > 1) {
-                    stylesString.append(",");//NOI18N
+                    stylesString.append(",");                                                           // NOI18N
                 }
-                stylesString.append(((WMSLayer) o).getSelectedStyle().getName().replaceAll(" ", "%20"));//NOI18N
+                stylesString.append(((WMSLayer)o).getSelectedStyle().getName().replaceAll(" ", "%20")); // NOI18N
             }
         }
 //        if (counter>0){
 //            return "&STYLES="+stylesString;
 //        } else return "";
-        return "&STYLES=" + stylesString.toString(); //LDS Bugfix//NOI18N
+        return "&STYLES=" + stylesString.toString(); // LDS Bugfix//NOI18N
     }
 
     /**
-     * @param wmsLayers
-     * @return true, if every of the given layer has a selected style
+     * DOCUMENT ME!
+     *
+     * @param   wmsLayers  DOCUMENT ME!
+     *
+     * @return  true, if every of the given layer has a selected style
      */
-    private boolean hasEveryLayerAStyle(Vector wmsLayers) {
-        Iterator it = wmsLayers.iterator();
+    private boolean hasEveryLayerAStyle(final Vector wmsLayers) {
+        final Iterator it = wmsLayers.iterator();
 
         while (it.hasNext()) {
-            Object o = it.next();
+            final Object o = it.next();
 
-            if (o instanceof WMSLayer && ((WMSLayer) o).isEnabled()) {
-                if (((WMSLayer) o).getSelectedStyle() == null) {
+            if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
+                if (((WMSLayer)o).getSelectedStyle() == null) {
                     return false;
                 }
             }
@@ -487,18 +610,27 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
         return true;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public WMSCapabilities getWmsCapabilities() {
         return wmsCapabilities;
     }
 
-    public void setWmsCapabilities(WMSCapabilities wmsCapabilities) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  wmsCapabilities  DOCUMENT ME!
+     */
+    public void setWmsCapabilities(final WMSCapabilities wmsCapabilities) {
         this.wmsCapabilities = wmsCapabilities;
-
     }
 
     @Override
-    public void setPNode(PNode imageObject) {
-        boolean vis = imageObject.getVisible();
+    public void setPNode(final PNode imageObject) {
+        final boolean vis = imageObject.getVisible();
         this.imageObject = imageObject;
         imageObject.setVisible(vis);
     }
@@ -508,51 +640,74 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
         return imageObject;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getCapabilitiesUrl() {
         return capabilitiesUrl;
     }
 
-    public void setCapabilitiesUrl(String capabilitiesUrl) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  capabilitiesUrl  DOCUMENT ME!
+     */
+    public void setCapabilitiesUrl(final String capabilitiesUrl) {
         this.capabilitiesUrl = capabilitiesUrl;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Element getElement() {
-        Element layerConf = new Element("WMSServiceLayer");//NOI18N
-        layerConf.setAttribute("name", getName());//NOI18N
-        layerConf.setAttribute("visible", new Boolean(getPNode().getVisible()).toString());//NOI18N
-        layerConf.setAttribute("enabled", new Boolean(isEnabled()).toString());//NOI18N
-        layerConf.setAttribute("translucency", new Float(getTranslucency()).toString());//NOI18N
-        layerConf.setAttribute("bgColor", getBackgroundColor());//NOI18N
-        layerConf.setAttribute("imageFormat", getImageFormat());//NOI18N
-        layerConf.setAttribute("exceptionFormat", getExceptionsFormat());//NOI18N
-        CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, getCapabilitiesUrl(), false);
+        final Element layerConf = new Element("WMSServiceLayer");                                      // NOI18N
+        layerConf.setAttribute("name", getName());                                                     // NOI18N
+        layerConf.setAttribute("visible", new Boolean(getPNode().getVisible()).toString());            // NOI18N
+        layerConf.setAttribute("enabled", new Boolean(isEnabled()).toString());                        // NOI18N
+        layerConf.setAttribute("translucency", new Float(getTranslucency()).toString());               // NOI18N
+        layerConf.setAttribute("bgColor", getBackgroundColor());                                       // NOI18N
+        layerConf.setAttribute("imageFormat", getImageFormat());                                       // NOI18N
+        layerConf.setAttribute("exceptionFormat", getExceptionsFormat());                              // NOI18N
+        final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, getCapabilitiesUrl(), false);
         layerConf.addContent(capLink.getElement());
-        Iterator lit = getWMSLayers().iterator();
+        final Iterator lit = getWMSLayers().iterator();
         while (lit.hasNext()) {
-            Object elem = lit.next();
+            final Object elem = lit.next();
             if (elem instanceof WMSLayer) {
-                WMSLayer wmsLayer = (WMSLayer) elem;
-                Element wmsLayerConf = new Element("wmsLayer");//NOI18N
-                wmsLayerConf.setAttribute("name", wmsLayer.getOgcCapabilitiesLayer().getName());//NOI18N
-                wmsLayerConf.setAttribute("enabled", new Boolean(wmsLayer.isEnabled()).toString());//NOI18N
+                final WMSLayer wmsLayer = (WMSLayer)elem;
+                final Element wmsLayerConf = new Element("wmsLayer");                                  // NOI18N
+                wmsLayerConf.setAttribute("name", wmsLayer.getOgcCapabilitiesLayer().getName());       // NOI18N
+                wmsLayerConf.setAttribute("enabled", new Boolean(wmsLayer.isEnabled()).toString());    // NOI18N
                 try {
-                    wmsLayerConf.setAttribute("style", wmsLayer.getSelectedStyle().getName());//NOI18N
+                    wmsLayerConf.setAttribute("style", wmsLayer.getSelectedStyle().getName());         // NOI18N
                 } catch (Exception e) {
                 }
-                wmsLayerConf.setAttribute("info", new Boolean(wmsLayer.isQuerySelected()).toString());//NOI18N
+                wmsLayerConf.setAttribute("info", new Boolean(wmsLayer.isQuerySelected()).toString()); // NOI18N
                 layerConf.addContent(wmsLayerConf);
             }
         }
         return layerConf;
     }
 
-    private Layer searchForLayer(Layer layer, String name) {
-        if (layer.getName() != null && layer.getName().equals(name)) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   layer  DOCUMENT ME!
+     * @param   name   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Layer searchForLayer(final Layer layer, final String name) {
+        if ((layer.getName() != null) && layer.getName().equals(name)) {
             return layer;
         } else {
-            Layer[] lArr = layer.getChildren();
+            final Layer[] lArr = layer.getChildren();
             for (int i = 0; i < lArr.length; i++) {
-                Layer l = searchForLayer(lArr[i], name);
+                final Layer l = searchForLayer(lArr[i], name);
                 if (l != null) {
                     return l;
                 }
@@ -597,14 +752,14 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
     }
 
     @Override
-    public boolean propertyEquals(Object obj) {
-        //TODO Dieses equals wird 10000 mal aufgerufen
+    public boolean propertyEquals(final Object obj) {
+        // TODO Dieses equals wird 10000 mal aufgerufen
         if (obj instanceof WMSServiceLayer) {
-            WMSServiceLayer tester = (WMSServiceLayer) obj;
+            final WMSServiceLayer tester = (WMSServiceLayer)obj;
             if (getName().equals(tester.getName())
-                    && getGetMapPrefix().equals(tester.getGetMapPrefix())
-                    && getLayersString(wmsLayers).equals(tester.getLayersString(tester.wmsLayers))
-                    && getStylesString(wmsLayers).equals(tester.getStylesString(tester.wmsLayers))) {
+                        && getGetMapPrefix().equals(tester.getGetMapPrefix())
+                        && getLayersString(wmsLayers).equals(tester.getLayersString(tester.wmsLayers))
+                        && getStylesString(wmsLayers).equals(tester.getStylesString(tester.wmsLayers))) {
                 return true;
             }
         }

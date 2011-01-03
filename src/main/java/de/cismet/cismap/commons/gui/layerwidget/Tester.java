@@ -1,102 +1,92 @@
-/*
- * Tester.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 18. Oktober 2005, 11:22
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
+import java.awt.dnd.DnDConstants;
+
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.tools.configuration.ConfigurationManager;
-import java.awt.dnd.DnDConstants;
 
+import de.cismet.tools.configuration.ConfigurationManager;
 
 /**
+ * DOCUMENT ME!
  *
- * @author  thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
-public class Tester extends javax.swing.JFrame    {
-  private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-   LayerWidget layerWidget;
+public class Tester extends javax.swing.JFrame {
+
+    //~ Instance fields --------------------------------------------------------
+
+    LayerWidget layerWidget;
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
     // added by therter to fix some errors.
     private MappingComponent mapC = new MappingComponent();
-    /** Creates new form Tester */
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel panCaps;
+    private javax.swing.JPanel panLayerWidget;
+    private javax.swing.JPanel panMap;
+    // End of variables declaration//GEN-END:variables
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates new form Tester.
+     */
     public Tester() {
-       try {
-            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource("de/cismet/cismap/commons/demo/log4j.properties"));//NOI18N
-        }
-        catch (Exception e) {
+        try {
+            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource(
+                    "de/cismet/cismap/commons/demo/log4j.properties")); // NOI18N
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         try {
-            //javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()) ;
-            //javax.swing.UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
-            //javax.swing.UIManager.setLookAndFeel(new PlasticLookAndFeel());
-            //javax.swing.UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
+            // javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()) ;
+            // javax.swing.UIManager.setLookAndFeel(new Plastic3DLookAndFeel());
+            // javax.swing.UIManager.setLookAndFeel(new PlasticLookAndFeel());
+            // javax.swing.UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
             javax.swing.UIManager.setLookAndFeel(new com.sun.java.swing.plaf.windows.WindowsLookAndFeel());
-           // UIManager.setLookAndFeel(new PlasticLookAndFeel());
-           //javax.swing.UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
+            // UIManager.setLookAndFeel(new PlasticLookAndFeel());
+            // javax.swing.UIManager.setLookAndFeel(new PlasticXPLookAndFeel());
         } catch (Exception e) {
-            log.warn("Error while configuring the Look&Feel!",e);//NOI18N
+            log.warn("Error while configuring the Look&Feel!", e); // NOI18N
         }
         initComponents();
-        CapabilityWidget capWidget=new CapabilityWidget();
+        final CapabilityWidget capWidget = new CapabilityWidget();
         panCaps.add(capWidget);
-        layerWidget=new LayerWidget(mapC);
+        layerWidget = new LayerWidget(mapC);
         panLayerWidget.add(layerWidget);
         validateTree();
         CismapBroker.getInstance().setMappingComponent(mapC);
-        mapC.setMappingModel(layerWidget.getMappingModel()) ;
-        ConfigurationManager cm=new ConfigurationManager();
+        mapC.setMappingModel(layerWidget.getMappingModel());
+        final ConfigurationManager cm = new ConfigurationManager();
         cm.addConfigurable(capWidget);
         cm.addConfigurable(layerWidget);
         cm.addConfigurable(mapC);
-        cm.setFileName("configuration.xml");//NOI18N
-        cm.setFolder(".cismap");//NOI18N
+        cm.setFileName("configuration.xml");                       // NOI18N
+        cm.setFolder(".cismap");                                   // NOI18N
         cm.configure();
-       
-        
-                
-        
-       
-       
     }
 
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -146,26 +136,32 @@ public class Tester extends javax.swing.JFrame    {
 
         jButton1.setText(org.openide.util.NbBundle.getMessage(Tester.class, "Tester.jButton1.text")); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton1ActionPerformed(evt);
+                }
+            });
         jPanel1.add(jButton1);
 
         jButton3.setText(org.openide.util.NbBundle.getMessage(Tester.class, "Tester.jButton3.text")); // NOI18N
         jButton3.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton3ActionPerformed(evt);
+                }
+            });
         jPanel1.add(jButton3);
 
         jButton4.setText(org.openide.util.NbBundle.getMessage(Tester.class, "Tester.jButton4.text")); // NOI18N
         jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton4ActionPerformed(evt);
+                }
+            });
         jPanel1.add(jButton4);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -175,45 +171,50 @@ public class Tester extends javax.swing.JFrame    {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         getContentPane().add(jPanel1, gridBagConstraints);
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-910)/2, (screenSize.height-606)/2, 910, 606);
-    }// </editor-fold>//GEN-END:initComponents
+        final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width - 910) / 2, (screenSize.height - 606) / 2, 910, 606);
+    } // </editor-fold>//GEN-END:initComponents
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        mapC.getRasterServiceLayer().removeAllChildren();// TODO add your handling code here:
-    }//GEN-LAST:event_jButton4ActionPerformed
-
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        validateTree();
-        mapC.showInternalLayerWidget(!mapC.isInternalLayerWidgetVisible(),500);
-        
-    }//GEN-LAST:event_jButton3ActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        mapC.setMappingModel(layerWidget.getMappingModel());
-    }//GEN-LAST:event_jButton1ActionPerformed
-    
     /**
-     * @param args the command line arguments
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
      */
-    public static void main(String args[]) {
+    private void jButton4ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton4ActionPerformed
+        mapC.getRasterServiceLayer().removeAllChildren();                        // TODO add your handling code here:
+    }                                                                            //GEN-LAST:event_jButton4ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton3ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton3ActionPerformed
+        validateTree();
+        mapC.showInternalLayerWidget(!mapC.isInternalLayerWidgetVisible(), 500);
+    }                                                                            //GEN-LAST:event_jButton3ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
+        mapC.setMappingModel(layerWidget.getMappingModel());
+    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  the command line arguments
+     */
+    public static void main(final String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Tester().setVisible(true);
-            }
-        });
+
+                @Override
+                public void run() {
+                    new Tester().setVisible(true);
+                }
+            });
     }
-
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel panCaps;
-    private javax.swing.JPanel panLayerWidget;
-    private javax.swing.JPanel panMap;
-    // End of variables declaration//GEN-END:variables
-    
 }

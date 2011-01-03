@@ -1,33 +1,44 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.features;
 
 /**
+ * DOCUMENT ME!
  *
- * @author srichter
+ * @author   srichter
+ * @version  $Revision$, $Date$
  */
 public abstract class FeatureCollectionAdapter implements FeatureCollectionListener {
 
+    //~ Methods ----------------------------------------------------------------
+
     @Override
-    public void featuresAdded(FeatureCollectionEvent fce) {
+    public void featuresAdded(final FeatureCollectionEvent fce) {
     }
 
     @Override
-    public void allFeaturesRemoved(FeatureCollectionEvent fce) {
+    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
     }
 
     @Override
-    public void featuresRemoved(FeatureCollectionEvent fce) {
+    public void featuresRemoved(final FeatureCollectionEvent fce) {
     }
 
     @Override
-    public void featuresChanged(FeatureCollectionEvent fce) {
+    public void featuresChanged(final FeatureCollectionEvent fce) {
     }
 
     @Override
-    public void featureSelectionChanged(FeatureCollectionEvent fce) {
+    public void featureSelectionChanged(final FeatureCollectionEvent fce) {
     }
 
     @Override
-    public void featureReconsiderationRequested(FeatureCollectionEvent fce) {
+    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
     }
 
     @Override

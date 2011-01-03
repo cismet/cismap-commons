@@ -1,66 +1,53 @@
-/*
- * Template.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 10. Juli 2006, 15:55
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.gui.printing;
+
+import org.jdom.Element;
 
 import java.util.List;
 import java.util.Vector;
-import org.jdom.Element;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class Template {
-    private String title="";//NOI18N
-    private String file="";//NOI18N
-    private String className="";//NOI18N
-    private String mapPlaceholder="";//NOI18N
-    private int mapWidth=0;
-    private int mapHeight=0;
-    private String scaleDemoninatorPlaceholder="";//NOI18N
-    private Vector<AdditionalTemplateParameter> additionalParameters=new Vector<AdditionalTemplateParameter>();
-    
-    /** Creates a new instance of Template */
-    public Template(Element template) throws Exception{
-        title=template.getAttribute("title").getValue();//NOI18N
-        file=template.getAttribute("file").getValue();//NOI18N
-        className=template.getAttribute("className").getValue();//NOI18N
-        mapPlaceholder=template.getAttribute("mapPlaceholder").getValue();//NOI18N
-        mapWidth=template.getAttribute("mapWidth").getIntValue();//NOI18N
-        mapHeight=template.getAttribute("mapHeight").getIntValue();//NOI18N
-        scaleDemoninatorPlaceholder=template.getAttribute("scaleDenominatorPlaceholder").getValue();//NOI18N
+
+    //~ Instance fields --------------------------------------------------------
+
+    private String title = "";                       // NOI18N
+    private String file = "";                        // NOI18N
+    private String className = "";                   // NOI18N
+    private String mapPlaceholder = "";              // NOI18N
+    private int mapWidth = 0;
+    private int mapHeight = 0;
+    private String scaleDemoninatorPlaceholder = ""; // NOI18N
+    private Vector<AdditionalTemplateParameter> additionalParameters = new Vector<AdditionalTemplateParameter>();
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of Template.
+     *
+     * @param   template  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public Template(final Element template) throws Exception {
+        title = template.getAttribute("title").getValue();                                             // NOI18N
+        file = template.getAttribute("file").getValue();                                               // NOI18N
+        className = template.getAttribute("className").getValue();                                     // NOI18N
+        mapPlaceholder = template.getAttribute("mapPlaceholder").getValue();                           // NOI18N
+        mapWidth = template.getAttribute("mapWidth").getIntValue();                                    // NOI18N
+        mapHeight = template.getAttribute("mapHeight").getIntValue();                                  // NOI18N
+        scaleDemoninatorPlaceholder = template.getAttribute("scaleDenominatorPlaceholder").getValue(); // NOI18N
 //        List additionalParameterList=template.getChildren("parameter");
 //        for (Object elem : additionalParameterList) {
 //            if (elem instanceof Element) {
@@ -70,97 +57,187 @@ public class Template {
 //        }
     }
 
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
     public String toString() {
         return getTitle();
     }
-    
-    public Element getElement(boolean selected) {
-        Element e=new Element("template");//NOI18N
-        e.setAttribute("selected",String.valueOf(selected));//NOI18N
-        e.setAttribute("title",getTitle());//NOI18N
-        e.setAttribute("file",getFile());//NOI18N
-        e.setAttribute("className", getClassName());//NOI18N
-        e.setAttribute("mapPlaceholder",getMapPlaceholder());//NOI18N
-        e.setAttribute("mapWidth",getMapWidth()+"");//NOI18N
-        e.setAttribute("mapHeight",getMapHeight()+"");//NOI18N
-        e.setAttribute("scaleDenominatorPlaceholder",getScaleDemoninatorPlaceholder());//NOI18N
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   selected  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Element getElement(final boolean selected) {
+        final Element e = new Element("template");                                       // NOI18N
+        e.setAttribute("selected", String.valueOf(selected));                            // NOI18N
+        e.setAttribute("title", getTitle());                                             // NOI18N
+        e.setAttribute("file", getFile());                                               // NOI18N
+        e.setAttribute("className", getClassName());                                     // NOI18N
+        e.setAttribute("mapPlaceholder", getMapPlaceholder());                           // NOI18N
+        e.setAttribute("mapWidth", getMapWidth() + "");                                  // NOI18N
+        e.setAttribute("mapHeight", getMapHeight() + "");                                // NOI18N
+        e.setAttribute("scaleDenominatorPlaceholder", getScaleDemoninatorPlaceholder()); // NOI18N
 //        for (AdditionalTemplateParameter elem : additionalParameters) {
 //            e.addContent(elem.getElement());
 //        }
         return e;
     }
-    public boolean equals(Object obj) {
-        return obj instanceof Template && ((Template)obj).title==title 
-                && ((Template)obj).file==file 
-                && ((Template)obj).getClassName()==getClassName() 
-                && ((Template)obj).mapPlaceholder==mapPlaceholder 
-                && ((Template)obj).mapWidth==mapWidth 
-                && ((Template)obj).mapHeight==mapHeight 
-                && ((Template)obj).scaleDemoninatorPlaceholder==scaleDemoninatorPlaceholder ;
+    @Override
+    public boolean equals(final Object obj) {
+        return (obj instanceof Template) && (((Template)obj).title == title)
+                    && (((Template)obj).file == file)
+                    && (((Template)obj).getClassName() == getClassName())
+                    && (((Template)obj).mapPlaceholder == mapPlaceholder)
+                    && (((Template)obj).mapWidth == mapWidth)
+                    && (((Template)obj).mapHeight == mapHeight)
+                    && (((Template)obj).scaleDemoninatorPlaceholder == scaleDemoninatorPlaceholder);
     }
-    
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  title  DOCUMENT ME!
+     */
+    public void setTitle(final String title) {
         this.title = title;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getFile() {
         return file;
     }
 
-    public void setFile(String file) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  file  DOCUMENT ME!
+     */
+    public void setFile(final String file) {
         this.file = file;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getMapPlaceholder() {
         return mapPlaceholder;
     }
 
-    public void setMapPlaceholder(String mapPlaceholder) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mapPlaceholder  DOCUMENT ME!
+     */
+    public void setMapPlaceholder(final String mapPlaceholder) {
         this.mapPlaceholder = mapPlaceholder;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getScaleDemoninatorPlaceholder() {
         return scaleDemoninatorPlaceholder;
     }
 
-    public void setScaleDemoninatorPlaceholder(String scaleDemoninatorPlaceholder) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  scaleDemoninatorPlaceholder  DOCUMENT ME!
+     */
+    public void setScaleDemoninatorPlaceholder(final String scaleDemoninatorPlaceholder) {
         this.scaleDemoninatorPlaceholder = scaleDemoninatorPlaceholder;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Vector<AdditionalTemplateParameter> getAdditionalParameters() {
         return additionalParameters;
     }
 
-    public void setAdditionalParameters(Vector<AdditionalTemplateParameter> additionalParameters) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  additionalParameters  DOCUMENT ME!
+     */
+    public void setAdditionalParameters(final Vector<AdditionalTemplateParameter> additionalParameters) {
         this.additionalParameters = additionalParameters;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public int getMapHeight() {
         return mapHeight;
     }
 
-    public void setMapHeight(int mapHeight) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mapHeight  DOCUMENT ME!
+     */
+    public void setMapHeight(final int mapHeight) {
         this.mapHeight = mapHeight;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public int getMapWidth() {
         return mapWidth;
     }
 
-    public void setMapWidth(int mapWidth) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mapWidth  DOCUMENT ME!
+     */
+    public void setMapWidth(final int mapWidth) {
         this.mapWidth = mapWidth;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getClassName() {
         return className;
     }
 
-    public void setClassName(String className) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  className  DOCUMENT ME!
+     */
+    public void setClassName(final String className) {
         this.className = className;
     }
 }

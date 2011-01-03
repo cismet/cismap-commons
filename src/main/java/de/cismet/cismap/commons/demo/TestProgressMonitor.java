@@ -1,9 +1,15 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * TestProgressMonitor.java
  *
  * Created on 27. Juni 2005, 10:51
  */
-
 package de.cismet.cismap.commons.demo;
 import javax.swing.JComponent;
 import javax.swing.JInternalFrame;
@@ -11,48 +17,86 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-
 /**
+ * DOCUMENT ME!
  *
- * @author  thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class TestProgressMonitor extends javax.swing.JFrame {
-    
-    /** Creates new form TestProgressMonitor */
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem aboutMenuItem;
+    private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JMenuItem contentsMenuItem;
+    private javax.swing.JMenuItem copyMenuItem;
+    private javax.swing.JMenuItem cutMenuItem;
+    private javax.swing.JMenuItem deleteMenuItem;
+    private javax.swing.JMenu editMenu;
+    private javax.swing.JMenuItem exitMenuItem;
+    private javax.swing.JMenu fileMenu;
+    private javax.swing.JMenu helpMenu;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JSlider jSlider1;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem openMenuItem;
+    private javax.swing.JInternalFrame palette;
+    private javax.swing.JPanel panTest;
+    private javax.swing.JMenuItem pasteMenuItem;
+    private javax.swing.JMenuItem saveAsMenuItem;
+    private javax.swing.JMenuItem saveMenuItem;
+    // End of variables declaration//GEN-END:variables
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates new form TestProgressMonitor.
+     */
     public TestProgressMonitor() {
         initComponents();
-        JSlider js=new JSlider();
+        final JSlider js = new JSlider();
         jProgressBar1.add(js);
-        js.setBounds(0,0,jProgressBar1.getWidth(),jProgressBar1.getHeight()) ;
+        js.setBounds(0, 0, jProgressBar1.getWidth(), jProgressBar1.getHeight());
         js.setOpaque(false);
         js.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                jProgressBar1.setValue(((JSlider)(e.getSource())).getValue());
-            }
-            
-        });
+
+                @Override
+                public void stateChanged(final ChangeEvent e) {
+                    jProgressBar1.setValue(((JSlider)(e.getSource())).getValue());
+                }
+            });
         pack();
 //        panTest.setBounds(0, 0, jdp.getWidth(), jdp.getHeight());
 //        jdp.add(panTest, 0-1);
-//        palette.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);     
-//       
+//        palette.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);
+//
 //
 //        jdp.add(palette);
 //        //getLayeredPane().add(palette,6);
-//        
+//
 ////        p.setSize(1000,1000);
 ////        p.setOpaque(false);
 //       // p.add(palette);
 //        System.out.println(palette.getDesktopPane());
-//        
-//        
-//        
-//        
+//
+//
+//
+//
 //        palette.pack();
 //        palette.show();
 //        palette.setVisible(true);
 //        palette.addMouseMotionListener(new MouseMotionAdapter() {
-//                public void 	mouseDragged(MouseEvent e) {
+//                public void   mouseDragged(MouseEvent e) {
 //                    System.out.println("+");
 //                }
 //        });
@@ -65,7 +109,7 @@ public class TestProgressMonitor extends javax.swing.JFrame {
 //                y=(int)component.getLocation().getY();
 //                super.beginDraggingFrame(component);
 //                startTime=System.currentTimeMillis();
-//                
+//
 //            }
 //            public void dragFrame(JComponent component, int newX, int newY) {
 //                super.dragFrame(component, newX, newY);
@@ -82,23 +126,22 @@ public class TestProgressMonitor extends javax.swing.JFrame {
 //                if (velocity>0.2) {
 //                    System.out.println("Schnapp");
 //                }
-//                
-//                
-//                
-//                
+//
+//
+//
+//
 //            }
 //        });
     }
 
-    
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
+     * content of this method is always regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-
         palette = new javax.swing.JInternalFrame();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -133,20 +176,26 @@ public class TestProgressMonitor extends javax.swing.JFrame {
         palette.setResizable(true);
         palette.setVisible(true);
         palette.addComponentListener(new java.awt.event.ComponentAdapter() {
-            public void componentMoved(java.awt.event.ComponentEvent evt) {
-                paletteComponentMoved(evt);
-            }
-        });
+
+                @Override
+                public void componentMoved(final java.awt.event.ComponentEvent evt) {
+                    paletteComponentMoved(evt);
+                }
+            });
         palette.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
-            public void mouseDragged(java.awt.event.MouseEvent evt) {
-                paletteMouseDragged(evt);
-            }
-        });
+
+                @Override
+                public void mouseDragged(final java.awt.event.MouseEvent evt) {
+                    paletteMouseDragged(evt);
+                }
+            });
         palette.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                paletteMousePressed(evt);
-            }
-        });
+
+                @Override
+                public void mousePressed(final java.awt.event.MouseEvent evt) {
+                    paletteMousePressed(evt);
+                }
+            });
 
         jLabel1.setText("jLabel1");
         palette.getContentPane().add(jLabel1, java.awt.BorderLayout.EAST);
@@ -168,10 +217,12 @@ public class TestProgressMonitor extends javax.swing.JFrame {
 
         jButton2.setText("jButton2");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton2ActionPerformed(evt);
+                }
+            });
         panTest.add(jButton2, java.awt.BorderLayout.SOUTH);
 
         jLabel5.setText("jLabel5");
@@ -192,142 +243,187 @@ public class TestProgressMonitor extends javax.swing.JFrame {
         getContentPane().add(jSlider1);
         jSlider1.setBounds(230, 160, 200, 40);
 
-        fileMenu.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.fileMenu.text")); // NOI18N
+        fileMenu.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.fileMenu.text")); // NOI18N
 
-        openMenuItem.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.openMenuItem.text")); // NOI18N
+        openMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.openMenuItem.text")); // NOI18N
         openMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                openMenuItemActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    openMenuItemActionPerformed(evt);
+                }
+            });
         fileMenu.add(openMenuItem);
 
-        saveMenuItem.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.saveMenuItem.text")); // NOI18N
+        saveMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.saveMenuItem.text")); // NOI18N
         fileMenu.add(saveMenuItem);
 
-        saveAsMenuItem.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.saveAsMenuItem")); // NOI18N
+        saveAsMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.saveAsMenuItem")); // NOI18N
         fileMenu.add(saveAsMenuItem);
 
-        exitMenuItem.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.exitMenuItem.text")); // NOI18N
+        exitMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.exitMenuItem.text")); // NOI18N
         exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exitMenuItemActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    exitMenuItemActionPerformed(evt);
+                }
+            });
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
 
-        editMenu.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.editMenu")); // NOI18N
+        editMenu.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.editMenu")); // NOI18N
 
-        cutMenuItem.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.cutMenuItem")); // NOI18N
+        cutMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.cutMenuItem")); // NOI18N
         editMenu.add(cutMenuItem);
 
-        copyMenuItem.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.copyMenuItem.text")); // NOI18N
+        copyMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.copyMenuItem.text")); // NOI18N
         editMenu.add(copyMenuItem);
 
-        pasteMenuItem.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.pasteMenuItem.text")); // NOI18N
+        pasteMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.pasteMenuItem.text")); // NOI18N
         editMenu.add(pasteMenuItem);
 
-        deleteMenuItem.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.deleteMenuItem.text")); // NOI18N
+        deleteMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.deleteMenuItem.text")); // NOI18N
         editMenu.add(deleteMenuItem);
 
         menuBar.add(editMenu);
 
-        helpMenu.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.helpMenu")); // NOI18N
+        helpMenu.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.helpMenu")); // NOI18N
 
-        contentsMenuItem.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.contentsMenuItem.text")); // NOI18N
+        contentsMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.contentsMenuItem.text")); // NOI18N
         helpMenu.add(contentsMenuItem);
 
-        aboutMenuItem.setText(org.openide.util.NbBundle.getMessage(TestProgressMonitor.class, "TestProgressMonitor.aboutMenuItem.text")); // NOI18N
+        aboutMenuItem.setText(org.openide.util.NbBundle.getMessage(
+                TestProgressMonitor.class,
+                "TestProgressMonitor.aboutMenuItem.text")); // NOI18N
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(helpMenu);
 
         setJMenuBar(menuBar);
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-400)/2, (screenSize.height-300)/2, 400, 300);
-    }// </editor-fold>//GEN-END:initComponents
+        final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds((screenSize.width - 400) / 2, (screenSize.height - 300) / 2, 400, 300);
+    } // </editor-fold>//GEN-END:initComponents
 
-    private void paletteMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_paletteMousePressed
-        
-    }//GEN-LAST:event_paletteMousePressed
-
-    private void paletteMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_paletteMouseDragged
-    }//GEN-LAST:event_paletteMouseDragged
-
-    private void paletteComponentMoved(java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_paletteComponentMoved
-    
-       
-    }//GEN-LAST:event_paletteComponentMoved
-    
-    private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
-        System.exit(0);
-    }//GEN-LAST:event_exitMenuItemActionPerformed
-
-    private void openMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openMenuItemActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_openMenuItemActionPerformed
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
-    
     /**
-     * @param args the command line arguments
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
      */
-    public static void main(String args[]) {
+    private void paletteMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_paletteMousePressed
+    }                                                                       //GEN-LAST:event_paletteMousePressed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void paletteMouseDragged(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_paletteMouseDragged
+    }                                                                       //GEN-LAST:event_paletteMouseDragged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void paletteComponentMoved(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_paletteComponentMoved
+    }                                                                             //GEN-LAST:event_paletteComponentMoved
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void exitMenuItemActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_exitMenuItemActionPerformed
+        System.exit(0);
+    }                                                                                //GEN-LAST:event_exitMenuItemActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void openMenuItemActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_openMenuItemActionPerformed
+        // TODO add your handling code here:
+    } //GEN-LAST:event_openMenuItemActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton2ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+    } //GEN-LAST:event_jButton2ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  the command line arguments
+     */
+    public static void main(final String[] args) {
         java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new TestProgressMonitor().setVisible(true);
-            }
-        });
+
+                @Override
+                public void run() {
+                    new TestProgressMonitor().setVisible(true);
+                }
+            });
     }
-    
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JMenuItem aboutMenuItem;
-    private javax.swing.ButtonGroup buttonGroup1;
-    private javax.swing.JMenuItem contentsMenuItem;
-    private javax.swing.JMenuItem copyMenuItem;
-    private javax.swing.JMenuItem cutMenuItem;
-    private javax.swing.JMenuItem deleteMenuItem;
-    private javax.swing.JMenu editMenu;
-    private javax.swing.JMenuItem exitMenuItem;
-    private javax.swing.JMenu fileMenu;
-    private javax.swing.JMenu helpMenu;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JProgressBar jProgressBar1;
-    private javax.swing.JSlider jSlider1;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JMenuBar menuBar;
-    private javax.swing.JMenuItem openMenuItem;
-    private javax.swing.JInternalFrame palette;
-    private javax.swing.JPanel panTest;
-    private javax.swing.JMenuItem pasteMenuItem;
-    private javax.swing.JMenuItem saveAsMenuItem;
-    private javax.swing.JMenuItem saveMenuItem;
-    // End of variables declaration//GEN-END:variables
-    
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
     public class FlyingWidget extends JInternalFrame {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new FlyingWidget object.
+         */
         public FlyingWidget() {
             super();
-            putClientProperty("JInternalFrame.isPalette", Boolean.TRUE);//NOI18N
+            putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N
+        }
 
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  boundaryComponent  DOCUMENT ME!
+         */
+        public void setBoundaryComponent(final JComponent boundaryComponent) {
         }
-        public void setBoundaryComponent(JComponent boundaryComponent) {
-            
-        }
-        
     }
-    
-    
 }

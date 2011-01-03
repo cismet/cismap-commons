@@ -1,73 +1,68 @@
-/*
- * CapabilitiesPreferences.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 2. M\u00E4rz 2006, 15:37
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.preferences;
+
+import org.jdom.Element;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
-import org.jdom.Element;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class CapabilitiesPreferences {
-    
-    final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(CapabilitiesPreferences.class);    
-    private TreeMap<Integer, CapabilityLink> capabilities=new TreeMap<Integer, CapabilityLink>();
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(CapabilitiesPreferences.class);
+
+    //~ Instance fields --------------------------------------------------------
+
+    private TreeMap<Integer, CapabilityLink> capabilities = new TreeMap<Integer, CapabilityLink>();
     private CapabilitiesListTreeNode capabilitiesListTree;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new CapabilitiesPreferences object.
+     */
     public CapabilitiesPreferences() {
     }
-    /** Creates a new instance of CapabilitiesPreferences */
-    public CapabilitiesPreferences(Element serverParent,Element localParent) {
-        Element serverRoot=serverParent.getChild("cismapCapabilitiesPreferences");//NOI18N
-        Element clientRoot=localParent.getChild("cismapCapabilitiesPreferences");//NOI18N
-        List caps=clientRoot.getChildren("capabilities");//NOI18N
-        Iterator<Element> it=caps.iterator();
-        int counter=0;
+    /**
+     * Creates a new instance of CapabilitiesPreferences.
+     *
+     * @param  serverParent  DOCUMENT ME!
+     * @param  localParent   DOCUMENT ME!
+     */
+    public CapabilitiesPreferences(final Element serverParent, final Element localParent) {
+        final Element serverRoot = serverParent.getChild("cismapCapabilitiesPreferences"); // NOI18N
+        final Element clientRoot = localParent.getChild("cismapCapabilitiesPreferences");  // NOI18N
+        final List caps = clientRoot.getChildren("capabilities");                          // NOI18N
+        final Iterator<Element> it = caps.iterator();
+        int counter = 0;
         while (it.hasNext()) {
             try {
-                Element elem =it.next();
-                String type=elem.getAttribute("type").getValue();//NOI18N
-                String link=elem.getTextTrim();
-                String subparent=elem.getAttributeValue("subparent");//NOI18N
-                boolean active=false;
-                try {active=elem.getAttribute("active").getBooleanValue();}catch(Exception unhandled) {}//NOI18N
-                capabilities.put(new Integer(counter++),new CapabilityLink(type,link,active,subparent));
+                final Element elem = it.next();
+                final String type = elem.getAttribute("type").getValue();                  // NOI18N
+                final String link = elem.getTextTrim();
+                final String subparent = elem.getAttributeValue("subparent");              // NOI18N
+                boolean active = false;
+                try {
+                    active = elem.getAttribute("active").getBooleanValue();
+                } catch (Exception unhandled) {
+                }                                                                          // NOI18N
+                capabilities.put(new Integer(counter++), new CapabilityLink(type, link, active, subparent));
             } catch (Throwable t) {
-                log.warn("Error while reading the CapabilityPreferences.",t);//NOI18N
+                log.warn("Error while reading the CapabilityPreferences.", t);             // NOI18N
             }
         }
 
@@ -75,37 +70,40 @@ public class CapabilitiesPreferences {
         capabilitiesListTree = createCapabilitiesListTreeNode(null, serverRoot);
     }
 
+    //~ Methods ----------------------------------------------------------------
+
     /**
-     * Erzeugt rekursiv aus einem JDom-Element einen CapabilitiesList-Knoten
-     * samt CapabilitiesList und Unterknoten.
+     * Erzeugt rekursiv aus einem JDom-Element einen CapabilitiesList-Knoten samt CapabilitiesList und Unterknoten.
      *
-     * @param nodetitle  Title des CapabilitiesList-Knotens
-     * @param element JDom-Element
-     * @return CapabilitiesList-Knoten
+     * @param   nodetitle  Title des CapabilitiesList-Knotens
+     * @param   element    JDom-Element
+     *
+     * @return  CapabilitiesList-Knoten
      */
-    private static CapabilitiesListTreeNode createCapabilitiesListTreeNode(String nodetitle, Element element) {
-        CapabilitiesListTreeNode node = new CapabilitiesListTreeNode();
+    private static CapabilitiesListTreeNode createCapabilitiesListTreeNode(final String nodetitle,
+            final Element element) {
+        final CapabilitiesListTreeNode node = new CapabilitiesListTreeNode();
         int listCounter = 0;
 
         node.setTitle(nodetitle);
-        
-        TreeMap<Integer, CapabilityLink> capabilitiesList = new TreeMap<Integer, CapabilityLink>();
-        for (Element elem : (List<Element>)element.getChildren("capabilitiesList")) {//NOI18N
+
+        final TreeMap<Integer, CapabilityLink> capabilitiesList = new TreeMap<Integer, CapabilityLink>();
+        for (final Element elem : (List<Element>)element.getChildren("capabilitiesList")) { // NOI18N
             try {
-                String type = elem.getAttribute("type").getValue();//NOI18N
-                String title = elem.getAttribute("titlestring").getValue();//NOI18N
+                final String type = elem.getAttribute("type").getValue();                   // NOI18N
+                final String title = elem.getAttribute("titlestring").getValue();           // NOI18N
 
                 if (type.equals(CapabilityLink.MENU)) {
                     // Unterknoten erzeugen
                     node.addSubnode(createCapabilitiesListTreeNode(title, elem));
                 } else {
                     // CapabilitiesList-Eintrag erzeugen
-                    String link = elem.getTextTrim();
-                    String subparent = elem.getAttributeValue("subparent");//NOI18N
+                    final String link = elem.getTextTrim();
+                    final String subparent = elem.getAttributeValue("subparent");  // NOI18N
                     capabilitiesList.put(new Integer(listCounter++), new CapabilityLink(type, link, title, subparent));
                 }
             } catch (Throwable t) {
-                log.warn("Error while reading the CapabilityListPreferences.", t);//NOI18N
+                log.warn("Error while reading the CapabilityListPreferences.", t); // NOI18N
             }
         }
 
@@ -115,17 +113,31 @@ public class CapabilitiesPreferences {
         // fertig
         return node;
     }
- 
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public TreeMap<Integer, CapabilityLink> getCapabilities() {
         return capabilities;
     }
 
-    public void setCapabilities(TreeMap<Integer, CapabilityLink> capabilities) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  capabilities  DOCUMENT ME!
+     */
+    public void setCapabilities(final TreeMap<Integer, CapabilityLink> capabilities) {
         this.capabilities = capabilities;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public CapabilitiesListTreeNode getCapabilitiesListTree() {
         return capabilitiesListTree;
     }
-
 }

@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * SimpleSingleSelectionListener.java
  *
@@ -5,50 +12,75 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolox.event.PNotificationCenter;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
-import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 
 /**
+ * DOCUMENT ME!
  *
- * @author hell
+ * @author   hell
+ * @version  $Revision$, $Date$
  */
 public class SimpleSingleSelectionListener extends PBasicInputEventHandler {
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION";//NOI18N
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION"; // NOI18N
+
+    //~ Instance fields --------------------------------------------------------
+
     PFeature sel = null;
-    private int clickCount = 0;
     MappingComponent mc = null;
-    
-    //Selektiere einen PNode
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private int clickCount = 0;
+
+    //~ Methods ----------------------------------------------------------------
+
+    // Selektiere einen PNode
     @Override
-    public void mouseClicked(edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        log.debug("mouseClicked():" + pInputEvent.getPickedNode());//NOI18N
-        Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[]{PFeature.class});
+    public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+        if (log.isDebugEnabled()) {
+            log.debug("mouseClicked():" + pInputEvent.getPickedNode());   // NOI18N
+        }
+        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
         clickCount = pInputEvent.getClickCount();
         if (pInputEvent.getComponent() instanceof MappingComponent) {
-            mc = (MappingComponent) pInputEvent.getComponent();
+            mc = (MappingComponent)pInputEvent.getComponent();
         }
         if (pInputEvent.getButton() == 3) {
-            log.debug("right mouseclick");//NOI18N
-            if (o instanceof PFeature && ((PFeature) o).getFeature() instanceof XStyledFeature) {
-                XStyledFeature xf = (XStyledFeature) ((PFeature) o).getFeature();
-                log.debug("valid object under pointer");//NOI18N
-                JPopupMenu popup = new JPopupMenu(org.openide.util.NbBundle.getMessage(SimpleSingleSelectionListener.class, "SimpleSingleSelectionListener.popup.text"));//NOI18N
-                JMenuItem m = new JMenuItem(org.openide.util.NbBundle.getMessage(SimpleSingleSelectionListener.class, "SimpleSingleSelectionListener.m.text"));//NOI18N
+            if (log.isDebugEnabled()) {
+                log.debug("right mouseclick");                            // NOI18N
+            }
+            if ((o instanceof PFeature) && (((PFeature)o).getFeature() instanceof XStyledFeature)) {
+                final XStyledFeature xf = (XStyledFeature)((PFeature)o).getFeature();
+                if (log.isDebugEnabled()) {
+                    log.debug("valid object under pointer");              // NOI18N
+                }
+                final JPopupMenu popup = new JPopupMenu(org.openide.util.NbBundle.getMessage(
+                            SimpleSingleSelectionListener.class,
+                            "SimpleSingleSelectionListener.popup.text")); // NOI18N
+                final JMenuItem m = new JMenuItem(org.openide.util.NbBundle.getMessage(
+                            SimpleSingleSelectionListener.class,
+                            "SimpleSingleSelectionListener.m.text"));     // NOI18N
                 m.setIcon(xf.getIconImage());
                 popup.add(m);
-                popup.show(mc, (int) pInputEvent.getCanvasPosition().getX(), (int) pInputEvent.getCanvasPosition().getY());
+                popup.show(
+                    mc,
+                    (int)pInputEvent.getCanvasPosition().getX(),
+                    (int)pInputEvent.getCanvasPosition().getY());
             }
         } else {
             if (o instanceof PFeature) {
                 super.mouseClicked(pInputEvent);
-                sel = (PFeature) o;
+                sel = (PFeature)o;
                 postSelectionChanged();
             }
 //        else if(o instanceof ParentNodeIsAPFeature && o instanceof PNode) {
@@ -66,20 +98,35 @@ public class SimpleSingleSelectionListener extends PBasicInputEventHandler {
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     private void postSelectionChanged() {
-        PNotificationCenter pn = PNotificationCenter.defaultCenter();
+        final PNotificationCenter pn = PNotificationCenter.defaultCenter();
         pn.postNotification(SimpleSingleSelectionListener.SELECTION_CHANGED_NOTIFICATION, this);
         if (mc != null) {
-            log.debug("unselectAll in postSelectionChanged()");//NOI18N
+            if (log.isDebugEnabled()) {
+                log.debug("unselectAll in postSelectionChanged()"); // NOI18N
+            }
 //            mc.getFeatureCollection().unselectAll(); //SINGLE SELECTION
             mc.getFeatureCollection().select(sel.getFeature());
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public PFeature getSelectedPFeature() {
         return sel;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public int getClickCount() {
         return clickCount;
     }

@@ -1,105 +1,158 @@
-/*
- * WorldToScreenTransform.java
- * Copyright (C) 2005 by:
- *
- *----------------------------
- * cismet GmbH
- * Goebenstrasse 40
- * 66117 Saarbruecken
- * http://www.cismet.de
- *----------------------------
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *----------------------------
- * Author:
- * thorsten.hell@cismet.de
- *----------------------------
- *
- * Created on 10. Januar 2006, 15:36
- *
- */
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons;
 
 /**
+ * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class WorldToScreenTransform {
+
+    //~ Instance fields --------------------------------------------------------
+
+    double xHome;
+    double yHome;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    double xHome,yHome;
-    /** Creates a new instance of WorldToScreenTransform */
-    public WorldToScreenTransform(double x,double y) {
-        xHome=x;
-        yHome=y;
-        log.debug("WorldToScreenTransform(x="+xHome+",y="+yHome+")");//NOI18N
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of WorldToScreenTransform.
+     *
+     * @param  x  DOCUMENT ME!
+     * @param  y  DOCUMENT ME!
+     */
+    public WorldToScreenTransform(final double x, final double y) {
+        xHome = x;
+        yHome = y;
+        if (log.isDebugEnabled()) {
+            log.debug("WorldToScreenTransform(x=" + xHome + ",y=" + yHome + ")"); // NOI18N
+        }
     }
-    
-    
-    public double getSourceX(double x) {
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   x  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getSourceX(final double x) {
         return getWorldX(x);
     }
-    public double getSourceY(double y) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   y  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getSourceY(final double y) {
         return getWorldY(y);
     }
-    public double getDestX(double x) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   x  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getDestX(final double x) {
         return getScreenX(x);
     }
-    public double getDestY(double y) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   y  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getDestY(final double y) {
         return getScreenY(y);
     }
-    
-    public double getWorldX(double screenX) {
-        return screenX+xHome;
-    }
-    public double getWorldY(double screenY) {
-        return yHome-screenY;
-    }
-    public double getScreenX(double worldX) {
-        return worldX-xHome;
-    }
-    public double getScreenY(double worldY) {
-        return (-1.0)*(worldY-yHome);
-    }
-    
-    
-    private static String xyToScreen(WorldToScreenTransform wtst,double x, double y){
-        return wtst.getScreenX(x)+","+wtst.getScreenY(y);//NOI18N
-    }
-    
-    public static void main(String[] args) {
-        WorldToScreenTransform wtst=new WorldToScreenTransform(-180,90);
-        System.out.println(xyToScreen(wtst, -180,90));
-        System.out.println(xyToScreen(wtst, -180,-90));
-        System.out.println(xyToScreen(wtst, 180,-90));
-        System.out.println(xyToScreen(wtst, 180,90));
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   screenX  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getWorldX(final double screenX) {
+        return screenX + xHome;
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   screenY  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getWorldY(final double screenY) {
+        return yHome - screenY;
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   worldX  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getScreenX(final double worldX) {
+        return worldX - xHome;
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   worldY  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getScreenY(final double worldY) {
+        return (-1.0) * (worldY - yHome);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   wtst  DOCUMENT ME!
+     * @param   x     DOCUMENT ME!
+     * @param   y     DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static String xyToScreen(final WorldToScreenTransform wtst, final double x, final double y) {
+        return wtst.getScreenX(x) + "," + wtst.getScreenY(y); // NOI18N
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        final WorldToScreenTransform wtst = new WorldToScreenTransform(-180, 90);
+        System.out.println(xyToScreen(wtst, -180, 90));
+        System.out.println(xyToScreen(wtst, -180, -90));
+        System.out.println(xyToScreen(wtst, 180, -90));
+        System.out.println(xyToScreen(wtst, 180, 90));
 
 //        System.out.println(wtst.getWorldX(wtst.getScreenX(0)));
 //        System.out.println(wtst.getWorldY(wtst.getScreenY(0)));
-        
-        
-    }
-    
-    public String toString() {
-        return "de.cismet.cismap.commons.WorldToScreenTransform: xHome:"+xHome+ " yHome:"+yHome;//NOI18N
-    }
-    
-    
-    
-    
-}
 
+    }
+
+    @Override
+    public String toString() {
+        return "de.cismet.cismap.commons.WorldToScreenTransform: xHome:" + xHome + " yHome:" + yHome; // NOI18N
+    }
+}

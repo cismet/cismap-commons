@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * GuiCredentialProvider.java
  *
@@ -6,17 +13,18 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package de.cismet.cismap.commons.security;
 
 import org.jdesktop.swingx.auth.LoginService;
 
 /**
+ * DOCUMENT ME!
  *
- * @author Sebastian
+ * @author   Sebastian
+ * @version  $Revision$, $Date$
  */
 public abstract class AbstractCredentialsProvider extends LoginService {
-    
+
 //    protected DefaultUserNameStore  usernames;
 //    protected Preferences appPrefs=null;
 //    protected UsernamePasswordCredentials creds;
@@ -143,5 +151,5 @@ public abstract class AbstractCredentialsProvider extends LoginService {
 //        usernames.setPreferences(appPrefs.node("loginURLHash"+Integer.toString(url.toString().hashCode())));
 //        requestUsernamePassword();
 //        return creds;
-//    }            
+//    }
 }

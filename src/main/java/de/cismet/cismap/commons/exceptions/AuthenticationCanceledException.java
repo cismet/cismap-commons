@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * AuthenticationCanceledException.java
  *
@@ -6,23 +13,33 @@
  * To change this template, choose Tools | Template Manager
  * and open the template in the editor.
  */
-
 package de.cismet.cismap.commons.exceptions;
 
-
 /**
+ * DOCUMENT ME!
  *
- * @author Sebastian
+ * @author   Sebastian
+ * @version  $Revision$, $Date$
  */
 public class AuthenticationCanceledException extends Exception {
 
-    /** Creates a new instance of AuthenticationCanceledException */
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new instance of AuthenticationCanceledException.
+     */
     public AuthenticationCanceledException() {
-        super(org.openide.util.NbBundle.getMessage(AuthenticationCanceledException.class, "AuthenticationCanceledException.AuthenticationCanceledException()"));//NOI18N
-    }
-    
-    public AuthenticationCanceledException(String message) {
-        super(message);
+        super(org.openide.util.NbBundle.getMessage(
+                AuthenticationCanceledException.class,
+                "AuthenticationCanceledException.AuthenticationCanceledException()")); // NOI18N
     }
 
+    /**
+     * Creates a new AuthenticationCanceledException object.
+     *
+     * @param  message  DOCUMENT ME!
+     */
+    public AuthenticationCanceledException(final String message) {
+        super(message);
+    }
 }
