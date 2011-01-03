@@ -6,7 +6,7 @@
     <parent>
         <groupId>de.cismet.cids</groupId>
         <artifactId>cids-parent</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>1.0</version>
     </parent>
 
     <groupId>de.cismet.commons</groupId>
@@ -67,6 +67,13 @@
 
     <build>
         <finalName>cismapCommons</finalName>
+        <!-- cannot update to current cids parent due to formatting errors in several classes -->
+        <plugins>
+            <plugin>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.0</version>
+            </plugin>
+        </plugins>
     </build>
 </project>
 
