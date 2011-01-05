@@ -33,6 +33,8 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 import java.awt.Cursor;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 
 import java.util.List;
@@ -70,7 +72,6 @@ public class MeasuringComponent extends javax.swing.JPanel {
     private final XBoundingBox initialBoundingBox;
     private RasterDocumentFeature mainRasterDocumentFeature;
     private final MessenGeometryListener mapListener;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private de.cismet.cismap.commons.gui.MappingComponent map;
     private javax.swing.JPanel panCenter;
@@ -232,7 +233,21 @@ public class MeasuringComponent extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     public void zoomToFeatureCollection() {
-        map.zoomToFeatureCollection();
+        if ((map.getWidth() > 0) && (map.getHeight() > 0)) {
+            map.zoomToFeatureCollection();
+        } else {
+            // lazy zoom if map is hidden and has size zero.
+            map.addComponentListener(new ComponentAdapter() {
+
+                    @Override
+                    public void componentResized(final ComponentEvent e) {
+                        if ((map.getWidth() > 0) && (map.getHeight() > 0)) {
+                            map.zoomToFeatureCollection();
+                            map.removeComponentListener(this);
+                        }
+                    }
+                });
+        }
     }
 
     /**
