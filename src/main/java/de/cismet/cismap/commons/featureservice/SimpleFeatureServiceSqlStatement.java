@@ -18,10 +18,10 @@ public class SimpleFeatureServiceSqlStatement {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String ALL_FIELDS_TOKEN = "<cismap::AllFields>"; // NOI18N
-    public static final String X1_TOKEN = "<cismap::x1>";          // NOI18N
-    public static final String Y1_TOKEN = "<cismap::y1>";          // NOI18N
-    public static final String X2_TOKEN = "<cismap::x2>";          // NOI18N
-    public static final String Y2_TOKEN = "<cismap::y2>";          // NOI18N
+    public static final String X1_TOKEN = "<cismap::x1>";                // NOI18N
+    public static final String Y1_TOKEN = "<cismap::y1>";                // NOI18N
+    public static final String X2_TOKEN = "<cismap::x2>";                // NOI18N
+    public static final String Y2_TOKEN = "<cismap::y2>";                // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 

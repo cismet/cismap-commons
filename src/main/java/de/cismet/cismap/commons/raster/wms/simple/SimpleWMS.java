@@ -18,6 +18,7 @@ import org.jdom.Element;
 import java.util.Vector;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.raster.wms.AbstractWMS;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
@@ -31,7 +32,10 @@ import de.cismet.cismap.commons.retrieval.RetrievalEvent;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class SimpleWMS extends AbstractWMS implements MapService, RasterMapService, RetrievalServiceLayer { // implements RasterService,RetrievalListener,ServiceLayer {
+public class SimpleWMS extends AbstractWMS implements MapService,
+    RasterMapService,
+    RetrievalServiceLayer,
+    LayerInfoProvider {    // implements RasterService,RetrievalListener,ServiceLayer {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -254,5 +258,29 @@ public class SimpleWMS extends AbstractWMS implements MapService, RasterMapServi
      */
     public void setPreferredClient(final HttpClient preferredClient) {
         this.preferredClient = preferredClient;
+    }
+
+    @Override
+    public String getLayerURI() {
+        return null;
+    }
+
+    @Override
+    public String getServerURI() {
+        return gmUrl.getUrlTemplate();
+    }
+
+    @Override
+    public boolean isLayerQuerySelected() {
+        return false;
+    }
+
+    @Override
+    public void setLayerQuerySelected(final boolean selected) {
+    }
+
+    @Override
+    public boolean isQueryable() {
+        return false;
     }
 }

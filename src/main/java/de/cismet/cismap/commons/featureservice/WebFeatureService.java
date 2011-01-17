@@ -28,6 +28,7 @@ import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
@@ -43,7 +44,7 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
  * @author   Sebastian Puhl
  * @version  $Revision$, $Date$
  */
-public class WebFeatureService extends AbstractFeatureService<WFSFeature, String> {
+public class WebFeatureService extends AbstractFeatureService<WFSFeature, String> implements LayerInfoProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -80,7 +81,6 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
     private Element wfsQueryElement;
     /** the hostname of the WFS server. */
     private String hostname;
-
     /** the version of the wfs. */
     private String version;
 
@@ -316,5 +316,29 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
      */
     public void setVersion(final String version) {
         this.version = version;
+    }
+
+    @Override
+    public String getLayerURI() {
+        return wfsQueryString;
+    }
+
+    @Override
+    public String getServerURI() {
+        return hostname;
+    }
+
+    @Override
+    public boolean isLayerQuerySelected() {
+        return false;
+    }
+
+    @Override
+    public void setLayerQuerySelected(final boolean selected) {
+    }
+
+    @Override
+    public boolean isQueryable() {
+        return false;
     }
 }

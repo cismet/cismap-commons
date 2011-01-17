@@ -30,7 +30,7 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
  */
 public interface MementoInterface {
 
-    //~ Static fields/initializers ---------------------------------------------
+    //~ Instance fields --------------------------------------------------------
 
     String ACTIVATE = "ACTIVATE";     // NOI18N
     String DEACTIVATE = "DEACTIVATE"; // NOI18N

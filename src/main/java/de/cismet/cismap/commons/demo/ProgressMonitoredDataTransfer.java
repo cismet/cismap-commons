@@ -181,9 +181,9 @@ public class ProgressMonitoredDataTransfer extends java.util.Observable implemen
             }
         } catch (InterruptedIOException ioe) {
             handleProblem("Cancelled by user after " // NOI18N
-                        + current + " bytes.");      // NOI18N
+                        + current + " bytes."); // NOI18N
         } catch (Exception ie) {
-            handleProblem("IO exception: " + ie);    // NOI18N
+            handleProblem("IO exception: " + ie); // NOI18N
         } finally {
             setDone();
             if (closeWhenDone) {

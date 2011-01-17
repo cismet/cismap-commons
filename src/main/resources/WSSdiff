@@ -3456,7 +3456,7 @@ diff -c -r1.75 -r1.77
   //        }
   //    }
 -     
-      // <editor-fold defaultstate="collapsed" desc="Setters & Getters">
+      
 -    
       public boolean isInfoNodeExpanded() {
           return infoPanel != null && infoPanel.isExpanded();

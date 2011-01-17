@@ -7,11 +7,13 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
+import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PImage;
 
 import java.awt.EventQueue;
 import java.awt.Image;
 
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -128,4 +130,15 @@ public class XPImage extends PImage {
         cl.setTransparency(getTransparency());
         return cl;
     }
+
+//    @Override
+//    protected void layoutChildren() {
+//        Iterator i = getChildrenIterator();
+//        while (i.hasNext()) {
+//            PNode each = (PNode) i.next();
+//            each.setOffset(getOffset());
+//            each.setScale(getScale());
+//        }
+//
+//    }
 }

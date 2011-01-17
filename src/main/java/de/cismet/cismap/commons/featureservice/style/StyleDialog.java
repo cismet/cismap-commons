@@ -241,9 +241,8 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      * @param  evt  DOCUMENT ME!
      */
     private void chkLinePatternItemStateChanged(final java.awt.event.ItemEvent evt) {
-        // not supported or shown
-// cbbLinePattern.setEnabled((evt.getStateChange() == ItemEvent.SELECTED));
-// updatePreview();
+        // not supported or shown cbbLinePattern.setEnabled((evt.getStateChange() == ItemEvent.SELECTED));
+        // updatePreview();
     }
 
     /**
@@ -1185,6 +1184,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         setModal(true);
         addWindowListener(new java.awt.event.WindowAdapter() {
 
+                @Override
                 public void windowClosing(final java.awt.event.WindowEvent evt) {
                     closeDialog(evt);
                 }
@@ -1278,6 +1278,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         chkFill.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkFill.text")); // NOI18N
         chkFill.addItemListener(new java.awt.event.ItemListener() {
 
+                @Override
                 public void itemStateChanged(final java.awt.event.ItemEvent evt) {
                     chkFillItemStateChanged(evt);
                 }
@@ -1300,6 +1301,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         chkFillPattern.setEnabled(false);
         chkFillPattern.addItemListener(new java.awt.event.ItemListener() {
 
+                @Override
                 public void itemStateChanged(final java.awt.event.ItemEvent evt) {
                     chkFillPatternItemStateChanged(evt);
                 }
@@ -1326,6 +1328,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         chkLine.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkLine.text")); // NOI18N
         chkLine.addItemListener(new java.awt.event.ItemListener() {
 
+                @Override
                 public void itemStateChanged(final java.awt.event.ItemEvent evt) {
                     chkLineItemStateChanged(evt);
                 }
@@ -1343,6 +1346,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         chkLinePattern.setEnabled(false);
         chkLinePattern.addItemListener(new java.awt.event.ItemListener() {
 
+                @Override
                 public void itemStateChanged(final java.awt.event.ItemEvent evt) {
                     chkLinePatternItemStateChanged(evt);
                 }
@@ -1369,6 +1373,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         chkSync.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkLineSync.text")); // NOI18N
         chkSync.addItemListener(new java.awt.event.ItemListener() {
 
+                @Override
                 public void itemStateChanged(final java.awt.event.ItemEvent evt) {
                     chkSyncItemStateChanged(evt);
                 }
@@ -1386,12 +1391,14 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 "StyleDialog.chkHighlightable.text")); // NOI18N
         chkHighlightable.addItemListener(new java.awt.event.ItemListener() {
 
+                @Override
                 public void itemStateChanged(final java.awt.event.ItemEvent evt) {
                     chkHighlightableItemStateChanged(evt);
                 }
             });
         chkHighlightable.addActionListener(new java.awt.event.ActionListener() {
 
+                @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     chkHighlightableActionPerformed(evt);
                 }
@@ -1424,12 +1431,14 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         sldLineWidth.setPreferredSize(new java.awt.Dimension(130, 37));
         sldLineWidth.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
 
+                @Override
                 public void mouseWheelMoved(final java.awt.event.MouseWheelEvent evt) {
                     sldLineWidthMouseWheelMoved(evt);
                 }
             });
         sldLineWidth.addChangeListener(new javax.swing.event.ChangeListener() {
 
+                @Override
                 public void stateChanged(final javax.swing.event.ChangeEvent evt) {
                     sldLineWidthStateChanged(evt);
                 }
@@ -1513,12 +1522,14 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         sldAlpha.setPreferredSize(new java.awt.Dimension(100, 23));
         sldAlpha.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
 
+                @Override
                 public void mouseWheelMoved(final java.awt.event.MouseWheelEvent evt) {
                     sldAlphaMouseWheelMoved(evt);
                 }
             });
         sldAlpha.addChangeListener(new javax.swing.event.ChangeListener() {
 
+                @Override
                 public void stateChanged(final javax.swing.event.ChangeEvent evt) {
                     sldAlphaStateChanged(evt);
                 }
@@ -1583,6 +1594,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cmdFill.setPreferredSize(new java.awt.Dimension(30, 18));
         cmdFill.addActionListener(new java.awt.event.ActionListener() {
 
+                @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdFillActionPerformed(evt);
                 }
@@ -1626,6 +1638,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cmdLine.setPreferredSize(new java.awt.Dimension(30, 18));
         cmdLine.addActionListener(new java.awt.event.ActionListener() {
 
+                @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdLineActionPerformed(evt);
                 }
@@ -1774,6 +1787,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 "StyleDialog.chkActivateLabels.text")); // NOI18N
         chkActivateLabels.addItemListener(new java.awt.event.ItemListener() {
 
+                @Override
                 public void itemStateChanged(final java.awt.event.ItemEvent evt) {
                     chkActivateLabelsItemStateChanged(evt);
                 }
@@ -1798,6 +1812,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cbbAnnotationExpression.setEditable(true);
         cbbAnnotationExpression.addItemListener(new java.awt.event.ItemListener() {
 
+                @Override
                 public void itemStateChanged(final java.awt.event.ItemEvent evt) {
                     cbbAnnotationExpressionItemStateChanged(evt);
                 }
@@ -1959,6 +1974,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         radCenter.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.radCenter.text")); // NOI18N
         radCenter.addActionListener(new java.awt.event.ActionListener() {
 
+                @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     radCenterActionPerformed(evt);
                 }
@@ -1969,6 +1985,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         radRight.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.radRight.text")); // NOI18N
         radRight.addActionListener(new java.awt.event.ActionListener() {
 
+                @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     radRightActionPerformed(evt);
                 }
@@ -2108,6 +2125,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cmdOK.setPreferredSize(new java.awt.Dimension(88, 23));
         cmdOK.addActionListener(new java.awt.event.ActionListener() {
 
+                @Override
                 public void actionPerformed(final java.awt.event.ActionEvent evt) {
                     cmdOKActionPerformed(evt);
                 }

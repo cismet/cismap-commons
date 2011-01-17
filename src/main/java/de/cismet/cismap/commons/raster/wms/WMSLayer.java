@@ -6,6 +6,7 @@
 *
 ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
+import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.Style;
 
@@ -15,7 +16,7 @@ import de.cismet.cismap.commons.wms.capabilities.Style;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class WMSLayer {
+public class WMSLayer implements LayerInfoProvider {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -151,5 +152,30 @@ public class WMSLayer {
      */
     public void setParentServiceLayer(final WMSServiceLayer parentServiceLayer) {
         this.parentServiceLayer = parentServiceLayer;
+    }
+
+    @Override
+    public String getLayerURI() {
+        return ogcCapabilitiesLayer.getName();
+    }
+
+    @Override
+    public String getServerURI() {
+        return parentServiceLayer.getCapabilitiesUrl();
+    }
+
+    @Override
+    public boolean isLayerQuerySelected() {
+        return isQuerySelected();
+    }
+
+    @Override
+    public void setLayerQuerySelected(final boolean selected) {
+        setQuerySelected(selected);
+    }
+
+    @Override
+    public boolean isQueryable() {
+        return getOgcCapabilitiesLayer().isQueryable();
     }
 }

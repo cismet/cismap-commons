@@ -19,7 +19,11 @@ package de.cismet.cismap.commons.features;
  */
 public interface CloneableFeature extends Feature, Cloneable {
 
-    // jalopy cannot handle this "fake" override
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
 
     //J-
     Object clone();
