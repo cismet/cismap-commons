@@ -74,7 +74,7 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
                 FeatureInfoDisplayKey.ANY),
             OGCWMSGetFeatureInfoRequestHtmlDisplay.class);
         displayRepository.put(new FeatureInfoDisplayKey(
-                "de.cismet.cismap.commons.raster.wms.InteractiveWMSServiceLayer",
+                "de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup",
                 FeatureInfoDisplayKey.ANY,
                 FeatureInfoDisplayKey.ANY),
             TestFeatureInfoDisplay.class);
