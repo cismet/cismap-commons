@@ -129,7 +129,6 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 
                     @Override
                     public void retrievalStarted(final RetrievalEvent e) {
-                        log.fatal("go " + e);
                     }
 
                     @Override
@@ -138,8 +137,6 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 
                     @Override
                     public void retrievalComplete(final RetrievalEvent e) {
-                        log.fatal("fertich " + e);
-
                         final Image i = (Image)e.getRetrievedObject();
                         ((XPImage)wsl.getPNode()).setImage(i);
                         new Thread() {
@@ -390,7 +387,6 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 
     @Override
     public void setSize(final int height, final int width) {
-        log.fatal("setSize");
         for (final WMSServiceLayer layer : layers) {
             layer.setSize(height, width);
         }
