@@ -1435,12 +1435,16 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             PNode p = new PNode();
             if (mapService instanceof RasterMapService) {
                 log.info("adding RasterMapService '" + mapService + "' " + mapService.getClass().getSimpleName() + ")"); // NOI18N
-                p = new XPImage();
+                if (mapService.getPNode() instanceof XPImage) {
+                    p = (XPImage)mapService.getPNode();
+                } else {
+                    p = new XPImage();
+                    mapService.setPNode(p);
+                }
                 mapService.addRetrievalListener(new MappingComponentRasterServiceListener(
                         position,
                         p,
                         (ServiceLayer)mapService));
-                mapService.setPNode(p);
             } else {
                 log.info("adding FeatureMapService '" + mapService + "' (" + mapService.getClass().getSimpleName()
                             + ")");                                                                                      // NOI18N
@@ -2746,8 +2750,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 log.info("Fehler beim Setzen der Transparenzeinstellungen", e); // NOI18N
             }
             // So kann man es Piccolo überlassen (müsste nur noch ein transformation machen, die die y achse spiegelt)
-            // PFeature p=new PFeature(features[i],(WorldToScreenTransform)null,(double)0,(double)0);
-            // p.setViewer(this);
+            // PFeature p=new PFeature(features[i],(WorldToScreenTransform)null,(double)0,(double)0); p.setViewer(this);
             // ((PPath)p).setStroke(new BasicStroke(0.5f));
             if (features[i].getGeometry() != null) {
                 pFeatureHM.put(p.getFeature(), p);

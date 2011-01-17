@@ -119,8 +119,13 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
 
     //~ Inner Classes ----------------------------------------------------------
 
-    // jalopy cannot handly this "fake" override
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @return   DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
     //J-
     FeatureFactory clone();
     //J+

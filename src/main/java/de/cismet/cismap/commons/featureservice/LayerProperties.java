@@ -198,7 +198,6 @@ public interface LayerProperties extends ConvertableToXML, Cloneable {
      *
      * @return  Cloned instance of this object
      */
-    // jalopy cannot handly this "fake" override
 
     //J-
     LayerProperties clone();

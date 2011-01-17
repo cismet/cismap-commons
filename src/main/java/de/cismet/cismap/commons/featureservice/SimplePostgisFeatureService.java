@@ -17,6 +17,7 @@ import java.util.HashMap;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.PostgisFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory;
@@ -31,12 +32,11 @@ import de.cismet.tools.ConnectionInfo;
  * @version  $Revision$, $Date$
  */
 public class SimplePostgisFeatureService
-        extends AbstractFeatureService<PostgisFeature, SimpleFeatureServiceSqlStatement> {
+        extends AbstractFeatureService<PostgisFeature, SimpleFeatureServiceSqlStatement> implements LayerInfoProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String POSTGIS_FEATURELAYER_TYPE = "simplePostgisFeatureService"; // NOI18N
-
     public static final HashMap<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
 
     static {
@@ -213,5 +213,29 @@ public class SimplePostgisFeatureService
             logger.debug("cloning SimplePostgisFeatureService " + this.getName()); // NOI18N
         }
         return new SimplePostgisFeatureService(this);
+    }
+
+    @Override
+    public String getLayerURI() {
+        return sqlStatement.getSqlTemplate();
+    }
+
+    @Override
+    public String getServerURI() {
+        return connectionInfo.toString();
+    }
+
+    @Override
+    public boolean isLayerQuerySelected() {
+        return false;
+    }
+
+    @Override
+    public void setLayerQuerySelected(final boolean selected) {
+    }
+
+    @Override
+    public boolean isQueryable() {
+        return false;
     }
 }

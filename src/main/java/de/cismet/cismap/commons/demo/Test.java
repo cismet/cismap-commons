@@ -152,11 +152,11 @@ public class Test extends JFrame {
             setLayout(new FlowLayout(FlowLayout.LEFT));
             add(new JButton(
                     new AbstractAction(
-                        org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.button.text")) {                // NOI18N
+                        org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.button.text")) {             // NOI18N
                         @Override
                         public void actionPerformed(final ActionEvent event) {
                             desktop.openModalDialog(
-                                org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.modalDialog.text"));    // NOI18N
+                                org.openide.util.NbBundle.getMessage(Test.class, "Test.TestPanel.modalDialog.text")); // NOI18N
                         }
                     }));
         }

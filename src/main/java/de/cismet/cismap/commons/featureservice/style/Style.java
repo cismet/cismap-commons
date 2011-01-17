@@ -59,8 +59,11 @@ public interface Style extends ConvertableToXML, Comparable, Cloneable {
 
     //~ Methods ----------------------------------------------------------------
 
-    // jalopy cannot handle this "fake" override
-
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     //J-
     Object clone() throws CloneNotSupportedException;
     //J+

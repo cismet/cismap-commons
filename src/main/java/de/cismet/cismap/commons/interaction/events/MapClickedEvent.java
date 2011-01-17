@@ -9,6 +9,8 @@ package de.cismet.cismap.commons.interaction.events;
 
 import edu.umd.cs.piccolo.event.PInputEvent;
 
+import de.cismet.cismap.commons.gui.MappingComponent;
+
 /**
  * DOCUMENT ME!
  *
@@ -19,6 +21,10 @@ public class MapClickedEvent {
 
     //~ Instance fields --------------------------------------------------------
 
+    double xCoord = -1d;
+    double yCoord = -1d;
+
+    private final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private PInputEvent pInputEvent = null;
     private Object objectUnderClick = null;
     private String mode = null;
@@ -34,6 +40,9 @@ public class MapClickedEvent {
     public MapClickedEvent(final String mode, final PInputEvent pInputEvent) {
         this.pInputEvent = pInputEvent;
         this.mode = mode;
+        final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
+        xCoord = mc.getWtst().getSourceX(pInputEvent.getPosition().getX() - mc.getClip_offset_x());
+        yCoord = mc.getWtst().getSourceY(pInputEvent.getPosition().getY() - mc.getClip_offset_y());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -99,5 +108,23 @@ public class MapClickedEvent {
      */
     public void setMode(final String mode) {
         this.mode = mode;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getxCoord() {
+        return xCoord;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getyCoord() {
+        return yCoord;
     }
 }

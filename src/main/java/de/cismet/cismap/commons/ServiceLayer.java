@@ -17,7 +17,7 @@ import java.util.HashMap;
  */
 public interface ServiceLayer {
 
-    //~ Static fields/initializers ---------------------------------------------
+    //~ Instance fields --------------------------------------------------------
 
     int LAYER_ENABLED_VISIBLE = 0;
     int LAYER_DISABLED_VISIBLE = 1;

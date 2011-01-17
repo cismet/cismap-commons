@@ -7,19 +7,32 @@
 ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
 
+import com.jhlabs.image.BlurFilter;
+
 import edu.umd.cs.piccolo.PNode;
 
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.tree.TreePath;
 
+import de.cismet.cismap.commons.ChildrenProvider;
+import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.gui.piccolo.XPImage;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
@@ -40,7 +53,9 @@ import de.cismet.tools.PropertyEqualsProvider;
  */
 public class WMSServiceLayer extends AbstractWMSServiceLayer implements RetrievalServiceLayer,
     RasterMapService,
-    PropertyEqualsProvider {
+    PropertyEqualsProvider,
+    LayerInfoProvider,
+    ChildrenProvider {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -107,6 +122,34 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
                 }
             }
         }
+//        JDialog jd=new JDialog();
+//        JButton cmd=new JButton("Test");
+//        cmd.addActionListener(new ActionListener() {
+//
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                Image i=((XPImage)getPNode()).getImage();
+//                BlurFilter bf=new BlurFilter();
+//                BufferedImage in=new BufferedImage(i.getWidth(null),i.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+//                in.getGraphics().drawImage(i, 0,0, null);
+//                BufferedImage out=new BufferedImage(i.getWidth(null),i.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+//                bf.filter(in, out);
+//                ((XPImage)getPNode()).setImage(out);
+//            }
+//        });
+//        jd.getContentPane().add(cmd);
+//        jd.pack();
+//        jd.setVisible(true);
+    }
+
+    /**
+     * Creates a new WMSServiceLayer object.
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public WMSServiceLayer(final Layer l) {
+        setName(l.getTitle());
+        addLayer(l);
     }
 
     /**
@@ -188,7 +231,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
      * @param  enabled        DOCUMENT ME!
      * @param  info           DOCUMENT ME!
      */
-    private void addLayer(final Layer nextLayer, Style selectedStyle, final boolean enabled, final boolean info) {
+    protected void addLayer(final Layer nextLayer, Style selectedStyle, final boolean enabled, final boolean info) {
         if ((nextLayer.getName() != null) && !nextLayer.getName().equals("")) // NOI18N
         {
             if (selectedStyle == null) {
@@ -219,7 +262,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
      * @param  nextLayer      DOCUMENT ME!
      * @param  selectedStyle  DOCUMENT ME!
      */
-    private void addLayer(final Layer nextLayer, final Style selectedStyle) {
+    protected void addLayer(final Layer nextLayer, final Style selectedStyle) {
         addLayer(nextLayer, selectedStyle, true, false);
     }
 
@@ -228,7 +271,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
      *
      * @param  nextLayer  DOCUMENT ME!
      */
-    private void addLayer(final Layer nextLayer) {
+    protected void addLayer(final Layer nextLayer) {
         addLayer(nextLayer, null);
     }
 
@@ -766,6 +809,37 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
 
         return false;
     }
+
+    @Override
+    public String getLayerURI() {
+        return getName();
+    }
+
+    @Override
+    public String getServerURI() {
+        return getCapabilitiesUrl();
+    }
+
+    @Override
+    public Collection getChildren() {
+        return getWMSLayers();
+    }
+
+    @Override
+    public boolean isLayerQuerySelected() {
+        return ((WMSLayer)getWMSLayers().get(0)).isQuerySelected();
+    }
+
+    @Override
+    public void setLayerQuerySelected(final boolean selected) {
+        ((WMSLayer)getWMSLayers().get(0)).setQuerySelected(selected);
+    }
+
+    @Override
+    public boolean isQueryable() {
+        return ((getWMSLayers().size() == 1) && ((WMSLayer)getWMSLayers().get(0)).isQueryable());
+    }
+
 //  @Override
 //  public int hashCode()
 //  {
@@ -776,4 +850,5 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
 //    hash = 73 * hash + (this.capabilitiesUrl != null ? this.capabilitiesUrl.hashCode() : 0);
 //    return hash;
 //  }
+
 }

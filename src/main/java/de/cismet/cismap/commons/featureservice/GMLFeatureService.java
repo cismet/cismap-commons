@@ -21,6 +21,7 @@ import java.util.Vector;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.GMLFeatureFactory;
@@ -34,7 +35,8 @@ import de.cismet.tools.collections.TypeSafeCollections;
  * @author   Pascal Dihé
  * @version  $Revision$, $Date$
  */
-public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeature, String> {
+public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeature, String>
+        implements LayerInfoProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -160,5 +162,29 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
     public Object clone() {
         logger.info("cloning service " + this.getName()); // NOI18N
         return new GMLFeatureService(this);
+    }
+
+    @Override
+    public String getLayerURI() {
+        return null;
+    }
+
+    @Override
+    public String getServerURI() {
+        return documentURI.toString();
+    }
+
+    @Override
+    public boolean isLayerQuerySelected() {
+        return false;
+    }
+
+    @Override
+    public void setLayerQuerySelected(final boolean selected) {
+    }
+
+    @Override
+    public boolean isQueryable() {
+        return false;
     }
 }
