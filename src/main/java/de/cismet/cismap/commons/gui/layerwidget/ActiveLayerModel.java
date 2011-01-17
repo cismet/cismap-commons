@@ -34,6 +34,7 @@ import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Debug;
+import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.MappingModelListener;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
@@ -47,6 +48,7 @@ import de.cismet.cismap.commons.featureservice.SimpleUpdateablePostgisFeatureSer
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
+import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupportingRasterLayer;
@@ -171,6 +173,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 wmsLayer.setImageFormat(preferredRasterFormat);
             }
             wmsLayer.setSrs(srs.getCode());
+        }
+        if (layer instanceof SlidableWMSServiceLayerGroup) {
+            ((SlidableWMSServiceLayerGroup)layer).setSrs(srs.getCode());
         }
 
         layer.addRetrievalListener(new RetrievalListener() {
@@ -310,15 +315,12 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  treePath  DOCUMENT ME!
-     */
+    //J-
     public void removeLayer(final TreePath treePath) {
         final Object layer = treePath.getLastPathComponent();
         removeLayer(layer, treePath);
     }
+    //J+
 
     /**
      * DOCUMENT ME!
@@ -658,20 +660,24 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 }
             }
             case 3: {
-                if ((node instanceof WMSServiceLayer) && (((WMSServiceLayer)node).getWMSLayers().size() > 1)) {
-                    return false;
+                if (node instanceof LayerInfoProvider) {
+                    return ((LayerInfoProvider)node).isQueryable();
                 } else {
-                    if (node instanceof WMSLayer) {
-                        return ((WMSLayer)node).getOgcCapabilitiesLayer().isQueryable();
-                    } else if ((node instanceof WMSServiceLayer)
-                                && (((WMSServiceLayer)node).getWMSLayers().get(0) instanceof WMSLayer)) {
-                        return ((WMSLayer)(((WMSServiceLayer)node).getWMSLayers().get(0))).getOgcCapabilitiesLayer()
-                                    .isQueryable();
-                    } else {
-                        return false;
-                    }
+                    return false;
                 }
             }
+
+//                if (node instanceof WMSServiceLayer && ((WMSServiceLayer) node).getWMSLayers().size() > 1) {
+//                    return false;
+//                } else {
+//                    if (node instanceof WMSLayer) {
+//                        return ((WMSLayer) node).getOgcCapabilitiesLayer().isQueryable();
+//                    } else if (node instanceof WMSServiceLayer && ((WMSServiceLayer) node).getWMSLayers().get(0) instanceof WMSLayer) {
+//                        return ((WMSLayer) (((WMSServiceLayer) node).getWMSLayers().get(0))).getOgcCapabilitiesLayer().isQueryable();
+//                    } else {
+//                        return false;
+//                    }
+//                }
             case 4: {
                 if (node instanceof RetrievalServiceLayer) {
                     return true;
@@ -1485,8 +1491,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 } else if (element.getName().equals("DocumentFeatureServiceLayer")) { // NOI18N
                     log.error("DocumentFeatureServiceLayer not supported");     // NOI18N
                     // throw new UnsupportedOperationException("DocumentFeatureServiceLayer not supported");
-                    // if(DEBUG)log.debug("DocumentFeatureLayer von ConfigFile wird hinzugefügt"); URI documentURI = new
-                    // URI(element.getChildText("documentURI").trim()); File testFile = new File(documentURI); if
+                    // if(DEBUG)log.debug("DocumentFeatureLayer von ConfigFile wird hinzugefügt"); URI documentURI =
+                    // new URI(element.getChildText("documentURI").trim()); File testFile = new File(documentURI); if
                     // (!testFile.exists()) { log.warn("Das Angebene Document(" + testFile.getAbsolutePath() + ")
                     // exisitiert nicht ---> abbruch, es wird kein Layer angelegt"); continue; }
                     //
