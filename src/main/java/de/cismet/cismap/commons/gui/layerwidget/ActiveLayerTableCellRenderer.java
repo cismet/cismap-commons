@@ -30,6 +30,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
 import de.cismet.cismap.commons.Debug;
+import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
@@ -325,29 +326,35 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 return styleLabel;
             }
         } else if (realColumn == 3) {
-            WMSLayer wmsLayer = null;
+            final WMSLayer wmsLayer = null;
             setText("");                                                                           // NOI18N
             setIcon(null);
             setHorizontalAlignment(JLabel.LEFT);
-            if ((value instanceof WMSServiceLayer) && (((WMSServiceLayer)value).getWMSLayers().size() > 1)) {
+//            if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() > 1) {
+//            } else {
+//                if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() == 1) {
+//                    wmsLayer = ((WMSLayer) ((WMSServiceLayer) value).getWMSLayers().get(0));
+//                } else if (value instanceof WMSLayer) {
+//                    wmsLayer = (WMSLayer) value;
+//                }
+//                if (wmsLayer != null && wmsLayer.getOgcCapabilitiesLayer().isQueryable()) {
+//                    return booleanRenderer.getTableCellRendererComponent(table, new Boolean(wmsLayer.isQuerySelected()), isSelected, hasFocus, row, column);
+//                } else {
+//                    setIcon(null);
+//                    setText("");//NOI18N
+//                }
+//            }
+            if ((value instanceof LayerInfoProvider) && ((LayerInfoProvider)value).isQueryable()) {
+                return booleanRenderer.getTableCellRendererComponent(
+                        table,
+                        ((LayerInfoProvider)value).isLayerQuerySelected(),
+                        isSelected,
+                        hasFocus,
+                        row,
+                        column);
             } else {
-                if ((value instanceof WMSServiceLayer) && (((WMSServiceLayer)value).getWMSLayers().size() == 1)) {
-                    wmsLayer = ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0));
-                } else if (value instanceof WMSLayer) {
-                    wmsLayer = (WMSLayer)value;
-                }
-                if ((wmsLayer != null) && wmsLayer.getOgcCapabilitiesLayer().isQueryable()) {
-                    return booleanRenderer.getTableCellRendererComponent(
-                            table,
-                            new Boolean(wmsLayer.isQuerySelected()),
-                            isSelected,
-                            hasFocus,
-                            row,
-                            column);
-                } else {
-                    setIcon(null);
-                    setText("");                                                                   // NOI18N
-                }
+                setIcon(null);
+                setText(""); // NOI18N
             }
         } else if (realColumn == 4) {
             // Component returnComp = null;

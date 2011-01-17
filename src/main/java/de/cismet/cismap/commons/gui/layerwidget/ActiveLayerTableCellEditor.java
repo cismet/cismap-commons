@@ -49,6 +49,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
 
 import de.cismet.cismap.commons.Debug;
+import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
@@ -177,17 +178,20 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                 @Override
                 public void actionPerformed(final ActionEvent e) {
                     try {
-                        WMSLayer l = null;
-                        if (value instanceof WMSLayer) {
-                            l = ((WMSLayer)value);
-                        } else if ((value instanceof WMSServiceLayer)
-                                    && (((WMSServiceLayer)value).getWMSLayers().size() == 1)) {
-                            l = ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0));
+                        if (value instanceof LayerInfoProvider) {
+                            ((LayerInfoProvider)value).setLayerQuerySelected(informationBox.isSelected());
+                            final ActiveLayerEvent ale = new ActiveLayerEvent();
+                            ale.setLayer(value);
+                            CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
                         }
-                        l.setQuerySelected(informationBox.isSelected());
-                        final ActiveLayerEvent ale = new ActiveLayerEvent();
-                        ale.setLayer(l.getParentServiceLayer());
-                        CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
+
+//                    WMSLayer l = null;
+//                    if (value instanceof WMSLayer) {
+//                        l = ((WMSLayer) value);
+//                    } else if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() == 1) {
+//                        l = ((WMSLayer) ((WMSServiceLayer) value).getWMSLayers().get(0));
+//                    }
+//                    l.setQuerySelected(informationBox.isSelected());
 
                         // A workaround for a ugly bug which denies the refresh of a cell
                         // in a treetable when it is in editing mode
@@ -518,6 +522,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         this.value = value;
         this.table = table;
         WMSLayer wmsLayer = null;
+        LayerInfoProvider layer = null;
 
         if (value instanceof WMSLayer) {
             wmsLayer = ((WMSLayer)value);
@@ -525,6 +530,9 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
             wmsLayer = (WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0);
         }
 
+        if (value instanceof LayerInfoProvider) {
+            layer = (LayerInfoProvider)value;
+        }
         if (realColumn == 0) {
             final TableCellRenderer renderer = table.getCellRenderer(row, column);
             visibilityLabel.setIcon(
@@ -569,7 +577,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         } else if (realColumn == 3) {
             return informationCellEditor.getTableCellEditorComponent(
                     table,
-                    new Boolean(wmsLayer.isQuerySelected()),
+                    layer.isLayerQuerySelected(),
                     isSelected,
                     row,
                     column);

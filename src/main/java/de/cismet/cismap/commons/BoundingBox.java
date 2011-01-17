@@ -16,6 +16,7 @@ import edu.umd.cs.piccolo.util.PBounds;
 
 import org.apache.log4j.Logger;
 
+
 //import org.deegree.gml.GMLGeometry;
 //import org.deegree.model.geometry.GM_Envelope;
 //import org.deegree.model.geometry.GM_Exception;
@@ -307,7 +308,7 @@ public class BoundingBox implements Cloneable, Serializable {
     }
 
     /**
-     * Rounds a double to #.00
+     * Rounds a double to #.00.
      *
      * @param   d  The double
      *

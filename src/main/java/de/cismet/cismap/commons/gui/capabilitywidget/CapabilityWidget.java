@@ -10,7 +10,9 @@ package de.cismet.cismap.commons.gui.capabilitywidget;
 import com.jgoodies.looks.Options;
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
 
 import org.openide.util.NbBundle;
 
@@ -42,7 +44,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -73,6 +77,7 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -80,6 +85,7 @@ import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
 import de.cismet.cismap.commons.exceptions.ConvertException;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
@@ -91,6 +97,7 @@ import de.cismet.cismap.commons.preferences.CapabilitiesPreferences;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
+import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
@@ -1456,9 +1463,12 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     /**
      * Konfiguriert das Widget und bestimmt, welche Capabilities verstanden werden.
      *
-     * @param  cp  CapabilitiesPreferences
+     * @param   node  cp CapabilitiesPreferences
+     *
+     * @return  DOCUMENT ME!
      */
-    private void configure(final CapabilitiesPreferences cp) {
+    //J-
+    public void configure(final CapabilitiesPreferences cp) {
         removeAllServer();
         JComponent activeComponent = null;
         final Iterator<Integer> it = cp.getCapabilities().keySet().iterator();
@@ -1485,6 +1495,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             capabilityList.add(component);
         }
     }
+    //J+
 
     /**
      * Erzeugt rekursiv aus einem CapabilitiesListTreeNode ein JMenu mit Untermenues und CapabilityLink-Einträgen.
