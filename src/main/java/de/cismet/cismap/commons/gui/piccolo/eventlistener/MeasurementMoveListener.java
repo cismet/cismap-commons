@@ -561,11 +561,10 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
      */
     private double getCurrentPosition() {
         if (geom != null) {
-            final LocationIndexedLine lil = new LocationIndexedLine(geom);
-            final Coordinate c = new Coordinate(mc.getWtst().getSourceX(cursorX), mc.getWtst().getSourceY(cursorY));
-            final LinearLocation ll = lil.indexOf(c);
-            final LengthLocationMap llm = new LengthLocationMap(geom);
-            return llm.getLength(ll);
+            return LinearReferencedPointFeature.getPositionOnLine(new Coordinate(
+                        mc.getWtst().getSourceX(cursorX),
+                        mc.getWtst().getSourceY(cursorY)),
+                    geom);
         } else {
             return 0d;
         }
