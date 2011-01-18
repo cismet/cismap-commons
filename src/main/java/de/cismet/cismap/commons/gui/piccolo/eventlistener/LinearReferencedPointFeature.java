@@ -285,14 +285,12 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     /**
      * DOCUMENT ME!
      *
-     * @param   point                        DOCUMENT ME!
+     * @param   pointCoord                   DOCUMENT ME!
      * @param   linestringOrMultilinestring  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    public static double getPositionOnLine(final Point point, final Geometry linestringOrMultilinestring) {
-        final Coordinate pointCoord = point.getCoordinate();
-
+    public static double getPositionOnLine(final Coordinate pointCoord, final Geometry linestringOrMultilinestring) {
         final LocationIndexedLine lineLIL = new LocationIndexedLine(linestringOrMultilinestring);
         final LengthLocationMap lineLLM = new LengthLocationMap(linestringOrMultilinestring);
         final LinearLocation pointLL = lineLIL.indexOf(pointCoord);
