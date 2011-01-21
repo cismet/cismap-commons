@@ -87,9 +87,10 @@ public class PSwingCanvas extends PCanvas {
      *
      * <p/>ZBasicRepaint Manager is an extension of RepaintManager that traps those repaints called by the Swing
      * components that have been added to the ZCanvas and passes these repaints to the SwingVisualComponent rather than
-     * up the component hierarchy as usually happens.
-     * </p>Also traps revalidate calls made by the Swing components added to the ZCanvas to reshape the applicable
-     * Visual Component.
+     * up the component hierarchy as usually happens.</p>
+     *
+     * <p>Also traps revalidate calls made by the Swing components added to the ZCanvas to reshape the applicable Visual
+     * Component.</p>
      *
      * <p>Also keeps a list of ZSwings that are painting. This disables repaint until the component has finished
      * painting. This is to address a problem introduced by Swing's CellRendererPane which is itself a work-around. The

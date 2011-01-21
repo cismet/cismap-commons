@@ -1031,6 +1031,10 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 final Element layerConf = ((SimpleUpdateablePostgisFeatureService)service).toElement();
                 allLayerConf.addContent(layerConf);
                 counter++;
+            } else if (service instanceof SlidableWMSServiceLayerGroup) {
+                final Element layerConf = ((SlidableWMSServiceLayerGroup)service).toElement();
+                allLayerConf.addContent(layerConf);
+                counter++;
             } else if (service instanceof ConvertableToXML) {
                 final Element layerConf = ((ConvertableToXML)service).toElement();
                 allLayerConf.addContent(layerConf);
@@ -1084,6 +1088,17 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                         spfs = new SimplePostgisFeatureService(layerelement);
                     }
                     return getKeyForRetrievalService(spfs);
+                } else if (layerelement.getName().equals(SlidableWMSServiceLayerGroup.XML_ELEMENT_NAME)) {         // NOI18N
+                    final SlidableWMSServiceLayerGroup slidableWms = new SlidableWMSServiceLayerGroup(
+                            layerelement,
+                            new HashMap<String, WMSCapabilities>());
+
+                    // the listener and the internal widget should be removed by the slidable wms object
+                    final ActiveLayerEvent event = new ActiveLayerEvent();
+                    event.setLayer(slidableWms);
+                    slidableWms.layerRemoved(event);
+
+                    return getKeyForRetrievalService(slidableWms);
                 } else {
                     final RetrievalServiceLayer layer = (RetrievalServiceLayer)XMLObjectFactory
                                 .restoreObjectfromElement(layerelement);
@@ -1106,21 +1121,24 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         final String keyString = null;
         if (layer != null) {
             try {
-                if (layer instanceof WMSServiceLayer) {                    // NOI18N
+                if (layer instanceof WMSServiceLayer) {                     // NOI18N
                     final WMSServiceLayer wmsServiceLayer = (WMSServiceLayer)layer;
                     return wmsServiceLayer.getName() + "#" + wmsServiceLayer.getCapabilitiesUrl();
                 } else if (layer instanceof WebFeatureService) {
                     final WebFeatureService wfs = (WebFeatureService)layer;
                     return wfs.getName() + "#" + wfs.getHostname();
-                } else if (layer instanceof DocumentFeatureService) {      // NOI18N
+                } else if (layer instanceof DocumentFeatureService) {       // NOI18N
                     final DocumentFeatureService dfs = (DocumentFeatureService)layer;
                     return dfs.getName() + dfs.getDocumentURI();
-                } else if (layer instanceof SimpleWMS) {                   // NOI18N
+                } else if (layer instanceof SimpleWMS) {                    // NOI18N
                     final SimpleWMS simpleWMS = (SimpleWMS)layer;
                     return simpleWMS.getName() + "#" + simpleWMS.getGmUrl().getUrlTemplate();
-                } else if (layer instanceof SimplePostgisFeatureService) { // NOI18N
+                } else if (layer instanceof SimplePostgisFeatureService) {  // NOI18N
                     final SimplePostgisFeatureService spfs = (SimplePostgisFeatureService)layer;
                     return spfs.getName() + "#" + spfs.getConnectionInfo().getUrl();
+                } else if (layer instanceof SlidableWMSServiceLayerGroup) { // NOI18N
+                    final SlidableWMSServiceLayerGroup wms = (SlidableWMSServiceLayerGroup)layer;
+                    return wms.getName() + "#" + wms.getName();
                 } else {
                     final RetrievalServiceLayer rsl = (RetrievalServiceLayer)layer;
                     return rsl.getName() + "#" + rsl.getClass();
@@ -1527,10 +1545,31 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                                 }
                             }
                         });
-                } else if (element.getName().equals("simplePostgisFeatureService")) {         // NOI18N
+                } else if (element.getName().equals(SlidableWMSServiceLayerGroup.XML_ELEMENT_NAME)) { // NOI18N
+                    final SlidableWMSServiceLayerGroup wms = new SlidableWMSServiceLayerGroup(element, capabilities);
+                    if (EventQueue.isDispatchThread()) {
+                        log.fatal("InvokeLater in EDT");                                      // NOI18N
+                    }
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                log.info("addLayer SlidableWMSServiceLayerGroup (" + wms.getName() + ")"); // NOI18N
+                                try {
+                                    addLayer(wms);
+                                } catch (IllegalArgumentException schonVorhanden) {
+                                    log.warn(
+                                        "Layer SimpleWMS '"
+                                                + wms.getName()
+                                                + "' already existed. Do not add the Layer. \n"
+                                                + schonVorhanden.getMessage());                            // NOI18N
+                                }
+                            }
+                        });
+                } else if (element.getName().equals("simplePostgisFeatureService")) {                      // NOI18N
                     SimplePostgisFeatureService spfs;
                     if ((element.getAttributeValue("updateable") != null)
-                                && element.getAttributeValue("updateable").equals("true")) {  // NOI18N
+                                && element.getAttributeValue("updateable").equals("true")) {               // NOI18N
                         spfs = new SimpleUpdateablePostgisFeatureService(element);
                     } else {
                         spfs = new SimplePostgisFeatureService(element);

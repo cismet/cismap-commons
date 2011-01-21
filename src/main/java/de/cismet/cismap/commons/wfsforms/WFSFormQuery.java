@@ -19,7 +19,7 @@ public class WFSFormQuery {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String INITIAL = "INITIAL"; // NOI18N
+    public static final String INITIAL = "INITIAL";   // NOI18N
     public static final String FOLLOWUP = "FOLLOWUP"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------

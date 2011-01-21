@@ -34,8 +34,8 @@ import java.awt.event.MouseMotionListener;
  * <P>A ZMouseEvent object is passed to every <code>ZMouseMotionListener</code> or <code>ZMouseMotionAdapter</code>
  * object which registered to receive mouse motion events using the component's <code>addMouseMotionListener</code>
  * method. (<code>ZMouseMotionAdapter</code> objects implement the <code>ZMouseMotionListener</code> interface.) Each
- * such listener object gets a <code>ZMouseEvent</code> containing the mouse motion event.
- * </p>
+ * such listener object gets a <code>ZMouseEvent</code> containing the mouse motion event.</p>
+ *
  * <P><b>Warning:</b> Serialized and ZSerialized objects of this class will not be compatible with future Jazz releases.
  * The current serialization support is appropriate for short term storage or RMI between applications running the same
  * version of Jazz. A future release of Jazz will provide support for long term persistence.</P>

@@ -25,17 +25,26 @@ package de.cismet.cismap.commons.raster.wms;
 
 import edu.umd.cs.piccolo.PNode;
 
+import org.jdom.CDATA;
+import org.jdom.DataConversionException;
+import org.jdom.Element;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.geom.Point2D;
 
 import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.JDialog;
@@ -52,7 +61,10 @@ import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.gui.FloatingControlProvider;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.XPImage;
+import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
+import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
@@ -72,16 +84,25 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
     RasterMapService,
     ChangeListener,
     MapService,
-    LayerInfoProvider {
+    LayerInfoProvider,
+    ActiveLayerListener {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String XML_ELEMENT_NAME = "SlidableWMSServiceLayerGroup";
+    private static final String SLIDER_PREFIX = "Slider";
+    private static List<Integer> uniqueNumbers = new ArrayList<Integer>();
+    private static String addedInternalWidget = null;
 
     //~ Instance fields --------------------------------------------------------
 
-    ArrayList<WMSServiceLayer> layers = new ArrayList<WMSServiceLayer>();
+    Vector<WMSServiceLayer> layers = new Vector<WMSServiceLayer>();
     ArrayList<PropertyChangeListener> propertyChangeListeners = new ArrayList<PropertyChangeListener>();
     ArrayList<RetrievalListener> retrievalListeners = new ArrayList<RetrievalListener>();
     boolean layerQuerySelected = false;
 
     private final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private final String sliderName;
     private PNode pnode = new XPImage();
     private JSlider slider = new JSlider();
     private JDialog dialog = new JDialog();
@@ -89,13 +110,16 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
     private int layerPosition;
     private boolean enabled;
     private String name;
-    private int progress;
+    private String completePath = null;
+    private Hashtable<WMSServiceLayer, Integer> progressTable = new Hashtable<WMSServiceLayer, Integer>();
+    private int layerComplete = 0;
     private String preferredRasterFormat;
     private String preferredTransparentPref;
     private String preferredBGColor;
     private String preferredExceptionsFormat;
     private int selectedLayer = 0;
     private String capabilitiesUrl = null;
+    private WMSCapabilities wmsCapabilities;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -105,21 +129,125 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
      * @param  treePaths  DOCUMENT ME!
      */
     public SlidableWMSServiceLayerGroup(final Vector treePaths) {
-        setDefaults();
+        sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         final TreePath tp = ((TreePath)treePaths.get(0));
-        final Layer[] children =
-            ((de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)tp.getLastPathComponent()).getChildren();
-        final Collection<Layer> c = new ArrayList<Layer>(Arrays.asList(children));
-        setName(((de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)tp.getLastPathComponent()).getName());
+        final Layer[] children = ((de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent())
+                    .getChildren();
+        setName(((de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent()).getName());
+
+        for (final Object path : tp.getPath()) {
+            if (path instanceof Layer) {
+                if (completePath == null) {
+                    completePath = ((Layer)path).getName();
+                } else {
+                    completePath += "/" + ((Layer)path).getName();
+                }
+            }
+        }
 
         for (final Layer l : children) {
             final WMSServiceLayer wsl = new WMSServiceLayer(l);
+            layers.add(wsl);
+        }
+        init();
+    }
+
+    /**
+     * Creates a new SlidableWMSServiceLayerGroup object.
+     *
+     * @param  element       treePaths DOCUMENT ME!
+     * @param  capabilities  DOCUMENT ME!
+     */
+    public SlidableWMSServiceLayerGroup(final Element element, final HashMap<String, WMSCapabilities> capabilities) {
+        sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
+        setName(element.getAttributeValue("name"));
+
+        try {
+            pnode.setVisible(element.getAttribute("visible").getBooleanValue());
+        } catch (final DataConversionException e) {
+            log.warn("Attribute visible has wrong data type.", e);
+        } catch (final NullPointerException e) {
+            log.warn("Attribute visible not found.", e);
+        }
+
+        try {
+            enabled = element.getAttribute("enabled").getBooleanValue();
+        } catch (final DataConversionException e) {
+            log.warn("Attribute enabled has wrong data type.", e);
+        } catch (final NullPointerException e) {
+            log.warn("Attribute enabled not found.", e);
+        }
+
+        try {
+            pnode.setTransparency(element.getAttribute("translucency").getFloatValue());
+        } catch (final DataConversionException e) {
+            log.warn("Attribute translucency has wrong data type.", e);
+        } catch (final NullPointerException e) {
+            log.warn("Attribute translucency not found.", e);
+        }
+
+        try {
+            completePath = element.getAttribute("completePath").getValue();
+        } catch (final NullPointerException e) {
+            log.warn("Attribute translucency not found.", e);
+        }
+
+        try {
+            preferredBGColor = element.getAttribute("bgColor").getValue();
+            preferredRasterFormat = element.getAttribute("imageFormat").getValue();
+            preferredExceptionsFormat = element.getAttribute("exceptionFormat").getValue();
+        } catch (final NullPointerException e) {
+            log.warn("Attribute not found.", e);
+        }
+
+        try {
+            final Element capElement = element.getChild("capabilities");
+            final CapabilityLink cp = new CapabilityLink(capElement);
+            wmsCapabilities = capabilities.get(cp.getLink());
+            capabilitiesUrl = cp.getLink();
+        } catch (final NullPointerException e) {
+            log.warn("Child element capabilities not found.", e);
+        }
+
+        final Element layersElement = element.getChild("layers");
+        final List layersList = layersElement.getChildren();
+
+        for (final Object o : layersList) {
+            layers.add(new WMSServiceLayer((Element)o, capabilities));
+        }
+
+        init();
+    }
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static int getUniqueRandomNumber() {
+        int number = 0;
+
+        do {
+            number = (new Random(System.currentTimeMillis())).nextInt();
+        } while (uniqueNumbers.contains(number));
+
+        return number;
+    }
+
+    /**
+     * initialises a new SlidableWMSServiceLayerGroup object.
+     */
+    private void init() {
+        setDefaults();
+
+        for (final WMSServiceLayer wsl : layers) {
             if (capabilitiesUrl == null) {
                 capabilitiesUrl = wsl.getCapabilitiesUrl();
             }
 
             wsl.setPNode(new XPImage());
-            layers.add(wsl);
 //            final Point2D localOrigin = CismapBroker.getInstance().getMappingComponent().getCamera().getViewBounds().getOrigin();
 //            final double localScale = CismapBroker.getInstance().getMappingComponent().getCamera().getViewScale();
             pnode.addChild(wsl.getPNode());
@@ -129,10 +257,23 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 
                     @Override
                     public void retrievalStarted(final RetrievalEvent e) {
+                        fireRetrievalStarted(e);
                     }
 
                     @Override
                     public void retrievalProgress(final RetrievalEvent e) {
+                        final RetrievalEvent event = new RetrievalEvent();
+                        progressTable.put(wsl, e.getPercentageDone());
+                        progress = 0;
+
+                        for (final int i : progressTable.values()) {
+                            progress += i;
+                        }
+
+                        progress /= layers.size();
+
+                        event.setPercentageDone(progress);
+                        fireRetrievalProgress(event);
                     }
 
                     @Override
@@ -155,7 +296,9 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
                                 wsl.getPNode().setScale(1 / localScale);
                                 wsl.getPNode().setOffset(localOrigin);
                                 CismapBroker.getInstance().getMappingComponent().repaint();
-                                if (wsl == layers.get(0)) {
+                                ++layerComplete;
+
+                                if (layerComplete == layers.size()) {
                                     final RetrievalEvent re = new RetrievalEvent();
                                     re.setIsComplete(true);
                                     re.setRetrievalService(SlidableWMSServiceLayerGroup.this);
@@ -164,6 +307,7 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 //                                re.setRetrievedObject(((XPImage) layers.get(0).getPNode()).getImage());
                                     re.setRetrievedObject(null);
                                     fireRetrievalComplete(re);
+                                    stateChanged(new ChangeEvent(this));
                                 }
                             }
                         }.start();
@@ -190,9 +334,8 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 
         layers.get(0).setVisible(true);
         initDialog();
+        CismapBroker.getInstance().addActiveLayerListener(this);
     }
-
-    //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
@@ -217,6 +360,7 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
      * @param  wmsCapabilities  DOCUMENT ME!
      */
     public void setWmsCapabilities(final WMSCapabilities wmsCapabilities) {
+        this.wmsCapabilities = wmsCapabilities;
         for (final WMSServiceLayer layer : layers) {
             layer.setWmsCapabilities(wmsCapabilities);
         }
@@ -228,6 +372,7 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
      * @param  capabilitiesUrl  DOCUMENT ME!
      */
     public void setCapabilitiesUrl(final String capabilitiesUrl) {
+        this.capabilitiesUrl = capabilitiesUrl;
         for (final WMSServiceLayer layer : layers) {
             layer.setCapabilitiesUrl(capabilitiesUrl);
         }
@@ -258,9 +403,7 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
         slider.addChangeListener(this);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
-        final Dimension d = slider.getPreferredSize();
-        d.width = (int)(((float)d.width) * 1.5);
-        slider.setPreferredSize(new Dimension(d));
+
         final Hashtable lableTable = new Hashtable();
         int x = 0;
         for (final WMSServiceLayer wsl : layers) {
@@ -277,10 +420,35 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 //        dialog.setVisible(true);
         internalFrame.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N
         internalFrame.getContentPane().add(slider);
-        CismapBroker.getInstance()
-                .getMappingComponent()
-                .addInternalWidget("Slider", MappingComponent.POSITION_NORTHEAST, internalFrame);
-        CismapBroker.getInstance().getMappingComponent().showInternalWidget("Slider", true, 800);
+        slider.setSnapToTicks(true);
+        slider.repaint();
+        internalFrame.setPreferredSize(new Dimension(
+                (int)getSliderWidth(),
+                (int)slider.getPreferredSize().getHeight()
+                        + 15));
+        internalFrame.pack();
+        internalFrame.setResizable(true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private double getSliderWidth() {
+        final Dictionary dic = slider.getLabelTable();
+        final Enumeration e = dic.keys();
+        final StringBuilder text = new StringBuilder();
+
+        while (e.hasMoreElements()) {
+            final Object o = dic.get(e.nextElement());
+            if (o instanceof JLabel) {
+                text.append(((JLabel)o).getText());
+                text.append("  ");
+            }
+        }
+        return slider.getFontMetrics(slider.getFont()).getStringBounds(text.toString(), slider.getGraphics())
+                    .getWidth();
     }
 
     @Override
@@ -420,5 +588,173 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
     @Override
     public boolean isQueryable() {
         return true;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the layer capabilities object of the current layer
+     */
+    private Layer getLayerInformation() {
+        if (wmsCapabilities != null) {
+            return getLayerInformation(null, wmsCapabilities.getLayer().getChildren());
+        }
+
+        return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   path        DOCUMENT ME!
+     * @param   layerArray  DOCUMENT ME!
+     *
+     * @return  the layer capabilities object of the current layer
+     */
+    private Layer getLayerInformation(final String path, final Layer[] layerArray) {
+        if (layerArray != null) {
+            for (final Layer l : layerArray) {
+                final String currentPath = ((path == null) ? l.getName() : (path + "/" + l.getName()));
+                if (currentPath.equals(completePath)) {
+                    return l;
+                } else {
+                    final Layer res = getLayerInformation(currentPath, l.getChildren());
+                    if (res != null) {
+                        return res;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof SlidableWMSServiceLayerGroup) {
+            final SlidableWMSServiceLayerGroup other = (SlidableWMSServiceLayerGroup)obj;
+            final Iterator<WMSServiceLayer> otherLayerIt = other.layers.iterator();
+
+            for (final WMSServiceLayer l : layers) {
+                if (otherLayerIt.hasNext()) {
+                    final WMSServiceLayer lOther = otherLayerIt.next();
+                    if (!lOther.propertyEquals(l)) {
+                        return false;
+                    }
+                }
+            }
+
+            return other.layers.size() == layers.size();
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 0;
+
+        for (final WMSServiceLayer l : layers) {
+            hash += l.hashCode() % 71;
+        }
+
+        return hash;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Vector<WMSServiceLayer> getLayers() {
+        return layers;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Element toElement() {
+        final Element element = new Element(XML_ELEMENT_NAME);
+        element.setAttribute("name", getName());
+        element.setAttribute("visible", (getPNode().getVisible() ? "true" : "false"));
+        element.setAttribute("enabled", Boolean.toString(isEnabled()));
+        element.setAttribute("translucency", "" + getPNode().getTransparency());
+        element.setAttribute("bgColor", preferredBGColor);
+        element.setAttribute("imageFormat", preferredRasterFormat);
+        element.setAttribute("exceptionFormat", preferredExceptionsFormat);
+        element.setAttribute("completePath", completePath);
+        final Element capElement = new Element("capabilities"); // NOI18N
+        // capElement.addContent(new CDATA(capabilitiesUrl));
+        final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, capabilitiesUrl, false);
+        capElement.addContent(capLink.getElement());
+
+        element.addContent(capElement);
+        final Element layerElement = new Element("layers"); // NOI18N
+        for (final WMSServiceLayer l : layers) {
+            layerElement.addContent(l.getElement());
+        }
+        element.addContent(layerElement);
+        return element;
+    }
+
+    @Override
+    public void layerAdded(final ActiveLayerEvent e) {
+    }
+
+    @Override
+    public void layerRemoved(final ActiveLayerEvent e) {
+        if (e.getLayer() == this) {
+            if ((addedInternalWidget != null) && addedInternalWidget.equals(sliderName)) {
+                CismapBroker.getInstance().getMappingComponent().removeInternalWidget(sliderName);
+                addedInternalWidget = null;
+            }
+
+            // use invoke lateer to avoid a java.util.ConcurrentModificationException
+            EventQueue.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        CismapBroker.getInstance().removeActiveLayerListener(SlidableWMSServiceLayerGroup.this);
+                    }
+                });
+            try {
+                uniqueNumbers.remove(Integer.valueOf(sliderName.substring(SLIDER_PREFIX.length())));
+            } catch (final NumberFormatException ex) {
+                log.error("The name of the internal slider widget is not valid.", ex);
+            }
+        }
+    }
+
+    @Override
+    public void layerPositionChanged(final ActiveLayerEvent e) {
+    }
+
+    @Override
+    public void layerVisibilityChanged(final ActiveLayerEvent e) {
+    }
+
+    @Override
+    public void layerInformationStatusChanged(final ActiveLayerEvent e) {
+    }
+
+    @Override
+    public synchronized void layerSelectionChanged(final ActiveLayerEvent e) {
+        if (e.getLayer() == this) {
+            if (addedInternalWidget != null) {
+                CismapBroker.getInstance().getMappingComponent().removeInternalWidget(addedInternalWidget);
+                CismapBroker.getInstance().getMappingComponent().repaint();
+            }
+            CismapBroker.getInstance()
+                    .getMappingComponent()
+                    .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
+            addedInternalWidget = sliderName;
+            CismapBroker.getInstance().getMappingComponent().showInternalWidget(sliderName, true, 800);
+        } else {
+            if ((addedInternalWidget != null) && !(e.getLayer() instanceof SlidableWMSServiceLayerGroup)) {
+                CismapBroker.getInstance().getMappingComponent().showInternalWidget(addedInternalWidget, false, 800);
+            }
+        }
     }
 }

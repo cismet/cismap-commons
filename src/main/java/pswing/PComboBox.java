@@ -35,9 +35,10 @@ import javax.swing.plaf.basic.ComboPopup;
  * is never transformed.
  *
  * <p/>This class was not designed for subclassing. If different behavior is required, it seems more appropriate to
- * subclass JComboBox directly using this class as a model.
- * </p>NOTE: There is currently a known bug, namely, if the ComboBox receives focus through 'tab' focus traversal and
- * the keyboard is used to interact with the ComboBox, there may be unexpected results.
+ * subclass JComboBox directly using this class as a model.</p>
+ *
+ * <p>NOTE: There is currently a known bug, namely, if the ComboBox receives focus through 'tab' focus traversal and the
+ * keyboard is used to interact with the ComboBox, there may be unexpected results.</p>
  *
  * <P><b>Warning:</b> Serialized and ZSerialized objects of this class will not be compatible with future Jazz releases.
  * The current serialization support is appropriate for short term storage or RMI between applications running the same

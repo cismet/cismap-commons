@@ -1789,7 +1789,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         if (log.isDebugEnabled()) {
             log.debug("removing internal widget '" + name + "'"); // NOI18N
         }
-        if (this.internalWidgets.containsKey(name)) {
+        if (!this.internalWidgets.containsKey(name)) {
             log.warn("widget '" + name + "' not found");          // NOI18N
             return false;
         }

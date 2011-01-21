@@ -36,6 +36,7 @@ import javax.swing.table.TableCellRenderer;
 
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
+import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleLegendProvider;
@@ -56,9 +57,17 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
 
     //~ Instance fields --------------------------------------------------------
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify
     private javax.swing.JScrollPane scpLegends;
     private javax.swing.JTable tblLegends;
+
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private HashMap<String, WMSCapabilities> wmsCapabilities = new HashMap<String, WMSCapabilities>();
+    private LegendModel tableModel = new LegendModel();
+    // End of variables declaration
+    private int maxWidth = 0;
+
+    //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates new form Legend.
@@ -89,6 +98,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         add(scpLegends, BorderLayout.CENTER);
         // tblLegends.setPreferredSize(Width(600);
     }
+
+    //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
@@ -172,23 +183,41 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             log.debug("layerRemoved() fired");                                   // NOI18N
         }
         if (e.getLayer() instanceof WMSServiceLayer) {
-            final WMSServiceLayer wmsLayer = (WMSServiceLayer)e.getLayer();
-            final Vector v = wmsLayer.getWMSLayers();
-            final Iterator it = v.iterator();
-            while (it.hasNext()) {
-                final Object elem = (Object)it.next();
-                if (elem instanceof WMSLayer) {
-                    final WMSLayer wl = (WMSLayer)elem;
-                    removeWMSLayer(wl);
-                }
-            }
+            removeWmsServiceLayer((WMSServiceLayer)e.getLayer());
         } else if (e.getLayer() instanceof WMSLayer) {
             removeWMSLayer((WMSLayer)e.getLayer());
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
             final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
             removeLegendByName(slp.getLegendIdentifier());
+        } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
+            final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup)e.getLayer();
+            final Vector v = wmsLayer.getLayers();
+            final Iterator it = v.iterator();
+            if (it.hasNext()) {
+                final Object elem = (Object)it.next();
+                if (elem instanceof WMSServiceLayer) {
+                    removeWmsServiceLayer((WMSServiceLayer)elem);
+                }
+            }
         } else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  wmsLayer  DOCUMENT ME!
+     */
+    private void removeWmsServiceLayer(final WMSServiceLayer wmsLayer) {
+        final Vector v = wmsLayer.getWMSLayers();
+        final Iterator it = v.iterator();
+        while (it.hasNext()) {
+            final Object elem = (Object)it.next();
+            if (elem instanceof WMSLayer) {
+                final WMSLayer wl = (WMSLayer)elem;
+                removeWMSLayer(wl);
+            }
         }
     }
 
@@ -219,13 +248,20 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         if (log.isDebugEnabled()) {
             log.debug("layerSelectionChanged() fired");                          // NOI18N
         }
-        if ((e.getLayer() instanceof WMSLayer) || (e.getLayer() instanceof WMSServiceLayer)) {
+        if ((e.getLayer() instanceof WMSLayer) || (e.getLayer() instanceof WMSServiceLayer)
+                    || (e.getLayer() instanceof SlidableWMSServiceLayerGroup)) {
             WMSLayer layer = null;
             if (e.getLayer() instanceof WMSLayer) {
                 layer = (WMSLayer)e.getLayer();
             } else if ((e.getLayer() instanceof WMSServiceLayer)
                         && (((WMSServiceLayer)e.getLayer()).getWMSLayers().size() == 1)) {
                 layer = (WMSLayer)((WMSServiceLayer)e.getLayer()).getWMSLayers().get(0);
+            } else if ((e.getLayer() instanceof SlidableWMSServiceLayerGroup)
+                        && (((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers().size() > 0)) {
+                final WMSServiceLayer sLayer = ((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers().get(0);
+                if (sLayer.getWMSLayers().size() == 1) {
+                    layer = (WMSLayer)((WMSServiceLayer)sLayer).getWMSLayers().get(0);
+                }
             }
             try {
                 scrollToLegend(layer.getSelectedStyle().getLegendURL()[0].toString());
@@ -254,74 +290,107 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         }
 
         if (e.getLayer() instanceof WMSServiceLayer) {
-            final WMSServiceLayer wmsLayer = (WMSServiceLayer)e.getLayer();
-            final Vector v = wmsLayer.getWMSLayers();
-            final Iterator it = v.iterator();
-            while (it.hasNext()) {
-                final Object elem = (Object)it.next();
-                if (elem instanceof WMSLayer) {
-                    final WMSLayer wl = (WMSLayer)elem;
-                    final String title = wl.getOgcCapabilitiesLayer().getTitle();
-                    final String name = wl.getOgcCapabilitiesLayer().getName();
-                    String url = null;
-                    try {
-                        final URL[] lua = wl.getSelectedStyle().getLegendURL();
-                        url = lua[0].toString();
-                    } catch (Throwable t) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Could not find legend for " + title, t); // NOI18N
-                        }
-                    }
-                    if (url != null) {
-                        wmsCapabilities.put(url, wmsLayer.getWmsCapabilities());
-                        this.addLegend(url, name);
-                        if (log.isDebugEnabled()) {
-                            log.debug("added legend:" + name + "=" + url);      // NOI18N
-                        }
-                    }
-                }
-            }
+            addWmsServiceLayer((WMSServiceLayer)e.getLayer());
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
             final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
             this.addLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
+        } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
+            final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup)e.getLayer();
+            final Vector v = wmsLayer.getLayers();
+            final Iterator it = v.iterator();
+            if (it.hasNext()) {
+                final Object elem = (Object)it.next();
+                if (elem instanceof WMSServiceLayer) {
+                    addWmsServiceLayer((WMSServiceLayer)elem);
+                }
+            }
         } else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  wmsLayer  DOCUMENT ME!
+     */
+    private void addWmsServiceLayer(final WMSServiceLayer wmsLayer) {
+        final Vector v = wmsLayer.getWMSLayers();
+        final Iterator it = v.iterator();
+        while (it.hasNext()) {
+            final Object elem = (Object)it.next();
+            if (elem instanceof WMSLayer) {
+                final WMSLayer wl = (WMSLayer)elem;
+                final String title = wl.getOgcCapabilitiesLayer().getTitle();
+                final String name = wl.getOgcCapabilitiesLayer().getName();
+                String url = null;
+                try {
+                    final URL[] lua = wl.getSelectedStyle().getLegendURL();
+                    url = lua[0].toString();
+                } catch (Throwable t) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Could not find legend for " + title, t); // NOI18N
+                    }
+                }
+                if (url != null) {
+                    wmsCapabilities.put(url, wmsLayer.getWmsCapabilities());
+                    this.addLegend(url, name);
+                    if (log.isDebugEnabled()) {
+                        log.debug("added legend:" + name + "=" + url);      // NOI18N
+                    }
+                }
+            }
         }
     }
 
     @Override
     public void layerInformationStatusChanged(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof WMSServiceLayer) {
-            final WMSServiceLayer wmsLayer = (WMSServiceLayer)e.getLayer();
-            final Vector v = wmsLayer.getWMSLayers();
-            final Iterator it = v.iterator();
-            while (it.hasNext()) {
-                final Object elem = (Object)it.next();
-                if (elem instanceof WMSLayer) {
-                    final WMSLayer wl = (WMSLayer)elem;
-                    final String title = wl.getOgcCapabilitiesLayer().getTitle();
-                    final String name = wl.getOgcCapabilitiesLayer().getName();
-                    String url = null;
-                    try {
-                        final URL[] lua = wl.getSelectedStyle().getLegendURL();
-                        url = lua[0].toString();
-                    } catch (Throwable t) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Could not find legend for " + title, t); // NOI18N
-                        }
-                    }
-                    if (url != null) {
-                        wmsCapabilities.put(url, wmsLayer.getWmsCapabilities());
+            refreshWMSServiceLayerInformation((WMSServiceLayer)e.getLayer());
+        } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
+            final Vector<WMSServiceLayer> layer = ((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers();
+            final Iterator<WMSServiceLayer> it = layer.iterator();
 
-                        tableModel.refreshLegend(url, name);
-                    }
-                }
+            if (it.hasNext()) {
+                refreshWMSServiceLayerInformation(it.next());
             }
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
             final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
             tableModel.refreshLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
         } else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  wmsLayer  DOCUMENT ME!
+     */
+    private void refreshWMSServiceLayerInformation(final WMSServiceLayer wmsLayer) {
+        final Vector v = wmsLayer.getWMSLayers();
+        final Iterator it = v.iterator();
+        while (it.hasNext()) {
+            final Object elem = (Object)it.next();
+            if (elem instanceof WMSLayer) {
+                final WMSLayer wl = (WMSLayer)elem;
+                final String title = wl.getOgcCapabilitiesLayer().getTitle();
+                final String name = wl.getOgcCapabilitiesLayer().getName();
+                String url = null;
+                try {
+                    final URL[] lua = wl.getSelectedStyle().getLegendURL();
+                    url = lua[0].toString();
+                } catch (Throwable t) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Could not find legend for " + title, t); // NOI18N
+                    }
+                }
+                if (url != null) {
+                    wmsCapabilities.put(url, wmsLayer.getWmsCapabilities());
+
+                    tableModel.refreshLegend(url, name);
+                }
+            }
         }
     }
 
@@ -349,14 +418,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 1, 5, 1));
     } // </editor-fold>//GEN-END:initComponents
-
-    //~ Instance fields --------------------------------------------------------
-
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private HashMap<String, WMSCapabilities> wmsCapabilities = new HashMap<String, WMSCapabilities>();
-    private LegendModel tableModel = new LegendModel();
-    // End of variables declaration//GEN-END:variables
-    private int maxWidth = 0;
 
     //~ Inner Classes ----------------------------------------------------------
 

@@ -31,6 +31,7 @@ import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.MapClickListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
+import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 
@@ -92,7 +93,13 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
         if ((o instanceof WMSLayer) && (displays.get(o) != null)) {
             tbpFeatureInfos.setSelectedComponent(displays.get(o));
         } else if ((o instanceof WMSServiceLayer) && (((WMSServiceLayer)o).getWMSLayers().size() == 1)) {
-            tbpFeatureInfos.setSelectedComponent(displays.get(((WMSServiceLayer)o).getWMSLayers().get(0)));
+            final FeatureInfoDisplay displ = displays.get(((WMSServiceLayer)o).getWMSLayers().get(0));
+
+            if (displ != null) {
+                tbpFeatureInfos.setSelectedComponent(displ);
+            }
+        } else if ((o instanceof SlidableWMSServiceLayerGroup) && (displays.get(o) != null)) {
+            tbpFeatureInfos.setSelectedComponent(displays.get(o));
         }
     }
 
