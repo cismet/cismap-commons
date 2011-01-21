@@ -158,7 +158,7 @@ public class PSwing extends PNode implements Serializable, PropertyChangeListene
     //~ Static fields/initializers ---------------------------------------------
 
     /** Used as a hashtable key for this object in the Swing component's client properties. */
-    public static final String VISUAL_COMPONENT_KEY = "ZSwing";     // NOI18N
+    public static final String VISUAL_COMPONENT_KEY = "ZSwing";                            // NOI18N
     private static final AffineTransform IDENTITY = new AffineTransform();
     private static PBounds TEMP_REPAINT_BOUNDS2 = new PBounds();
 

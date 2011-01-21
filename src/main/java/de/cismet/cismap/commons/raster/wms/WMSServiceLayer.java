@@ -800,7 +800,8 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
         if (obj instanceof WMSServiceLayer) {
             final WMSServiceLayer tester = (WMSServiceLayer)obj;
             if (getName().equals(tester.getName())
-                        && getGetMapPrefix().equals(tester.getGetMapPrefix())
+                        && ((getGetMapPrefix() == tester.getGetMapPrefix())
+                            || ((getGetMapPrefix() != null) && getGetMapPrefix().equals(tester.getGetMapPrefix())))
                         && getLayersString(wmsLayers).equals(tester.getLayersString(tester.wmsLayers))
                         && getStylesString(wmsLayers).equals(tester.getStylesString(tester.wmsLayers))) {
                 return true;
