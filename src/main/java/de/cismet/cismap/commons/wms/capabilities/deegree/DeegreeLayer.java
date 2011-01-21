@@ -54,6 +54,11 @@ public class DeegreeLayer implements Layer {
     }
 
     @Override
+    public String[] getKeywords() {
+        return layer.getKeywordList();
+    }
+
+    @Override
     public boolean isQueryable() {
         return layer.isQueryable();
     }

@@ -36,6 +36,8 @@ public interface Layer {
      * @return  DOCUMENT ME!
      */
     String getAbstract();
+
+    String[] getKeywords();
     /**
      * DOCUMENT ME!
      *
