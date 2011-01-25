@@ -5127,13 +5127,15 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     }
 
     @Override
-    public void crsChanged(final CrsChangedEvent event) {
+    public synchronized void crsChanged(final CrsChangedEvent event) {
         if ((event.getFormerCrs() != null) && (fixedBoundingBox == null) && !resetCrs) {
             if (locked) {
                 return;
             }
 
             try {
+                // the wtst object should not be null, so teh getWtst method will be invoked
+                getWtst();
                 final BoundingBox bbox = getCurrentBoundingBox(); // getCurrentBoundingBox();
                 final CrsTransformer crsTransformer = new CrsTransformer(event.getCurrentCrs().getCode());
                 final BoundingBox newBbox = crsTransformer.transformBoundingBox(bbox, event.getFormerCrs().getCode());
