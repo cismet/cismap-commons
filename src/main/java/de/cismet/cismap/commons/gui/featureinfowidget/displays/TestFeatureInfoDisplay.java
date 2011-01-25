@@ -30,6 +30,8 @@ package de.cismet.cismap.commons.gui.featureinfowidget.displays;
 
 import org.jdesktop.swingx.graphics.GraphicsUtilities;
 
+import org.openide.util.lookup.ServiceProvider;
+
 import java.awt.image.BufferedImage;
 
 import java.net.URL;
@@ -38,7 +40,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
+import de.cismet.cismap.commons.gui.featureinfowidget.AbstractFeatureInfoDisplay;
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplay;
+import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplayKey;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 
 /**
@@ -47,7 +51,8 @@ import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
  * @author   thorsten
  * @version  $Revision$, $Date$
  */
-public class TestFeatureInfoDisplay extends FeatureInfoDisplay {
+@ServiceProvider(service = FeatureInfoDisplay.class)
+public class TestFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -63,6 +68,10 @@ public class TestFeatureInfoDisplay extends FeatureInfoDisplay {
      * Creates new form TestFeatureInfoDisplay.
      */
     public TestFeatureInfoDisplay() {
+        super(new FeatureInfoDisplayKey(
+                "de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup",
+                "testserver",
+                FeatureInfoDisplayKey.ANY));
         initComponents();
     }
 
@@ -88,6 +97,7 @@ public class TestFeatureInfoDisplay extends FeatureInfoDisplay {
 
     @Override
     public void init(final Object layer, final JTabbedPane parentTabbedPane) {
+        System.out.println("bla");
     }
 
     @Override

@@ -5,22 +5,6 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- *  Copyright (C) 2010 thorsten
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package de.cismet.cismap.commons.gui.featureinfowidget;
 
 /**
@@ -87,23 +71,20 @@ public class FeatureInfoDisplayKey {
 
     @Override
     public boolean equals(final Object obj) {
-        if (obj == null) {
+        if ((obj == null) || (getClass() != obj.getClass())) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
+
         final FeatureInfoDisplayKey other = (FeatureInfoDisplayKey)obj;
         if ((this.javaclass == null) ? (other.javaclass != null) : (!this.javaclass.equals(other.javaclass))) {
             return false;
-        }
-        if ((this.server == null) ? (other.server != null) : (!this.server.equals(other.server))) {
+        } else if ((this.server == null) ? (other.server != null) : (!this.server.equals(other.server))) {
             return false;
-        }
-        if ((this.layer == null) ? (other.layer != null) : (!this.layer.equals(other.layer))) {
+        } else if ((this.layer == null) ? (other.layer != null) : (!this.layer.equals(other.layer))) {
             return false;
+        } else {
+            return true;
         }
-        return true;
     }
 
     @Override
@@ -112,6 +93,19 @@ public class FeatureInfoDisplayKey {
         hash = (59 * hash) + ((this.javaclass != null) ? this.javaclass.hashCode() : 0);
         hash = (59 * hash) + ((this.server != null) ? this.server.hashCode() : 0);
         hash = (59 * hash) + ((this.layer != null) ? this.layer.hashCode() : 0);
+
         return hash;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(super.toString());
+
+        sb.append(" [javaclass=").append(javaclass); // NOI18N
+        sb.append(", server=").append(server);       // NOI18N
+        sb.append(", layer=").append(layer);         // NOI18N
+        sb.append("]");                              // NOI18N
+
+        return sb.toString();
     }
 }
