@@ -6,7 +6,7 @@
 *
 ****************************************************/
 /*
- * FeatureInfoDisplay.java
+ * AbstractFeatureInfoDisplay.java
  *
  * Created on 5. April 2006, 15:42
  */
@@ -17,9 +17,16 @@ import calpa.html.CalHTMLPane;
 import calpa.html.CalHTMLPreferences;
 import calpa.html.DefaultCalHTMLObserver;
 
+import org.apache.log4j.Logger;
+
+import org.openide.util.lookup.ServiceProvider;
+
+import java.applet.AppletContext;
+
 import java.awt.ComponentOrientation;
 import java.awt.EventQueue;
 import java.awt.Image;
+import java.awt.event.MouseEvent;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,12 +34,15 @@ import java.io.ByteArrayOutputStream;
 import java.net.URL;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
+import de.cismet.cismap.commons.gui.featureinfowidget.AbstractFeatureInfoDisplay;
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplay;
+import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplayKey;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
@@ -54,22 +64,26 @@ import de.cismet.security.handler.WSSAccessHandler;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay implements RetrievalListener,
+@ServiceProvider(service = FeatureInfoDisplay.class)
+public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoDisplay implements RetrievalListener,
     HyperlinkListener {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final Logger LOG = Logger.getLogger(OGCWMSGetFeatureInfoRequestHtmlDisplay.class);
 
     //~ Instance fields --------------------------------------------------------
 
     WMSLayer wmsLayer = null;
     UniversalRetrieval ur = null;
-    Icon icoProgress = new javax.swing.ImageIcon(getClass().getResource(
+    private final Icon icoProgress = new ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/featureinfowidget/res/progress.png"));   // NOI18N
-    Icon icoProgress64 = new javax.swing.ImageIcon(getClass().getResource(
+    private final Icon icoProgress64 = new ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/featureinfowidget/res/progress64.png")); // NOI18N
-    Icon icoInfo = new javax.swing.ImageIcon(getClass().getResource(
+    private final Icon icoInfo = new ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/featureinfowidget/res/info.png"));       // NOI18N
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    DefaultCalHTMLObserver htmlObserver = new DefaultCalHTMLObserver() {
+    private final DefaultCalHTMLObserver htmlObserver = new DefaultCalHTMLObserver() {
 
             @Override
             public void statusUpdate(final CalHTMLPane calHTMLPane,
@@ -78,8 +92,8 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
                     final int i0,
                     final String string) {
                 super.statusUpdate(calHTMLPane, i, uRL, i0, string);
-                if (log.isDebugEnabled()) {
-                    log.debug("StatusUpdate" + i + uRL); // NOI18N
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("StatusUpdate" + i + uRL); // NOI18N
                 }
             }
 
@@ -97,14 +111,13 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
             }
         };
 
-    CalHTMLPreferences htmlPrefs = new CalHTMLPreferences();
-    private java.applet.AppletContext appletContext = null;
+    private final CalHTMLPreferences htmlPrefs;
+    private AppletContext appletContext;
     private boolean shiftDown;
-    private int x = -1;
-    private int y = -1;
-    private JTabbedPane tabbedparent = null;
-    private String urlBuffer = null;
-    private SwingWorker currentWorker = null;
+    private JTabbedPane tabbedparent;
+    private String urlBuffer;
+    private SwingWorker currentWorker;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdOpenExternal;
     private calpa.html.CalHTMLPane htmlPane;
@@ -115,9 +128,14 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates new form FeatureInfoDisplay.
+     * Creates new form AbstractFeatureInfoDisplay.
      */
     public OGCWMSGetFeatureInfoRequestHtmlDisplay() {
+        super(new FeatureInfoDisplayKey(
+                "de.cismet.cismap.commons.raster.wms.WMSLayer", // NOI18N
+                FeatureInfoDisplayKey.ANY,
+                FeatureInfoDisplayKey.ANY));
+        htmlPrefs = new CalHTMLPreferences();
         htmlPrefs.setAutomaticallyFollowHyperlinks(false);
         htmlPrefs.setHandleFormSubmission(false);
         htmlPrefs.setOptimizeDisplay(CalCons.OPTIMIZE_ALL);
@@ -125,7 +143,6 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
         htmlPrefs.setLoadImages(true);
 
         initComponents();
-        // htmlPane.addHyperlinkListener(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -148,58 +165,26 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
      * @param  y  DOCUMENT ME!
      */
     private void showContent(final int x, final int y) {
-        this.x = x;
-        this.y = y;
         final String url = wmsLayer.getParentServiceLayer().getGetFeatureInfoUrl(x, y, wmsLayer);
-        if (log.isDebugEnabled()) {
-            log.debug("showContet of " + url);                 // NOI18N
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("showContet of " + url);                 // NOI18N
         }
         urlBuffer = url;
         if ((currentWorker != null) && !currentWorker.isCancelled()) {
             currentWorker.cancel(true);
         }
-        if (log.isDebugEnabled()) {
-            log.debug("before FeatureInfoRetriever creation"); // NOI18N
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("before FeatureInfoRetriever creation"); // NOI18N
         }
         currentWorker = new FeatureInfoRetriever(url);
-        if (log.isDebugEnabled()) {
-            log.debug("afterFeatureInfoCreation");             // NOI18N
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("afterFeatureInfoCreation");             // NOI18N
         }
         CismapBroker.getInstance().execute(currentWorker);
-//        urlBuffer=url;
-//        UniversalRetrieval ur=new UniversalRetrieval(url);
-//        ur.addRetrievalListener(this);
-//        ur.retrieve(false);
-
-//        try {
-//            log.debug("FeatureInfoUrl:"+wmsLayer.getParentServiceLayer().getGetFeatureInfoUrl(x,y,wmsLayer));
-//            htmlPane.showHTMLDocument(new URL(wmsLayer.getParentServiceLayer().getGetFeatureInfoUrl(x,y,wmsLayer)));
-//
-//        }
-//        catch (Exception e) {
-//            log.error("Fehler beim Anzeigen der FeatureInfo",e);
-//        }
     }
 
     @Override
     public void retrievalStarted(final RetrievalEvent e) {
-//        StyledDocument doc = (StyledDocument)htmlPane.getDocument();
-//
-//        htmlPane.setText("");
-//        htmlPane.setContentType("text/plain");
-//        htmlPane.setEditable(true);
-//        // The image must first be wrapped in a style
-//        Style style = doc.addStyle("StyleName", null);
-//        StyleConstants.setIcon(style, icoProgress64);
-//        try {
-//
-//            // Insert the image at the end of the text
-//            doc.insertString(doc.getLength(), "ignored text", style);
-//        } catch (BadLocationException ex) {
-//            ex.printStackTrace();
-//        }
-//        htmlPane.setEditable(false);
-        // htmlPane.setText("");
     }
 
     @Override
@@ -216,18 +201,13 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
             tabbedparent.setIconAt(tabbedparent.indexOfComponent(this), icoInfo);
         }
         if (e.getRetrievedObject() instanceof String) {
-//            htmlPane.setContentType("text/html");
-//            htmlPane.setText(StaticHtmlTools.convertHTTPReferences(StaticHtmlTools.stripMetaTag(e.getRetrievedObject().toString())));
             htmlPane.showHTMLDocument(e.getRetrievedObject().toString());
-            if (log.isDebugEnabled()) {
-                log.debug("String:" + e.getRetrievedObject().toString()); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("String:" + e.getRetrievedObject().toString()); // NOI18N
             }
         } else if (e.getRetrievedObject() instanceof Image) {
-            if (log.isDebugEnabled()) {
-//            htmlPane.setText("");
-//            htmlPane.select(0,1);
-//            htmlPane.insertIcon(new ImageIcon((Image)e.getRetrievedObject()));
-                log.debug("Bild:" + e.getRetrievedObject()); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Image:" + e.getRetrievedObject());             // NOI18N
             }
         }
     }
@@ -243,8 +223,8 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
      */
     @Override
     public void hyperlinkUpdate(final HyperlinkEvent event) {
-        if (log.isDebugEnabled()) {
-            log.debug("hyperlinkUpdate: " + event); // NOI18N
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("hyperlinkUpdate: " + event); // NOI18N
         }
         if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
             if (shiftDown) {
@@ -270,17 +250,17 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
                 final java.net.URL u = new java.net.URL(url);
                 appletContext.showDocument(u, "cismetBrowser");         // NOI18N
             }
-        } catch (Exception e) {
-            log.warn("Error while opening: " + url + ".\nNew try.", e); // NOI18N
+        } catch (final Exception e) {
+            LOG.warn("Error while opening: " + url + ".\nNew try.", e); // NOI18N
             // Nochmal zur Sicherheit mit dem BrowserLauncher probieren
             try {
                 de.cismet.tools.BrowserLauncher.openURL(url);
-            } catch (Exception e2) {
-                log.warn("Second try also failed. Error while opening: " + url + "\nLast try.", e2); // NOI18N
+            } catch (final Exception e2) {
+                LOG.warn("Second try also failed. Error while opening: " + url + "\nLast try.", e2); // NOI18N
                 try {
                     de.cismet.tools.BrowserLauncher.openURL("file://" + url);                        // NOI18N
-                } catch (Exception e3) {
-                    log.error("Third try also failed. Error while opening: file://" + url, e3);      // NOI18N
+                } catch (final Exception e3) {
+                    LOG.error("Third try also failed. Error while opening: file://" + url, e3);      // NOI18N
                 }
             }
         }
@@ -355,33 +335,35 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
                 final AccessHandler handler = WebAccessManager.getInstance().getHandlerForURL(new URL(urlBuffer));
                 if (handler != null) {
                     if (handler instanceof WSSAccessHandler) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("handler is wss handler --> creating wss get request"); // NOI18N
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("handler is wss handler --> creating wss get request"); // NOI18N
                         }
+
                         final String wssRequest = ((WSSAccessHandler)handler).createGetRequest(urlBuffer);
-                        if (log.isDebugEnabled()) {
-                            log.debug("created wss request: " + wssRequest);                  // NOI18N
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("created wss request: " + wssRequest); // NOI18N
                         }
                         openUrlInExternalBrowser(wssRequest);
+
                         return;
                     } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("No special handler --> default access via open URL");  // NOI18N
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("No special handler --> default access via open URL"); // NOI18N
                         }
                     }
                 } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("no handler available for given url default access via openURL"); // NOI18N
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("no handler available for given url default access via openURL"); // NOI18N
                     }
                 }
                 openUrlInExternalBrowser(urlBuffer);
-            } catch (Exception ex) {
-                log.error("Error while creating url for featureinfo");                        // NOI18N
+            } catch (final Exception ex) {
+                LOG.error("Error while creating url for featureinfo", ex);                   // NOI18N
             }
         } else {
-            openUrlInExternalBrowser("http://www.cismet.de");                                 // NOI18N
+            openUrlInExternalBrowser("http://www.cismet.de");                                // NOI18N
         }
-    }                                                                                         //GEN-LAST:event_cmdOpenExternalActionPerformed
+    }                                                                                        //GEN-LAST:event_cmdOpenExternalActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -389,7 +371,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
      * @param  evt  DOCUMENT ME!
      */
     private void htmlPane_MouseMoved(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_htmlPane_MouseMoved
-        shiftDown = (evt.getModifiers() & evt.SHIFT_MASK) == evt.SHIFT_MASK;
+        shiftDown = (evt.getModifiers() & MouseEvent.SHIFT_MASK) == MouseEvent.SHIFT_MASK;
     }                                                                       //GEN-LAST:event_htmlPane_MouseMoved
 
     /**
@@ -428,8 +410,8 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
 
         @Override
         protected String doInBackground() throws Exception {
-            if (log.isDebugEnabled()) {
-                log.debug("FeatureInfoRetriever started"); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("FeatureInfoRetriever started"); // NOI18N
             }
             try {
                 EventQueue.invokeLater(new Runnable() {
@@ -469,8 +451,8 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
                     byteArrayOut.write(c);
                 }
                 return byteArrayOut.toString();
-            } catch (Exception ex) {
-                log.error("Error while fetching FeatureInfos", ex); // NOI18N
+            } catch (final Exception ex) {
+                LOG.error("Error while fetching FeatureInfos", ex); // NOI18N
                 return null;
             }
         }
@@ -479,7 +461,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
         protected void done() {
             super.done();
             if (isCancelled()) {
-                log.warn("FeatureInfoRetriever was canceled"); // NOI18N
+                LOG.warn("FeatureInfoRetriever was canceled"); // NOI18N
                 return;
             }
             try {
@@ -489,23 +471,12 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends FeatureInfoDisplay i
                 }
                 final String result = get();
                 // ToDo more generic it should be possible to display images
-                // if (e.getRetrievedObject() instanceof String) {
-// htmlPane.setContentType("text/html");
-// htmlPane.setText(StaticHtmlTools.convertHTTPReferences(StaticHtmlTools.stripMetaTag(e.getRetrievedObject().toString())));
                 htmlPane.showHTMLDocument(result);
-                if (log.isDebugEnabled()) {
-                    log.debug("String:" + result); // NOI18N
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("String:" + result);                                    // NOI18N
                 }
-
-                // } else if (e.getRetrievedObject() instanceof Image) {
-//
-////            htmlPane.setText("");
-////            htmlPane.select(0,1);
-////            htmlPane.insertIcon(new ImageIcon((Image)e.getRetrievedObject()));
-//            log.debug("Bild:" + e.getRetrievedObject());
-//        }
-            } catch (Exception ex) {
-                log.error("Error while processing data of FeatureInfoRetriever", ex); // NOI18N
+            } catch (final Exception ex) {
+                LOG.error("Error while processing data of FeatureInfoRetriever", ex); // NOI18N
                 return;
             }
         }

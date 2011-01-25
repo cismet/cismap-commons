@@ -21,6 +21,7 @@ import java.net.URL;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -191,7 +192,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             removeLegendByName(slp.getLegendIdentifier());
         } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
             final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup)e.getLayer();
-            final Vector v = wmsLayer.getLayers();
+            final List v = wmsLayer.getLayers();
             final Iterator it = v.iterator();
             if (it.hasNext()) {
                 final Object elem = (Object)it.next();
@@ -296,7 +297,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             this.addLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
         } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
             final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup)e.getLayer();
-            final Vector v = wmsLayer.getLayers();
+            final List v = wmsLayer.getLayers();
             final Iterator it = v.iterator();
             if (it.hasNext()) {
                 final Object elem = (Object)it.next();
@@ -348,7 +349,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         if (e.getLayer() instanceof WMSServiceLayer) {
             refreshWMSServiceLayerInformation((WMSServiceLayer)e.getLayer());
         } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
-            final Vector<WMSServiceLayer> layer = ((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers();
+            final List<WMSServiceLayer> layer = ((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers();
             final Iterator<WMSServiceLayer> it = layer.iterator();
 
             if (it.hasNext()) {

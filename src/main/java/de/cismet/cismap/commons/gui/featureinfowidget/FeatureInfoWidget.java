@@ -14,18 +14,20 @@ package de.cismet.cismap.commons.gui.featureinfowidget;
 
 import com.jgoodies.looks.Options;
 
+import org.apache.log4j.Logger;
+
 import java.awt.Color;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import de.cismet.cismap.commons.ChildrenProvider;
 import de.cismet.cismap.commons.LayerInfoProvider;
-import de.cismet.cismap.commons.gui.featureinfowidget.displays.OGCWMSGetFeatureInfoRequestHtmlDisplay;
-import de.cismet.cismap.commons.gui.featureinfowidget.displays.TestFeatureInfoDisplay;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.GetFeatureInfoClickDetectionListener;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.MapClickListener;
@@ -41,15 +43,17 @@ import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayerListener, MapClickListener {
+public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, MapClickListener {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(FeatureInfoWidget.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    HashMap<Object, FeatureInfoDisplay> displays = new HashMap<Object, FeatureInfoDisplay>();
-    HashMap<FeatureInfoDisplayKey, Class<? extends FeatureInfoDisplay>> displayRepository =
-        new HashMap<FeatureInfoDisplayKey, Class<? extends FeatureInfoDisplay>>();
+    private final transient Map<Object, FeatureInfoDisplay> displays;
+    private final transient FeatureInfoDisplayRepository displayRepo;
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JTabbedPane tbpFeatureInfos;
@@ -61,45 +65,36 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
      * Creates new form FeatureInfoWidget.
      */
     public FeatureInfoWidget() {
+        displays = new HashMap<Object, FeatureInfoDisplay>();
+        displayRepo = new FeatureInfoDisplayRepository();
+
         initComponents();
+
         tbpFeatureInfos.putClientProperty(Options.NO_CONTENT_BORDER_KEY, Boolean.FALSE);
-        // tbpFeatureInfos.putClientProperty(Options.EMBEDDED_TABS_KEY, Boolean.TRUE);
         tbpFeatureInfos.setRequestFocusEnabled(true);
         tbpFeatureInfos.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-
-        // tbpFeatureInfos.setUI(new WindowsTabbedPaneUI());
-
-        displayRepository.put(new FeatureInfoDisplayKey(
-                "de.cismet.cismap.commons.raster.wms.WMSLayer",
-                FeatureInfoDisplayKey.ANY,
-                FeatureInfoDisplayKey.ANY),
-            OGCWMSGetFeatureInfoRequestHtmlDisplay.class);
-        displayRepository.put(new FeatureInfoDisplayKey(
-                "de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup",
-                FeatureInfoDisplayKey.ANY,
-                FeatureInfoDisplayKey.ANY),
-            TestFeatureInfoDisplay.class);
     }
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
     public void layerVisibilityChanged(final ActiveLayerEvent e) {
+        // noop
     }
 
     @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         final Object o = e.getLayer();
         if ((o instanceof WMSLayer) && (displays.get(o) != null)) {
-            tbpFeatureInfos.setSelectedComponent(displays.get(o));
+            tbpFeatureInfos.setSelectedComponent(displays.get(o).getDisplayComponent());
         } else if ((o instanceof WMSServiceLayer) && (((WMSServiceLayer)o).getWMSLayers().size() == 1)) {
             final FeatureInfoDisplay displ = displays.get(((WMSServiceLayer)o).getWMSLayers().get(0));
 
             if (displ != null) {
-                tbpFeatureInfos.setSelectedComponent(displ);
+                tbpFeatureInfos.setSelectedComponent(displ.getDisplayComponent());
             }
         } else if ((o instanceof SlidableWMSServiceLayerGroup) && (displays.get(o) != null)) {
-            tbpFeatureInfos.setSelectedComponent(displays.get(o));
+            tbpFeatureInfos.setSelectedComponent(displays.get(o).getDisplayComponent());
         }
     }
 
@@ -110,6 +105,7 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
 
     @Override
     public void layerPositionChanged(final ActiveLayerEvent e) {
+        // noop
     }
 
     @Override
@@ -139,58 +135,30 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
             }
         } else if ((o instanceof LayerInfoProvider) && ((LayerInfoProvider)o).isQueryable()) {
             final LayerInfoProvider layer = (LayerInfoProvider)o;
-            FeatureInfoDisplay d = displays.get(layer);
-            if ((d != null) && ((layer.isLayerQuerySelected() == false) || remove)) {
+            FeatureInfoDisplay display = displays.get(layer);
+            if ((display != null) && ((layer.isLayerQuerySelected() == false) || remove)) {
                 try {
-                    tbpFeatureInfos.remove(d);
+                    tbpFeatureInfos.remove(display.getDisplayComponent());
                     displays.remove(layer);
                 } catch (Exception ex) {
-                    log.warn("Workaround for style changes(there is no refresh, but only remove/add)", ex); // NOI18N I dont understand this
+                    LOG.warn("Workaround for style changes(there is no refresh, but only remove/add)", ex); // NOI18N I dont understand this
                 }
-            } else if ((d == null) && layer.isLayerQuerySelected()) {
+            } else if ((display == null) && layer.isLayerQuerySelected()) {
                 try {
-                    final Class<? extends FeatureInfoDisplay> dc = getDisplayClass(layer.getClass().getCanonicalName(),
-                            layer);
-                    d = dc.getConstructor().newInstance();
-                    d.init(layer, tbpFeatureInfos);
-                    tbpFeatureInfos.add(layer.toString(), d);
-                    displays.put(layer, d);
-                } catch (Exception exception) {
-                    log.error("Exception in creating featureInfoDisplay component", exception);
+                    display = displayRepo.getDisplayClass(layer.getClass().getCanonicalName(), layer);
+                    if (display == null) {
+                        // TODO: use default display? or should even a default be delivered by the repo?
+                        throw new IllegalStateException("dispay info for layer is null: " + layer); // NOI18N
+                    }
+                    display.init(layer, tbpFeatureInfos);
+                    tbpFeatureInfos.add(layer.toString(), display.getDisplayComponent());
+                    displays.put(layer, display);
+                } catch (final Exception exception) {
+                    LOG.error("Exception in creating featureInfoDisplay component", exception);     // NOI18N
+                    layer.setLayerQuerySelected(false);
                 }
             }
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   layerclass  DOCUMENT ME!
-     * @param   layerinfo   DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private Class<? extends FeatureInfoDisplay> getDisplayClass(final String layerclass,
-            final LayerInfoProvider layerinfo) {
-        final String server = layerinfo.getServerURI();
-        final String layer = layerinfo.getLayerURI();
-
-        Class<? extends FeatureInfoDisplay> c = null;
-        c = displayRepository.get(new FeatureInfoDisplayKey(layerclass, server, layer));
-        if (c == null) {
-            c = displayRepository.get(new FeatureInfoDisplayKey(layerclass, server, FeatureInfoDisplayKey.ANY));
-        }
-        if (c == null) {
-            c = displayRepository.get(new FeatureInfoDisplayKey(
-                        layerclass,
-                        FeatureInfoDisplayKey.ANY,
-                        FeatureInfoDisplayKey.ANY));
-        }
-
-        if (c == null) {
-            // Error INfoDisplay oder STandardInfoDisplay
-        }
-        return c;
     }
 
     /**
@@ -244,12 +212,12 @@ public class FeatureInfoWidget extends javax.swing.JPanel implements ActiveLayer
             try {
                 tbpFeatureInfos.setForegroundAt(selectedindex, Color.blue);
             } catch (Exception ex) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Error. Feeling not blue.", ex);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Error. Feeling not blue.", ex); // NOI18N
                 }
             }
         }
-    } //GEN-LAST:event_tbpFeatureInfosStateChanged
+    }                                                          //GEN-LAST:event_tbpFeatureInfosStateChanged
 
     @Override
     public void clickedOnMap(final MapClickedEvent mce) {
