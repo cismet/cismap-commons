@@ -69,19 +69,19 @@ public final class FeatureInfoDisplayRepository {
      *
      * @return  DOCUMENT ME!
      */
-    public FeatureInfoDisplay getDisplayClass(final String layerclass, final LayerInfoProvider layerinfo) {
+    public FeatureInfoDisplay getDisplayClass(final Class layerclass, final LayerInfoProvider layerinfo) {
         final String server = layerinfo.getServerURI();
         final String layer = layerinfo.getLayerURI();
 
         FeatureInfoDisplay display = repo.get(new FeatureInfoDisplayKey(layerclass, server, layer));
         if (display == null) {
-            display = repo.get(new FeatureInfoDisplayKey(layerclass, server, FeatureInfoDisplayKey.ANY));
+            display = repo.get(new FeatureInfoDisplayKey(layerclass, server, FeatureInfoDisplayKey.ANY_SERVER));
 
             if (display == null) {
                 display = repo.get(new FeatureInfoDisplayKey(
                             layerclass,
-                            FeatureInfoDisplayKey.ANY,
-                            FeatureInfoDisplayKey.ANY));
+                            FeatureInfoDisplayKey.ANY_SERVER,
+                            FeatureInfoDisplayKey.ANY_SERVER));
 
                 if (display == null) {
                     if (LOG.isDebugEnabled()) {

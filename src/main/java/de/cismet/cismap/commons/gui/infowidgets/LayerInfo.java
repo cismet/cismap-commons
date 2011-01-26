@@ -12,11 +12,12 @@
  */
 package de.cismet.cismap.commons.gui.infowidgets;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
 
@@ -36,9 +37,16 @@ import de.cismet.cismap.commons.wms.capabilities.Layer;
  */
 public class LayerInfo extends javax.swing.JPanel implements CapabilityListener, ActiveLayerListener {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final String DE = "--DE"; // NOI18N
+    private static final String EN = "--EN"; // NOI18N
+
+    private static final String[] LANGUAGES = { DE, EN };
+
     //~ Instance fields --------------------------------------------------------
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
@@ -51,15 +59,13 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
     private javax.swing.JScrollPane scpAbstract;
     private javax.swing.JSplitPane sppMain;
     private javax.swing.JTextArea txtAbstract;
-    private static final String DE = "--DE"; // NOI18N
-    private static final String EN = "--EN"; // NOI18N
-
-    private static final String[] LANGUAGES = { DE, EN };
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private boolean splitPaneInitialized = false;
     private ResourceBundle srsMapping = null;
     private HashMap<String, String> srsMap = new HashMap<String, String>();
+
+    //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates new form LayerInfo.
@@ -82,6 +88,8 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
             log.error("Cannot open the resource bundle for the crs mapping.", e);
         }
     }
+
+    //~ Methods ----------------------------------------------------------------
 
     @Override
     public void serverChanged(final CapabilityEvent e) {
@@ -213,8 +221,6 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         add(panMain, java.awt.BorderLayout.CENTER);
     } // </editor-fold>//GEN-END:initComponents
 
-    //~ Methods ----------------------------------------------------------------
-
     /**
      * DOCUMENT ME!
      *
@@ -231,7 +237,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
     private void formComponentResized(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentResized
     }                                                                            //GEN-LAST:event_formComponentResized
     /**
-     * End of variables declaration//GEN-END:variables.
+     * End of variables declaration.
      *
      * @param  layer  DOCUMENT ME!
      */
@@ -292,7 +298,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         lblFeatureInfo.setEnabled(v.featureInfo);
 
         if ((v.srs != null) && (v.srs.length > 0)) {
-            final Vector<String> srs = new Vector<String>();
+            final List<String> srs = new ArrayList<String>();
             lstSrs.setVisible(true);
             for (String s : v.srs) {
                 s = getSrsDescription(s);
@@ -301,7 +307,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
                 }
             }
 
-            lstSrs.setModel(new DefaultComboBoxModel(srs));
+            lstSrs.setModel(new DefaultComboBoxModel(srs.toArray()));
         } else {
             lstSrs.setVisible(false);
         }
@@ -329,7 +335,7 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
     @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof WMSServiceLayer) {
-            final Vector v = ((WMSServiceLayer)e.getLayer()).getWMSLayers();
+            final List v = ((WMSServiceLayer)e.getLayer()).getWMSLayers();
             if (v.size() == 1) {
                 final Object o = v.get(0);
                 if (o instanceof WMSLayer) {
@@ -403,10 +409,4 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
         boolean featureInfo;
         String[] srs;
     }
-
-//    public static void main(String[] args) {
-//        String s="--DE Inhalt: Orthofotomosaik fuer das Stadtgebiet von Wuppertal, Bildflug vom 13.03.2007, hergestellt durch Hansa Luftbild AG / Muenster. Sichtbarkeit: oeffentlich, Detailzooms nur fuer interne und autorisierte externe Nutzer. Nutzung: Detailzooms fuer externe Nutzer i. A. kostenpflichtig nach Abschluss eines schriftlichen Nutzungsrechtsvertrages.--EN This is english";
-//        System.out.println(new LayerInfo().getGDILanguageString(s));
-//    }
-
 }

@@ -23,6 +23,8 @@
  */
 package de.cismet.cismap.commons;
 
+import de.cismet.cismap.commons.wms.capabilities.Layer;
+
 /**
  * DOCUMENT ME!
  *
@@ -63,4 +65,11 @@ public interface LayerInfoProvider {
      * @param  selected  DOCUMENT ME!
      */
     void setLayerQuerySelected(boolean selected);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Layer getLayerInformation();
 }

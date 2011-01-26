@@ -17,11 +17,13 @@ public class FeatureInfoDisplayKey {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String ANY = null;
+    public static final Class ANY_CLASS = null;
+    public static final String ANY_SERVER = null;
+    public static final String ANY_LAYER = null;
 
     //~ Instance fields --------------------------------------------------------
 
-    private String javaclass;
+    private Class javaclass;
     private String server;
     private String layer;
 
@@ -34,7 +36,7 @@ public class FeatureInfoDisplayKey {
      * @param  server     DOCUMENT ME!
      * @param  layer      DOCUMENT ME!
      */
-    public FeatureInfoDisplayKey(final String javaclass, final String server, final String layer) {
+    public FeatureInfoDisplayKey(final Class javaclass, final String server, final String layer) {
         this.javaclass = javaclass;
         this.server = server;
         this.layer = layer;
@@ -47,7 +49,7 @@ public class FeatureInfoDisplayKey {
      *
      * @return  DOCUMENT ME!
      */
-    public String getJavaclass() {
+    public Class getJavaclass() {
         return javaclass;
     }
 

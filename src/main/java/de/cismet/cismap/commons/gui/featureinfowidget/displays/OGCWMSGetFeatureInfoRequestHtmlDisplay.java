@@ -132,9 +132,10 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
      */
     public OGCWMSGetFeatureInfoRequestHtmlDisplay() {
         super(new FeatureInfoDisplayKey(
-                "de.cismet.cismap.commons.raster.wms.WMSLayer", // NOI18N
-                FeatureInfoDisplayKey.ANY,
-                FeatureInfoDisplayKey.ANY));
+                WMSLayer.class,
+                FeatureInfoDisplayKey.ANY_SERVER,
+                FeatureInfoDisplayKey.ANY_SERVER));
+
         htmlPrefs = new CalHTMLPreferences();
         htmlPrefs.setAutomaticallyFollowHyperlinks(false);
         htmlPrefs.setHandleFormSubmission(false);

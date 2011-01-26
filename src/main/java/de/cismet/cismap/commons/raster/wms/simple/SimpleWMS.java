@@ -25,6 +25,7 @@ import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
 
 /**
  * DOCUMENT ME!
@@ -282,5 +283,10 @@ public class SimpleWMS extends AbstractWMS implements MapService,
     @Override
     public boolean isQueryable() {
         return false;
+    }
+
+    @Override
+    public Layer getLayerInformation() {
+        return null;
     }
 }

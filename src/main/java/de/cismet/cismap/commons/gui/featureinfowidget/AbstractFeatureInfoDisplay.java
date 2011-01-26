@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 /**
  * DOCUMENT ME!
  *
- * @author   thorsten
+ * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
 public abstract class AbstractFeatureInfoDisplay extends JPanel implements FeatureInfoDisplay {
@@ -27,9 +27,9 @@ public abstract class AbstractFeatureInfoDisplay extends JPanel implements Featu
     /**
      * Creates a new AbstractFeatureInfoDisplay object.
      *
-     * @param   displayKey  DOCUMENT ME!
+     * @param   displayKey  the {@link FeatureInfoDisplayKey} of this display
      *
-     * @throws  IllegalArgumentException  DOCUMENT ME!
+     * @throws  IllegalArgumentException  if the given display key is <code>null</code>
      */
     public AbstractFeatureInfoDisplay(final FeatureInfoDisplayKey displayKey) {
         if (displayKey == null) {
@@ -49,5 +49,19 @@ public abstract class AbstractFeatureInfoDisplay extends JPanel implements Featu
     @Override
     public FeatureInfoDisplayKey getDisplayKey() {
         return displayKey;
+    }
+
+    @Override
+    public boolean acceptLayer(final Class layerClass) {
+        final Class keyClass = displayKey.getJavaclass();
+        if (keyClass == null) {
+            return true;
+        } else {
+            if (layerClass == null) {
+                return false;
+            } else {
+                return keyClass.isAssignableFrom(layerClass);
+            }
+        }
     }
 }

@@ -15,7 +15,7 @@ import org.jdom.Element;
 
 import java.net.URI;
 
-import java.util.Vector;
+import java.util.List;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 
@@ -76,11 +76,13 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
     public DocumentFeatureService(final String name,
             final URI documentURI,
             final long documentSize,
-            final Vector<FeatureServiceAttribute> attributes) throws Exception {
+            final List<FeatureServiceAttribute> attributes) throws Exception {
         super(name, attributes);
-        this.setDocumentURI(documentURI);
+        this.documentURI = documentURI;
         this.documentSize = documentSize;
-        logger.info("creating new DocumentFeatureService from URI: " + this.getDocumentURI()); // NOI18N
+        if (LOG.isInfoEnabled()) {
+            LOG.info("creating new DocumentFeatureService from URI: " + documentURI); // NOI18N
+        }
     }
 
     /**
@@ -90,7 +92,7 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
      */
     protected DocumentFeatureService(final DocumentFeatureService dfs) {
         super(dfs);
-        this.setDocumentURI(dfs.getDocumentURI());
+        this.documentURI = dfs.getDocumentURI();
         this.documentSize = dfs.getDocumentSize();
     }
 

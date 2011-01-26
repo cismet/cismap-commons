@@ -37,7 +37,7 @@ public class WMSLayer implements LayerInfoProvider {
     public WMSLayer(final Layer ogcCapabilitiesLayer, final Style selectedStyle) {
         this.ogcCapabilitiesLayer = ogcCapabilitiesLayer;
         this.selectedStyle = selectedStyle;
-        setEnabled(true);
+        enabled = true;
         querySelected = false;
         this.selectedStyle = selectedStyle;
     }
@@ -177,5 +177,10 @@ public class WMSLayer implements LayerInfoProvider {
     @Override
     public boolean isQueryable() {
         return getOgcCapabilitiesLayer().isQueryable();
+    }
+
+    @Override
+    public Layer getLayerInformation() {
+        return null;
     }
 }
