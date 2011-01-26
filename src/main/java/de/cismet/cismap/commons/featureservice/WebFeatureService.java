@@ -23,7 +23,7 @@ import org.jdom.Element;
 import java.awt.Font;
 
 import java.util.HashMap;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -34,7 +34,7 @@ import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.wfs.WFSFacade;
-import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
 
 /**
  * This class provides access to a Web Feature service. Requests will be send to a WFS instance. The response will be
@@ -111,7 +111,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
     public WebFeatureService(final String name,
             final String host,
             final Element query,
-            final Vector<FeatureServiceAttribute> attributes,
+            final List<FeatureServiceAttribute> attributes,
             final String version) throws Exception {
         super(name, attributes);
         this.version = version;
@@ -149,8 +149,8 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
     public void setMaxFeatureCount(final int maxFeatureCount) {
         super.setMaxFeatureCount(maxFeatureCount);
         if (this.wfsQueryElement != null) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("setting max features of WFS query to " + (maxFeatureCount + 100)); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("setting max features of WFS query to " + (maxFeatureCount + 100)); // NOI18N
             }
             WFSFacade.setMaxFeatureCount(this.wfsQueryElement, maxFeatureCount + 100, getVersion());
             this.wfsQueryString = FeatureServiceUtilities.elementToString(this.wfsQueryElement);
@@ -225,8 +225,8 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
 
     @Override
     public void setQuery(final String wfsQueryString) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("setting the string representation of the WFS query (will not be saved)"); // NOI18N
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("setting the string representation of the WFS query (will not be saved)"); // NOI18N
         }
         this.wfsQueryString = wfsQueryString;
     }
@@ -246,8 +246,8 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
      * @param  wfsQuery  DOCUMENT ME!
      */
     public void setQueryElement(final Element wfsQuery) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("setting the XML Element representation of the WFS query (will be saved)"); // NOI18N
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("setting the XML Element representation of the WFS query (will be saved)"); // NOI18N
         }
         this.wfsQueryElement = wfsQuery;
         // overwrite string representation of query
@@ -340,5 +340,10 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
     @Override
     public boolean isQueryable() {
         return false;
+    }
+
+    @Override
+    public Layer getLayerInformation() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -88,7 +88,7 @@ public abstract class AbstractWMS extends AbstractRetrievalService implements Ma
 
     @Override
     public void retrievalError(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        logger.warn("retrievalError", new CurrentStackTrace()); // NOI18N
+        LOG.warn("retrievalError", new CurrentStackTrace()); // NOI18N
         this.fireRetrievalError(e);
     }
 

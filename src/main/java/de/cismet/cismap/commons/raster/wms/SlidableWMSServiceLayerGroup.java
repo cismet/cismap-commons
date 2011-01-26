@@ -591,6 +591,7 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
      *
      * @return  the layer capabilities object of the current layer
      */
+    @Override
     public Layer getLayerInformation() {
         if (wmsCapabilities != null) {
             return getLayerInformation(null, wmsCapabilities.getLayer().getChildren());

@@ -145,7 +145,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 }
             } else if ((display == null) && layer.isLayerQuerySelected()) {
                 try {
-                    display = displayRepo.getDisplayClass(layer.getClass().getCanonicalName(), layer);
+                    display = displayRepo.getDisplayClass(layer.getClass(), layer);
                     if (display == null) {
                         // TODO: use default display? or should even a default be delivered by the repo?
                         throw new IllegalStateException("dispay info for layer is null: " + layer); // NOI18N

@@ -15,8 +15,9 @@ import org.jdom.Element;
 
 import java.net.URI;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -25,8 +26,7 @@ import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.GMLFeatureFactory;
-
-import de.cismet.tools.collections.TypeSafeCollections;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
 
 /**
  * Document FeatureService that supports GML Documents.
@@ -41,7 +41,7 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String GML_FEATURELAYER_TYPE = "GMLFeatureServiceLayer"; // NOI18N
-    public static final Map<Integer, Icon> layerIcons = TypeSafeCollections.newHashMap();
+    public static final Map<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
 
     static {
         layerIcons.put(
@@ -92,7 +92,7 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
     public GMLFeatureService(final String name,
             final URI documentURI,
             final long documentSize,
-            final Vector<FeatureServiceAttribute> attributes) throws Exception {
+            final List<FeatureServiceAttribute> attributes) throws Exception {
         super(name, documentURI, documentSize, attributes);
     }
 
@@ -131,13 +131,13 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
 
     @Override
     public String getQuery() {
-        // logger.warn("unexpected call to getQuery, not supported by this service");
+        // LOG.warn("unexpected call to getQuery, not supported by this service");
         return null;
     }
 
     @Override
     public void setQuery(final String query) {
-        logger.warn("unexpected call to setQuery, not supported by this service:\n" + query); // NOI18N
+        LOG.warn("unexpected call to setQuery, not supported by this service:\n" + query); // NOI18N
     }
 
     @Override
@@ -160,7 +160,7 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
 
     @Override
     public Object clone() {
-        logger.info("cloning service " + this.getName()); // NOI18N
+        LOG.info("cloning service " + this.getName()); // NOI18N
         return new GMLFeatureService(this);
     }
 
@@ -186,5 +186,10 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
     @Override
     public boolean isQueryable() {
         return false;
+    }
+
+    @Override
+    public Layer getLayerInformation() {
+        return null;
     }
 }

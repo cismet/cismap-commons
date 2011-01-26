@@ -74,14 +74,14 @@ public class SimpleUpdateablePostgisFeatureService extends SimplePostgisFeatureS
             actionElement = element.getChild("action");                                                          // NOI18N
             this.postgisAction.setAction(actionElement.getText());
         } catch (Exception e) {
-            logger.warn("No action in updateable Service: " + e.getMessage());                                   // NOI18N
+            LOG.warn("No action in updateable Service: " + e.getMessage());                                      // NOI18N
         }
         try {
             this.postgisAction.setActionText(actionElement.getAttribute("text").getValue());                     // NOI18N
             this.postgisAction.setIconPath(actionElement.getAttribute("icon").getValue());                       // NOI18N
             this.postgisAction.setIcon(new ImageIcon(getClass().getResource(this.postgisAction.getIconPath())));
         } catch (Exception e) {
-            logger.warn("No actiontext in updateable Service: " + e.getMessage());                               // NOI18N
+            LOG.warn("No actiontext in updateable Service: " + e.getMessage());                                  // NOI18N
             this.postgisAction.setActionText(org.openide.util.NbBundle.getMessage(
                     SimpleUpdateablePostgisFeatureService.class,
                     "SimpleUpdateablePostgisFeatureService.initFromElement(Element).postgisAction.actionText")); // NOI18N

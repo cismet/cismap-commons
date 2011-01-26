@@ -7,11 +7,14 @@
 ****************************************************/
 package de.cismet.cismap.commons.retrieval;
 
+import org.apache.log4j.Logger;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Vector;
+import java.util.List;
 
 import de.cismet.cismap.commons.Debug;
 
@@ -32,14 +35,14 @@ public abstract class AbstractRetrievalService implements RetrievalService {
 
     protected static final boolean DEBUG = Debug.DEBUG;
 
-    //~ Instance fields --------------------------------------------------------
+    protected static final Logger LOG = Logger.getLogger(AbstractRetrievalService.class);
 
-    protected final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
+    //~ Instance fields --------------------------------------------------------
 
     protected int progress = -1;
     protected Object errorObject = null;
     protected boolean refreshNeeded = false;
-    protected Vector listeners = new Vector();
+    protected List<RetrievalListener> listeners = new ArrayList<RetrievalListener>();
     protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     final Object fireRetrievalStartedLock = new Object();
     final Object fireRetrievalProgressLock = new Object();
@@ -154,7 +157,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
     public void fireRetrievalError(final RetrievalEvent e) {
         synchronized (fireRetrievalErrorLock) {
             this.setProgress(0);
-            logger.warn("fireRetrievalError: ", new CurrentStackTrace()); // NOI18N
+            LOG.warn("fireRetrievalError: ", new CurrentStackTrace()); // NOI18N
             e.setRetrievalService(this);
             final Iterator it = listeners.iterator();
             while (it.hasNext()) {
@@ -187,7 +190,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
      *
      * @return  DOCUMENT ME!
      */
-    public Vector getListeners() {
+    public List<RetrievalListener> getListeners() {
         return listeners;
     }
 
@@ -200,7 +203,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
     public void setProgress(final int progress) {
         final int oldProgress = this.progress;
         if ((progress > 100) || (progress < -1)) {
-            logger.warn("invalid progress '" + progress + "', setting to -1 (indeterminate)"); // NOI18N
+            LOG.warn("invalid progress '" + progress + "', setting to -1 (indeterminate)"); // NOI18N
             this.progress = -1;
         } else {
             this.progress = progress;

@@ -14,7 +14,7 @@
  *  (at your option) any later version.
  *
  *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  but WITHOUT ANY_SERVER WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
  *
@@ -44,6 +44,7 @@ import de.cismet.cismap.commons.gui.featureinfowidget.AbstractFeatureInfoDisplay
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplay;
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoDisplayKey;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
+import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 
 /**
  * DOCUMENT ME!
@@ -69,9 +70,9 @@ public class TestFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
      */
     public TestFeatureInfoDisplay() {
         super(new FeatureInfoDisplayKey(
-                "de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup",
+                SlidableWMSServiceLayerGroup.class,
                 "testserver",
-                FeatureInfoDisplayKey.ANY));
+                FeatureInfoDisplayKey.ANY_SERVER));
         initComponents();
     }
 

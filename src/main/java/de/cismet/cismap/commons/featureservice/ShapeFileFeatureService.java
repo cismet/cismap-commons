@@ -131,13 +131,13 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
 
     @Override
     public String getQuery() {
-        // logger.warn("unexpected call to getQuery, not supported by this service");
+        // LOG.warn("unexpected call to getQuery, not supported by this service");
         return null;
     }
 
     @Override
     public void setQuery(final String query) {
-        logger.warn("unexpected call to setQuery, not supported by this service:\n" + query); // NOI18N
+        LOG.warn("unexpected call to setQuery, not supported by this service:\n" + query); // NOI18N
     }
 
     @Override
@@ -160,7 +160,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
 
     @Override
     public Object clone() {
-        logger.info("cloning service " + this.getName()); // NOI18N
+        LOG.info("cloning service " + this.getName()); // NOI18N
         return new ShapeFileFeatureService(this);
     }
 

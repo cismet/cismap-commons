@@ -21,6 +21,7 @@ import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.PostgisFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory;
+import de.cismet.cismap.commons.wms.capabilities.Layer;
 
 import de.cismet.tools.ConnectionInfo;
 
@@ -76,8 +77,8 @@ public class SimplePostgisFeatureService
      */
     public SimplePostgisFeatureService(final SimplePostgisFeatureService spfs) {
         super(spfs);
-        this.setConnectionInfo(spfs.getConnectionInfo());
-        this.setQuery(spfs.getQuery());
+        this.connectionInfo = spfs.getConnectionInfo();
+        this.sqlStatement = spfs.getQuery();
     }
 
     /**
@@ -101,13 +102,13 @@ public class SimplePostgisFeatureService
         {
             final ConnectionInfo newConnectionInfo = new ConnectionInfo(element.getChild("dbConnectionInfo")); // NOI18N
             this.setConnectionInfo(newConnectionInfo);
-            if (logger.isDebugEnabled()) {
-                logger.debug("SimplePostgisFeatureService initialised with connection: \n"
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("SimplePostgisFeatureService initialised with connection: \n"
                             + this.getConnectionInfo().getUrl() + ", " + this.getConnectionInfo().getDriver() + ", "
                             + this.getConnectionInfo().getUser());                                             // NOI18N
             }
         } else {
-            logger.error("missing element 'dbConnectionInfo' in xml configuration");                           // NOI18N
+            LOG.error("missing element 'dbConnectionInfo' in xml configuration");                              // NOI18N
         }
 
         // TODO: SimpleFeatureServiceSqlStatement should implement ConvertableToXML
@@ -121,17 +122,17 @@ public class SimplePostgisFeatureService
         final Element e = super.toElement();
 
         if (this.sqlStatement != null) {
-            final Element stmnt = new Element("statement");           // NOI18N
+            final Element stmnt = new Element("statement");        // NOI18N
             stmnt.addContent(new CDATA(sqlStatement.getSqlTemplate()));
             e.addContent(stmnt);
-            final Element allFields = new Element("allFields");       // NOI18N
+            final Element allFields = new Element("allFields");    // NOI18N
             allFields.addContent(new CDATA(sqlStatement.getAllFields()));
             e.addContent(allFields);
-            final Element orderBy = new Element("orderBy");           // NOI18N
+            final Element orderBy = new Element("orderBy");        // NOI18N
             orderBy.addContent(new CDATA(sqlStatement.getOrderBy()));
             e.addContent(orderBy);
         } else {
-            logger.warn("sql statement is null and cannot be saved"); // NOI18N
+            LOG.warn("sql statement is null and cannot be saved"); // NOI18N
         }
 
         if (this.connectionInfo != null) {
@@ -143,7 +144,7 @@ public class SimplePostgisFeatureService
             connectionElement.addContent(new Element("pass").addContent(this.getConnectionInfo().getPass()));          // NOI18N
             e.addContent(connectionElement);
         } else {
-            logger.warn("connection info is null and cannot be saved");                                                // NOI18N
+            LOG.warn("connection info is null and cannot be saved");                                                   // NOI18N
         }
 
         return e;
@@ -209,8 +210,8 @@ public class SimplePostgisFeatureService
 
     @Override
     public SimplePostgisFeatureService clone() {
-        if (logger.isDebugEnabled()) {
-            logger.debug("cloning SimplePostgisFeatureService " + this.getName()); // NOI18N
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("cloning SimplePostgisFeatureService " + this.getName()); // NOI18N
         }
         return new SimplePostgisFeatureService(this);
     }
@@ -237,5 +238,10 @@ public class SimplePostgisFeatureService
     @Override
     public boolean isQueryable() {
         return false;
+    }
+
+    @Override
+    public Layer getLayerInformation() {
+        return null;
     }
 }

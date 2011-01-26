@@ -19,10 +19,10 @@ import java.awt.Image;
 
 import java.net.URL;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -195,7 +195,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             final List v = wmsLayer.getLayers();
             final Iterator it = v.iterator();
             if (it.hasNext()) {
-                final Object elem = (Object)it.next();
+                final Object elem = it.next();
                 if (elem instanceof WMSServiceLayer) {
                     removeWmsServiceLayer((WMSServiceLayer)elem);
                 }
@@ -211,10 +211,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
      * @param  wmsLayer  DOCUMENT ME!
      */
     private void removeWmsServiceLayer(final WMSServiceLayer wmsLayer) {
-        final Vector v = wmsLayer.getWMSLayers();
+        final List v = wmsLayer.getWMSLayers();
         final Iterator it = v.iterator();
         while (it.hasNext()) {
-            final Object elem = (Object)it.next();
+            final Object elem = it.next();
             if (elem instanceof WMSLayer) {
                 final WMSLayer wl = (WMSLayer)elem;
                 removeWMSLayer(wl);
@@ -234,7 +234,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         try {
             final URL[] lua = wl.getSelectedStyle().getLegendURL();
             url = lua[0].toString();
-        } catch (Throwable t) {
+        } catch (final Exception t) {
             if (log.isDebugEnabled()) {
                 log.debug("Could not find a legend for " + title, t); // NOI18N
             }
@@ -261,7 +261,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                         && (((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers().size() > 0)) {
                 final WMSServiceLayer sLayer = ((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers().get(0);
                 if (sLayer.getWMSLayers().size() == 1) {
-                    layer = (WMSLayer)((WMSServiceLayer)sLayer).getWMSLayers().get(0);
+                    layer = (WMSLayer)sLayer.getWMSLayers().get(0);
                 }
             }
             try {
@@ -300,7 +300,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
             final List v = wmsLayer.getLayers();
             final Iterator it = v.iterator();
             if (it.hasNext()) {
-                final Object elem = (Object)it.next();
+                final Object elem = it.next();
                 if (elem instanceof WMSServiceLayer) {
                     addWmsServiceLayer((WMSServiceLayer)elem);
                 }
@@ -316,10 +316,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
      * @param  wmsLayer  DOCUMENT ME!
      */
     private void addWmsServiceLayer(final WMSServiceLayer wmsLayer) {
-        final Vector v = wmsLayer.getWMSLayers();
+        final List v = wmsLayer.getWMSLayers();
         final Iterator it = v.iterator();
         while (it.hasNext()) {
-            final Object elem = (Object)it.next();
+            final Object elem = it.next();
             if (elem instanceof WMSLayer) {
                 final WMSLayer wl = (WMSLayer)elem;
                 final String title = wl.getOgcCapabilitiesLayer().getTitle();
@@ -328,7 +328,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                 try {
                     final URL[] lua = wl.getSelectedStyle().getLegendURL();
                     url = lua[0].toString();
-                } catch (Throwable t) {
+                } catch (final Exception t) {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not find legend for " + title, t); // NOI18N
                     }
@@ -369,10 +369,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
      * @param  wmsLayer  DOCUMENT ME!
      */
     private void refreshWMSServiceLayerInformation(final WMSServiceLayer wmsLayer) {
-        final Vector v = wmsLayer.getWMSLayers();
+        final List v = wmsLayer.getWMSLayers();
         final Iterator it = v.iterator();
         while (it.hasNext()) {
-            final Object elem = (Object)it.next();
+            final Object elem = it.next();
             if (elem instanceof WMSLayer) {
                 final WMSLayer wl = (WMSLayer)elem;
                 final String title = wl.getOgcCapabilitiesLayer().getTitle();
@@ -381,7 +381,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                 try {
                     final URL[] lua = wl.getSelectedStyle().getLegendURL();
                     url = lua[0].toString();
-                } catch (Throwable t) {
+                } catch (final Exception t) {
                     if (log.isDebugEnabled()) {
                         log.debug("Could not find legend for " + title, t); // NOI18N
                     }
@@ -458,8 +458,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
          */
         public LegendPanel(final String url) {
             this();
-            this.setUrl(url);
-//            this.setMinimumSize(new Dimension(tblLegends.getColumnModel().getColumn(0).getPreferredWidth(),20));
+            this.url = url;
             refresh();
         }
 
@@ -468,7 +467,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         /**
          * DOCUMENT ME!
          */
-        public void refresh() {
+        public final void refresh() {
             final ImageRetrieval ir = new ImageRetrieval(this);
             ir.setUrl(url);
             ir.setWMSCapabilities(wmsCapabilities.get(url));
@@ -617,7 +616,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
 
         // private LinkedHashMap<String,LegendPanel> panels=new LinkedHashMap<String,LegendPanel>();
 
-        private Vector<LegendPanel> panels = new Vector<LegendPanel>();
+        private List<LegendPanel> panels = new ArrayList<LegendPanel>();
         private HashMap<String, LegendPanel> panelsByName = new HashMap<String, LegendPanel>();
         private HashMap<String, LegendPanel> panelsByUrl = new HashMap<String, LegendPanel>();
         private HashMap<String, String> urlsByName = new HashMap<String, String>();
