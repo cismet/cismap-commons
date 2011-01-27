@@ -93,6 +93,6 @@ public final class FeatureInfoDisplayRepository {
             }
         }
 
-        return display;
+        return display.createCopy();
     }
 }

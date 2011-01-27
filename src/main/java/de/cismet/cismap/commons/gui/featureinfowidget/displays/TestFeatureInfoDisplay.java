@@ -131,4 +131,10 @@ public class TestFeatureInfoDisplay extends AbstractFeatureInfoDisplay {
                 }
             }.execute();
     }
+
+    @Override
+    public FeatureInfoDisplay createCopy() {
+        final TestFeatureInfoDisplay newInstance = new TestFeatureInfoDisplay();
+        return newInstance;
+    }
 }
