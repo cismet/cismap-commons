@@ -383,6 +383,31 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
     private void htmlPane_KeyPressed(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_htmlPane_KeyPressed
     }                                                                     //GEN-LAST:event_htmlPane_KeyPressed
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof OGCWMSGetFeatureInfoRequestHtmlDisplay) {
+            final OGCWMSGetFeatureInfoRequestHtmlDisplay o = (OGCWMSGetFeatureInfoRequestHtmlDisplay)obj;
+            if ((o.wmsLayer != null) && o.wmsLayer.equals(this.wmsLayer)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = (11 * hash) + ((this.wmsLayer != null) ? this.wmsLayer.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public FeatureInfoDisplay createCopy() {
+        final OGCWMSGetFeatureInfoRequestHtmlDisplay newInstance = new OGCWMSGetFeatureInfoRequestHtmlDisplay();
+        newInstance.init(wmsLayer, tabbedparent);
+        return newInstance;
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**

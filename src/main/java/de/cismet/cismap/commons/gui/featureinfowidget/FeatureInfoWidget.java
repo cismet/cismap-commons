@@ -202,7 +202,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpFeatureInfosStateChanged
+    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpFeatureInfosStateChanged
         for (int i = 0; i < tbpFeatureInfos.getTabCount(); ++i) {
             tbpFeatureInfos.setForegroundAt(i, null);
         }
@@ -217,7 +217,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 }
             }
         }
-    }                                                          //GEN-LAST:event_tbpFeatureInfosStateChanged
+    }//GEN-LAST:event_tbpFeatureInfosStateChanged
 
     @Override
     public void clickedOnMap(final MapClickedEvent mce) {
