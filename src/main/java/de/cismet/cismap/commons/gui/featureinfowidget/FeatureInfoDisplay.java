@@ -75,11 +75,4 @@ public interface FeatureInfoDisplay {
      * @return  true if this <code>FeatureInfoDisplay</code> accepts the given layer, false otherwise
      */
     boolean acceptLayer(Class layerClass);
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    FeatureInfoDisplay createCopy();
 }

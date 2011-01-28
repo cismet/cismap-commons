@@ -69,7 +69,7 @@ public final class FeatureInfoDisplayRepository {
      *
      * @return  DOCUMENT ME!
      */
-    public FeatureInfoDisplay getDisplayClass(final Class layerclass, final LayerInfoProvider layerinfo) {
+    public FeatureInfoDisplay getDisplay(final Class layerclass, final LayerInfoProvider layerinfo) {
         final String server = layerinfo.getServerURI();
         final String layer = layerinfo.getLayerURI();
 
@@ -93,6 +93,13 @@ public final class FeatureInfoDisplayRepository {
             }
         }
 
-        return display.createCopy();
+        try {
+            return display.getClass().newInstance();
+        } catch (final Exception ex) {
+            LOG.error("Cannot instantiate the required display class: " + display.getClass().getName()
+                        + ". The origin object will be used.",
+                ex);
+            return display;
+        }
     }
 }
