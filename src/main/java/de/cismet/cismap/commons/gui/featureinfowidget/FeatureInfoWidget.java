@@ -145,7 +145,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 }
             } else if ((display == null) && layer.isLayerQuerySelected()) {
                 try {
-                    display = displayRepo.getDisplayClass(layer.getClass(), layer);
+                    display = displayRepo.getDisplay(layer.getClass(), layer);
                     if (display == null) {
                         // TODO: use default display? or should even a default be delivered by the repo?
                         throw new IllegalStateException("dispay info for layer is null: " + layer); // NOI18N
@@ -202,7 +202,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpFeatureInfosStateChanged
+    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpFeatureInfosStateChanged
         for (int i = 0; i < tbpFeatureInfos.getTabCount(); ++i) {
             tbpFeatureInfos.setForegroundAt(i, null);
         }
@@ -217,7 +217,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 }
             }
         }
-    }//GEN-LAST:event_tbpFeatureInfosStateChanged
+    }                                                          //GEN-LAST:event_tbpFeatureInfosStateChanged
 
     @Override
     public void clickedOnMap(final MapClickedEvent mce) {
