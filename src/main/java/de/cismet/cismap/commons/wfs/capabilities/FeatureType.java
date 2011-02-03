@@ -30,6 +30,7 @@ import java.util.Vector;
 import javax.xml.namespace.QName;
 
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.wms.capabilities.Envelope;
 
 /**
  * DOCUMENT ME!
@@ -133,4 +134,11 @@ public interface FeatureType {
      * @return  DOCUMENT ME!
      */
     WFSCapabilities getWFSCapabilities();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Envelope[] getWgs84BoundingBoxes();
 }

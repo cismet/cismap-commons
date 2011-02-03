@@ -101,6 +101,7 @@ import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
+import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeFeatureType;
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
@@ -167,6 +168,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private CapabilityWidget thisWidget = null;
 //    private URL postURL;
     private Element serverElement;
+    private JPopupMenu treePopMenu = new JPopupMenu();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdAddByUrl;
@@ -194,6 +196,24 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         final DropTarget dt = new DropTarget(this, acceptableActions, this);
         // tbpCapabilities.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT); tbpCapabilities.setUI(new
         // WindowsTabbedPaneUI());
+
+        final JMenuItem pmenuItem = new JMenuItem(NbBundle.getMessage(
+                    CapabilityWidget.class,
+                    "CapabilityWidget.CapabilityWidget().pmenuItem.text"));
+        pmenuItem.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    JTree tree = wmsCapabilitiesTrees.get(tbpCapabilities.getSelectedComponent());
+                    if (tree == null) {
+                        tree = wfsCapabilitiesTrees.get(tbpCapabilities.getSelectedComponent());
+                    }
+                    if (tree instanceof DragTree) {
+                        zoomToExtent((DragTree)tree);
+                    }
+                }
+            });
+        treePopMenu.add(pmenuItem);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -1252,6 +1272,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         final URL finalPostUrl = postURL;
                         final WFSCapabilitiesFactory capFact = new WFSCapabilitiesFactory();
                         final WFSCapabilities cap = capFact.createCapabilities(finalPostUrl.toString());
+                        trvCap.setWfsCapabilities(cap);
                         final String name = FeatureServiceUtilities.getServiceName(cap);
                         if (log.isDebugEnabled()) {
                             // Hashmap mit den FeatureLayer-Attributen erzeugen
@@ -1580,19 +1601,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      */
     private void addPopupMenu(final DragTree trvCap) {
         trvCap.addMouseListener(new LayerMouseListener());
-        final JPopupMenu popMenu = new JPopupMenu();
-        final JMenuItem pmenuItem = new JMenuItem(NbBundle.getMessage(
-                    CapabilityWidget.class,
-                    "CapabilityWidget.CapabilityWidget().pmenuItem.text"));
-        pmenuItem.addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(final ActionEvent e) {
-                    zoomToExtent(trvCap);
-                }
-            });
-        popMenu.add(pmenuItem);
-        trvCap.setComponentPopupMenu(popMenu);
     }
 
     /**
@@ -1606,50 +1614,37 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         }
 
         if (currentTrvCap != null) {
-            final WMSCapabilities wmsCap = currentTrvCap.getWmsCapabilities();
-            final LayerBoundingBox[] boxes = wmsCap.getLayer().getBoundingBoxes();
-            Envelope bestEnvelope = null;
             final String currentCrs = CismapBroker.getInstance().getSrs().getCode();
+            final WMSCapabilities wmsCap = currentTrvCap.getWmsCapabilities();
+            final LayerBoundingBox[] boxes = null;
+            Envelope bestEnvelope = null;
 
             // search for a bounding box with the right CRS
-            if (boxes != null) {
-                for (final LayerBoundingBox tmp : boxes) {
-                    if (tmp.getSRS().equals(CismapBroker.getInstance().getSrs().getCode())) {
-                        bestEnvelope = tmp;
-                    }
+            if (wmsCap != null) {
+                bestEnvelope = getEnvelopeForSelectedWmsLayer(currentTrvCap);
+
+                if (bestEnvelope == null) {
+                    bestEnvelope = getEnvelopeForSelectedWms(wmsCap);
                 }
+            } else if (currentTrvCap.getWfsCapabilities() != null) {
+                // the selected server is a wfs
+                bestEnvelope = getWfsEnvelope(currentTrvCap);
             }
 
             if (bestEnvelope == null) {
-                // if no suitable bounding box was found, take the latlon box or an arbitrary bounding box
-                if (wmsCap.getLayer().getLatLonBoundingBoxes() != null) {
-                    bestEnvelope = wmsCap.getLayer().getLatLonBoundingBoxes();
-                } else {
-                    if ((boxes != null) && (boxes.length > 0)) {
-                        bestEnvelope = boxes[0];
-                    }
-                }
-
-                if (bestEnvelope == null) {
-                    log.warn("no envelope found in the capabilities document");
-                    JOptionPane.showMessageDialog(
-                        null,
-                        NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.zoomToExtent().JOptionPane.msg"),
-                        NbBundle.getMessage(
-                            CapabilityWidget.class,
-                            "CapabilityWidget.zoomToExtent().JOptionPane.title"),
-                        JOptionPane.ERROR_MESSAGE);
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("envelope with the current srs found.");
-                }
+                log.warn("no envelope found in the capabilities document");
+                JOptionPane.showMessageDialog(
+                    null,
+                    NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.zoomToExtent().JOptionPane.msg"),
+                    NbBundle.getMessage(
+                        CapabilityWidget.class,
+                        "CapabilityWidget.zoomToExtent().JOptionPane.title"),
+                    JOptionPane.ERROR_MESSAGE);
             }
 
             try {
                 if (bestEnvelope != null) {
                     BoundingBox bb = null;
-
                     if (bestEnvelope instanceof LayerBoundingBox) {
                         if (((LayerBoundingBox)bestEnvelope).getSRS().equals(currentCrs)) {
                             bb = new BoundingBox(bestEnvelope.getMin().getX(),
@@ -1683,6 +1678,119 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 log.error("Cannot transform coordinates", e);
             }
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   currentTrvCap  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Envelope getEnvelopeForSelectedWmsLayer(final DragTree currentTrvCap) {
+        final TreePath currentPath = currentTrvCap.getSelectionPath();
+        Envelope bestEnvelope = null;
+
+        if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof Layer)) {
+            final Layer l = (Layer)currentPath.getLastPathComponent();
+            final LayerBoundingBox[] boxes = l.getBoundingBoxes();
+            final String currentCrs = CismapBroker.getInstance().getSrs().getCode();
+
+            // search for a bounding box with the right CRS
+            if (boxes != null) {
+                for (final LayerBoundingBox tmp : boxes) {
+                    if (tmp.getSRS().equals(currentCrs)) {
+                        bestEnvelope = tmp;
+                        break;
+                    }
+                }
+            }
+
+            if (bestEnvelope == null) {
+                if (l.getLatLonBoundingBoxes() != null) {
+                    bestEnvelope = l.getLatLonBoundingBoxes();
+                } else {
+                    if ((boxes != null) && (boxes.length > 0)) {
+                        bestEnvelope = boxes[0];
+                    }
+                }
+            }
+        }
+
+        return bestEnvelope;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   caps  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Envelope getEnvelopeForSelectedWms(final WMSCapabilities caps) {
+        Envelope bestEnvelope = null;
+
+        if (caps != null) {
+            final LayerBoundingBox[] boxes = caps.getLayer().getBoundingBoxes();
+            final String currentCrs = CismapBroker.getInstance().getSrs().getCode();
+
+            // search for a bounding box with the right CRS
+            if (boxes != null) {
+                for (final LayerBoundingBox tmp : boxes) {
+                    if (tmp.getSRS().equals(currentCrs)) {
+                        bestEnvelope = tmp;
+                    }
+                }
+            }
+
+            if (bestEnvelope == null) {
+                if (caps.getLayer().getLatLonBoundingBoxes() != null) {
+                    bestEnvelope = caps.getLayer().getLatLonBoundingBoxes();
+                } else {
+                    if ((boxes != null) && (boxes.length > 0)) {
+                        bestEnvelope = boxes[0];
+                    }
+                }
+            }
+        }
+
+        return bestEnvelope;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   currentTrvCap  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Envelope getWfsEnvelope(final DragTree currentTrvCap) {
+        final TreePath currentPath = currentTrvCap.getSelectionPath();
+        Envelope bestEnvelope = null;
+        FeatureType selectedFeature = null;
+
+        if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof FeatureType)) {
+            selectedFeature = (FeatureType)currentPath.getLastPathComponent();
+        } else {
+            try {
+                final Iterator<FeatureType> it = currentTrvCap.getWfsCapabilities().getFeatureTypeList().iterator();
+
+                if (it.hasNext()) {
+                    selectedFeature = it.next();
+                }
+            } catch (final Exception e) {
+                log.error("Cannot receive the feature type list from the capabilities document", e);
+            }
+        }
+
+        if (selectedFeature != null) {
+            final Envelope[] envs = selectedFeature.getWgs84BoundingBoxes();
+            if ((envs != null) && (envs.length > 0)) {
+                bestEnvelope = envs[0];
+            }
+        }
+
+        return bestEnvelope;
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -1743,19 +1851,18 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
         @Override
         public void mousePressed(final MouseEvent e) {
-            if (e.getButton() == MouseEvent.BUTTON3) {
-                if (e.getSource() instanceof DragTree) {
-                    if (e.isPopupTrigger()) {
-                        try {
-                            final Robot robot = new Robot();
-                            robot.mousePress(InputEvent.BUTTON1_MASK);
-                            robot.mouseRelease(InputEvent.BUTTON1_MASK);
-                        } catch (AWTException ex) {
-                            log.warn("Cannot simulate a left click on the DragTree", ex);
-                        }
-                        ((DragTree)e.getSource()).getComponentPopupMenu().show(e.getComponent(), e.getX(), e.getY());
+            if (e.isPopupTrigger() && (e.getSource() instanceof DragTree)) {
+                try {
+                    final JTree currentTree = (JTree)e.getSource();
+                    final TreePath selPath = currentTree.getPathForLocation(e.getX(), e.getY());
+                    if (selPath != null) {
+                        currentTree.setSelectionPath(selPath);
                     }
+                } catch (Exception ex) {
+                    log.error("Error during on-the-fly-selection", ex);
                 }
+
+                CapabilityWidget.this.treePopMenu.show(e.getComponent(), e.getX(), e.getY());
             }
         }
     }
@@ -1772,6 +1879,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         DragSource dragSource = null;
         TreePath[] cachedTreePaths; // DND Fehlverhalten Workaround
         private WMSCapabilities wmsCapabilities;
+        private WFSCapabilities wfsCapabilities;
 
         //~ Constructors -------------------------------------------------------
 
@@ -1893,6 +2001,24 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
          */
         public void setWmsCapabilities(final WMSCapabilities wmsCapabilities) {
             this.wmsCapabilities = wmsCapabilities;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public WFSCapabilities getWfsCapabilities() {
+            return wfsCapabilities;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  wfsCapabilities  DOCUMENT ME!
+         */
+        public void setWfsCapabilities(final WFSCapabilities wfsCapabilities) {
+            this.wfsCapabilities = wfsCapabilities;
         }
     }
 
