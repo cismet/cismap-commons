@@ -30,6 +30,8 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.OperationType;
 import de.cismet.cismap.commons.wfs.capabilities.OutputFormatType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
+import de.cismet.cismap.commons.wms.capabilities.Envelope;
+import de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeEnvelope;
 
 /**
  * DOCUMENT ME!
@@ -202,5 +204,17 @@ public class DeegreeFeatureType implements FeatureType {
         }
 
         return name;
+    }
+
+    @Override
+    public Envelope[] getWgs84BoundingBoxes() {
+        final org.deegree.model.spatialschema.Envelope[] envelopeOrig = feature.getWgs84BoundingBoxes();
+        final Envelope[] envelopes = new Envelope[envelopeOrig.length];
+
+        for (int i = 0; i < envelopeOrig.length; ++i) {
+            envelopes[i] = new DeegreeEnvelope(envelopeOrig[i]);
+        }
+
+        return envelopes;
     }
 }
