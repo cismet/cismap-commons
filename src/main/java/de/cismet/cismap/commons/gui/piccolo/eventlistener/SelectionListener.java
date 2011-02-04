@@ -10,7 +10,12 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 
+import java.util.Collection;
 import java.util.Vector;
+
+import javax.swing.Action;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
@@ -18,6 +23,8 @@ import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
+
+import de.cismet.tools.gui.ActionsProvider;
 
 /**
  * DOCUMENT ME!
@@ -58,6 +65,20 @@ public class SelectionListener extends RectangleRubberBandListener {
         if (pInputEvent.isRightMouseButton()) {
             if (log.isDebugEnabled()) {
                 log.debug("right mouseclick");                                                                          // NOI18N
+            }
+            if ((o instanceof PFeature) && (((PFeature)o).getFeature() instanceof ActionsProvider)) {
+                final JPopupMenu popup = new JPopupMenu("Test");
+                final ActionsProvider ap = (ActionsProvider)((PFeature)o).getFeature();
+                final Collection<? extends Action> ac = ap.getActions();
+                if (ac.size() > 0) {
+                    for (final Action a : ac) {
+                        popup.add(a);
+                    }
+                    popup.show(
+                        mc,
+                        (int)pInputEvent.getCanvasPosition().getX(),
+                        (int)pInputEvent.getCanvasPosition().getY());
+                }
             }
 //            if (o instanceof PFeature && ((PFeature)o).getFeature() instanceof XStyledFeature) {
 //                XStyledFeature xf=(XStyledFeature)((PFeature)o).getFeature();
