@@ -100,16 +100,25 @@ public class SelectionListener extends RectangleRubberBandListener {
                         popup.add(a);
                     }
                 }
+
+                final JSeparator sep = new JSeparator();
+
                 if (popup.getComponentCount() > 0) {
-                    popup.add(new JSeparator());
+                    popup.add(sep);
                 }
+
+                int commonActionCounter = 0;
                 if (commonFeatureActions != null) {
                     for (final CommonFeatureAction cfa : commonFeatureActions) {
                         cfa.setSourceFeature(pf.getFeature());
                         if (cfa.isActive()) {
                             popup.add(cfa);
+                            commonActionCounter++;
                         }
                     }
+                }
+                if (commonActionCounter == 0) {
+                    popup.remove(sep);
                 }
                 if (popup.getComponentCount() > 0) {
                     popup.show(
