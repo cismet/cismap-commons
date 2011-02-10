@@ -10,13 +10,19 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 
+import org.openide.util.Lookup;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Vector;
 
 import javax.swing.Action;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 
+import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.SearchFeature;
@@ -44,9 +50,26 @@ public class SelectionListener extends RectangleRubberBandListener {
     PFeature sel = null;
     Vector<PFeature> pfVector = new Vector<PFeature>();
     MappingComponent mc = null;
-
+    ArrayList<? extends CommonFeatureAction> commonFeatureActions = null;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private int clickCount = 0;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new SelectionListener object.
+     */
+    public SelectionListener() {
+        final Lookup.Result<CommonFeatureAction> result = Lookup.getDefault().lookupResult(CommonFeatureAction.class);
+        commonFeatureActions = new ArrayList<CommonFeatureAction>(result.allInstances());
+        Collections.sort(commonFeatureActions, new Comparator<CommonFeatureAction>() {
+
+                @Override
+                public int compare(final CommonFeatureAction o1, final CommonFeatureAction o2) {
+                    return Integer.valueOf(o1.getSorter()).compareTo(Integer.valueOf(o2.getSorter()));
+                }
+            });
+    }
 
     //~ Methods ----------------------------------------------------------------
 
@@ -64,22 +87,38 @@ public class SelectionListener extends RectangleRubberBandListener {
 
         if (pInputEvent.isRightMouseButton()) {
             if (log.isDebugEnabled()) {
-                log.debug("right mouseclick");                                                                          // NOI18N
+                log.debug("right mouseclick"); // NOI18N
             }
-            if ((o instanceof PFeature) && (((PFeature)o).getFeature() instanceof ActionsProvider)) {
-                final JPopupMenu popup = new JPopupMenu("Test");
-                final ActionsProvider ap = (ActionsProvider)((PFeature)o).getFeature();
-                final Collection<? extends Action> ac = ap.getActions();
-                if (ac.size() > 0) {
+            final JPopupMenu popup = new JPopupMenu("Test");
+
+            if ((o instanceof PFeature)) {
+                final PFeature pf = ((PFeature)o);
+                if (pf.getFeature() instanceof ActionsProvider) {
+                    final ActionsProvider ap = (ActionsProvider)((PFeature)o).getFeature();
+                    final Collection<? extends Action> ac = ap.getActions();
                     for (final Action a : ac) {
                         popup.add(a);
                     }
+                }
+                if (popup.getComponentCount() > 0) {
+                    popup.add(new JSeparator());
+                }
+                if (commonFeatureActions != null) {
+                    for (final CommonFeatureAction cfa : commonFeatureActions) {
+                        cfa.setSourceFeature(pf.getFeature());
+                        if (cfa.isActive()) {
+                            popup.add(cfa);
+                        }
+                    }
+                }
+                if (popup.getComponentCount() > 0) {
                     popup.show(
                         mc,
                         (int)pInputEvent.getCanvasPosition().getX(),
                         (int)pInputEvent.getCanvasPosition().getY());
                 }
             }
+
 //            if (o instanceof PFeature && ((PFeature)o).getFeature() instanceof XStyledFeature) {
 //                XStyledFeature xf=(XStyledFeature)((PFeature)o).getFeature();
 //                log.debug("valid object under pointer");
