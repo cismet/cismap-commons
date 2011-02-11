@@ -16,7 +16,7 @@ import javax.swing.JPanel;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public abstract class AbstractFeatureInfoDisplay extends JPanel implements FeatureInfoDisplay {
+public abstract class AbstractFeatureInfoDisplay<T> extends JPanel implements FeatureInfoDisplay<T> {
 
     //~ Instance fields --------------------------------------------------------
 
