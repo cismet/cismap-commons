@@ -19,7 +19,7 @@ import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
  * @author   martin.scholl@cismet.de
  * @version  $Revision$, $Date$
  */
-public interface FeatureInfoDisplay {
+public interface FeatureInfoDisplay<T> {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -33,7 +33,7 @@ public interface FeatureInfoDisplay {
      *
      * @throws  InitialisationException  if any error occurs during initialisation
      */
-    void init(Object layer, JTabbedPane parentTabbedPane) throws InitialisationException;
+    void init(T layer, JTabbedPane parentTabbedPane) throws InitialisationException;
 
     /**
      * Processes the {@link MapClickedEvent} and most likely somehow display information within the display component.

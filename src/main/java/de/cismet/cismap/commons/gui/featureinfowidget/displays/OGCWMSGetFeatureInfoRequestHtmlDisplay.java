@@ -65,8 +65,9 @@ import de.cismet.security.handler.WSSAccessHandler;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = FeatureInfoDisplay.class)
-public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoDisplay implements RetrievalListener,
-    HyperlinkListener {
+public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoDisplay<WMSLayer>
+        implements RetrievalListener,
+            HyperlinkListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -149,8 +150,8 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public void init(final Object layer, final JTabbedPane parentTabbedPane) {
-        wmsLayer = (WMSLayer)layer;
+    public void init(final WMSLayer layer, final JTabbedPane parentTabbedPane) {
+        this.wmsLayer = layer;
         this.tabbedparent = parentTabbedPane;
     }
 
