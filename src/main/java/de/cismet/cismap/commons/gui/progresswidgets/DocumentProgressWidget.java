@@ -110,9 +110,9 @@ public class DocumentProgressWidget extends javax.swing.JInternalFrame {
         serviceLabel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         serviceLabel.setText("Service Name");
 
-        final java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle(
-                "de/cismet/cismap/commons/gui/progresswidgets/Bundle");                // NOI18N
-        messageLabel.setText(bundle.getString("DocumentProgressWidget.messageLabel")); // NOI18N
+        messageLabel.setText(org.openide.util.NbBundle.getMessage(
+                DocumentProgressWidget.class,
+                "DocumentProgressWidget.messageLabel")); // NOI18N
 
         final javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -126,11 +126,12 @@ public class DocumentProgressWidget extends javax.swing.JInternalFrame {
                         javax.swing.GroupLayout.PREFERRED_SIZE).addGroup(
                         mainPanelLayout.createSequentialGroup().addComponent(iconLabel).addPreferredGap(
                             javax.swing.LayoutStyle.ComponentPlacement.RELATED).addGroup(
-                            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(
-                                messageLabel,
-                                javax.swing.GroupLayout.DEFAULT_SIZE,
-                                290,
-                                Short.MAX_VALUE).addComponent(
+                            mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                                mainPanelLayout.createSequentialGroup().addComponent(
+                                    messageLabel,
+                                    javax.swing.GroupLayout.DEFAULT_SIZE,
+                                    239,
+                                    Short.MAX_VALUE).addGap(51, 51, 51)).addComponent(
                                 serviceLabel,
                                 javax.swing.GroupLayout.DEFAULT_SIZE,
                                 290,
@@ -139,6 +140,7 @@ public class DocumentProgressWidget extends javax.swing.JInternalFrame {
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
                 mainPanelLayout.createSequentialGroup().addContainerGap().addGroup(
                     mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                        javax.swing.GroupLayout.Alignment.TRAILING,
                         mainPanelLayout.createSequentialGroup().addComponent(serviceLabel).addPreferredGap(
                             javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(
                             messageLabel,

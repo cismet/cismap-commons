@@ -22,6 +22,7 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PNode;
@@ -60,6 +61,7 @@ import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.AnnotatedFeature;
@@ -74,6 +76,7 @@ import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.DrawSelectionFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CurrentStackTrace;
 
@@ -312,11 +315,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
         }
 
-        final Geometry geom = feature.getGeometry();
+        final Geometry geom = CrsTransformer.transformToCurrentCrs(feature.getGeometry());
         if (feature instanceof RasterDocumentFeature) {
             final RasterDocumentFeature rdf = (RasterDocumentFeature)feature;
             final PImage pImage = new PImage(rdf.getRasterDocument());
-            final PBounds bounds = boundsFromRectPolygonGeom(rdf.getGeometry());
+            final PBounds bounds = boundsFromRectPolygonGeom(geom);
             // x,y,with,heigth
             pImage.setBounds(bounds);
             addChild(pImage);
@@ -350,7 +353,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         }
                     } else if ((pi != null) && (getFeature() != null) && (getFeature() instanceof StyledFeature)
                                 && (((StyledFeature)getFeature()).getPointAnnotationSymbol() != null)) {
-                        log.fatal("Sweetspot updated");                                                                  // NOI18N
+//                        log.fatal("Sweetspot updated");                                                                  // NOI18N
                         if (log.isDebugEnabled()) {
                             log.debug("newSweetSpotx: "
                                         + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());     // NOI18N
@@ -406,50 +409,61 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
     /**
      * Gleicht die Geometrie an das PFeature an. Erstellt die jeweilige Geometrie (Punkt, Linie, Polygon) und f\u00FCgt
-     * sie dem Feature hinzu.
+     * sie dem Feature hinzu. Das CRS der Feature-Geometry wird dabei mit dem CRS der PFeature-Geometry ueberschrieben.
      */
     public void syncGeometry() {
-        if (getFeature().isEditable()) {
-            final GeometryFactory gf = new GeometryFactory();
-            // TODO Im Moment nur f\u00FCr einfache Polygone ohne L\u00F6cher
-            if (coordArr != null) {
-                if (viewer.isFeatureDebugging()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("syncGeometry:coordArray.length:" + coordArr.length); // NOI18N
-                    }
-                }
-                if (coordArr.length == 1) {
-                    // Point
-                    final Point p = gf.createPoint(coordArr[0]);
-                    feature.setGeometry(p);
+        try {
+            if (getFeature().isEditable()) {
+                // TODO Im Moment nur f\u00FCr einfache Polygone ohne L\u00F6cher
+                if (coordArr != null) {
+                    final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                            CismapBroker.getInstance().getDefaultCrsAlias());
+                    final CrsTransformer defaultTranformer = new CrsTransformer(CismapBroker.getInstance()
+                                    .getDefaultCrs());
+                    final Coordinate[] defaultCoordArr = defaultTranformer.transformGeometry(
+                            coordArr,
+                            CismapBroker.getInstance().getSrs().getCode());
                     if (viewer.isFeatureDebugging()) {
                         if (log.isDebugEnabled()) {
-                            log.debug("syncGeometry:Point:" + p); // NOI18N
+                            log.debug("syncGeometry:Point"); // NOI18N
                         }
                     }
-                } else if ((coordArr.length > 3) && coordArr[0].equals(coordArr[coordArr.length - 1])) {
-                    // simple Polygon
-                    final LinearRing shell = gf.createLinearRing(coordArr);
-                    final Polygon poly = gf.createPolygon(shell, null);
-                    feature.setGeometry(poly);
-                    if (viewer.isFeatureDebugging()) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("syncGeometry:Polygon:" + poly); // NOI18N
+                    if (defaultCoordArr.length == 1) {
+                        // Point
+                        final Point p = gf.createPoint(defaultCoordArr[0]);
+                        feature.setGeometry(p);
+                        if (viewer.isFeatureDebugging()) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("syncGeometry:Point:" + p); // NOI18N
+                            }
+                        }
+                    } else if ((defaultCoordArr.length > 3)
+                                && defaultCoordArr[0].equals(defaultCoordArr[defaultCoordArr.length - 1])) {
+                        // simple Polygon
+                        final LinearRing shell = gf.createLinearRing(defaultCoordArr);
+                        final Polygon poly = gf.createPolygon(shell, null);
+                        feature.setGeometry(poly);
+                        if (viewer.isFeatureDebugging()) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("syncGeometry:Polygon:" + poly); // NOI18N
+                            }
+                        }
+                    } else {
+                        // Linestring
+                        final LineString line = gf.createLineString(defaultCoordArr);
+                        feature.setGeometry(line);
+                        if (viewer.isFeatureDebugging()) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("syncGeometry:Line:" + line); // NOI18N
+                            }
                         }
                     }
                 } else {
-                    // Linestring
-                    final LineString line = gf.createLineString(coordArr);
-                    feature.setGeometry(line);
-                    if (viewer.isFeatureDebugging()) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("syncGeometry:Line:" + line); // NOI18N
-                        }
-                    }
+                    log.warn("coordArr==null");                         // NOI18N
                 }
-            } else {
-                log.warn("coordArr==null");                         // NOI18N
             }
+        } catch (Exception e) {
+            log.error("Error while synchronising PFeature with feature.");
         }
     }
 
@@ -719,7 +733,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
                 final boolean vis = primaryAnnotation.getVisible();
 
-                final Point intPoint = getFeature().getGeometry().getInteriorPoint();
+                final Point intPoint = CrsTransformer.transformToCurrentCrs(feature.getGeometry()).getInteriorPoint();
 
                 primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()), wtst.getScreenY(intPoint.getY()));
 
@@ -781,8 +795,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if ((position == 0) && (getFeature().getGeometry() instanceof Polygon)) {
                 newCoordinates[newCoordinates.length - 1] = newCoordinates[0];
             }
-            log.info("Original: " + original);  // NOI18N
-            log.info("New: " + newCoordinates); // NOI18N
+            if (log.isInfoEnabled()) {
+                log.info("Original: " + original);  // NOI18N
+                log.info("New: " + newCoordinates); // NOI18N
+            }
             return newCoordinates;
         } else {
             if (original != null) {
@@ -1028,28 +1044,30 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         for (final Feature f : allFeatures) {
             // \u00DCberschneiden sich die Features? if (!f.equals(PFeature.this.getFeature()) &&
             // f.getGeometry().intersects(PFeature.this.getFeature().getGeometry()) ){
-            if (!f.equals(PFeature.this.getFeature())
-                        && f.getGeometry().buffer(0.01).intersects(
-                            PFeature.this.getFeature().getGeometry().buffer(0.01))) {
-                final Point p = gf.createPoint(coordArr[posInArray]);
-                // Erzeuge Array mit allen Eckpunkten
-                final Coordinate[] ca = f.getGeometry().getCoordinates();
+            if (!f.equals(PFeature.this.getFeature())) {
+                final Geometry fgeo = CrsTransformer.transformToCurrentCrs(f.getGeometry());
+                final Geometry thisGeo = CrsTransformer.transformToCurrentCrs(PFeature.this.getFeature().getGeometry());
+                if (fgeo.buffer(0.01).intersects(thisGeo.buffer(0.01))) {
+                    final Point p = gf.createPoint(coordArr[posInArray]);
+                    // Erzeuge Array mit allen Eckpunkten
+                    final Coordinate[] ca = fgeo.getCoordinates();
 
-                // Prüfe für alle Punkte ob der Abstand < 1cm ist
-                for (int i = 0; i < ca.length; ++i) {
-                    final Point p2 = gf.createPoint(ca[i]);
-                    final double abstand = p.distance(p2);
-                    if (abstand < 0.01) {
-                        glueCoords.put(getViewer().getPFeatureHM().get(f), i);
-                        if (viewer.isFeatureDebugging()) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("checkforGlueCoords() Abstand kleiner als 1cm: " + abstand + " :: " + f); // NOI18N
+                    // Prüfe für alle Punkte ob der Abstand < 1cm ist
+                    for (int i = 0; i < ca.length; ++i) {
+                        final Point p2 = gf.createPoint(ca[i]);
+                        final double abstand = p.distance(p2);
+                        if (abstand < 0.01) {
+                            glueCoords.put(getViewer().getPFeatureHM().get(f), i);
+                            if (viewer.isFeatureDebugging()) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("checkforGlueCoords() Abstand kleiner als 1cm: " + abstand + " :: " + f); // NOI18N
+                                }
                             }
-                        }
-                    } else {
-                        if (viewer.isFeatureDebugging()) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("checkforGlueCoords() Abstand: " + abstand);                              // NOI18N
+                        } else {
+                            if (viewer.isFeatureDebugging()) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("checkforGlueCoords() Abstand: " + abstand);                              // NOI18N
+                                }
                             }
                         }
                     }
@@ -1619,19 +1637,20 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void resetInfoNodePosition() {
         if (stickyChild != null) {
+            final Geometry geom = CrsTransformer.transformToCurrentCrs(getFeature().getGeometry());
             if (viewer.isFeatureDebugging()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("getFeature().getGeometry():" + getFeature().getGeometry()); // NOI18N
+                    log.debug("getFeature().getGeometry():" + geom);                  // NOI18N
                 }
             }
             if (viewer.isFeatureDebugging()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("getFeature().getGeometry().getInteriorPoint().getY():"      // NOI18N
-                                + getFeature().getGeometry().getInteriorPoint().getY());
+                    log.debug("getFeature().getGeometry().getInteriorPoint().getY():" // NOI18N
+                                + geom.getInteriorPoint().getY());
                 }
             }
-            stickyChild.setOffset(wtst.getScreenX(getFeature().getGeometry().getInteriorPoint().getX()),
-                wtst.getScreenY(getFeature().getGeometry().getInteriorPoint().getY()));
+            stickyChild.setOffset(wtst.getScreenX(geom.getInteriorPoint().getX()),
+                wtst.getScreenY(geom.getInteriorPoint().getY()));
         }
     }
 
@@ -1722,8 +1741,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     p.setOffset(stickyChild.getWidth(), 0);
                 } else {
                     syncGeometry();
-                    p.setOffset(wtst.getScreenX(getFeature().getGeometry().getInteriorPoint().getX()),
-                        wtst.getScreenY(getFeature().getGeometry().getInteriorPoint().getY()));
+                    final Geometry geom = CrsTransformer.transformToCurrentCrs(getFeature().getGeometry());
+                    p.setOffset(wtst.getScreenX(geom.getInteriorPoint().getX()),
+                        wtst.getScreenY(geom.getInteriorPoint().getY()));
                     addChild(p);
                     p.setWidth(pswingComp.getWidth());
                     p.setHeight(pswingComp.getHeight());

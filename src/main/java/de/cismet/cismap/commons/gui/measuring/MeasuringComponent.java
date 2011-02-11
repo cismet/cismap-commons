@@ -108,7 +108,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
         final ActiveLayerModel mappingModel = new ActiveLayerModel();
         mappingModel.addHome(initialBBox);
         mappingModel.setSrs(srs);
-        mappingModel.setDefaultSrs(srs);
+        mappingModel.setDefaultHomeSrs(srs);
         map.setAnimationDuration(0);
         map.setReadOnly(false);
         map.setMappingModel(mappingModel);

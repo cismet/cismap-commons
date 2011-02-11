@@ -14,6 +14,7 @@ package de.cismet.cismap.commons.featureservice.factory;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 import org.deegree.model.feature.Feature;
@@ -37,10 +38,12 @@ import java.util.Vector;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * Feature Factory that supports of GML documents.<br/>
@@ -128,6 +131,7 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         }
 
         // store the feature in the spatial index structure
+        gmlFeature.setGeometry(CrsTransformer.transformToDefaultCrs(gmlFeature.getGeometry()));
         this.degreeFeaturesTree.insert(gmlFeature.getGeometry().getEnvelopeInternal(), gmlFeature);
         return gmlFeature;
     }
@@ -301,9 +305,9 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         polyCords[2] = new Coordinate(boundingBox.getX2(), boundingBox.getY2());
         polyCords[3] = new Coordinate(boundingBox.getX2(), boundingBox.getY1());
         polyCords[4] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
-        final Polygon boundingPolygon = (new GeometryFactory()).createPolygon((new GeometryFactory()).createLinearRing(
-                    polyCords),
-                null);
+        final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+        final Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
         final List<DefaultFeatureServiceFeature> selectedFeatures = this.degreeFeaturesTree.query(
                 boundingPolygon.getEnvelopeInternal());
