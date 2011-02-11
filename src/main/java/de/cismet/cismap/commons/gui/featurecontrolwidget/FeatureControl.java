@@ -54,7 +54,6 @@ import de.cismet.cismap.commons.features.SubFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 
 import de.cismet.tools.CurrentStackTrace;
@@ -82,9 +81,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     private ImageIcon icoGreenled = new ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/res/greenled.png")); // NOI18N
     private MappingComponent mappingComponent = null;
-    // the transformer should transform geometries to a metric srs. This allows the calculation of the length
-    // and the area of a geometry
-    private CrsTransformer transformer;
     private ListSelectionListener theListSelectionListener = new ListSelectionListener() {
 
             @Override
@@ -167,8 +163,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     }
                 }
             });
-
-        transformer = mappingComponent.getMetricTransformer();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -1074,10 +1068,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         @Override
         public Object getValueAt(final int rowIndex, final int columnIndex) {
             try {
-                if (transformer == null) {
-                    transformer = mappingComponent.getMetricTransformer();
-                }
-
                 final Feature f = (Feature)getFeatureCollection().getFeature(rowIndex);
                 switch (columnIndex) {
                     case 0: {
@@ -1117,14 +1107,9 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     case 4: {
                         // Gr\u00F6\u00DFe
                         if (f.getGeometry() != null) {
-                            Geometry geom = null;
+                            final Geometry geom = CrsTransformer.transformToMetricCrs(f.getGeometry(),
+                                    mappingComponent.getCrsList());
 
-                            if ((transformer != null) && !CismapBroker.getInstance().getSrs().isMetric()) {
-                                geom = transformer.transformGeometry(f.getGeometry(),
-                                        CismapBroker.getInstance().getSrs().getCode());
-                            } else {
-                                geom = f.getGeometry();
-                            }
                             return StaticDecimalTools.round(geom.getArea());
                         } else {
                             return 0.0;
@@ -1133,14 +1118,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     case 5: {
                         // L\u00E4nge
                         if (f.getGeometry() != null) {
-                            Geometry geom = null;
-
-                            if ((transformer != null) && !CismapBroker.getInstance().getSrs().isMetric()) {
-                                geom = transformer.transformGeometry(f.getGeometry(),
-                                        CismapBroker.getInstance().getSrs().getCode());
-                            } else {
-                                geom = f.getGeometry();
-                            }
+                            final Geometry geom = CrsTransformer.transformToMetricCrs(f.getGeometry(),
+                                    mappingComponent.getCrsList());
 
                             return StaticDecimalTools.round(geom.getLength());
                         } else {
@@ -1150,8 +1129,9 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     case 6: {
                         // Zentrum
                         if (f.getGeometry() != null) {
-                            return "(" + StaticDecimalTools.round(f.getGeometry().getCentroid().getX()) + ","   // NOI18N
-                                        + StaticDecimalTools.round(f.getGeometry().getCentroid().getY()) + ")"; // NOI18N
+                            final Geometry geom = CrsTransformer.transformToCurrentCrs(f.getGeometry());
+                            return "(" + StaticDecimalTools.round(geom.getCentroid().getX()) + ","   // NOI18N
+                                        + StaticDecimalTools.round(geom.getCentroid().getY()) + ")"; // NOI18N
                         } else {
                             return 0.0;
                         }

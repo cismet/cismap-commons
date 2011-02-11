@@ -3201,15 +3201,15 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
         for (final Feature f : collection) {
             if (first) {
-                g = f.getGeometry().getEnvelope();
-                if (f instanceof Bufferable) {
+                g = CrsTransformer.transformToCurrentCrs(f.getGeometry()).getEnvelope();
+                if ((f instanceof Bufferable) && CismapBroker.getInstance().getSrs().isMetric()) {
                     g = g.buffer(((Bufferable)f).getBuffer());
                 }
                 first = false;
             } else {
                 if (f.getGeometry() != null) {
-                    Geometry geometry = f.getGeometry().getEnvelope();
-                    if (f instanceof Bufferable) {
+                    Geometry geometry = CrsTransformer.transformToCurrentCrs(f.getGeometry()).getEnvelope();
+                    if ((f instanceof Bufferable) && CismapBroker.getInstance().getSrs().isMetric()) {
                         geometry = geometry.buffer(((Bufferable)f).getBuffer());
                     }
                     g = g.getEnvelope().union(geometry);
@@ -3231,6 +3231,15 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             } else {
                 buff = vBuff;
             }
+
+            if (buff == 0.0) {
+                if (CismapBroker.getInstance().getSrs().isMetric()) {
+                    buff = 1.0;
+                } else {
+                    buff = 0.01;
+                }
+            }
+
             g = g.buffer(buff);
             final BoundingBox bb = new BoundingBox(g);
             gotoBoundingBox(bb, withHistory, !fixedScale, animationDuration);
@@ -4254,6 +4263,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
                     if (s.isSelected() && s.isMetric()) {
                         try {
+                            if (CismapBroker.getInstance().getDefaultCrs() != null) {
+                                log.warn("More than one default CRS is set. "
+                                            + "Please check your master configuration file."); // NOI18N
+                            }
+                            CismapBroker.getInstance().setDefaultCrs(s.getCode());
                             transformer = new CrsTransformer(s.getCode());
                         } catch (Exception ex) {
                             log.error("Cannot create a GeoTransformer for the crs " + s.getCode(), ex);
@@ -4262,16 +4276,22 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 }
             }
         } catch (Exception skip) {
-            log.error("Error while reading the crs list", skip); // NOI18N
+            log.error("Error while reading the crs list", skip);                               // NOI18N
+        }
+
+        if (CismapBroker.getInstance().getDefaultCrs() == null) {
+            log.fatal("The default CRS is not set. This can lead to almost irreparable data errors. "
+                        + "Keep in mind: The default CRS must be metric"); // NOI18N
         }
 
         if (transformer == null) {
-            log.warn("No metric default crs found. Use EPSG:31466 to calculate geometry lengths and scales");
+            log.error("No metric default crs found. Use EPSG:31466 as default crs"); // NOI18N
 
             try {
-                transformer = new CrsTransformer("EPSG:31466");
+                transformer = new CrsTransformer("EPSG:31466");                         // NOI18N
+                CismapBroker.getInstance().setDefaultCrs("EPSG:31466");                 // NOI18N
             } catch (Exception ex) {
-                log.error("Cannot create a GeoTransformer for the crs EPSG:31466", ex);
+                log.error("Cannot create a GeoTransformer for the crs EPSG:31466", ex); // NOI18N
             }
         }
 
@@ -4319,7 +4339,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                         }
 
                         alm.setSrs(crsObject);
-                        alm.setDefaultSrs(crsObject);
+                        alm.setDefaultHomeSrs(crsObject);
                         CismapBroker.getInstance().setSrs(crsObject);
                         wtst = null;
                         getWtst();
@@ -4328,6 +4348,14 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             }
         } catch (Throwable t) {
             log.error("Fehler beim MasterConfigure der MappingComponent", t); // NOI18N
+        }
+
+        try {
+            final Element defaultCrs = prefs.getChild("defaultCrs");
+            final int defaultCrsInt = Integer.parseInt(defaultCrs.getAttributeValue("geometrySridAlias"));
+            CismapBroker.getInstance().setDefaultCrsAlias(defaultCrsInt);
+        } catch (Exception ex) {
+            log.error("Error while reading the default crs alias from the master configuration file.", ex);
         }
 
         try {
@@ -4367,14 +4395,6 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     final Crs s = new Crs((Element)elem);
                     if (!crsList.contains(s)) {
                         crsList.add(s);
-                    }
-
-                    if (s.isSelected() && s.isMetric()) {
-                        try {
-                            transformer = new CrsTransformer(s.getCode());
-                        } catch (Exception ex) {
-                            log.error("Cannot create a GeoTransformer for the crs " + s.getCode(), ex);
-                        }
                     }
                 }
             }
@@ -4626,6 +4646,16 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * @param  bb  target BoundingBox
      */
     public void gotoBoundingBoxWithoutHistory(final BoundingBox bb) {
+        gotoBoundingBoxWithoutHistory(bb, animationDuration);
+    }
+
+    /**
+     * Moves the view to the target Boundingbox without saving the action in the history.
+     *
+     * @param  bb                 target BoundingBox
+     * @param  animationDuration  the animation duration
+     */
+    public void gotoBoundingBoxWithoutHistory(final BoundingBox bb, final int animationDuration) {
         gotoBoundingBox(bb, false, true, animationDuration);
     }
 
@@ -5134,7 +5164,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             }
 
             try {
-                // the wtst object should not be null, so teh getWtst method will be invoked
+                // the wtst object should not be null, so the getWtst method will be invoked
                 getWtst();
                 final BoundingBox bbox = getCurrentBoundingBox(); // getCurrentBoundingBox();
                 final CrsTransformer crsTransformer = new CrsTransformer(event.getCurrentCrs().getCode());
@@ -5146,22 +5176,9 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 }
                 wtst = null;
                 getWtst();
-                gotoBoundingBoxWithoutHistory(newBbox);
-
-                // transform all features
-                for (final Feature f : featureCollection.getAllFeatures()) {
-                    final Geometry geom = crsTransformer.transformGeometry(f.getGeometry(),
-                            event.getFormerCrs().getCode());
-                    f.setGeometry(geom);
-                    final PFeature feature = pFeatureHM.get(f);
-                    feature.setFeature(f);
-                    Coordinate[] coordArray = feature.getCoordArr();
-                    coordArray = crsTransformer.transformGeometry(coordArray, event.getFormerCrs().getCode());
-                    feature.setCoordArr(coordArray);
-                }
+                gotoBoundingBoxWithoutHistory(newBbox, 0);
 
                 final ArrayList<Feature> list = new ArrayList<Feature>(featureCollection.getAllFeatures());
-//                list.add(f);
                 removeFeatures(list);
                 addFeaturesToMap(list.toArray(new Feature[list.size()]));
             } catch (Exception e) {

@@ -19,6 +19,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -29,6 +30,7 @@ import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
@@ -152,7 +154,8 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
      */
     private void init(final Coordinate[] coordArr, final WorldToScreenTransform wtst) {
         try {
-            final GeometryFactory gf = new GeometryFactory();
+            final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                    CrsTransformer.getCurrentSrid());
             // TODO Im Moment nur f�r einfache Polygone ohne L�cher
             if (coordArr.length == 1) {
                 // Point

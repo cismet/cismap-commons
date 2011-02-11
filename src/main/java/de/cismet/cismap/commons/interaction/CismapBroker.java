@@ -98,6 +98,8 @@ public class CismapBroker {
     private BoundingBox initialBoundingBox;
     private ExecutorService execService = null;
     private boolean serverAliasesInited = false;
+    private String defaultCrs = "EPSG:31466";
+    private int DefaultCrsAlias = -1;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -820,5 +822,41 @@ public class CismapBroker {
             log.fatal("Error during the creation of " + cismapFolderPath, e); // NOI18N
         }
         this.cismapFolderPath = cismapFolderPath;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the defaultCrs
+     */
+    public String getDefaultCrs() {
+        return defaultCrs;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  defaultCrs  the defaultCrs to set
+     */
+    public void setDefaultCrs(final String defaultCrs) {
+        this.defaultCrs = defaultCrs;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the DefaultCrsAlias
+     */
+    public int getDefaultCrsAlias() {
+        return DefaultCrsAlias;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  DefaultCrsAlias  the DefaultCrsAlias to set
+     */
+    public void setDefaultCrsAlias(final int DefaultCrsAlias) {
+        this.DefaultCrsAlias = DefaultCrsAlias;
     }
 }

@@ -100,7 +100,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     private TreeTableModelAdapter tableModel;
     private boolean initalLayerConfigurationFromServer = false;
     private HashMap<String, Element> masterLayerHashmap = new HashMap<String, Element>();
-    private Crs defaultSrs;
+    private Crs defaultHomeSrs;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -772,8 +772,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
     @Override
     public de.cismet.cismap.commons.BoundingBox getInitialBoundingBox() {
-        if ((srs == null) || (defaultSrs == null)) {
-            log.warn("SRS is not set or default SRS is not set, yet");
+        if ((srs == null) && (defaultHomeSrs == null)) {
+            log.warn("SRS and default SRS are not set, yet");
             return null;
         }
         XBoundingBox homeBox = homes.get(srs.getCode());
@@ -783,13 +783,12 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 log.debug("No home found for srs " + srs.getCode());
             }
 
-            final XBoundingBox defaultBox = homes.get(defaultSrs.getCode());
+            final XBoundingBox defaultBox = homes.get(defaultHomeSrs.getCode());
 
             if (defaultBox != null) {
                 try {
                     final CrsTransformer transformer = new CrsTransformer(srs.getCode());
                     homeBox = transformer.transformBoundingBox(defaultBox);
-                    homes.put(srs.getCode(), homeBox);
                 } catch (Exception e) {
                     log.error("Error while transforming coordinates from " + defaultBox.getSrs() + " to " + srs, e);
                 }
@@ -834,8 +833,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      * @param  srs  DOCUMENT ME!
      */
     public void setSrs(final Crs srs) {
-        if (this.defaultSrs == null) {
-            this.defaultSrs = srs;
+        if (this.defaultHomeSrs == null) {
+            this.defaultHomeSrs = srs;
         }
 
         for (final Object layer : this.layers) {
@@ -1674,8 +1673,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      *
      * @return  the defaultSrs
      */
-    public Crs getDefaultSrs() {
-        return defaultSrs;
+    public Crs getDefaultHomeSrs() {
+        return defaultHomeSrs;
     }
 
     /**
@@ -1683,7 +1682,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      *
      * @param  defaultSrs  the defaultSrs to set
      */
-    public void setDefaultSrs(final Crs defaultSrs) {
-        this.defaultSrs = defaultSrs;
+    public void setDefaultHomeSrs(final Crs defaultSrs) {
+        this.defaultHomeSrs = defaultSrs;
     }
 }

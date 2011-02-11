@@ -7,13 +7,17 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 
 import java.awt.Color;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -60,6 +64,19 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
 
     @Override
     protected void finishGeometry(final PureNewFeature newFeature) {
+        // the coordinates of the newly created feature should must the default srs, because
+        // every feature uses internally the default srs.
+        if (log.isDebugEnabled()) {
+            log.debug("original geometry" + newFeature.getGeometry().toText());
+        }
+        Geometry defaultGeom = newFeature.getGeometry();
+        final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
+        defaultGeom.setSRID(currentSrid);
+        defaultGeom = CrsTransformer.transformToDefaultCrs(defaultGeom);
+        newFeature.setGeometry(defaultGeom);
+        if (log.isDebugEnabled()) {
+            log.debug("geometry after transformation to default crs " + newFeature.getGeometry().toText());
+        }
         super.finishGeometry(newFeature);
 
         newFeature.setEditable(true);

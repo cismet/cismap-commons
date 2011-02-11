@@ -14,6 +14,7 @@ package de.cismet.cismap.commons.featureservice.factory;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 import org.deegree.io.shpapi.ShapeFile;
@@ -30,10 +31,13 @@ import java.util.Vector;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeFeatureType;
 
 /**
  * DOCUMENT ME!
@@ -200,6 +204,8 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             final ShapeFeature featureServiceFeature = this.createFeatureInstance(degreeFeature, i);
             this.initialiseFeature(featureServiceFeature, degreeFeature, false, i);
             // this.tempFeatureCollection[i] = shapeFile.getFeatureByRecNo(i + 1);
+            featureServiceFeature.setGeometry(CrsTransformer.transformToDefaultCrs(
+                    featureServiceFeature.getGeometry()));
 
             final int newProgress = (int)((double)i / (double)max * 100d);
             if ((workerThread != null) && (newProgress > currentProgress) && (newProgress >= 5)
@@ -299,10 +305,12 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         polyCords[2] = new Coordinate(boundingBox.getX2(), boundingBox.getY2());
         polyCords[3] = new Coordinate(boundingBox.getX2(), boundingBox.getY1());
         polyCords[4] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
-        final Polygon boundingPolygon = (new GeometryFactory()).createPolygon((new GeometryFactory()).createLinearRing(
-                    polyCords),
-                null);
+        // The GeometryFactory must use the same srid as the elements in the deegreeFeaturesTree
+        final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+        Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
+        boundingPolygon = (Polygon)CrsTransformer.transformToDefaultCrs(boundingPolygon);
         final List<ShapeFeature> selectedFeatures = this.degreeFeaturesTree.query(boundingPolygon
                         .getEnvelopeInternal());
 

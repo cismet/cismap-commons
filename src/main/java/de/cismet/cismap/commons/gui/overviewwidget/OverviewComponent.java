@@ -109,7 +109,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
                 true);
         overviewMap.setFixedBoundingBox(extent);
         model.setSrs(srs);
-        model.setDefaultSrs(srs);
+        model.setDefaultHomeSrs(srs);
         model.addHome(extent);
         overviewMap.setMappingModel(model);
         model.removeAllLayers();
@@ -213,6 +213,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
 
                                 final double x = bb.getX1() + (bb.getWidth() / 2.0);
                                 final double y = bb.getY2() - (bb.getHeight() / 2.0);
+                                overviewMap.getWtst();
                                 overviewMap.outlineArea(bb, fill);
                                 // overviewMap.crossHairPoint(new Coordinate(2583781, 5682540));
                                 overviewMap.crossHairPoint(new Coordinate(x, y));

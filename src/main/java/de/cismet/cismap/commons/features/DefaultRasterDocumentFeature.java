@@ -27,10 +27,13 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 import edu.umd.cs.piccolo.nodes.PImage;
 
 import java.awt.image.BufferedImage;
+
+import de.cismet.cismap.commons.CrsTransformer;
 
 /**
  * DOCUMENT ME!
@@ -42,7 +45,6 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final GeometryFactory GEOM_FACTORY = new GeometryFactory();
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
             DefaultRasterDocumentFeature.class);
 
@@ -155,6 +157,8 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
      * @return  DOCUMENT ME!
      */
     private static Geometry getGeomFromRasterImage(final BufferedImage bi, final double x, final double y) {
+        final GeometryFactory GEOM_FACTORY = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.getCurrentSrid());
         final int width = bi.getWidth();
         final int height = bi.getHeight();
         final Coordinate ursprung0 = new Coordinate(x, y);
@@ -164,7 +168,9 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
         final Coordinate ursprung4 = new Coordinate(x, y);
         final Coordinate[] coords = new Coordinate[] { ursprung0, x1, xy2, y3, ursprung4 };
         final LinearRing linearRing = GEOM_FACTORY.createLinearRing(coords);
-        final Geometry result = GEOM_FACTORY.createPolygon(linearRing, null);
+        Geometry result = GEOM_FACTORY.createPolygon(linearRing, null);
+
+        result = CrsTransformer.transformToDefaultCrs(result);
         log.info("Created Geometry: " + result);
         return result;
     }

@@ -9,8 +9,10 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.impl.PackedCoordinateSequenceFactory;
 
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
@@ -22,8 +24,10 @@ import java.awt.geom.Point2D;
 
 import java.util.Vector;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 /**
@@ -151,8 +155,13 @@ public class MeasurementListener extends PBasicInputEventHandler {
                     mc.getWtst().getSourceY(yp[i] - mc.getClip_offset_y()));
         }
         final CoordinateSequence cs = new PackedCoordinateSequenceFactory().create(coordArr);
-        final LineString ls = new LineString(cs, new GeometryFactory());
-        final double l = ls.getLength();
+        final LineString ls = new LineString(
+                cs,
+                new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), CrsTransformer.getCurrentSrid()));
+        final Geometry geom = CrsTransformer.transformToMetricCrs(
+                ls,
+                CismapBroker.getInstance().getMappingComponent().getCrsList());
+        final double l = geom.getLength();
         return l;
     }
 
