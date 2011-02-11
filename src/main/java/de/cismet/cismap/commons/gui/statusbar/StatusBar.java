@@ -60,7 +60,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
     MappingComponent mappingComponent;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private GeoTransformer transformer = null;
-    private DecimalFormat df = new DecimalFormat("0.000000");  // NOI18N
+    private DecimalFormat df = new DecimalFormat("0.00");      // NOI18N
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JSeparator jSeparator1;
@@ -94,7 +94,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         lblCoordinates.setText(""); // NOI18N
         lblStatusImage.setIcon(defaultIcon);
         lblCrs.setText(CismapBroker.getInstance().getSrs().getCode());
-        lblWgs84Coordinates.setToolTipText("WGS84");
         final DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
@@ -170,7 +169,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
             lblScale.setText("1:" + sd);   // NOI18N
         } else if (e.getName().equals(StatusEvent.CRS)) {
             lblCrs.setText(((Crs)e.getValue()).getShortname());
-            lblCoordinates.setToolTipText(e.getValue().toString());
+            lblCoordinates.setToolTipText(((Crs)e.getValue()).getShortname());
         }
     }
 
@@ -204,7 +203,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
 
         lblCoordinates.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 11;
+        gridBagConstraints.gridx = 9;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         add(lblCoordinates, gridBagConstraints);
@@ -249,7 +248,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 7;
+        gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
         add(lblScale, gridBagConstraints);
 
@@ -274,8 +273,11 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         add(jSeparator5, gridBagConstraints);
 
         lblWgs84Coordinates.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblWgs84Coordinates.setToolTipText(org.openide.util.NbBundle.getMessage(
+                StatusBar.class,
+                "StatusBar.lblWgs84Coordinates.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 9;
+        gridBagConstraints.gridx = 11;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         add(lblWgs84Coordinates, gridBagConstraints);
@@ -297,7 +299,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
         add(lblCrs, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
