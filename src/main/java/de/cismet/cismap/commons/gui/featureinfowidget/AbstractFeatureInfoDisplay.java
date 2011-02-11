@@ -50,18 +50,4 @@ public abstract class AbstractFeatureInfoDisplay extends JPanel implements Featu
     public FeatureInfoDisplayKey getDisplayKey() {
         return displayKey;
     }
-
-    @Override
-    public boolean acceptLayer(final Class layerClass) {
-        final Class keyClass = displayKey.getJavaclass();
-        if (keyClass == null) {
-            return true;
-        } else {
-            if (layerClass == null) {
-                return false;
-            } else {
-                return keyClass.isAssignableFrom(layerClass);
-            }
-        }
-    }
 }
