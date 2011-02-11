@@ -96,8 +96,8 @@ public final class FeatureInfoDisplayRepository {
         try {
             return display.getClass().newInstance();
         } catch (final Exception ex) {
-            LOG.error("Cannot instantiate the required display class: " + display.getClass().getName()
-                        + ". The origin object will be used.",
+            LOG.error("Cannot instantiate the required display class: " + display.getClass().getName() // NOI18N
+                        + ". The origin object will be used.", // NOI18N
                 ex);
             return display;
         }

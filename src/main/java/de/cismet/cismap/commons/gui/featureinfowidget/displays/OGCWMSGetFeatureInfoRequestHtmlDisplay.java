@@ -134,7 +134,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
         super(new FeatureInfoDisplayKey(
                 WMSLayer.class,
                 FeatureInfoDisplayKey.ANY_SERVER,
-                FeatureInfoDisplayKey.ANY_SERVER));
+                FeatureInfoDisplayKey.ANY_LAYER));
 
         htmlPrefs = new CalHTMLPreferences();
         htmlPrefs.setAutomaticallyFollowHyperlinks(false);
@@ -328,7 +328,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOpenExternalActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOpenExternalActionPerformed
+    private void cmdOpenExternalActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOpenExternalActionPerformed
 
         if (urlBuffer != null) {
             try {
@@ -364,24 +364,24 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
         } else {
             openUrlInExternalBrowser("http://www.cismet.de");                                // NOI18N
         }
-    }                                                                                        //GEN-LAST:event_cmdOpenExternalActionPerformed
+    }//GEN-LAST:event_cmdOpenExternalActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void htmlPane_MouseMoved(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_htmlPane_MouseMoved
+    private void htmlPane_MouseMoved(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_htmlPane_MouseMoved
         shiftDown = (evt.getModifiers() & MouseEvent.SHIFT_MASK) == MouseEvent.SHIFT_MASK;
-    }                                                                       //GEN-LAST:event_htmlPane_MouseMoved
+    }//GEN-LAST:event_htmlPane_MouseMoved
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void htmlPane_KeyPressed(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_htmlPane_KeyPressed
-    }                                                                     //GEN-LAST:event_htmlPane_KeyPressed
+    private void htmlPane_KeyPressed(final java.awt.event.KeyEvent evt) {//GEN-FIRST:event_htmlPane_KeyPressed
+    }//GEN-LAST:event_htmlPane_KeyPressed
 
     //~ Inner Classes ----------------------------------------------------------
 
