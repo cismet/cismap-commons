@@ -496,9 +496,16 @@ public class CismapBroker {
      */
     public Crs getSrs() {
         if (srs == null) {
-            log.error("srs is not set. Use EPSG:31466 ", new CurrentStackTrace());
-            final Crs crs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, false);
-            return crs;
+            if ((mappingComponent == null) || mappingComponent.isLocked()) {
+                // the getSrs() method is called before the mapping component has configured it.
+                // So a dummy will be returned. This should not happen after the startup phase.
+                final Crs crs = new Crs("dummy", "dummy", "EPSG:31466", true, false);
+                return crs;
+            } else {
+                log.error("srs is not set. Use EPSG:31466 ", new CurrentStackTrace());
+                final Crs crs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, false);
+                return crs;
+            }
         }
         return srs;
     }
