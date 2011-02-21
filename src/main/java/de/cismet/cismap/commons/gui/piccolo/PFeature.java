@@ -1820,6 +1820,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
         }
         viewer.getCamera().animateViewToCenterBounds(newBounds.getBounds2D(), true, viewer.getAnimationDuration());
+        viewer.refresh();
     }
 
     /**
