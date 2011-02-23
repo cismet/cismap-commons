@@ -148,6 +148,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private double sweetSelX = 0;
     private double sweetSelY = 0;
 
+    // r/w access only in synchronized(this) block
+    private transient PImage rdfImage;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -318,11 +321,23 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final Geometry geom = CrsTransformer.transformToCurrentCrs(feature.getGeometry());
         if (feature instanceof RasterDocumentFeature) {
             final RasterDocumentFeature rdf = (RasterDocumentFeature)feature;
-            final PImage pImage = new PImage(rdf.getRasterDocument());
-            final PBounds bounds = boundsFromRectPolygonGeom(geom);
-            // x,y,with,heigth
-            pImage.setBounds(bounds);
-            addChild(pImage);
+            try {
+                final PBounds bounds = boundsFromRectPolygonGeom(geom);
+                final PImage pImage = new PImage(rdf.getRasterDocument());
+
+                synchronized (this) {
+                    removeChild(rdfImage);
+                    rdfImage = pImage;
+                }
+
+                // x,y,with,heigth
+                pImage.setBounds(bounds);
+                addChild(pImage);
+            } catch (final IllegalArgumentException e) {
+                if (log.isInfoEnabled()) {
+                    log.info("rasterdocumentfeature is no rectangle, we'll draw the geometry without raster image", e); // NOI18N
+                }
+            }
             doGeometry(geom);
         } else {
             if ((geom instanceof Polygon) || (geom instanceof LineString) || (geom instanceof MultiLineString)) {
