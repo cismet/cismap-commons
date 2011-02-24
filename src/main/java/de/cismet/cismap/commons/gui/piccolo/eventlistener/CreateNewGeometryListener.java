@@ -66,17 +66,13 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     protected void finishGeometry(final PureNewFeature newFeature) {
         // the coordinates of the newly created feature should must the default srs, because
         // every feature uses internally the default srs.
-        if (log.isDebugEnabled()) {
-            log.debug("original geometry" + newFeature.getGeometry().toText());
-        }
-        Geometry defaultGeom = newFeature.getGeometry();
         final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
-        defaultGeom.setSRID(currentSrid);
-        defaultGeom = CrsTransformer.transformToDefaultCrs(defaultGeom);
-        newFeature.setGeometry(defaultGeom);
+
         if (log.isDebugEnabled()) {
-            log.debug("geometry after transformation to default crs " + newFeature.getGeometry().toText());
+            log.debug("new geometry" + newFeature.getGeometry().toText() + " srid: " + currentSrid);
         }
+
+        newFeature.getGeometry().setSRID(currentSrid);
         super.finishGeometry(newFeature);
 
         newFeature.setEditable(true);

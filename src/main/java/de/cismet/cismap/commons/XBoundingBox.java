@@ -7,8 +7,16 @@
 ****************************************************/
 package de.cismet.cismap.commons;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+
 import org.jdom.DataConversionException;
 import org.jdom.Element;
+
+import java.util.List;
+
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -24,6 +32,24 @@ public class XBoundingBox extends BoundingBox {
     private boolean metric = true;
 
     //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new BoundingBox object.
+     *
+     * @param  geom  DOCUMENT ME!
+     */
+    public XBoundingBox(final Geometry geom) {
+        super(geom);
+        this.srs = CrsTransformer.createCrsFromSrid(geom.getSRID());
+        final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
+
+        for (final Crs crsTmp : crsList) {
+            if (crsTmp.getCode().equals(this.srs)) {
+                this.metric = crsTmp.isMetric();
+                break;
+            }
+        }
+    }
 
     /**
      * Creates a new XBoundingBox object.

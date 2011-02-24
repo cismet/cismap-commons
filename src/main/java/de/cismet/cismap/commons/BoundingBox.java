@@ -30,10 +30,12 @@ import java.io.Serializable;
 /**
  * Class to store a simple BoundingBox.
  *
+ * <p>This class should not be used. XBoundingBox should be used instead.</p>
+ *
  * @author   hell
  * @version  $Revision$, $Date$
  */
-
+@Deprecated
 public class BoundingBox implements Cloneable, Serializable {
 
     //~ Instance fields --------------------------------------------------------

@@ -89,9 +89,12 @@ public class CrsTransformer {
      * @throws  CRSTransformationException  DOCUMENT ME!
      * @throws  IllegalArgumentException    DOCUMENT ME!
      */
-    public BoundingBox transformBoundingBox(final BoundingBox bbox, final String sourceCrs) throws UnknownCRSException,
+    public BoundingBox transformBoundingBox(final BoundingBox bbox, String sourceCrs) throws UnknownCRSException,
         CRSTransformationException,
         IllegalArgumentException {
+        if (isDefaultCrs(sourceCrs)) {
+            sourceCrs = CismapBroker.getInstance().getDefaultCrs();
+        }
         final CoordinateSystem coordSystem = CRSFactory.create(sourceCrs);
         Point minPoint = GeometryFactory.createPoint(bbox.getX1(), bbox.getY1(), coordSystem);
         Point maxPoint = GeometryFactory.createPoint(bbox.getX2(), bbox.getY2(), coordSystem);
@@ -144,10 +147,13 @@ public class CrsTransformer {
      * @throws  GeometryException           DOCUMENT ME!
      */
     public com.vividsolutions.jts.geom.Geometry transformGeometry(final com.vividsolutions.jts.geom.Geometry geom,
-            final String sourceCrs) throws UnknownCRSException,
+            String sourceCrs) throws UnknownCRSException,
         CRSTransformationException,
         IllegalArgumentException,
         GeometryException {
+        if (isDefaultCrs(sourceCrs)) {
+            sourceCrs = CismapBroker.getInstance().getDefaultCrs();
+        }
         final CoordinateSystem coordSystem = CRSFactory.create(sourceCrs);
         com.vividsolutions.jts.geom.Geometry newGeom = (com.vividsolutions.jts.geom.Geometry)geom.clone();
         Geometry deegreeGeom = JTSAdapter.wrap(newGeom);
@@ -218,6 +224,17 @@ public class CrsTransformer {
     }
 
     /**
+     * creates the crs from the given srid.
+     *
+     * @param   srid  crs DOCUMENT ME!
+     *
+     * @return  the crs
+     */
+    public static String createCrsFromSrid(final int srid) {
+        return "EPSG:" + srid;
+    }
+
+    /**
      * DOCUMENT ME!
      *
      * @return  the current srid
@@ -244,8 +261,7 @@ public class CrsTransformer {
         if (log.isDebugEnabled()) {
             log.debug("crsname " + crsname + " currentSrs " + currentSrs + " default crs: " + defaultCrs);
         }
-        if (crsname.endsWith(":" + CismapBroker.getInstance().getDefaultCrsAlias()) || crsname.endsWith(":-1")
-                    || crsname.endsWith(":0")) {
+        if (isDefaultCrs(crsname)) {
             crsname = defaultCrs;
         }
 
@@ -277,8 +293,7 @@ public class CrsTransformer {
         com.vividsolutions.jts.geom.Geometry newGeom = null;
         final String curCrs = "EPSG:" + geom.getSRID();
         // Wenn SRID nicht gesetzt oder auf -1 gesetzt ist, dann handelt es sich schon um das default CRS
-        if (!curCrs.endsWith(":" + CismapBroker.getInstance().getDefaultCrsAlias()) && !curCrs.endsWith(":0")
-                    && !curCrs.endsWith(":-1")) {
+        if (!isDefaultCrs(curCrs)) {
             try {
                 if (log.isDebugEnabled()) {
                     log.debug("transform geometry from " + curCrs + " to "
@@ -318,7 +333,7 @@ public class CrsTransformer {
 
         // Wenn SRID nicht gesetzt oder auf -1 gesetzt ist, dann handelt es sich um das default CRS
         // und das ist immer metrisch
-        if (!curCrs.endsWith(":-1") && !curCrs.endsWith(":0")) {
+        if (!isDefaultCrs(curCrs)) {
             final int index = crsList.indexOf(curCrs);
             if (index != -1) {
                 final Crs crs = crsList.get(index);
@@ -342,5 +357,21 @@ public class CrsTransformer {
         }
 
         return newGeom;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   crs  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static boolean isDefaultCrs(final String crs) {
+        if (crs.endsWith(":" + CismapBroker.getInstance().getDefaultCrsAlias())
+                    || crs.endsWith(":0") || crs.endsWith(":-1")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
