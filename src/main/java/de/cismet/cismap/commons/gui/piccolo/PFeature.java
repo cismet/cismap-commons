@@ -326,7 +326,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 final PImage pImage = new PImage(rdf.getRasterDocument());
 
                 synchronized (this) {
-                    removeChild(rdfImage);
+                    if (rdfImage != null) {
+                        removeChild(rdfImage);
+                    }
                     rdfImage = pImage;
                 }
 
