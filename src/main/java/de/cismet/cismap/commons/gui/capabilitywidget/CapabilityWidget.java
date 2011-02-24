@@ -1851,7 +1851,25 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
         @Override
         public void mousePressed(final MouseEvent e) {
-            if (e.isPopupTrigger() && (e.getSource() instanceof DragTree)) {
+            processPopup(e);
+        }
+
+        @Override
+        public void mouseReleased(final MouseEvent e) {
+            processPopup(e);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
+        public void processPopup(final MouseEvent e) {
+            // Under Windows: isPopupTrigger returns true when the right mouse button is pressed
+            // and a mouse released event is thrown
+            // Under Linux: isPopupTrigger returns true when the right mouse button is pressed
+            // and a mouse pressed event is thrown
+            if ((e.isPopupTrigger()) && (e.getSource() instanceof DragTree)) {
                 try {
                     final JTree currentTree = (JTree)e.getSource();
                     final TreePath selPath = currentTree.getPathForLocation(e.getX(), e.getY());
