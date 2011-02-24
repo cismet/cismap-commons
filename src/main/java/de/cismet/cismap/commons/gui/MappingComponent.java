@@ -4577,7 +4577,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * @param  animationDuration  duration of the animation
      * @param  queryServices      true, if the services should be refreshed after animation
      */
-    public void gotoBoundingBox(final BoundingBox bb,
+    public void gotoBoundingBox(BoundingBox bb,
             final boolean history,
             final boolean scaleToFit,
             final int animationDuration,
@@ -4593,6 +4593,18 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             } catch (Exception e) {
                 log.warn("Fehler bei removeAllCHildren", e);                     // NOI18N
             }
+
+            if (bb instanceof XBoundingBox) {
+                if (!((XBoundingBox)bb).getSrs().equals(CismapBroker.getInstance().getSrs().getCode())) {
+                    try {
+                        final CrsTransformer trans = new CrsTransformer(CismapBroker.getInstance().getSrs().getCode());
+                        bb = trans.transformBoundingBox((XBoundingBox)bb);
+                    } catch (Exception e) {
+                        log.error("Cannot transform the bounding box", e);
+                    }
+                }
+            }
+
             final double x1 = getWtst().getScreenX(bb.getX1());
             final double y1 = getWtst().getScreenY(bb.getY1());
             final double x2 = getWtst().getScreenX(bb.getX2());

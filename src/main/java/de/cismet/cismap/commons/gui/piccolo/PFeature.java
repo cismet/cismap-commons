@@ -426,7 +426,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
     /**
      * Gleicht die Geometrie an das PFeature an. Erstellt die jeweilige Geometrie (Punkt, Linie, Polygon) und f\u00FCgt
-     * sie dem Feature hinzu. Das CRS der Feature-Geometry wird dabei mit dem CRS der PFeature-Geometry ueberschrieben.
+     * sie dem Feature hinzu.
      */
     public void syncGeometry() {
         try {
@@ -434,32 +434,27 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 // TODO Im Moment nur f\u00FCr einfache Polygone ohne L\u00F6cher
                 if (coordArr != null) {
                     final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                            CismapBroker.getInstance().getDefaultCrsAlias());
-                    final CrsTransformer defaultTranformer = new CrsTransformer(CismapBroker.getInstance()
-                                    .getDefaultCrs());
-                    final Coordinate[] defaultCoordArr = defaultTranformer.transformGeometry(
-                            coordArr,
-                            CismapBroker.getInstance().getSrs().getCode());
+                            CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
                     if (viewer.isFeatureDebugging()) {
                         if (log.isDebugEnabled()) {
-                            log.debug("syncGeometry:Point"); // NOI18N
+                            log.debug("syncGeometry"); // NOI18N
                         }
                     }
-                    if (defaultCoordArr.length == 1) {
+                    if (coordArr.length == 1) {
                         // Point
-                        final Point p = gf.createPoint(defaultCoordArr[0]);
-                        feature.setGeometry(p);
+                        final Point p = gf.createPoint(coordArr[0]);
+                        assignSynchronizedGeometry(p);
                         if (viewer.isFeatureDebugging()) {
                             if (log.isDebugEnabled()) {
                                 log.debug("syncGeometry:Point:" + p); // NOI18N
                             }
                         }
-                    } else if ((defaultCoordArr.length > 3)
-                                && defaultCoordArr[0].equals(defaultCoordArr[defaultCoordArr.length - 1])) {
+                    } else if ((coordArr.length > 3)
+                                && coordArr[0].equals(coordArr[coordArr.length - 1])) {
                         // simple Polygon
-                        final LinearRing shell = gf.createLinearRing(defaultCoordArr);
+                        final LinearRing shell = gf.createLinearRing(coordArr);
                         final Polygon poly = gf.createPolygon(shell, null);
-                        feature.setGeometry(poly);
+                        assignSynchronizedGeometry(poly);
                         if (viewer.isFeatureDebugging()) {
                             if (log.isDebugEnabled()) {
                                 log.debug("syncGeometry:Polygon:" + poly); // NOI18N
@@ -467,8 +462,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         }
                     } else {
                         // Linestring
-                        final LineString line = gf.createLineString(defaultCoordArr);
-                        feature.setGeometry(line);
+                        final LineString line = gf.createLineString(coordArr);
+                        assignSynchronizedGeometry(line);
                         if (viewer.isFeatureDebugging()) {
                             if (log.isDebugEnabled()) {
                                 log.debug("syncGeometry:Line:" + line); // NOI18N
@@ -481,6 +476,47 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
         } catch (Exception e) {
             log.error("Error while synchronising PFeature with feature.");
+        }
+    }
+
+    /**
+     * Assigns the PFeature geometry to the feature if they differ. The feature will keep its crs.
+     *
+     * @param  newGeom  DOCUMENT ME!
+     */
+    private void assignSynchronizedGeometry(final Geometry newGeom) {
+        final Geometry oldGeom = feature.getGeometry();
+        final String oldCrs = CrsTransformer.createCrsFromSrid(oldGeom.getSRID());
+        final String newCrs = CrsTransformer.createCrsFromSrid(newGeom.getSRID());
+
+        if ((newGeom.getSRID() == oldGeom.getSRID())
+                    || (CrsTransformer.isDefaultCrs(oldCrs) && CrsTransformer.isDefaultCrs(newCrs))) {
+            if (log.isDebugEnabled()) {
+                log.debug("feature and pfeature geometry differ, but have the same crs and will be synchronized."); // NOI18N
+            }
+            feature.setGeometry(newGeom);
+        } else {
+            try {
+                final CrsTransformer transformer = new CrsTransformer(newCrs);
+                final Geometry oldGeomWithNewSrid = transformer.transformGeometry(oldGeom, oldCrs);
+
+                if (!oldGeomWithNewSrid.equalsExact(newGeom)) {
+                    final CrsTransformer reverseTransformer = new CrsTransformer(oldCrs);
+                    final Geometry newGeomWithOldSrid = reverseTransformer.transformGeometry(newGeom, newCrs);
+
+                    if (log.isDebugEnabled()) {
+                        log.debug("feature and pfeature geometry differ and will be synchronized."); // NOI18N
+                    }
+
+                    feature.setGeometry(newGeomWithOldSrid);
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("feature and pfeature geometry do not differ."); // NOI18N
+                    }
+                }
+            } catch (final Exception e) {
+                log.error("Cannot synchronize feature.", e);                       // NOI18N
+            }
         }
     }
 

@@ -20,6 +20,7 @@ import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.*;
 

@@ -122,9 +122,12 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         } catch (Exception e) {
             shapeFeature.setGeometry(JTSAdapter.export(degreeFeature.getDefaultGeometryPropertyValue()));
         }
+        if (shapeFeature.getGeometry() != null) {
+            // store the feature in the spatial index structure
+            shapeFeature.setGeometry(CrsTransformer.transformToDefaultCrs(shapeFeature.getGeometry()));
+            this.degreeFeaturesTree.insert(shapeFeature.getGeometry().getEnvelopeInternal(), shapeFeature);
+        }
 
-        // store the feature in the spatial index structure
-        this.degreeFeaturesTree.insert(shapeFeature.getGeometry().getEnvelopeInternal(), shapeFeature);
         return shapeFeature;
     }
 
@@ -204,8 +207,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             final ShapeFeature featureServiceFeature = this.createFeatureInstance(degreeFeature, i);
             this.initialiseFeature(featureServiceFeature, degreeFeature, false, i);
             // this.tempFeatureCollection[i] = shapeFile.getFeatureByRecNo(i + 1);
-            featureServiceFeature.setGeometry(CrsTransformer.transformToDefaultCrs(
-                    featureServiceFeature.getGeometry()));
 
             final int newProgress = (int)((double)i / (double)max * 100d);
             if ((workerThread != null) && (newProgress > currentProgress) && (newProgress >= 5)
