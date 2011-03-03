@@ -214,8 +214,11 @@ public class CrsTransformer {
      *
      * @return  the srid or -1 if the srid could not be determined
      */
-    public static int extractSridFromCrs(final String crs) {
+    public static int extractSridFromCrs(String crs) {
         try {
+            if (isDefaultCrs(crs)) {
+                crs = CismapBroker.getInstance().getDefaultCrs();
+            }
             return Integer.parseInt(crs.substring(crs.indexOf(":") + 1));
         } catch (Exception e) {
             log.error("Cannot extract the SRID from the CRS " + crs);
@@ -231,7 +234,11 @@ public class CrsTransformer {
      * @return  the crs
      */
     public static String createCrsFromSrid(final int srid) {
-        return "EPSG:" + srid;
+        if (isDefaultCrs("EPSG:" + srid)) {
+            return CismapBroker.getInstance().getDefaultCrs();
+        } else {
+            return "EPSG:" + srid;
+        }
     }
 
     /**
