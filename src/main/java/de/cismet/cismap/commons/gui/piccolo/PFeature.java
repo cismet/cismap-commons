@@ -24,6 +24,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.TopologyException;
 
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PNode;
@@ -1799,7 +1800,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     Point interiorPoint = null;
                     try {
                         interiorPoint = geom.getInteriorPoint();
-                    } catch (Exception e) {
+                    } catch (TopologyException e) {
                         log.warn("Interior point of geometry couldn't be calculated. Try to use buffering.");
                         // see http://www.vividsolutions.com/JTS/bin/JTS%20Developer%20Guide.pdf, p. 11/12
                     }
