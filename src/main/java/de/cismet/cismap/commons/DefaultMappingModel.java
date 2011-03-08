@@ -449,4 +449,9 @@ public class DefaultMappingModel implements MappingModel, Configurable {
     public TreeMap getFeatureServices() {
         return this.featureServices;
     }
+
+    @Override
+    public Crs getSrs() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
