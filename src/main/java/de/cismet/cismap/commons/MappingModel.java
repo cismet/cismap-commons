@@ -70,4 +70,11 @@ public interface MappingModel {
      * @param  layer  DOCUMENT ME!
      */
     void removeLayer(RetrievalServiceLayer layer);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Crs getSrs();
 }

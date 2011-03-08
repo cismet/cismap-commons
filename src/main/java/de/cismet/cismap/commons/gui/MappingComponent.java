@@ -938,16 +938,16 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
             if (bounds instanceof PBoundsWithCleverToString) {
                 final PBoundsWithCleverToString boundWCTS = (PBoundsWithCleverToString)bounds;
-                if (!boundWCTS.getCrsCode().equals(CismapBroker.getInstance().getSrs().getCode())) {
+                if (!boundWCTS.getCrsCode().equals(mappingModel.getSrs().getCode())) {
                     try {
                         final Rectangle2D pos = new Rectangle2D.Double();
                         XBoundingBox bbox = boundWCTS.getWorldCoordinates();
-                        final CrsTransformer trans = new CrsTransformer(CismapBroker.getInstance().getSrs().getCode());
+                        final CrsTransformer trans = new CrsTransformer(mappingModel.getSrs().getCode());
                         bbox = trans.transformBoundingBox(bbox);
                         bounds = bbox.getPBounds(getWtst());
                     } catch (Exception e) {
                         log.error("Cannot transform the bounding box from " + boundWCTS.getCrsCode() + " to "
-                                    + CismapBroker.getInstance().getSrs().getCode());
+                                    + mappingModel.getSrs().getCode());
                     }
                 }
             }
@@ -1967,7 +1967,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             addToHistory(new PBoundsWithCleverToString(
                     new PBounds(newViewBounds),
                     wtst,
-                    CismapBroker.getInstance().getSrs().getCode()));
+                    mappingModel.getSrs().getCode()));
             queryServicesWithoutHistory();
             if (DEBUG) {
                 if (log.isDebugEnabled()) {
@@ -3202,14 +3202,14 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         for (final Feature f : collection) {
             if (first) {
                 g = CrsTransformer.transformToCurrentCrs(f.getGeometry()).getEnvelope();
-                if ((f instanceof Bufferable) && CismapBroker.getInstance().getSrs().isMetric()) {
+                if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
                     g = g.buffer(((Bufferable)f).getBuffer());
                 }
                 first = false;
             } else {
                 if (f.getGeometry() != null) {
                     Geometry geometry = CrsTransformer.transformToCurrentCrs(f.getGeometry()).getEnvelope();
-                    if ((f instanceof Bufferable) && CismapBroker.getInstance().getSrs().isMetric()) {
+                    if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
                         geometry = geometry.buffer(((Bufferable)f).getBuffer());
                     }
                     g = g.getEnvelope().union(geometry);
@@ -3233,7 +3233,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             }
 
             if (buff == 0.0) {
-                if (CismapBroker.getInstance().getSrs().isMetric()) {
+                if (mappingModel.getSrs().isMetric()) {
                     buff = 1.0;
                 } else {
                     buff = 0.01;
@@ -4218,7 +4218,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 //            gotoInitialBoundingBox();
 //        }
         currentPosition.addContent(currentBoundingBox.getJDOMElement());
-        currentPosition.setAttribute("CRS", CismapBroker.getInstance().getSrs().getCode());
+        currentPosition.setAttribute("CRS", mappingModel.getSrs().getCode());
         // currentPosition.addContent(getCurrentBoundingBox().getJDOMElement());
         ret.addContent(currentPosition);
 
@@ -4254,6 +4254,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         // CRS List
         try {
             final List crsElements = prefs.getChild("crsList").getChildren("crs"); // NOI18N
+            boolean defaultCrsFound = false;
             crsList.clear();
 
             for (final Object elem : crsElements) {
@@ -4263,11 +4264,12 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
                     if (s.isSelected() && s.isMetric()) {
                         try {
-                            if (CismapBroker.getInstance().getDefaultCrs() != null) {
+                            if (defaultCrsFound) {
                                 log.warn("More than one default CRS is set. "
                                             + "Please check your master configuration file."); // NOI18N
                             }
                             CismapBroker.getInstance().setDefaultCrs(s.getCode());
+                            defaultCrsFound = true;
                             transformer = new CrsTransformer(s.getCode());
                         } catch (Exception ex) {
                             log.error("Cannot create a GeoTransformer for the crs " + s.getCode(), ex);
@@ -4388,14 +4390,18 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
         try {
             final List crsElements = prefs.getChild("crsList").getChildren("crs"); // NOI18N
-            crsList.clear();
 
             for (final Object elem : crsElements) {
                 if (elem instanceof Element) {
                     final Crs s = new Crs((Element)elem);
-                    if (!crsList.contains(s)) {
-                        crsList.add(s);
+                    // the crs is equals to an other crs, if the code is equal. If a crs has in the
+                    // local configuration file an other name than in the master configuration file,
+                    // the old crs will be removed and the local one should be added to use the
+                    // local name and short name of the crs.
+                    if (crsList.contains(s)) {
+                        crsList.remove(s);
                     }
+                    crsList.add(s);
                 }
             }
         } catch (Exception skip) {
@@ -4595,9 +4601,9 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             }
 
             if (bb instanceof XBoundingBox) {
-                if (!((XBoundingBox)bb).getSrs().equals(CismapBroker.getInstance().getSrs().getCode())) {
+                if (!((XBoundingBox)bb).getSrs().equals(mappingModel.getSrs().getCode())) {
                     try {
-                        final CrsTransformer trans = new CrsTransformer(CismapBroker.getInstance().getSrs().getCode());
+                        final CrsTransformer trans = new CrsTransformer(mappingModel.getSrs().getCode());
                         bb = trans.transformBoundingBox((XBoundingBox)bb);
                     } catch (Exception e) {
                         log.error("Cannot transform the bounding box", e);
@@ -4708,10 +4714,10 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         final double realWorldWidthInMeter = screenWidthInMeter * scaleDenominator;
         final double realWorldHeightInMeter = screenHeightInMeter * scaleDenominator;
 
-        if (!CismapBroker.getInstance().getSrs().isMetric() && (transformer != null)) {
+        if (!mappingModel.getSrs().isMetric() && (transformer != null)) {
             try {
                 // transform the given bounding box to a metric coordinate system
-                bb = transformer.transformBoundingBox(bb, CismapBroker.getInstance().getSrs().getCode());
+                bb = transformer.transformBoundingBox(bb, mappingModel.getSrs().getCode());
             } catch (Exception e) {
                 log.error("Cannot transform the current bounding box.", e);
             }
@@ -4727,10 +4733,10 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 midY
                         + (realWorldHeightInMeter / 2));
 
-        if (!CismapBroker.getInstance().getSrs().isMetric() && (transformer != null)) {
+        if (!mappingModel.getSrs().isMetric() && (transformer != null)) {
             try {
                 // transform the scaled bounding box to the current coordinate system
-                final CrsTransformer trans = new CrsTransformer(CismapBroker.getInstance().getSrs().getCode());
+                final CrsTransformer trans = new CrsTransformer(mappingModel.getSrs().getCode());
                 scaledBox = trans.transformBoundingBox(scaledBox, transformer.getDestinationCrs());
             } catch (Exception e) {
                 log.error("Cannot transform the current bounding box.", e);
@@ -4752,11 +4758,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         final double screenHeightInInch = getHeight() / screenResolution;
         final double screenHeightInMeter = screenHeightInInch * 0.0254;
 
-        if (!CismapBroker.getInstance().getSrs().isMetric() && (transformer != null)) {
+        if (!mappingModel.getSrs().isMetric() && (transformer != null)) {
             try {
                 boundingBox = transformer.transformBoundingBox(
                         boundingBox,
-                        CismapBroker.getInstance().getSrs().getCode());
+                        mappingModel.getSrs().getCode());
             } catch (Exception e) {
                 log.error("Cannot transform the current bounding box.", e);
             }
@@ -5205,6 +5211,8 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     JOptionPane.ERROR_MESSAGE);
                 log.error("Cannot transform the current bounding box to the CRS " + event.getCurrentCrs(), e);
                 resetCrs = true;
+                final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
+                alm.setSrs(event.getCurrentCrs());
                 CismapBroker.getInstance().setSrs(event.getFormerCrs());
             }
         } else {
