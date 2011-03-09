@@ -504,7 +504,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
                 if (!oldGeomWithNewSrid.equalsExact(newGeom)) {
                     final CrsTransformer reverseTransformer = new CrsTransformer(oldCrs);
-                    final Geometry newGeomWithOldSrid = reverseTransformer.transformGeometry(newGeom, newCrs);
+                    final Geometry newGeomWithOldSrid = reverseTransformer.fastTransformGeometry(newGeom, newCrs);
 
                     if (log.isDebugEnabled()) {
                         log.debug("feature and pfeature geometry differ and will be synchronized."); // NOI18N
