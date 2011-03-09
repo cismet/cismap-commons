@@ -14,6 +14,7 @@ import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.SystemFlavorMap;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DragSource;
@@ -621,9 +622,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     public void drop(final java.awt.dnd.DropTargetDropEvent dtde) {
         final DataFlavor TREEPATH_FLAVOR = new DataFlavor(
                 DataFlavor.javaJVMLocalObjectMimeType,
-                "SelectionAndCapabilities");                                                            // NOI18N
+                "SelectionAndCapabilities");                                           // NOI18N
         if (log.isDebugEnabled()) {
-            log.debug("Drop with this flavors:" + dtde.getCurrentDataFlavorsAsList());                  // NOI18N
+            log.debug("Drop with this flavors:" + dtde.getCurrentDataFlavorsAsList()); // NOI18N
         }
         if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
                     || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
@@ -632,25 +633,35 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 List<File> data = null;
                 final Transferable transferable = dtde.getTransferable();
                 if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
-                    data = DnDUtils.textURIListToFileList((String)transferable.getTransferData(
-                                DnDUtils.URI_LIST_FLAVOR));
-//                    data = (java.util.List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                } else {
-                    if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Drop is unix drop");                                // NOI18N
+                    }
+
+                    try {
                         if (log.isDebugEnabled()) {
-                            log.debug("Drop is unix drop xxx "
+                            log.debug("Drop is Mac drop xxx"
                                         + transferable.getTransferData(DataFlavor.javaFileListFlavor)); // NOI18N
                         }
 
-                        data = DnDUtils.textURIListToFileList((String)transferable.getTransferData(
-                                    DnDUtils.URI_LIST_FLAVOR));
-                    } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Drop is windows drop"); // NOI18N
-                        }
                         data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                    } catch (UnsupportedFlavorException e) {
+                        // transferable.getTransferData(DataFlavor.javaFileListFlavor) will throw an
+                        // UnsupportedFlavorException on Linux
+                        if (data == null) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("Drop is Linux drop"); // NOI18N
+                            }
+                            data = DnDUtils.textURIListToFileList((String)transferable.getTransferData(
+                                        DnDUtils.URI_LIST_FLAVOR));
+                        }
                     }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Drop is windows drop");       // NOI18N
+                    }
+                    data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
                 }
+
                 if (log.isDebugEnabled()) {
                     log.debug("Drag&Drop File List: " + data); // NOI18N
                 }
