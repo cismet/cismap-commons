@@ -64,7 +64,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         "http://geoportal.wuppertal.de/deegree/wms?&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&BBOX=<cismap:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:stadtplan2007&STYLES=default"; // NOI18N
     SimpleWMS backgroundService = new SimpleWMS(new SimpleWmsGetMapUrl(url));
     Crs srs = new Crs("EPSG:31466", "EPSG:31466", "EPSG:31466", true, true);                                                                                                                                                                                                                              // NOI18N
-    BoundingBox home = new BoundingBox(2567799, 5670041, 2594650, 5688258);
+    XBoundingBox home = new XBoundingBox(2567799, 5670041, 2594650, 5688258, srs.getCode(), srs.isMetric());
 
     //~ Constructors -----------------------------------------------------------
 
@@ -77,15 +77,9 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         add(overviewMap, BorderLayout.CENTER);
         overviewMap.setInteractionMode(MappingComponent.OVERVIEW);
         overviewMap.setReadOnly(true);
-        final XBoundingBox extent = new XBoundingBox(home.getX1(),
-                home.getY1(),
-                home.getX2(),
-                home.getY2(),
-                srs.getCode(),
-                true);
-        overviewMap.setFixedBoundingBox(extent);
+        overviewMap.setFixedBoundingBox(home);
         model.setSrs(srs);
-        model.addHome(extent);
+        model.addHome(home);
         overviewMap.setMappingModel(model);
         revalidate();
     }
@@ -101,16 +95,10 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         }
         model = new ActiveLayerModel();
 
-        final XBoundingBox extent = new XBoundingBox(home.getX1(),
-                home.getY1(),
-                home.getX2(),
-                home.getY2(),
-                srs.getCode(),
-                true);
-        overviewMap.setFixedBoundingBox(extent);
+        overviewMap.setFixedBoundingBox(home);
         model.setSrs(srs);
         model.setDefaultHomeSrs(srs);
-        model.addHome(extent);
+        model.addHome(home);
         overviewMap.setMappingModel(model);
         model.removeAllLayers();
         model.addLayer((RetrievalServiceLayer)backgroundService);
@@ -251,7 +239,8 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
             }
 
             try {
-                home = new BoundingBox(prefs.getChild("overviewExtent")); // NOI18N
+                // TODO determine, whether the home CRS is metric or not
+                home = new XBoundingBox(prefs.getChild("overviewExtent"), srs.getCode(), true); // NOI18N
             } catch (Exception skip) {
             }
 

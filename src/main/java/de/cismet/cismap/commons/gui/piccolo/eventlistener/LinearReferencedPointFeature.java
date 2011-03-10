@@ -10,7 +10,7 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import com.vividsolutions.jts.linearref.LengthLocationMap;
 import com.vividsolutions.jts.linearref.LinearLocation;
@@ -88,8 +88,8 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
      */
     public LinearReferencedPointFeature(final double value, final Geometry baseLineGeom, final boolean showSubLine) {
         this.baseLineGeom = baseLineGeom;
-
-        setGeometry(new GeometryFactory().createPoint(getCoordinateOnLine(value, baseLineGeom)));
+        setGeometry(new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), baseLineGeom.getSRID())
+                    .createPoint(getCoordinateOnLine(value, baseLineGeom)));
         setEditable(true);
         setPointAnnotationSymbol(FeatureAnnotationSymbol.newCenteredFeatureAnnotationSymbol(
                 annotationIco.getImage(),
@@ -158,9 +158,26 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
 
     @Override
     public void moveTo(final Coordinate coordinate) {
+//        // mauskoordinaten ins selbe coordsys umwandeln wie das der route
+//        Coordinate coord = transformToRouteSrid(coordinate);
+
         final Coordinate manipulatedCoordinate = getNearestCoordninateOnLine(coordinate);
         performMove(manipulatedCoordinate);
     }
+
+//    private Coordinate transformToRouteSrid(Coordinate coord) {
+//        try {
+//        final CrsTransformer crsT = new CrsTransformer(CrsTransformer.createCrsFromSrid(
+//                        getLineGeometry().getSRID()));
+//
+//            Coordinate[] coords = new Coordinate[] { coord };
+//            coords = crsT.transformGeometry(coords, CismapBroker.getInstance().getSrs().getCode());
+//            return coords[0];
+//        } catch (Exception ex) {
+//            LOG.error("Fehler beim Umrechnen des CRS", ex);
+//        }
+//        return coord;
+//    }
 
     /**
      * DOCUMENT ME!

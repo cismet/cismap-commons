@@ -14,6 +14,7 @@ package de.cismet.cismap.commons.gui.piccolo;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
@@ -23,6 +24,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.TopologyException;
 
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PNode;
@@ -502,7 +504,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
                 if (!oldGeomWithNewSrid.equalsExact(newGeom)) {
                     final CrsTransformer reverseTransformer = new CrsTransformer(oldCrs);
-                    final Geometry newGeomWithOldSrid = reverseTransformer.transformGeometry(newGeom, newCrs);
+                    final Geometry newGeomWithOldSrid = reverseTransformer.fastTransformGeometry(newGeom, newCrs);
 
                     if (log.isDebugEnabled()) {
                         log.debug("feature and pfeature geometry differ and will be synchronized."); // NOI18N
@@ -1795,8 +1797,21 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 } else {
                     syncGeometry();
                     final Geometry geom = CrsTransformer.transformToCurrentCrs(getFeature().getGeometry());
-                    p.setOffset(wtst.getScreenX(geom.getInteriorPoint().getX()),
-                        wtst.getScreenY(geom.getInteriorPoint().getY()));
+                    Point interiorPoint = null;
+                    try {
+                        interiorPoint = geom.getInteriorPoint();
+                    } catch (TopologyException e) {
+                        log.warn("Interior point of geometry couldn't be calculated. Try to use buffering.");
+                        // see http://www.vividsolutions.com/JTS/bin/JTS%20Developer%20Guide.pdf, p. 11/12
+                    }
+                    if (interiorPoint == null) {
+                        final GeometryFactory factory = new GeometryFactory();
+                        final GeometryCollection collection = factory.createGeometryCollection(new Geometry[] { geom });
+                        final Geometry union = collection.buffer(0);
+                        interiorPoint = union.getInteriorPoint();
+                    }
+                    p.setOffset(wtst.getScreenX(interiorPoint.getX()),
+                        wtst.getScreenY(interiorPoint.getY()));
                     addChild(p);
                     p.setWidth(pswingComp.getWidth());
                     p.setHeight(pswingComp.getHeight());
