@@ -1,13 +1,12 @@
 /***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ****************************************************/
 package de.cismet.cismap.commons;
 
-import com.vividsolutions.jts.geom.Polygon;
 
 import org.deegree.crs.components.Unit;
 import org.deegree.model.crs.CRSFactory;
@@ -36,17 +35,13 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 public class CrsTransformer {
 
     //~ Static fields/initializers ---------------------------------------------
-
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(CrsTransformer.class);
-
     //~ Instance fields --------------------------------------------------------
-
     private GeoTransformer transformer;
     private CoordinateSystem crs;
     private String destCrsAsString;
 
     //~ Constructors -----------------------------------------------------------
-
     /**
      * Creates a new CrsTransformer object.
      *
@@ -62,7 +57,6 @@ public class CrsTransformer {
     }
 
     //~ Methods ----------------------------------------------------------------
-
     /**
      * DOCUMENT ME!
      *
@@ -90,16 +84,16 @@ public class CrsTransformer {
      * @throws  IllegalArgumentException    DOCUMENT ME!
      */
     public BoundingBox transformBoundingBox(final BoundingBox bbox, String sourceCrs) throws UnknownCRSException,
-        CRSTransformationException,
-        IllegalArgumentException {
+            CRSTransformationException,
+            IllegalArgumentException {
         if (isDefaultCrs(sourceCrs)) {
             sourceCrs = CismapBroker.getInstance().getDefaultCrs();
         }
         final CoordinateSystem coordSystem = CRSFactory.create(sourceCrs);
         Point minPoint = GeometryFactory.createPoint(bbox.getX1(), bbox.getY1(), coordSystem);
         Point maxPoint = GeometryFactory.createPoint(bbox.getX2(), bbox.getY2(), coordSystem);
-        minPoint = (org.deegree.model.spatialschema.Point)transformer.transform(minPoint);
-        maxPoint = (org.deegree.model.spatialschema.Point)transformer.transform(maxPoint);
+        minPoint = (org.deegree.model.spatialschema.Point) transformer.transform(minPoint);
+        maxPoint = (org.deegree.model.spatialschema.Point) transformer.transform(maxPoint);
         BoundingBox newBbox;
 
         if (bbox instanceof XBoundingBox) {
@@ -128,9 +122,9 @@ public class CrsTransformer {
      * @throws  IllegalArgumentException    DOCUMENT ME!
      */
     public XBoundingBox transformBoundingBox(final XBoundingBox bbox) throws UnknownCRSException,
-        CRSTransformationException,
-        IllegalArgumentException {
-        return (XBoundingBox)transformBoundingBox(bbox, bbox.getSrs());
+            CRSTransformationException,
+            IllegalArgumentException {
+        return (XBoundingBox) transformBoundingBox(bbox, bbox.getSrs());
     }
 
     /**
@@ -146,13 +140,13 @@ public class CrsTransformer {
      * @throws  IllegalArgumentException    DOCUMENT ME!
      * @throws  GeometryException           DOCUMENT ME!
      */
-    public com.vividsolutions.jts.geom.Geometry transformGeometry(final com.vividsolutions.jts.geom.Geometry geom,
+    public <T extends com.vividsolutions.jts.geom.Geometry> T transformGeometry(final T geom,
             final String sourceCrs) throws UnknownCRSException,
-        CRSTransformationException,
-        IllegalArgumentException,
-        GeometryException {
-        final com.vividsolutions.jts.geom.Geometry newGeom = (com.vividsolutions.jts.geom.Geometry)geom.clone();
-        return fastTransformGeometry(newGeom, sourceCrs);
+            CRSTransformationException,
+            IllegalArgumentException,
+            GeometryException {
+        final com.vividsolutions.jts.geom.Geometry newGeom = (com.vividsolutions.jts.geom.Geometry) geom.clone();
+        return (T) fastTransformGeometry(newGeom, sourceCrs);
     }
 
     /**
@@ -168,11 +162,11 @@ public class CrsTransformer {
      * @throws  IllegalArgumentException    DOCUMENT ME!
      * @throws  GeometryException           DOCUMENT ME!
      */
-    public com.vividsolutions.jts.geom.Geometry fastTransformGeometry(com.vividsolutions.jts.geom.Geometry geom,
+    public <T extends com.vividsolutions.jts.geom.Geometry> T fastTransformGeometry(T geom,
             String sourceCrs) throws UnknownCRSException,
-        CRSTransformationException,
-        IllegalArgumentException,
-        GeometryException {
+            CRSTransformationException,
+            IllegalArgumentException,
+            GeometryException {
         if (isDefaultCrs(sourceCrs)) {
             sourceCrs = CismapBroker.getInstance().getDefaultCrs();
         }
@@ -180,7 +174,7 @@ public class CrsTransformer {
         Geometry deegreeGeom = JTSAdapter.wrap(geom);
         deegreeGeom = transformer.transform(deegreeGeom, coordSystem.getCRS());
 
-        geom = JTSAdapter.export(deegreeGeom);
+        geom = (T) JTSAdapter.export(deegreeGeom);
         setSrid(geom);
         return geom;
     }
@@ -202,9 +196,9 @@ public class CrsTransformer {
     public com.vividsolutions.jts.geom.Coordinate[] transformGeometry(
             final com.vividsolutions.jts.geom.Coordinate[] coords,
             final String sourceCrs) throws UnknownCRSException,
-        CRSTransformationException,
-        IllegalArgumentException,
-        GeometryException {
+            CRSTransformationException,
+            IllegalArgumentException,
+            GeometryException {
         final com.vividsolutions.jts.geom.GeometryFactory gfac = new com.vividsolutions.jts.geom.GeometryFactory();
         com.vividsolutions.jts.geom.Geometry geom;
 
@@ -278,8 +272,8 @@ public class CrsTransformer {
      *
      * @return  the new geomerty or the given geometry, if the given geometry is already in the current CRS
      */
-    public static com.vividsolutions.jts.geom.Geometry transformToCurrentCrs(
-            final com.vividsolutions.jts.geom.Geometry geom) {
+    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToCurrentCrs(
+            final T geom) {
         final String currentSrs = CismapBroker.getInstance().getSrs().getCode();
         return transformToGivenCrs(geom, currentSrs);
     }
@@ -292,8 +286,8 @@ public class CrsTransformer {
      *
      * @return  the new geomerty or the given geometry, if the given geometry is already in the current CRS
      */
-    public static com.vividsolutions.jts.geom.Geometry transformToGivenCrs(
-            final com.vividsolutions.jts.geom.Geometry geom,
+    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToGivenCrs(
+            final T geom,
             final String crs) {
         if (geom == null) {
             return null;
@@ -311,13 +305,13 @@ public class CrsTransformer {
         if (!crs.equals(crsname)) {
             try {
                 final CrsTransformer crsTransformer = new CrsTransformer(crs);
-                return crsTransformer.transformGeometry(geom, crsname);
+                return (T) crsTransformer.transformGeometry(geom, crsname);
             } catch (Exception e) {
                 log.error("Cannot transform the geometry from " + crsname + " to " + crs, e);
             }
         }
 
-        return geom;
+        return (T) geom;
     }
 
     /**
@@ -327,8 +321,8 @@ public class CrsTransformer {
      *
      * @return  the new geomerty or the given geometry, if the given geometry is already in the default CRS
      */
-    public static com.vividsolutions.jts.geom.Geometry transformToDefaultCrs(
-            final com.vividsolutions.jts.geom.Geometry geom) {
+    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToDefaultCrs(
+            final T geom) {
         if (geom == null) {
             return null;
         }
@@ -340,21 +334,21 @@ public class CrsTransformer {
             try {
                 if (log.isDebugEnabled()) {
                     log.debug("transform geometry from " + curCrs + " to "
-                                + CismapBroker.getInstance().getDefaultCrs());
+                            + CismapBroker.getInstance().getDefaultCrs());
                 }
                 final CrsTransformer transformer = new CrsTransformer(CismapBroker.getInstance().getDefaultCrs());
                 newGeom = transformer.transformGeometry(geom, curCrs);
             } catch (Exception e) {
                 log.error("Cannot transform the geometry from " + curCrs + " to "
-                            + CismapBroker.getInstance().getDefaultCrs(),
-                    e);
+                        + CismapBroker.getInstance().getDefaultCrs(),
+                        e);
                 newGeom = geom;
             }
         } else {
             newGeom = geom;
         }
 
-        return newGeom;
+        return (T) newGeom;
     }
 
     /**
@@ -365,8 +359,8 @@ public class CrsTransformer {
      *
      * @return  the new geomerty or the given geometry, if the given geometry is already in the current CRS
      */
-    public static com.vividsolutions.jts.geom.Geometry transformToMetricCrs(
-            final com.vividsolutions.jts.geom.Geometry geom,
+    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToMetricCrs(
+            final T geom,
             final List<Crs> crsList) {
         if (geom == null) {
             return null;
@@ -399,7 +393,7 @@ public class CrsTransformer {
             newGeom = geom;
         }
 
-        return newGeom;
+        return (T) newGeom;
     }
 
     /**
@@ -411,8 +405,8 @@ public class CrsTransformer {
      */
     public static boolean isDefaultCrs(final String crs) {
         if (crs.endsWith(":" + CismapBroker.getInstance().getDefaultCrsAlias())
-                    || crs.endsWith(":0") || crs.endsWith(":-1")
-                    || crs.equals(CismapBroker.getInstance().getDefaultCrs())) {
+                || crs.endsWith(":0") || crs.endsWith(":-1")
+                || crs.equals(CismapBroker.getInstance().getDefaultCrs())) {
             return true;
         } else {
             return false;
