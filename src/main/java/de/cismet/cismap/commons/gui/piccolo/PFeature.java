@@ -63,6 +63,7 @@ import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.WorldToScreenTransform;
@@ -78,7 +79,6 @@ import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.DrawSelectionFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CurrentStackTrace;
 
@@ -320,7 +320,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
         }
 
-        final Geometry geom = CrsTransformer.transformToCurrentCrs(feature.getGeometry());
+        final Geometry geom = CrsTransformer.transformToGivenCrs(feature.getGeometry(), getViewerCrs().getCode());
         if (feature instanceof RasterDocumentFeature) {
             final RasterDocumentFeature rdf = (RasterDocumentFeature)feature;
             try {
@@ -436,7 +436,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 // TODO Im Moment nur f\u00FCr einfache Polygone ohne L\u00F6cher
                 if (coordArr != null) {
                     final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                            CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+                            CrsTransformer.extractSridFromCrs(getViewerCrs().getCode()));
                     if (viewer.isFeatureDebugging()) {
                         if (log.isDebugEnabled()) {
                             log.debug("syncGeometry"); // NOI18N
@@ -788,7 +788,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
                 final boolean vis = primaryAnnotation.getVisible();
 
-                final Point intPoint = CrsTransformer.transformToCurrentCrs(feature.getGeometry()).getInteriorPoint();
+                final Point intPoint = CrsTransformer.transformToGivenCrs(feature.getGeometry(),
+                            getViewerCrs().getCode())
+                            .getInteriorPoint();
 
                 primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()), wtst.getScreenY(intPoint.getY()));
 
@@ -1100,8 +1102,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // \u00DCberschneiden sich die Features? if (!f.equals(PFeature.this.getFeature()) &&
             // f.getGeometry().intersects(PFeature.this.getFeature().getGeometry()) ){
             if (!f.equals(PFeature.this.getFeature())) {
-                final Geometry fgeo = CrsTransformer.transformToCurrentCrs(f.getGeometry());
-                final Geometry thisGeo = CrsTransformer.transformToCurrentCrs(PFeature.this.getFeature().getGeometry());
+                final Geometry fgeo = CrsTransformer.transformToGivenCrs(f.getGeometry(), getViewerCrs().getCode());
+                final Geometry thisGeo = CrsTransformer.transformToGivenCrs(PFeature.this.getFeature().getGeometry(),
+                        getViewerCrs().getCode());
                 if (fgeo.buffer(0.01).intersects(thisGeo.buffer(0.01))) {
                     final Point p = gf.createPoint(coordArr[posInArray]);
                     // Erzeuge Array mit allen Eckpunkten
@@ -1692,7 +1695,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void resetInfoNodePosition() {
         if (stickyChild != null) {
-            final Geometry geom = CrsTransformer.transformToCurrentCrs(getFeature().getGeometry());
+            final Geometry geom = CrsTransformer.transformToGivenCrs(getFeature().getGeometry(),
+                    getViewerCrs().getCode());
             if (viewer.isFeatureDebugging()) {
                 if (log.isDebugEnabled()) {
                     log.debug("getFeature().getGeometry():" + geom);                  // NOI18N
@@ -1796,7 +1800,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     p.setOffset(stickyChild.getWidth(), 0);
                 } else {
                     syncGeometry();
-                    final Geometry geom = CrsTransformer.transformToCurrentCrs(getFeature().getGeometry());
+                    final Geometry geom = CrsTransformer.transformToGivenCrs(getFeature().getGeometry(),
+                            getViewerCrs().getCode());
                     Point interiorPoint = null;
                     try {
                         interiorPoint = geom.getInteriorPoint();
@@ -2285,6 +2290,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void setViewer(final MappingComponent viewer) {
         this.viewer = viewer;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Crs getViewerCrs() {
+        return viewer.getMappingModel().getSrs();
     }
 
     /**

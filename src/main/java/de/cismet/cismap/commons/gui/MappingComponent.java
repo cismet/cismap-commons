@@ -536,8 +536,6 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                             .fireStatusValueChanged(new StatusEvent(StatusEvent.SCALE, interactionMode));
                 }
             });
-
-        CismapBroker.getInstance().addCrsChangeListener(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -3201,14 +3199,16 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
         for (final Feature f : collection) {
             if (first) {
-                g = CrsTransformer.transformToCurrentCrs(f.getGeometry()).getEnvelope();
+                g = CrsTransformer.transformToGivenCrs(f.getGeometry(), mappingModel.getSrs().getCode()).getEnvelope();
                 if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
                     g = g.buffer(((Bufferable)f).getBuffer());
                 }
                 first = false;
             } else {
                 if (f.getGeometry() != null) {
-                    Geometry geometry = CrsTransformer.transformToCurrentCrs(f.getGeometry()).getEnvelope();
+                    Geometry geometry = CrsTransformer.transformToGivenCrs(f.getGeometry(),
+                                mappingModel.getSrs().getCode())
+                                .getEnvelope();
                     if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
                         geometry = geometry.buffer(((Bufferable)f).getBuffer());
                     }

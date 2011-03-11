@@ -64,8 +64,6 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
 
     @Override
     protected void finishGeometry(final PureNewFeature newFeature) {
-        // the coordinates of the newly created feature should must the default srs, because
-        // every feature uses internally the default srs.
         final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
 
         if (log.isDebugEnabled()) {
