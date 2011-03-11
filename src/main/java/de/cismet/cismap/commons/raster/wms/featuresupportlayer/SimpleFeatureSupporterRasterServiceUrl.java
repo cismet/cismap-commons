@@ -44,7 +44,10 @@ public class SimpleFeatureSupporterRasterServiceUrl extends SimpleWmsGetMapUrl {
     public String toString() {
         String retValue;
         retValue = super.toString();
-        retValue = retValue.replaceAll(filterToken, filter);
+        if ((filterToken != null) && (filter != null)) {
+            retValue = retValue.replaceAll(filterToken, filter);
+        }
+
         return retValue;
     }
 
