@@ -253,6 +253,9 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 
                     @Override
                     public void retrievalStarted(final RetrievalEvent e) {
+                        progress = -1;
+                        layerComplete = 0;
+                        progressTable.clear();
                         fireRetrievalStarted(e);
                     }
 
@@ -311,10 +314,12 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 
                     @Override
                     public void retrievalAborted(final RetrievalEvent e) {
+                        fireRetrievalAborted(e);
                     }
 
                     @Override
                     public void retrievalError(final RetrievalEvent e) {
+                        fireRetrievalError(e);
                     }
                 });
             if (wsl.getBackgroundColor() == null) {

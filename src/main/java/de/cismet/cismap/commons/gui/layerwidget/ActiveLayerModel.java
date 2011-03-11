@@ -811,6 +811,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public Crs getSrs() {
         return srs;
     }
@@ -840,6 +841,10 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         for (final Object layer : this.layers) {
             if (layer instanceof WMSServiceLayer) {
                 ((WMSServiceLayer)layer).setSrs(srs.getCode());
+            } else if (layer instanceof SlidableWMSServiceLayerGroup) {
+                ((SlidableWMSServiceLayerGroup)layer).setSrs(srs.getCode());
+            } else {
+                log.error("The SRS of a layer cannot be changed. Layer is of type  " + layer.getClass().getName());
             }
         }
 

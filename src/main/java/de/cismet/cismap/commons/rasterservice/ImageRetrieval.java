@@ -186,7 +186,8 @@ public class ImageRetrieval extends Thread {
                 fireLoadingAborted();
             }
         } catch (Exception e) {
-            log.error("Error in ImageRetrieval output has " + byteArrayOut.size() + " bytes."); // NOI18N
+            log.error("Error in ImageRetrieval output has " + ((byteArrayOut != null) ? byteArrayOut.size() : "")
+                        + " bytes.");                             // NOI18N
             final RetrievalEvent re = new RetrievalEvent();
             re.setIsComplete(false);
             if ((e.getMessage() == null) || e.getMessage().equals("null")) { // NOI18N
