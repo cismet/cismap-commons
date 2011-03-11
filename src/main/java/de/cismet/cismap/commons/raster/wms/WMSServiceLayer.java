@@ -473,7 +473,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
             url += "&BBOX=" + bb.getURLString();                                                              // NOI18N
             url += "&WIDTH=" + width;                                                                         // NOI18N
             url += "&HEIGHT=" + height;                                                                       // NOI18N
-            url += "&SRS=" + CismapBroker.getInstance().getSrs().getCode();                                   // NOI18N
+            url += "&SRS=" + srs;                                                                             // NOI18N
             url += "&FORMAT=" + imageFormat;                                                                  // NOI18N
             url += "&TRANSPARENT=" + Boolean.valueOf(transparentImage).toString().toUpperCase();              // NOI18N
             url += "&BGCOLOR=" + backgroundColor;                                                             // NOI18N
@@ -504,17 +504,19 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
      */
     private String getGetMapPrefix() {
         try {
-            final Operation op = getWmsCapabilities().getRequest().getMapOperation();
             String prefix = null;
+            if ((getWmsCapabilities() != null) && (getWmsCapabilities().getRequest() != null)) {
+                final Operation op = getWmsCapabilities().getRequest().getMapOperation();
 
-            if (op != null) {
-                // ToDo UGLY WINNING WSS schneidet wenn es get und post gibt das geht.
-                if (op.getGet() != null) {
-                    prefix = op.getGet().toString();
-                } else if (op.getPost() != null) {
-                    prefix = op.getPost().toString();
-                } else {
-                    return null;
+                if (op != null) {
+                    // ToDo UGLY WINNING WSS schneidet wenn es get und post gibt das geht.
+                    if (op.getGet() != null) {
+                        prefix = op.getGet().toString();
+                    } else if (op.getPost() != null) {
+                        prefix = op.getPost().toString();
+                    } else {
+                        return null;
+                    }
                 }
             }
             return prefix;

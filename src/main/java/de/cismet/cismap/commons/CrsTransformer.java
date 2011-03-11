@@ -280,25 +280,40 @@ public class CrsTransformer {
      */
     public static com.vividsolutions.jts.geom.Geometry transformToCurrentCrs(
             final com.vividsolutions.jts.geom.Geometry geom) {
+        final String currentSrs = CismapBroker.getInstance().getSrs().getCode();
+        return transformToGivenCrs(geom, currentSrs);
+    }
+
+    /**
+     * transforms the given geometry to the current CRS.
+     *
+     * @param   geom  the geometry to transform
+     * @param   crs   DOCUMENT ME!
+     *
+     * @return  the new geomerty or the given geometry, if the given geometry is already in the current CRS
+     */
+    public static com.vividsolutions.jts.geom.Geometry transformToGivenCrs(
+            final com.vividsolutions.jts.geom.Geometry geom,
+            final String crs) {
         if (geom == null) {
             return null;
         }
         String crsname = "EPSG:" + geom.getSRID();
         final String defaultCrs = CismapBroker.getInstance().getDefaultCrs();
-        final String currentSrs = CismapBroker.getInstance().getSrs().getCode();
+
         if (log.isDebugEnabled()) {
-            log.debug("crsname " + crsname + " currentSrs " + currentSrs + " default crs: " + defaultCrs);
+            log.debug("crsname " + crsname + " given crs " + crs + " default crs: " + defaultCrs);
         }
         if (isDefaultCrs(crsname)) {
             crsname = defaultCrs;
         }
 
-        if (!currentSrs.equals(crsname)) {
+        if (!crs.equals(crsname)) {
             try {
-                final CrsTransformer crsTransformer = new CrsTransformer(currentSrs);
+                final CrsTransformer crsTransformer = new CrsTransformer(crs);
                 return crsTransformer.transformGeometry(geom, crsname);
             } catch (Exception e) {
-                log.error("Cannot transform the geometry from " + crsname + " to " + currentSrs, e);
+                log.error("Cannot transform the geometry from " + crsname + " to " + crs, e);
             }
         }
 
