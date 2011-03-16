@@ -14,7 +14,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import de.cismet.cismap.commons.gui.MapListener;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -34,7 +33,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
 
     //~ Instance fields --------------------------------------------------------
 
-    protected Vector<Feature> features = new Vector<Feature>();
+    protected List<Feature> features = new ArrayList<Feature>();
     protected final Set<FeatureCollectionListener> listeners = new HashSet<FeatureCollectionListener>();
     protected LinkedHashSet<Feature> holdFeatures = new LinkedHashSet<Feature>();
     protected LinkedHashSet<Feature> selectedFeatures = new LinkedHashSet<Feature>();
@@ -122,7 +121,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     @Override
-    public Vector getAllFeatures() {
+    public List<Feature> getAllFeatures() {
         return features;
     }
 
@@ -506,7 +505,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     @Override
     public void removeAllFeatures() {
         final Set<Feature> cf = new HashSet<Feature>(features);
-        features.removeAllElements();
+        features.clear();
         fireAllFeaturesRemoved(cf);
         addFeatures(holdFeatures);
     }
@@ -687,5 +686,10 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
         while (it.hasNext()) {
             it.next().featuresAdded(new FeatureCollectionEvent(this, cf));
         }
+    }
+
+    @Override
+    public boolean contains(final Feature feature) {
+        return features.contains(feature);
     }
 }

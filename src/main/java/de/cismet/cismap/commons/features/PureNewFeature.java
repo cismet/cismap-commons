@@ -25,7 +25,7 @@ import java.awt.Color;
 import java.awt.Paint;
 import java.awt.geom.Point2D;
 
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -242,7 +242,7 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
             }
         } else {
             try {
-                final Vector<Feature> allFeatures = CismapBroker.getInstance()
+                final List<Feature> allFeatures = CismapBroker.getInstance()
                             .getMappingComponent()
                             .getFeatureCollection()
                             .getAllFeatures();

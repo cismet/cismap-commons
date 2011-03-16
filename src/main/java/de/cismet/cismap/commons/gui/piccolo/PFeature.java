@@ -1097,7 +1097,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final MultiMap glueCoords = new MultiMap();
 
         // Alle vorhandenen Features holen und pr\u00FCfen
-        final Vector<Feature> allFeatures = getViewer().getFeatureCollection().getAllFeatures();
+        final List<Feature> allFeatures = getViewer().getFeatureCollection().getAllFeatures();
         for (final Feature f : allFeatures) {
             // \u00DCberschneiden sich die Features? if (!f.equals(PFeature.this.getFeature()) &&
             // f.getGeometry().intersects(PFeature.this.getFeature().getGeometry()) ){

@@ -7,7 +7,7 @@
 ****************************************************/
 package de.cismet.cismap.commons.features;
 import java.util.Collection;
-import java.util.Vector;
+import java.util.List;
 
 import de.cismet.cismap.commons.*;
 
@@ -45,7 +45,17 @@ public interface FeatureCollection extends ServiceLayer {
      *
      * @return  DOCUMENT ME!
      */
-    Vector<Feature> getAllFeatures();
+    List<Feature> getAllFeatures();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   feature  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean contains(final Feature feature);
+
     /**
      * DOCUMENT ME!
      *
