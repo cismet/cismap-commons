@@ -21,6 +21,7 @@ import java.awt.geom.Point2D;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -164,7 +165,7 @@ public class RotationPHandle extends PHandle {
                     selArr.add(sel);
                 }
             }
-            final Vector<Feature> all = pfeature.getViewer().getFeatureCollection().getAllFeatures();
+            final List<Feature> all = pfeature.getViewer().getFeatureCollection().getAllFeatures();
 
             // FeatureChangedEvents werfen und aktuell halten
             if (pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
