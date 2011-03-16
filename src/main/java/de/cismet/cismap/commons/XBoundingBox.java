@@ -7,9 +7,12 @@
 ****************************************************/
 package de.cismet.cismap.commons;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 
 import org.jdom.DataConversionException;
 import org.jdom.Element;
@@ -123,5 +126,26 @@ public class XBoundingBox extends BoundingBox {
      */
     public void setMetric(final boolean metric) {
         this.metric = metric;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Geometry getGeometry() {
+        final GeometryFactory factory = new GeometryFactory(
+                new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(srs));
+
+        final Coordinate[] bbox = new Coordinate[5];
+        bbox[0] = new Coordinate(getX1(), getY1());
+        bbox[1] = new Coordinate(getX1(), getY2());
+        bbox[2] = new Coordinate(getX2(), getY2());
+        bbox[3] = new Coordinate(getX2(), getY1());
+        bbox[4] = new Coordinate(getX1(), getY1());
+        final LinearRing ring = new LinearRing(new CoordinateArraySequence(bbox), factory);
+
+        return factory.createPolygon(ring, new LinearRing[0]);
     }
 }
