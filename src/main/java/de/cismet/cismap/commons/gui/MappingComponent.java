@@ -4018,12 +4018,22 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 final double y1 = wtst.getWorldY(bounds.getY());
                 final double x2 = x1 + bounds.width;
                 final double y2 = y1 - bounds.height;
-                currentBoundingBox = new BoundingBox(x1, y1, x2, y2);
-                // if(DEBUG)log.debug("getCurrentBoundingBox()" + currentBoundingBox + "(" + (y2 - y1) + "," + (x2 -
-                // x1) + ")", new CurrentStackTrace());
+
+                final Crs currentCrs = CismapBroker.getInstance().getSrs();
+                final boolean metric;
+                // FIXME: this is a hack to overcome the "metric" issue for 4326 default srs
+                if (CrsTransformer.getCurrentSrid() == 4326) {
+                    metric = false;
+                } else {
+                    metric = currentCrs.isMetric();
+                }
+
+                currentBoundingBox = new XBoundingBox(x1, y1, x2, y2, currentCrs.getCode(), metric);
+
                 return currentBoundingBox;
-            } catch (Throwable t) {
-                log.error("Fehler in getCurrentBoundingBox()", t); // NOI18N
+            } catch (Exception e) {
+                log.error("cannot create bounding box from current view, return null", e); // NOI18N
+                
                 return null;
             }
         }
