@@ -7,6 +7,11 @@
 ****************************************************/
 package de.cismet.cismap.commons;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.PrecisionModel;
+
+import edu.umd.cs.piccolo.PNode;
+
 import org.apache.log4j.Logger;
 
 import org.deegree.crs.components.Unit;
@@ -20,6 +25,7 @@ import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.GeometryFactory;
 import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.model.spatialschema.Point;
+import org.deegree.ogcwebservices.wcts.data.GeometryData;
 
 import java.security.InvalidParameterException;
 
@@ -239,6 +245,35 @@ public class CrsTransformer {
     }
 
     /**
+     * transforms the given PNode object and all its sub nodes to the given CRS.
+     *
+     * @param  node     DOCUMENT ME!
+     * @param  oldCrs   DOCUMENT ME!
+     * @param  newCrs   DOCUMENT ME!
+     * @param  oldWtst  DOCUMENT ME!
+     * @param  newWtst  DOCUMENT ME!
+     */
+    public static void transformPNodeToGivenCrs(final PNode node,
+            final String oldCrs,
+            final String newCrs,
+            final WorldToScreenTransform oldWtst,
+            final WorldToScreenTransform newWtst) {
+        final com.vividsolutions.jts.geom.GeometryFactory fac = new com.vividsolutions.jts.geom.GeometryFactory(
+                new PrecisionModel(PrecisionModel.FLOATING),
+                extractSridFromCrs(oldCrs));
+        final double x = oldWtst.getWorldX(node.getXOffset());
+        final double y = oldWtst.getWorldY(node.getYOffset());
+        com.vividsolutions.jts.geom.Point p = fac.createPoint(new Coordinate(x, y));
+
+        p = transformToGivenCrs(p, newCrs);
+        node.setOffset(newWtst.getScreenX(p.getX()), newWtst.getScreenY(p.getY()));
+
+        for (int index = 0; index < node.getChildrenCount(); ++index) {
+            transformPNodeToGivenCrs(node.getChild(index), oldCrs, newCrs, oldWtst, newWtst);
+        }
+    }
+
+    /**
      * extracts the srid from the given srs. The srs should have the form "EPSG:XXXX"
      *
      * @param   crs  DOCUMENT ME!
@@ -427,6 +462,9 @@ public class CrsTransformer {
         if (crs.endsWith(":" + CismapBroker.getInstance().getDefaultCrsAlias())
                     || crs.endsWith(":0") || crs.endsWith(":-1") // NOI18N
                     || crs.equals(CismapBroker.getInstance().getDefaultCrs())) {
+            if (crs.endsWith(":0")) {
+                LOG.warn("srid of a geometry is not set. This can lead to an error.", new Throwable());
+            }
             return true;
         } else {
             return false;

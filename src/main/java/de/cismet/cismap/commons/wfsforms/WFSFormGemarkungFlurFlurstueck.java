@@ -23,6 +23,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -366,25 +367,25 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
 
         final boolean scaling = !(mc.isFixedMapScale()) && !(chkLockScale.isSelected());
 
-        BoundingBox bb = null;
+        XBoundingBox bb = null;
         final int animation = mc.getAnimationDuration();
         if (flurstueck != null) {
             if (scaling) {
-                bb = new BoundingBox(flurstueck.getJTSGeometry());
+                bb = new XBoundingBox(flurstueck.getJTSGeometry());
             } else {
-                bb = new BoundingBox(flurstueck.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
+                bb = new XBoundingBox(flurstueck.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
             }
         } else if (flur != null) {
             if (scaling) {
-                bb = new BoundingBox(flur.getJTSGeometry());
+                bb = new XBoundingBox(flur.getJTSGeometry());
             } else {
-                bb = new BoundingBox(flur.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
+                bb = new XBoundingBox(flur.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
             }
         } else if (gemarkung != null) {
             if (scaling) {
-                bb = new BoundingBox(gemarkung.getJTSGeometry());
+                bb = new XBoundingBox(gemarkung.getJTSGeometry());
             } else {
-                bb = new BoundingBox(gemarkung.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
+                bb = new XBoundingBox(gemarkung.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
             }
         } else {
             return;
@@ -450,9 +451,6 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
             mappingComponent = CismapBroker.getInstance().getMappingComponent();
         }
 
-        if (!mappingComponent.getHighlightingLayer().getChildrenReference().contains(pMark)) {
-            mappingComponent.getHighlightingLayer().addChild(pMark);
-        }
         if (flurstueck != null) {
             visualizePosition(flurstueck, chkVisualize.isSelected());
         } else if (flur != null) {

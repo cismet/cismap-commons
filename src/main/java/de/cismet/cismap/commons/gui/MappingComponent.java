@@ -5193,7 +5193,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
             try {
                 // the wtst object should not be null, so the getWtst method will be invoked
-                getWtst();
+                final WorldToScreenTransform oldWtst = getWtst();
                 final BoundingBox bbox = getCurrentBoundingBox(); // getCurrentBoundingBox();
                 final CrsTransformer crsTransformer = new CrsTransformer(event.getCurrentCrs().getCode());
                 final BoundingBox newBbox = crsTransformer.transformBoundingBox(bbox, event.getFormerCrs().getCode());
@@ -5209,6 +5209,18 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 final ArrayList<Feature> list = new ArrayList<Feature>(featureCollection.getAllFeatures());
                 removeFeatures(list);
                 addFeaturesToMap(list.toArray(new Feature[list.size()]));
+
+                // transform the highlighting layer
+                for (int i = 0; i < highlightingLayer.getChildrenCount(); ++i) {
+                    final PNode node = highlightingLayer.getChild(i);
+                    CrsTransformer.transformPNodeToGivenCrs(
+                        node,
+                        event.getFormerCrs().getCode(),
+                        event.getCurrentCrs().getCode(),
+                        oldWtst,
+                        getWtst());
+                    rescaleStickyNode(node);
+                }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(
                     this,

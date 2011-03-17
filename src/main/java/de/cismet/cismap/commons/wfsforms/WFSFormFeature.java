@@ -8,7 +8,9 @@
 package de.cismet.cismap.commons.wfsforms;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 import org.deegree.datatypes.QualifiedName;
 import org.deegree.model.feature.Feature;
@@ -21,6 +23,8 @@ import java.net.URISyntaxException;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import de.cismet.cismap.commons.CrsTransformer;
 
 /**
  * DOCUMENT ME!
@@ -35,6 +39,7 @@ public class WFSFormFeature {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Feature feature;
     private WFSFormQuery query;
+    private String featureCrs = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -47,6 +52,10 @@ public class WFSFormFeature {
     public WFSFormFeature(final Feature feature, final WFSFormQuery query) {
         this.feature = feature;
         this.query = query;
+        if ((feature != null) && (feature.getDefaultGeometryPropertyValue() != null)
+                    && (feature.getDefaultGeometryPropertyValue().getCoordinateSystem() != null)) {
+            this.featureCrs = feature.getDefaultGeometryPropertyValue().getCoordinateSystem().getIdentifier();
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -156,7 +165,12 @@ public class WFSFormFeature {
      * @param  feature  DOCUMENT ME!
      */
     public void setFeature(final Feature feature) {
+        log.error("setFeature " + feature, new Exception());
         this.feature = feature;
+        if ((feature != null) && (feature.getDefaultGeometryPropertyValue() != null)
+                    && (feature.getDefaultGeometryPropertyValue().getCoordinateSystem() != null)) {
+            this.featureCrs = feature.getDefaultGeometryPropertyValue().getCoordinateSystem().getIdentifier();
+        }
     }
 
     /**
@@ -175,7 +189,35 @@ public class WFSFormFeature {
      */
     public Geometry getJTSGeometry() {
         try {
-            return JTSAdapter.export(feature.getDefaultGeometryPropertyValue());
+            Geometry res = JTSAdapter.export(feature.getDefaultGeometryPropertyValue());
+            if (log.isDebugEnabled()) {
+                log.debug("feature srid: " + res.getSRID());
+            }
+
+            if ((feature != null) && (feature.getDefaultGeometryPropertyValue() != null)
+                        && (feature.getDefaultGeometryPropertyValue().getCoordinateSystem() != null)) {
+                final String crsString = feature.getDefaultGeometryPropertyValue()
+                            .getCoordinateSystem()
+                            .getIdentifier();
+                final int srid = CrsTransformer.extractSridFromCrs(crsString);
+                final GeometryFactory fac = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+                res = fac.createGeometry(res);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Use saved crs from member variable. " + this.featureCrs);
+                }
+
+                if (this.featureCrs != null) {
+                    final int srid = CrsTransformer.extractSridFromCrs(this.featureCrs);
+                    final GeometryFactory fac = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+                    res = fac.createGeometry(res);
+                }
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("feature srid after setting: " + res.getSRID());
+            }
+            return res;
         } catch (GeometryException ex) {
             log.error("Error in getJTSGeometry()", ex); // NOI18N
         }
@@ -193,7 +235,16 @@ public class WFSFormFeature {
                         query.getPropertyPrefix().toString(),
                         query.getPositionProperty().toString(),
                         new URI(query.getPropertyNamespace().toString())));
-            final Point p = (Point)(JTSAdapter.export((org.deegree.model.spatialschema.Geometry)(fp[0].getValue())));
+            final org.deegree.model.spatialschema.Geometry geo = ((org.deegree.model.spatialschema.Geometry)
+                    (fp[0].getValue()));
+            // the JTSAdapter ignores the srid. The resulted geometry will not have a srid and
+            // its factory will not have a srid. So the result of an operation like .buffer(int) will not have
+            // a srid. To prevent this, a new point is created from a factory with a srid.
+            Point p = (Point)(JTSAdapter.export(geo));
+            final int srid = CrsTransformer.extractSridFromCrs(geo.getCoordinateSystem().getIdentifier());
+            final GeometryFactory fac = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+
+            p = fac.createPoint(p.getCoordinate());
             if (log.isDebugEnabled()) {
                 log.debug("POSITION=" + p);                                                              // NOI18N
             }
