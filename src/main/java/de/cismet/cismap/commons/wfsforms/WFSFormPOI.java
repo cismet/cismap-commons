@@ -31,6 +31,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -318,9 +319,6 @@ public class WFSFormPOI extends AbstractWFSForm {
             mc = CismapBroker.getInstance().getMappingComponent();
         }
 
-        if (!mc.getHighlightingLayer().getChildrenReference().contains(pMark)) {
-            mc.getHighlightingLayer().addChild(pMark);
-        }
         if (poi != null) {
             visualizePosition(poi, chkVisualize.isSelected());
         }
@@ -362,13 +360,13 @@ public class WFSFormPOI extends AbstractWFSForm {
             mc = CismapBroker.getInstance().getMappingComponent();
         }
         final boolean scaling = !(mc.isFixedMapScale()) && !(chkLockScale.isSelected());
-        BoundingBox bb = null;
+        XBoundingBox bb = null;
         final int animation = mc.getAnimationDuration();
         if (poi != null) {
             if (scaling) {
-                bb = new BoundingBox(poi.getJTSGeometry());
+                bb = new XBoundingBox(poi.getJTSGeometry());
             } else {
-                bb = new BoundingBox(poi.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
+                bb = new XBoundingBox(poi.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
             }
         } else {
             return;

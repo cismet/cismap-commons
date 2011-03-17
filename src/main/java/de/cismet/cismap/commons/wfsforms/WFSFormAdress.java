@@ -34,6 +34,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -348,9 +349,6 @@ public class WFSFormAdress extends AbstractWFSForm {
             mappingComponent = CismapBroker.getInstance().getMappingComponent();
         }
 
-        if (!mappingComponent.getHighlightingLayer().getChildrenReference().contains(pMark)) {
-            mappingComponent.getHighlightingLayer().addChild(pMark);
-        }
         if (nr != null) {
             visualizePosition(nr, chkVisualize.isSelected());
         } else if (strasse != null) {
@@ -395,19 +393,19 @@ public class WFSFormAdress extends AbstractWFSForm {
             mc = CismapBroker.getInstance().getMappingComponent();
         }
         final boolean scaling = !(mc.isFixedMapScale()) && !(chkLockScale.isSelected());
-        BoundingBox bb = null;
+        XBoundingBox bb = null;
         final int animation = mc.getAnimationDuration();
         if (nr != null) {
             if (scaling) {
-                bb = new BoundingBox(nr.getJTSGeometry());
+                bb = new XBoundingBox(nr.getJTSGeometry());
             } else {
-                bb = new BoundingBox(nr.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
+                bb = new XBoundingBox(nr.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
             }
         } else if (strasse != null) {
             if (scaling) {
-                bb = new BoundingBox(strasse.getJTSGeometry());
+                bb = new XBoundingBox(strasse.getJTSGeometry());
             } else {
-                bb = new BoundingBox(strasse.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
+                bb = new XBoundingBox(strasse.getPosition().buffer(AbstractWFSForm.FEATURE_BORDER));
             }
         } else {
             return;

@@ -261,16 +261,15 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                                     }
                                 });
                         }
-
                         fc = gmlDocument.parse();
                         gmlDocument.removeFeatureProgressListener(this);
                         if (log.isDebugEnabled()) {
-                            log.debug("Featurecollection " + fc);     // NOI18N
+                            log.debug("Featurecollection " + fc);               // NOI18N
                         }
                         for (int i = 0; i < fc.size(); ++i) {
                             features.add(new WFSFormFeature(fc.getFeature(i), query));
                             if (log.isDebugEnabled()) {
-                                log.debug(i + ":" + features.get(i)); // NOI18N
+                                log.debug(i + ":" + features.get(i));           // NOI18N
                             }
                         }
 

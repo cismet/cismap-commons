@@ -28,8 +28,12 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.CrsChangeListener;
+import de.cismet.cismap.commons.interaction.events.CrsChangedEvent;
 
 /**
  * DOCUMENT ME!
@@ -37,7 +41,7 @@ import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public abstract class AbstractWFSForm extends JPanel {
+public abstract class AbstractWFSForm extends JPanel implements CrsChangeListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -70,6 +74,7 @@ public abstract class AbstractWFSForm extends JPanel {
     private String className;
     private boolean inited = false;
     private String sorter = null;
+    private WFSFormFeature lastVisualizedFeature = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -290,15 +295,20 @@ public abstract class AbstractWFSForm extends JPanel {
      * @param  showMarker  DOCUMENT ME!
      */
     public void visualizePosition(final WFSFormFeature feature, final boolean showMarker) {
+        lastVisualizedFeature = feature;
         mappingComponent.getHighlightingLayer().removeAllChildren();
         mappingComponent.getHighlightingLayer().addChild(pMark);
         mappingComponent.addStickyNode(pMark);
-        final Point p = feature.getPosition();
+        final Point p = CrsTransformer.transformToGivenCrs(feature.getPosition(),
+                mappingComponent.getMappingModel().getSrs().getCode());
         final double x = mappingComponent.getWtst().getScreenX(p.getCoordinate().x);
         final double y = mappingComponent.getWtst().getScreenY(p.getCoordinate().y);
         pMark.setOffset(x, y);
         pMark.setVisible(showMarker);
         mappingComponent.rescaleStickyNodes();
+
+        CismapBroker.getInstance().removeCrsChangeListener(this);
+        CismapBroker.getInstance().addCrsChangeListener(this);
     }
 
     /**
@@ -493,6 +503,12 @@ public abstract class AbstractWFSForm extends JPanel {
         return sorter;
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        CismapBroker.getInstance().removeCrsChangeListener(this);
+    }
+
     /**
      * DOCUMENT ME!
      *
@@ -500,5 +516,12 @@ public abstract class AbstractWFSForm extends JPanel {
      */
     public void setSorter(final String sorter) {
         this.sorter = sorter;
+    }
+
+    @Override
+    public void crsChanged(final CrsChangedEvent event) {
+        if (mappingComponent.getHighlightingLayer().getAllNodes().contains(pMark) && (lastVisualizedFeature != null)) {
+            visualizePosition(lastVisualizedFeature, pMark.getVisible());
+        }
     }
 }
