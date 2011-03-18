@@ -22,6 +22,8 @@ import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
+import de.cismet.tools.CurrentStackTrace;
+
 /**
  * DOCUMENT ME!
  *
@@ -35,6 +37,15 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
     PImage pi;
     boolean rasterServiceLayerVisible = true;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new BackgroundRefreshingPanEventListener object.
+     */
+    public BackgroundRefreshingPanEventListener() {
+        setAutopan(false);
+    }
 
     //~ Methods ----------------------------------------------------------------
 
@@ -104,11 +115,6 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
         super.dragActivityFirstStep(aEvent);
     }
 
-    @Override
-    public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent event) {
-        super.mouseMoved(event);
-    }
-
     /**
      * DOCUMENT ME!
      *
@@ -135,5 +141,11 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
     public void mouseDragged(final PInputEvent e) {
         super.mouseDragged(e);
         CismapBroker.getInstance().fireMapBoundsChanged();
+//        if (e.getCanvasDelta().getHeight() > 100 || e.getCanvasDelta().getWidth() > 100) {
+//            log.fatal(e.getCanvasDelta()+""+e.getSourceSwingEvent().getSource(), new CurrentStackTrace());
+//        } else {
+//            log.error(e.getCanvasDelta()+""+e.getSourceSwingEvent().getSource(), new CurrentStackTrace());
+//
+//        }
     }
 }
