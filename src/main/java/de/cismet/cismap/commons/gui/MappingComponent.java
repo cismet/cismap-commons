@@ -4033,7 +4033,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 return currentBoundingBox;
             } catch (Exception e) {
                 log.error("cannot create bounding box from current view, return null", e); // NOI18N
-                
+
                 return null;
             }
         }
@@ -4832,8 +4832,8 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 mde.setXPos(getWtst().getWorldX(p.getX()));
                 mde.setYPos(getWtst().getWorldY(p.getY()));
                 CismapBroker.getInstance().fireDropOnMap(mde);
-            } catch (NoninvertibleTransformException ex) {
-                log.error(ex, ex);
+            } catch (Exception ex) {
+                log.error("Error in drop", ex);//NOI18N
             }
         }
     }
@@ -4895,8 +4895,8 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             mde.setXPos(getWtst().getWorldX(p.getX()));
             mde.setYPos(getWtst().getWorldY(p.getY()));
             CismapBroker.getInstance().fireDragOverMap(mde);
-        } catch (NoninvertibleTransformException ex) {
-            log.error(ex, ex);
+        } catch (Exception ex) {
+            log.error("Error in dragOver", ex); //NOI18N
         }
 //        MapDnDEvent mde = new MapDnDEvent();
 //        mde.setDte(dtde);
