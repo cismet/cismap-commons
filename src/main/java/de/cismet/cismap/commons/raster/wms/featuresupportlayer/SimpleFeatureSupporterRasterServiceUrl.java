@@ -7,6 +7,7 @@
 ****************************************************/
 package de.cismet.cismap.commons.raster.wms.featuresupportlayer;
 
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 
 /**
@@ -20,10 +21,10 @@ public class SimpleFeatureSupporterRasterServiceUrl extends SimpleWmsGetMapUrl {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String FILTER_TOKEN = "<cismap:filterString>"; // NOI18N
+    public static final String SRS_TOKEN = "<cismap:srs>";             // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
-    private String filterToken;
     private String filter;
 
     //~ Constructors -----------------------------------------------------------
@@ -35,7 +36,6 @@ public class SimpleFeatureSupporterRasterServiceUrl extends SimpleWmsGetMapUrl {
      */
     public SimpleFeatureSupporterRasterServiceUrl(final String urlTemplate) {
         super(urlTemplate);
-        filterToken = FILTER_TOKEN;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -44,9 +44,12 @@ public class SimpleFeatureSupporterRasterServiceUrl extends SimpleWmsGetMapUrl {
     public String toString() {
         String retValue;
         retValue = super.toString();
-        if ((filterToken != null) && (filter != null)) {
-            retValue = retValue.replaceAll(filterToken, filter);
+        if (filter != null) {
+            retValue = retValue.replaceAll(FILTER_TOKEN, filter);
         }
+
+        // we can always replace all since the code is always present, requests without SRS_TOKEN won't be affected
+        retValue = retValue.replaceAll(SRS_TOKEN, CismapBroker.getInstance().getSrs().getCode());
 
         return retValue;
     }
@@ -69,24 +72,7 @@ public class SimpleFeatureSupporterRasterServiceUrl extends SimpleWmsGetMapUrl {
         this.filter = filter;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        final SimpleFeatureSupporterRasterServiceUrl u = new SimpleFeatureSupporterRasterServiceUrl(
-                "http://s102w2k1.wuppertal-intra.de/wunda_dk_v61/isserver/ims/scripts/ShowMap.pl?datasource=erhebungsflaechen&VERSION=1.1.1&REQUEST=GetMap&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=true&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_inimage&LAYERS=09_2&STYLES=farbe_altabl&<cismap:filterString>"); // NOI18N
-        u.setFilter("Testfilter");                                                                                                                                                                                                                                                                                                                                                                    // NOI18N
-        u.setX1(0.1);
-        u.setX2(0.2);
-        u.setY1(0.3);
-        u.setY2(0.4);
-        u.setHeight(1);
-        u.setWidth(1000);
-        System.out.println(u);
-    }
-
+    // TODO: these two method should probably be available in the super implementation
     @Override
     public boolean equals(final Object o) {
         return (o instanceof SimpleFeatureSupporterRasterServiceUrl)
