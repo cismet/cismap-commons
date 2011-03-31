@@ -68,7 +68,7 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
 
         //~ Enum constants -----------------------------------------------------
 
-        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON, UNKNOWN
+        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON, MULTIPOLYGON, UNKNOWN
     }
 
     //~ Instance fields --------------------------------------------------------
