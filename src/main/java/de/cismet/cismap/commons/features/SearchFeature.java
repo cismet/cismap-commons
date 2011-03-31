@@ -112,11 +112,15 @@ public class SearchFeature extends PureNewFeature {
                     return "Such-Polygon";
                 }
                 default: {
-                    return "Error in getName()";
+                    if (super.getName() != null) {
+                        return super.getName();
+                    } else {
+                        return "---";
+                    }
                 }
             }
         } else {
-            return "Error in getName()";
+            return "--";
         }
     }
 
