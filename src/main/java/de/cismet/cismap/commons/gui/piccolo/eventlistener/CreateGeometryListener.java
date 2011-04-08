@@ -148,7 +148,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     public void mousePressed(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseClicked(pInputEvent);
         if (mc.isReadOnly()) {
-            ((DefaultFeatureCollection)(mc.getFeatureCollection())).removeFeaturesByInstance(Feature.class);
+            ((DefaultFeatureCollection)(mc.getFeatureCollection())).removeFeaturesByInstance(PureNewFeature.class);
         }
         if (isInMode(POINT)) {
             if (pInputEvent.isLeftMouseButton()) {
