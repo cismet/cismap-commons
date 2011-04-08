@@ -9,6 +9,8 @@ package de.cismet.cismap.commons.gui;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PCanvas;
@@ -16,6 +18,7 @@ import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.PRoot;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.event.PInputEventListener;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.util.PBounds;
@@ -48,7 +51,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
@@ -78,12 +80,12 @@ import java.util.concurrent.Future;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
 import de.cismet.cismap.commons.BoundingBox;
@@ -115,7 +117,6 @@ import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.PBoundsWithCleverToString;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import de.cismet.cismap.commons.gui.piccolo.PFeatureCoordinatePosition;
 import de.cismet.cismap.commons.gui.piccolo.PNodeFactory;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
 import de.cismet.cismap.commons.gui.piccolo.XPImage;
@@ -166,7 +167,6 @@ import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDebuggingTools;
 
-import de.cismet.tools.collections.MultiMap;
 import de.cismet.tools.collections.TypeSafeCollections;
 
 import de.cismet.tools.configuration.Configurable;
@@ -241,9 +241,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     // internalLayerWidget
     // = null;//new
     // NewSimpleInternalLayerWidget(this);
-
     // 10MB
-
     // private NewSimpleInternalLayerWidget internalLayerWidget = null;//new NewSimpleInternalLayerWidget(this);
     boolean featureServiceLayerVisible = true;
     final List<LayerControl> layerControls = new ArrayList<LayerControl>();
@@ -352,6 +350,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     private final Map<MapService, Future<?>> serviceFuturesMap = TypeSafeCollections.newHashMap();
     /** Utility field used by bound properties. */
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private ButtonGroup interactionButtonGroup;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -539,6 +538,24 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ButtonGroup getInteractionButtonGroup() {
+        return interactionButtonGroup;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  interactionButtonGroup  DOCUMENT ME!
+     */
+    public void setInteractionButtonGroup(final ButtonGroup interactionButtonGroup) {
+        this.interactionButtonGroup = interactionButtonGroup;
+    }
 
     /**
      * DOCUMENT ME!
@@ -3455,6 +3472,21 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     /**
      * DOCUMENT ME!
      *
+     * @param   event  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public com.vividsolutions.jts.geom.Point getPointGeometryFromPInputEvent(final PInputEvent event) {
+        final double xCoord = getWtst().getSourceX(event.getPosition().getX() - getClip_offset_x());
+        final double yCoord = getWtst().getSourceY(event.getPosition().getY() - getClip_offset_y());
+        final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(getMappingModel().getSrs().getCode()));
+        return gf.createPoint(new Coordinate(xCoord, yCoord));
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
     public PLayer getHandleLayer() {
@@ -4833,7 +4865,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 mde.setYPos(getWtst().getWorldY(p.getY()));
                 CismapBroker.getInstance().fireDropOnMap(mde);
             } catch (Exception ex) {
-                log.error("Error in drop", ex);//NOI18N
+                log.error("Error in drop", ex); // NOI18N
             }
         }
     }
@@ -4896,7 +4928,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             mde.setYPos(getWtst().getWorldY(p.getY()));
             CismapBroker.getInstance().fireDragOverMap(mde);
         } catch (Exception ex) {
-            log.error("Error in dragOver", ex); //NOI18N
+            log.error("Error in dragOver", ex); // NOI18N
         }
 //        MapDnDEvent mde = new MapDnDEvent();
 //        mde.setDte(dtde);
@@ -5548,6 +5580,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             return this.requestId;
         }
     }
+
     /**
      * //////////////////////////////////////////////// CLASS MappingComponentFeatureServiceListener //
      * ////////////////////////////////////////////////.
@@ -5562,7 +5595,6 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         PLayer parent;
         long requestIdentifier;
         Thread completionThread = null;
-
         private Logger logger = Logger.getLogger(this.getClass());
         private Vector deletionCandidates = new Vector();
         private Vector twins = new Vector();
@@ -5726,7 +5758,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                                                 }
                                             }
                                         } else {                              // no FeatureWithId, test geometries for
-                                                                              // equality
+                                            // equality
                                             if (((PFeature)tester).getFeature().getGeometry().equals(
                                                             p.getFeature().getGeometry())) {
                                                 twin = ((PFeature)tester);
@@ -5841,7 +5873,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                                                                     + requestIdentifier
                                                                     + ")]: deleteFeatures="
                                                                     + deleteFeatures.size());     // + " :" +
-                                                                                                  // deleteFeatures);//NOI18N
+                                                        // deleteFeatures);//NOI18N
                                                     }
                                                 }
                                                 parent.removeChildren(deleteFeatures);
