@@ -3216,11 +3216,14 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
         for (final Feature f : collection) {
             if (first) {
-                g = CrsTransformer.transformToGivenCrs(f.getGeometry(), mappingModel.getSrs().getCode()).getEnvelope();
-                if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
-                    g = g.buffer(((Bufferable)f).getBuffer());
+                if (f.getGeometry() != null) {
+                    g = CrsTransformer.transformToGivenCrs(f.getGeometry(), mappingModel.getSrs().getCode())
+                                .getEnvelope();
+                    if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
+                        g = g.buffer(((Bufferable)f).getBuffer());
+                    }
+                    first = false;
                 }
-                first = false;
             } else {
                 if (f.getGeometry() != null) {
                     Geometry geometry = CrsTransformer.transformToGivenCrs(f.getGeometry(),
