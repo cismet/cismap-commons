@@ -50,7 +50,7 @@ public class MeasurementPHandle extends PPath {
 
     private PLocator locator;
     private MappingComponent mc = null;
-    private MeasurementPanel measurementPanel;
+    private LinearReferencingPointInfoPanel measurementPanel;
     private PSwing pswingComp;
 
     //~ Constructors -----------------------------------------------------------
@@ -82,7 +82,7 @@ public class MeasurementPHandle extends PPath {
      * DOCUMENT ME!
      */
     private void initPanel() {
-        measurementPanel = new MeasurementPanel();
+        measurementPanel = new LinearReferencingPointInfoPanel();
 
         pswingComp = new PSwing((PSwingCanvas)mc, measurementPanel);
         measurementPanel.setPNodeParent(pswingComp);

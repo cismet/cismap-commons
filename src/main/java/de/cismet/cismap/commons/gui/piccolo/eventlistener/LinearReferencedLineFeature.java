@@ -170,7 +170,7 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
      *
      * @return  DOCUMENT ME!
      */
-    private static Geometry createSubline(final double von, final double bis, final Geometry auf) {
+    public static Geometry createSubline(final double von, final double bis, final Geometry auf) {
         final LengthIndexedLine lil = new LengthIndexedLine(auf);
         return lil.extractLine(von, bis);
     }

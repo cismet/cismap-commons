@@ -5,10 +5,6 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.cismet.cismap.commons.gui.piccolo;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -23,7 +19,7 @@ import pswing.PSwingCanvas;
 
 import java.awt.geom.Point2D;
 
-import java.text.DecimalFormat;
+import java.text.Format;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -37,27 +33,27 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class LinearReferencedPointFeaturePHandle extends PHandle {
+public class LinearReferencedPointPHandle extends PHandle {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
-            LinearReferencedPointFeaturePHandle.class);
+            LinearReferencedPointPHandle.class);
 
     //~ Instance fields --------------------------------------------------------
 
     private PFeature pfeature;
-    private MeasurementPanel measurementPanel;
+    private LinearReferencingPointInfoPanel measurementPanel;
     private PSwing pswingComp;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new LinearReferencedPointFeaturePHandle object.
+     * Creates a new LinearReferencedPointPHandle object.
      *
      * @param  pfeature  DOCUMENT ME!
      */
-    public LinearReferencedPointFeaturePHandle(final PFeature pfeature) {
+    public LinearReferencedPointPHandle(final PFeature pfeature) {
         super(new PLocator() {
 
                 @Override
@@ -103,7 +99,7 @@ public class LinearReferencedPointFeaturePHandle extends PHandle {
      * DOCUMENT ME!
      */
     private void initPanel() {
-        measurementPanel = new MeasurementPanel();
+        measurementPanel = new LinearReferencingPointInfoPanel();
 
         pswingComp = new PSwing((PSwingCanvas)pfeature.getViewer(), measurementPanel);
         measurementPanel.setPNodeParent(pswingComp);
@@ -157,7 +153,14 @@ public class LinearReferencedPointFeaturePHandle extends PHandle {
         if (pfeature != null) {
             final LinearReferencedPointFeature linref = (LinearReferencedPointFeature)pfeature.getFeature();
 
-            final String info = new DecimalFormat("0.00").format(linref.getCurrentPosition());
+            String info = "";
+
+            final Format infoFormat = ((LinearReferencedPointFeature)pfeature.getFeature()).getInfoFormat();
+            if (infoFormat != null) {
+                info = infoFormat.format(linref.getCurrentPosition());
+            } else {
+                info = String.valueOf(linref.getCurrentPosition());
+            }
             measurementPanel.setLengthInfo(info);
 
             final PBounds b = getBoundsReference();

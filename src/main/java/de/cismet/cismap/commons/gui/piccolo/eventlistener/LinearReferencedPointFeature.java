@@ -20,6 +20,8 @@ import com.vividsolutions.jts.util.GeometricShapeFactory;
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
 
+import java.text.Format;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -67,6 +69,8 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     private ImageIcon annotationSelectedIco = new javax.swing.ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/res/linRefPointSelected.png")); // NOI18N
 
+    private Format infoFormat;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -88,8 +92,7 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
      */
     public LinearReferencedPointFeature(final double value, final Geometry baseLineGeom, final boolean showSubLine) {
         this.baseLineGeom = baseLineGeom;
-        setGeometry(new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), baseLineGeom.getSRID())
-                    .createPoint(getCoordinateOnLine(value, baseLineGeom)));
+        setGeometry(getPointOnLine(value, baseLineGeom));
         setEditable(true);
         setPointAnnotationSymbol(FeatureAnnotationSymbol.newCenteredFeatureAnnotationSymbol(
                 annotationIco.getImage(),
@@ -97,6 +100,24 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  infoFormat  DOCUMENT ME!
+     */
+    public void setInfoFormat(final Format infoFormat) {
+        this.infoFormat = infoFormat;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Format getInfoFormat() {
+        return infoFormat;
+    }
 
     /**
      * DOCUMENT ME!
@@ -324,10 +345,24 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
      *
      * @return  DOCUMENT ME!
      */
-    public static Coordinate getCoordinateOnLine(final double position, final Geometry linestringOrMultilinestring) {
+    private static Coordinate getCoordinateOnLine(final double position, final Geometry linestringOrMultilinestring) {
         final LengthIndexedLine lil = new LengthIndexedLine(linestringOrMultilinestring);
         final Coordinate coordinate = lil.extractPoint(position);
         return coordinate;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   position                     DOCUMENT ME!
+     * @param   linestringOrMultilinestring  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Geometry getPointOnLine(final double position, final Geometry linestringOrMultilinestring) {
+        final Coordinate coordinate = getCoordinateOnLine(position, linestringOrMultilinestring);
+        return new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), linestringOrMultilinestring.getSRID())
+                    .createPoint(coordinate);
     }
 
     @Override
