@@ -54,7 +54,7 @@ public class MarkPHandle extends PPath {
 
     private PLocator locator;
     private MappingComponent mc = null;
-    private MeasurementPanel measurementPanel;
+    private LinearReferencingPointInfoPanel measurementPanel;
     private MeasurementMoveListener measurementListener;
     private PSwing pswingComp;
 
@@ -141,7 +141,7 @@ public class MarkPHandle extends PPath {
      * DOCUMENT ME!
      */
     private void initPanel() {
-        measurementPanel = new MeasurementPanel();
+        measurementPanel = new LinearReferencingPointInfoPanel();
 
         pswingComp = new PSwing((PSwingCanvas)mc, measurementPanel);
         measurementPanel.setPNodeParent(pswingComp);

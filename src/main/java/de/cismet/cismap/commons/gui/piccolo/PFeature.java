@@ -1268,7 +1268,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
         }
 
-        final PHandle h = new LinearReferencedPointFeaturePHandle(this);
+        final PHandle h = new LinearReferencedPointPHandle(this);
 
 //        EventQueue.invokeLater(new Runnable() {
 //

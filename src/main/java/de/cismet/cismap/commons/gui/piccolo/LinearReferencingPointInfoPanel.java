@@ -20,7 +20,7 @@ import javax.swing.JPanel;
  *
  * @version  $Revision$, $Date$
  */
-public class MeasurementPanel extends JPanel {
+public class LinearReferencingPointInfoPanel extends JPanel {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -43,7 +43,7 @@ public class MeasurementPanel extends JPanel {
     /**
      * Creates new form InfoPanel.
      */
-    public MeasurementPanel() {
+    public LinearReferencingPointInfoPanel() {
         super();
         try {
             initComponents();
@@ -72,7 +72,6 @@ public class MeasurementPanel extends JPanel {
         lblLength.setBackground(javax.swing.UIManager.getDefaults().getColor("Nb.Desktop.background"));
         lblLength.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         lblLength.setIcon(icoRuler);
-        lblLength.setText("0.00");                             // NOI18N
         lblLength.addMouseListener(new java.awt.event.MouseAdapter() {
 
                 @Override
