@@ -51,6 +51,7 @@ import de.cismet.cismap.commons.features.RasterDocumentFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MessenGeometryListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.collections.TypeSafeCollections;
 
@@ -83,7 +84,6 @@ public class MeasuringComponent extends javax.swing.JPanel {
      * Creates new form MeasuringComponent.
      */
     public MeasuringComponent() {
-        // Wupp home
         this(new XBoundingBox(
                 2583621.251964098d,
                 5682507.032498134d,
@@ -207,6 +207,23 @@ public class MeasuringComponent extends javax.swing.JPanel {
             drdf = new DefaultRasterDocumentFeature(bi, geometry);
         } else {
             drdf = new DefaultRasterDocumentFeature(bi, initialBoundingBox.getX1(), initialBoundingBox.getY1());
+        }
+        addFeature(drdf);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  bi        DOCUMENT ME!
+     * @param  geometry  DOCUMENT ME!
+     * @param  srid      DOCUMENT ME!
+     */
+    public void addImage(final BufferedImage bi, final Geometry geometry, final int srid) {
+        final DefaultRasterDocumentFeature drdf;
+        if (geometry != null) {
+            drdf = new DefaultRasterDocumentFeature(bi, geometry);
+        } else {
+            drdf = new DefaultRasterDocumentFeature(bi, initialBoundingBox.getX1(), initialBoundingBox.getY1(), srid);
         }
         addFeature(drdf);
     }

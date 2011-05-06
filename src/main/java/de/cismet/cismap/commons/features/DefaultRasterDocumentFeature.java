@@ -34,6 +34,7 @@ import edu.umd.cs.piccolo.nodes.PImage;
 import java.awt.image.BufferedImage;
 
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -78,6 +79,21 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
      */
     public DefaultRasterDocumentFeature(final BufferedImage rasterDocument, final double x, final double y) {
         this(rasterDocument, getGeomFromRasterImage(rasterDocument, x, y));
+    }
+
+    /**
+     * Creates a new DefaultRasterDocumentFeature object.
+     *
+     * @param  rasterDocument  DOCUMENT ME!
+     * @param  x               DOCUMENT ME!
+     * @param  y               DOCUMENT ME!
+     * @param  srid            DOCUMENT ME!
+     */
+    public DefaultRasterDocumentFeature(final BufferedImage rasterDocument,
+            final double x,
+            final double y,
+            final int srid) {
+        this(rasterDocument, getGeomFromRasterImage(rasterDocument, x, y, srid));
     }
 
     /**
@@ -157,8 +173,30 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
      * @return  DOCUMENT ME!
      */
     private static Geometry getGeomFromRasterImage(final BufferedImage bi, final double x, final double y) {
+        return getGeomFromRasterImage(
+                bi,
+                x,
+                y,
+                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getDefaultCrs()));
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   bi    DOCUMENT ME!
+     * @param   x     DOCUMENT ME!
+     * @param   y     DOCUMENT ME!
+     * @param   srid  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static Geometry getGeomFromRasterImage(final BufferedImage bi,
+            final double x,
+            final double y,
+            final int srid) {
         final GeometryFactory GEOM_FACTORY = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                CrsTransformer.getCurrentSrid());
+                srid);
+
         final int width = bi.getWidth();
         final int height = bi.getHeight();
         final Coordinate ursprung0 = new Coordinate(x, y);
@@ -168,9 +206,9 @@ public class DefaultRasterDocumentFeature implements RasterDocumentFeature {
         final Coordinate ursprung4 = new Coordinate(x, y);
         final Coordinate[] coords = new Coordinate[] { ursprung0, x1, xy2, y3, ursprung4 };
         final LinearRing linearRing = GEOM_FACTORY.createLinearRing(coords);
-        Geometry result = GEOM_FACTORY.createPolygon(linearRing, null);
+        final Geometry result = GEOM_FACTORY.createPolygon(linearRing, null);
 
-        result = CrsTransformer.transformToDefaultCrs(result);
+//        result = CrsTransformer.transformToDefaultCrs(result);
         log.info("Created Geometry: " + result);
         return result;
     }
