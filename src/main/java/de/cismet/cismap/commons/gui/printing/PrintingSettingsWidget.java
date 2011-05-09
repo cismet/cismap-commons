@@ -87,7 +87,6 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     public PrintingSettingsWidget(final boolean modal, final MappingComponent mappingComponent) {
         super(StaticSwingTools.getParentFrame(mappingComponent), modal);
         initComponents();
-        panDesc.setBackground(new Color(216, 228, 248));
         getRootPane().setDefaultButton(cmdOk);
         this.mappingComponent = mappingComponent;
     }
@@ -153,7 +152,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(org.openide.util.NbBundle.getMessage(PrintingSettingsWidget.class, "PrintingSettingsWidget.title")); // NOI18N
 
-        panDesc.setBackground(java.awt.SystemColor.inactiveCaptionText);
+        panDesc.setBackground(new java.awt.Color(216, 228, 248));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 11));
         jLabel1.setText(org.openide.util.NbBundle.getMessage(
@@ -184,14 +183,14 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 254,
                 Short.MAX_VALUE).add(
                 org.jdesktop.layout.GroupLayout.TRAILING,
-                panDescLayout.createSequentialGroup().addContainerGap(114, Short.MAX_VALUE).add(jLabel5)
+                panDescLayout.createSequentialGroup().addContainerGap(116, Short.MAX_VALUE).add(jLabel5)
                             .addContainerGap()).add(
                 panDescLayout.createSequentialGroup().addContainerGap().add(
                     panDescLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
                         panDescLayout.createSequentialGroup().add(
                             jSeparator2,
                             org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                            230,
+                            234,
                             Short.MAX_VALUE).addContainerGap()).add(
                         panDescLayout.createSequentialGroup().add(
                             panDescLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
@@ -293,12 +292,12 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                             panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
                                 cboAction,
                                 0,
-                                274,
-                                Short.MAX_VALUE).add(cboResolution, 0, 274, Short.MAX_VALUE).add(
+                                302,
+                                Short.MAX_VALUE).add(cboResolution, 0, 302, Short.MAX_VALUE).add(
                                 cboScales,
                                 0,
-                                274,
-                                Short.MAX_VALUE).add(cboTemplates, 0, 274, Short.MAX_VALUE)))).addContainerGap()).add(
+                                302,
+                                Short.MAX_VALUE).add(cboTemplates, 0, 302, Short.MAX_VALUE)))).addContainerGap()).add(
                 jSeparator4,
                 org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
                 376,
@@ -307,7 +306,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 panSettingsLayout.createSequentialGroup().addContainerGap().add(
                     jSeparator1,
                     org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
-                    364,
+                    366,
                     Short.MAX_VALUE)));
         panSettingsLayout.setVerticalGroup(
             panSettingsLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(
@@ -342,7 +341,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                         org.jdesktop.layout.GroupLayout.DEFAULT_SIZE,
                         org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)).addPreferredGap(
                     org.jdesktop.layout.LayoutStyle.RELATED,
-                    89,
+                    108,
                     Short.MAX_VALUE).add(
                     jSeparator4,
                     org.jdesktop.layout.GroupLayout.PREFERRED_SIZE,
