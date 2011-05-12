@@ -35,7 +35,7 @@ public class ExportWFS implements Comparable {
 
     //~ Instance fields --------------------------------------------------------
 
-    private String title;
+    private String topic;
     private String query;
     private URL url;
 
@@ -44,12 +44,12 @@ public class ExportWFS implements Comparable {
     /**
      * Creates a new ExportWFS object.
      *
-     * @param  title  DOCUMENT ME!
+     * @param  topic  DOCUMENT ME!
      * @param  query  DOCUMENT ME!
      * @param  url    DOCUMENT ME!
      */
-    public ExportWFS(final String title, final String query, final URL url) {
-        this.title = title;
+    public ExportWFS(final String topic, final String query, final URL url) {
+        this.topic = topic;
         this.query = query;
         this.url = url;
     }
@@ -61,17 +61,17 @@ public class ExportWFS implements Comparable {
      *
      * @return  DOCUMENT ME!
      */
-    public String getTitle() {
-        return title;
+    public String getTopic() {
+        return topic;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  title  DOCUMENT ME!
+     * @param  topic  DOCUMENT ME!
      */
-    public void setTitle(final String title) {
-        this.title = title;
+    public void setTopic(final String topic) {
+        this.topic = topic;
     }
 
     /**
@@ -112,7 +112,7 @@ public class ExportWFS implements Comparable {
 
     @Override
     public String toString() {
-        return title;
+        return topic;
     }
 
     @Override
@@ -125,7 +125,7 @@ public class ExportWFS implements Comparable {
 
         boolean result = true;
 
-        if ((this.title == null) ? (other.title != null) : (!this.title.equals(other.title))) {
+        if ((this.topic == null) ? (other.topic != null) : (!this.topic.equals(other.topic))) {
             result &= false;
         }
 
@@ -144,7 +144,7 @@ public class ExportWFS implements Comparable {
     public int hashCode() {
         int result = 7;
 
-        result = (43 * result) + ((this.title != null) ? this.title.hashCode() : 0);
+        result = (43 * result) + ((this.topic != null) ? this.topic.hashCode() : 0);
         result = (43 * result) + ((this.url != null) ? this.url.hashCode() : 0);
         result = (43 * result) + ((this.query != null) ? this.query.hashCode() : 0);
 
@@ -159,6 +159,6 @@ public class ExportWFS implements Comparable {
 
         final ExportWFS other = (ExportWFS)o;
 
-        return title.compareTo(other.title);
+        return topic.compareTo(other.topic);
     }
 }

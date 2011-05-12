@@ -28,23 +28,30 @@
  */
 package de.cismet.cismap.commons.gui.shapeexport;
 
-import java.awt.Component;
 import org.apache.log4j.Logger;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import org.openide.util.NbBundle;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.Map.Entry;
 
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
 /**
@@ -53,7 +60,7 @@ import javax.swing.JProgressBar;
  * @author   jweintraut
  * @version  $Revision$, $Date$
  */
-public class DownloadManagerPanel extends javax.swing.JPanel implements Observer {
+public class DownloadManagerPanel extends javax.swing.JPanel implements DownloadListChangedListener, WindowListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -62,14 +69,15 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Observer
     //~ Instance fields --------------------------------------------------------
 
     private int countOfCurrentDownloads = 0;
-    private Map<ExportWFS, Integer> positionInGridBag = new HashMap<ExportWFS, Integer>();
-    private Map<Download, ExportWFS> downloads = new HashMap<Download, ExportWFS>();
-    private Map<Download, Component> components = new HashMap<Download, Component>();
+    private Map<Download, Integer> positions = new HashMap<Download, Integer>();
+    private Map<Download, List<Component>> components = new HashMap<Download, List<Component>>();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblDestinationFile;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JLabel lblWFS;
+    private javax.swing.JPanel pnlFill;
+    private javax.swing.JSeparator sepHeader;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -77,8 +85,11 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Observer
     /**
      * Creates new form DownloadManagerPanel.
      */
-    public DownloadManagerPanel() {
+    public DownloadManagerPanel( /*final String destinationDirectory, final String destinationFile*/) {
         initComponents();
+
+        add(DownloadManager.instance().getDownloads().keySet());
+        DownloadManager.instance().addDownloadListChangedListener(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -95,6 +106,8 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Observer
         lblWFS = new javax.swing.JLabel();
         lblDestinationFile = new javax.swing.JLabel();
         lblStatus = new javax.swing.JLabel();
+        sepHeader = new javax.swing.JSeparator();
+        pnlFill = new javax.swing.JPanel();
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -104,6 +117,7 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Observer
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblWFS, gridBagConstraints);
@@ -114,6 +128,7 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Observer
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
         gridBagConstraints.weightx = 0.8;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblDestinationFile, gridBagConstraints);
@@ -124,74 +139,260 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Observer
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
         gridBagConstraints.weightx = 0.2;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblStatus, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(sepHeader, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(pnlFill, gridBagConstraints);
     }                                                    // </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
      *
-     * @param  wfss  downloads url DOCUMENT ME!
+     * @param  downloads  wfss downloads url DOCUMENT ME!
      */
-    public void add(final Collection<ExportWFS> wfss) {
-        final GridBagConstraints layoutConstraints = new GridBagConstraints();
-        layoutConstraints.anchor = GridBagConstraints.WEST;
-        layoutConstraints.insets = new Insets(5, 5, 5, 5);
-
-        for (final ExportWFS wfs : wfss) {
+    public void add(final Collection<Download> downloads) {
+        for (final Download download : downloads) {
             countOfCurrentDownloads++;
-            positionInGridBag.put(wfs, new Integer(countOfCurrentDownloads));
 
-            layoutConstraints.gridx = 0;
-            layoutConstraints.gridy = countOfCurrentDownloads;
-            add(new JLabel(wfs.getTitle()), layoutConstraints);
+            final List<Component> componentsOfDownload = new LinkedList<Component>();
+            addDownloadToPosition(download, countOfCurrentDownloads + 1, componentsOfDownload);
+            components.put(download, componentsOfDownload);
 
-            layoutConstraints.gridx = 1;
-            layoutConstraints.gridy = countOfCurrentDownloads;
-            add(new JLabel(wfs.getUrl().toString()), layoutConstraints);
-
-            layoutConstraints.gridx = 2;
-            layoutConstraints.gridy = countOfCurrentDownloads;
-
-            final Download download = new Download(wfs.getUrl(), wfs.getQuery(), "E:\\Projekte\\Shape-Export");
-            download.addObserver(this);
-            downloads.put(download, wfs);
-            final JProgressBar progressBar = new JProgressBar();
-            progressBar.setIndeterminate(true);
-            add(progressBar, layoutConstraints);
+            positions.put(download, new Integer(countOfCurrentDownloads));
         }
+
+        moveFillingPanel(countOfCurrentDownloads + 2);
+        validate();
+        repaint();
     }
 
     @Override
-    public void update(final Observable o, final Object arg) {
-        if (!(o instanceof Download)) {
-            return;
-        }
+    public synchronized void downloadListChanged(final DownloadListChangedEvent event) {
+        final List<Download> downloads = event.getDownloads();
 
-        final Download download = (Download)o;
-        final ExportWFS wfs = downloads.get(download);
-        final Integer positionInLayout = positionInGridBag.get(wfs);
-
-        switch (download.getStatus()) {
-            case Download.COMPLETE: {
-                LOG.fatal("Download complete");
-                System.out.println("Download complete");
-                final GridBagLayout layout = (GridBagLayout)getLayout();
+        switch (event.getAction()) {
+            case ADDED: {
+                add(downloads);
                 break;
             }
-            case Download.ERROR: {
-                LOG.fatal("Download failed");
-                System.out.println("Download failed");
+            case REMOVED: {
+                remove(downloads);
+                break;
+            }
+            case ERROR: {
+                remove(downloads);
+                add(downloads);
                 break;
             }
         }
     }
-    
-    protected void removeDownloadAndRearrangeLayout(final Download download) {
-        final ExportWFS wfs = downloads.get(download);
-        final Integer positionInLayout = positionInGridBag.get(wfs);
-        
-                
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  downloads  DOCUMENT ME!
+     */
+    protected void remove(final List<Download> downloads) {
+        for (final Download download : downloads) {
+            final Integer positionInLayout = positions.get(download);
+            final List<Component> componentsOfDownload = components.get(download);
+
+            for (final Component component : componentsOfDownload) {
+                remove(component);
+            }
+            components.remove(download);
+            positions.remove(download);
+            countOfCurrentDownloads--;
+
+            rearrangeDownloads(positionInLayout);
+        }
+
+        moveFillingPanel(countOfCurrentDownloads + 2);
+
+        validate();
+        repaint();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  positionInLayout  DOCUMENT ME!
+     */
+    protected void rearrangeDownloads(final Integer positionInLayout) {
+        final List<Download> downloadsToRearrange = new LinkedList<Download>();
+        for (final Entry<Download, Integer> entry : positions.entrySet()) {
+            if (entry.getValue() > positionInLayout) {
+                entry.setValue(entry.getValue() - 1);
+                downloadsToRearrange.add(entry.getKey());
+            }
+        }
+
+        for (final Download downloadToRearrange : downloadsToRearrange) {
+            final List<Component> componentsToDelete = components.get(downloadToRearrange);
+
+            for (final Component componentToDelete : componentsToDelete) {
+                remove(componentToDelete);
+            }
+            components.remove(downloadToRearrange);
+
+            final Integer position = positions.get(downloadToRearrange);
+            final List<Component> componentsAdded = new LinkedList<Component>();
+            addDownloadToPosition(downloadToRearrange, position + 1, componentsAdded);
+            components.put(downloadToRearrange, componentsAdded);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  download    title DOCUMENT ME!
+     * @param  position    DOCUMENT ME!
+     * @param  components  DOCUMENT ME!
+     */
+    protected void addDownloadToPosition(final Download download,
+            final int position,
+            final List<Component> components) {
+        final GridBagConstraints layoutConstraints = new GridBagConstraints();
+        layoutConstraints.anchor = GridBagConstraints.LINE_START;
+        layoutConstraints.insets = new Insets(5, 5, 5, 5);
+        layoutConstraints.gridy = position;
+
+        layoutConstraints.gridx = 0;
+        final JLabel lblTitle = new JLabel(download.getTopic());
+        add(lblTitle, layoutConstraints);
+
+        layoutConstraints.gridx = 1;
+        final JLabel lblUrl = new JLabel(download.getFileToSaveTo().getAbsolutePath());
+        add(lblUrl, layoutConstraints);
+
+        layoutConstraints.gridx = 2;
+
+        if (download.getStatus() == Download.ERROR) {
+            lblTitle.setForeground(Color.red);
+            lblUrl.setForeground(Color.red);
+            final JButton btnError = new JButton(new DisplayErrorAction(
+                        this,
+                        download.getExceptionCatchedWhileDownloading()));
+            layoutConstraints.insets = new Insets(0, 5, 0, 5);
+            layoutConstraints.anchor = GridBagConstraints.LINE_END;
+            add(btnError, layoutConstraints);
+            components.add(btnError);
+        } else {
+            final JProgressBar progressBar = new JProgressBar();
+            add(progressBar, layoutConstraints);
+            progressBar.setIndeterminate(true);
+            components.add(progressBar);
+        }
+
+        components.add(lblTitle);
+        components.add(lblUrl);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  position  DOCUMENT ME!
+     */
+    protected void moveFillingPanel(final int position) {
+        remove(pnlFill);
+
+        final GridBagConstraints layoutConstraints = new GridBagConstraints();
+        layoutConstraints.fill = GridBagConstraints.BOTH;
+        layoutConstraints.gridwidth = 3;
+        layoutConstraints.gridx = 0;
+        layoutConstraints.gridy = position;
+        layoutConstraints.weightx = 1.0;
+        layoutConstraints.weighty = 1.0;
+
+        add(pnlFill, layoutConstraints);
+    }
+
+    @Override
+    public void windowOpened(final WindowEvent e) {
+    }
+
+    @Override
+    public void windowClosing(final WindowEvent e) {
+        DownloadManager.instance().removeDownloadListChangedListener(this);
+    }
+
+    @Override
+    public void windowClosed(final WindowEvent e) {
+    }
+
+    @Override
+    public void windowIconified(final WindowEvent e) {
+    }
+
+    @Override
+    public void windowDeiconified(final WindowEvent e) {
+    }
+
+    @Override
+    public void windowActivated(final WindowEvent e) {
+    }
+
+    @Override
+    public void windowDeactivated(final WindowEvent e) {
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class DisplayErrorAction extends AbstractAction {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private Component parent;
+        private Exception exception;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new DisplayErrorAction object.
+         *
+         * @param  parent     DOCUMENT ME!
+         * @param  exception  DOCUMENT ME!
+         */
+        public DisplayErrorAction(final Component parent, final Exception exception) {
+            super(NbBundle.getMessage(DownloadManagerPanel.class, "DownloadManagerPanel.DisplayErrorAction.text"));
+            this.parent = parent;
+            this.exception = exception;
+
+            setToolTipText(NbBundle.getMessage(
+                    DownloadManagerPanel.class,
+                    "DownloadManagerPanel.DisplayErrorAction.tooltiptext"));
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            JOptionPane.showMessageDialog(
+                parent,
+                exception,
+                NbBundle.getMessage(
+                    DownloadManagerPanel.class,
+                    "DownloadManagerPanel.DisplayErrorAction.actionPerformed(ActionEvent).JOptionPane.title"),
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
