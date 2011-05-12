@@ -27,7 +27,10 @@ import org.apache.log4j.Logger;
 
 import org.jdom.Element;
 
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
+
+import java.io.File;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -63,14 +66,25 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
 
     private static final String PLUGIN_NAME = "SHAPE_EXPORT";
     private static final String XML_CONF_ROOT = "cismapShapeExport";
-    private static final String XML_WFS = "exportWFS";
+    private static final String XML_BBOX_TOKEN = "bboxToken";
+    private static final String XML_WFS = "wfs";
     private static final String XML_WFS_TITLE = "title";
     private static final String XML_WFS_URL = "url";
     private static final String XML_WFS_QUERY = "query";
+    private static final String XML_DESTINATION = "destination";
+    private static final String XML_DIRECTORY = "directory";
+    private static final String XML_FILE = "file";
+    private static final String XML_EXTENSION = "extension";
 
     private static Set<ExportWFS> wfsList = new TreeSet<ExportWFS>();
+    private static String bboxToken = "<cismap:BBOX/>";
+    private static File destinationDirectory;
+    private static String destinationFile = "export";
+    private static String destinationFileExtension = ".zip";
 
     //~ Instance fields --------------------------------------------------------
+
+    private boolean enableShapeExport = true;
 
     private List<ToolbarComponentDescription> toolbarComponents;
 
@@ -85,6 +99,42 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
         return wfsList;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static String getBboxToken() {
+        return bboxToken;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static File getDestinationDirectory() {
+        return destinationDirectory;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static String getDestinationFile() {
+        return destinationFile;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static String getDestinationFileExtension() {
+        return destinationFileExtension;
+    }
+
     @Override
     public void configure(final Element parent) {
         // TODO if necessary
@@ -95,7 +145,16 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
         final Element cismapShapeExport = parent.getChild(XML_CONF_ROOT);
         if (cismapShapeExport == null) {
             LOG.warn("The shape export isn't configured. The export functionality will not be available.");
+            enableShapeExport = false;
             return;
+        }
+
+        final Element bboxToken = cismapShapeExport.getChild(XML_BBOX_TOKEN);
+        if ((bboxToken == null) || (bboxToken.getText() == null) || (bboxToken.getText().trim().length() == 0)) {
+            LOG.warn("There is no replacement token configured for shape export. Using default replacement token '"
+                        + this.bboxToken + "'.");
+        } else {
+            this.bboxToken = bboxToken.getText();
         }
 
         final List<Element> exportWFSs = cismapShapeExport.getChildren(XML_WFS);
@@ -121,7 +180,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
                         convertedUrl = new URL(contentOfUrl);
                     } catch (MalformedURLException e) {
                         LOG.error("The given URL for WFS '" + contentOfTitle
-                                    + "' is invalid. This WFS will bee skipped for shape export.",
+                                    + "' is invalid. This WFS will be skipped for shape export.",
                             e);
                     }
 
@@ -135,12 +194,68 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
         if (wfsList.isEmpty()) {
             LOG.warn(
                 "Could not read the list of WFSs for shape export. The export functionality will not be available.");
+            enableShapeExport = false;
+        }
+
+        final Element destination = cismapShapeExport.getChild(XML_DESTINATION);
+        if (destination == null) {
+            LOG.warn(
+                "There is no destination directory and file name configured for shape export. Using default directory and default file name.");
+        }
+
+        if (destination != null) {
+            final Element directory = destination.getChild(XML_DIRECTORY);
+            if ((directory == null) || (directory.getText() == null) || (directory.getText().trim().length() == 0)) {
+                LOG.warn("There is no destination directory configured for shape export. Using default directory.");
+            } else {
+                destinationDirectory = new File(System.getProperty("user.home"), directory.getText());
+                if (!destinationDirectory.exists()) {
+                    destinationDirectory.mkdirs();
+                }
+            }
+        }
+
+        if ((destinationDirectory == null) || !destinationDirectory.exists() || !destinationDirectory.isDirectory()
+                    || !destinationDirectory.canWrite()) {
+            if (destinationDirectory != null) {
+                LOG.warn("The destination directory for shape export '" + destinationDirectory.getAbsolutePath()
+                            + "' is invalid. Using '" + System.getProperty("user.home") + File.separatorChar
+                            + "cismap' instead.");
+            }
+
+            destinationDirectory = new File(System.getProperty("user.home"), "cismap");
+            if (!destinationDirectory.exists()) {
+                destinationDirectory.mkdirs();
+            }
+        }
+
+        if (!destinationDirectory.exists() || !destinationDirectory.isDirectory() || !destinationDirectory.canWrite()) {
+            LOG.error("The destination directory for shape export '" + destinationDirectory.getAbsolutePath()
+                        + "' is invalid. Shape export will be disabled.");
+            enableShapeExport = false;
+        }
+
+        final Element file = destination.getChild(XML_FILE);
+        if ((file == null) || (file.getText() == null) || (file.getText().trim().length() == 0)) {
+            LOG.warn("There is no destination file name configured for shape export. Using default file name '"
+                        + destinationFile + "'.");
+        } else {
+            destinationFile = file.getText();
+        }
+
+        final Element extension = destination.getChild(XML_EXTENSION);
+        if ((extension == null) || (extension.getText() == null) || (extension.getText().trim().length() == 0)) {
+            LOG.warn(
+                "There is no destination file extension configured for shape export. Using default file extension '"
+                        + destinationFileExtension
+                        + "'.");
+        } else {
+            destinationFileExtension = extension.getText();
         }
     }
 
     @Override
     public Element getConfiguration() throws NoWriteError {
-        // throw new UnsupportedOperationException("Not supported yet.");
         // TODO if neccessary
         return null;
     }
@@ -152,14 +267,24 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
 
     @Override
     public Collection<ToolbarComponentDescription> getToolbarComponents() {
-        if (toolbarComponents == null) {
+        if ((toolbarComponents == null) && enableShapeExport) {
+            final JButton btnShapeExport = new JButton(new ShapeExportAction());
+            btnShapeExport.setText(null);
+            final JButton btnDownloadManager = new JButton(new DownloadManagerAction());
+            btnDownloadManager.setText(null);
             final List<ToolbarComponentDescription> preparationList = TypeSafeCollections.newArrayList();
-            final ToolbarComponentDescription description = new ToolbarComponentDescription(
+            final ToolbarComponentDescription shapeExport = new ToolbarComponentDescription(
                     "tlbMain",
-                    new JButton(new ShapeExportAction()),
+                    btnShapeExport,
                     ToolbarPositionHint.AFTER,
-                    "cmdShapeExport");
-            preparationList.add(description);
+                    "cmdClipboard");
+            final ToolbarComponentDescription downloadManager = new ToolbarComponentDescription(
+                    "tlbMain",
+                    btnDownloadManager,
+                    ToolbarPositionHint.AFTER,
+                    NbBundle.getMessage(ShapeExport.class, "ShapeExportAction.name"));
+            preparationList.add(shapeExport);
+            preparationList.add(downloadManager);
             toolbarComponents = Collections.unmodifiableList(preparationList);
         }
 

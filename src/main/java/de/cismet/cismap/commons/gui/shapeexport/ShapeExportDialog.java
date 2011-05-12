@@ -31,12 +31,13 @@ package de.cismet.cismap.commons.gui.shapeexport;
 import org.apache.log4j.Logger;
 
 import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.font.FontRenderContext;
 
 import java.net.MalformedURLException;
@@ -47,11 +48,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeSet;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import de.cismet.tools.gui.StaticSwingTools;
@@ -74,6 +75,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     private Map<ExportWFS, JCheckBox> checkboxes;
     private Collection<ExportWFS> selectedWFSs = null;
     private boolean cancelled = true;
+    private int countOfSelectedWFSs = 0;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
@@ -87,7 +89,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     private javax.swing.JPanel pnlButtons;
     private javax.swing.JPanel pnlControls;
     private javax.swing.JPanel pnlExportParameters;
-    private javax.swing.JPanel pnlFill;
+    private javax.swing.JPanel pnlFillDesc;
+    private javax.swing.JPanel pnlFillExportParameters;
     private javax.swing.JScrollPane scpExportParameters;
     private javax.swing.JSeparator sepControls;
     private javax.swing.JSeparator sepStep1Header;
@@ -137,7 +140,23 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         // Create the JCheckBox objects and determine max width for "special layout"
         int maxWidth = -1;
         for (final ExportWFS wfs : wfsCollection) {
-            final JCheckBox newCheckBox = new JCheckBox(wfs.getTitle());
+            final JCheckBox newCheckBox = new JCheckBox(wfs.getTopic());
+            newCheckBox.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        if (e.getSource() instanceof JCheckBox) {
+                            final JCheckBox checkbox = (JCheckBox)e.getSource();
+                            if (checkbox.isSelected()) {
+                                countOfSelectedWFSs++;
+                            } else {
+                                countOfSelectedWFSs--;
+                            }
+
+                            btnOK.setEnabled(countOfSelectedWFSs > 0);
+                        }
+                    }
+                });
             checkboxes.put(wfs, newCheckBox);
 
             if (font == null) {
@@ -154,13 +173,13 @@ public class ShapeExportDialog extends javax.swing.JDialog {
             }
         }
 
-        // Calculate the gap between checkbox an text and add the checkboxes to the panel
+        // Calculate the gap between checkbox and text and add the checkboxes to the panel
         int verticalPosition = 3;
         final GridBagConstraints layoutConstraints = new GridBagConstraints();
         layoutConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         layoutConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        layoutConstraints.gridx = 1;
-        layoutConstraints.weightx = 1.0;
+        layoutConstraints.gridx = 2;
+        layoutConstraints.weightx = 0;
 
         for (final ExportWFS wfs : this.wfsCollection) {
             layoutConstraints.gridy = verticalPosition;
@@ -177,10 +196,10 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         final JPanel pnlFill = new JPanel();
         pnlFill.setOpaque(false);
         layoutConstraints.fill = GridBagConstraints.BOTH;
-        layoutConstraints.gridwidth = 2;
+        layoutConstraints.gridwidth = 3;
         layoutConstraints.gridx = 0;
         layoutConstraints.gridy = verticalPosition;
-        layoutConstraints.insets = new java.awt.Insets(0, 0, 0, 0);
+        layoutConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
         layoutConstraints.weighty = 1.0;
         pnlExportParameters.add(pnlFill, layoutConstraints);
 
@@ -206,12 +225,13 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         sepSteps = new javax.swing.JSeparator();
         lblStep1 = new javax.swing.JLabel();
         lblIcon = new javax.swing.JLabel();
-        pnlFill = new javax.swing.JPanel();
+        pnlFillDesc = new javax.swing.JPanel();
         scpExportParameters = new javax.swing.JScrollPane();
         pnlExportParameters = new javax.swing.JPanel();
         lblDialogHint = new javax.swing.JLabel();
         lblStep1Header = new javax.swing.JLabel();
         sepStep1Header = new javax.swing.JSeparator();
+        pnlFillExportParameters = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(org.openide.util.NbBundle.getMessage(ShapeExportDialog.class, "ShapeExportDialog.title")); // NOI18N
@@ -236,6 +256,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         pnlButtons.add(btnCancel);
 
         btnOK.setText(org.openide.util.NbBundle.getMessage(ShapeExportDialog.class, "ShapeExportDialog.btnOK.text")); // NOI18N
+        btnOK.setEnabled(false);
         btnOK.setPreferredSize(new java.awt.Dimension(100, 25));
         btnOK.addActionListener(new java.awt.event.ActionListener() {
 
@@ -299,14 +320,14 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 3, 7);
         panDesc.add(lblIcon, gridBagConstraints);
 
-        pnlFill.setOpaque(false);
+        pnlFillDesc.setOpaque(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        panDesc.add(pnlFill, gridBagConstraints);
+        panDesc.add(pnlFillDesc, gridBagConstraints);
 
         getContentPane().add(panDesc, java.awt.BorderLayout.LINE_START);
 
@@ -331,7 +352,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 0);
         pnlExportParameters.add(lblStep1Header, gridBagConstraints);
@@ -341,7 +362,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 250;
         gridBagConstraints.ipady = 9;
@@ -349,6 +370,12 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(6, 5, 0, 5);
         pnlExportParameters.add(sepStep1Header, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        pnlExportParameters.add(pnlFillExportParameters, gridBagConstraints);
 
         scpExportParameters.setViewportView(pnlExportParameters);
 
@@ -366,9 +393,10 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         cancelled = false;
 
         selectedWFSs = new LinkedList<ExportWFS>();
-        for (final Entry<ExportWFS, JCheckBox> entry : checkboxes.entrySet()) {
-            if (entry.getValue().isSelected()) {
-                selectedWFSs.add(entry.getKey());
+        for (final ExportWFS wfs : wfsCollection) {
+            final JCheckBox checkbox = checkboxes.get(wfs);
+            if (checkbox.isSelected()) {
+                selectedWFSs.add(wfs);
             }
         }
 
@@ -411,8 +439,10 @@ public class ShapeExportDialog extends javax.swing.JDialog {
      */
     public static final void main(final String[] args) {
         final URL url;
+        final URL erraneousURL;
         try {
             url = new URL("http://wfs.fis-wasser-mv.de/services");
+            erraneousURL = new URL("http://doesntexist.fis-wasser-mv.de/services");
         } catch (MalformedURLException ex) {
             Exceptions.printStackTrace(ex);
             return;
@@ -424,7 +454,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<ogc:Filter>"
                         + "<ogc:BBOX>"
                         + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
-                        + "<cismet:BBOX/>"
+                        + "<cismap:BBOX/>"
                         + "</ogc:BBOX>"
                         + "</ogc:Filter>"
                         + "<wfs:PropertyName>app:id</wfs:PropertyName>"
@@ -441,7 +471,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<ogc:Filter>"
                         + "<ogc:BBOX>"
                         + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
-                        + "<cismet:BBOX/>"
+                        + "<cismap:BBOX/>"
                         + "</ogc:BBOX>"
                         + "</ogc:Filter>"
                         + "<wfs:PropertyName>app:id</wfs:PropertyName>"
@@ -449,7 +479,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
                         + "</wfs:Query>"
                         + "</wfs:GetFeature>",
-                url);
+                erraneousURL);
 
         final ExportWFS wfs3 = new ExportWFS(
                 "Und dann noch das Test-Thema 3",
@@ -458,7 +488,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<ogc:Filter>"
                         + "<ogc:BBOX>"
                         + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
-                        + "<cismet:BBOX/>"
+                        + "<cismap:BBOX/>"
                         + "</ogc:BBOX>"
                         + "</ogc:Filter>"
                         + "<wfs:PropertyName>app:gid</wfs:PropertyName>"
@@ -522,7 +552,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "</wfs:GetFeature>",
                 url);
 
-        final Collection<ExportWFS> wfsList = new LinkedList<ExportWFS>();
+        final Collection<ExportWFS> wfsList = new TreeSet<ExportWFS>();
 
         wfsList.add(wfs1);
         wfsList.add(wfs2);
@@ -537,21 +567,25 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         }
 
         final Collection<ExportWFS> selectedWFS = dialog.getSelectedWFSs();
-        LOG.fatal(selectedWFS);
-        System.out.println(selectedWFS);
+        System.err.println(selectedWFS);
 
         for (final ExportWFS wfs : selectedWFS) {
             wfs.setQuery(wfs.getQuery().replace(
-                    "<cismet:BBOX/>",
+                    ShapeExport.getBboxToken(),
                     "<gml:Box><gml:coord><gml:X>3.3260837108302265E7</gml:X><gml:Y>5939174.86179747</gml:Y></gml:coord><gml:coord><gml:X>3.3306013669564433E7</gml:X><gml:Y>5954878.55311782</gml:Y></gml:coord></gml:Box>"));
         }
 
-        final JFrame frame = new JFrame("Download-Manager");
+        System.err.println(selectedWFS);
+        DownloadManager.instance().add(selectedWFS);
+
+        final JFrame frame = new JFrame(NbBundle.getMessage(
+                    ShapeExportDialog.class,
+                    "ShapeExportAction.actionPerformed(ActionEvent).JDialog.title"));
         final DownloadManagerPanel pnlDownload = new DownloadManagerPanel();
         frame.setLayout(new BorderLayout());
         frame.add(pnlDownload, BorderLayout.CENTER);
+        frame.addWindowListener(pnlDownload);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        pnlDownload.add(selectedWFS);
         frame.validate();
         frame.pack();
         frame.setVisible(true);

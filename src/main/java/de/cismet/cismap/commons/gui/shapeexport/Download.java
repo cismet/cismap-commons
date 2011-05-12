@@ -25,17 +25,13 @@ package de.cismet.cismap.commons.gui.shapeexport;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.Exceptions;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
 import java.io.StringReader;
 
 import java.net.URL;
 
-import java.util.HashMap;
 import java.util.Observable;
 
 import de.cismet.security.AccessHandler.ACCESS_METHODS;
@@ -53,54 +49,45 @@ import de.cismet.security.exceptions.RequestFailedException;
  * @author   jweintraut
  * @version  $Revision$, $Date$
  */
-public class Download extends Observable implements Runnable {
+public class Download extends Observable implements Runnable, Comparable {
 
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger LOG = Logger.getLogger(Download.class);
     private static final int MAX_BUFFER_SIZE = 1024;
-    public static final String[] STATUSES = {
-            "Downloading", "Paused", "Complete", "Cancelled",
-            "Error"
-        };
-    // TODO: The strings in STATUSES are read in DownloadsTableModel using following constants as array indices.
+
     public static final int DOWNLOADING = 0;
-    public static final int PAUSED = 1;
-    public static final int COMPLETE = 2;
-    public static final int CANCELLED = 3;
-    public static final int ERROR = 4;
+    public static final int COMPLETE = 1;
+    public static final int CANCELLED = 2;
+    public static final int ERROR = 3;
 
     //~ Instance fields --------------------------------------------------------
 
-    /*public static final boolean proxyRequired = true;
-     * public static final String proxyIP = "127.0.0.1"; public static final String proxyPort = "8080"; public static
-     * final String proxyUsername = "proxyUser";public static final String proxyPassword = "proxyPassword";*/
     private URL url;
     private String request;
-    private String saveDir;
-    private int currentSize;
-    private int downloaded;
+    private File fileToSaveTo;
     private int status;
+    private String topic;
+    private Thread downloadThread;
+    private Exception exceptionCatchedWhileDownloading;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Constructor for Download.
      *
-     * @param  url      DOCUMENT ME!
-     * @param  request  DOCUMENT ME!
-     * @param  saveDir  DOCUMENT ME!
+     * @param  url           DOCUMENT ME!
+     * @param  request       DOCUMENT ME!
+     * @param  topic         saveDir DOCUMENT ME!
+     * @param  fileToSaveTo  DOCUMENT ME!
      */
-    public Download(final URL url, final String request, final String saveDir) {
+    public Download(final URL url, final String request, final String topic, final File fileToSaveTo) {
         this.url = url;
         this.request = request;
-        this.saveDir = saveDir;
+        this.topic = topic;
+        this.fileToSaveTo = fileToSaveTo;
 
-        currentSize = -1;
-        downloaded = 0;
         status = DOWNLOADING;
-
-        download();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -115,30 +102,12 @@ public class Download extends Observable implements Runnable {
     }
 
     /**
-     * Get this download's request.
+     * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    public String getRequest() {
-        return request;
-    }
-
-    /**
-     * Get this download's size.
-     *
-     * @return  DOCUMENT ME!
-     */
-    public int getSize() {
-        return currentSize;
-    }
-
-    /**
-     * Get this download's progress.
-     *
-     * @return  DOCUMENT ME!
-     */
-    public float getProgress() {
-        return ((float)downloaded / currentSize) * 100;
+    public String getTopic() {
+        return topic;
     }
 
     /**
@@ -146,8 +115,26 @@ public class Download extends Observable implements Runnable {
      *
      * @return  DOCUMENT ME!
      */
-    public int getDownloaded() {
-        return downloaded;
+    public File getFileToSaveTo() {
+        return fileToSaveTo;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fileToSaveTo  DOCUMENT ME!
+     */
+    public void setFileToSaveTo(final File fileToSaveTo) {
+        this.fileToSaveTo = fileToSaveTo;
+    }
+
+    /**
+     * Get this download's request.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getRequest() {
+        return request;
     }
 
     /**
@@ -161,19 +148,11 @@ public class Download extends Observable implements Runnable {
 
     /**
      * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    public void pause() {
-        status = PAUSED;
-        stateChanged();
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    public void resume() {
-        status = DOWNLOADING;
-        stateChanged();
-        download();
+    public Exception getExceptionCatchedWhileDownloading() {
+        return exceptionCatchedWhileDownloading;
     }
 
     /**
@@ -186,8 +165,12 @@ public class Download extends Observable implements Runnable {
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  exception  DOCUMENT ME!
      */
-    private void error() {
+    private void error(final Exception exception) {
+        LOG.error("Exception occurred while downloading '" + fileToSaveTo + "'.", exception);
+        exceptionCatchedWhileDownloading = exception;
         status = ERROR;
         stateChanged();
     }
@@ -195,9 +178,11 @@ public class Download extends Observable implements Runnable {
     /**
      * DOCUMENT ME!
      */
-    private void download() {
-        final Thread thread = new Thread(this);
-        thread.start();
+    public void startDownload() {
+        if (downloadThread == null) {
+            downloadThread = new Thread(this);
+            downloadThread.start();
+        }
     }
 
     /**
@@ -214,43 +199,22 @@ public class Download extends Observable implements Runnable {
 
     @Override
     public void run() {
-        RandomAccessFile file = null;
         FileOutputStream out = null;
         InputStream resp = null;
-        final HashMap<String, String> requestOptions = new HashMap<String, String>();
-        // int availableBytes = 0;
 
-        requestOptions.put("Range", "bytes=" + downloaded + "-");
         try {
             resp = WebAccessManager.getInstance()
                         .doRequest(
                                 url,
                                 new StringReader(request),
-                                ACCESS_METHODS.POST_REQUEST,
-                                requestOptions);
-
-            // Check for valid content length.
-            /*availableBytes = resp.available();
-             * if (availableBytes < 1) { error();}*/
-
-            // Set the size for this download if it hasn't been already set.
-            /*if (currentSize == -1) {
-             *  currentSize = availableBytes; stateChanged();}*/
-
-            // Open file and seek to the end of it.
-            file = new RandomAccessFile(getFileName(url), "rw");
-            file.seek(downloaded);
+                                ACCESS_METHODS.POST_REQUEST);
 
             status = DOWNLOADING;
-            out = new FileOutputStream(saveDir + File.separator + this.getFileName(url));
+            out = new FileOutputStream(fileToSaveTo);
             while (status == DOWNLOADING) {
                 // Size buffer according to how much of the file is left to download.
                 final byte[] buffer;
-                // if ((currentSize - downloaded) > MAX_BUFFER_SIZE) {
                 buffer = new byte[MAX_BUFFER_SIZE];
-                // } else {
-                // buffer = new byte[currentSize - downloaded];
-                // }
 
                 // Read from server into buffer.
                 final int read = resp.read(buffer);
@@ -259,9 +223,7 @@ public class Download extends Observable implements Runnable {
                 }
 
                 // Write buffer to file.
-                // file.write(buffer, 0, read);
                 out.write(buffer, 0, read);
-                downloaded += read;
                 stateChanged();
             }
 
@@ -270,23 +232,22 @@ public class Download extends Observable implements Runnable {
                 stateChanged();
             }
         } catch (MissingArgumentException ex) {
-            Exceptions.printStackTrace(ex);
+            error(ex);
         } catch (AccessMethodIsNotSupportedException ex) {
-            Exceptions.printStackTrace(ex);
+            error(ex);
         } catch (RequestFailedException ex) {
-            Exceptions.printStackTrace(ex);
+            error(ex);
         } catch (NoHandlerForURLException ex) {
-            Exceptions.printStackTrace(ex);
+            error(ex);
         } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            error(ex);
         } finally {
             // Close file.
-            if (file != null) {
+            if (out != null) {
                 try {
                     out.close();
-                    file.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOG.warn("Exception occured while closing file.", e);
                 }
             }
 
@@ -295,71 +256,10 @@ public class Download extends Observable implements Runnable {
                 try {
                     resp.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOG.warn("Exception occured while closing response stream.", e);
                 }
             }
         }
-
-        /*final char[] buffer = new char[256];
-         * final StringBuilder response = new StringBuilder(); final BufferedReader br = new BufferedReader(new
-         * InputStreamReader(resp)); int count = br.read(buffer, 0, buffer.length);
-         *
-         * while (count != -1) { response.append(buffer, 0, count); count = br.read(buffer, 0, buffer.length); }
-         * br.close();
-         *
-         *return response.toString();*/
-
-        /*try {
-         * if (proxyRequired) { final Properties systemSettings = System.getProperties();
-         * systemSettings.put("http.proxyHost", proxyIP); systemSettings.put("http.proxyPort", proxyPort);
-         * System.setProperties(systemSettings); }
-         *
-         * // Open connection to URL. final HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-         *
-         * // Specify what portion of file to download. connection.setRequestProperty("Range", "bytes=" + downloaded +
-         * "-");
-         *
-         * if (proxyRequired) { final String encoded = new String(new sun.misc.BASE64Encoder().encode( new
-         * String(proxyUsername + ":" + proxyPassword).getBytes()));
-         * connection.setRequestProperty("Proxy-Authorization", "Basic " + encoded); }
-         *
-         * // Connect to server. connection.connect();
-         *
-         * final int responseCode = connection.getResponseCode();
-         *
-         * // Make sure response code is in the 200 range. // 200 - no partial download // 206 - supports resume // TODO:
-         * Support full download and resuming if ((responseCode == 200) || (responseCode == 206)) { error(); }
-         *
-         * // Check for valid content length. final int contentLength = connection.getContentLength(); if (contentLength <
-         * 1) { error(); }
-         *
-         * // Set the size for this download if it hasn't been already set. if (size == -1) { size = contentLength;
-         * stateChanged(); }
-         *
-         * // Open file and seek to the end of it. file = new RandomAccessFile(getFileName(url), "rw");
-         * file.seek(downloaded);
-         *
-         * stream = connection.getInputStream(); status = DOWNLOADING; out = new FileOutputStream(saveDir + File.separator
-         * + this.getFileName(url)); while (status == DOWNLOADING) { // Size buffer according to how much of the file is
-         * left to download. byte[] buffer; if ((size - downloaded) > MAX_BUFFER_SIZE) { buffer = new
-         * byte[MAX_BUFFER_SIZE]; } else { buffer = new byte[size - downloaded]; }
-         *
-         * // Read from server into buffer. final int read = stream.read(buffer); if (read == -1) { break; }
-         *
-         * // Write buffer to file. // file.write(buffer, 0, read); out.write(buffer, 0, read); downloaded += read;
-         * stateChanged();}*/
-
-        /*
-         * Change status to complete if this point was reached because downloading has finished.
-         */
-        /*if (status == DOWNLOADING) {
-         * status = COMPLETE;
-         *
-         * stateChanged(); } } catch (Exception e) { e.printStackTrace(); error(); } finally { // Close file. if (file !=
-         * null) { try { out.close(); file.close(); } catch (Exception e) { e.printStackTrace(); } }
-         *
-         * // Close connection to server. if (stream != null) { try { stream.close(); } catch (Exception e) {
-         * e.printStackTrace(); } }}*/
     }
 
     /**
@@ -368,5 +268,50 @@ public class Download extends Observable implements Runnable {
     private void stateChanged() {
         setChanged();
         notifyObservers();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (!(obj instanceof Download)) {
+            return false;
+        }
+
+        final Download other = (Download)obj;
+
+        boolean result = true;
+
+        if ((this.url != other.url) && ((this.url == null) || !this.url.equals(other.url))) {
+            result &= false;
+        }
+        if ((this.request == null) ? (other.request != null) : (!this.request.equals(other.request))) {
+            result &= false;
+        }
+        if ((this.fileToSaveTo == null) ? (other.fileToSaveTo != null)
+                                        : (!this.fileToSaveTo.equals(other.fileToSaveTo))) {
+            result &= false;
+        }
+
+        return result;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+
+        hash = (43 * hash) + ((this.url != null) ? this.url.hashCode() : 0);
+        hash = (43 * hash) + ((this.request != null) ? this.request.hashCode() : 0);
+        hash = (43 * hash) + ((this.fileToSaveTo != null) ? this.fileToSaveTo.hashCode() : 0);
+
+        return hash;
+    }
+
+    @Override
+    public int compareTo(final Object o) {
+        if (!(o instanceof Download)) {
+            return 1;
+        }
+
+        final Download other = (Download)o;
+        return this.topic.compareTo(other.topic);
     }
 }

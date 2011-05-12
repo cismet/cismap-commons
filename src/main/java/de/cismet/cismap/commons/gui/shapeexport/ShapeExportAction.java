@@ -25,6 +25,9 @@ package de.cismet.cismap.commons.gui.shapeexport;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 
 import java.util.Collection;
@@ -34,6 +37,8 @@ import javax.swing.JDialog;
 
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -53,7 +58,13 @@ public class ShapeExportAction extends AbstractAction {
      * Creates a new ShapeExportAction object.
      */
     public ShapeExportAction() {
-        super("Shape-Export :)");
+        super();
+        putValue(
+            SMALL_ICON,
+            new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/shapeexport_small.png")));
+        putValue(SHORT_DESCRIPTION, NbBundle.getMessage(ShapeExportAction.class, "ShapeExportAction.tooltiptext"));
+        putValue(NAME, NbBundle.getMessage(ShapeExportAction.class, "ShapeExportAction.name"));
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -64,7 +75,8 @@ public class ShapeExportAction extends AbstractAction {
 
         final ShapeExportDialog dialog = new ShapeExportDialog(CismapBroker.getInstance().getMappingComponent(),
                 ShapeExport.getWFSList());
-        findOptimalPositionOnScreen(dialog);
+        dialog.setLocationRelativeTo(StaticSwingTools.getParentFrame(
+                CismapBroker.getInstance().getMappingComponent()));
         dialog.setVisible(true);
 
         if (dialog.isCancelled()) {
@@ -75,25 +87,24 @@ public class ShapeExportAction extends AbstractAction {
                     .getCurrentBoundingBox();
         wfsList = dialog.getSelectedWFSs();
         for (final ExportWFS wfs : wfsList) {
-            wfs.getQuery().replace("<cismap:BBOX/>", boundingBox.toGmlString());
-            LOG.fatal(wfs + ": " + wfs.getQuery());
-            System.out.println(wfs + ": " + wfs.getQuery());
+            wfs.setQuery(wfs.getQuery().replace(ShapeExport.getBboxToken(), boundingBox.toGmlString()));
         }
-    }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  component  DOCUMENT ME!
-     */
-    public static void findOptimalPositionOnScreen(final JDialog component) {
-        final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        // component.setSize(screenSize.width / 2, screenSize.height / 2);
-        final java.awt.Insets insets = component.getInsets();
-        /*component.setSize(component.getWidth() + insets.left + insets.right,
-         *  component.getHeight()         + insets.top         + insets.bottom         + 20);*/
-        component.setLocation((screenSize.width - component.getWidth()) / 2,
-            (screenSize.height - component.getHeight())
-                    / 2);
+        DownloadManager.instance().add(wfsList);
+
+        final JDialog downloadManager = new JDialog(StaticSwingTools.getParentFrame(
+                    CismapBroker.getInstance().getMappingComponent()),
+                NbBundle.getMessage(
+                    ShapeExportAction.class,
+                    "ShapeExportAction.actionPerformed(ActionEvent).JDialog.title"));
+        final DownloadManagerPanel pnlDownload = new DownloadManagerPanel();
+        downloadManager.setLayout(new BorderLayout());
+        downloadManager.add(pnlDownload, BorderLayout.CENTER);
+        downloadManager.addWindowListener(pnlDownload);
+        downloadManager.validate();
+        downloadManager.pack();
+        downloadManager.setLocationRelativeTo(StaticSwingTools.getParentFrame(
+                CismapBroker.getInstance().getMappingComponent()));
+        downloadManager.setVisible(true);
     }
 }
