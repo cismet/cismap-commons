@@ -82,9 +82,9 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
     private static String destinationFile = "export";
     private static String destinationFileExtension = ".zip";
 
-    //~ Instance fields --------------------------------------------------------
+    private static boolean enableShapeExport = true;
 
-    private boolean enableShapeExport = true;
+    //~ Instance fields --------------------------------------------------------
 
     private List<ToolbarComponentDescription> toolbarComponents;
 
