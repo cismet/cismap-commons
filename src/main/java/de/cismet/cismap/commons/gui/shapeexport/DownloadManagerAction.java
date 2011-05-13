@@ -9,9 +9,9 @@ package de.cismet.cismap.commons.gui.shapeexport;
 
 import org.openide.util.NbBundle;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
@@ -26,7 +26,7 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   jweintraut
  * @version  $Revision$, $Date$
  */
-public class DownloadManagerAction extends AbstractAction {
+public class DownloadManagerAction extends AbstractAction implements WindowListener {
 
     //~ Constructors -----------------------------------------------------------
 
@@ -48,20 +48,44 @@ public class DownloadManagerAction extends AbstractAction {
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        final JDialog downloadManager = new JDialog(StaticSwingTools.getParentFrame(
-                    CismapBroker.getInstance().getMappingComponent()),
-                NbBundle.getMessage(
-                    DownloadManagerAction.class,
-                    "DownloadManagerAction.actionPerformed(ActionEvent).JDialog.title"));
-        final DownloadManagerPanel pnlDownload = new DownloadManagerPanel();
-        downloadManager.setLayout(new BorderLayout());
-        downloadManager.add(pnlDownload, BorderLayout.CENTER);
-        downloadManager.addWindowListener(pnlDownload);
-        downloadManager.setPreferredSize(new Dimension(600, 150));
-        downloadManager.validate();
-        downloadManager.pack();
-        downloadManager.setLocationRelativeTo(StaticSwingTools.getParentFrame(
-                CismapBroker.getInstance().getMappingComponent()));
-        downloadManager.setVisible(true);
+        final JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
+                    CismapBroker.getInstance().getMappingComponent()));
+        if (!downloadManager.isVisible()) {
+            downloadManager.setLocationRelativeTo(StaticSwingTools.getParentFrame(
+                    CismapBroker.getInstance().getMappingComponent()));
+            downloadManager.addWindowListener(this);
+            downloadManager.setVisible(true);
+            downloadManager.pack();
+        }
+    }
+
+    @Override
+    public void windowOpened(final WindowEvent e) {
+        setEnabled(false);
+    }
+
+    @Override
+    public void windowClosing(final WindowEvent e) {
+        setEnabled(true);
+    }
+
+    @Override
+    public void windowClosed(final WindowEvent e) {
+    }
+
+    @Override
+    public void windowIconified(final WindowEvent e) {
+    }
+
+    @Override
+    public void windowDeiconified(final WindowEvent e) {
+    }
+
+    @Override
+    public void windowActivated(final WindowEvent e) {
+    }
+
+    @Override
+    public void windowDeactivated(final WindowEvent e) {
     }
 }

@@ -7,9 +7,9 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.shapeexport;
 
+import java.util.Collection;
 import java.util.EventObject;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
 
 /**
  * DOCUMENT ME!
@@ -35,7 +35,7 @@ public class DownloadListChangedEvent extends EventObject {
 
     //~ Instance fields --------------------------------------------------------
 
-    private List<Download> downloads;
+    private Collection<Download> downloads;
     private Action action;
 
     //~ Constructors -----------------------------------------------------------
@@ -49,7 +49,7 @@ public class DownloadListChangedEvent extends EventObject {
      */
     public DownloadListChangedEvent(final Object source, final Download download, final Action action) {
         super(source);
-        this.downloads = new LinkedList<Download>();
+        this.downloads = new LinkedHashSet<Download>();
         this.downloads.add(download);
         this.action = action;
     }
@@ -61,7 +61,7 @@ public class DownloadListChangedEvent extends EventObject {
      * @param  downloads  DOCUMENT ME!
      * @param  action     DOCUMENT ME!
      */
-    public DownloadListChangedEvent(final Object source, final List<Download> downloads, final Action action) {
+    public DownloadListChangedEvent(final Object source, final Collection<Download> downloads, final Action action) {
         super(source);
         this.downloads = downloads;
         this.action = action;
@@ -74,7 +74,7 @@ public class DownloadListChangedEvent extends EventObject {
      *
      * @return  DOCUMENT ME!
      */
-    public List<Download> getDownloads() {
+    public Collection<Download> getDownloads() {
         return downloads;
     }
 

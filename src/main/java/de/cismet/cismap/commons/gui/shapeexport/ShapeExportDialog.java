@@ -45,9 +45,9 @@ import java.net.URL;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import javax.swing.JCheckBox;
@@ -364,11 +364,11 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipadx = 250;
-        gridBagConstraints.ipady = 9;
+        gridBagConstraints.ipadx = 319;
+        gridBagConstraints.ipady = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(6, 5, 0, 5);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         pnlExportParameters.add(sepStep1Header, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -392,7 +392,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOKActionPerformed
         cancelled = false;
 
-        selectedWFSs = new LinkedList<ExportWFS>();
+        selectedWFSs = new LinkedHashSet<ExportWFS>();
         for (final ExportWFS wfs : wfsCollection) {
             final JCheckBox checkbox = checkboxes.get(wfs);
             if (checkbox.isSelected()) {
@@ -586,8 +586,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         frame.add(pnlDownload, BorderLayout.CENTER);
         frame.addWindowListener(pnlDownload);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.validate();
-        frame.pack();
         frame.setVisible(true);
+        frame.pack();
     }
 }

@@ -37,9 +37,9 @@ import java.net.URL;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import javax.swing.JButton;
 
@@ -76,7 +76,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
     private static final String XML_FILE = "file";
     private static final String XML_EXTENSION = "extension";
 
-    private static Set<ExportWFS> wfsList = new TreeSet<ExportWFS>();
+    private static Set<ExportWFS> wfsList = new LinkedHashSet<ExportWFS>();
     private static String bboxToken = "<cismap:BBOX/>";
     private static File destinationDirectory;
     private static String destinationFile = "export";
@@ -270,8 +270,18 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
         if ((toolbarComponents == null) && enableShapeExport) {
             final JButton btnShapeExport = new JButton(new ShapeExportAction());
             btnShapeExport.setText(null);
+            btnShapeExport.setName(NbBundle.getMessage(ShapeExport.class, "ShapeExportAction.name"));
+            btnShapeExport.setBorderPainted(false);
+            btnShapeExport.setFocusable(false);
+            btnShapeExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+            btnShapeExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
             final JButton btnDownloadManager = new JButton(new DownloadManagerAction());
             btnDownloadManager.setText(null);
+            btnDownloadManager.setName(NbBundle.getMessage(ShapeExport.class, "DownloadManagerAction.name"));
+            btnDownloadManager.setBorderPainted(false);
+            btnDownloadManager.setFocusable(false);
+            btnDownloadManager.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+            btnDownloadManager.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
             final List<ToolbarComponentDescription> preparationList = TypeSafeCollections.newArrayList();
             final ToolbarComponentDescription shapeExport = new ToolbarComponentDescription(
                     "tlbMain",
