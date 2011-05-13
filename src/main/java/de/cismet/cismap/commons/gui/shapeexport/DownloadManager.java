@@ -15,14 +15,11 @@ import java.io.IOException;
 import java.net.URL;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.TreeMap;
 
 import javax.swing.event.EventListenerList;
 
@@ -41,7 +38,7 @@ public class DownloadManager implements Observer {
 
     //~ Instance fields --------------------------------------------------------
 
-    private Map<Download, ExportWFS> downloads = new TreeMap<Download, ExportWFS>();
+    private Map<Download, ExportWFS> downloads = new HashMap<Download, ExportWFS>();
     private int countOfCurrentDownloads = 0;
     private EventListenerList listeners = new EventListenerList();
 
@@ -74,7 +71,7 @@ public class DownloadManager implements Observer {
      * @param  wfss  DOCUMENT ME!
      */
     public synchronized void add(final Collection<ExportWFS> wfss) {
-        final List<Download> downloadsAdded = new LinkedList<Download>();
+        final Collection<Download> downloadsAdded = new LinkedHashSet<Download>();
 
         for (final ExportWFS wfs : wfss) {
             final File destinationFile = determineDestinationFile(wfs.getUrl(),
@@ -94,8 +91,6 @@ public class DownloadManager implements Observer {
 
             downloadsAdded.add(download);
         }
-
-        Collections.sort(downloadsAdded);
 
         notifyDownloadListChanged(new DownloadListChangedEvent(
                 this,
@@ -154,7 +149,6 @@ public class DownloadManager implements Observer {
      * @return  DOCUMENT ME!
      */
     public Map<Download, ExportWFS> getDownloads() {
-        LOG.info("Downloads: " + downloads);
         return downloads;
     }
 

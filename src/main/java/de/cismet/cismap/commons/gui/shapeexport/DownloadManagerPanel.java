@@ -34,7 +34,6 @@ import org.openide.util.NbBundle;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -176,13 +175,13 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
         }
 
         moveFillingPanel(countOfCurrentDownloads + 2);
-        validate();
+        revalidate();
         repaint();
     }
 
     @Override
     public synchronized void downloadListChanged(final DownloadListChangedEvent event) {
-        final List<Download> downloads = event.getDownloads();
+        final Collection<Download> downloads = event.getDownloads();
 
         switch (event.getAction()) {
             case ADDED: {
@@ -206,7 +205,7 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
      *
      * @param  downloads  DOCUMENT ME!
      */
-    protected void remove(final List<Download> downloads) {
+    protected void remove(final Collection<Download> downloads) {
         for (final Download download : downloads) {
             final Integer positionInLayout = positions.get(download);
             final List<Component> componentsOfDownload = components.get(download);
@@ -223,7 +222,7 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
 
         moveFillingPanel(countOfCurrentDownloads + 2);
 
-        validate();
+        revalidate();
         repaint();
     }
 

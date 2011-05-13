@@ -27,7 +27,6 @@ import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 
 import java.util.Collection;
@@ -92,19 +91,13 @@ public class ShapeExportAction extends AbstractAction {
 
         DownloadManager.instance().add(wfsList);
 
-        final JDialog downloadManager = new JDialog(StaticSwingTools.getParentFrame(
-                    CismapBroker.getInstance().getMappingComponent()),
-                NbBundle.getMessage(
-                    ShapeExportAction.class,
-                    "ShapeExportAction.actionPerformed(ActionEvent).JDialog.title"));
-        final DownloadManagerPanel pnlDownload = new DownloadManagerPanel();
-        downloadManager.setLayout(new BorderLayout());
-        downloadManager.add(pnlDownload, BorderLayout.CENTER);
-        downloadManager.addWindowListener(pnlDownload);
-        downloadManager.validate();
-        downloadManager.pack();
-        downloadManager.setLocationRelativeTo(StaticSwingTools.getParentFrame(
-                CismapBroker.getInstance().getMappingComponent()));
-        downloadManager.setVisible(true);
+        final JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
+                    CismapBroker.getInstance().getMappingComponent()));
+        if (!downloadManager.isVisible()) {
+            downloadManager.setLocationRelativeTo(StaticSwingTools.getParentFrame(
+                    CismapBroker.getInstance().getMappingComponent()));
+            downloadManager.setVisible(true);
+            downloadManager.pack();
+        }
     }
 }
