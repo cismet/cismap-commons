@@ -194,7 +194,8 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
                 remove(downloads);
                 break;
             }
-            case ERROR: {
+            case ERROR: 
+            case NO_DATA: {
                 remove(downloads);
                 add(downloads);
                 break;
@@ -294,6 +295,16 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
             layoutConstraints.anchor = GridBagConstraints.LINE_END;
             add(btnError, layoutConstraints);
             components.add(btnError);
+        } else if (download.getStatus() == Download.NO_DATA) {
+            lblTitle.setForeground(Color.orange);
+            lblUrl.setForeground(Color.orange);
+            final JButton btnError = new JButton(new DisplayNoDataAction(
+                        this,
+                        download.getCaughtException()));
+            layoutConstraints.insets = new Insets(0, 5, 0, 5);
+            layoutConstraints.anchor = GridBagConstraints.LINE_END;
+            add(btnError, layoutConstraints);
+            components.add(btnError);
         } else {
             final JProgressBar progressBar = new JProgressBar();
             add(progressBar, layoutConstraints);
@@ -376,6 +387,50 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
          * @param  exception  The exception caught.
          */
         public DisplayErrorAction(final Component parent, final Exception exception) {
+            super(NbBundle.getMessage(DownloadManagerPanel.class, "DownloadManagerPanel.DisplayNoDataAction.text"));
+            this.parent = parent;
+            this.exception = exception;
+
+            setToolTipText(NbBundle.getMessage(
+                    DownloadManagerPanel.class,
+                    "DownloadManagerPanel.DisplayNoDataAction.tooltiptext"));
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            JOptionPane.showMessageDialog(
+                parent,
+                exception,
+                NbBundle.getMessage(
+                    DownloadManagerPanel.class,
+                    "DownloadManagerPanel.DisplayNoDataAction.actionPerformed(ActionEvent).JOptionPane.title"),
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    /**
+     * This action displays a dialog to visualize the error caught while downloading.
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class DisplayNoDataAction extends AbstractAction {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private Component parent;
+        private Exception exception;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new DisplayErrorAction object.
+         *
+         * @param  parent     The parent component.
+         * @param  exception  The exception caught.
+         */
+        public DisplayNoDataAction(final Component parent, final Exception exception) {
             super(NbBundle.getMessage(DownloadManagerPanel.class, "DownloadManagerPanel.DisplayErrorAction.text"));
             this.parent = parent;
             this.exception = exception;
