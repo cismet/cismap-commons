@@ -12,7 +12,8 @@ import java.util.EventObject;
 import java.util.LinkedHashSet;
 
 /**
- * DOCUMENT ME!
+ * A wrapper class for the communication between download manager and its DownloadListChangedListeners. An event
+ * contains the changed download and the change action (ADDED, REMOVED, ERROR).
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$
@@ -22,7 +23,7 @@ public class DownloadListChangedEvent extends EventObject {
     //~ Enums ------------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * An enumeration representing the action of a download.
      *
      * @version  $Revision$, $Date$
      */
@@ -43,9 +44,9 @@ public class DownloadListChangedEvent extends EventObject {
     /**
      * Creates a new DownloadListChangedEvent object.
      *
-     * @param  source    DOCUMENT ME!
-     * @param  download  DOCUMENT ME!
-     * @param  action    DOCUMENT ME!
+     * @param  source    The source object.
+     * @param  download  The download.
+     * @param  action    The change action.
      */
     public DownloadListChangedEvent(final Object source, final Download download, final Action action) {
         super(source);
@@ -57,9 +58,9 @@ public class DownloadListChangedEvent extends EventObject {
     /**
      * Creates a new DownloadListChangedEvent object.
      *
-     * @param  source     DOCUMENT ME!
-     * @param  downloads  DOCUMENT ME!
-     * @param  action     DOCUMENT ME!
+     * @param  source     The source object.
+     * @param  downloads  The changed downloads.
+     * @param  action     The change aciton.
      */
     public DownloadListChangedEvent(final Object source, final Collection<Download> downloads, final Action action) {
         super(source);
@@ -70,18 +71,18 @@ public class DownloadListChangedEvent extends EventObject {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Returns the changed downloads.
      *
-     * @return  DOCUMENT ME!
+     * @return  A collection of changed downloads.
      */
     public Collection<Download> getDownloads() {
         return downloads;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the change action.
      *
-     * @return  DOCUMENT ME!
+     * @return  The change action.
      */
     public Action getAction() {
         return action;

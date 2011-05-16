@@ -26,7 +26,8 @@ package de.cismet.cismap.commons.gui.shapeexport;
 import java.net.URL;
 
 /**
- * DOCUMENT ME!
+ * The objects of this class represent a topic extracted from the configuration file. It comprises of a name, the query
+ * and the URL of the corresponding server..
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$
@@ -36,6 +37,7 @@ public class ExportWFS implements Comparable {
     //~ Instance fields --------------------------------------------------------
 
     private String topic;
+    private String file;
     private String query;
     private URL url;
 
@@ -44,12 +46,14 @@ public class ExportWFS implements Comparable {
     /**
      * Creates a new ExportWFS object.
      *
-     * @param  topic  DOCUMENT ME!
-     * @param  query  DOCUMENT ME!
-     * @param  url    DOCUMENT ME!
+     * @param  topic  The topic.
+     * @param  file   The file name.
+     * @param  query  The query.
+     * @param  url    The URL of the server.
      */
-    public ExportWFS(final String topic, final String query, final URL url) {
+    public ExportWFS(final String topic, final String file, final String query, final URL url) {
         this.topic = topic;
+        this.file = file;
         this.query = query;
         this.url = url;
     }
@@ -57,57 +61,48 @@ public class ExportWFS implements Comparable {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Returns the topic of this export.
      *
-     * @return  DOCUMENT ME!
+     * @return  The topic.
      */
     public String getTopic() {
         return topic;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the file of this export.
      *
-     * @param  topic  DOCUMENT ME!
+     * @return  The file.
      */
-    public void setTopic(final String topic) {
-        this.topic = topic;
+    public String getFile() {
+        return file;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the query of this export.
      *
-     * @return  DOCUMENT ME!
+     * @return  The query.
      */
     public String getQuery() {
         return query;
     }
 
     /**
-     * DOCUMENT ME!
+     * Sets the query of this export.
      *
-     * @param  query  url DOCUMENT ME!
+     * @param  query  The query.
      */
     public void setQuery(final String query) {
         this.query = query;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the URL of the server used by this export.
      *
-     * @return  DOCUMENT ME!
+     * @return  The URL of the server.
      */
     public URL getUrl() {
         return url;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  url  DOCUMENT ME!
-     */
-    public void setUrl(final URL url) {
-        this.url = url;
     }
 
     @Override

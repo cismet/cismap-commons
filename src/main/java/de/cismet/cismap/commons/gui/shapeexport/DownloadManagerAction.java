@@ -21,7 +21,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
- * DOCUMENT ME!
+ * This action is responsible for the the steps to be done when the user wants to see the current downloads.
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$

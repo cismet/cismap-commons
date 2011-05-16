@@ -369,4 +369,15 @@ public class BoundingBox implements Cloneable, Serializable {
                     + "<gml:coord><gml:X>" + getX2() + "</gml:X><gml:Y>" + getY2() + "</gml:Y></gml:coord>"   // NOI18N
                     + "</gml:Box>";                                                                           // NOI18N
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String toGml4WFS110String() {
+        return "<gml:Envelope><gml:lowerCorner>" + getX1()                                // NOI18N
+                    + " " + getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"          // NOI18N
+                    + getX2() + " " + getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+    }
 }
