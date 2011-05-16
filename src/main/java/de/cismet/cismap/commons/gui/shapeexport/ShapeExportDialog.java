@@ -431,7 +431,15 @@ public class ShapeExportDialog extends javax.swing.JDialog {
      * @return  The selected topics.
      */
     public Collection<ExportWFS> getSelectedWFSs() {
-        return selectedWFSs;
+        final Collection result = new LinkedHashSet<ExportWFS>();
+        for (final ExportWFS wfs : selectedWFSs) {
+            result.add(new ExportWFS(
+                    new String(wfs.getTopic()),
+                    new String(wfs.getFile()),
+                    new String(wfs.getQuery()),
+                    wfs.getUrl()));
+        }
+        return result;
     }
 
     /**
