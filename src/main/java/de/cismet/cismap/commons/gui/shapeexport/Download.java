@@ -39,6 +39,7 @@ import de.cismet.security.AccessHandler.ACCESS_METHODS;
 import de.cismet.security.WebAccessManager;
 
 import de.cismet.security.exceptions.AccessMethodIsNotSupportedException;
+import de.cismet.security.exceptions.BadHttpStatusCodeException;
 import de.cismet.security.exceptions.MissingArgumentException;
 import de.cismet.security.exceptions.NoHandlerForURLException;
 import de.cismet.security.exceptions.RequestFailedException;
@@ -61,6 +62,7 @@ public class Download extends Observable implements Runnable, Comparable {
     public static final int DOWNLOADING = 0;
     public static final int COMPLETE = 1;
     public static final int ERROR = 2;
+    public static final int NO_DATA = 3;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -167,6 +169,12 @@ public class Download extends Observable implements Runnable, Comparable {
         status = ERROR;
         stateChanged();
     }
+    
+    private void noData(final Exception exception) {
+        caughtException = exception;
+        status = NO_DATA;
+        stateChanged();
+    }
 
     /**
      * Starts a thread which downloads the shape export.
@@ -221,6 +229,10 @@ public class Download extends Observable implements Runnable, Comparable {
             error(ex);
         } catch (NoHandlerForURLException ex) {
             error(ex);
+        } catch(BadHttpStatusCodeException e) {
+            if(e.getHttpStatuscode() == 204) {
+                noData(e);
+            }
         } catch (Exception ex) {
             error(ex);
         } finally {
