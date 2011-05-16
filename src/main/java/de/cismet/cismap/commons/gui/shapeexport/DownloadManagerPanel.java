@@ -54,7 +54,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
 /**
- * DOCUMENT ME!
+ * Visualizes the download list of DownloadManager. New downloads are dynamically added, completed ones are removed.
+ * Erraneous downloads are marked red. This panel is informed of new, completed or erraneous downloads via the
+ * DownloadListChangedListener interface by the download manager.
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$
@@ -84,7 +86,7 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
     /**
      * Creates new form DownloadManagerPanel.
      */
-    public DownloadManagerPanel( /*final String destinationDirectory, final String destinationFile*/) {
+    public DownloadManagerPanel() {
         initComponents();
 
         add(DownloadManager.instance().getDownloads().keySet());
@@ -159,9 +161,9 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
     }                                                    // </editor-fold>//GEN-END:initComponents
 
     /**
-     * DOCUMENT ME!
+     * Adds new downloads to display.
      *
-     * @param  downloads  wfss downloads url DOCUMENT ME!
+     * @param  downloads  A collection of new downloads.
      */
     public void add(final Collection<Download> downloads) {
         for (final Download download : downloads) {
@@ -201,9 +203,9 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
     }
 
     /**
-     * DOCUMENT ME!
+     * Removes the given downloads from the panel.
      *
-     * @param  downloads  DOCUMENT ME!
+     * @param  downloads  The downloads to remove.
      */
     protected void remove(final Collection<Download> downloads) {
         for (final Download download : downloads) {
@@ -227,9 +229,10 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
     }
 
     /**
-     * DOCUMENT ME!
+     * Since this panel works with the help of GridbagLayout to dynamically visualize the current downloads, the
+     * components have to be rearranged as soon as a download is deleted. This is done by this method.
      *
-     * @param  positionInLayout  DOCUMENT ME!
+     * @param  positionInLayout  The position of the removed download.
      */
     protected void rearrangeDownloads(final Integer positionInLayout) {
         final List<Download> downloadsToRearrange = new LinkedList<Download>();
@@ -256,11 +259,12 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
     }
 
     /**
-     * DOCUMENT ME!
+     * Handles all the GUI stuff to be done when a download was added. All corresponding components will be added to the
+     * given collection object.
      *
-     * @param  download    title DOCUMENT ME!
-     * @param  position    DOCUMENT ME!
-     * @param  components  DOCUMENT ME!
+     * @param  download    The download added.
+     * @param  position    The position of the new download.
+     * @param  components  The collection of components added for this download.
      */
     protected void addDownloadToPosition(final Download download,
             final int position,
@@ -285,7 +289,7 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
             lblUrl.setForeground(Color.red);
             final JButton btnError = new JButton(new DisplayErrorAction(
                         this,
-                        download.getExceptionCatchedWhileDownloading()));
+                        download.getCaughtException()));
             layoutConstraints.insets = new Insets(0, 5, 0, 5);
             layoutConstraints.anchor = GridBagConstraints.LINE_END;
             add(btnError, layoutConstraints);
@@ -302,9 +306,9 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
     }
 
     /**
-     * DOCUMENT ME!
+     * Rearranges the panel which servers as a dummy. This dummy prevents UI glitches when the user resizes the panel.
      *
-     * @param  position  DOCUMENT ME!
+     * @param  position  The position of the dummy panel.
      */
     protected void moveFillingPanel(final int position) {
         remove(pnlFill);
@@ -352,7 +356,7 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
     //~ Inner Classes ----------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * This action displays a dialog to visualize the error caught while downloading.
      *
      * @version  $Revision$, $Date$
      */
@@ -368,8 +372,8 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
         /**
          * Creates a new DisplayErrorAction object.
          *
-         * @param  parent     DOCUMENT ME!
-         * @param  exception  DOCUMENT ME!
+         * @param  parent     The parent component.
+         * @param  exception  The exception caught.
          */
         public DisplayErrorAction(final Component parent, final Exception exception) {
             super(NbBundle.getMessage(DownloadManagerPanel.class, "DownloadManagerPanel.DisplayErrorAction.text"));

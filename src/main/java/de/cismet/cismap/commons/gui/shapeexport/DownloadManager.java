@@ -12,8 +12,6 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.IOException;
 
-import java.net.URL;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -24,7 +22,9 @@ import java.util.Observer;
 import javax.swing.event.EventListenerList;
 
 /**
- * DOCUMENT ME!
+ * The download manager manages all current downloads. New downloads are added to a collection, completed downloads are
+ * removed. Erraneous downloads remain in the collection. The download manager observes all download objects for state
+ * changed and informs the download manager panel via the DownloadListChangedListener interface.
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$
@@ -53,9 +53,9 @@ public class DownloadManager implements Observer {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * It's a Singleton. There can only be one download manager.
      *
-     * @return  DOCUMENT ME!
+     * @return  The download manager.
      */
     public static DownloadManager instance() {
         if (instance == null) {
@@ -66,15 +66,17 @@ public class DownloadManager implements Observer {
     }
 
     /**
-     * DOCUMENT ME!
+     * This method is used to add new shape exports to the download list. The download manager converts ExportWFS
+     * objects to Download objects.
      *
-     * @param  wfss  DOCUMENT ME!
+     * @param  wfss  A collection of shape exports to add.
      */
     public synchronized void add(final Collection<ExportWFS> wfss) {
         final Collection<Download> downloadsAdded = new LinkedHashSet<Download>();
 
         for (final ExportWFS wfs : wfss) {
-            final File destinationFile = determineDestinationFile(wfs.getUrl(),
+            final File destinationFile = determineDestinationFile(
+                    wfs,
                     ShapeExport.getDestinationDirectory(),
                     ShapeExport.getDestinationFileExtension());
             if (destinationFile == null) {
@@ -99,18 +101,21 @@ public class DownloadManager implements Observer {
     }
 
     /**
-     * DOCUMENT ME!
+     * A helper method which determines the download location for a download. It uses a counter between 2 and 1000. The
+     * value of the counter is added to the file name. The pattern is
+     * &lt;USER_HOME&gt;/&lt;DESTINATION_DIRECTORY&gt;/&lt;DESTINATION_FILE&gt;&lt;COUNTER&gt;&lt;EXTENSION&gt;
      *
-     * @param   url                   DOCUMENT ME!
-     * @param   destinationDirectory  DOCUMENT ME!
-     * @param   extension             DOCUMENT ME!
+     * @param   wfs                   url The requested URL. Only necessary for the log message if the destination file
+     *                                could'nt be determined.
+     * @param   destinationDirectory  The destination directory.
+     * @param   extension             The file extension.
      *
-     * @return  DOCUMENT ME!
+     * @return  A file object pointing to the download location.
      */
-    protected File determineDestinationFile(final URL url,
+    protected File determineDestinationFile(final ExportWFS wfs,
             final File destinationDirectory,
             final String extension) {
-        final String destinationFile = ShapeExport.getDestinationFile();
+        final String destinationFile = wfs.getFile();
         boolean fileFound = false;
         int counter = 2;
         File fileToSaveTo = new File(destinationDirectory, destinationFile + extension);
@@ -132,7 +137,7 @@ public class DownloadManager implements Observer {
             }
 
             if ((counter >= 1000) && !fileFound) {
-                LOG.error("Could not create a file for the download from '" + url.toExternalForm()
+                LOG.error("Could not create a file for the download from '" + wfs.getUrl().toExternalForm()
                             + "'. The configured path is '" + destinationDirectory.getAbsolutePath()
                             + File.separatorChar + ShapeExport.getDestinationFile() + "<1.." + 999 + ">." + extension
                             + ".");
@@ -144,9 +149,9 @@ public class DownloadManager implements Observer {
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the current download list.
      *
-     * @return  DOCUMENT ME!
+     * @return  The current download list.
      */
     public Map<Download, ExportWFS> getDownloads() {
         return downloads;
@@ -161,7 +166,6 @@ public class DownloadManager implements Observer {
         final Download download = (Download)o;
 
         switch (download.getStatus()) {
-            case Download.CANCELLED:
             case Download.COMPLETE: {
                 downloads.remove(download);
                 countOfCurrentDownloads--;
@@ -182,27 +186,27 @@ public class DownloadManager implements Observer {
     }
 
     /**
-     * DOCUMENT ME!
+     * Adds a new DownloadListChangedListener.
      *
-     * @param  listener  DOCUMENT ME!
+     * @param  listener  The listener to add.
      */
     public void addDownloadListChangedListener(final DownloadListChangedListener listener) {
         listeners.add(DownloadListChangedListener.class, listener);
     }
 
     /**
-     * DOCUMENT ME!
+     * Removes a DownloadListChangedListener.
      *
-     * @param  listener  DOCUMENT ME!
+     * @param  listener  The listener to remove.
      */
     public void removeDownloadListChangedListener(final DownloadListChangedListener listener) {
         listeners.remove(DownloadListChangedListener.class, listener);
     }
 
     /**
-     * DOCUMENT ME!
+     * Notifies all current DownloadListChangedListeners.
      *
-     * @param  event  DOCUMENT ME!
+     * @param  event  The event to notify about.
      */
     protected synchronized void notifyDownloadListChanged(final DownloadListChangedEvent event) {
         for (final DownloadListChangedListener listener : listeners.getListeners(DownloadListChangedListener.class)) {

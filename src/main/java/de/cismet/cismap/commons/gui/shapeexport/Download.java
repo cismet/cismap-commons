@@ -44,7 +44,9 @@ import de.cismet.security.exceptions.NoHandlerForURLException;
 import de.cismet.security.exceptions.RequestFailedException;
 
 /**
- * DOCUMENT ME!
+ * The objects of this class represent a shape export download. Each download starts an own thread to download the
+ * associated shape export. There are three states defined: DOWNLOADING, COMPLETE, ERROR. The objects of this class are
+ * observed by the download manager.
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$
@@ -58,8 +60,7 @@ public class Download extends Observable implements Runnable, Comparable {
 
     public static final int DOWNLOADING = 0;
     public static final int COMPLETE = 1;
-    public static final int CANCELLED = 2;
-    public static final int ERROR = 3;
+    public static final int ERROR = 2;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -69,17 +70,17 @@ public class Download extends Observable implements Runnable, Comparable {
     private int status;
     private String topic;
     private Thread downloadThread;
-    private Exception exceptionCatchedWhileDownloading;
+    private Exception caughtException;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Constructor for Download.
      *
-     * @param  url           DOCUMENT ME!
-     * @param  request       DOCUMENT ME!
-     * @param  topic         saveDir DOCUMENT ME!
-     * @param  fileToSaveTo  DOCUMENT ME!
+     * @param  url           The URL of the server to download from.
+     * @param  request       The request to send.
+     * @param  topic         The topic of the shape export.
+     * @param  fileToSaveTo  A file object pointing to the download location.
      */
     public Download(final URL url, final String request, final String topic, final File fileToSaveTo) {
         this.url = url;
@@ -95,34 +96,34 @@ public class Download extends Observable implements Runnable, Comparable {
     /**
      * Get this download's URL.
      *
-     * @return  DOCUMENT ME!
+     * @return  The URL of the requested server.
      */
     public String getUrl() {
         return url.toString();
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the topic of the download.
      *
-     * @return  DOCUMENT ME!
+     * @return  The topic.
      */
     public String getTopic() {
         return topic;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns a file object pointing to the download location of this download.
      *
-     * @return  DOCUMENT ME!
+     * @return  A file object pointing to the download location.
      */
     public File getFileToSaveTo() {
         return fileToSaveTo;
     }
 
     /**
-     * DOCUMENT ME!
+     * Sets the download location.
      *
-     * @param  fileToSaveTo  DOCUMENT ME!
+     * @param  fileToSaveTo  A file object pointing to the download location.
      */
     public void setFileToSaveTo(final File fileToSaveTo) {
         this.fileToSaveTo = fileToSaveTo;
@@ -131,52 +132,44 @@ public class Download extends Observable implements Runnable, Comparable {
     /**
      * Get this download's request.
      *
-     * @return  DOCUMENT ME!
+     * @return  The request.
      */
     public String getRequest() {
         return request;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the status of this download. Is one of DOWNLOADING, COMPLETE or ERROR.
      *
-     * @return  DOCUMENT ME!
+     * @return  The status of this download.
      */
     public int getStatus() {
         return status;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the exception which is caught during the download. If an exception occurs the download is aborted.
      *
-     * @return  DOCUMENT ME!
+     * @return  The caught exception.
      */
-    public Exception getExceptionCatchedWhileDownloading() {
-        return exceptionCatchedWhileDownloading;
+    public Exception getCaughtException() {
+        return caughtException;
     }
 
     /**
-     * DOCUMENT ME!
-     */
-    public void cancel() {
-        status = CANCELLED;
-        stateChanged();
-    }
-
-    /**
-     * DOCUMENT ME!
+     * Logs a caught exception and sets some members accordingly.
      *
-     * @param  exception  DOCUMENT ME!
+     * @param  exception  The caught exception.
      */
     private void error(final Exception exception) {
         LOG.error("Exception occurred while downloading '" + fileToSaveTo + "'.", exception);
-        exceptionCatchedWhileDownloading = exception;
+        caughtException = exception;
         status = ERROR;
         stateChanged();
     }
 
     /**
-     * DOCUMENT ME!
+     * Starts a thread which downloads the shape export.
      */
     public void startDownload() {
         if (downloadThread == null) {
@@ -185,24 +178,13 @@ public class Download extends Observable implements Runnable, Comparable {
         }
     }
 
-    /**
-     * Get file name portion of URL.
-     *
-     * @param   url  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public String getFileName(final URL url) {
-        final String fileName = url.getFile();
-        return fileName.substring(fileName.lastIndexOf(File.separatorChar) + 1);
-    }
-
     @Override
     public void run() {
         FileOutputStream out = null;
         InputStream resp = null;
 
         try {
+            LOG.info("Sending request \n" + request + "\n to '" + url.toExternalForm() + "'.");
             resp = WebAccessManager.getInstance()
                         .doRequest(
                                 url,
@@ -263,7 +245,7 @@ public class Download extends Observable implements Runnable, Comparable {
     }
 
     /**
-     * DOCUMENT ME!
+     * Marks this observable as changed and notifies observers.
      */
     private void stateChanged() {
         setChanged();

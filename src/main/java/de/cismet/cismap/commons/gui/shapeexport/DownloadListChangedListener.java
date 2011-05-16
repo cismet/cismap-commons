@@ -10,7 +10,7 @@ package de.cismet.cismap.commons.gui.shapeexport;
 import java.util.EventListener;
 
 /**
- * DOCUMENT ME!
+ * The interface for DownloadListChangedListeners.
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$
@@ -20,9 +20,9 @@ public interface DownloadListChangedListener extends EventListener {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * The method to be called by download manager when the download list has changed.
      *
-     * @param  event  DOCUMENT ME!
+     * @param  event  A DownloadListChangedEvent containing the download that has changed.
      */
     void downloadListChanged(DownloadListChangedEvent event);
 }

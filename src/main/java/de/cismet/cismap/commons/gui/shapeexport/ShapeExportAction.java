@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 import java.util.Collection;
@@ -40,7 +41,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
- * DOCUMENT ME!
+ * This action is responsible for the the steps to be done when the user wants to start a shape export.
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$
@@ -71,11 +72,12 @@ public class ShapeExportAction extends AbstractAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         Collection<ExportWFS> wfsList = null;
+        final Component parent = StaticSwingTools.getParentFrame(
+                CismapBroker.getInstance().getMappingComponent());
 
         final ShapeExportDialog dialog = new ShapeExportDialog(CismapBroker.getInstance().getMappingComponent(),
                 ShapeExport.getWFSList());
-        dialog.setLocationRelativeTo(StaticSwingTools.getParentFrame(
-                CismapBroker.getInstance().getMappingComponent()));
+        dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
 
         if (dialog.isCancelled()) {
@@ -86,7 +88,7 @@ public class ShapeExportAction extends AbstractAction {
                     .getCurrentBoundingBox();
         wfsList = dialog.getSelectedWFSs();
         for (final ExportWFS wfs : wfsList) {
-            wfs.setQuery(wfs.getQuery().replace(ShapeExport.getBboxToken(), boundingBox.toGmlString()));
+            wfs.setQuery(wfs.getQuery().replace(ShapeExport.getBboxToken(), boundingBox.toGml4WFS110String()));
         }
 
         DownloadManager.instance().add(wfsList);
@@ -94,8 +96,7 @@ public class ShapeExportAction extends AbstractAction {
         final JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
                     CismapBroker.getInstance().getMappingComponent()));
         if (!downloadManager.isVisible()) {
-            downloadManager.setLocationRelativeTo(StaticSwingTools.getParentFrame(
-                    CismapBroker.getInstance().getMappingComponent()));
+            downloadManager.setLocationRelativeTo(parent);
             downloadManager.setVisible(true);
             downloadManager.pack();
         }

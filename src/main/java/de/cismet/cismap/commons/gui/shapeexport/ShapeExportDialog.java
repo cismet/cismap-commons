@@ -58,7 +58,8 @@ import javax.swing.JPanel;
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
- * DOCUMENT ME!
+ * This dialog lets the user select which topic he wants to export. Every topic is represented by a checkbox. The
+ * checkboxes are created dynamically.
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$
@@ -102,8 +103,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     /**
      * Creates a new ShapeExportDialog object.
      *
-     * @param  parent         DOCUMENT ME!
-     * @param  wfsCollection  DOCUMENT ME!
+     * @param  parent         The parent component.
+     * @param  wfsCollection  The topics to display.
      */
     public ShapeExportDialog(final JComponent parent, final Collection<ExportWFS> wfsCollection) {
         this(StaticSwingTools.getParentFrame(parent), true, wfsCollection);
@@ -112,9 +113,9 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     /**
      * Creates new form WFSExportDialog.
      *
-     * @param  parent         DOCUMENT ME!
-     * @param  modal          DOCUMENT ME!
-     * @param  wfsCollection  DOCUMENT ME!
+     * @param  parent         The parent component.
+     * @param  modal          A flag indicating whether this dialog has to be modal.
+     * @param  wfsCollection  The topics to display.
      */
     public ShapeExportDialog(final java.awt.Frame parent,
             final boolean modal,
@@ -130,7 +131,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Creates the checkboxes dynamically.
      */
     private void createCheckboxes() {
         // Variables 'font' and 'fontRenderContext' are only there to save some coding. Get rid of them if needed ;)
@@ -141,6 +142,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         int maxWidth = -1;
         for (final ExportWFS wfs : wfsCollection) {
             final JCheckBox newCheckBox = new JCheckBox(wfs.getTopic());
+            newCheckBox.setFocusPainted(false);
             newCheckBox.addActionListener(new ActionListener() {
 
                     @Override
@@ -385,9 +387,9 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     } // </editor-fold>//GEN-END:initComponents
 
     /**
-     * DOCUMENT ME!
+     * An action listener for the OK button.
      *
-     * @param  evt  DOCUMENT ME!
+     * @param  evt  The action event.
      */
     private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOKActionPerformed
         cancelled = false;
@@ -404,9 +406,9 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     } //GEN-LAST:event_btnOKActionPerformed
 
     /**
-     * DOCUMENT ME!
+     * An action listener for the cancel button.
      *
-     * @param  evt  DOCUMENT ME!
+     * @param  evt  The action event.
      */
     private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnCancelActionPerformed
         cancelled = true;
@@ -415,27 +417,27 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     }                                                                             //GEN-LAST:event_btnCancelActionPerformed
 
     /**
-     * DOCUMENT ME!
+     * Returns a flag indicating whether the user closed the dialog.
      *
-     * @return  DOCUMENT ME!
+     * @return  A flag indicating whether the user closed the dialog.
      */
     public boolean isCancelled() {
         return cancelled;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns a collection of all topics the user selected.
      *
-     * @return  DOCUMENT ME!
+     * @return  The selected topics.
      */
     public Collection<ExportWFS> getSelectedWFSs() {
         return selectedWFSs;
     }
 
     /**
-     * DOCUMENT ME!
+     * Starts a small test application.
      *
-     * @param  args  DOCUMENT ME!
+     * @param  args  The command line arguments.
      */
     public static final void main(final String[] args) {
         final URL url;
@@ -449,6 +451,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         }
         final ExportWFS wfs1 = new ExportWFS(
                 "Test-Thema 1",
+                "route",
                 "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version=\"1.1.0\" service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
                         + "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">"
                         + "<ogc:Filter>"
@@ -466,6 +469,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
 
         final ExportWFS wfs2 = new ExportWFS(
                 "Dann das Test-Thema 2",
+                "route",
                 "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
                         + "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">"
                         + "<ogc:Filter>"
@@ -483,6 +487,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
 
         final ExportWFS wfs3 = new ExportWFS(
                 "Und dann noch das Test-Thema 3",
+                "oeg",
                 "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
                         + "<wfs:Query typeName=\"app:ogc.oeg\" srsName=\"EPSG:35833\">"
                         + "<ogc:Filter>"

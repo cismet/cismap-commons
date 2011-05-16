@@ -52,7 +52,8 @@ import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
 
 /**
- * DOCUMENT ME!
+ * This class configures the shape export functionality in cismap. Therefore it reads the corresponding part of
+ * defaultCismapProperties.xml and provides the buttons for cismap's toolbar.
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$
@@ -74,6 +75,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
     private static final String XML_DESTINATION = "destination";
     private static final String XML_DIRECTORY = "directory";
     private static final String XML_FILE = "file";
+    private static final String XML_WFS_FILE = "file";
     private static final String XML_EXTENSION = "extension";
 
     private static Set<ExportWFS> wfsList = new LinkedHashSet<ExportWFS>();
@@ -91,45 +93,48 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Returns a Set of all configured export topics. The Set is ordered by the appearance of the topics in the config
+     * file.
      *
-     * @return  DOCUMENT ME!
+     * @return  A Set of available topics.
      */
     public static Set<ExportWFS> getWFSList() {
         return wfsList;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the string which serves as a replacement token to put a bounding box in the configured WFS queries. This
+     * token is later replaced by a XBoundingBox's GML string.
      *
-     * @return  DOCUMENT ME!
+     * @return  The replacement token for a bounding box in a WFS query.
      */
     public static String getBboxToken() {
         return bboxToken;
     }
 
     /**
-     * DOCUMENT ME!
+     * Shape exports shall be saved in a directory somewhere in user's home directory. This method will return a file
+     * object pointing to that directory. This directory is already tested for existence and, if necessary, created.
      *
-     * @return  DOCUMENT ME!
+     * @return  A file object pointing to the directory where to place exports.
      */
     public static File getDestinationDirectory() {
         return destinationDirectory;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns a String object which denotes the file name which is to be used for shape exports.
      *
-     * @return  DOCUMENT ME!
+     * @return  The file name for shape exports.
      */
     public static String getDestinationFile() {
         return destinationFile;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the configured extension for shape exports. Usually it is set to ".zip".
      *
-     * @return  DOCUMENT ME!
+     * @return  The file extension for shape exports.
      */
     public static String getDestinationFileExtension() {
         return destinationFileExtension;
@@ -155,46 +160,6 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
                         + this.bboxToken + "'.");
         } else {
             this.bboxToken = bboxToken.getText();
-        }
-
-        final List<Element> exportWFSs = cismapShapeExport.getChildren(XML_WFS);
-
-        for (final Element exportWFS : exportWFSs) {
-            final Element title = exportWFS.getChild(XML_WFS_TITLE);
-            final Element url = exportWFS.getChild(XML_WFS_URL);
-            final Element query = exportWFS.getChild(XML_WFS_QUERY);
-
-            if ((title != null) && (url != null)) {
-                final String contentOfTitle = title.getText();
-                final String contentOfUrl = url.getText();
-                final String contentOfQuery = query.getText();
-
-                if ((contentOfTitle != null) && (contentOfTitle.trim().length() > 0)
-                            && (contentOfUrl != null)
-                            && (contentOfUrl.trim().length() > 0)
-                            && (contentOfQuery != null)
-                            && (contentOfQuery.trim().length() > 0)) {
-                    URL convertedUrl = null;
-
-                    try {
-                        convertedUrl = new URL(contentOfUrl);
-                    } catch (MalformedURLException e) {
-                        LOG.error("The given URL for WFS '" + contentOfTitle
-                                    + "' is invalid. This WFS will be skipped for shape export.",
-                            e);
-                    }
-
-                    if (convertedUrl != null) {
-                        wfsList.add(new ExportWFS(contentOfTitle, contentOfQuery, convertedUrl));
-                    }
-                }
-            }
-        }
-
-        if (wfsList.isEmpty()) {
-            LOG.warn(
-                "Could not read the list of WFSs for shape export. The export functionality will not be available.");
-            enableShapeExport = false;
         }
 
         final Element destination = cismapShapeExport.getChild(XML_DESTINATION);
@@ -251,6 +216,51 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
                         + "'.");
         } else {
             destinationFileExtension = extension.getText();
+        }
+
+        final List<Element> exportWFSs = cismapShapeExport.getChildren(XML_WFS);
+
+        for (final Element exportWFS : exportWFSs) {
+            final Element title = exportWFS.getChild(XML_WFS_TITLE);
+            final Element wfsFile = exportWFS.getChild(XML_WFS_FILE);
+            final Element url = exportWFS.getChild(XML_WFS_URL);
+            final Element query = exportWFS.getChild(XML_WFS_QUERY);
+
+            if ((title != null) && (url != null) && (query != null)) {
+                final String contentOfTitle = title.getText();
+                final String contentOfUrl = url.getText();
+                final String contentOfQuery = query.getText();
+                String contentOfWfsFile = destinationFile;
+                if ((wfsFile != null) && (wfsFile.getText() != null) && (wfsFile.getText().trim().length() > 0)) {
+                    contentOfWfsFile = wfsFile.getText();
+                }
+
+                if ((contentOfTitle != null) && (contentOfTitle.trim().length() > 0)
+                            && (contentOfUrl != null)
+                            && (contentOfUrl.trim().length() > 0)
+                            && (contentOfQuery != null)
+                            && (contentOfQuery.trim().length() > 0)) {
+                    URL convertedUrl = null;
+
+                    try {
+                        convertedUrl = new URL(contentOfUrl);
+                    } catch (MalformedURLException e) {
+                        LOG.error("The given URL for WFS '" + contentOfTitle
+                                    + "' is invalid. This WFS will be skipped for shape export.",
+                            e);
+                    }
+
+                    if (convertedUrl != null) {
+                        wfsList.add(new ExportWFS(contentOfTitle, contentOfWfsFile, contentOfQuery, convertedUrl));
+                    }
+                }
+            }
+        }
+
+        if (wfsList.isEmpty()) {
+            LOG.warn(
+                "Could not read the list of WFSs for shape export. The export functionality will not be available.");
+            enableShapeExport = false;
         }
     }
 
