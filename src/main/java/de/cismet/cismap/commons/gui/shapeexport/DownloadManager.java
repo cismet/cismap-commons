@@ -182,13 +182,6 @@ public class DownloadManager implements Observer {
                         DownloadListChangedEvent.Action.ERROR));
                 break;
             }
-            case Download.NO_DATA: {
-                notifyDownloadListChanged(new DownloadListChangedEvent(
-                        this,
-                        download,
-                        DownloadListChangedEvent.Action.NO_DATA));
-                break;
-            }
         }
     }
 
