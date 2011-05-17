@@ -344,7 +344,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 5, 5);
         pnlExportParameters.add(lblDialogHint, gridBagConstraints);
 
         lblStep1Header.setFont(new java.awt.Font("Tahoma", 1, 11));
@@ -358,9 +358,6 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 0);
         pnlExportParameters.add(lblStep1Header, gridBagConstraints);
-
-        sepStep1Header.setMaximumSize(new java.awt.Dimension(0, 0));
-        sepStep1Header.setPreferredSize(new java.awt.Dimension(0, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;

@@ -53,6 +53,8 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
+import de.cismet.security.exceptions.BadHttpStatusCodeException;
+
 /**
  * Visualizes the download list of DownloadManager. New downloads are dynamically added, completed ones are removed.
  * Erraneous downloads are marked red. This panel is informed of new, completed or erraneous downloads via the
@@ -194,8 +196,7 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
                 remove(downloads);
                 break;
             }
-            case ERROR: 
-            case NO_DATA: {
+            case ERROR: {
                 remove(downloads);
                 add(downloads);
                 break;
@@ -286,21 +287,27 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
         layoutConstraints.gridx = 2;
 
         if (download.getStatus() == Download.ERROR) {
+            int statuscode = -1;
+            if (download.getCaughtException() instanceof BadHttpStatusCodeException) {
+                statuscode = ((BadHttpStatusCodeException)download.getCaughtException()).getHttpStatuscode();
+                LOG.info("Couldn't download '" + download.getFileToSaveTo().getAbsolutePath()
+                            + "' because of HTTP code '" + statuscode + "'.");
+            }
+
+            JButton btnError = null;
+
+            if (statuscode == 204) {
+                btnError = new JButton(new DisplayNoDataAction(
+                            this,
+                            download.getCaughtException()));
+            } else {
+                btnError = new JButton(new DisplayErrorAction(
+                            this,
+                            download.getCaughtException()));
+            }
+
             lblTitle.setForeground(Color.red);
             lblUrl.setForeground(Color.red);
-            final JButton btnError = new JButton(new DisplayErrorAction(
-                        this,
-                        download.getCaughtException()));
-            layoutConstraints.insets = new Insets(0, 5, 0, 5);
-            layoutConstraints.anchor = GridBagConstraints.LINE_END;
-            add(btnError, layoutConstraints);
-            components.add(btnError);
-        } else if (download.getStatus() == Download.NO_DATA) {
-            lblTitle.setForeground(Color.orange);
-            lblUrl.setForeground(Color.orange);
-            final JButton btnError = new JButton(new DisplayNoDataAction(
-                        this,
-                        download.getCaughtException()));
             layoutConstraints.insets = new Insets(0, 5, 0, 5);
             layoutConstraints.anchor = GridBagConstraints.LINE_END;
             add(btnError, layoutConstraints);
@@ -387,13 +394,13 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
          * @param  exception  The exception caught.
          */
         public DisplayErrorAction(final Component parent, final Exception exception) {
-            super(NbBundle.getMessage(DownloadManagerPanel.class, "DownloadManagerPanel.DisplayNoDataAction.text"));
+            super(NbBundle.getMessage(DownloadManagerPanel.class, "DownloadManagerPanel.DisplayErrorAction.text"));
             this.parent = parent;
             this.exception = exception;
 
             setToolTipText(NbBundle.getMessage(
                     DownloadManagerPanel.class,
-                    "DownloadManagerPanel.DisplayNoDataAction.tooltiptext"));
+                    "DownloadManagerPanel.DisplayErrorAction.tooltiptext"));
         }
 
         //~ Methods ------------------------------------------------------------
@@ -405,11 +412,11 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
                 exception,
                 NbBundle.getMessage(
                     DownloadManagerPanel.class,
-                    "DownloadManagerPanel.DisplayNoDataAction.actionPerformed(ActionEvent).JOptionPane.title"),
+                    "DownloadManagerPanel.DisplayErrorAction.actionPerformed(ActionEvent).JOptionPane.title"),
                 JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     /**
      * This action displays a dialog to visualize the error caught while downloading.
      *
@@ -431,13 +438,13 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
          * @param  exception  The exception caught.
          */
         public DisplayNoDataAction(final Component parent, final Exception exception) {
-            super(NbBundle.getMessage(DownloadManagerPanel.class, "DownloadManagerPanel.DisplayErrorAction.text"));
+            super(NbBundle.getMessage(DownloadManagerPanel.class, "DownloadManagerPanel.DisplayNoDataAction.text"));
             this.parent = parent;
             this.exception = exception;
 
             setToolTipText(NbBundle.getMessage(
                     DownloadManagerPanel.class,
-                    "DownloadManagerPanel.DisplayErrorAction.tooltiptext"));
+                    "DownloadManagerPanel.DisplayNoDataAction.tooltiptext"));
         }
 
         //~ Methods ------------------------------------------------------------
@@ -449,7 +456,7 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
                 exception,
                 NbBundle.getMessage(
                     DownloadManagerPanel.class,
-                    "DownloadManagerPanel.DisplayErrorAction.actionPerformed(ActionEvent).JOptionPane.title"),
+                    "DownloadManagerPanel.DisplayNoDataAction.actionPerformed(ActionEvent).JOptionPane.title"),
                 JOptionPane.ERROR_MESSAGE);
         }
     }
