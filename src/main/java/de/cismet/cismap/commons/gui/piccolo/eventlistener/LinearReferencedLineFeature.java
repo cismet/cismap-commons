@@ -57,8 +57,8 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
     private Geometry baseLineGeom;
     private FeatureCollectionListener featureCollectionListener;
     private boolean featCollLock = false;
-    private StationListener fromStationListener;
-    private StationListener toStationListener;
+    private LinearReferencedPointFeatureHandler fromPointListener;
+    private LinearReferencedPointFeatureHandler toPointListener;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -76,8 +76,8 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
         setLinePaint(DEFAULT_COLOR);
         setPrimaryAnnotationVisible(false);
 
-        fromStationListener = new StationListener(FROM);
-        toStationListener = new StationListener(TO);
+        fromPointListener = new LinearReferencedPointFeatureHandler(FROM);
+        toPointListener = new LinearReferencedPointFeatureHandler(TO);
 
         setPointFeature(fromFeature, FROM);
         setPointFeature(toFeature, TO);
@@ -97,7 +97,7 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
      */
     public final void setPointFeature(final LinearReferencedPointFeature feature, final boolean isFrom) {
         final LinearReferencedPointFeature oldFeature = (isFrom) ? fromFeature : toFeature;
-        final StationListener listener = (isFrom) ? fromStationListener : toStationListener;
+        final LinearReferencedPointFeatureHandler listener = (isFrom) ? fromPointListener : toPointListener;
         if (oldFeature != null) {
             oldFeature.removeListener(listener);
         }
@@ -116,7 +116,7 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
      *
      * @return  DOCUMENT ME!
      */
-    public LinearReferencedPointFeature getStationFeature(final boolean isFrom) {
+    public LinearReferencedPointFeature getPointFeature(final boolean isFrom) {
         return (isFrom) ? fromFeature : toFeature;
     }
 
@@ -248,7 +248,7 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
      *
      * @version  $Revision$, $Date$
      */
-    class StationListener implements LinearReferencedPointFeatureListener {
+    class LinearReferencedPointFeatureHandler implements LinearReferencedPointFeatureListener {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -257,11 +257,11 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
         //~ Constructors -------------------------------------------------------
 
         /**
-         * Creates a new StationListener object.
+         * Creates a new LinearReferencedPointFeatureHandler object.
          *
          * @param  isFrom  DOCUMENT ME!
          */
-        StationListener(final boolean isFrom) {
+        LinearReferencedPointFeatureHandler(final boolean isFrom) {
             this.isFrom = isFrom;
         }
 
