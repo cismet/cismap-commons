@@ -30,30 +30,13 @@ package de.cismet.cismap.commons.gui.shapeexport;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.NbBundle;
-
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
-
-import de.cismet.security.exceptions.BadHttpStatusCodeException;
+import javax.swing.Box;
 
 /**
  * Visualizes the download list of DownloadManager. New downloads are dynamically added, completed ones are removed.
@@ -63,7 +46,7 @@ import de.cismet.security.exceptions.BadHttpStatusCodeException;
  * @author   jweintraut
  * @version  $Revision$, $Date$
  */
-public class DownloadManagerPanel extends javax.swing.JPanel implements DownloadListChangedListener, WindowListener {
+public class DownloadManagerPanel extends javax.swing.JPanel implements DownloadListChangedListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -71,28 +54,19 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
 
     //~ Instance fields --------------------------------------------------------
 
-    private int countOfCurrentDownloads = 0;
-    private Map<Download, Integer> positions = new HashMap<Download, Integer>();
-    private Map<Download, List<Component>> components = new HashMap<Download, List<Component>>();
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel lblDestinationFile;
-    private javax.swing.JLabel lblStatus;
-    private javax.swing.JLabel lblWFS;
-    private javax.swing.JPanel pnlFill;
-    private javax.swing.JSeparator sepHeader;
-    // End of variables declaration//GEN-END:variables
+    private Map<Download, DownloadPanel> panels = new HashMap<Download, DownloadPanel>();
+    private Component verticalGlue = Box.createVerticalGlue();
 
     //~ Constructors -----------------------------------------------------------
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // End of variables declaration//GEN-END:variables
 
     /**
      * Creates new form DownloadManagerPanel.
      */
     public DownloadManagerPanel() {
         initComponents();
-
-        add(DownloadManager.instance().getDownloads().keySet());
-        DownloadManager.instance().addDownloadListChangedListener(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -104,81 +78,55 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
-
-        lblWFS = new javax.swing.JLabel();
-        lblDestinationFile = new javax.swing.JLabel();
-        lblStatus = new javax.swing.JLabel();
-        sepHeader = new javax.swing.JSeparator();
-        pnlFill = new javax.swing.JPanel();
-
-        setLayout(new java.awt.GridBagLayout());
-
-        lblWFS.setText(org.openide.util.NbBundle.getMessage(
-                DownloadManagerPanel.class,
-                "DownloadManagerPanel.lblWFS.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
-        gridBagConstraints.weightx = 0.2;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblWFS, gridBagConstraints);
-
-        lblDestinationFile.setText(org.openide.util.NbBundle.getMessage(
-                DownloadManagerPanel.class,
-                "DownloadManagerPanel.lblDestinationFile.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
-        gridBagConstraints.weightx = 0.8;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblDestinationFile, gridBagConstraints);
-
-        lblStatus.setText(org.openide.util.NbBundle.getMessage(
-                DownloadManagerPanel.class,
-                "DownloadManagerPanel.lblStatus.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_START;
-        gridBagConstraints.weightx = 0.2;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblStatus, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        add(sepHeader, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        add(pnlFill, gridBagConstraints);
-    }                                                    // </editor-fold>//GEN-END:initComponents
+        setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
+    } // </editor-fold>//GEN-END:initComponents
 
     /**
      * Adds new downloads to display.
      *
      * @param  downloads  A collection of new downloads.
      */
-    public void add(final Collection<Download> downloads) {
-        for (final Download download : downloads) {
-            countOfCurrentDownloads++;
-
-            final List<Component> componentsOfDownload = new LinkedList<Component>();
-            addDownloadToPosition(download, countOfCurrentDownloads + 1, componentsOfDownload);
-            components.put(download, componentsOfDownload);
-
-            positions.put(download, new Integer(countOfCurrentDownloads));
+    public synchronized void add(final Collection<Download> downloads) {
+        if ((downloads == null) || (downloads.size() <= 0)) {
+            return;
         }
 
-        moveFillingPanel(countOfCurrentDownloads + 2);
+        remove(verticalGlue);
+
+        for (final Download download : downloads) {
+            final DownloadPanel pnlDownload = new DownloadPanel(download);
+            add(pnlDownload);
+
+            panels.put(download, pnlDownload);
+        }
+
+        add(verticalGlue);
+
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * Removes the given downloads from the panel.
+     *
+     * @param  downloads  The downloads to remove.
+     */
+    protected synchronized void remove(final Collection<Download> downloads) {
+        if ((downloads == null) || (downloads.size() <= 0)) {
+            return;
+        }
+
+        remove(verticalGlue);
+
+        for (final Download download : downloads) {
+            final DownloadPanel pnlDownload = panels.get(download);
+
+            remove(pnlDownload);
+            panels.remove(download);
+        }
+
+        add(verticalGlue);
+
         revalidate();
         repaint();
     }
@@ -196,268 +144,6 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
                 remove(downloads);
                 break;
             }
-            case ERROR: {
-                remove(downloads);
-                add(downloads);
-                break;
-            }
-        }
-    }
-
-    /**
-     * Removes the given downloads from the panel.
-     *
-     * @param  downloads  The downloads to remove.
-     */
-    protected void remove(final Collection<Download> downloads) {
-        for (final Download download : downloads) {
-            final Integer positionInLayout = positions.get(download);
-            final List<Component> componentsOfDownload = components.get(download);
-
-            for (final Component component : componentsOfDownload) {
-                remove(component);
-            }
-            components.remove(download);
-            positions.remove(download);
-            countOfCurrentDownloads--;
-
-            rearrangeDownloads(positionInLayout);
-        }
-
-        moveFillingPanel(countOfCurrentDownloads + 2);
-
-        revalidate();
-        repaint();
-    }
-
-    /**
-     * Since this panel works with the help of GridbagLayout to dynamically visualize the current downloads, the
-     * components have to be rearranged as soon as a download is deleted. This is done by this method.
-     *
-     * @param  positionInLayout  The position of the removed download.
-     */
-    protected void rearrangeDownloads(final Integer positionInLayout) {
-        final List<Download> downloadsToRearrange = new LinkedList<Download>();
-        for (final Entry<Download, Integer> entry : positions.entrySet()) {
-            if (entry.getValue() > positionInLayout) {
-                entry.setValue(entry.getValue() - 1);
-                downloadsToRearrange.add(entry.getKey());
-            }
-        }
-
-        for (final Download downloadToRearrange : downloadsToRearrange) {
-            final List<Component> componentsToDelete = components.get(downloadToRearrange);
-
-            for (final Component componentToDelete : componentsToDelete) {
-                remove(componentToDelete);
-            }
-            components.remove(downloadToRearrange);
-
-            final Integer position = positions.get(downloadToRearrange);
-            final List<Component> componentsAdded = new LinkedList<Component>();
-            addDownloadToPosition(downloadToRearrange, position + 1, componentsAdded);
-            components.put(downloadToRearrange, componentsAdded);
-        }
-    }
-
-    /**
-     * Handles all the GUI stuff to be done when a download was added. All corresponding components will be added to the
-     * given collection object.
-     *
-     * @param  download    The download added.
-     * @param  position    The position of the new download.
-     * @param  components  The collection of components added for this download.
-     */
-    protected void addDownloadToPosition(final Download download,
-            final int position,
-            final List<Component> components) {
-        final GridBagConstraints layoutConstraints = new GridBagConstraints();
-        layoutConstraints.anchor = GridBagConstraints.LINE_START;
-        layoutConstraints.insets = new Insets(5, 5, 5, 5);
-        layoutConstraints.gridy = position;
-
-        layoutConstraints.gridx = 0;
-        final JLabel lblTitle = new JLabel(download.getTopic());
-        add(lblTitle, layoutConstraints);
-
-        layoutConstraints.gridx = 1;
-        final JLabel lblUrl = new JLabel(download.getFileToSaveTo().getAbsolutePath());
-        add(lblUrl, layoutConstraints);
-
-        layoutConstraints.gridx = 2;
-
-        if (download.getStatus() == Download.ERROR) {
-            int statuscode = -1;
-            if (download.getCaughtException() instanceof BadHttpStatusCodeException) {
-                statuscode = ((BadHttpStatusCodeException)download.getCaughtException()).getHttpStatuscode();
-                LOG.info("Couldn't download '" + download.getFileToSaveTo().getAbsolutePath()
-                            + "' because of HTTP code '" + statuscode + "'.");
-            }
-
-            JButton btnError = null;
-
-            if (statuscode == 204) {
-                btnError = new JButton(new DisplayNoDataAction(
-                            this,
-                            download.getCaughtException()));
-            } else {
-                btnError = new JButton(new DisplayErrorAction(
-                            this,
-                            download.getCaughtException()));
-            }
-
-            lblTitle.setForeground(Color.red);
-            lblUrl.setForeground(Color.red);
-            layoutConstraints.insets = new Insets(0, 5, 0, 5);
-            layoutConstraints.anchor = GridBagConstraints.LINE_END;
-            add(btnError, layoutConstraints);
-            components.add(btnError);
-        } else {
-            final JProgressBar progressBar = new JProgressBar();
-            add(progressBar, layoutConstraints);
-            progressBar.setIndeterminate(true);
-            components.add(progressBar);
-        }
-
-        components.add(lblTitle);
-        components.add(lblUrl);
-    }
-
-    /**
-     * Rearranges the panel which servers as a dummy. This dummy prevents UI glitches when the user resizes the panel.
-     *
-     * @param  position  The position of the dummy panel.
-     */
-    protected void moveFillingPanel(final int position) {
-        remove(pnlFill);
-
-        final GridBagConstraints layoutConstraints = new GridBagConstraints();
-        layoutConstraints.fill = GridBagConstraints.BOTH;
-        layoutConstraints.gridwidth = 3;
-        layoutConstraints.gridx = 0;
-        layoutConstraints.gridy = position;
-        layoutConstraints.weightx = 1.0;
-        layoutConstraints.weighty = 1.0;
-
-        add(pnlFill, layoutConstraints);
-    }
-
-    @Override
-    public void windowOpened(final WindowEvent e) {
-    }
-
-    @Override
-    public void windowClosing(final WindowEvent e) {
-        DownloadManager.instance().removeDownloadListChangedListener(this);
-    }
-
-    @Override
-    public void windowClosed(final WindowEvent e) {
-    }
-
-    @Override
-    public void windowIconified(final WindowEvent e) {
-    }
-
-    @Override
-    public void windowDeiconified(final WindowEvent e) {
-    }
-
-    @Override
-    public void windowActivated(final WindowEvent e) {
-    }
-
-    @Override
-    public void windowDeactivated(final WindowEvent e) {
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * This action displays a dialog to visualize the error caught while downloading.
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class DisplayErrorAction extends AbstractAction {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private Component parent;
-        private Exception exception;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new DisplayErrorAction object.
-         *
-         * @param  parent     The parent component.
-         * @param  exception  The exception caught.
-         */
-        public DisplayErrorAction(final Component parent, final Exception exception) {
-            super(NbBundle.getMessage(DownloadManagerPanel.class, "DownloadManagerPanel.DisplayErrorAction.text"));
-            this.parent = parent;
-            this.exception = exception;
-
-            setToolTipText(NbBundle.getMessage(
-                    DownloadManagerPanel.class,
-                    "DownloadManagerPanel.DisplayErrorAction.tooltiptext"));
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            JOptionPane.showMessageDialog(
-                parent,
-                exception,
-                NbBundle.getMessage(
-                    DownloadManagerPanel.class,
-                    "DownloadManagerPanel.DisplayErrorAction.actionPerformed(ActionEvent).JOptionPane.title"),
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    /**
-     * This action displays a dialog to visualize the error caught while downloading.
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class DisplayNoDataAction extends AbstractAction {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private Component parent;
-        private Exception exception;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new DisplayErrorAction object.
-         *
-         * @param  parent     The parent component.
-         * @param  exception  The exception caught.
-         */
-        public DisplayNoDataAction(final Component parent, final Exception exception) {
-            super(NbBundle.getMessage(DownloadManagerPanel.class, "DownloadManagerPanel.DisplayNoDataAction.text"));
-            this.parent = parent;
-            this.exception = exception;
-
-            setToolTipText(NbBundle.getMessage(
-                    DownloadManagerPanel.class,
-                    "DownloadManagerPanel.DisplayNoDataAction.tooltiptext"));
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            JOptionPane.showMessageDialog(
-                parent,
-                exception,
-                NbBundle.getMessage(
-                    DownloadManagerPanel.class,
-                    "DownloadManagerPanel.DisplayNoDataAction.actionPerformed(ActionEvent).JOptionPane.title"),
-                JOptionPane.ERROR_MESSAGE);
         }
     }
 }

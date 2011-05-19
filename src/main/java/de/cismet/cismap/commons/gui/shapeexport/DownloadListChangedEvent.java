@@ -31,7 +31,7 @@ public class DownloadListChangedEvent extends EventObject {
 
         //~ Enum constants -----------------------------------------------------
 
-        ADDED, REMOVED, ERROR
+        ADDED, REMOVED, CHANGED_COUNTERS
     }
 
     //~ Instance fields --------------------------------------------------------

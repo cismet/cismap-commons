@@ -80,7 +80,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
 
     private static Set<ExportWFS> wfsList = new LinkedHashSet<ExportWFS>();
     private static String bboxToken = "<cismap:BBOX/>";
-    private static File destinationDirectory;
+    private static File destinationDirectory = new File(System.getProperty("user.dir"));
     private static String destinationFile = "export";
     private static String destinationFileExtension = ".zip";
 
