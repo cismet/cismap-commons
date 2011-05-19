@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Observable;
@@ -38,9 +37,11 @@ public class DownloadManager implements Observer {
 
     //~ Instance fields --------------------------------------------------------
 
-    private Map<Download, ExportWFS> downloads = new HashMap<Download, ExportWFS>();
-    private int countOfCurrentDownloads = 0;
+    private Collection<Download> downloads = new LinkedHashSet<Download>();
     private EventListenerList listeners = new EventListenerList();
+    private int countDownloadsTotal = 0;
+    private int countDownloadsRunning = 0;
+    private int countDownloadsErraneous = 0;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -84,20 +85,57 @@ public class DownloadManager implements Observer {
             }
 
             final Download download = new Download(wfs.getUrl(), wfs.getQuery(), wfs.getTopic(), destinationFile);
-            download.addObserver(this);
-            downloads.put(download, wfs);
-
-            countOfCurrentDownloads++;
-
-            download.startDownload();
-
+            downloads.add(download);
             downloadsAdded.add(download);
+            countDownloadsTotal++;
+
+            download.addObserver(this);
+            download.startDownload();
         }
 
-        notifyDownloadListChanged(new DownloadListChangedEvent(
-                this,
-                downloadsAdded,
-                DownloadListChangedEvent.Action.ADDED));
+        if (downloadsAdded.size() > 0) {
+            notifyDownloadListChanged(new DownloadListChangedEvent(
+                    this,
+                    downloadsAdded,
+                    DownloadListChangedEvent.Action.ADDED));
+            notifyDownloadListChanged(new DownloadListChangedEvent(
+                    this,
+                    downloadsAdded,
+                    DownloadListChangedEvent.Action.CHANGED_COUNTERS));
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public synchronized void removeObsoleteDownloads() {
+        final Collection<Download> downloadsRemoved = new LinkedHashSet<Download>();
+
+        for (final Download download : downloads) {
+            if ((download.getStatus() == Download.COMPLETED) || (download.getStatus() == Download.ERROR)) {
+                downloadsRemoved.add(download);
+            }
+        }
+
+        if (downloadsRemoved.size() > 0) {
+            for (final Download download : downloadsRemoved) {
+                downloads.remove(download);
+                countDownloadsTotal--;
+
+                if (download.getStatus() == Download.ERROR) {
+                    countDownloadsErraneous--;
+                }
+            }
+
+            notifyDownloadListChanged(new DownloadListChangedEvent(
+                    this,
+                    downloadsRemoved,
+                    DownloadListChangedEvent.Action.REMOVED));
+            notifyDownloadListChanged(new DownloadListChangedEvent(
+                    this,
+                    downloadsRemoved,
+                    DownloadListChangedEvent.Action.CHANGED_COUNTERS));
+        }
     }
 
     /**
@@ -153,8 +191,35 @@ public class DownloadManager implements Observer {
      *
      * @return  The current download list.
      */
-    public Map<Download, ExportWFS> getDownloads() {
+    public Collection<Download> getDownloads() {
         return downloads;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getCountDownloadsErraneous() {
+        return countDownloadsErraneous;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getCountDownloadsRunning() {
+        return countDownloadsRunning;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getCountDownloadsTotal() {
+        return countDownloadsTotal;
     }
 
     @Override
@@ -166,23 +231,25 @@ public class DownloadManager implements Observer {
         final Download download = (Download)o;
 
         switch (download.getStatus()) {
-            case Download.COMPLETE: {
-                downloads.remove(download);
-                countOfCurrentDownloads--;
-                notifyDownloadListChanged(new DownloadListChangedEvent(
-                        this,
-                        download,
-                        DownloadListChangedEvent.Action.REMOVED));
+            case Download.COMPLETED: {
+                countDownloadsRunning--;
                 break;
             }
             case Download.ERROR: {
-                notifyDownloadListChanged(new DownloadListChangedEvent(
-                        this,
-                        download,
-                        DownloadListChangedEvent.Action.ERROR));
+                countDownloadsRunning--;
+                countDownloadsErraneous++;
+                break;
+            }
+            case Download.RUNNING: {
+                countDownloadsRunning++;
                 break;
             }
         }
+
+        notifyDownloadListChanged(new DownloadListChangedEvent(
+                this,
+                download,
+                DownloadListChangedEvent.Action.CHANGED_COUNTERS));
     }
 
     /**

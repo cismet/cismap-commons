@@ -31,11 +31,8 @@ package de.cismet.cismap.commons.gui.shapeexport;
 import org.apache.log4j.Logger;
 
 import org.openide.util.Exceptions;
-import org.openide.util.NbBundle;
 
-import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.font.FontRenderContext;
@@ -50,10 +47,12 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeSet;
 
+import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.JDialog;
+
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
 
@@ -88,10 +87,10 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     private javax.swing.JLabel lblSteps;
     private javax.swing.JPanel panDesc;
     private javax.swing.JPanel pnlButtons;
+    private javax.swing.JPanel pnlCheckboxes;
     private javax.swing.JPanel pnlControls;
     private javax.swing.JPanel pnlExportParameters;
     private javax.swing.JPanel pnlFillDesc;
-    private javax.swing.JPanel pnlFillExportParameters;
     private javax.swing.JScrollPane scpExportParameters;
     private javax.swing.JSeparator sepControls;
     private javax.swing.JSeparator sepStep1Header;
@@ -143,6 +142,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         for (final ExportWFS wfs : wfsCollection) {
             final JCheckBox newCheckBox = new JCheckBox(wfs.getTopic());
             newCheckBox.setFocusPainted(false);
+            newCheckBox.setAlignmentX(1F);
             newCheckBox.addActionListener(new ActionListener() {
 
                     @Override
@@ -176,34 +176,16 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         }
 
         // Calculate the gap between checkbox and text and add the checkboxes to the panel
-        int verticalPosition = 3;
-        final GridBagConstraints layoutConstraints = new GridBagConstraints();
-        layoutConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-        layoutConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        layoutConstraints.gridx = 2;
-        layoutConstraints.weightx = 0;
-
         for (final ExportWFS wfs : this.wfsCollection) {
-            layoutConstraints.gridy = verticalPosition;
-            verticalPosition++;
-
             final JCheckBox newCheckBox = checkboxes.get(wfs);
             newCheckBox.setIconTextGap((maxWidth
                             - (int)font.getStringBounds(newCheckBox.getText(),
                                 fontRenderContext).getWidth()) + 10);
-            pnlExportParameters.add(newCheckBox, layoutConstraints);
+            pnlCheckboxes.add(newCheckBox);
         }
-
-        // Add a panel which fills the remaining space. Especially useful for users who like to resize dialogs.
-        final JPanel pnlFill = new JPanel();
-        pnlFill.setOpaque(false);
-        layoutConstraints.fill = GridBagConstraints.BOTH;
-        layoutConstraints.gridwidth = 3;
-        layoutConstraints.gridx = 0;
-        layoutConstraints.gridy = verticalPosition;
-        layoutConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
-        layoutConstraints.weighty = 1.0;
-        pnlExportParameters.add(pnlFill, layoutConstraints);
+        pnlCheckboxes.add(Box.createVerticalGlue());
+        pnlCheckboxes.validate();
+        scpExportParameters.setMinimumSize(pnlCheckboxes.getMinimumSize());
 
         pack();
     }
@@ -228,15 +210,16 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         lblStep1 = new javax.swing.JLabel();
         lblIcon = new javax.swing.JLabel();
         pnlFillDesc = new javax.swing.JPanel();
-        scpExportParameters = new javax.swing.JScrollPane();
         pnlExportParameters = new javax.swing.JPanel();
         lblDialogHint = new javax.swing.JLabel();
         lblStep1Header = new javax.swing.JLabel();
         sepStep1Header = new javax.swing.JSeparator();
-        pnlFillExportParameters = new javax.swing.JPanel();
+        scpExportParameters = new javax.swing.JScrollPane();
+        pnlCheckboxes = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(org.openide.util.NbBundle.getMessage(ShapeExportDialog.class, "ShapeExportDialog.title")); // NOI18N
+        setMinimumSize(new java.awt.Dimension(529, 250));
         setModal(true);
 
         pnlControls.setLayout(new java.awt.BorderLayout());
@@ -333,8 +316,6 @@ public class ShapeExportDialog extends javax.swing.JDialog {
 
         getContentPane().add(panDesc, java.awt.BorderLayout.LINE_START);
 
-        scpExportParameters.setBorder(null);
-
         pnlExportParameters.setLayout(new java.awt.GridBagLayout());
 
         lblDialogHint.setText(org.openide.util.NbBundle.getMessage(
@@ -354,14 +335,14 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 0);
         pnlExportParameters.add(lblStep1Header, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.ipadx = 319;
         gridBagConstraints.ipady = 1;
@@ -369,16 +350,22 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         pnlExportParameters.add(sepStep1Header, gridBagConstraints);
+
+        scpExportParameters.setBorder(null);
+
+        pnlCheckboxes.setLayout(new javax.swing.BoxLayout(pnlCheckboxes, javax.swing.BoxLayout.PAGE_AXIS));
+        scpExportParameters.setViewportView(pnlCheckboxes);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        pnlExportParameters.add(pnlFillExportParameters, gridBagConstraints);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHEAST;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
+        pnlExportParameters.add(scpExportParameters, gridBagConstraints);
 
-        scpExportParameters.setViewportView(pnlExportParameters);
-
-        getContentPane().add(scpExportParameters, java.awt.BorderLayout.CENTER);
+        getContentPane().add(pnlExportParameters, java.awt.BorderLayout.CENTER);
 
         pack();
     } // </editor-fold>//GEN-END:initComponents
@@ -448,7 +435,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         final URL url;
         final URL erraneousURL;
         try {
-            url = new URL("http://wfs.fis-wasser-mv.de/services");
+            // url = new URL("http://wfs.fis-wasser-mv.de/services");
+            url = new URL("http://flexo.cismet.de:8080/deegree-wfs/services");
             erraneousURL = new URL("http://doesntexist.fis-wasser-mv.de/services");
         } catch (MalformedURLException ex) {
             Exceptions.printStackTrace(ex);
@@ -561,6 +549,113 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "</wfs:Query>"
                         + "</wfs:GetFeature>",
                 url);
+        final ExportWFS wfs4 = new ExportWFS(
+                "Test-Thema 1",
+                "route",
+                "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version=\"1.1.0\" service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
+                        + "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">"
+                        + "<ogc:Filter>"
+                        + "<ogc:BBOX>"
+                        + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
+                        + "<cismap:BBOX/>"
+                        + "</ogc:BBOX>"
+                        + "</ogc:Filter>"
+                        + "<wfs:PropertyName>app:id</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:gwk</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
+                        + "</wfs:Query>"
+                        + "</wfs:GetFeature>",
+                url);
+
+        final ExportWFS wfs5 = new ExportWFS(
+                "Dann das Test-Thema 2",
+                "route",
+                "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
+                        + "<wfs:Query typeName=\"app:route\" srsName=\"EPSG:35833\">"
+                        + "<ogc:Filter>"
+                        + "<ogc:BBOX>"
+                        + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
+                        + "<cismap:BBOX/>"
+                        + "</ogc:BBOX>"
+                        + "</ogc:Filter>"
+                        + "<wfs:PropertyName>app:id</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:gwk</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
+                        + "</wfs:Query>"
+                        + "</wfs:GetFeature>",
+                erraneousURL);
+
+        final ExportWFS wfs6 = new ExportWFS(
+                "Und dann noch das Test-Thema 3",
+                "oeg",
+                "<wfs:GetFeature xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:app=\"http://www.deegree.org/app\" version='1.1.0' service=\"WFS\" outputFormat=\"SHAPE\" maxFeatures=\"3000\">"
+                        + "<wfs:Query typeName=\"app:ogc.oeg\" srsName=\"EPSG:35833\">"
+                        + "<ogc:Filter>"
+                        + "<ogc:BBOX>"
+                        + "<ogc:PropertyName>app:the_geom</ogc:PropertyName>"
+                        + "<cismap:BBOX/>"
+                        + "</ogc:BBOX>"
+                        + "</ogc:Filter>"
+                        + "<wfs:PropertyName>app:gid</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:area</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:perimeter</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:ezg3_</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:ezg3_id</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:poly_</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:subclass</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:subclass_</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:rings_ok</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:rings_nok</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:schluessel</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:zehn</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:typ</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:typ1</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:typ2</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:teilgebnr</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:pegelnr</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:pegelname</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:pkz</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:seenr</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:seename</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:flussgeb</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:von</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:modi_geo</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:modi_gwk</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:modi_gebbz</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:key_pl</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:key_pl_ten</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:teilgeb</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:wrkarea</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:area_km2</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:mst</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:a_sum</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:id_ezg</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:nsaldo_amt</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:min_nsl_lw</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:max_nsl_lw</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:nsaldo_lw</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:area_lw</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:kg_lw</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:gwn_0</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:rd_p1</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:gwn_p1</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:no3_sw</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:no3_gw</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:no3_kg_gw</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:no3_kg_ow</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:et0</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:no3_gw1</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:no3_gw2</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:kf_hoch</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:mv</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:proz_gw</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:nsald_amt2</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:nsald_lw2</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:gwk_fluss</wfs:PropertyName>"
+                        + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
+                        + "</wfs:Query>"
+                        + "</wfs:GetFeature>",
+                url);
 
         final Collection<ExportWFS> wfsList = new TreeSet<ExportWFS>();
 
@@ -568,16 +663,14 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         wfsList.add(wfs2);
         wfsList.add(wfs3);
 
-        final ShapeExportDialog dialog = new ShapeExportDialog(null, wfsList);
-
-        dialog.setVisible(true);
-
-        if (dialog.isCancelled()) {
-            return;
-        }
-
-        final Collection<ExportWFS> selectedWFS = dialog.getSelectedWFSs();
-        System.err.println(selectedWFS);
+        /*final ShapeExportDialog dialog = new ShapeExportDialog(null, wfsList);
+         *
+         * dialog.setVisible(true);
+         *
+         * if (dialog.isCancelled()) { return; }
+         *
+         *final Collection<ExportWFS> selectedWFS = dialog.getSelectedWFSs();*/
+        final Collection<ExportWFS> selectedWFS = wfsList;
 
         for (final ExportWFS wfs : selectedWFS) {
             wfs.setQuery(wfs.getQuery().replace(
@@ -585,18 +678,32 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                     "<gml:Box><gml:coord><gml:X>3.3260837108302265E7</gml:X><gml:Y>5939174.86179747</gml:Y></gml:coord><gml:coord><gml:X>3.3306013669564433E7</gml:X><gml:Y>5954878.55311782</gml:Y></gml:coord></gml:Box>"));
         }
 
-        System.err.println(selectedWFS);
-        DownloadManager.instance().add(selectedWFS);
+        JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
+                    CismapBroker.getInstance().getMappingComponent()));
+        if (!downloadManager.isVisible()) {
+            downloadManager.setVisible(true);
+            downloadManager.pack();
+        }
 
-        final JFrame frame = new JFrame(NbBundle.getMessage(
-                    ShapeExportDialog.class,
-                    "ShapeExportAction.actionPerformed(ActionEvent).JDialog.title"));
-        final DownloadManagerPanel pnlDownload = new DownloadManagerPanel();
-        frame.setLayout(new BorderLayout());
-        frame.add(pnlDownload, BorderLayout.CENTER);
-        frame.addWindowListener(pnlDownload);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-        frame.pack();
+        DownloadManager.instance().add(selectedWFS);
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
+        selectedWFS.clear();
+        selectedWFS.add(wfs4);
+        selectedWFS.add(wfs5);
+        selectedWFS.add(wfs6);
+
+        downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
+                    CismapBroker.getInstance().getMappingComponent()));
+        if (!downloadManager.isVisible()) {
+            downloadManager.setVisible(true);
+            downloadManager.pack();
+        }
+
+        DownloadManager.instance().add(selectedWFS);
     }
 }

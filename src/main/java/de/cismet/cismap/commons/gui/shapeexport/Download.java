@@ -39,7 +39,6 @@ import de.cismet.security.AccessHandler.ACCESS_METHODS;
 import de.cismet.security.WebAccessManager;
 
 import de.cismet.security.exceptions.AccessMethodIsNotSupportedException;
-import de.cismet.security.exceptions.BadHttpStatusCodeException;
 import de.cismet.security.exceptions.MissingArgumentException;
 import de.cismet.security.exceptions.NoHandlerForURLException;
 import de.cismet.security.exceptions.RequestFailedException;
@@ -59,8 +58,8 @@ public class Download extends Observable implements Runnable, Comparable {
     private static final Logger LOG = Logger.getLogger(Download.class);
     private static final int MAX_BUFFER_SIZE = 1024;
 
-    public static final int DOWNLOADING = 0;
-    public static final int COMPLETE = 1;
+    public static final int RUNNING = 0;
+    public static final int COMPLETED = 1;
     public static final int ERROR = 2;
 
     //~ Instance fields --------------------------------------------------------
@@ -89,7 +88,7 @@ public class Download extends Observable implements Runnable, Comparable {
         this.topic = topic;
         this.fileToSaveTo = fileToSaveTo;
 
-        status = DOWNLOADING;
+        status = RUNNING;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -164,6 +163,7 @@ public class Download extends Observable implements Runnable, Comparable {
      */
     private void error(final Exception exception) {
         LOG.error("Exception occurred while downloading '" + fileToSaveTo + "'.", exception);
+        fileToSaveTo.deleteOnExit();
         caughtException = exception;
         status = ERROR;
         stateChanged();
@@ -184,17 +184,21 @@ public class Download extends Observable implements Runnable, Comparable {
         FileOutputStream out = null;
         InputStream resp = null;
 
+        stateChanged();
+
         try {
-            LOG.info("Sending request \n" + request + "\n to '" + url.toExternalForm() + "'.");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Sending request \n" + request + "\n to '" + url.toExternalForm() + "'.");
+            }
             resp = WebAccessManager.getInstance()
                         .doRequest(
                                 url,
                                 new StringReader(request),
                                 ACCESS_METHODS.POST_REQUEST);
 
-            status = DOWNLOADING;
             out = new FileOutputStream(fileToSaveTo);
-            while (status == DOWNLOADING) {
+            boolean downloading = true;
+            while (downloading) {
                 // Size buffer according to how much of the file is left to download.
                 final byte[] buffer;
                 buffer = new byte[MAX_BUFFER_SIZE];
@@ -202,17 +206,11 @@ public class Download extends Observable implements Runnable, Comparable {
                 // Read from server into buffer.
                 final int read = resp.read(buffer);
                 if (read == -1) {
-                    break;
+                    downloading = false;
+                } else {
+                    // Write buffer to file.
+                    out.write(buffer, 0, read);
                 }
-
-                // Write buffer to file.
-                out.write(buffer, 0, read);
-                stateChanged();
-            }
-
-            if (status == DOWNLOADING) {
-                status = COMPLETE;
-                stateChanged();
             }
         } catch (MissingArgumentException ex) {
             error(ex);
@@ -242,6 +240,11 @@ public class Download extends Observable implements Runnable, Comparable {
                     LOG.warn("Exception occured while closing response stream.", e);
                 }
             }
+        }
+
+        if (status == RUNNING) {
+            status = COMPLETED;
+            stateChanged();
         }
     }
 
@@ -284,6 +287,8 @@ public class Download extends Observable implements Runnable, Comparable {
         hash = (43 * hash) + ((this.url != null) ? this.url.hashCode() : 0);
         hash = (43 * hash) + ((this.request != null) ? this.request.hashCode() : 0);
         hash = (43 * hash) + ((this.fileToSaveTo != null) ? this.fileToSaveTo.hashCode() : 0);
+
+        LOG.info("Hash code for '" + fileToSaveTo.getAbsolutePath() + "': " + hash);
 
         return hash;
     }
