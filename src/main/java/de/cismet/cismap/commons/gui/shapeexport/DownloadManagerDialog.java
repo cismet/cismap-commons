@@ -135,6 +135,9 @@ public class DownloadManagerDialog extends javax.swing.JDialog implements Window
 
         pnlControls.setLayout(new java.awt.GridBagLayout());
 
+        btnOpenDestinationDirectory.setMnemonic(org.openide.util.NbBundle.getMessage(
+                DownloadManagerDialog.class,
+                "DownloadManagerDialog.btnOpenDestinationDirectory.mnemonic").charAt(0));
         btnOpenDestinationDirectory.setText(org.openide.util.NbBundle.getMessage(
                 DownloadManagerDialog.class,
                 "DownloadManagerDialog.btnOpenDestinationDirectory.text")); // NOI18N
@@ -149,6 +152,9 @@ public class DownloadManagerDialog extends javax.swing.JDialog implements Window
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         pnlControls.add(btnOpenDestinationDirectory, gridBagConstraints);
 
+        btnClearList.setMnemonic(org.openide.util.NbBundle.getMessage(
+                DownloadManagerDialog.class,
+                "DownloadManagerDialog.btnClearList.mnemonic").charAt(0));
         btnClearList.setText(org.openide.util.NbBundle.getMessage(
                 DownloadManagerDialog.class,
                 "DownloadManagerDialog.btnClearList.text")); // NOI18N
