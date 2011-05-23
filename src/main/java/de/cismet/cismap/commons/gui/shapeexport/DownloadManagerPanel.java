@@ -34,6 +34,7 @@ import java.awt.Component;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.swing.Box;
@@ -78,6 +79,7 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        setBackground(java.awt.SystemColor.window);
         setLayout(new javax.swing.BoxLayout(this, javax.swing.BoxLayout.PAGE_AXIS));
     } // </editor-fold>//GEN-END:initComponents
 
@@ -91,13 +93,24 @@ public class DownloadManagerPanel extends javax.swing.JPanel implements Download
             return;
         }
 
-        remove(verticalGlue);
+        final LinkedList<DownloadPanel> oldPanels = new LinkedList<DownloadPanel>();
+        for (final Component component : getComponents()) {
+            if (component instanceof DownloadPanel) {
+                oldPanels.add((DownloadPanel)component);
+            }
+        }
+
+        removeAll();
 
         for (final Download download : downloads) {
             final DownloadPanel pnlDownload = new DownloadPanel(download);
             add(pnlDownload);
 
             panels.put(download, pnlDownload);
+        }
+
+        for (final DownloadPanel pnlDownload : oldPanels) {
+            add(pnlDownload);
         }
 
         add(verticalGlue);

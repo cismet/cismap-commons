@@ -35,6 +35,10 @@ public class DownloadManagerDialog extends javax.swing.JDialog implements Window
 
     private static DownloadManagerDialog instance;
 
+    //~ Instance fields --------------------------------------------------------
+
+    private boolean closeAfterLastDownload = true;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnClearList;
     private javax.swing.JButton btnOpenDestinationDirectory;
@@ -52,7 +56,7 @@ public class DownloadManagerDialog extends javax.swing.JDialog implements Window
     /**
      * Creates new form DownloadManagerDialog.
      *
-     * @param  parent  DOCUMENT ME!
+     * @param  parent  The parent frame.
      */
     private DownloadManagerDialog(final java.awt.Frame parent) {
         super(parent, false);
@@ -68,11 +72,11 @@ public class DownloadManagerDialog extends javax.swing.JDialog implements Window
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Creates or returns the singleton object.
      *
-     * @param   parent  DOCUMENT ME!
+     * @param   parent  The parent frame of this dialog.
      *
-     * @return  DOCUMENT ME!
+     * @return  The singleton instance.
      */
     public static DownloadManagerDialog instance(final Frame parent) {
         if (instance == null) {
@@ -189,20 +193,22 @@ public class DownloadManagerDialog extends javax.swing.JDialog implements Window
     } // </editor-fold>//GEN-END:initComponents
 
     /**
-     * DOCUMENT ME!
+     * Notifies the DownloadManager singleton that all obsolete downloads should be removed.
      *
-     * @param  evt  DOCUMENT ME!
+     * @param  evt  The event object.
      */
     private void btnClearListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnClearListActionPerformed
+        closeAfterLastDownload = false;
         DownloadManager.instance().removeObsoleteDownloads();
     }                                                                                //GEN-LAST:event_btnClearListActionPerformed
 
     /**
-     * DOCUMENT ME!
+     * Opens a file manager pointing to the destination directory for downloads.
      *
-     * @param  evt  DOCUMENT ME!
+     * @param  evt  The event object.
      */
     private void btnOpenDestinationDirectoryActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOpenDestinationDirectoryActionPerformed
+        closeAfterLastDownload = false;
         BrowserLauncher.openURLorFile(ShapeExport.getDestinationDirectory().getAbsolutePath());
     }                                                                                               //GEN-LAST:event_btnOpenDestinationDirectoryActionPerformed
 
@@ -215,6 +221,14 @@ public class DownloadManagerDialog extends javax.swing.JDialog implements Window
         switch (event.getAction()) {
             case CHANGED_COUNTERS: {
                 lblDownloadsTotalValue.setText(String.valueOf(DownloadManager.instance().getCountDownloadsTotal()));
+
+                // Don't close window if at least one download is erraneous
+                closeAfterLastDownload &= DownloadManager.instance().getCountDownloadsErraneous() == 0;
+                if (closeAfterLastDownload
+                            && (DownloadManager.instance().getCountDownloadsCompleted()
+                                == DownloadManager.instance().getCountDownloadsTotal())) {
+                    dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+                }
             }
         }
     }

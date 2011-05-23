@@ -13,8 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -37,11 +36,12 @@ public class DownloadManager implements Observer {
 
     //~ Instance fields --------------------------------------------------------
 
-    private Collection<Download> downloads = new LinkedHashSet<Download>();
+    private LinkedList<Download> downloads = new LinkedList<Download>();
     private EventListenerList listeners = new EventListenerList();
     private int countDownloadsTotal = 0;
     private int countDownloadsRunning = 0;
     private int countDownloadsErraneous = 0;
+    private int countDownloadsCompleted = 0;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -73,7 +73,12 @@ public class DownloadManager implements Observer {
      * @param  wfss  A collection of shape exports to add.
      */
     public synchronized void add(final Collection<ExportWFS> wfss) {
-        final Collection<Download> downloadsAdded = new LinkedHashSet<Download>();
+        if ((wfss == null) || wfss.isEmpty()) {
+            return;
+        }
+
+        final LinkedList<Download> temporaryDownloads = new LinkedList<Download>();
+        final LinkedList<Download> downloadsAdded = new LinkedList<Download>();
 
         for (final ExportWFS wfs : wfss) {
             final File destinationFile = determineDestinationFile(
@@ -85,12 +90,16 @@ public class DownloadManager implements Observer {
             }
 
             final Download download = new Download(wfs.getUrl(), wfs.getQuery(), wfs.getTopic(), destinationFile);
-            downloads.add(download);
-            downloadsAdded.add(download);
+            temporaryDownloads.addFirst(download);
+        }
+
+        for (final Download downloadAdded : temporaryDownloads) {
+            downloads.addFirst(downloadAdded);
+            downloadsAdded.addFirst(downloadAdded);
             countDownloadsTotal++;
 
-            download.addObserver(this);
-            download.startDownload();
+            downloadAdded.addObserver(this);
+            downloadAdded.startDownload();
         }
 
         if (downloadsAdded.size() > 0) {
@@ -106,10 +115,10 @@ public class DownloadManager implements Observer {
     }
 
     /**
-     * DOCUMENT ME!
+     * Removes oboslete downloads. Only running downloads aren't obsolote.
      */
     public synchronized void removeObsoleteDownloads() {
-        final Collection<Download> downloadsRemoved = new LinkedHashSet<Download>();
+        final Collection<Download> downloadsRemoved = new LinkedList<Download>();
 
         for (final Download download : downloads) {
             if ((download.getStatus() == Download.COMPLETED) || (download.getStatus() == Download.ERROR)) {
@@ -122,8 +131,15 @@ public class DownloadManager implements Observer {
                 downloads.remove(download);
                 countDownloadsTotal--;
 
-                if (download.getStatus() == Download.ERROR) {
-                    countDownloadsErraneous--;
+                switch (download.getStatus()) {
+                    case Download.ERROR: {
+                        countDownloadsErraneous--;
+                        break;
+                    }
+                    case Download.COMPLETED: {
+                        countDownloadsCompleted--;
+                        break;
+                    }
                 }
             }
 
@@ -196,27 +212,36 @@ public class DownloadManager implements Observer {
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the count of erraneous downloads.
      *
-     * @return  DOCUMENT ME!
+     * @return  The count of erraneous downloads.
      */
     public int getCountDownloadsErraneous() {
         return countDownloadsErraneous;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the count of running downloads.
      *
-     * @return  DOCUMENT ME!
+     * @return  The count of running downloads.
      */
     public int getCountDownloadsRunning() {
         return countDownloadsRunning;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the count of completed downloads.
      *
-     * @return  DOCUMENT ME!
+     * @return  The count of completed downloads.
+     */
+    public int getCountDownloadsCompleted() {
+        return countDownloadsCompleted;
+    }
+
+    /**
+     * Returns the total count of downloads.
+     *
+     * @return  The total count of downloads.
      */
     public int getCountDownloadsTotal() {
         return countDownloadsTotal;
@@ -233,6 +258,7 @@ public class DownloadManager implements Observer {
         switch (download.getStatus()) {
             case Download.COMPLETED: {
                 countDownloadsRunning--;
+                countDownloadsCompleted++;
                 break;
             }
             case Download.ERROR: {
