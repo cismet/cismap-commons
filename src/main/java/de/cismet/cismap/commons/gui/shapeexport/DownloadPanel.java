@@ -25,7 +25,8 @@ import javax.swing.JOptionPane;
 import de.cismet.security.exceptions.BadHttpStatusCodeException;
 
 /**
- * DOCUMENT ME!
+ * A panel which represents a download. In order to visualize the different states of a Download object, each
+ * DownloadPanel object registers as observer on its download.
  *
  * @author   jweintraut
  * @version  $Revision$, $Date$
@@ -48,7 +49,7 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
     /**
      * Creates new form DownloadPanel.
      *
-     * @param  download  DOCUMENT ME!
+     * @param  download  The Download object to visualize.
      */
     public DownloadPanel(final Download download) {
         this.download = download;
@@ -71,8 +72,8 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
         lblIcon = new javax.swing.JLabel();
         lblTopic = new javax.swing.JLabel();
         lblMessage = new javax.swing.JLabel();
-        prbProgress = new javax.swing.JProgressBar();
         sepDownloadPanels = new javax.swing.JSeparator();
+        prbProgress = new javax.swing.JProgressBar();
 
         setMaximumSize(new java.awt.Dimension(2147483647, 53));
         addMouseListener(new java.awt.event.MouseAdapter() {
@@ -102,39 +103,41 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
 
         lblMessage.setBackground(new java.awt.Color(255, 102, 0));
         lblMessage.setText(org.openide.util.NbBundle.getMessage(DownloadPanel.class, "DownloadPanel.lblMessage.text")); // NOI18N
-        lblMessage.setMaximumSize(new java.awt.Dimension(32767, 14));
-        lblMessage.setMinimumSize(new java.awt.Dimension(10, 14));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblMessage, gridBagConstraints);
-
-        prbProgress.setBorderPainted(false);
-        prbProgress.setIndeterminate(true);
+        lblMessage.setMaximumSize(new java.awt.Dimension(32767, 15));
+        lblMessage.setMinimumSize(new java.awt.Dimension(10, 15));
+        lblMessage.setPreferredSize(new java.awt.Dimension(8, 15));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(prbProgress, gridBagConstraints);
+        add(lblMessage, gridBagConstraints);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(sepDownloadPanels, gridBagConstraints);
+
+        prbProgress.setBorderPainted(false);
+        prbProgress.setIndeterminate(true);
+        prbProgress.setMaximumSize(new java.awt.Dimension(32767, 15));
+        prbProgress.setMinimumSize(new java.awt.Dimension(10, 15));
+        prbProgress.setPreferredSize(new java.awt.Dimension(146, 15));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(prbProgress, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
     /**
-     * DOCUMENT ME!
+     * Opens a message dialog if the downloads is erraneous and the user double-clicked the panel.
      *
-     * @param  evt  DOCUMENT ME!
+     * @param  evt  The event object.
      */
     private void formMouseClicked(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_formMouseClicked
         if ((evt.getClickCount() > 1) && (download.getCaughtException() != null)) {
@@ -159,7 +162,7 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
     }
 
     /**
-     * DOCUMENT ME!
+     * Modifies the components in order to visualize the current state of this panel's download.
      */
     private void updateComponents() {
         switch (download.getStatus()) {
@@ -172,7 +175,6 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
             case Download.COMPLETED: {
                 prbProgress.setVisible(false);
                 lblMessage.setVisible(true);
-                // lblMessage.setSize(prbProgress.getSize());
                 lblTopic.setForeground(SystemColor.textInactiveText);
                 lblMessage.setForeground(SystemColor.textInactiveText);
                 lblMessage.setText(download.getFileToSaveTo().getAbsolutePath());
@@ -181,7 +183,6 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
             case Download.ERROR: {
                 prbProgress.setVisible(false);
                 lblMessage.setVisible(true);
-                // lblMessage.setSize(prbProgress.getSize());
                 lblMessage.setForeground(Color.red);
                 if (download.getCaughtException() instanceof BadHttpStatusCodeException) {
                     final BadHttpStatusCodeException exception = (BadHttpStatusCodeException)
@@ -191,6 +192,8 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
                                 DownloadPanel.class,
                                 "DownloadPanel.lblMessage.noData",
                                 download.getTopic()));
+                    } else {
+                        lblMessage.setText(NbBundle.getMessage(DownloadPanel.class, "DownloadPanel.lblMessage.error"));
                     }
                 } else {
                     lblMessage.setText(NbBundle.getMessage(DownloadPanel.class, "DownloadPanel.lblMessage.error"));

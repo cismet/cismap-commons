@@ -288,8 +288,6 @@ public class Download extends Observable implements Runnable, Comparable {
         hash = (43 * hash) + ((this.request != null) ? this.request.hashCode() : 0);
         hash = (43 * hash) + ((this.fileToSaveTo != null) ? this.fileToSaveTo.hashCode() : 0);
 
-        LOG.info("Hash code for '" + fileToSaveTo.getAbsolutePath() + "': " + hash);
-
         return hash;
     }
 

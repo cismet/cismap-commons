@@ -378,7 +378,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
     private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOKActionPerformed
         cancelled = false;
 
-        selectedWFSs = new LinkedHashSet<ExportWFS>();
+        selectedWFSs = new LinkedList<ExportWFS>();
         for (final ExportWFS wfs : wfsCollection) {
             final JCheckBox checkbox = checkboxes.get(wfs);
             if (checkbox.isSelected()) {
@@ -476,7 +476,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
                         + "</wfs:Query>"
                         + "</wfs:GetFeature>",
-                erraneousURL);
+                url);
 
         final ExportWFS wfs3 = new ExportWFS(
                 "Und dann noch das Test-Thema 3",
