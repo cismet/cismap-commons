@@ -106,9 +106,7 @@ public class DownloadManagerDialog extends javax.swing.JDialog implements Window
         pnlControls = new javax.swing.JPanel();
         btnOpenDestinationDirectory = new javax.swing.JButton();
         btnClearList = new javax.swing.JButton();
-        horizontalGlue = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
-                new java.awt.Dimension(0, 0),
-                new java.awt.Dimension(32767, 0));
+        horizontalGlue = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
         lblDownloadsTotalKey = new javax.swing.JLabel();
         lblDownloadsTotalValue = new javax.swing.JLabel();
 
@@ -136,87 +134,75 @@ public class DownloadManagerDialog extends javax.swing.JDialog implements Window
         pnlControls.setLayout(new java.awt.GridBagLayout());
 
         btnOpenDestinationDirectory.setMnemonic(org.openide.util.NbBundle.getMessage(
-                DownloadManagerDialog.class,
-                "DownloadManagerDialog.btnOpenDestinationDirectory.mnemonic").charAt(0));
-        btnOpenDestinationDirectory.setText(org.openide.util.NbBundle.getMessage(
-                DownloadManagerDialog.class,
-                "DownloadManagerDialog.btnOpenDestinationDirectory.text")); // NOI18N
-        btnOpenDestinationDirectory.addActionListener(new java.awt.event.ActionListener() {
+            DownloadManagerDialog.class,
+            "DownloadManagerDialog.btnOpenDestinationDirectory.mnemonic").charAt(0));
+    btnOpenDestinationDirectory.setText(org.openide.util.NbBundle.getMessage(DownloadManagerDialog.class, "DownloadManagerDialog.btnOpenDestinationDirectory.text")); // NOI18N
+    btnOpenDestinationDirectory.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+            btnOpenDestinationDirectoryActionPerformed(evt);
+        }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+    pnlControls.add(btnOpenDestinationDirectory, gridBagConstraints);
 
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    btnOpenDestinationDirectoryActionPerformed(evt);
-                }
-            });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlControls.add(btnOpenDestinationDirectory, gridBagConstraints);
+    btnClearList.setMnemonic(org.openide.util.NbBundle.getMessage(
+        DownloadManagerDialog.class,
+        "DownloadManagerDialog.btnClearList.mnemonic").charAt(0));
+btnClearList.setText(org.openide.util.NbBundle.getMessage(DownloadManagerDialog.class, "DownloadManagerDialog.btnClearList.text")); // NOI18N
+btnClearList.addActionListener(new java.awt.event.ActionListener() {
+    public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnClearListActionPerformed(evt);
+    }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+    pnlControls.add(btnClearList, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 1.0;
+    pnlControls.add(horizontalGlue, gridBagConstraints);
 
-        btnClearList.setMnemonic(org.openide.util.NbBundle.getMessage(
-                DownloadManagerDialog.class,
-                "DownloadManagerDialog.btnClearList.mnemonic").charAt(0));
-        btnClearList.setText(org.openide.util.NbBundle.getMessage(
-                DownloadManagerDialog.class,
-                "DownloadManagerDialog.btnClearList.text")); // NOI18N
-        btnClearList.addActionListener(new java.awt.event.ActionListener() {
+    lblDownloadsTotalKey.setText(org.openide.util.NbBundle.getMessage(DownloadManagerDialog.class, "DownloadManagerDialog.lblDownloadsTotalKey.text")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+    pnlControls.add(lblDownloadsTotalKey, gridBagConstraints);
 
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    btnClearListActionPerformed(evt);
-                }
-            });
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlControls.add(btnClearList, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        pnlControls.add(horizontalGlue, gridBagConstraints);
+    lblDownloadsTotalValue.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+    lblDownloadsTotalValue.setText(org.openide.util.NbBundle.getMessage(DownloadManagerDialog.class, "DownloadManagerDialog.lblDownloadsTotalValue.text")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.ipadx = 20;
+    gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+    pnlControls.add(lblDownloadsTotalValue, gridBagConstraints);
 
-        lblDownloadsTotalKey.setText(org.openide.util.NbBundle.getMessage(
-                DownloadManagerDialog.class,
-                "DownloadManagerDialog.lblDownloadsTotalKey.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlControls.add(lblDownloadsTotalKey, gridBagConstraints);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    getContentPane().add(pnlControls, gridBagConstraints);
 
-        lblDownloadsTotalValue.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        lblDownloadsTotalValue.setText(org.openide.util.NbBundle.getMessage(
-                DownloadManagerDialog.class,
-                "DownloadManagerDialog.lblDownloadsTotalValue.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.ipadx = 20;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        pnlControls.add(lblDownloadsTotalValue, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        getContentPane().add(pnlControls, gridBagConstraints);
-
-        pack();
-    } // </editor-fold>//GEN-END:initComponents
+    pack();
+    }// </editor-fold>//GEN-END:initComponents
 
     /**
      * Notifies the DownloadManager singleton that all obsolete downloads should be removed.
      *
      * @param  evt  The event object.
      */
-    private void btnClearListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnClearListActionPerformed
+    private void btnClearListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnClearListActionPerformed
         closeAfterLastDownload = false;
         DownloadManager.instance().removeObsoleteDownloads();
-    }                                                                                //GEN-LAST:event_btnClearListActionPerformed
+    }//GEN-LAST:event_btnClearListActionPerformed
 
     /**
      * Opens a file manager pointing to the destination directory for downloads.
      *
      * @param  evt  The event object.
      */
-    private void btnOpenDestinationDirectoryActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOpenDestinationDirectoryActionPerformed
+    private void btnOpenDestinationDirectoryActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOpenDestinationDirectoryActionPerformed
         closeAfterLastDownload = false;
         BrowserLauncher.openURLorFile(ShapeExport.getDestinationDirectory().getAbsolutePath());
-    }                                                                                               //GEN-LAST:event_btnOpenDestinationDirectoryActionPerformed
+    }//GEN-LAST:event_btnOpenDestinationDirectoryActionPerformed
 
     @Override
     public void downloadListChanged(final DownloadListChangedEvent event) {
