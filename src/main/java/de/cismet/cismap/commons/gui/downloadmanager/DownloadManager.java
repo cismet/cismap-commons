@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cismap.commons.gui.shapeexport;
+package de.cismet.cismap.commons.gui.downloadmanager;
 
 import org.apache.log4j.Logger;
 
@@ -18,6 +18,9 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.event.EventListenerList;
+
+import de.cismet.cismap.commons.gui.shapeexport.ExportWFS;
+import de.cismet.cismap.commons.gui.shapeexport.ShapeExport;
 
 /**
  * The download manager manages all current downloads. New downloads are added to a collection, completed downloads are
@@ -67,51 +70,31 @@ public class DownloadManager implements Observer {
     }
 
     /**
-     * This method is used to add new shape exports to the download list. The download manager converts ExportWFS
-     * objects to Download objects.
+     * This method is used to add new downloads to the download list.
      *
-     * @param  wfss  A collection of shape exports to add.
+     * @param  downloads  wfss A collection of downloads to add.
      */
-    public synchronized void add(final Collection<ExportWFS> wfss) {
-        if ((wfss == null) || wfss.isEmpty()) {
+    public void add(final Collection<Download> downloads) {
+        if ((downloads == null) || (downloads.size() <= 0)) {
             return;
         }
 
-        final LinkedList<Download> temporaryDownloads = new LinkedList<Download>();
-        final LinkedList<Download> downloadsAdded = new LinkedList<Download>();
+        this.downloads.addAll(0, downloads);
+        countDownloadsTotal += downloads.size();
 
-        for (final ExportWFS wfs : wfss) {
-            final File destinationFile = determineDestinationFile(
-                    wfs,
-                    ShapeExport.getDestinationDirectory(),
-                    ShapeExport.getDestinationFileExtension());
-            if (destinationFile == null) {
-                return;
-            }
-
-            final Download download = new Download(wfs.getUrl(), wfs.getQuery(), wfs.getTopic(), destinationFile);
-            temporaryDownloads.addFirst(download);
+        for (final Download download : downloads) {
+            download.addObserver(this);
+            download.startDownload();
         }
 
-        for (final Download downloadAdded : temporaryDownloads) {
-            downloads.addFirst(downloadAdded);
-            downloadsAdded.addFirst(downloadAdded);
-            countDownloadsTotal++;
-
-            downloadAdded.addObserver(this);
-            downloadAdded.startDownload();
-        }
-
-        if (downloadsAdded.size() > 0) {
-            notifyDownloadListChanged(new DownloadListChangedEvent(
-                    this,
-                    downloadsAdded,
-                    DownloadListChangedEvent.Action.ADDED));
-            notifyDownloadListChanged(new DownloadListChangedEvent(
-                    this,
-                    downloadsAdded,
-                    DownloadListChangedEvent.Action.CHANGED_COUNTERS));
-        }
+        notifyDownloadListChanged(new DownloadListChangedEvent(
+                this,
+                downloads,
+                DownloadListChangedEvent.Action.ADDED));
+        notifyDownloadListChanged(new DownloadListChangedEvent(
+                this,
+                downloads,
+                DownloadListChangedEvent.Action.CHANGED_COUNTERS));
     }
 
     /**

@@ -31,11 +31,15 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 import java.util.Collection;
+import java.util.LinkedList;
 
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
 
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.gui.downloadmanager.Download;
+import de.cismet.cismap.commons.gui.downloadmanager.DownloadManager;
+import de.cismet.cismap.commons.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
@@ -91,7 +95,7 @@ public class ShapeExportAction extends AbstractAction {
             wfs.setQuery(wfs.getQuery().replace(ShapeExport.getBboxToken(), boundingBox.toGml4WFS110String()));
         }
 
-        DownloadManager.instance().add(wfsList);
+        DownloadManager.instance().add(convertToDownloads(wfsList));
 
         final JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
                     CismapBroker.getInstance().getMappingComponent()));
@@ -100,5 +104,38 @@ public class ShapeExportAction extends AbstractAction {
             downloadManager.setVisible(true);
             downloadManager.pack();
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   wfss  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Collection<Download> convertToDownloads(final Collection<ExportWFS> wfss) {
+        final Collection<Download> result = new LinkedList<Download>();
+
+        final String directory = ShapeExport.getDestinationDirectory().getAbsolutePath();
+        final String filename = ShapeExport.getDestinationFile();
+        final String extension = ShapeExport.getDestinationFileExtension();
+
+        for (final ExportWFS wfs : wfss) {
+            Download download = null;
+            if ((filename == null) || (filename.trim().length() == 0)) {
+                download = new Download(wfs.getUrl(),
+                        wfs.getQuery(),
+                        wfs.getTopic(),
+                        directory,
+                        wfs.getFile(),
+                        extension);
+            } else {
+                download = new Download(wfs.getUrl(), wfs.getQuery(), wfs.getTopic(), directory, filename, extension);
+            }
+
+            result.add(download);
+        }
+
+        return result;
     }
 }

@@ -21,12 +21,14 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.cismet.cismap.commons.gui.shapeexport;
+package de.cismet.cismap.commons.gui.downloadmanager;
 
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 
@@ -68,7 +70,7 @@ public class Download extends Observable implements Runnable, Comparable {
     private String request;
     private File fileToSaveTo;
     private int status;
-    private String topic;
+    private String title;
     private Thread downloadThread;
     private Exception caughtException;
 
@@ -79,14 +81,38 @@ public class Download extends Observable implements Runnable, Comparable {
      *
      * @param  url           The URL of the server to download from.
      * @param  request       The request to send.
-     * @param  topic         The topic of the shape export.
+     * @param  title         The title of the download.
      * @param  fileToSaveTo  A file object pointing to the download location.
      */
-    public Download(final URL url, final String request, final String topic, final File fileToSaveTo) {
+    public Download(final URL url, final String request, final String title, final File fileToSaveTo) {
         this.url = url;
         this.request = request;
-        this.topic = topic;
+        this.title = title;
         this.fileToSaveTo = fileToSaveTo;
+
+        status = RUNNING;
+    }
+
+    /**
+     * Constructor for Download.
+     *
+     * @param  url        The URL of the server to download from.
+     * @param  request    The request to send.
+     * @param  title      The title of the download.
+     * @param  directory  A String containing the download directory.
+     * @param  filename   A String containing the filename.
+     * @param  extension  A String containing the file extension.
+     */
+    public Download(final URL url,
+            final String request,
+            final String title,
+            final String directory,
+            final String filename,
+            final String extension) {
+        this.url = url;
+        this.request = request;
+        this.title = title;
+        determineDestinationFile(directory, filename, extension, url);
 
         status = RUNNING;
     }
@@ -103,12 +129,12 @@ public class Download extends Observable implements Runnable, Comparable {
     }
 
     /**
-     * Returns the topic of the download.
+     * Returns the title of the download.
      *
-     * @return  The topic.
+     * @return  The title.
      */
-    public String getTopic() {
-        return topic;
+    public String getTitle() {
+        return title;
     }
 
     /**
@@ -181,6 +207,10 @@ public class Download extends Observable implements Runnable, Comparable {
 
     @Override
     public void run() {
+        if (status != RUNNING) {
+            return;
+        }
+
         FileOutputStream out = null;
         InputStream resp = null;
 
@@ -249,6 +279,60 @@ public class Download extends Observable implements Runnable, Comparable {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  directory  DOCUMENT ME!
+     * @param  filename   DOCUMENT ME!
+     * @param  extension  DOCUMENT ME!
+     * @param  url        DOCUMENT ME!
+     */
+    private void determineDestinationFile(final String directory,
+            final String filename,
+            final String extension,
+            final URL url) {
+        this.fileToSaveTo = new File(directory, filename + extension);
+
+        boolean fileFound = false;
+        int counter = 2;
+
+        while (!fileFound) {
+            while (fileToSaveTo.exists() && (counter < 1000)) {
+                fileToSaveTo = new File(directory, filename + counter + extension);
+                counter++;
+            }
+
+            try {
+                fileToSaveTo.createNewFile();
+
+                if (fileToSaveTo.exists() && fileToSaveTo.isFile() && fileToSaveTo.canWrite()) {
+                    fileFound = true;
+                }
+            } catch (IOException ex) {
+                fileToSaveTo.deleteOnExit();
+            }
+
+            if ((counter >= 1000) && !fileFound) {
+                LOG.error("Could not create a file for the download '" + url.toExternalForm()
+                            + "'. The tested path is '" + directory + File.separatorChar
+                            + filename + "<1.." + 999 + ">." + extension
+                            + ".");
+                error(new FileNotFoundException(
+                        "Could not create a file for the download '"
+                                + url.toExternalForm()
+                                + "'. The tested path is '"
+                                + directory
+                                + File.separatorChar
+                                + filename
+                                + "<1.."
+                                + 999
+                                + ">."
+                                + extension
+                                + "."));
+            }
+        }
+    }
+
+    /**
      * Marks this observable as changed and notifies observers.
      */
     private void stateChanged() {
@@ -298,6 +382,6 @@ public class Download extends Observable implements Runnable, Comparable {
         }
 
         final Download other = (Download)o;
-        return this.topic.compareTo(other.topic);
+        return this.title.compareTo(other.title);
     }
 }

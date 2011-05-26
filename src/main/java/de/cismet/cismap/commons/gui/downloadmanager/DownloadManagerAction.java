@@ -5,7 +5,7 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cismap.commons.gui.shapeexport;
+package de.cismet.cismap.commons.gui.downloadmanager;
 
 import org.openide.util.NbBundle;
 

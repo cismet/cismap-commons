@@ -52,6 +52,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 
+import de.cismet.cismap.commons.gui.downloadmanager.DownloadManager;
+import de.cismet.cismap.commons.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
@@ -678,32 +680,22 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                     "<gml:Box><gml:coord><gml:X>3.3260837108302265E7</gml:X><gml:Y>5939174.86179747</gml:Y></gml:coord><gml:coord><gml:X>3.3306013669564433E7</gml:X><gml:Y>5954878.55311782</gml:Y></gml:coord></gml:Box>"));
         }
 
-        JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
+        final JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
                     CismapBroker.getInstance().getMappingComponent()));
         if (!downloadManager.isVisible()) {
             downloadManager.setVisible(true);
             downloadManager.pack();
         }
 
-        DownloadManager.instance().add(selectedWFS);
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        selectedWFS.clear();
-        selectedWFS.add(wfs4);
-        selectedWFS.add(wfs5);
-        selectedWFS.add(wfs6);
-
-        downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
-                    CismapBroker.getInstance().getMappingComponent()));
-        if (!downloadManager.isVisible()) {
-            downloadManager.setVisible(true);
-            downloadManager.pack();
-        }
-
-        DownloadManager.instance().add(selectedWFS);
+        /*DownloadManager.instance().add(selectedWFS);
+         * try { Thread.sleep(5000); } catch (InterruptedException ex) { Exceptions.printStackTrace(ex); }
+         *
+         * selectedWFS.clear(); selectedWFS.add(wfs4); selectedWFS.add(wfs5); selectedWFS.add(wfs6);
+         *
+         * downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
+         * CismapBroker.getInstance().getMappingComponent())); if (!downloadManager.isVisible()) {
+         * downloadManager.setVisible(true); downloadManager.pack(); }
+         *
+         *DownloadManager.instance().add(selectedWFS);*/
     }
 }

@@ -45,6 +45,7 @@ import javax.swing.JButton;
 
 import de.cismet.cismap.commons.gui.ToolbarComponentDescription;
 import de.cismet.cismap.commons.gui.ToolbarComponentsProvider;
+import de.cismet.cismap.commons.gui.downloadmanager.DownloadManagerAction;
 
 import de.cismet.tools.collections.TypeSafeCollections;
 
@@ -154,12 +155,12 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
             return;
         }
 
-        final Element bboxToken = cismapShapeExport.getChild(XML_BBOX_TOKEN);
-        if ((bboxToken == null) || (bboxToken.getText() == null) || (bboxToken.getText().trim().length() == 0)) {
+        final Element bbox = cismapShapeExport.getChild(XML_BBOX_TOKEN);
+        if ((bbox == null) || (bbox.getText() == null) || (bbox.getText().trim().length() == 0)) {
             LOG.warn("There is no replacement token configured for shape export. Using default replacement token '"
-                        + this.bboxToken + "'.");
+                        + bboxToken + "'.");
         } else {
-            this.bboxToken = bboxToken.getText();
+            bboxToken = bbox.getText();
         }
 
         final Element destination = cismapShapeExport.getChild(XML_DESTINATION);
@@ -280,14 +281,14 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
         if ((toolbarComponents == null) && enableShapeExport) {
             final JButton btnShapeExport = new JButton(new ShapeExportAction());
             btnShapeExport.setText(null);
-            btnShapeExport.setName(NbBundle.getMessage(ShapeExport.class, "ShapeExportAction.name"));
+            btnShapeExport.setName(NbBundle.getMessage(ShapeExportAction.class, "ShapeExportAction.name"));
             btnShapeExport.setBorderPainted(false);
             btnShapeExport.setFocusable(false);
             btnShapeExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
             btnShapeExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
             final JButton btnDownloadManager = new JButton(new DownloadManagerAction());
             btnDownloadManager.setText(null);
-            btnDownloadManager.setName(NbBundle.getMessage(ShapeExport.class, "DownloadManagerAction.name"));
+            btnDownloadManager.setName(NbBundle.getMessage(DownloadManagerAction.class, "DownloadManagerAction.name"));
             btnDownloadManager.setBorderPainted(false);
             btnDownloadManager.setFocusable(false);
             btnDownloadManager.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -302,7 +303,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
                     "tlbMain",
                     btnDownloadManager,
                     ToolbarPositionHint.AFTER,
-                    NbBundle.getMessage(ShapeExport.class, "ShapeExportAction.name"));
+                    NbBundle.getMessage(ShapeExportAction.class, "ShapeExportAction.name"));
             preparationList.add(shapeExport);
             preparationList.add(downloadManager);
             toolbarComponents = Collections.unmodifiableList(preparationList);

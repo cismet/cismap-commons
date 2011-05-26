@@ -26,7 +26,7 @@
  *
  * Created on 27.04.2011, 13:22:46
  */
-package de.cismet.cismap.commons.gui.shapeexport;
+package de.cismet.cismap.commons.gui.downloadmanager;
 
 import org.apache.log4j.Logger;
 
