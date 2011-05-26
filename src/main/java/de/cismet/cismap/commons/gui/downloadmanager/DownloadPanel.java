@@ -10,7 +10,7 @@
  *
  * Created on 18.05.2011, 17:05:07
  */
-package de.cismet.cismap.commons.gui.shapeexport;
+package de.cismet.cismap.commons.gui.downloadmanager;
 
 import org.openide.util.NbBundle;
 
@@ -39,7 +39,7 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel lblIcon;
     private javax.swing.JLabel lblMessage;
-    private javax.swing.JLabel lblTopic;
+    private javax.swing.JLabel lblTitle;
     private javax.swing.JProgressBar prbProgress;
     private javax.swing.JSeparator sepDownloadPanels;
     // End of variables declaration//GEN-END:variables
@@ -70,7 +70,7 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
         java.awt.GridBagConstraints gridBagConstraints;
 
         lblIcon = new javax.swing.JLabel();
-        lblTopic = new javax.swing.JLabel();
+        lblTitle = new javax.swing.JLabel();
         lblMessage = new javax.swing.JLabel();
         sepDownloadPanels = new javax.swing.JSeparator();
         prbProgress = new javax.swing.JProgressBar();
@@ -86,23 +86,21 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
         setLayout(new java.awt.GridBagLayout());
 
         lblIcon.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/res/download.png")));                       // NOI18N
-        lblIcon.setText(org.openide.util.NbBundle.getMessage(DownloadPanel.class, "DownloadPanel.lblIcon.text")); // NOI18N
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/download.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblIcon, gridBagConstraints);
 
-        lblTopic.setFont(new java.awt.Font("Tahoma", 0, 14));
-        lblTopic.setText(download.getTopic());
+        lblTitle.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lblTitle.setText(download.getTitle());
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(lblTopic, gridBagConstraints);
+        add(lblTitle, gridBagConstraints);
 
         lblMessage.setBackground(new java.awt.Color(255, 102, 0));
-        lblMessage.setText(org.openide.util.NbBundle.getMessage(DownloadPanel.class, "DownloadPanel.lblMessage.text")); // NOI18N
         lblMessage.setMaximumSize(new java.awt.Dimension(32767, 15));
         lblMessage.setMinimumSize(new java.awt.Dimension(10, 15));
         lblMessage.setPreferredSize(new java.awt.Dimension(8, 15));
@@ -169,13 +167,13 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
             case Download.RUNNING: {
                 prbProgress.setVisible(true);
                 lblMessage.setVisible(false);
-                lblTopic.setForeground(SystemColor.textText);
+                lblTitle.setForeground(SystemColor.textText);
                 break;
             }
             case Download.COMPLETED: {
                 prbProgress.setVisible(false);
                 lblMessage.setVisible(true);
-                lblTopic.setForeground(SystemColor.textInactiveText);
+                lblTitle.setForeground(SystemColor.textInactiveText);
                 lblMessage.setForeground(SystemColor.textInactiveText);
                 lblMessage.setText(download.getFileToSaveTo().getAbsolutePath());
                 break;
@@ -191,7 +189,7 @@ public class DownloadPanel extends javax.swing.JPanel implements Observer {
                         lblMessage.setText(NbBundle.getMessage(
                                 DownloadPanel.class,
                                 "DownloadPanel.lblMessage.noData",
-                                download.getTopic()));
+                                download.getTitle()));
                     } else {
                         lblMessage.setText(NbBundle.getMessage(DownloadPanel.class, "DownloadPanel.lblMessage.error"));
                     }
