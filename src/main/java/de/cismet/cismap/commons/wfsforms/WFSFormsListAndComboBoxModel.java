@@ -7,10 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons.wfsforms;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.log4j.Priority;
 
 import org.deegree.model.feature.FeatureCollection;
@@ -30,8 +26,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+
+import java.net.URL;
 
 import java.nio.charset.Charset;
 
@@ -44,6 +43,10 @@ import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JProgressBar;
+
+import de.cismet.security.AccessHandler.ACCESS_METHODS;
+
+import de.cismet.security.WebAccessManager;
 
 import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.CurrentStackTrace;
@@ -168,28 +171,6 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                 started = false;
                 finished = false;
                 error = false;
-                final HttpClient client = new HttpClient();
-                final String proxySet = System.getProperty("proxySet"); // NOI18N
-                if ((proxySet != null) && proxySet.equals("true")) { // NOI18N
-                    if (log.isDebugEnabled()) {
-                        log.debug("proxyIs Set");                    // NOI18N
-                        log.debug("ProxyHost:" + System.getProperty("http.proxyHost")); // NOI18N
-                    }
-                    if (log.isDebugEnabled()) {
-                        log.debug("ProxyPort:" + System.getProperty("http.proxyPort")); // NOI18N
-                    }
-                    try {
-                        client.getHostConfiguration()
-                                .setProxy(System.getProperty("http.proxyHost"),
-                                    Integer.parseInt(System.getProperty("http.proxyPort"))); // NOI18N
-                    } catch (Exception e) {
-                        log.error("Problem while setting proxy", e); // NOI18N
-                    }
-                }
-
-                final PostMethod httppost = new PostMethod(query.getServerUrl());
-                // PostMethod httppost = new PostMethod("http://www.heise.de");
-
                 String postString = query.getWfsQueryString();
 
                 if (replacingValues != null) {
@@ -204,127 +185,121 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
 
                 log.info("WFS Query:" + StaticHtmlTools.stringToHTMLString(postString));              // NOI18N
                 final String modifiedString = new String(postString.getBytes("UTF-8"), "ISO-8859-1"); // NOI18N
-                httppost.setRequestEntity(new StringRequestEntity(modifiedString));
 
                 try {
                     if (log.isDebugEnabled()) {
                         log.debug("in EDT:" + EventQueue.isDispatchThread()); // NOI18N
                     }
-                    client.executeMethod(httppost);
-                    if (httppost.getStatusCode() == HttpStatus.SC_OK) {
-                        if (WFSFormsListAndComboBoxModel.this.progressBar != null) {
-                            EventQueue.invokeLater(new Runnable() {
+                    final InputStream resp = WebAccessManager.getInstance()
+                                .doRequest(new URL(query.getServerUrl()), modifiedString, ACCESS_METHODS.POST_REQUEST);
 
-                                    @Override
-                                    public void run() {
-                                        WFSFormsListAndComboBoxModel.this.progressBar.setIndeterminate(true);
-                                    }
-                                });
-                        }
-                        if (log.isDebugEnabled()) {
-                            log.debug("Start parsing of " + WFSFormsListAndComboBoxModel.this.query.getId()); // NOI18N
-                        }
-                        started = true;
+                    if (WFSFormsListAndComboBoxModel.this.progressBar != null) {
                         EventQueue.invokeLater(new Runnable() {
 
                                 @Override
                                 public void run() {
-                                    WFSFormsListAndComboBoxModel.this.fireContentsChanged(
-                                        WFSFormsListAndComboBoxModel.this,
-                                        0,
-                                        0);
+                                    WFSFormsListAndComboBoxModel.this.progressBar.setIndeterminate(true);
                                 }
                             });
-
-                        final long start = System.currentTimeMillis();
-
-                        // FileReader reader = new FileReader("request");
-
-                        gmlDocument.load(new InputStreamReader(
-                                httppost.getResponseBodyAsStream(),
-                                Charset.forName("UTF-8")),
-                            "http://dummyURL"); // NOI18N
-                        // gmlDocument.load(new InputStreamReader(new
-                        // FileInputStream("request"),Charset.forName("iso-8859-1")),"http://dummyURL");
-                        gmlDocument.addFeatureProgressListener(this);
-                        max = gmlDocument.getFeatureCount();
-                        if (WFSFormsListAndComboBoxModel.this.progressBar != null) {
-                            EventQueue.invokeLater(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        WFSFormsListAndComboBoxModel.this.progressBar.setIndeterminate(false);
-                                        WFSFormsListAndComboBoxModel.this.progressBar.setMaximum(max);
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("Feature count: " + max); // NOI18N
-                                        }
-                                    }
-                                });
-                        }
-                        fc = gmlDocument.parse();
-                        gmlDocument.removeFeatureProgressListener(this);
-                        if (log.isDebugEnabled()) {
-                            log.debug("Featurecollection " + fc);               // NOI18N
-                        }
-                        for (int i = 0; i < fc.size(); ++i) {
-                            features.add(new WFSFormFeature(fc.getFeature(i), query));
-                            if (log.isDebugEnabled()) {
-                                log.debug(i + ":" + features.get(i));           // NOI18N
-                            }
-                        }
-
-                        final long stop = System.currentTimeMillis();
-                        if (log.isEnabledFor(Priority.INFO)) {
-                            log.info(((stop - start) / 1000.0) + " Sekunden dauerte das Parsen");             // NOI18N
-                        }
-                        if (log.isDebugEnabled()) {
-                            log.debug("Ended parsing of " + WFSFormsListAndComboBoxModel.this.query.getId()); // NOI18N
-                        }
-                        finished = true;
-                        error = false;
-                        selectedValue = null;
-                        WFSFormsListAndComboBoxModel.this.fireContentsChanged(
-                            WFSFormsListAndComboBoxModel.this,
-                            0,
-                            fc.size()
-                                    - 1);
-                        fireActionPerformed(null);
-                        if (WFSFormsListAndComboBoxModel.this.progressBar != null) {
-                            Color invisible = WFSFormsListAndComboBoxModel.this.progressBar.getForeground();
-                            invisible = new Color(invisible.getRed(), invisible.getGreen(), invisible.getBlue(), 0);
-                            final Color invisibleCopy = invisible;
-                            EventQueue.invokeLater(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        WFSFormsListAndComboBoxModel.this.progressBar.setForeground(invisibleCopy);
-                                    }
-                                });
-                        }
-                        EventQueue.invokeLater(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    WFSFormsListAndComboBoxModel.this.comp.setEnabled(true);
-                                }
-                            });
-                    } else {
-                        final String errorTxt = "Unexpected failure: " + httppost.getStatusLine().toString(); // NOI18N
-                        log.error(errorTxt);
-                        reportRetrievalError(new Exception(errorTxt));
                     }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Start parsing of " + WFSFormsListAndComboBoxModel.this.query.getId()); // NOI18N
+                    }
+                    started = true;
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                WFSFormsListAndComboBoxModel.this.fireContentsChanged(
+                                    WFSFormsListAndComboBoxModel.this,
+                                    0,
+                                    0);
+                            }
+                        });
+
+                    final long start = System.currentTimeMillis();
+
+                    // FileReader reader = new FileReader("request");
+
+                    gmlDocument.load(new InputStreamReader(
+                            resp,
+                            Charset.forName("UTF-8")),
+                        "http://dummyURL"); // NOI18N
+                    // gmlDocument.load(new InputStreamReader(new
+                    // FileInputStream("request"),Charset.forName("iso-8859-1")),"http://dummyURL");
+                    gmlDocument.addFeatureProgressListener(this);
+                    max = gmlDocument.getFeatureCount();
+                    if (WFSFormsListAndComboBoxModel.this.progressBar != null) {
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    WFSFormsListAndComboBoxModel.this.progressBar.setIndeterminate(false);
+                                    WFSFormsListAndComboBoxModel.this.progressBar.setMaximum(max);
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Feature count: " + max); // NOI18N
+                                    }
+                                }
+                            });
+                    }
+                    fc = gmlDocument.parse();
+                    gmlDocument.removeFeatureProgressListener(this);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Featurecollection " + fc);               // NOI18N
+                    }
+                    for (int i = 0; i < fc.size(); ++i) {
+                        features.add(new WFSFormFeature(fc.getFeature(i), query));
+                        if (log.isDebugEnabled()) {
+                            log.debug(i + ":" + features.get(i));           // NOI18N
+                        }
+                    }
+
+                    final long stop = System.currentTimeMillis();
+                    if (log.isEnabledFor(Priority.INFO)) {
+                        log.info(((stop - start) / 1000.0) + " Sekunden dauerte das Parsen");             // NOI18N
+                    }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Ended parsing of " + WFSFormsListAndComboBoxModel.this.query.getId()); // NOI18N
+                    }
+                    finished = true;
+                    error = false;
+                    selectedValue = null;
+                    WFSFormsListAndComboBoxModel.this.fireContentsChanged(
+                        WFSFormsListAndComboBoxModel.this,
+                        0,
+                        fc.size()
+                                - 1);
+                    fireActionPerformed(null);
+                    if (WFSFormsListAndComboBoxModel.this.progressBar != null) {
+                        Color invisible = WFSFormsListAndComboBoxModel.this.progressBar.getForeground();
+                        invisible = new Color(invisible.getRed(), invisible.getGreen(), invisible.getBlue(), 0);
+                        final Color invisibleCopy = invisible;
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    WFSFormsListAndComboBoxModel.this.progressBar.setForeground(invisibleCopy);
+                                }
+                            });
+                    }
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                WFSFormsListAndComboBoxModel.this.comp.setEnabled(true);
+                            }
+                        });
+
                     comp.setToolTipText("");
                 } catch (Throwable t) {
-                    log.error("Error occured as sending a POST request", t);                                  // NOI18N
+                    log.error("Error occured as sending a POST request", t); // NOI18N
                     error = true;
                     gmlDocument.removeFeatureProgressListener(this);
                     reportRetrievalError(t);
-                } finally {
-                    httppost.releaseConnection();
                 }
             }
         } catch (Exception e) {
-            log.error("Error while loading the features.", e);                                                // NOI18N
+            log.error("Error while loading the features.", e);               // NOI18N
             gmlDocument.removeFeatureProgressListener(this);
             reportRetrievalError(e);
         }
