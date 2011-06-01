@@ -70,6 +70,7 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
                 "/de/cismet/cismap/commons/gui/res/linRefPointSelected.png")); // NOI18N
 
     private Format infoFormat;
+    private boolean isMovable = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -93,13 +94,30 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     public LinearReferencedPointFeature(final double value, final Geometry baseLineGeom, final boolean showSubLine) {
         this.baseLineGeom = baseLineGeom;
         setGeometry(getPointOnLine(value, baseLineGeom));
-        setEditable(true);
         setPointAnnotationSymbol(FeatureAnnotationSymbol.newCenteredFeatureAnnotationSymbol(
                 annotationIco.getImage(),
                 annotationSelectedIco.getImage()));
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  isMovable  DOCUMENT ME!
+     */
+    public void setMovable(final boolean isMovable) {
+        this.isMovable = isMovable;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isMovable() {
+        return isMovable;
+    }
 
     /**
      * DOCUMENT ME!
@@ -179,11 +197,13 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
 
     @Override
     public void moveTo(final Coordinate coordinate) {
+        if (isMovable()) {
 //        // mauskoordinaten ins selbe coordsys umwandeln wie das der route
 //        Coordinate coord = transformToRouteSrid(coordinate);
 
-        final Coordinate manipulatedCoordinate = getNearestCoordninateOnLine(coordinate);
-        performMove(manipulatedCoordinate);
+            final Coordinate manipulatedCoordinate = getNearestCoordninateOnLine(coordinate);
+            performMove(manipulatedCoordinate);
+        }
     }
 
 //    private Coordinate transformToRouteSrid(Coordinate coord) {
