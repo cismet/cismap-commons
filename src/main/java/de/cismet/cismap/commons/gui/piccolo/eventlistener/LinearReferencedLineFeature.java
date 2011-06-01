@@ -12,6 +12,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.awt.Stroke;
 
 import java.util.Collection;
@@ -79,12 +80,10 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
         fromPointListener = new LinearReferencedPointFeatureHandler(FROM);
         toPointListener = new LinearReferencedPointFeatureHandler(TO);
 
-        setPointFeature(fromFeature, FROM);
-        setPointFeature(toFeature, TO);
-
         initFeatureCollectionListener();
 
-        updateGeometry();
+        setPointFeature(fromFeature, FROM);
+        setPointFeature(toFeature, TO);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -92,21 +91,25 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
     /**
      * DOCUMENT ME!
      *
-     * @param  feature  DOCUMENT ME!
-     * @param  isFrom   DOCUMENT ME!
+     * @param  pointFeature  DOCUMENT ME!
+     * @param  isFrom        DOCUMENT ME!
      */
-    public final void setPointFeature(final LinearReferencedPointFeature feature, final boolean isFrom) {
+    public final void setPointFeature(final LinearReferencedPointFeature pointFeature, final boolean isFrom) {
         final LinearReferencedPointFeature oldFeature = (isFrom) ? fromFeature : toFeature;
         final LinearReferencedPointFeatureHandler listener = (isFrom) ? fromPointListener : toPointListener;
         if (oldFeature != null) {
             oldFeature.removeListener(listener);
         }
-        feature.addListener(listener);
-        if (isFrom) {
-            this.fromFeature = feature;
-        } else {
-            this.toFeature = feature;
+        if (pointFeature != null) {
+            pointFeature.addListener(listener);
         }
+        if (isFrom) {
+            this.fromFeature = pointFeature;
+        } else {
+            this.toFeature = pointFeature;
+        }
+
+        updateGeometry();
     }
 
     /**
@@ -118,6 +121,16 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
      */
     public LinearReferencedPointFeature getPointFeature(final boolean isFrom) {
         return (isFrom) ? fromFeature : toFeature;
+    }
+
+    @Override
+    public void setLinePaint(final Paint linePaint) {
+        super.setLinePaint(linePaint);
+        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+        final PFeature pFeature = mc.getPFeatureHM().get(this);
+        if (pFeature != null) {
+            pFeature.visualize();
+        }
     }
 
     /**
@@ -137,11 +150,14 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
                         featCollLock = true;
                         try {
                             boolean addFeaturesToCollection = false;
-                            for (final Feature feature : features) {
-                                if (collection.isSelected(feature) && (feature instanceof LinearReferencedLineFeature)
-                                            && (((LinearReferencedLineFeature)feature)
-                                                == LinearReferencedLineFeature.this)) {
-                                    addFeaturesToCollection = true;
+                            if (features != null) {
+                                for (final Feature feature : features) {
+                                    if (collection.isSelected(feature)
+                                                && (feature instanceof LinearReferencedLineFeature)
+                                                && (((LinearReferencedLineFeature)feature)
+                                                    == LinearReferencedLineFeature.this)) {
+                                        addFeaturesToCollection = true;
+                                    }
                                 }
                             }
                             if (addFeaturesToCollection) {
@@ -182,32 +198,36 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
         if (LOG.isDebugEnabled()) {
             LOG.debug("update Geometry");
         }
-        Geometry sublineGeom;
-        if (fromFeature != toFeature) {
-            sublineGeom = createSubline(fromFeature.getCurrentPosition(), toFeature.getCurrentPosition(), baseLineGeom);
-        } else {
-            sublineGeom = fromFeature.getGeometry();
-        }
-        setGeometry(sublineGeom);
+        if ((fromFeature != null) && (toFeature != null)) {
+            Geometry sublineGeom;
+            if (fromFeature != toFeature) {
+                sublineGeom = createSubline(fromFeature.getCurrentPosition(),
+                        toFeature.getCurrentPosition(),
+                        baseLineGeom);
+            } else {
+                sublineGeom = fromFeature.getGeometry();
+            }
+            setGeometry(sublineGeom);
 
-        final Coordinate[] coordinates = sublineGeom.getCoordinates();
+            final Coordinate[] coordinates = sublineGeom.getCoordinates();
 
-        final float[] xp = new float[coordinates.length];
-        final float[] yp = new float[coordinates.length];
-        for (int i = 0; i < coordinates.length; i++) {
-            xp[i] = (float)coordinates[i].x;
-            yp[i] = (float)coordinates[i].y;
-        }
+            final float[] xp = new float[coordinates.length];
+            final float[] yp = new float[coordinates.length];
+            for (int i = 0; i < coordinates.length; i++) {
+                xp[i] = (float)coordinates[i].x;
+                yp[i] = (float)coordinates[i].y;
+            }
 
-        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
-        final PFeature pFeature = mc.getPFeatureHM().get(this);
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            final PFeature pFeature = mc.getPFeatureHM().get(this);
 
-        if (pFeature != null) {
-            pFeature.setCoordArr(coordinates);
-            pFeature.setPathToPolyline(xp, yp);
-            pFeature.syncGeometry();
-            pFeature.visualize();
+            if (pFeature != null) {
+                pFeature.setCoordArr(coordinates);
+                pFeature.setPathToPolyline(xp, yp);
+                pFeature.syncGeometry();
+                pFeature.visualize();
 //            pFeature.resetInfoNodePosition();
+            }
         }
     }
 
