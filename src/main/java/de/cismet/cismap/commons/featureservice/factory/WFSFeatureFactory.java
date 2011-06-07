@@ -185,6 +185,24 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             }
             // check if canceled .......................................................
 
+            if ((featureCollection.size() == 1) && (featureCollection.getFeature(0).getName() != null)
+                        && featureCollection.getFeature(0).getName().getLocalName().equals("ExceptionText")) {
+                logger.warn(
+                    "The wfs response contains only one feature with the name ExceptionText. "
+                            + "So an error occured. Trying to extract the error message.");
+                try {
+                    final String errorMessage = featureCollectionDocument.getRootElement()
+                                .getFirstChild()
+                                .getFirstChild()
+                                .getTextContent();
+
+                    throw new Exception(errorMessage);
+                } catch (NullPointerException e) {
+                    logger.error("Cannot extract the error message from the wfs response.");
+                    throw new Exception("The wfs replies with an Exception, but the error text cannot be extracted.");
+                }
+            }
+
             logger.info("FRW[" + workerThread + "]: parsing " + featureCollection.size() + " features took "
                         + (System.currentTimeMillis() - start) + " ms");
 
