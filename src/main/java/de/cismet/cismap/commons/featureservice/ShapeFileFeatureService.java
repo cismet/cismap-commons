@@ -65,6 +65,11 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
                     "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png"))); // NOI18N
     }
 
+    //~ Instance fields --------------------------------------------------------
+
+    private boolean noGeometryRecognised = false;
+    private boolean errorInGeometryFound = false;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -123,10 +128,14 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
-        return new ShapeFeatureFactory(this.getLayerProperties(),
+        final ShapeFeatureFactory sff = new ShapeFeatureFactory(this.getLayerProperties(),
                 this.getDocumentURI(),
                 this.maxSupportedFeatureCount,
                 this.layerInitWorker);
+        noGeometryRecognised = sff.isNoGeometryRecognised();
+        errorInGeometryFound = sff.isErrorInGeometryFound();
+
+        return sff;
     }
 
     @Override
@@ -162,6 +171,24 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
     public Object clone() {
         LOG.info("cloning service " + this.getName()); // NOI18N
         return new ShapeFileFeatureService(this);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the noGeometryRecognised
+     */
+    public boolean isNoGeometryRecognised() {
+        return noGeometryRecognised;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the errorInGeometryFound
+     */
+    public boolean isErrorInGeometryFound() {
+        return errorInGeometryFound;
     }
 
 // breaks DocumentFeatureServiceFactory
