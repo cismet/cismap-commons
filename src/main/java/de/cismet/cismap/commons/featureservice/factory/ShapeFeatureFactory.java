@@ -12,6 +12,7 @@
 package de.cismet.cismap.commons.featureservice.factory;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -32,12 +33,12 @@ import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeFeatureType;
 
 /**
  * DOCUMENT ME!
@@ -58,6 +59,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     // private Feature[] tempFeatureCollection;
     // private int currentProgress = 0;
     protected Vector<FeatureServiceAttribute> featureServiceAttributes;
+    private Geometry extend;
+    private boolean noGeometryRecognised = false;
+    private boolean errorInGeometryFound = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -120,8 +124,20 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         try {
             shapeFeature.setGeometry(JTSAdapter.export(degreeFeature.getGeometryPropertyValues()[geometryIndex]));
         } catch (Exception e) {
+            logger.error("Error while parsing the geometry of a feature from a shape file.", e);
+            if (degreeFeature.getGeometryPropertyValues().length == 0) {
+                noGeometryRecognised = true;
+            } else {
+                errorInGeometryFound = true;
+            }
             shapeFeature.setGeometry(JTSAdapter.export(degreeFeature.getDefaultGeometryPropertyValue()));
         }
+
+        if (shapeFeature.getGeometry() != null) {
+            shapeFeature.getGeometry()
+                    .setSRID(CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getDefaultCrs()));
+        }
+
         if (shapeFeature.getGeometry() != null) {
             // store the feature in the spatial index structure
             shapeFeature.setGeometry(CrsTransformer.transformToDefaultCrs(shapeFeature.getGeometry()));
@@ -208,6 +224,17 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             this.initialiseFeature(featureServiceFeature, degreeFeature, false, i);
             // this.tempFeatureCollection[i] = shapeFile.getFeatureByRecNo(i + 1);
 
+            // debug
+            final Geometry geom = featureServiceFeature.getGeometry();
+            if (geom != null) {
+                if (getExtend() == null) {
+                    extend = geom.getEnvelope();
+                } else {
+                    extend = getExtend().getEnvelope().union(geom.getEnvelope());
+                }
+            }
+            // debug
+
             final int newProgress = (int)((double)i / (double)max * 100d);
             if ((workerThread != null) && (newProgress > currentProgress) && (newProgress >= 5)
                         && ((newProgress % 5) == 0)) {
@@ -223,7 +250,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         }
 
         this.cleanup();
-
         logger.info("parsing, converting and initialising " + max + " shape features took "
                     + (System.currentTimeMillis() - start) + " ms");
     }
@@ -389,5 +415,32 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     @Override
     public ShapeFeatureFactory clone() {
         return new ShapeFeatureFactory(this);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the noGeometryRecognised
+     */
+    public boolean isNoGeometryRecognised() {
+        return noGeometryRecognised;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the errorInGeometryFound
+     */
+    public boolean isErrorInGeometryFound() {
+        return errorInGeometryFound;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  a geometry that contains all features of the shape file
+     */
+    public Geometry getExtend() {
+        return extend;
     }
 }

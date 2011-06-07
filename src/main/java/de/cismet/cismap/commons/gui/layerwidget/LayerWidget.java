@@ -9,6 +9,8 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import org.jdom.Element;
 
+import org.openide.util.NbBundle;
+
 import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
@@ -31,6 +33,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolTip;
@@ -46,6 +49,7 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
+import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
@@ -676,6 +680,44 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                             final DocumentFeatureService dfs = DocumentFeatureServiceFactory
                                         .createDocumentFeatureService(currentFile);
                             activeLayerModel.addLayer(dfs);
+
+                            if (dfs instanceof ShapeFileFeatureService) {
+                                new Thread(new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            do {
+                                                try {
+                                                    Thread.sleep(500);
+                                                } catch (InterruptedException e) {
+                                                    // nothing to do
+                                                }
+                                            } while (!dfs.isInitialized());
+
+                                            if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
+                                                JOptionPane.showMessageDialog(
+                                                    LayerWidget.this,
+                                                    NbBundle.getMessage(
+                                                        LayerWidget.class,
+                                                        "LayerWidget.drop().errorInShapeGeometryFoundMessage"),
+                                                    NbBundle.getMessage(
+                                                        LayerWidget.class,
+                                                        "LayerWidget.drop().errorInShapeGeometryFoundTitle"),
+                                                    JOptionPane.ERROR_MESSAGE);
+                                            } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
+                                                JOptionPane.showMessageDialog(
+                                                    LayerWidget.this,
+                                                    NbBundle.getMessage(
+                                                        LayerWidget.class,
+                                                        "LayerWidget.drop().noGeometryFoundInShapeMessage"),
+                                                    NbBundle.getMessage(
+                                                        LayerWidget.class,
+                                                        "LayerWidget.drop().noGeometryFoundInShapeTitle"),
+                                                    JOptionPane.WARNING_MESSAGE);
+                                            }
+                                        }
+                                    }).start();
+                            }
                         } catch (Exception ex) {
                             log.error("Error during creation of a FeatureServices", ex); // NOI18N
                         }
