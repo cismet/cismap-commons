@@ -52,11 +52,11 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 
-import de.cismet.cismap.commons.gui.downloadmanager.DownloadManager;
-import de.cismet.cismap.commons.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.downloadmanager.DownloadManager;
+import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 
 /**
  * This dialog lets the user select which topic he wants to export. Every topic is represented by a checkbox. The
