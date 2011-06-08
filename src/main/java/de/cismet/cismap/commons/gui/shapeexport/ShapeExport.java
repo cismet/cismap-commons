@@ -45,12 +45,15 @@ import javax.swing.JButton;
 
 import de.cismet.cismap.commons.gui.ToolbarComponentDescription;
 import de.cismet.cismap.commons.gui.ToolbarComponentsProvider;
-import de.cismet.cismap.commons.gui.downloadmanager.DownloadManagerAction;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.collections.TypeSafeCollections;
 
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
+
+import de.cismet.tools.gui.downloadmanager.DownloadManager;
+import de.cismet.tools.gui.downloadmanager.DownloadManagerAction;
 
 /**
  * This class configures the shape export functionality in cismap. Therefore it reads the corresponding part of
@@ -278,7 +281,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
 
     @Override
     public Collection<ToolbarComponentDescription> getToolbarComponents() {
-        if ((toolbarComponents == null) && enableShapeExport) {
+        if ((toolbarComponents == null) && enableShapeExport && DownloadManager.instance().isEnabled()) {
             final JButton btnShapeExport = new JButton(new ShapeExportAction());
             btnShapeExport.setText(null);
             btnShapeExport.setName(NbBundle.getMessage(ShapeExportAction.class, "ShapeExportAction.name"));
@@ -286,7 +289,8 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
             btnShapeExport.setFocusable(false);
             btnShapeExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
             btnShapeExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-            final JButton btnDownloadManager = new JButton(new DownloadManagerAction());
+            final JButton btnDownloadManager = new JButton(new DownloadManagerAction(
+                        CismapBroker.getInstance().getMappingComponent()));
             btnDownloadManager.setText(null);
             btnDownloadManager.setName(NbBundle.getMessage(DownloadManagerAction.class, "DownloadManagerAction.name"));
             btnDownloadManager.setBorderPainted(false);

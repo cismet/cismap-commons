@@ -37,12 +37,12 @@ import javax.swing.AbstractAction;
 import javax.swing.JDialog;
 
 import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.gui.downloadmanager.Download;
-import de.cismet.cismap.commons.gui.downloadmanager.DownloadManager;
-import de.cismet.cismap.commons.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.downloadmanager.Download;
+import de.cismet.tools.gui.downloadmanager.DownloadManager;
+import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 
 /**
  * This action is responsible for the the steps to be done when the user wants to start a shape export.
@@ -116,7 +116,6 @@ public class ShapeExportAction extends AbstractAction {
     private Collection<Download> convertToDownloads(final Collection<ExportWFS> wfss) {
         final Collection<Download> result = new LinkedList<Download>();
 
-        final String directory = ShapeExport.getDestinationDirectory().getAbsolutePath();
         final String filenameFromShapeExport = ShapeExport.getDestinationFile();
         final String extension = ShapeExport.getDestinationFileExtension();
 
@@ -127,14 +126,12 @@ public class ShapeExportAction extends AbstractAction {
                 download = new Download(wfs.getUrl(),
                         wfs.getQuery(),
                         wfs.getTopic(),
-                        directory,
                         filenameFromShapeExport,
                         extension);
             } else {
                 download = new Download(wfs.getUrl(),
                         wfs.getQuery(),
                         wfs.getTopic(),
-                        directory,
                         wfs.getFile(),
                         extension);
             }
