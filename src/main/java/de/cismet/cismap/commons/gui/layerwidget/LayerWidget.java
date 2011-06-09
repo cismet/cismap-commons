@@ -784,7 +784,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                             sac.getHost(),
                             sac.getQuery(),
                             sac.getAttributes(),
-                            sac.getFeature().getWFSCapabilities().getVersion());
+                            sac.getFeature());
                     if ((sac.getIdentifier() != null) && (sac.getIdentifier().length() > 0)) {
                         if (log.isDebugEnabled()) {
                             log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier()

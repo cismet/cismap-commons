@@ -28,12 +28,18 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.wfs.WFSFacade;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
+import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 
 /**
@@ -77,12 +83,13 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
     //~ Instance fields --------------------------------------------------------
 
     /** the request which will be send to the WFS. */
+    private Crs crs;
     private String wfsQueryString;
     private Element wfsQueryElement;
     /** the hostname of the WFS server. */
     private String hostname;
     /** the version of the wfs. */
-    private String version;
+    private FeatureType feature;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -104,7 +111,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
      * @param   host        hostname of the WFS server
      * @param   query       the request which will be send to the WFS
      * @param   attributes  featureServiceAttributes vector with all FeatureServiceAttributes of the FeatureService
-     * @param   version     DOCUMENT ME!
+     * @param   feature     version DOCUMENT ME!
      *
      * @throws  Exception  if something went wrong
      */
@@ -112,9 +119,10 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
             final String host,
             final Element query,
             final List<FeatureServiceAttribute> attributes,
-            final String version) throws Exception {
+            final FeatureType feature) throws Exception {
         super(name, attributes);
-        this.version = version;
+        crs = CismapBroker.getInstance().getSrs();
+        setFeature(feature);
         setQueryElement(query);
         setHostname(host);
 
@@ -131,6 +139,8 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
      */
     protected WebFeatureService(final WebFeatureService wfs) {
         super(wfs);
+        this.setCrs(wfs.getCrs());
+        this.setFeature(wfs.getFeature());
         this.setHostname(wfs.getHostname());
         this.setQueryElement(wfs.getQueryElement());
         // overwrite with customised query if applicable
@@ -162,6 +172,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
         final Element parentElement = super.toElement();
 
         final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, hostname, getVersion(), false);
+        parentElement.addContent(crs.getJDOMElement());
         parentElement.addContent(capLink.getElement());
         parentElement.addContent(getQueryElement().detach());
 
@@ -172,12 +183,19 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
     public void initFromElement(final Element element) throws Exception {
         super.initFromElement(element);
         final CapabilityLink cp = new CapabilityLink(element);
+        final Element crsElement = element.getChild("crs");
         final Element query = element.getChild(FeatureServiceUtilities.GET_FEATURE, FeatureServiceUtilities.WFS);
-        // query string is not saved!
-        this.setQuery(null);
+        final WFSCapabilitiesFactory fac = new WFSCapabilitiesFactory();
+        final WFSCapabilities cap = fac.createCapabilities(cp.getLink());
+        if (crsElement != null) {
+            setCrs(new Crs(crsElement));
+        }
+        feature = WFSFacade.extractRequestedFeatureType(FeatureServiceUtilities.elementToString(query), cap);
+        // query string will be set, when the query element will be set
         this.setQueryElement(query);
         this.setHostname(cp.getLink());
-        this.setVersion(cp.getVersion());
+
+//        this.setVersion(cp.getVersion());
     }
 
     /**
@@ -287,7 +305,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
-        return new WFSFeatureFactory(this.getLayerProperties(), this.getHostname(), this.getVersion());
+        return new WFSFeatureFactory(this.getLayerProperties(), this.getHostname(), this.feature, getCrs());
     }
 
     /**
@@ -306,16 +324,12 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
      * @return  the version of the referenced wfs
      */
     public String getVersion() {
-        return version;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  version  the version of the referenced wfs to set
-     */
-    public void setVersion(final String version) {
-        this.version = version;
+        if (feature != null) {
+            return feature.getWFSCapabilities().getVersion();
+        } else {
+            LOG.error("Version is not set.");
+            return "";
+        }
     }
 
     @Override
@@ -345,5 +359,54 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
     @Override
     public Layer getLayerInformation() {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the feature
+     */
+    public FeatureType getFeature() {
+        return feature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  feature  the feature to set
+     */
+    public void setFeature(final FeatureType feature) {
+        this.feature = feature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the crs
+     */
+    public Crs getCrs() {
+        if (crs == null) {
+            return CismapBroker.getInstance().getSrs();
+        }
+        return crs;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crs  the crs to set
+     */
+    public void setCrs(final Crs crs) {
+        this.crs = crs;
+        if (featureFactory != null) {
+            ((WFSFeatureFactory)featureFactory).setCrs(crs);
+        }
+//        try {
+//            featureFactory = createFeatureFactory();
+//            this.featureFactory.setMaxFeatureCount(this.getMaxFeatureCount());
+//            this.featureFactory.setLayerProperties(layerProperties);
+//        } catch (Exception e) {
+//            LOG.error("Error while creating a new feature factory.", e);
+//        }
     }
 }

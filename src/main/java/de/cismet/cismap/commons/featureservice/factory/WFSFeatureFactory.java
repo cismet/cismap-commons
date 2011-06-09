@@ -28,10 +28,14 @@ import java.util.Vector;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.wfs.WFSFacade;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 
 import de.cismet.security.AccessHandler.ACCESS_METHODS;
 
@@ -51,7 +55,8 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     //~ Instance fields --------------------------------------------------------
 
     protected String hostname = null;
-    protected String wfsVersion;
+    protected FeatureType featureType;
+    private Crs crs;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -61,13 +66,18 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      *
      * @param  layerProperties  DOCUMENT ME!
      * @param  hostname         DOCUMENT ME!
-     * @param  wfsVersion       DOCUMENT ME!
+     * @param  featureType      wfsVersion DOCUMENT ME!
+     * @param  crs              DOCUMENT ME!
      */
-    public WFSFeatureFactory(final LayerProperties layerProperties, final String hostname, final String wfsVersion) {
+    public WFSFeatureFactory(final LayerProperties layerProperties,
+            final String hostname,
+            final FeatureType featureType,
+            final Crs crs) {
         logger.info("initialising WFSFeatureFactory with hostname: '" + hostname + "'");
         this.layerProperties = layerProperties;
         this.hostname = hostname;
-        this.wfsVersion = wfsVersion;
+        this.featureType = featureType;
+        this.crs = crs;
     }
 
     /**
@@ -78,7 +88,8 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     protected WFSFeatureFactory(final WFSFeatureFactory wfsff) {
         super(wfsff);
         this.hostname = wfsff.hostname;
-        this.wfsVersion = wfsff.wfsVersion;
+        this.featureType = wfsff.featureType;
+        this.crs = wfsff.crs;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -103,8 +114,18 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             return null;
         }
         // check if canceled .......................................................
-
-        final String postString = WFSFacade.setGetFeatureBoundingBox(query, boundingBox, wfsVersion);
+// final Crs currentCrs = CismapBroker.getInstance().getSrs();
+        final XBoundingBox bbox = new XBoundingBox(boundingBox.getX1(),
+                boundingBox.getY1(),
+                boundingBox.getX2(),
+                boundingBox.getY2(),
+                getCrs().getCode(),
+                getCrs().isMetric());
+        final WFSFacade facade = featureType.getWFSCapabilities().getServiceFacade();
+        final String postString = facade.setGetFeatureBoundingBox(query, bbox, featureType, getCrs().getCode());
+        featureSrid = CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(
+                    featureType,
+                    getCrs().getCode()));
 
         // check if canceled .......................................................
         if (this.checkCancelled(workerThread, "creating post string")) {
@@ -275,5 +296,23 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     @Override
     public WFSFeatureFactory clone() {
         return new WFSFeatureFactory(this);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the crs
+     */
+    public Crs getCrs() {
+        return crs;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crs  the crs to set
+     */
+    public void setCrs(final Crs crs) {
+        this.crs = crs;
     }
 }

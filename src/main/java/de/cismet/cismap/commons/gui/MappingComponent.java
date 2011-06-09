@@ -5245,6 +5245,12 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 removeFeatures(list);
                 addFeaturesToMap(list.toArray(new Feature[list.size()]));
 
+                // refresh all wfs layer
+                if (getMappingModel() instanceof ActiveLayerModel) {
+                    final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
+                    alm.refreshWebFeatureServices();
+                }
+
                 // transform the highlighting layer
                 for (int i = 0; i < highlightingLayer.getChildrenCount(); ++i) {
                     final PNode node = highlightingLayer.getChild(i);

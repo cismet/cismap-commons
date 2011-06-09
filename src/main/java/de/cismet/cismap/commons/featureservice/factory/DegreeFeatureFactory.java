@@ -36,6 +36,7 @@ public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
     //~ Instance fields --------------------------------------------------------
 
     protected int geometryIndex;
+    protected Integer featureSrid = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -135,6 +136,10 @@ public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
             } catch (Exception e) {
                 featureServiceFeature.setGeometry(JTSAdapter.export(degreeFeature.getDefaultGeometryPropertyValue()));
             }
+        }
+
+        if ((featureServiceFeature.getGeometry() != null) && (featureSrid != null)) {
+            featureServiceFeature.getGeometry().setSRID(featureSrid);
         }
 
         // adding properties

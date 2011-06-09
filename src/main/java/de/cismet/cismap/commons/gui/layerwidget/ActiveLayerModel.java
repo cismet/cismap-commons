@@ -307,6 +307,25 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     /**
      * DOCUMENT ME!
      */
+    public void refreshWebFeatureServices() {
+        final Object[] oa = layers.toArray();
+        final Vector<WebFeatureService> removedLayer = new Vector<WebFeatureService>();
+
+        for (int i = 0; i < oa.length; i++) {
+            if (oa[i] instanceof WebFeatureService) {
+                removedLayer.add((WebFeatureService)oa[i]);
+                removeLayer(oa[i], null);
+            }
+        }
+
+        for (final WebFeatureService tmp : removedLayer) {
+            addLayer((WebFeatureService)tmp.clone());
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
     public void removeAllLayers() {
         final Object[] oa = layers.toArray();
         for (int i = 0; i < oa.length; i++) {
@@ -843,6 +862,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 ((WMSServiceLayer)layer).setSrs(srs.getCode());
             } else if (layer instanceof SlidableWMSServiceLayerGroup) {
                 ((SlidableWMSServiceLayerGroup)layer).setSrs(srs.getCode());
+            } else if (layer instanceof WebFeatureService) {
+                ((WebFeatureService)layer).setCrs(srs);
             } else {
                 log.error("The SRS of a layer cannot be changed. Layer is of type  " + layer.getClass().getName());
             }
