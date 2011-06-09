@@ -417,15 +417,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
      * @return  The selected topics.
      */
     public Collection<ExportWFS> getSelectedWFSs() {
-        final Collection result = new LinkedHashSet<ExportWFS>();
-        for (final ExportWFS wfs : selectedWFSs) {
-            result.add(new ExportWFS(
-                    new String(wfs.getTopic()),
-                    new String(wfs.getFile()),
-                    new String(wfs.getQuery()),
-                    wfs.getUrl()));
-        }
-        return result;
+        return selectedWFSs;
     }
 
     /**
@@ -460,7 +452,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
                         + "</wfs:Query>"
                         + "</wfs:GetFeature>",
-                url);
+                url,
+                null);
 
         final ExportWFS wfs2 = new ExportWFS(
                 "Dann das Test-Thema 2",
@@ -478,7 +471,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
                         + "</wfs:Query>"
                         + "</wfs:GetFeature>",
-                url);
+                url,
+                null);
 
         final ExportWFS wfs3 = new ExportWFS(
                 "Und dann noch das Test-Thema 3",
@@ -550,7 +544,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
                         + "</wfs:Query>"
                         + "</wfs:GetFeature>",
-                url);
+                url,
+                null);
         final ExportWFS wfs4 = new ExportWFS(
                 "Test-Thema 1",
                 "route",
@@ -567,7 +562,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
                         + "</wfs:Query>"
                         + "</wfs:GetFeature>",
-                url);
+                url,
+                null);
 
         final ExportWFS wfs5 = new ExportWFS(
                 "Dann das Test-Thema 2",
@@ -585,7 +581,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
                         + "</wfs:Query>"
                         + "</wfs:GetFeature>",
-                erraneousURL);
+                erraneousURL,
+                null);
 
         final ExportWFS wfs6 = new ExportWFS(
                 "Und dann noch das Test-Thema 3",
@@ -657,7 +654,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                         + "<wfs:PropertyName>app:the_geom</wfs:PropertyName>"
                         + "</wfs:Query>"
                         + "</wfs:GetFeature>",
-                url);
+                url,
+                null);
 
         final Collection<ExportWFS> wfsList = new TreeSet<ExportWFS>();
 

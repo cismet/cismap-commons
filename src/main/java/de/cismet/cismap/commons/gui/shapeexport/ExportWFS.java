@@ -40,22 +40,25 @@ public class ExportWFS implements Comparable {
     private String file;
     private String query;
     private URL url;
+    private String targetCRS;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new ExportWFS object.
      *
-     * @param  topic  The topic.
-     * @param  file   The file name.
-     * @param  query  The query.
-     * @param  url    The URL of the server.
+     * @param  topic      The topic.
+     * @param  file       The file name.
+     * @param  query      The query.
+     * @param  url        The URL of the server.
+     * @param  targetCRS  The target CRS.
      */
-    public ExportWFS(final String topic, final String file, final String query, final URL url) {
+    public ExportWFS(final String topic, final String file, final String query, final URL url, final String targetCRS) {
         this.topic = topic;
         this.file = file;
         this.query = query;
         this.url = url;
+        this.targetCRS = targetCRS;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -103,6 +106,15 @@ public class ExportWFS implements Comparable {
      */
     public URL getUrl() {
         return url;
+    }
+
+    /**
+     * Returns the target CRS of this export.
+     *
+     * @return  The target CRS.
+     */
+    public String getTargetCRS() {
+        return targetCRS;
     }
 
     @Override

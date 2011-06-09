@@ -76,6 +76,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
     private static final String XML_WFS_TITLE = "title";
     private static final String XML_WFS_URL = "url";
     private static final String XML_WFS_QUERY = "query";
+    private static final String XML_WFS_TARGET_CRS = "targetCRS";
     private static final String XML_DESTINATION = "destination";
     private static final String XML_DIRECTORY = "directory";
     private static final String XML_FILE = "file";
@@ -98,12 +99,34 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
 
     /**
      * Returns a Set of all configured export topics. The Set is ordered by the appearance of the topics in the config
-     * file.
+     * file. The Set contains a copy of the wfs list. Any change to a wfs won't affect the list this ShapeExport object
+     * manages.
      *
      * @return  A Set of available topics.
      */
     public static Set<ExportWFS> getWFSList() {
-        return wfsList;
+        final Set<ExportWFS> result = new LinkedHashSet<ExportWFS>();
+        for (final ExportWFS wfs : wfsList) {
+            ExportWFS copiedWFS = null;
+            if (wfs.getTargetCRS() != null) {
+                copiedWFS = new ExportWFS(
+                        new String(wfs.getTopic()),
+                        new String(wfs.getFile()),
+                        new String(wfs.getQuery()),
+                        wfs.getUrl(),
+                        new String(wfs.getTargetCRS()));
+            } else {
+                copiedWFS = new ExportWFS(
+                        new String(wfs.getTopic()),
+                        new String(wfs.getFile()),
+                        new String(wfs.getQuery()),
+                        wfs.getUrl(),
+                        null);
+            }
+
+            result.add(copiedWFS);
+        }
+        return result;
     }
 
     /**
@@ -229,12 +252,19 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
             final Element wfsFile = exportWFS.getChild(XML_WFS_FILE);
             final Element url = exportWFS.getChild(XML_WFS_URL);
             final Element query = exportWFS.getChild(XML_WFS_QUERY);
+            final Element targetCRS = exportWFS.getChild(XML_WFS_TARGET_CRS);
 
             if ((title != null) && (url != null) && (query != null)) {
                 final String contentOfTitle = title.getText();
                 final String contentOfUrl = url.getText();
                 final String contentOfQuery = query.getText();
                 String contentOfWfsFile = destinationFile;
+
+                String contentOfTargetCRS = null;
+                if (targetCRS != null) {
+                    contentOfTargetCRS = targetCRS.getText();
+                }
+
                 if ((wfsFile != null) && (wfsFile.getText() != null) && (wfsFile.getText().trim().length() > 0)) {
                     contentOfWfsFile = wfsFile.getText();
                 }
@@ -255,7 +285,12 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
                     }
 
                     if (convertedUrl != null) {
-                        wfsList.add(new ExportWFS(contentOfTitle, contentOfWfsFile, contentOfQuery, convertedUrl));
+                        wfsList.add(new ExportWFS(
+                                contentOfTitle,
+                                contentOfWfsFile,
+                                contentOfQuery,
+                                convertedUrl,
+                                contentOfTargetCRS));
                     }
                 }
             }
