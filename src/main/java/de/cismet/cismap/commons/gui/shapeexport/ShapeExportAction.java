@@ -23,6 +23,8 @@
  */
 package de.cismet.cismap.commons.gui.shapeexport;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -36,6 +38,7 @@ import java.util.LinkedList;
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -88,10 +91,16 @@ public class ShapeExportAction extends AbstractAction {
             return;
         }
 
-        final XBoundingBox boundingBox = (XBoundingBox)CismapBroker.getInstance().getMappingComponent()
+        XBoundingBox boundingBox = (XBoundingBox)CismapBroker.getInstance().getMappingComponent()
                     .getCurrentBoundingBox();
+
         wfsList = dialog.getSelectedWFSs();
         for (final ExportWFS wfs : wfsList) {
+            if (wfs.getTargetCRS() != null) {
+                final Geometry g = CrsTransformer.transformToGivenCrs(boundingBox.getGeometry(), wfs.getTargetCRS());
+                boundingBox = new XBoundingBox(g);
+            }
+
             wfs.setQuery(wfs.getQuery().replace(ShapeExport.getBboxToken(), boundingBox.toGml4WFS110String()));
         }
 
