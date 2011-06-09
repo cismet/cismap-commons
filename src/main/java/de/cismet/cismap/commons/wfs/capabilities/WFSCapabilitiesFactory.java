@@ -55,13 +55,6 @@ public class WFSCapabilitiesFactory extends AbstractVersionNegotiator {
 
     /**
      * DOCUMENT ME!
-     */
-    public static void toggleGeotools() {
-        geotools = !geotools;
-    }
-
-    /**
-     * DOCUMENT ME!
      *
      * @param   link  DOCUMENT ME!
      *

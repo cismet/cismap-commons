@@ -23,9 +23,11 @@
  */
 package de.cismet.cismap.commons.wfs;
 
-import org.apache.commons.httpclient.HttpStatus;
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.apache.log4j.Logger;
 
+import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
@@ -35,15 +37,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 
 import java.net.URL;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 import javax.xml.namespace.QName;
 
 import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.exceptions.BadHttpStatusCodeException;
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
@@ -199,34 +204,124 @@ public class WFSFacade {
      *
      * @param   query    the getFeature request template.
      * @param   bbox     the bounding box that should be used in the getFeature request
-     * @param   version  the version of the wfs
+     * @param   feature  the type of the feature from the given query
+     * @param   mapCrs   the crs of the map, the features should be shown on
      *
      * @return  the new getFeature request
      */
-    public static String setGetFeatureBoundingBox(final String query, final BoundingBox bbox, final String version) {
+    public String setGetFeatureBoundingBox(final String query,
+            final XBoundingBox bbox,
+            final FeatureType feature,
+            final String mapCrs) {
         String request;
         String envelope;
+        final String crs = getOptimalCrsForFeature(feature, mapCrs);
+        final Geometry geom = CrsTransformer.transformToGivenCrs(bbox.getGeometry(), crs);
+        final XBoundingBox tbbox = new XBoundingBox(geom);
 
-        if ((version != null) && version.equals("1.0.0")) {                                             // NOI18N
-            envelope = "<gml:Box><gml:coord><gml:X>" + bbox.getX1() + "</gml:X><gml:Y>" + bbox.getY1()  // NOI18N
-                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + bbox.getX2()                  // NOI18N
-                        + "</gml:X><gml:Y>" + bbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";     // NOI18N
-        } else if ((version != null) && version.equals("1.1.0")) {                                      // NOI18N
-            envelope = "<gml:Envelope><gml:lowerCorner>" + bbox.getX1()                                 // NOI18N
-                        + " " + bbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"               // NOI18N
-                        + bbox.getX2() + " " + bbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+        if ((cap.getVersion() != null) && cap.getVersion().equals("1.0.0")) {                             // NOI18N
+            envelope = "<gml:Box><gml:coord><gml:X>" + bbox.getX1() + "</gml:X><gml:Y>" + bbox.getY1()    // NOI18N
+                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + bbox.getX2()                    // NOI18N
+                        + "</gml:X><gml:Y>" + bbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";       // NOI18N
+        } else if ((cap.getVersion() != null) && cap.getVersion().equals("1.1.0")) {                      // NOI18N
+            envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
+                        + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
+                        + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
         } else {
-            logger.error("unknown service version used: " + version                                     // NOI18N
-                        + ". Try to use a version 1.1.0 request");                                      // NOI18N
-            envelope = "<gml:Envelope><gml:lowerCorner>" + bbox.getX1()                                 // NOI18N
-                        + " " + bbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"               // NOI18N
-                        + bbox.getX2() + " " + bbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            logger.error("unknown service version used: " + cap.getVersion()                              // NOI18N
+                        + ". Try to use a version 1.1.0 request");                                        // NOI18N
+            envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
+                        + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
+                        + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
         }
 
         request = query.toString().replaceAll(CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER, envelope);
-        request = request.replaceAll(SRS_NAME_PLACEHOLDER, CismapBroker.getInstance().getSrs().getCode());
+        request = request.replaceAll(SRS_NAME_PLACEHOLDER, crs);
 
         return request;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   feature  DOCUMENT ME!
+     * @param   mapSrs   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static String getOptimalCrsForFeature(final FeatureType feature, final String mapSrs) {
+        String desiredSrs = mapSrs;
+
+        if (desiredSrs == null) {
+            desiredSrs = CismapBroker.getInstance().getSrs().getCode();
+        }
+
+        for (final String tmpSrs : feature.getSupportedSRS()) {
+            if (tmpSrs.equals(desiredSrs)) {
+                return tmpSrs;
+            }
+        }
+
+        if (feature.getDefaultSRS() != null) {
+            return feature.getDefaultSRS();
+        } else {
+            return mapSrs;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   request  DOCUMENT ME!
+     * @param   cap      DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static FeatureType extractRequestedFeatureType(final String request, final WFSCapabilities cap) {
+        try {
+            final SAXBuilder builder = new SAXBuilder();
+            final Element root = builder.build(new StringReader(request)).getRootElement();
+            final Attribute att = root.getChild(QUERY, WFS).getAttribute(TYPE_NAME_ATTR);
+            if (att != null) {
+                return extractFeatureTypeFromCap(att.getValue(), cap);
+            }
+        } catch (Exception ex) {
+            logger.error("Error during parsing of the wfs request. The feature type cannot be recognized.", ex); // NOI18N
+        }
+
+        logger.error(
+            "The feature type cannot be extracted from the wfs request. So the supported crs cannot be determined exactly."); // NOI18N
+
+        return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   featureName  DOCUMENT ME!
+     * @param   cap          DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static FeatureType extractFeatureTypeFromCap(final String featureName, final WFSCapabilities cap) {
+        try {
+            if (featureName != null) {
+                final Iterator<FeatureType> featureIterator = cap.getFeatureTypeList().iterator();
+                final String localFeatureName = featureName.substring(featureName.indexOf(":") + 1);
+
+                while (featureIterator.hasNext()) {
+                    final FeatureType feature = featureIterator.next();
+                    if (feature.getName().getLocalPart().equals(localFeatureName)) {
+                        return feature;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            logger.error("Error while discovering the feature list.", ex); // NOI18N
+        }
+
+        logger.error("The feature type with the name " + featureName + " cannot be found."); // NOI18N
+        return null;
     }
 
     /**

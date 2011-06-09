@@ -522,7 +522,7 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
                         sac.getHost(),
                         sac.getQuery(),
                         sac.getAttributes(),
-                        sac.getFeature().getWFSCapabilities().getVersion());
+                        sac.getFeature());
                 if (log.isDebugEnabled()) {
                     log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier()
                                 + "' (EXPRESSIONTYPE_PROPERTYNAME)");                                              // NOI18N
