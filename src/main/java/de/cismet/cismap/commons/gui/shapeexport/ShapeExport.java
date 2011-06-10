@@ -85,7 +85,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
 
     private static Set<ExportWFS> wfsList = new LinkedHashSet<ExportWFS>();
     private static String bboxToken = "<cismap:BBOX/>";
-    private static File destinationDirectory = new File(System.getProperty("user.dir"));
+    private static String destinationDirectory = "cismap";
     private static String destinationFile = "export";
     private static String destinationFileExtension = ".zip";
 
@@ -145,7 +145,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
      *
      * @return  A file object pointing to the directory where to place exports.
      */
-    public static File getDestinationDirectory() {
+    public static String getDestinationDirectory() {
         return destinationDirectory;
     }
 
@@ -200,31 +200,8 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
             if ((directory == null) || (directory.getText() == null) || (directory.getText().trim().length() == 0)) {
                 LOG.warn("There is no destination directory configured for shape export. Using default directory.");
             } else {
-                destinationDirectory = new File(System.getProperty("user.home"), directory.getText());
-                if (!destinationDirectory.exists()) {
-                    destinationDirectory.mkdirs();
-                }
+                destinationDirectory = directory.getText();
             }
-        }
-
-        if ((destinationDirectory == null) || !destinationDirectory.exists() || !destinationDirectory.isDirectory()
-                    || !destinationDirectory.canWrite()) {
-            if (destinationDirectory != null) {
-                LOG.warn("The destination directory for shape export '" + destinationDirectory.getAbsolutePath()
-                            + "' is invalid. Using '" + System.getProperty("user.home") + File.separatorChar
-                            + "cismap' instead.");
-            }
-
-            destinationDirectory = new File(System.getProperty("user.home"), "cismap");
-            if (!destinationDirectory.exists()) {
-                destinationDirectory.mkdirs();
-            }
-        }
-
-        if (!destinationDirectory.exists() || !destinationDirectory.isDirectory() || !destinationDirectory.canWrite()) {
-            LOG.error("The destination directory for shape export '" + destinationDirectory.getAbsolutePath()
-                        + "' is invalid. Shape export will be disabled.");
-            enableShapeExport = false;
         }
 
         final Element file = destination.getChild(XML_FILE);

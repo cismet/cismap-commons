@@ -129,21 +129,17 @@ public class ShapeExportAction extends AbstractAction {
         final String extension = ShapeExport.getDestinationFileExtension();
 
         for (final ExportWFS wfs : wfss) {
-            Download download = null;
-            final String filenameFromWFS = wfs.getFile();
-            if ((filenameFromWFS == null) || (filenameFromWFS.trim().length() == 0)) {
-                download = new Download(wfs.getUrl(),
-                        wfs.getQuery(),
-                        wfs.getTopic(),
-                        filenameFromShapeExport,
-                        extension);
-            } else {
-                download = new Download(wfs.getUrl(),
-                        wfs.getQuery(),
-                        wfs.getTopic(),
-                        wfs.getFile(),
-                        extension);
+            String filenameForDownload = wfs.getFile();
+            if ((filenameForDownload == null) || (filenameForDownload.trim().length() == 0)) {
+                filenameForDownload = filenameFromShapeExport;
             }
+
+            final Download download = new Download(wfs.getUrl(),
+                    wfs.getQuery(),
+                    ShapeExport.getDestinationDirectory(),
+                    wfs.getTopic(),
+                    filenameForDownload,
+                    extension);
 
             result.add(download);
         }
