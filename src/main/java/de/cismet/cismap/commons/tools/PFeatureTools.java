@@ -203,7 +203,7 @@ public class PFeatureTools {
 
         final PPickPath pp = ((MappingComponent)pInputEvent.getComponent()).getCamera()
                     .pick(pInputEvent.getCanvasPosition().getX(), pInputEvent.getCanvasPosition().getY(), halo);
-
+        pp.pushNode(pInputEvent.getPickedNode());
         do {
             if (first) {
                 o = pp.getPickedNode();
