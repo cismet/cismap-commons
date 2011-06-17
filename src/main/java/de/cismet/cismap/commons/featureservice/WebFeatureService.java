@@ -172,9 +172,17 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
         final Element parentElement = super.toElement();
 
         final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, hostname, getVersion(), false);
-        parentElement.addContent(crs.getJDOMElement());
-        parentElement.addContent(capLink.getElement());
-        parentElement.addContent(getQueryElement().detach());
+
+        try {
+            parentElement.addContent(capLink.getElement());
+        } catch (Exception e) {
+            LOG.warn("error in parentElement.addContent(capLink.getElement());", e);
+        }
+        try {
+            parentElement.addContent(getQueryElement().detach());
+        } catch (Exception e) {
+            LOG.warn("error in parentElement.addContent(getQueryElement().detach());", e);
+        }
 
         return parentElement;
     }
@@ -183,13 +191,9 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
     public void initFromElement(final Element element) throws Exception {
         super.initFromElement(element);
         final CapabilityLink cp = new CapabilityLink(element);
-        final Element crsElement = element.getChild("crs");
         final Element query = element.getChild(FeatureServiceUtilities.GET_FEATURE, FeatureServiceUtilities.WFS);
         final WFSCapabilitiesFactory fac = new WFSCapabilitiesFactory();
         final WFSCapabilities cap = fac.createCapabilities(cp.getLink());
-        if (crsElement != null) {
-            setCrs(new Crs(crsElement));
-        }
         feature = WFSFacade.extractRequestedFeatureType(FeatureServiceUtilities.elementToString(query), cap);
         // query string will be set, when the query element will be set
         this.setQueryElement(query);
