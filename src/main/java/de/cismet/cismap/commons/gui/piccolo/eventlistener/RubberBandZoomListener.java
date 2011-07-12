@@ -16,6 +16,7 @@ import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
 
 import java.awt.event.ActionListener;
+import java.awt.geom.Point2D;
 
 import javax.swing.Timer;
 
@@ -36,8 +37,7 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private final Timer timer;
+    private final transient Timer timer;
     private ActionListener zoomListener = null;
 
     //~ Constructors -----------------------------------------------------------
@@ -46,7 +46,7 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
      * Creates a new RubberBandZoomListener object.
      */
     public RubberBandZoomListener() {
-        timer = new Timer(500, null);
+        timer = new Timer(1, null);
         timer.setRepeats(false);
     }
 
@@ -62,7 +62,6 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
             if ((bb.width > 20) && (bb.height > 20)) {
                 if (e.getComponent() instanceof MappingComponent) {
                     final MappingComponent map = (MappingComponent)e.getComponent();
-//                    map.getHandleLayer().removeAllChildren();
                     e.getCamera().animateViewToCenterBounds(b, true, map.getAnimationDuration());
                     map.setNewViewBounds(b);
                     map.queryServices();
@@ -111,8 +110,6 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
      * @param  delayTime               DOCUMENT ME!
      */
     public void zoom(final float factor, final PInputEvent e, final int localAnimationDuration, final int delayTime) {
-//        if (e.getComponent() instanceof MappingComponent) {
-//            if (((MappingComponent) e.getComponent()).getAnimating()) {
         final PBounds b = new PBounds();
         final double scale = factor;
         final double oldWidth = e.getCamera().getViewBounds().getWidth();
@@ -122,28 +119,31 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
 
         final double offsetX = (newWidth - oldWidth) / 2;
         final double offsetY = (newHeight - oldHeight) / 2;
-//        if (e.getComponent() instanceof MappingComponent) {
-//            MappingComponent map = (MappingComponent) e.getComponent();
-//            map.getHandleLayer().removeAllChildren();
-//        }
-        // Offsetverschiebung sorgt daf\u00FCr das der Punkt auf den man geclickt hat an der gleichen Stelle bleibt
-        b.setOrigin(e.getCamera().getViewBounds().getOrigin().getX() - offsetX,
-            e.getCamera().getViewBounds().getOrigin().getY()
-                    - offsetY); // );
+
+        final Point2D origin = e.getCamera().getViewBounds().getOrigin();
+        final double originX = origin.getX() - offsetX;
+        final double originY = origin.getY() - offsetY;
+
+        b.setOrigin(originX, originY);
         b.setSize(newWidth, newHeight);
         e.getCamera().animateViewToCenterBounds(b, true, localAnimationDuration);
+
         if (localAnimationDuration == 0) {
             CismapBroker.getInstance().fireMapBoundsChanged();
         }
-        if (!timer.isRunning()) {
+
+        timer.setInitialDelay(delayTime);
+        if (timer.isRunning()) {
+            timer.restart();
+        } else {
             if (zoomListener != null) {
                 timer.removeActionListener(zoomListener);
             }
+
             zoomListener = new ZoomAction(b, e);
+
             timer.addActionListener(zoomListener);
             timer.start();
         }
     }
-//        }
-//    }
 }
