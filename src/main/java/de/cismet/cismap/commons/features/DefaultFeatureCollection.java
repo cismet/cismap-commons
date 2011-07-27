@@ -448,7 +448,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     @Override
-    public void addFeatures(final Collection<Feature> cf) {
+    public void addFeatures(final Collection<? extends Feature> cf) {
         if (log.isDebugEnabled()) {
             log.debug("addFeatures(Collection<Feature> cf):" + cf); // NOI18N
         }
