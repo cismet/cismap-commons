@@ -32,11 +32,12 @@ import org.openide.util.NbBundle;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 
+import java.io.File;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
 import javax.swing.AbstractAction;
-import javax.swing.JDialog;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
@@ -46,6 +47,8 @@ import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
+import de.cismet.tools.gui.downloadmanager.MultipleDownload;
+import de.cismet.tools.gui.downloadmanager.SingleDownload;
 
 /**
  * This action is responsible for the the steps to be done when the user wants to start a shape export.
@@ -104,29 +107,40 @@ public class ShapeExportAction extends AbstractAction {
             wfs.setQuery(wfs.getQuery().replace(ShapeExport.getBboxToken(), boundingBox.toGml4WFS110String()));
         }
 
-        DownloadManager.instance().add(convertToDownloads(wfsList));
-
-        final JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
-                    CismapBroker.getInstance().getMappingComponent()));
-        if (!downloadManager.isVisible()) {
-            downloadManager.setLocationRelativeTo(parent);
-            downloadManager.setVisible(true);
-            downloadManager.pack();
+        if (
+            !DownloadManagerDialog.showAskingForUserTitle(
+                        StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()))) {
+            return;
         }
+        final String jobname = DownloadManagerDialog.getJobname();
+        if ((jobname == null) || (jobname.trim().length() <= 0)) {
+            return;
+        }
+
+        DownloadManager.instance().add(convertToDownloads(wfsList, jobname));
+
+        /*final JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
+         *          CismapBroker.getInstance().getMappingComponent())); if (!downloadManager.isVisible()) {
+         * downloadManager.setLocationRelativeTo(parent); downloadManager.setVisible(true); downloadManager.pack();}*/
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   wfss  DOCUMENT ME!
+     * @param   wfss     DOCUMENT ME!
+     * @param   jobname  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private Collection<Download> convertToDownloads(final Collection<ExportWFS> wfss) {
-        final Collection<Download> result = new LinkedList<Download>();
+    private Download convertToDownloads(final Collection<ExportWFS> wfss, final String jobname) {
+        final Collection<SingleDownload> downloads = new LinkedList<SingleDownload>();
 
         final String filenameFromShapeExport = ShapeExport.getDestinationFile();
         final String extension = ShapeExport.getDestinationFileExtension();
+        String destinationDirectory = ShapeExport.getDestinationDirectory();
+        if ((jobname != null) && (jobname.trim().length() > 0)) {
+            destinationDirectory = destinationDirectory.concat(File.separator).concat(jobname);
+        }
 
         for (final ExportWFS wfs : wfss) {
             String filenameForDownload = wfs.getFile();
@@ -134,16 +148,20 @@ public class ShapeExportAction extends AbstractAction {
                 filenameForDownload = filenameFromShapeExport;
             }
 
-            final Download download = new Download(wfs.getUrl(),
+            final SingleDownload download = new SingleDownload(wfs.getUrl(),
                     wfs.getQuery(),
-                    ShapeExport.getDestinationDirectory(),
+                    destinationDirectory,
                     wfs.getTopic(),
                     filenameForDownload,
                     extension);
 
-            result.add(download);
+            downloads.add(download);
         }
 
-        return result;
+        if (downloads.size() == 1) {
+            return downloads.iterator().next();
+        } else {
+            return new MultipleDownload(downloads, jobname);
+        }
     }
 }

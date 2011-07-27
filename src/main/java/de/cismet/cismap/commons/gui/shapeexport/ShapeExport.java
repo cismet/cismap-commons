@@ -30,8 +30,6 @@ import org.jdom.Element;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
-import java.io.File;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 
