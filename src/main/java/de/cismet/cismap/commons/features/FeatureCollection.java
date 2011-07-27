@@ -144,7 +144,7 @@ public interface FeatureCollection extends ServiceLayer {
      *
      * @param  cf  DOCUMENT ME!
      */
-    void addFeatures(Collection<Feature> cf);
+    void addFeatures(Collection<? extends Feature> cf);
     /**
      * DOCUMENT ME!
      *
