@@ -12,23 +12,43 @@
  */
 package de.cismet.cismap.commons.gui.featureinfowidget;
 
+import Sirius.navigator.plugin.PluginRegistry;
+
 import com.jgoodies.looks.Options;
 
 import org.apache.log4j.Logger;
 
+import org.jfree.util.Log;
+
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Paint;
+import java.awt.image.BufferedImage;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import de.cismet.cismap.commons.ChildrenProvider;
 import de.cismet.cismap.commons.LayerInfoProvider;
+import de.cismet.cismap.commons.features.DefaultStyledFeature;
+import de.cismet.cismap.commons.features.SignaturedFeature;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.GetFeatureInfoClickDetectionListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldFeatureChangeEvent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldListener;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.MapClickListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
@@ -36,6 +56,8 @@ import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+
+import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
 /**
  * DOCUMENT ME!
@@ -53,7 +75,6 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
 
     private final transient Map<Object, FeatureInfoDisplay> displays;
     private final transient FeatureInfoDisplayRepository displayRepo;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JTabbedPane tbpFeatureInfos;
@@ -154,7 +175,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                     tbpFeatureInfos.add(layer.toString(), display.getDisplayComponent());
                     displays.put(layer, display);
                 } catch (final Exception exception) {
-                    LOG.error("Exception in creating featureInfoDisplay component", exception);     // NOI18N
+                    LOG.error("Exception in creating featureInfoDisplay component", exception); // NOI18N
                     layer.setLayerQuerySelected(false);
                 }
             }
@@ -202,7 +223,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpFeatureInfosStateChanged
+    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpFeatureInfosStateChanged
         for (int i = 0; i < tbpFeatureInfos.getTabCount(); ++i) {
             tbpFeatureInfos.setForegroundAt(i, null);
         }
@@ -217,8 +238,16 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 }
             }
         }
-    }                                                          //GEN-LAST:event_tbpFeatureInfosStateChanged
+    }//GEN-LAST:event_tbpFeatureInfosStateChanged
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Map<Object, FeatureInfoDisplay> getDisplays() {
+        return displays;
+    }
     @Override
     public void clickedOnMap(final MapClickedEvent mce) {
         if (mce.getMode().equals(GetFeatureInfoClickDetectionListener.FEATURE_INFO_MODE)) {

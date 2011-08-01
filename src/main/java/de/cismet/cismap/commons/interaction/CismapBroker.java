@@ -494,6 +494,15 @@ public class CismapBroker {
      *
      * @return  DOCUMENT ME!
      */
+    public Vector<MapClickListener> getMapClickListeners() {
+        return mapClickListeners;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Crs getSrs() {
         if (srs == null) {
             if ((mappingComponent == null) || mappingComponent.isLocked()) {
