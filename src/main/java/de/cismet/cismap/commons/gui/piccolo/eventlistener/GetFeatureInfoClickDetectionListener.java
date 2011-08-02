@@ -211,6 +211,11 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
             int bgR = 255;
             int bgG = 255;
             int bgB = 255;
+            Color standardBG = null;
+            int lastBGR = 255;
+            int lastBGG = 255;
+            int lastBGB = 255;
+            Color lastBG = null;
             BufferedImage subimage = featureInfoIcon.getSubimage(xPos, yPos, width, height);
             Graphics2D g2d = (Graphics2D)subimage.getGraphics();
 
@@ -252,6 +257,11 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                     bgR = Integer.parseInt((String)iconProps.get("overlayBackgroundColorR"));                                      // NOI18N
                     bgG = Integer.parseInt((String)iconProps.get("overlayBackgroundColorG"));                                      // NOI18N
                     bgB = Integer.parseInt((String)iconProps.get("overlayBackgroundColorB"));                                      // NOI18N
+                    lastBGR = Integer.parseInt((String)iconProps.get("lastOverlayBackgroundColorR"));                              // NOI18N
+                    lastBGG = Integer.parseInt((String)iconProps.get("lastOverlayBackgroundColorG"));                              // NOI18N
+                    lastBGB = Integer.parseInt((String)iconProps.get("lastOverlayBackgroundColorB"));                              // NOI18N
+                    standardBG = new Color(bgR, bgG, bgB);
+                    lastBG = new Color(lastBGR, lastBGG, lastBGB);
                     subimage = featureInfoIcon.getSubimage(xPos, yPos, width, height);
                     g2d = (Graphics2D)subimage.getGraphics();
                 } catch (NumberFormatException ex) {
@@ -267,10 +277,6 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                 if (nr == (c.size() - 1)) {
                     if (featureInfoIcon2 != null) {
                         g2d = (Graphics2D)featureInfoIcon2.getSubimage(xPos, yPos, width, height).getGraphics();
-//                        g2d.setPaint(new Color(255, 85, 85));
-//                        g2d.setStroke(new BasicStroke(4));
-//                        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
-//                        g2d.drawOval(6, 8, 26, 26);
                     }
                 }
 
@@ -279,7 +285,11 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                     Log.warn(
                         "OverlayIcon for MultipleFeautreInfoRequestDisplay is null, default FeatureInfoIcon is used"); // NOI18N
                 } else {
-                    g2d.drawImage(f.getOverlayIcon(), 0, 0, cismapPl);
+                    if (nr == (c.size() - 1)) {
+                        g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, cismapPl);
+                    } else {
+                        g2d.drawImage(f.getOverlayIcon(), 0, 0, standardBG, cismapPl);
+                    }
                 }
 
                 final DefaultStyledFeature dsf = new DefaultStyledFeature();
