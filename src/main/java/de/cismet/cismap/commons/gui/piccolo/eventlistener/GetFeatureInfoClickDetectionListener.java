@@ -188,17 +188,27 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
             mc.getRubberBandLayer().removeAllChildren();
             mc.getTmpFeatureLayer().removeAllChildren();
             BufferedImage featureInfoIcon = null;
-            BufferedImage featureInfoIcon2 = null;
+            BufferedImage lastFeatureInfoIcon = null;
+            BufferedImage originalFeatureInfoIcon = null;
             InputStream is = this.getClass().getResourceAsStream("/de/cismet/cismap/commons/gui/res/featureInfo.png"); // NOI18N
             try {
+                originalFeatureInfoIcon = ImageIO.read(is);
+                is.close();
+                is = this.getClass().getResourceAsStream("/de/cismet/cismap/commons/gui/res/featureInfo.png");
                 featureInfoIcon = ImageIO.read(is);
+                is.close();
                 is = this.getClass().getResourceAsStream("/de/cismet/cismap/commons/gui/res/lastFeatureInfo.png");
-                featureInfoIcon2 = ImageIO.read(is);
+                lastFeatureInfoIcon = ImageIO.read(is);
+                is.close();
             } catch (IOException ex) {
                 LOG.warn("Could not load featureInfo icon", ex);                                                       // NO18N
             }
             if (featureInfoIcon == null) {
                 final String msg = "Could not load featureInfoIcon";                                                   // NOI18N
+                LOG.error(msg);
+                throw new IllegalStateException(msg);
+            } else if (lastFeatureInfoIcon == null) {
+                final String msg = "Could not load lastFeatureInfoIcon";                                               // NOI18N
                 LOG.error(msg);
                 throw new IllegalStateException(msg);
             }
@@ -211,11 +221,11 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
             int bgR = 255;
             int bgG = 255;
             int bgB = 255;
-            Color standardBG = null;
+            Color standardBG = new Color(bgR, bgG, bgB);
             int lastBGR = 255;
             int lastBGG = 255;
             int lastBGB = 255;
-            Color lastBG = null;
+            Color lastBG = new Color(lastBGR, lastBGG, lastBGB);
             BufferedImage subimage = featureInfoIcon.getSubimage(xPos, yPos, width, height);
             Graphics2D g2d = (Graphics2D)subimage.getGraphics();
 
@@ -244,10 +254,13 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                             && iconProps.containsKey("overlayWidth") && iconProps.containsKey("overlayHeigth") // NOI18N
                             && iconProps.containsKey("overlayBackgroundColorR")                                // NOI18N
                             && iconProps.containsKey("overlayBackgroundColorG")                                // NOI18N
-                            && iconProps.containsKey("overlayBackgroundColorB"))) {                            // NOI18N
+                            && iconProps.containsKey("overlayBackgroundColorB")
+                            && iconProps.containsKey("lastOverlayBackgroundColorR")                            // NOI18N
+                            && iconProps.containsKey("lastOverlayBackgroundColorG")                            // NOI18N
+                            && iconProps.containsKey("lastOverlayBackgroundColorB"))) {                        // NOI18N
                 // TODO ERROR LOG EXCPETION
                 LOG.warn(
-                    "featureInfoicon.properties file does not contain all needed keys. Default values for overlay area are used"); // NOI18N
+                    "featureInfoIcon.properties file does not contain all needed keys. Default values for overlay area are used"); // NOI18N
             } else {
                 try {
                     xPos = Integer.parseInt((String)iconProps.get("overlayPositionX"));                                            // NOI18N
@@ -274,31 +287,26 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
             // add a node for each SignaturedFeature to the map
             int nr = 0;
             for (final SignaturedFeature f : c) {
-                if (nr == (c.size() - 1)) {
-                    if (featureInfoIcon2 != null) {
-                        g2d = (Graphics2D)featureInfoIcon2.getSubimage(xPos, yPos, width, height).getGraphics();
-                    }
-                }
-
+                final DefaultStyledFeature dsf = new DefaultStyledFeature();
+                final FeatureAnnotationSymbol symb;
                 if (f.getOverlayIcon() == null) {
                     // paint standard overlay, little circle and a number within or so...
+                    symb = new FeatureAnnotationSymbol(originalFeatureInfoIcon);
                     Log.warn(
                         "OverlayIcon for MultipleFeautreInfoRequestDisplay is null, default FeatureInfoIcon is used"); // NOI18N
                 } else {
                     if (nr == (c.size() - 1)) {
+                        if (lastFeatureInfoIcon != null) {
+                            g2d = (Graphics2D)lastFeatureInfoIcon.getSubimage(xPos, yPos, width, height).getGraphics();
+                        }
                         g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, cismapPl);
+                        symb = new FeatureAnnotationSymbol(lastFeatureInfoIcon);
                     } else {
                         g2d.drawImage(f.getOverlayIcon(), 0, 0, standardBG, cismapPl);
+                        symb = new FeatureAnnotationSymbol(featureInfoIcon);
                     }
                 }
 
-                final DefaultStyledFeature dsf = new DefaultStyledFeature();
-                final FeatureAnnotationSymbol symb;
-                if (nr == (c.size() - 1)) {
-                    symb = new FeatureAnnotationSymbol(featureInfoIcon2);
-                } else {
-                    symb = new FeatureAnnotationSymbol(featureInfoIcon);
-                }
                 symb.setSweetSpotX(0.5);
                 symb.setSweetSpotY(0.9);
                 dsf.setPointAnnotationSymbol(symb);
