@@ -816,18 +816,38 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  dte  DOCUMENT ME!
+     */
     @Override
     public void dragExit(final java.awt.dnd.DropTargetEvent dte) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  dtde  DOCUMENT ME!
+     */
     @Override
     public void dropActionChanged(final java.awt.dnd.DropTargetDragEvent dtde) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  dtde  DOCUMENT ME!
+     */
     @Override
     public void dragOver(final java.awt.dnd.DropTargetDragEvent dtde) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  dtde  DOCUMENT ME!
+     */
     @Override
     public void dragEnter(final java.awt.dnd.DropTargetDragEvent dtde) {
     }
@@ -859,18 +879,35 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         this.errorImage = errorImage;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  NoWriteError  DOCUMENT ME!
+     */
     @Override
     @Deprecated
     public Element getConfiguration() throws NoWriteError {
         return activeLayerModel.getConfiguration();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     @Deprecated
     public void masterConfigure(final Element e) {
         activeLayerModel.masterConfigure(e);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     @Deprecated
     public void configure(final Element e) {

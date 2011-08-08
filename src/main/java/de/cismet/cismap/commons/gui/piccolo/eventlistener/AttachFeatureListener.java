@@ -54,6 +54,11 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pInputEvent  DOCUMENT ME!
+     */
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
@@ -108,6 +113,11 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  event  DOCUMENT ME!
+     */
     @Override
     public void mouseReleased(final PInputEvent event) {
         super.mouseReleased(event);

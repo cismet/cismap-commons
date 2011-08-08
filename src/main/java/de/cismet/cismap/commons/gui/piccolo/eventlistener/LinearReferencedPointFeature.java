@@ -195,6 +195,11 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         return new Coordinate(point.getX(), point.getY());
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  coordinate  DOCUMENT ME!
+     */
     @Override
     public void moveTo(final Coordinate coordinate) {
         if (isMovable()) {
@@ -385,31 +390,61 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
                     .createPoint(coordinate);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public ImageIcon getIconImage() {
         return ico;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getName() {
         return "Station";
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getType() {
         return "Station";
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   refresh  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public JComponent getInfoComponent(final Refreshable refresh) {
         return null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Stroke getLineStyle() {
         return null;
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     @Override
     public void moveFinished() {
         final LinearReferencedPointFeature snappingPoint = getSnappingPoint();

@@ -22,5 +22,5 @@ public class Debug {
     //~ Static fields/initializers ---------------------------------------------
 
     /** Set to {@code false} to remove all debug statements during compiling. */
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 }

@@ -116,6 +116,16 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   degreeFeature  DOCUMENT ME!
+     * @param   index          DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     @Override
     protected DefaultFeatureServiceFeature createFeatureInstance(final Feature degreeFeature, final int index)
             throws Exception {
@@ -152,6 +162,11 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         this.gmlDocument = null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isLazy() {
         return false;
@@ -248,17 +263,30 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
                     + (System.currentTimeMillis() - start) + " ms");
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     @Override
     public synchronized void flush() {
         logger.warn("flushing cached features");
         this.lastCreatedfeatureVector.clear();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public int getMaxCachedFeatureCount() {
         return this.maxCachedFeatureCount;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  maxCachedFeatureCount  DOCUMENT ME!
+     */
     @Override
     public void setMaxCachedFeatureCount(final int maxCachedFeatureCount) {
         this.maxCachedFeatureCount = maxCachedFeatureCount;
@@ -282,6 +310,18 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         this.documentURI = documentURI;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   query         DOCUMENT ME!
+     * @param   boundingBox   DOCUMENT ME!
+     * @param   workerThread  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                 DOCUMENT ME!
+     */
     @Override
     public synchronized Vector<DefaultFeatureServiceFeature> createFeatures(final String query,
             final BoundingBox boundingBox,
@@ -348,6 +388,16 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         return new Vector<DefaultFeatureServiceFeature>(selectedFeatures);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   workerThread  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                 DOCUMENT ME!
+     */
     @Override
     public synchronized Vector<FeatureServiceAttribute> createAttributes(final SwingWorker workerThread)
             throws TooManyFeaturesException, Exception {
@@ -364,11 +414,21 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         return this.featureServiceAttributes;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     protected boolean isGenerateIds() {
         return true;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public GMLFeatureFactory clone() {
         return new GMLFeatureFactory(this);

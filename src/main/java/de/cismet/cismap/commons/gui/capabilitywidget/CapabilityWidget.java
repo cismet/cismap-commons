@@ -413,20 +413,38 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             processUrl(link, null);
         }
     }
-
-    // restliche unbenutzte DnD-Methoden
+    /**
+     * restliche unbenutzte DnD-Methoden.
+     *
+     * @param  dte  DOCUMENT ME!
+     */
     @Override
     public void dragExit(final DropTargetEvent dte) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  dtde  DOCUMENT ME!
+     */
     @Override
     public void dropActionChanged(final DropTargetDragEvent dtde) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  dtde  DOCUMENT ME!
+     */
     @Override
     public void dragOver(final DropTargetDragEvent dtde) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  dtde  DOCUMENT ME!
+     */
     @Override
     public void dragEnter(final DropTargetDragEvent dtde) {
     }
@@ -1369,6 +1387,11 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         CismetThreadPool.execute(t);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void stateChanged(final ChangeEvent e) {
         if (selectedIndex > -1) {
@@ -1849,11 +1872,21 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void mousePressed(final MouseEvent e) {
             processPopup(e);
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void mouseReleased(final MouseEvent e) {
             processPopup(e);
@@ -1944,6 +1977,11 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void dragGestureRecognized(final DragGestureEvent e) {
             getSelectionModel().setSelectionPaths(cachedTreePaths); // DND Fehlverhalten Workaround
@@ -1981,24 +2019,47 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
         }
-
-        // unbenutzte DnD-Methoden
+        /**
+         * unbenutzte DnD-Methoden.
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void dragDropEnd(final DragSourceDropEvent e) {
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void dragEnter(final DragSourceDragEvent e) {
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void dragExit(final DragSourceEvent e) {
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void dragOver(final DragSourceDragEvent e) {
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void dropActionChanged(final DragSourceDragEvent e) {
         }
@@ -2183,6 +2244,13 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             this.subparent = subparent;
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   obj  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public boolean equals(final Object obj) {
             if (obj instanceof LinkWithSubparent) {
@@ -2195,6 +2263,11 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public int hashCode() {
             final String t = link + subparent;

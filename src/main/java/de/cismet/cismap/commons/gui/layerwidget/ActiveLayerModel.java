@@ -367,6 +367,11 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     */
     @Override
     public void removeLayer(final RetrievalServiceLayer layer) {
         final RetrievalServiceLayer wmsServiceLayer = ((RetrievalServiceLayer)layer);
@@ -506,6 +511,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   column  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Class getColumnClass(final int column) {
         switch (column) {
@@ -716,6 +728,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         return true;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aValue  DOCUMENT ME!
+     * @param  node    DOCUMENT ME!
+     * @param  column  DOCUMENT ME!
+     */
     @Override
     public void setValueAt(final Object aValue, final Object node, final int column) {
         if (column == 1) {
@@ -741,11 +760,21 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         super.setValueAt(aValue, node, column);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mml  DOCUMENT ME!
+     */
     @Override
     public void removeMappingModelListener(final de.cismet.cismap.commons.MappingModelListener mml) {
         mappingModelListeners.remove(mml);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mml  DOCUMENT ME!
+     */
     @Override
     public void addMappingModelListener(final de.cismet.cismap.commons.MappingModelListener mml) {
         mappingModelListeners.add(mml);
@@ -789,6 +818,11 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         homes.put(xbb.getSrs(), xbb);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public de.cismet.cismap.commons.BoundingBox getInitialBoundingBox() {
         if ((srs == null) && (defaultHomeSrs == null)) {
@@ -1006,8 +1040,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             }
         }
     }
-
-    // Configurable
+    /**
+     * Configurable.
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  NoWriteError  DOCUMENT ME!
+     */
     @Override
     public Element getConfiguration() throws NoWriteError {
         final Element conf = new Element("cismapActiveLayerConfiguration"); // NOI18N
@@ -1175,6 +1214,11 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         return null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void masterConfigure(final Element e) {
         if (DEBUG) {
@@ -1224,6 +1268,11 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public synchronized void configure(final Element e) {
         if (DEBUG) {
@@ -1665,12 +1714,22 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Deprecated
     @Override
     public java.util.TreeMap getRasterServices() {
         return getMapServices();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public java.util.TreeMap getFeatureServices() {
         return new TreeMap();

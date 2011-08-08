@@ -88,6 +88,12 @@ public class RotationPHandle extends PHandle {
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aLocalDimension  DOCUMENT ME!
+     * @param  aEvent           DOCUMENT ME!
+     */
     @Override
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent aEvent) {
         final SimpleMoveListener moveListener = (SimpleMoveListener)pfeature.getViewer()
@@ -148,6 +154,12 @@ public class RotationPHandle extends PHandle {
         super.startHandleDrag(aLocalPoint, aEvent);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aLocalPoint  DOCUMENT ME!
+     * @param  aEvent       DOCUMENT ME!
+     */
     @Override
     public void endHandleDrag(final java.awt.geom.Point2D aLocalPoint, final PInputEvent aEvent) {
         try {
@@ -264,6 +276,11 @@ public class RotationPHandle extends PHandle {
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pInputEvent  DOCUMENT ME!
+     */
     @Override
     public void mouseMovedNotInDragOperation(final PInputEvent pInputEvent) {
         final SimpleMoveListener moveListener = (SimpleMoveListener)pfeature.getViewer()

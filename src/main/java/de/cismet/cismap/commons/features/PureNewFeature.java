@@ -176,31 +176,61 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public java.awt.Stroke getLineStyle() {
         return null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public java.awt.Paint getFillingPaint() {
         return fillingPaint;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fillingStyle  DOCUMENT ME!
+     */
     @Override
     public void setFillingPaint(final Paint fillingStyle) {
         this.fillingPaint = fillingStyle;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public float getTransparency() {
         return 1f;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getType() {
         return ""; // NOI18N
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getName() {
         if (getGeometryType() != null) {
@@ -278,11 +308,23 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         this.name = name;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   refresh  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public JComponent getInfoComponent(final Refreshable refresh) {
         return null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public ImageIcon getIconImage() {
         if (getGeometry() instanceof Point) {
@@ -300,6 +342,11 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Paint getLinePaint() {
         final Paint retValue;
@@ -308,6 +355,11 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         return retValue;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
         return null;
