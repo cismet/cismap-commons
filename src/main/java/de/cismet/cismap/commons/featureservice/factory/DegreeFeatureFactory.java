@@ -209,6 +209,11 @@ public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  progress  DOCUMENT ME!
+         */
         @Override
         public void featureProgress(final int progress) {
             if (DEBUG) {

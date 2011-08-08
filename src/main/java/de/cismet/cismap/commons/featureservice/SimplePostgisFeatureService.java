@@ -94,6 +94,13 @@ public class SimplePostgisFeatureService
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   element  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     @Override
     public void initFromElement(final Element element) throws Exception {
         super.initFromElement(element);
@@ -117,6 +124,11 @@ public class SimplePostgisFeatureService
         this.sqlStatement.setOrderBy(element.getChild("orderBy").getTextTrim());                               // NOI18N
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Element toElement() {
         final Element e = super.toElement();
@@ -150,6 +162,11 @@ public class SimplePostgisFeatureService
         return e;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     protected LayerProperties createLayerProperties() {
         final DefaultLayerProperties defaultLayerProperties = new DefaultLayerProperties();
@@ -160,31 +177,65 @@ public class SimplePostgisFeatureService
         return defaultLayerProperties;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
         return new PostgisFeatureFactory(this.getLayerProperties(), this.getConnectionInfo(), null, this);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public SimpleFeatureServiceSqlStatement getQuery() {
         return this.sqlStatement;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  sqlStatement  DOCUMENT ME!
+     */
     @Override
     public void setQuery(final SimpleFeatureServiceSqlStatement sqlStatement) {
         this.sqlStatement = sqlStatement;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     @Override
     protected void initConcreteInstance() throws Exception {
         // nothing to do here
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     protected String getFeatureLayerType() {
         return POSTGIS_FEATURELAYER_TYPE;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   type  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Icon getLayerIcon(final int type) {
         return layerIcons.get(type);
@@ -208,6 +259,11 @@ public class SimplePostgisFeatureService
         return this.connectionInfo;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public SimplePostgisFeatureService clone() {
         if (LOG.isDebugEnabled()) {
@@ -216,30 +272,60 @@ public class SimplePostgisFeatureService
         return new SimplePostgisFeatureService(this);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getLayerURI() {
         return sqlStatement.getSqlTemplate();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getServerURI() {
         return connectionInfo.toString();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isLayerQuerySelected() {
         return false;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selected  DOCUMENT ME!
+     */
     @Override
     public void setLayerQuerySelected(final boolean selected) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isQueryable() {
         return false;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Layer getLayerInformation() {
         return null;

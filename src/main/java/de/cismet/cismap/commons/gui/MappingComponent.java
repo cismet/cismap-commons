@@ -3989,6 +3989,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mme  DOCUMENT ME!
+     */
     @Override
     public void mapServiceLayerStructureChanged(final de.cismet.cismap.commons.MappingModelEvent mme) {
     }
@@ -4240,6 +4245,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Element getConfiguration() {
         if (log.isDebugEnabled()) {
@@ -4293,6 +4303,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         return ret;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void masterConfigure(final Element e) {
         final Element prefs = e.getChild("cismapMappingPreferences"); // NOI18N
@@ -5219,6 +5234,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         this.inputEventListener.putAll(inputEventListener);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  event  DOCUMENT ME!
+     */
     @Override
     public synchronized void crsChanged(final CrsChangedEvent event) {
         if ((event.getFormerCrs() != null) && (fixedBoundingBox == null) && !resetCrs) {
@@ -5353,6 +5373,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalStarted(final RetrievalEvent e) {
             fireActivityChanged();
@@ -5363,10 +5388,20 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalProgress(final RetrievalEvent e) {
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalError(final RetrievalEvent e) {
             this.logger.error(rasterService + ": Fehler beim Laden des Bildes! " + e.getErrorType() + " Errors: "
@@ -5379,6 +5414,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalComplete(final RetrievalEvent e) {
             final Point2D localOrigin = getCamera().getViewBounds().getOrigin();
@@ -5424,6 +5464,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalAborted(final RetrievalEvent e) {
             this.logger.warn(rasterService + ": retrievalAborted: " + e.getRequestIdentifier()); // NOI18N
@@ -5479,6 +5524,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalStarted(final RetrievalEvent e) {
             if (!e.isInitialisationEvent()) {
@@ -5501,6 +5551,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             // MappingComponent.this.isInternalWidgetVisible(ZOOM);
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalProgress(final RetrievalEvent e) {
             if (!e.isInitialisationEvent()) {
@@ -5523,6 +5578,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             this.documentProgressWidget.setProgress(e.getPercentageDone());
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalComplete(final RetrievalEvent e) {
             if (!e.isInitialisationEvent()) {
@@ -5542,6 +5602,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             MappingComponent.this.showInternalWidget(MappingComponent.PROGRESSWIDGET, false, 200);
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalAborted(final RetrievalEvent e) {
             if (!e.isInitialisationEvent()) {
@@ -5561,6 +5626,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             MappingComponent.this.showInternalWidget(MappingComponent.PROGRESSWIDGET, false, 25);
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalError(final RetrievalEvent e) {
             if (!e.isInitialisationEvent()) {
@@ -5623,6 +5693,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalStarted(final RetrievalEvent e) {
             if (!e.isInitialisationEvent()) {
@@ -5638,6 +5713,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             fireActivityChanged();
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalProgress(final RetrievalEvent e) {
             if (DEBUG) {
@@ -5653,6 +5733,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             // flüssiger ist
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalError(final RetrievalEvent e) {
             this.logger.error(featureService + "[" + e.getRequestIdentifier() + " (" + this.requestIdentifier + ")]: "
@@ -5660,6 +5745,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             fireActivityChanged();
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalComplete(final RetrievalEvent e) {
             if (DEBUG) {
@@ -5948,6 +6038,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             fireActivityChanged();
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
         @Override
         public void retrievalAborted(final RetrievalEvent e) {
             this.logger.warn(featureService + "[" + e.getRequestIdentifier() + " (" + requestIdentifier
@@ -6003,19 +6098,36 @@ class ImageSelection implements Transferable {
 
     //~ Methods ----------------------------------------------------------------
 
-    // Returns supported flavors
+    /**
+     * Returns supported flavors.
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public DataFlavor[] getTransferDataFlavors() {
         return new DataFlavor[] { DataFlavor.imageFlavor };
     }
-
-    // Returns true if flavor is supported
+    /**
+     * Returns true if flavor is supported.
+     *
+     * @param   flavor  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isDataFlavorSupported(final DataFlavor flavor) {
         return DataFlavor.imageFlavor.equals(flavor);
     }
-
-    // Returns image
+    /**
+     * Returns image.
+     *
+     * @param   flavor  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  UnsupportedFlavorException  DOCUMENT ME!
+     * @throws  IOException                 DOCUMENT ME!
+     */
     @Override
     public Object getTransferData(final DataFlavor flavor) throws UnsupportedFlavorException, IOException {
         if (!DataFlavor.imageFlavor.equals(flavor)) {

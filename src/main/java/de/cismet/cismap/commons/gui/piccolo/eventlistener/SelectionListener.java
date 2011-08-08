@@ -73,7 +73,11 @@ public class SelectionListener extends RectangleRubberBandListener {
 
     //~ Methods ----------------------------------------------------------------
 
-    // Selektiere einen PNode
+    /**
+     * Selektiere einen PNode.
+     *
+     * @param  pInputEvent  DOCUMENT ME!
+     */
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         if (log.isDebugEnabled()) {

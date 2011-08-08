@@ -596,6 +596,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         return bb;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  bb  DOCUMENT ME!
+     */
     @Override
     public void setBoundingBox(final BoundingBox bb) {
         this.bb = bb;
@@ -807,6 +812,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         return true;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isVisible() {
         return visible;
@@ -821,25 +831,51 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         this.visible = visible;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  height  DOCUMENT ME!
+     * @param  width   DOCUMENT ME!
+     */
     @Override
     public void setSize(final int height, final int width) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public PNode getPNode() {
         return pNode;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pNode  DOCUMENT ME!
+     */
     @Override
     public void setPNode(final PNode pNode) {
         this.pNode = pNode;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String toString() {
         return this.getName();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Element toElement() {
         final Element element = new Element(getFeatureLayerType());
@@ -871,6 +907,13 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         return element;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   element  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     @Override
     public void initFromElement(final Element element) throws Exception {
         if (element.getAttributeValue("name") != null)                                                  // NOI18N
@@ -1064,6 +1107,13 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             return this.id;
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         *
+         * @throws  Exception  DOCUMENT ME!
+         */
         @Override
         protected List<FT> doInBackground() throws Exception {
             if (DEBUG) {
@@ -1098,6 +1148,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             return features;
         }
 
+        /**
+         * DOCUMENT ME!
+         */
         @Override
         protected void done() {
             if (DEBUG) {
@@ -1189,6 +1242,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public String toString() {
             return String.valueOf(this.getId());
@@ -1227,6 +1285,13 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             return this.id;
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         *
+         * @throws  Exception  DOCUMENT ME!
+         */
         @Override
         protected Void doInBackground() throws Exception {
             if (DEBUG) {
@@ -1250,6 +1315,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             return null;
         }
 
+        /**
+         * DOCUMENT ME!
+         */
         @Override
         protected void done() {
             AbstractFeatureService.this.setRefreshNeeded(false);
@@ -1342,6 +1410,11 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public String toString() {
             return String.valueOf(this.getId());

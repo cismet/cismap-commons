@@ -290,6 +290,11 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         setModus(modii.MARK_ADD);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  event  DOCUMENT ME!
+     */
     @Override
     public void mouseDragged(final PInputEvent event) {
         updateHandleCoords2(event.getPosition());
@@ -300,6 +305,11 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         dragUpdate(event);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  event  DOCUMENT ME!
+     */
     @Override
     public void mouseReleased(final PInputEvent event) {
         if (isDragging) {
@@ -308,6 +318,11 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  event  DOCUMENT ME!
+     */
     @Override
     public void mouseClicked(final PInputEvent event) {
         if (event.isLeftMouseButton()) {
@@ -756,6 +771,11 @@ public class MeasurementMoveListener extends PBasicInputEventHandler {
         return modus;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  event  DOCUMENT ME!
+     */
     @Override
     public void mouseMoved(final PInputEvent event) {
         final Runnable t = new Runnable() {

@@ -107,11 +107,23 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   type  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Icon getLayerIcon(final int type) {
         return layerIcons.get(type);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     protected LayerProperties createLayerProperties() {
         final DefaultLayerProperties defaultLayerProperties = new DefaultLayerProperties();
@@ -121,6 +133,13 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
         return defaultLayerProperties;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
         return new GMLFeatureFactory(this.getLayerProperties(),
@@ -129,22 +148,42 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
                 this.layerInitWorker);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getQuery() {
         // LOG.warn("unexpected call to getQuery, not supported by this service");
         return null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  query  DOCUMENT ME!
+     */
     @Override
     public void setQuery(final String query) {
         LOG.warn("unexpected call to setQuery, not supported by this service:\n" + query); // NOI18N
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     @Override
     protected void initConcreteInstance() throws Exception {
         // nothing to do here
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  documentURI  DOCUMENT ME!
+     */
     @Override
     public void setDocumentURI(final URI documentURI) {
         super.setDocumentURI(documentURI);
@@ -153,41 +192,81 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     protected String getFeatureLayerType() {
         return GML_FEATURELAYER_TYPE;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Object clone() {
         LOG.info("cloning service " + this.getName()); // NOI18N
         return new GMLFeatureService(this);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getLayerURI() {
         return null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getServerURI() {
         return documentURI.toString();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isLayerQuerySelected() {
         return false;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selected  DOCUMENT ME!
+     */
     @Override
     public void setLayerQuerySelected(final boolean selected) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isQueryable() {
         return false;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Layer getLayerInformation() {
         return null;

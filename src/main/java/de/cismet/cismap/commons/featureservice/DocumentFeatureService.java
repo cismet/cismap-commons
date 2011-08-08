@@ -98,6 +98,11 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Element toElement() {
         final Element parentElement = super.toElement();
@@ -109,6 +114,13 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
         return parentElement;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   element  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     @Override
     public void initFromElement(final Element element) throws Exception {
         super.initFromElement(element);

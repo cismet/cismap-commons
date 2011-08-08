@@ -129,6 +129,11 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void statusValueChanged(final StatusEvent e) {
         if (e.getName().equals(StatusEvent.COORDINATE_STRING)) {
@@ -400,10 +405,20 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void featuresRemoved(final FeatureCollectionEvent fce) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void featuresChanged(final FeatureCollectionEvent fce) {
         if (log.isDebugEnabled()) {
@@ -416,19 +431,39 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void featuresAdded(final FeatureCollectionEvent fce) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void featureSelectionChanged(final FeatureCollectionEvent fce) {
         refreshMeasurementsInStatus();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
     }
@@ -442,6 +477,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener, Fea
         return pomScale;
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     @Override
     public void featureCollectionChanged() {
     }

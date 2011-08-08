@@ -102,8 +102,18 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     public void setHostname(final String hostname) {
         this.hostname = hostname;
     }
-
-    // TODO: Track Progress?
+    /**
+     * TODO: Track Progress?
+     *
+     * @param   query         DOCUMENT ME!
+     * @param   boundingBox   DOCUMENT ME!
+     * @param   workerThread  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                 DOCUMENT ME!
+     */
     @Override
     public Vector<WFSFeature> createFeatures(final String query,
             final BoundingBox boundingBox,
@@ -254,6 +264,17 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   workerThread  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  TooManyFeaturesException       DOCUMENT ME!
+     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     * @throws  Exception                      DOCUMENT ME!
+     */
     @Override
     public Vector createAttributes(final SwingWorker workerThread) throws TooManyFeaturesException,
         UnsupportedOperationException,
@@ -283,16 +304,36 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   degreeFeature  DOCUMENT ME!
+     * @param   index          DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     @Override
     protected WFSFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
         return new WFSFeature();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     protected boolean isGenerateIds() {
         return false;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public WFSFeatureFactory clone() {
         return new WFSFeatureFactory(this);

@@ -121,6 +121,11 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pInputEvent  DOCUMENT ME!
+     */
     @Override
     public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
@@ -141,6 +146,11 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pInputEvent  DOCUMENT ME!
+     */
     @Override
     public void mousePressed(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         super.mouseClicked(pInputEvent);
@@ -241,6 +251,11 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  arg0  DOCUMENT ME!
+     */
     @Override
     public void mouseReleased(final PInputEvent arg0) {
         super.mouseReleased(arg0);
@@ -270,6 +285,11 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  event  DOCUMENT ME!
+     */
     @Override
     public void keyPressed(final edu.umd.cs.piccolo.event.PInputEvent event) {
         if (inProgress) {
@@ -503,10 +523,20 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         pn.postNotification(GEOMETRY_CREATED_NOTIFICATION, newFeature);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pInputEvent  DOCUMENT ME!
+     */
     @Override
     public void mouseDragged(final PInputEvent pInputEvent) {
         super.mouseDragged(pInputEvent);
@@ -551,18 +581,36 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     @Override
     public void featureCollectionChanged() {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void featureSelectionChanged(final FeatureCollectionEvent fce) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void featuresAdded(final FeatureCollectionEvent fce) {
         if (log.isDebugEnabled()) {
@@ -579,10 +627,20 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void featuresChanged(final FeatureCollectionEvent fce) {
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fce  DOCUMENT ME!
+     */
     @Override
     public void featuresRemoved(final FeatureCollectionEvent fce) {
     }
@@ -640,6 +698,11 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         return tempFeature;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
     @Override
     public void mouseWheelRotated(final PInputEvent evt) {
         // delegate zoom event

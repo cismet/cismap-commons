@@ -2195,12 +2195,22 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         repaint();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  s  DOCUMENT ME!
+     */
     @Override
     public void setStroke(final Stroke s) {
         // log.debug("setStroke: " + s, new CurrentStackTrace());
         super.setStroke(s);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isSelected() {
         return selected;
