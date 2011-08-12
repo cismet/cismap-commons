@@ -183,8 +183,11 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                     }
                 }
 
-                log.info("WFS Query:" + StaticHtmlTools.stringToHTMLString(postString));              // NOI18N
-                final String modifiedString = new String(postString.getBytes("UTF-8"), "ISO-8859-1"); // NOI18N
+                log.info("WFS Query:" + StaticHtmlTools.stringToHTMLString(postString)); // NOI18N
+                final String modifiedString = getRightEncodedString(postString);         // NOI18N
+//                final String modifiedString = getRightEncodedString(new String(
+//                            postString.getBytes("UTF-8"),
+//                            "ISO-8859-1"));                                              // NOI18N
 
                 try {
                     if (log.isDebugEnabled()) {
@@ -519,5 +522,32 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
         for (final ActionListener a : actionListener) {
             a.actionPerformed(e);
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   s  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String getRightEncodedString(final String s) {
+//        try {
+//            return new String(s.getBytes("UTF-8"), "ISO-8859-1");
+//        }
+//        catch (Exception e){
+//            log.error("Fehler beim KOnvertieren",e);
+//            return null;
+//        }
+
+        String ret = s;
+        ret = ret.replaceAll("ä", "&#228;");
+        ret = ret.replaceAll("Ä", "&#196;");
+        ret = ret.replaceAll("ö", "&#246;");
+        ret = ret.replaceAll("Ö", "&#214;");
+        ret = ret.replaceAll("ü", "&#252;");
+        ret = ret.replaceAll("Ü", "&#220;");
+        ret = ret.replaceAll("ß", "&#223;");
+        return ret;
     }
 }
