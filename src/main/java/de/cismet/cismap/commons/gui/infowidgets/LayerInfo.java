@@ -13,6 +13,7 @@
 package de.cismet.cismap.commons.gui.infowidgets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -21,12 +22,15 @@ import java.util.ResourceBundle;
 
 import javax.swing.DefaultComboBoxModel;
 
+import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CapabilityListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeFeatureType;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 
 /**
@@ -106,6 +110,8 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
     public void layerChanged(final CapabilityEvent e) {
         if (e.getCapabilityObject() instanceof Layer) {
             setValues((Layer)e.getCapabilityObject());
+        } else if (e.getCapabilityObject() instanceof DeegreeFeatureType) {
+            setValues(((FeatureType)e.getCapabilityObject()));
         }
     }
 
@@ -273,6 +279,66 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
     /**
      * DOCUMENT ME!
      *
+     * @param  feature  DOCUMENT ME!
+     */
+    private void setValues(final FeatureType feature) {
+        final Values v = new Values();
+        try {
+            v.title = feature.getTitle();
+        } catch (Exception e) {
+        }
+        try {
+            v.name = feature.getName().getPrefix() + ":" + feature.getName().getLocalPart();
+        } catch (Exception e) {
+        }
+
+        try {
+            v.description = feature.getAbstract();
+        } catch (Exception e) {
+        }
+
+        v.featureInfo = false;
+
+        try {
+            v.srs = feature.getSupportedSRS();
+            if ((feature.getDefaultSRS() != null) && !contains(v.srs, feature.getDefaultSRS())) {
+                if (v.srs == null) {
+                    v.srs = new String[0];
+                }
+                final String[] tmp = new String[v.srs.length + 1];
+                System.arraycopy(v.srs, 0, tmp, 0, v.srs.length);
+                tmp[v.srs.length] = feature.getDefaultSRS();
+                v.srs = tmp;
+            }
+        } catch (Exception e) {
+        }
+
+        setValues(v);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   ar   DOCUMENT ME!
+     * @param   val  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean contains(final String[] ar, final String val) {
+        if (ar == null) {
+            return false;
+        }
+        for (final String tmp : ar) {
+            if (tmp.equals(val)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  v  DOCUMENT ME!
      */
     private void setValues(final Values v) {
@@ -342,6 +408,8 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
                     setValues(((WMSLayer)o).getOgcCapabilitiesLayer());
                 }
             }
+        } else if (e.getLayer() instanceof WebFeatureService) {
+            setValues(((WebFeatureService)e.getLayer()).getFeature());
         }
     }
 

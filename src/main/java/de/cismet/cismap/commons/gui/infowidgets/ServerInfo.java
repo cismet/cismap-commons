@@ -19,6 +19,7 @@ import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.CapabilityListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
+import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 import de.cismet.tools.gui.StaticSwingTools;
@@ -69,7 +70,9 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
     public void serverChanged(final CapabilityEvent e) {
         final Object serverInfo = e.getCapabilityObject();
         if (serverInfo instanceof WMSCapabilities) {
-            setValues((WMSCapabilities)serverInfo);
+            setValues(((WMSCapabilities)serverInfo).getService());
+        } else if (serverInfo instanceof WFSCapabilities) {
+            setValues(((WFSCapabilities)serverInfo).getService());
         }
     }
 
@@ -228,11 +231,9 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
     /**
      * DOCUMENT ME!
      *
-     * @param  caps  DOCUMENT ME!
+     * @param  service  caps DOCUMENT ME!
      */
-    private void setValues(final WMSCapabilities caps) {
-        final Service service = caps.getService();
-
+    private void setValues(final Service service) {
         final Values v = new Values();
         try {
             v.name = service.getName();
@@ -392,7 +393,9 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         final Object serverInfo = e.getCapabilities();
         if (serverInfo instanceof WMSCapabilities) {
-            setValues((WMSCapabilities)serverInfo);
+            setValues(((WMSCapabilities)serverInfo).getService());
+        } else if (serverInfo instanceof WFSCapabilities) {
+            setValues(((WFSCapabilities)serverInfo).getService());
         }
     }
 

@@ -59,7 +59,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     // private Feature[] tempFeatureCollection;
     // private int currentProgress = 0;
     protected Vector<FeatureServiceAttribute> featureServiceAttributes;
-    private Geometry extend;
+//    private Geometry extend;
     private boolean noGeometryRecognised = false;
     private boolean errorInGeometryFound = false;
 
@@ -224,16 +224,16 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             this.initialiseFeature(featureServiceFeature, degreeFeature, false, i);
             // this.tempFeatureCollection[i] = shapeFile.getFeatureByRecNo(i + 1);
 
-            // debug
-            final Geometry geom = featureServiceFeature.getGeometry();
-            if (geom != null) {
-                if (getExtend() == null) {
-                    extend = geom.getEnvelope();
-                } else {
-                    extend = getExtend().getEnvelope().union(geom.getEnvelope());
-                }
-            }
-            // debug
+            //debug
+//            final Geometry geom = featureServiceFeature.getGeometry();
+//            if (geom != null) {
+//                if (extend == null) {
+//                    extend = geom.getEnvelope();
+//                } else {
+//                    extend = getExtend().getEnvelope().union(geom.getEnvelope());
+//                }
+//            }
+            //debug
 
             final int newProgress = (int)((double)i / (double)max * 100d);
             if ((workerThread != null) && (newProgress > currentProgress) && (newProgress >= 5)
@@ -249,6 +249,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             }
         }
 
+//        CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(new XBoundingBox(extend));
         this.cleanup();
         logger.info("parsing, converting and initialising " + max + " shape features took "
                     + (System.currentTimeMillis() - start) + " ms");
@@ -433,14 +434,5 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      */
     public boolean isErrorInGeometryFound() {
         return errorInGeometryFound;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  a geometry that contains all features of the shape file
-     */
-    public Geometry getExtend() {
-        return extend;
     }
 }

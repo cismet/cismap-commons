@@ -54,6 +54,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
 
     //~ Static fields/initializers ---------------------------------------------
 
+    public static HashMap<String, WFSCapabilities> capCache = new HashMap<String, WFSCapabilities>();
     public static final String WFS_FEATURELAYER_TYPE = "WebFeatureServiceLayer"; // NOI18N
     public static final HashMap<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
 
@@ -192,8 +193,14 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
         super.initFromElement(element);
         final CapabilityLink cp = new CapabilityLink(element);
         final Element query = element.getChild(FeatureServiceUtilities.GET_FEATURE, FeatureServiceUtilities.WFS);
-        final WFSCapabilitiesFactory fac = new WFSCapabilitiesFactory();
-        final WFSCapabilities cap = fac.createCapabilities(cp.getLink());
+        WFSCapabilities cap = capCache.get(cp.getLink());
+
+        if (cap == null) {
+            final WFSCapabilitiesFactory fac = new WFSCapabilitiesFactory();
+            cap = fac.createCapabilities(cp.getLink());
+            capCache.put(cp.getLink(), cap);
+        }
+
         feature = WFSFacade.extractRequestedFeatureType(FeatureServiceUtilities.elementToString(query), cap);
         // query string will be set, when the query element will be set
         this.setQueryElement(query);
