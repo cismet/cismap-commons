@@ -178,7 +178,7 @@ public abstract class AbstractVersionNegotiator {
      *
      * @return  the version string of the given link or null, if the given link does not contain any version string
      */
-    private String getVersionFromLink(final String link) {
+    protected String getVersionFromLink(final String link) {
         String version = null;
 
         if (link.toLowerCase().indexOf(VERSION_STRING) != -1) {
@@ -216,7 +216,7 @@ public abstract class AbstractVersionNegotiator {
      *
      * @return  the version of the given document or null, if no version string found
      */
-    private String getDocumentVersion(final StringBuilder document) {
+    protected String getDocumentVersion(final StringBuilder document) {
         String documentVersion = null;
         int startIndexOfVersion = -1;
 

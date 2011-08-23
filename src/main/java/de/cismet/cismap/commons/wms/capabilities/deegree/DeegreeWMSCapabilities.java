@@ -28,6 +28,8 @@ import org.apache.log4j.Logger;
 import org.deegree.framework.xml.XMLFragment;
 import org.deegree.ogcwebservices.getcapabilities.InvalidCapabilitiesException;
 import org.deegree.ogcwebservices.wms.capabilities.WMSCapabilitiesDocument;
+import org.deegree.ogcwebservices.wms.capabilities.WMSCapabilitiesDocumentFactory;
+import org.deegree.ogcwebservices.wms.capabilities.WMSCapabilitiesDocument_1_3_0;
 
 import org.xml.sax.SAXException;
 
@@ -63,24 +65,29 @@ public class DeegreeWMSCapabilities implements WMSCapabilities {
     /**
      * Creates a new DeegreeWMSCapabilities object.
      *
-     * @param   in      DOCUMENT ME!
-     * @param   nameID  DOCUMENT ME!
+     * @param   in       DOCUMENT ME!
+     * @param   nameID   DOCUMENT ME!
+     * @param   version  DOCUMENT ME!
      *
      * @throws  InvalidCapabilitiesException  DOCUMENT ME!
      * @throws  IOException                   DOCUMENT ME!
      * @throws  SAXException                  DOCUMENT ME!
      */
-    public DeegreeWMSCapabilities(final InputStream in, final String nameID) throws InvalidCapabilitiesException,
-        IOException,
-        SAXException {
+    public DeegreeWMSCapabilities(final InputStream in, final String nameID, final String version)
+            throws InvalidCapabilitiesException, IOException, SAXException {
         String urlString = nameID;
-        final WMSCapabilitiesDocument parser = new WMSCapabilitiesDocument();
+        WMSCapabilitiesDocument parser;
+
+        if ((((version != null) && (version.equals("1.3.0"))) || version.equals("1.3"))) {
+            parser = new WMSCapabilitiesDocument_1_3_0();
+        } else {
+            parser = new WMSCapabilitiesDocument();
+        }
 
         if (urlString.indexOf("?") != -1) {
             urlString = urlString.substring(0, urlString.indexOf("?"));
         }
         this.url = new URL(urlString);
-
         parser.load(in, XMLFragment.DEFAULT_URL);
         cap = (org.deegree.ogcwebservices.wms.capabilities.WMSCapabilities)parser.parseCapabilities();
     }

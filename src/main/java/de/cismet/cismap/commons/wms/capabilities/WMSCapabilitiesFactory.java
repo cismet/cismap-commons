@@ -65,7 +65,9 @@ public class WMSCapabilitiesFactory extends AbstractVersionNegotiator {
 
         do {
             try {
-                result = new DeegreeWMSCapabilities(docStream, link);
+                final StringBuilder builder = new StringBuilder(document);
+                final String version = getDocumentVersion(builder);
+                result = new DeegreeWMSCapabilities(docStream, link, version);
             } catch (Throwable th) {
                 logger.warn("cannot parse the GetCapabilities document. Try to use an other version.", th); // NOI18N
                 errorMsg = th.getMessage();
