@@ -1959,7 +1959,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     public void valueChanged(final TreeSelectionEvent e) {
                         if ((getSelectionPath() != null)
                                     && ((getSelectionPath().getLastPathComponent() instanceof Layer)
-                                        || (getSelectionPath().getLastPathComponent() instanceof Element))) {
+                                        || (getSelectionPath().getLastPathComponent() instanceof Element)
+                                        || (getSelectionPath().getLastPathComponent() instanceof FeatureType))) {
                             CismapBroker.getInstance()
                                     .fireCapabilityLayerChanged(
                                         new CapabilityEvent(getSelectionPath().getLastPathComponent()));
