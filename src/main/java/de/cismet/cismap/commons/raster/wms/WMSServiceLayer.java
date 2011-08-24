@@ -473,7 +473,11 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
             url += "&BBOX=" + bb.getURLString();                                                              // NOI18N
             url += "&WIDTH=" + width;                                                                         // NOI18N
             url += "&HEIGHT=" + height;                                                                       // NOI18N
-            url += "&SRS=" + srs;                                                                             // NOI18N
+            if (version.trim().equals("1.3") || version.trim().equals("1.3.0")) {
+                url += "&CRS=" + srs;                                                                             // NOI18N
+            } else {
+                url += "&SRS=" + srs;                                                                             // NOI18N
+            }
             url += "&FORMAT=" + imageFormat;                                                                  // NOI18N
             url += "&TRANSPARENT=" + Boolean.valueOf(transparentImage).toString().toUpperCase();              // NOI18N
             url += "&BGCOLOR=" + backgroundColor;                                                             // NOI18N
@@ -489,8 +493,13 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
 
             url += "&QUERY_LAYERS=" + l.getOgcCapabilitiesLayer().getName(); // NOI18N
             url += "&INFO_FORMAT=text/html";                                 // NOI18N
-            url += "&X=" + x;                                                // NOI18N
-            url += "&Y=" + y;                                                // NOI18N
+            if (version.trim().equals("1.3") || version.trim().equals("1.3.0")) {
+                url += "&I=" + x;                                                // NOI18N
+                url += "&J=" + y;                                                // NOI18N
+            } else {
+                url += "&X=" + x;                                                // NOI18N
+                url += "&Y=" + y;                                                // NOI18N
+            }
             return url;
         } else {
             return null;
