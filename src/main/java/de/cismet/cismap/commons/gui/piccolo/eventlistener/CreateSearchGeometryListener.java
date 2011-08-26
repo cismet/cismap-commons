@@ -146,20 +146,9 @@ public class CreateSearchGeometryListener extends CreateGeometryListener {
      */
     private void showFeature(final PureNewFeature feature) {
         if (feature != null) {
-            final PPath tmpFeature = new PPath();
-            tmpFeature.setStroke(new FixedWidthStroke());
-            // Alles außer Linie wird mit Farbe gefüllt
-            if (!isInMode(LINESTRING)) {
-                tmpFeature.setPaint(getFillingColor());
-            }
-            // Punkte abfragen und in neues Feature übertragen
-            final Vector<Point2D> points = new Vector<Point2D>();
-            for (final Coordinate coord : feature.getGeometry().getCoordinates()) {
-                points.add(new Point2D.Double(coord.x, coord.y));
-            }
-            tmpFeature.setPathToPolyline(points.toArray(new Point2D[0]));
 
-            feature.setEditable(true);
+            feature.setEditable(feature.getGeometryType() != PureNewFeature.geomTypes.MULTIPOLYGON);
+
             mc.getFeatureCollection().addFeature(feature);
             if (isHoldingGeometries()) {
                 mc.getFeatureCollection().holdFeature(feature);
@@ -238,8 +227,8 @@ public class CreateSearchGeometryListener extends CreateGeometryListener {
      */
     public void search(final PureNewFeature searchFeature) {
         if (searchFeature != null) {
-            showFeature(searchFeature);
             doSearch(searchFeature);
+            showFeature(searchFeature);
             cleanup(searchFeature);
         }
     }
