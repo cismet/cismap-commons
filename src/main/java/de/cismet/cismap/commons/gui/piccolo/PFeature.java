@@ -432,7 +432,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void syncGeometry() {
         try {
-            if (getFeature().isEditable()) {
+            if (getFeature().isEditable() && !(getFeature().getGeometry() instanceof MultiPolygon)) { // Weil aus Koordinatenarray die Zuweisung nicht mehr gemacht werden kann erstaml kein Sync bei Multipolygon
                 // TODO Im Moment nur f\u00FCr einfache Polygone ohne L\u00F6cher
                 if (coordArr != null) {
                     final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),

@@ -97,19 +97,34 @@ public class SearchFeature extends PureNewFeature {
         if (getGeometryType() != null) {
             switch (getGeometryType()) {
                 case RECTANGLE: {
-                    return "Such-Rechteck";
+                    return org.openide.util.NbBundle.getMessage(
+                            PureNewFeature.class,
+                            "SearchFeature.getName().searchRectangle");    // NOI18N
                 }
                 case LINESTRING: {
-                    return "Such-Linienzug";
+                    return org.openide.util.NbBundle.getMessage(
+                            PureNewFeature.class,
+                            "SearchFeature.getName().searchPolyline");     // NOI18N
                 }
                 case ELLIPSE: {
-                    return "Such-Ellipse";
+                    return org.openide.util.NbBundle.getMessage(
+                            PureNewFeature.class,
+                            "SearchFeature.getName().searchEllipse");      // NOI18N
                 }
                 case POINT: {
-                    return "Such-Punkt";
+                    return org.openide.util.NbBundle.getMessage(
+                            PureNewFeature.class,
+                            "SearchFeature.getName().searchPoint");        // NOI18N
                 }
                 case POLYGON: {
-                    return "Such-Polygon";
+                    return org.openide.util.NbBundle.getMessage(
+                            PureNewFeature.class,
+                            "SearchFeature.getName().searchPOLYGON");      // NOI18N
+                }
+                case MULTIPOLYGON: {
+                    return org.openide.util.NbBundle.getMessage(
+                            PureNewFeature.class,
+                            "SearchFeature.getName().searchMULTIPOLYGON"); // NOI18N
                 }
                 default: {
                     if (super.getName() != null) {

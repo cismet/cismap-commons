@@ -17,6 +17,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -239,32 +240,38 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
                     case RECTANGLE: {
                         return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newRectangle");   // NOI18N
+                                "PureNewFeature.getName().newRectangle");    // NOI18N
                     }
                     case LINESTRING: {
                         return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPolyline");    // NOI18N
+                                "PureNewFeature.getName().newPolyline");     // NOI18N
                     }
                     case ELLIPSE: {
                         return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newEllipse");     // NOI18N
+                                "PureNewFeature.getName().newEllipse");      // NOI18N
                     }
                     case POINT: {
                         return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPoint");       // NOI18N
+                                "PureNewFeature.getName().newPoint");        // NOI18N
                     }
                     case POLYGON: {
                         return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPolygon");     // NOI18N
+                                "PureNewFeature.getName().newPolygon");      // NOI18N
                     }
-                    default: {
+                    case MULTIPOLYGON: {
                         return org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().errorInGetName"); // NOI18N
+                                "PureNewFeature.getName().newMultiPolygon"); // NOI18N
+                    }
+                    default: {
+//                        return org.openide.util.NbBundle.getMessage(
+//                                PureNewFeature.class,
+//                                "PureNewFeature.getName().errorInGetName");  // NOI18N
+                        return getGeometryType().toString() + " " + getGeometry().getGeometryType();
                     }
                 }
             } else {
@@ -272,29 +279,31 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
             }
         } else {
             try {
-                final List<Feature> allFeatures = CismapBroker.getInstance()
-                            .getMappingComponent()
-                            .getFeatureCollection()
-                            .getAllFeatures();
-                if (name.trim().equals("")) {                               // NOI18N
+                if (name.trim().equals("")) {                                // NOI18N
                     if (getGeometry() instanceof Point) {
                         name = org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPoint");       // NOI18N
+                                "PureNewFeature.getName().newPoint");        // NOI18N
                     } else if (getGeometry() instanceof LineString) {
                         name = org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPolyline");    // NOI18N
-                    } else {
+                                "PureNewFeature.getName().newPolyline");     // NOI18N
+                    } else if (getGeometry() instanceof Polygon) {
                         name = org.openide.util.NbBundle.getMessage(
                                 PureNewFeature.class,
-                                "PureNewFeature.getName().newPolygon");     // NOI18N
+                                "PureNewFeature.getName().newPolygon");      // NOI18N
+                    } else if (getGeometry() instanceof MultiPolygon) {
+                        name = org.openide.util.NbBundle.getMessage(
+                                PureNewFeature.class,
+                                "PureNewFeature.getName().newMultiPolygon"); // NOI18N
+                    } else {
+                        name = "-";                                          // NOI18N
                     }
                 }
                 return name;
             } catch (Exception e) {
-                log.fatal("getName() error", e);                            // NOI18N
-                return "Error in getName()";                                // NOI18N
+                log.fatal("getName() error", e);                             // NOI18N
+                return "Error in getName()";                                 // NOI18N
             }
         }
     }
@@ -336,6 +345,8 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
         } else if (getGeometryType() == geomTypes.RECTANGLE) {
             return icoRectangle;
         } else if (getGeometryType() == geomTypes.POLYGON) {
+            return icoPolygon;
+        } else if (getGeometryType() == geomTypes.MULTIPOLYGON) {
             return icoPolygon;
         } else {
             return null;
