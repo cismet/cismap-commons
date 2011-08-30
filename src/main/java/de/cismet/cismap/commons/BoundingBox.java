@@ -91,7 +91,7 @@ public class BoundingBox implements Cloneable, Serializable {
      * @param  geom  DOCUMENT ME!
      */
     public BoundingBox(final Geometry geom) {
-        final Geometry bb = geom.getEnvelope();
+        final Geometry bb = geom.getEnvelope().buffer(0.000d);
         if (bb instanceof Point) {
             setX1(((Point)bb).getX());
             setX2(((Point)bb).getX());
