@@ -113,15 +113,8 @@ public class ShapeExportAction extends AbstractAction {
             return;
         }
         final String jobname = DownloadManagerDialog.getJobname();
-        if ((jobname == null) || (jobname.trim().length() <= 0)) {
-            return;
-        }
 
         DownloadManager.instance().add(convertToDownloads(wfsList, jobname));
-
-        /*final JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
-         *          CismapBroker.getInstance().getMappingComponent())); if (!downloadManager.isVisible()) {
-         * downloadManager.setLocationRelativeTo(parent); downloadManager.setVisible(true); downloadManager.pack();}*/
     }
 
     /**
