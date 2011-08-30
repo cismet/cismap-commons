@@ -43,7 +43,6 @@ public class JasperDownload extends AbstractDownload {
             final String directory,
             final String title,
             final String filename) {
-        this.log = Logger.getLogger(JasperDownload.class);
         this.print = print;
         this.directory = directory;
         this.title = title;
