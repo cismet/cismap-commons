@@ -47,8 +47,8 @@ import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
+import de.cismet.tools.gui.downloadmanager.HttpDownload;
 import de.cismet.tools.gui.downloadmanager.MultipleDownload;
-import de.cismet.tools.gui.downloadmanager.SingleDownload;
 
 /**
  * This action is responsible for the the steps to be done when the user wants to start a shape export.
@@ -133,7 +133,7 @@ public class ShapeExportAction extends AbstractAction {
      * @return  DOCUMENT ME!
      */
     private Download convertToDownloads(final Collection<ExportWFS> wfss, final String jobname) {
-        final Collection<SingleDownload> downloads = new LinkedList<SingleDownload>();
+        final Collection<HttpDownload> downloads = new LinkedList<HttpDownload>();
 
         final String filenameFromShapeExport = ShapeExport.getDestinationFile();
         final String extension = ShapeExport.getDestinationFileExtension();
@@ -148,7 +148,7 @@ public class ShapeExportAction extends AbstractAction {
                 filenameForDownload = filenameFromShapeExport;
             }
 
-            final SingleDownload download = new SingleDownload(wfs.getUrl(),
+            final HttpDownload download = new HttpDownload(wfs.getUrl(),
                     wfs.getQuery(),
                     destinationDirectory,
                     wfs.getTopic(),
