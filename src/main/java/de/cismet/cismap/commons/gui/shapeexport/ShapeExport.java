@@ -291,7 +291,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
 
     @Override
     public Collection<ToolbarComponentDescription> getToolbarComponents() {
-        if ((toolbarComponents == null) && enableShapeExport && DownloadManager.instance().isEnabled()) {
+        if ((toolbarComponents == null) && enableShapeExport) {
             final JButton btnShapeExport = new JButton(new ShapeExportAction());
             btnShapeExport.setText(null);
             btnShapeExport.setName(NbBundle.getMessage(ShapeExportAction.class, "ShapeExportAction.name"));
