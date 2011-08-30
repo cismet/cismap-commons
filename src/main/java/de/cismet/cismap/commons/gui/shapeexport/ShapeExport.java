@@ -43,15 +43,11 @@ import javax.swing.JButton;
 
 import de.cismet.cismap.commons.gui.ToolbarComponentDescription;
 import de.cismet.cismap.commons.gui.ToolbarComponentsProvider;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.collections.TypeSafeCollections;
 
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
-
-import de.cismet.tools.gui.downloadmanager.DownloadManager;
-import de.cismet.tools.gui.downloadmanager.DownloadManagerAction;
 
 /**
  * This class configures the shape export functionality in cismap. Therefore it reads the corresponding part of
@@ -299,27 +295,15 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
             btnShapeExport.setFocusable(false);
             btnShapeExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
             btnShapeExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-            final JButton btnDownloadManager = new JButton(new DownloadManagerAction(
-                        CismapBroker.getInstance().getMappingComponent()));
-            btnDownloadManager.setText(null);
-            btnDownloadManager.setName(NbBundle.getMessage(DownloadManagerAction.class, "DownloadManagerAction.name"));
-            btnDownloadManager.setBorderPainted(false);
-            btnDownloadManager.setFocusable(false);
-            btnDownloadManager.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-            btnDownloadManager.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+
             final List<ToolbarComponentDescription> preparationList = TypeSafeCollections.newArrayList();
             final ToolbarComponentDescription shapeExport = new ToolbarComponentDescription(
                     "tlbMain",
                     btnShapeExport,
                     ToolbarPositionHint.AFTER,
                     "cmdClipboard");
-            final ToolbarComponentDescription downloadManager = new ToolbarComponentDescription(
-                    "tlbMain",
-                    btnDownloadManager,
-                    ToolbarPositionHint.AFTER,
-                    NbBundle.getMessage(ShapeExportAction.class, "ShapeExportAction.name"));
             preparationList.add(shapeExport);
-            preparationList.add(downloadManager);
+
             toolbarComponents = Collections.unmodifiableList(preparationList);
         }
 
