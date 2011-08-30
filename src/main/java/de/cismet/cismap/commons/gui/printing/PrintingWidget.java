@@ -64,6 +64,8 @@ import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.gui.Static2DTools;
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.downloadmanager.DownloadManager;
+import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
 
 /**
@@ -482,9 +484,9 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdBackActionPerformed
+    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBackActionPerformed
         dispose();
-    }                                                                           //GEN-LAST:event_cmdBackActionPerformed
+    }//GEN-LAST:event_cmdBackActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -549,26 +551,26 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formComponentShown(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentShown
-    }                                                                          //GEN-LAST:event_formComponentShown
+    private void formComponentShown(final java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
+    }//GEN-LAST:event_formComponentShown
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
         mappingComponent.setInteractionMode(interactionModeAfterPrinting);
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
         dispose();
-    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
+    }//GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
         final Runnable r = new Runnable() {
 
                 @Override
@@ -641,31 +643,15 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                         / 2);
                             aFrame.setVisible(true);
                         } else if (a.getId().equalsIgnoreCase(Action.PDF)) {
-                            final String home = System.getProperty("user.home");                           // NOI18N
-                            final String fs = System.getProperty("file.separator");                        // NOI18N
-
-                            String file = home + fs + "cismap.pdf"; // TODO//NOI18N
-                            final File f = new File(file);
-                            file = file.replaceAll("\\\\", "/");    // NOI18N
-                            file = file.replaceAll(" ", "%20");     // NOI18N
-                            // String file="cismap.pdf"; //MesseHotfix
-
-                            JasperExportManager.exportReportToPdfFile(jasperPrint, f.toString());
-
-                            log.info("try to open pdf:" + file);                        // NOI18N
-                            de.cismet.tools.BrowserLauncher.openURL("file:///" + file); // NOI18N
-//                        try {
-//                            if (Desktop.isDesktopSupported()) {
-//                                Desktop desktop =Desktop.getDesktop();
-//                                //desktop.browse(new URI("file:///"+file));
-//                                desktop.open(f);
-//                            }
-//                            else {
-//                                log.fatal("Desktop not supported");
-//                            }
-//                        } catch (Throwable tt) {
-//                            log.fatal("Konnte PDF nicht oeffnen",tt);
-//                        }
+                            if (
+                                !DownloadManagerDialog.showAskingForUserTitle(
+                                            StaticSwingTools.getParentFrame(PrintingWidget.this))) {
+                                return;
+                            }
+                            final String jobname = DownloadManagerDialog.getJobname();
+                            DownloadManager.instance()
+                                    .add(new JasperDownload(jasperPrint, jobname, "Cismap-Druck", "cismap"));
+                            
                             java.awt.EventQueue.invokeLater(new Runnable() {
 
                                     @Override
@@ -701,7 +687,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             };
         CismetThreadPool.execute(r);
         dispose();
-    } //GEN-LAST:event_cmdOkActionPerformed
+    }//GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!
