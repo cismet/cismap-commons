@@ -3220,7 +3220,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     g = CrsTransformer.transformToGivenCrs(f.getGeometry(), mappingModel.getSrs().getCode())
                                 .getEnvelope();
                     if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
-                        g = g.buffer(((Bufferable)f).getBuffer());
+                        g = g.buffer(((Bufferable)f).getBuffer() + 0.001);
                     }
                     first = false;
                 }
@@ -3230,7 +3230,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                                 mappingModel.getSrs().getCode())
                                 .getEnvelope();
                     if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
-                        geometry = geometry.buffer(((Bufferable)f).getBuffer());
+                        geometry = geometry.buffer(((Bufferable)f).getBuffer() + 0.001);
                     }
                     g = g.getEnvelope().union(geometry);
                 }
@@ -3262,7 +3262,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
             g = g.buffer(buff);
             final BoundingBox bb = new BoundingBox(g);
-            gotoBoundingBox(bb, withHistory, !fixedScale, animationDuration);
+
+            final boolean onlyOnePoint = (collection.size() == 1)
+                        && (((Feature)(collection.toArray()[0])).getGeometry()
+                            instanceof com.vividsolutions.jts.geom.Point);
+            gotoBoundingBox(bb, withHistory, !(fixedScale || (onlyOnePoint && (g.getArea() < 10))), animationDuration);
         }
     }
 
