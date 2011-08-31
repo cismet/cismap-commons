@@ -171,7 +171,7 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
 
         jLabel1.setText(org.openide.util.NbBundle.getMessage(
                 RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jLabel1.text_2")); // NOI18N
+                "RectangleFromLineDialog.jLabel1.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -182,7 +182,7 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
 
         jLabel2.setText(org.openide.util.NbBundle.getMessage(
                 RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jLabel2.text_2")); // NOI18N
+                "RectangleFromLineDialog.jLabel2.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -251,7 +251,7 @@ public class RectangleFromLineDialog extends javax.swing.JDialog {
         jRadioButton1.setSelected(true);
         jRadioButton1.setText(org.openide.util.NbBundle.getMessage(
                 RectangleFromLineDialog.class,
-                "RectangleFromLineDialog.jRadioButton1.text_3")); // NOI18N
+                "RectangleFromLineDialog.jRadioButton1.text")); // NOI18N
         panSide.add(jRadioButton1);
 
         buttonGroup1.add(jRadioButton2);
