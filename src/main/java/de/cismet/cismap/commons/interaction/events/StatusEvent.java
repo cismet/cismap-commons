@@ -25,6 +25,13 @@ public class StatusEvent {
     public static final String OBJECT_INFOS = "object_infos";           // NOI18N
     public static final String SCALE = "scale";                         // NOI18N
     public static final String CRS = "crs";                             // NOI18N
+    public static final String RETRIEVAL_STARTED = "retrieval.started";
+    public static final String RETRIEVAL_COMPLETED = "retrieval.completed";
+    public static final String RETRIEVAL_ABORTED = "retrieval.aborted";
+    public static final String RETRIEVAL_ERROR = "retrieval.error";
+    public static final String RETRIEVAL_REMOVED = "retrieval.removed";
+    public static final String MAP_EXTEND_FIXED = "map.extent.fixed";
+    public static final String MAP_SCALE_FIXED = "map.scale.fixed";
 
     //~ Instance fields --------------------------------------------------------
 

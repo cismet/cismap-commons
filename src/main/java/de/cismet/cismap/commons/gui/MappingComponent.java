@@ -70,6 +70,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -148,6 +149,7 @@ import de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl;
 import de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.CrsChangeListener;
+import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.CrsChangedEvent;
 import de.cismet.cismap.commons.interaction.events.MapDnDEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
@@ -351,6 +353,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     /** Utility field used by bound properties. */
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     private ButtonGroup interactionButtonGroup;
+    private boolean mainMappingComponent = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -535,6 +538,16 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                             .fireStatusValueChanged(new StatusEvent(StatusEvent.SCALE, interactionMode));
                 }
             });
+    }
+
+    /**
+     * Creates a new MappingComponent object.
+     *
+     * @param  mainMappingComponent  DOCUMENT ME!
+     */
+    public MappingComponent(final boolean mainMappingComponent) {
+        this();
+        this.mainMappingComponent = mainMappingComponent;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -4011,6 +4024,10 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     public void mapServiceRemoved(final MapService rasterService) {
         try {
             mapServicelayer.removeChild(rasterService.getPNode());
+            if (mainMappingComponent) {
+                CismapBroker.getInstance()
+                        .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_REMOVED, rasterService));
+            }
             System.gc();
         } catch (Exception e) {
             log.warn("Fehler bei mapServiceRemoved", e); // NOI18N
@@ -4996,6 +5013,13 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      */
     public void setFixedMapExtent(final boolean fixedMapExtent) {
         this.fixedMapExtent = fixedMapExtent;
+
+        if (mainMappingComponent) {
+            CismapBroker.getInstance()
+                    .fireStatusValueChanged(new StatusEvent(
+                            StatusEvent.MAP_EXTEND_FIXED,
+                            this.fixedMapExtent));
+        }
     }
 
     /**
@@ -5014,6 +5038,13 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      */
     public void setFixedMapScale(final boolean fixedMapScale) {
         this.fixedMapScale = fixedMapScale;
+
+        if (mainMappingComponent) {
+            CismapBroker.getInstance()
+                    .fireStatusValueChanged(new StatusEvent(
+                            StatusEvent.MAP_SCALE_FIXED,
+                            this.fixedMapScale));
+        }
     }
 
     /**
@@ -5199,6 +5230,15 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      */
     public boolean isLocked() {
         return locked;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isMainMappingComponent() {
+        return mainMappingComponent;
     }
 
     /**
@@ -5390,6 +5430,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                     this.logger.debug(rasterService + ": TaskCounter:" + taskCounter); // NOI18N
                 }
             }
+
+            if (mainMappingComponent) {
+                CismapBroker.getInstance()
+                        .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_STARTED, rasterService));
+            }
         }
 
         /**
@@ -5415,6 +5460,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 if (log.isDebugEnabled()) {
                     log.debug(rasterService + ": TaskCounter:" + taskCounter);  // NOI18N
                 }
+            }
+
+            if (mainMappingComponent) {
+                CismapBroker.getInstance()
+                        .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_ERROR, rasterService));
             }
         }
 
@@ -5466,6 +5516,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             } else {
                 EventQueue.invokeLater(paintImageOnMap);
             }
+
+            if (mainMappingComponent) {
+                CismapBroker.getInstance()
+                        .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_COMPLETED, rasterService));
+            }
         }
 
         /**
@@ -5476,6 +5531,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         @Override
         public void retrievalAborted(final RetrievalEvent e) {
             this.logger.warn(rasterService + ": retrievalAborted: " + e.getRequestIdentifier()); // NOI18N
+
+            if (mainMappingComponent) {
+                CismapBroker.getInstance()
+                        .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_ABORTED, rasterService));
+            }
         }
 
         /**
@@ -5715,6 +5775,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 }
             }
             fireActivityChanged();
+
+            if (mainMappingComponent) {
+                CismapBroker.getInstance()
+                        .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_STARTED, featureService));
+            }
         }
 
         /**
@@ -5747,6 +5812,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             this.logger.error(featureService + "[" + e.getRequestIdentifier() + " (" + this.requestIdentifier + ")]: "
                         + (e.isInitialisationEvent() ? "initialisation" : "retrieval") + " error"); // NOI18N
             fireActivityChanged();
+
+            if (mainMappingComponent) {
+                CismapBroker.getInstance()
+                        .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_ERROR, featureService));
+            }
         }
 
         /**
@@ -6040,6 +6110,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             }
 
             fireActivityChanged();
+
+            if (mainMappingComponent) {
+                CismapBroker.getInstance()
+                        .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_COMPLETED, featureService));
+            }
         }
 
         /**
@@ -6074,10 +6149,14 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
             }
 
             fireActivityChanged();
+
+            if (mainMappingComponent) {
+                CismapBroker.getInstance()
+                        .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_ABORTED, featureService));
+            }
         }
     }
 }
-
 /**
  * DOCUMENT ME!
  *
