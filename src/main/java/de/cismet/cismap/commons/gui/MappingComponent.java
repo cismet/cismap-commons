@@ -361,7 +361,18 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * Creates a new instance of MappingComponent.
      */
     public MappingComponent() {
+        this(false);
+    }
+
+    /**
+     * Creates a new MappingComponent object.
+     *
+     * @param  mainMappingComponent  DOCUMENT ME!
+     */
+    public MappingComponent(final boolean mainMappingComponent) {
         super();
+        this.mainMappingComponent = mainMappingComponent;
+        
         locked = true;
         THIS = this;
         // wird in der Regel wieder ueberschrieben
@@ -538,16 +549,6 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                             .fireStatusValueChanged(new StatusEvent(StatusEvent.SCALE, interactionMode));
                 }
             });
-    }
-
-    /**
-     * Creates a new MappingComponent object.
-     *
-     * @param  mainMappingComponent  DOCUMENT ME!
-     */
-    public MappingComponent(final boolean mainMappingComponent) {
-        this();
-        this.mainMappingComponent = mainMappingComponent;
     }
 
     //~ Methods ----------------------------------------------------------------
