@@ -174,53 +174,80 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                 startPoint = pInputEvent.getPosition();
             }
         } else if (isInMode(RECTANGLE_FROM_LINE)) {
-            if (!inProgress) {
-                inProgress = true;
-                initTempFeature(true);
-                startPoint = pInputEvent.getPosition();
-                points = new Vector<Point2D>(5);
-                points.add(startPoint);
-            } else {
-                final Point2D stopPoint = pInputEvent.getPosition();
-                points.add(stopPoint);
-                points.add(stopPoint);
-                points.add(startPoint);
-                points.add(startPoint);
+            // snappingpoint ermitteln falls snapping enabled
+            final Point2D snappingPoint = (mc.isSnappingEnabled())
+                ? PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition()) : null;
+            // wenn snappingpoint vorhanden, dann den nehmen, ansonsten normalen punkt unter der maus ermitteln
+            final Point2D point = (snappingPoint != null) ? snappingPoint : pInputEvent.getPosition();
 
-                final double distance = startPoint.distance(stopPoint);
-                final Frame frame = StaticSwingTools.getParentFrame(mc);
-
-                final RectangleFromLineDialog dialog = new RectangleFromLineDialog(frame, true, distance);
-                dialog.addWidthChangedListener(new ChangeListener() {
-
-                        @Override
-                        public void stateChanged(final ChangeEvent ce) {
-                            final double height = dialog.getRectangleWidth();
-                            final boolean isLefty = dialog.isLefty();
-
-                            final Point2D startPoint = points.get(0);
-                            final Point2D stopPoint = points.get(1);
-
-                            final double deltaX = stopPoint.getX() - startPoint.getX();
-                            final double deltaY = stopPoint.getY() - startPoint.getY();
-
-                            final double alpha = Math.atan2(deltaY, deltaX);
-                            final double alpha90 = alpha + Math.toRadians((isLefty) ? -90 : 90);
-
-                            final double x = Math.cos(alpha90) * height;
-                            final double y = Math.sin(alpha90) * height;
-
-                            points.set(2, new Point2D.Double(x + stopPoint.getX(), y + stopPoint.getY()));
-                            points.set(3, new Point2D.Double(x + startPoint.getX(), y + startPoint.getY()));
-
-                            updatePolygon(null);
-                        }
-                    });
-                dialog.setLocationRelativeTo(frame);
-                dialog.setVisible(true);
-                if (dialog.getReturnStatus() == RectangleFromLineDialog.STATUS_OK) {
-                    createPureNewFeature(PureNewFeature.geomTypes.POLYGON);
+            if (pInputEvent.isLeftMouseButton()) {
+                if (!inProgress) {
+                    inProgress = true;
+                    initTempFeature(true);
+                    startPoint = point;
+                    points = new Vector<Point2D>(5);
+                    points.add(startPoint);
                 } else {
+                    final Point2D stopPoint = point;
+
+                    // erst einmal nur "flaches" Rechteck erzeugen (eine Linie, aber mit 4 Punkten)
+                    points.add(stopPoint);
+                    points.add(stopPoint);
+                    points.add(startPoint);
+                    points.add(startPoint);
+
+                    // Länge ermitteln
+                    final double length = startPoint.distance(stopPoint);
+
+                    // Dialog erzeugen
+                    final Frame parentFrame = StaticSwingTools.getParentFrame(mc);
+                    final RectangleFromLineDialog dialog = new RectangleFromLineDialog(parentFrame, true, length);
+
+                    // in der Karte dynamisch auf Eingaben im Dialog reagieren
+                    dialog.addWidthChangedListener(new ChangeListener() {
+
+                            @Override
+                            public void stateChanged(final ChangeEvent ce) {
+                                final double height = dialog.getRectangleWidth();
+                                final boolean isLefty = dialog.isLefty();
+
+                                final Point2D startPoint = points.get(0);
+                                final Point2D stopPoint = points.get(1);
+
+                                final double deltaX = stopPoint.getX() - startPoint.getX();
+                                final double deltaY = stopPoint.getY() - startPoint.getY();
+
+                                final double alpha = Math.atan2(deltaY, deltaX);
+                                final double alpha90 = alpha + Math.toRadians((isLefty) ? -90 : 90);
+
+                                final double x = Math.cos(alpha90) * height;
+                                final double y = Math.sin(alpha90) * height;
+
+                                points.set(2, new Point2D.Double(x + stopPoint.getX(), y + stopPoint.getY()));
+                                points.set(3, new Point2D.Double(x + startPoint.getX(), y + startPoint.getY()));
+
+                                updatePolygon(null);
+                            }
+                        });
+
+                    // Dialog mittig anzeigen
+                    dialog.setLocationRelativeTo(parentFrame);
+                    dialog.setVisible(true);
+
+                    // Ergebnis des Dialogs auswerten
+                    if (dialog.getReturnStatus() == RectangleFromLineDialog.STATUS_OK) {
+                        // fertig
+                        createPureNewFeature(PureNewFeature.geomTypes.POLYGON);
+                        inProgress = false;
+                    } else {
+                        // abbrechen
+                        mc.getTmpFeatureLayer().removeChild(tempFeature);
+                        inProgress = false;
+                    }
+                }
+            } else if (pInputEvent.isRightMouseButton()) {
+                // abbrechen
+                if (tempFeature != null) {
                     mc.getTmpFeatureLayer().removeChild(tempFeature);
                 }
                 inProgress = false;
