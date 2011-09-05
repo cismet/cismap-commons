@@ -268,22 +268,50 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
             mode = ((String)e.getValue());
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_STARTED)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Entered RETRIEVAL_STARTED: " + e.getValue() + " (" + System.currentTimeMillis() + ")");
+            }
+
             if (e.getValue() instanceof ServiceLayer) {
                 final ServiceLayer service = (ServiceLayer)e.getValue();
+                if (erroneousServices.contains(service)) {
+                    erroneousServices.remove(service);
+                    servicesErroneousCounter--;
+                }
                 if (!services.contains(service)) {
                     services.add(service);
                     servicesCounter++;
                 }
             }
+
+            if (log.isDebugEnabled()) {
+                log.debug("RETRIEVAL_STARTED (" + e.getValue() + ", " + System.currentTimeMillis()
+                            + ") - services started: " + servicesCounter + ", erroneous services: "
+                            + servicesErroneousCounter);
+            }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_COMPLETED)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Entered RETRIEVAL_COMPLETED: " + e.getValue() + " (" + System.currentTimeMillis() + ")");
+            }
+
             if (e.getValue() instanceof ServiceLayer) {
                 final ServiceLayer service = (ServiceLayer)e.getValue();
                 if (services.contains(service)) {
                     services.remove(service);
                     servicesCounter--;
                 }
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("RETRIEVAL_COMPLETED (" + e.getValue() + ", " + System.currentTimeMillis()
+                            + ") - services started: " + servicesCounter + ", erroneous services: "
+                            + servicesErroneousCounter);
             }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_ABORTED)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Entered RETRIEVAL_ABORTED: " + e.getValue() + " (" + System.currentTimeMillis() + ")");
+            }
+
             if (e.getValue() instanceof ServiceLayer) {
                 final ServiceLayer service = (ServiceLayer)e.getValue();
                 if (services.contains(service)) {
@@ -291,7 +319,17 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                     servicesCounter--;
                 }
             }
+
+            if (log.isDebugEnabled()) {
+                log.debug("RETRIEVAL_ABORTED (" + e.getValue() + ", " + System.currentTimeMillis()
+                            + ") - services started: " + servicesCounter + ", erroneous services: "
+                            + servicesErroneousCounter);
+            }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_ERROR)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Entered RETRIEVAL_ERROR: " + e.getValue() + " (" + System.currentTimeMillis() + ")");
+            }
+
             if (e.getValue() instanceof ServiceLayer) {
                 final ServiceLayer service = (ServiceLayer)e.getValue();
                 if (services.contains(service)) {
@@ -301,7 +339,17 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                     servicesErroneousCounter++;
                 }
             }
+
+            if (log.isDebugEnabled()) {
+                log.debug("RETRIEVAL_ERROR (" + e.getValue() + ", " + System.currentTimeMillis()
+                            + ") - services started: " + servicesCounter + ", erroneous services: "
+                            + servicesErroneousCounter);
+            }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_REMOVED)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Entered RETRIEVAL_REMOVED: " + e.getValue() + " (" + System.currentTimeMillis() + ")");
+            }
+
             if (e.getValue() instanceof ServiceLayer) {
                 final ServiceLayer service = (ServiceLayer)e.getValue();
                 if (services.contains(service)) {
@@ -312,6 +360,39 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                     erroneousServices.remove(service);
                     servicesErroneousCounter--;
                 }
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("RETRIEVAL_REMOVED (" + e.getValue() + ", " + System.currentTimeMillis()
+                            + ") - services started: " + servicesCounter + ", erroneous services: "
+                            + servicesErroneousCounter);
+            }
+        } else if (e.getName().equals(StatusEvent.RETRIEVAL_RESET)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Entered RETRIEVAL_RESET: " + e.getValue() + " (" + System.currentTimeMillis() + ")");
+            }
+
+            if (e.getValue() instanceof ServiceLayer) {
+                final ServiceLayer service = (ServiceLayer)e.getValue();
+                if (services.contains(service)) {
+                    services.remove(service);
+                    servicesCounter--;
+                }
+                if (erroneousServices.contains(service)) {
+                    erroneousServices.remove(service);
+                    servicesErroneousCounter--;
+                }
+            }
+
+            services.clear();
+            erroneousServices.clear();
+            servicesCounter = 0;
+            servicesErroneousCounter = 0;
+
+            if (log.isDebugEnabled()) {
+                log.debug("RETRIEVAL_RESET (" + e.getValue() + ", " + System.currentTimeMillis()
+                            + ") - services started: " + servicesCounter + ", erroneous services: "
+                            + servicesErroneousCounter);
             }
         }
 
@@ -487,22 +568,22 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblScaleMousePressed
+    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblScaleMousePressed
         if (evt.isPopupTrigger()) {
             pomScale.setVisible(true);
         }
-    }//GEN-LAST:event_lblScaleMousePressed
+    }                                                                        //GEN-LAST:event_lblScaleMousePressed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCrsMousePressed
+    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblCrsMousePressed
         if (evt.isPopupTrigger()) {
             pomCrs.setVisible(true);
         }
-    }//GEN-LAST:event_lblCrsMousePressed
+    }                                                                      //GEN-LAST:event_lblCrsMousePressed
 
     /**
      * DOCUMENT ME!
