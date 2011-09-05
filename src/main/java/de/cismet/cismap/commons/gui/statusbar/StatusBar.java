@@ -270,49 +270,40 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_STARTED)) {
             if (e.getValue() instanceof ServiceLayer) {
                 final ServiceLayer service = (ServiceLayer)e.getValue();
-                log.fatal("STARTED: " + service);
                 if (!services.contains(service)) {
                     services.add(service);
                     servicesCounter++;
                 }
-                log.fatal("SERVICES: " + servicesCounter + ", ERRONEOUS SERVICES: " + servicesErroneousCounter);
             }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_COMPLETED)) {
             if (e.getValue() instanceof ServiceLayer) {
                 final ServiceLayer service = (ServiceLayer)e.getValue();
-                log.fatal("COMPLETED: " + service);
                 if (services.contains(service)) {
                     services.remove(service);
                     servicesCounter--;
                 }
-                log.fatal("SERVICES: " + servicesCounter + ", ERRONEOUS SERVICES: " + servicesErroneousCounter);
             }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_ABORTED)) {
             if (e.getValue() instanceof ServiceLayer) {
                 final ServiceLayer service = (ServiceLayer)e.getValue();
-                log.fatal("ABORTED: " + service);
                 if (services.contains(service)) {
                     services.remove(service);
                     servicesCounter--;
                 }
-                log.fatal("SERVICES: " + servicesCounter + ", ERRONEOUS SERVICES: " + servicesErroneousCounter);
             }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_ERROR)) {
             if (e.getValue() instanceof ServiceLayer) {
                 final ServiceLayer service = (ServiceLayer)e.getValue();
-                log.fatal("ERROR: " + service);
                 if (services.contains(service)) {
                     services.remove(service);
                     servicesCounter--;
                     erroneousServices.add(service);
                     servicesErroneousCounter++;
                 }
-                log.fatal("SERVICES: " + servicesCounter + ", ERRONEOUS SERVICES: " + servicesErroneousCounter);
             }
         } else if (e.getName().equals(StatusEvent.RETRIEVAL_REMOVED)) {
             if (e.getValue() instanceof ServiceLayer) {
                 final ServiceLayer service = (ServiceLayer)e.getValue();
-                log.fatal("REMOVED: " + service);
                 if (services.contains(service)) {
                     services.remove(service);
                     servicesCounter--;
@@ -321,7 +312,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                     erroneousServices.remove(service);
                     servicesErroneousCounter--;
                 }
-                log.fatal("SERVICES: " + servicesCounter + ", ERRONEOUS SERVICES: " + servicesErroneousCounter);
             }
         }
 
@@ -497,22 +487,22 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblScaleMousePressed
+    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblScaleMousePressed
         if (evt.isPopupTrigger()) {
             pomScale.setVisible(true);
         }
-    }                                                                        //GEN-LAST:event_lblScaleMousePressed
+    }//GEN-LAST:event_lblScaleMousePressed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblCrsMousePressed
+    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCrsMousePressed
         if (evt.isPopupTrigger()) {
             pomCrs.setVisible(true);
         }
-    }                                                                      //GEN-LAST:event_lblCrsMousePressed
+    }//GEN-LAST:event_lblCrsMousePressed
 
     /**
      * DOCUMENT ME!
