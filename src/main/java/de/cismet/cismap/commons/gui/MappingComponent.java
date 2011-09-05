@@ -372,7 +372,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     public MappingComponent(final boolean mainMappingComponent) {
         super();
         this.mainMappingComponent = mainMappingComponent;
-        
+
         locked = true;
         THIS = this;
         // wird in der Regel wieder ueberschrieben
@@ -2036,6 +2036,9 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
      * @param  forced  forces the refresh
      */
     private void queryServicesWithoutHistory(final boolean forced) {
+        if (forced && mainMappingComponent) {
+            CismapBroker.getInstance().fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_RESET, this));
+        }
         if (!locked) {
             final Runnable r = new Runnable() {
 
