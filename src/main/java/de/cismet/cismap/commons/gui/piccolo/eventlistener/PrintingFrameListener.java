@@ -56,7 +56,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
     MappingComponent mappingComponent = null;
     Point2D startDragPosition;
     double widthToHeightRatio = 1.0d;
-    double scaleDenominator = 0d;
+    int scaleDenominator = 0;
     int placeholderWidth = 0;
     boolean inDragOperation = false;
     int placeholderHeight = 0;
@@ -155,7 +155,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
      * @param  placeholderHeight   DOCUMENT ME!
      * @param  oldInteractionMode  DOCUMENT ME!
      */
-    public void init(double scaleDenominator,
+    public void init(final int scaleDenominator,
             final int placeholderWidth,
             final int placeholderHeight,
             final String oldInteractionMode) {
@@ -169,7 +169,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
         final double mapHeight = mappingComponent.getCamera().getViewBounds().getHeight();
 
         // calculate realworldsize
-        if (scaleDenominator == -1) {
+        if (this.scaleDenominator == -1) {
             final String s = JOptionPane.showInputDialog(
                     mappingComponent,
                     org.openide.util.NbBundle.getMessage(
@@ -177,16 +177,16 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
                         "PrintingFrameListener.init(double,int,int,String).message"),
                     ""); // NOI18N
             try {
-                final Double d = new Double(s);
-                scaleDenominator = d;
-                realWorldWidth = placeholderWidth / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                            / MILLIMETER_OF_A_METER * scaleDenominator;
-                realWorldHeight = placeholderHeight / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                            / MILLIMETER_OF_A_METER * scaleDenominator;
+                this.scaleDenominator = Integer.parseInt(s);
             } catch (Exception skip) {
-                scaleDenominator = 0;
+                log.warn(
+                    "Could not determine the given scale denominator. It will be set to '0.0' to enable free scaling.",
+                    skip);
+                this.scaleDenominator = 0;
             }
-        } else if (scaleDenominator == 0) {
+        }
+
+        if (this.scaleDenominator == 0) {
             // no fixed scale
             if ((widthToHeightRatio / (mapWidth / mapHeight)) < 1) {
                 // height is the critical value and must be shrinked. in german: bestimmer ;-)
@@ -201,9 +201,9 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
             }
         } else {
             realWorldWidth = placeholderWidth / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                        / MILLIMETER_OF_A_METER * scaleDenominator;
+                        / MILLIMETER_OF_A_METER * this.scaleDenominator;
             realWorldHeight = placeholderHeight / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                        / MILLIMETER_OF_A_METER * scaleDenominator;
+                        / MILLIMETER_OF_A_METER * this.scaleDenominator;
         }
         final Point2D center = mappingComponent.getCamera().getViewBounds().getCenter2D();
         final PBounds pb = new PBounds(0, 0, realWorldWidth, realWorldHeight);
@@ -218,7 +218,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
         getPrintingRectangle().moveToFront();
         getPrintingRectangle().repaint();
 
-        if ((scaleDenominator != 0) && !mappingComponent.isFixedMapScale()) {
+        if ((this.scaleDenominator != 0) && !mappingComponent.isFixedMapScale()) {
             final PBounds b = getPrintingRectangle().getBounds();
             final PBounds mover = new PBounds(b.getX() - (b.getWidth() * (0.25 / 2.0)),
                     b.getY()
