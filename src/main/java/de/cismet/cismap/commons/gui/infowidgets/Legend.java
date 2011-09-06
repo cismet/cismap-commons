@@ -180,6 +180,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
     }
 
     @Override
+    public void layerAvailabilityChanged(final ActiveLayerEvent e) {
+    }
+
+    @Override
     public void layerRemoved(final ActiveLayerEvent e) {
         if (log.isDebugEnabled()) {
             log.debug("layerRemoved() fired");                                   // NOI18N

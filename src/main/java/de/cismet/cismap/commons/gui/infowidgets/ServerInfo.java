@@ -390,6 +390,10 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
     }
 
     @Override
+    public void layerAvailabilityChanged(final ActiveLayerEvent e) {
+    }
+
+    @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         final Object serverInfo = e.getCapabilities();
         if (serverInfo instanceof WMSCapabilities) {

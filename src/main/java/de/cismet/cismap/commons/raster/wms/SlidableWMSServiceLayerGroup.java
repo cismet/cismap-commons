@@ -738,6 +738,10 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
     }
 
     @Override
+    public void layerAvailabilityChanged(final ActiveLayerEvent e) {
+    }
+
+    @Override
     public void layerInformationStatusChanged(final ActiveLayerEvent e) {
     }
 
