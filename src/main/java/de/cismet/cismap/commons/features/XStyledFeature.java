@@ -13,7 +13,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 import de.cismet.cismap.commons.Refreshable;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 
 /**
  * DOCUMENT ME!

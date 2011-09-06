@@ -394,9 +394,14 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      */
     public void disableLayer(final TreePath treePath) {
         final Object layer = treePath.getLastPathComponent();
+        final ActiveLayerEvent activeLayerEvent = new ActiveLayerEvent();
         if (layer instanceof RetrievalServiceLayer) {
             final RetrievalServiceLayer wmsServiceLayer = ((RetrievalServiceLayer)layer);
             wmsServiceLayer.setEnabled(!wmsServiceLayer.isEnabled());
+
+            activeLayerEvent.setLayer(layer);
+            CismapBroker.getInstance().fireLayerAvailabilityChanged(activeLayerEvent);
+
             if (wmsServiceLayer.isEnabled()) {
                 wmsServiceLayer.setRefreshNeeded(true);
             }
@@ -409,6 +414,10 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
             final TreePath parentPath = treePath.getParentPath();
             ((WMSLayer)layer).setEnabled(!((WMSLayer)layer).isEnabled());
+
+            activeLayerEvent.setLayer(layer);
+            CismapBroker.getInstance().fireLayerAvailabilityChanged(activeLayerEvent);
+
             ((WMSServiceLayer)parentPath.getLastPathComponent()).setRefreshNeeded(true);
             fireTreeNodesChanged(
                 this,

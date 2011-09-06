@@ -48,6 +48,12 @@ public interface ActiveLayerListener {
      *
      * @param  e  DOCUMENT ME!
      */
+    void layerAvailabilityChanged(ActiveLayerEvent e);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     void layerInformationStatusChanged(ActiveLayerEvent e);
     /**
      * DOCUMENT ME!

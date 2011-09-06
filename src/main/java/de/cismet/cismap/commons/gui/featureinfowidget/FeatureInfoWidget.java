@@ -104,6 +104,11 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
     }
 
     @Override
+    public void layerAvailabilityChanged(final ActiveLayerEvent e) {
+        // noop
+    }
+
+    @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         final Object o = e.getLayer();
         if ((o instanceof WMSLayer) && (displays.get(o) != null)) {
@@ -175,7 +180,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                     tbpFeatureInfos.add(layer.toString(), display.getDisplayComponent());
                     displays.put(layer, display);
                 } catch (final Exception exception) {
-                    LOG.error("Exception in creating featureInfoDisplay component", exception); // NOI18N
+                    LOG.error("Exception in creating featureInfoDisplay component", exception);     // NOI18N
                     layer.setLayerQuerySelected(false);
                 }
             }
@@ -223,7 +228,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpFeatureInfosStateChanged
+    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpFeatureInfosStateChanged
         for (int i = 0; i < tbpFeatureInfos.getTabCount(); ++i) {
             tbpFeatureInfos.setForegroundAt(i, null);
         }
@@ -238,7 +243,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 }
             }
         }
-    }//GEN-LAST:event_tbpFeatureInfosStateChanged
+    }                                                          //GEN-LAST:event_tbpFeatureInfosStateChanged
 
     /**
      * DOCUMENT ME!

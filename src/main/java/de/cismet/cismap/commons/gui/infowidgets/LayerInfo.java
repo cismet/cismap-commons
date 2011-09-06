@@ -399,6 +399,10 @@ public class LayerInfo extends javax.swing.JPanel implements CapabilityListener,
     }
 
     @Override
+    public void layerAvailabilityChanged(final ActiveLayerEvent e) {
+    }
+
+    @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof WMSServiceLayer) {
             final List v = ((WMSServiceLayer)e.getLayer()).getWMSLayers();

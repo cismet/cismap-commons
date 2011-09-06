@@ -395,6 +395,17 @@ public class CismapBroker {
      *
      * @param  ale  DOCUMENT ME!
      */
+    public void fireLayerAvailabilityChanged(final ActiveLayerEvent ale) {
+        for (final Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
+            it.next().layerAvailabilityChanged(ale);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ale  DOCUMENT ME!
+     */
     public void fireLayerInformationStatusChanged(final ActiveLayerEvent ale) {
         for (final Iterator<ActiveLayerListener> it = activeLayerListeners.iterator(); it.hasNext();) {
             it.next().layerInformationStatusChanged(ale);

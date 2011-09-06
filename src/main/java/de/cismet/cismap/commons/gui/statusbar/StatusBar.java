@@ -20,8 +20,12 @@ import org.deegree.model.spatialschema.Point;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -32,9 +36,9 @@ import java.util.HashSet;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import de.cismet.cismap.commons.Crs;
-import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
@@ -51,6 +55,8 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 
 import de.cismet.tools.StaticDecimalTools;
+
+import de.cismet.tools.gui.Static2DTools;
 
 /**
  * DOCUMENT ME!
@@ -86,11 +92,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.Box.Filler gluFiller;
     private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JSeparator jSeparator4;
-    private javax.swing.JSeparator jSeparator5;
-    private javax.swing.JSeparator jSeparator6;
     private javax.swing.JLabel lblCoordinates;
     private javax.swing.JLabel lblCrs;
     private javax.swing.JLabel lblMeasurement;
@@ -103,6 +104,11 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     private javax.swing.JPanel pnlServicesStatus;
     private javax.swing.JPopupMenu pomCrs;
     private javax.swing.JPopupMenu pomScale;
+    private javax.swing.JSeparator sepCoordinates;
+    private javax.swing.JSeparator sepCrs;
+    private javax.swing.JSeparator sepFeedbackIcons;
+    private javax.swing.JSeparator sepMeasurement;
+    private javax.swing.JSeparator sepScale;
     private de.cismet.cismap.commons.gui.statusbar.ServicesRetrievedPanel servicesRetrievedPanel1;
     // End of variables declaration//GEN-END:variables
 
@@ -184,7 +190,19 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                             final ImageIcon ico = ((XStyledFeature)((PFeature)e.getValue()).getFeature())
                                         .getIconImage();
                             if ((ico != null) && (ico.getIconWidth() > 0) && (ico.getIconHeight() > 0)) {
-                                lblStatusImage.setIcon(ico);
+                                final BufferedImage imageToScale = new BufferedImage(ico.getIconWidth(),
+                                        ico.getIconHeight(),
+                                        BufferedImage.TYPE_INT_ARGB);
+                                final Graphics g = imageToScale.createGraphics();
+                                g.drawImage(ico.getImage(), 0, 0, ico.getImageObserver());
+                                g.dispose();
+                                lblStatusImage.setIcon(new ImageIcon(
+                                        Static2DTools.getFasterScaledInstance(
+                                            imageToScale,
+                                            lblStatusImage.getWidth(),
+                                            lblStatusImage.getHeight(),
+                                            RenderingHints.VALUE_INTERPOLATION_BILINEAR,
+                                            true)));
                             } else {
                                 lblStatusImage.setIcon(defaultIcon);
                             }
@@ -414,66 +432,95 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         jSeparator1 = new javax.swing.JSeparator();
         pomScale = new javax.swing.JPopupMenu();
         pomCrs = new javax.swing.JPopupMenu();
-        lblCoordinates = new javax.swing.JLabel();
-        lblStatusImage = new javax.swing.JLabel();
-        jSeparator2 = new javax.swing.JSeparator();
-        lblStatus = new javax.swing.JLabel();
-        jSeparator3 = new javax.swing.JSeparator();
-        lblScale = new javax.swing.JLabel();
-        jSeparator4 = new javax.swing.JSeparator();
-        lblMeasurement = new javax.swing.JLabel();
-        jSeparator5 = new javax.swing.JSeparator();
-        lblWgs84Coordinates = new javax.swing.JLabel();
-        jSeparator6 = new javax.swing.JSeparator();
-        lblCrs = new javax.swing.JLabel();
         pnlServicesStatus = new javax.swing.JPanel();
         servicesRetrievedPanel1 = new de.cismet.cismap.commons.gui.statusbar.ServicesRetrievedPanel();
         pnlFixMapExtent = new javax.swing.JPanel();
         pnlFixMapScale = new javax.swing.JPanel();
+        sepFeedbackIcons = new javax.swing.JSeparator();
+        lblMeasurement = new javax.swing.JLabel();
+        sepMeasurement = new javax.swing.JSeparator();
+        lblStatusImage = new javax.swing.JLabel();
+        lblStatus = new javax.swing.JLabel();
         gluFiller = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 0),
                 new java.awt.Dimension(0, 0));
+        lblScale = new javax.swing.JLabel();
+        sepScale = new javax.swing.JSeparator();
+        lblCrs = new javax.swing.JLabel();
+        sepCrs = new javax.swing.JSeparator();
+        lblCoordinates = new javax.swing.JLabel();
+        sepCoordinates = new javax.swing.JSeparator();
+        lblWgs84Coordinates = new javax.swing.JLabel();
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         setLayout(new java.awt.GridBagLayout());
 
-        lblCoordinates.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        pnlServicesStatus.setLayout(new java.awt.BorderLayout());
+        pnlServicesStatus.add(servicesRetrievedPanel1, java.awt.BorderLayout.CENTER);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 10;
+        gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        add(lblCoordinates, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
+        add(pnlServicesStatus, gridBagConstraints);
+
+        pnlFixMapExtent.setMinimumSize(new java.awt.Dimension(16, 16));
+        pnlFixMapExtent.setLayout(new java.awt.BorderLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+        add(pnlFixMapExtent, gridBagConstraints);
+
+        pnlFixMapScale.setMinimumSize(new java.awt.Dimension(16, 16));
+        pnlFixMapScale.setLayout(new java.awt.BorderLayout());
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+        add(pnlFixMapScale, gridBagConstraints);
+
+        sepFeedbackIcons.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+        add(sepFeedbackIcons, gridBagConstraints);
+
+        lblMeasurement.setMinimumSize(new java.awt.Dimension(300, 17));
+        lblMeasurement.setPreferredSize(new java.awt.Dimension(300, 17));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(lblMeasurement, gridBagConstraints);
+
+        sepMeasurement.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+        add(sepMeasurement, gridBagConstraints);
 
         lblStatusImage.setMaximumSize(new java.awt.Dimension(17, 17));
         lblStatusImage.setMinimumSize(new java.awt.Dimension(17, 17));
         lblStatusImage.setPreferredSize(new java.awt.Dimension(17, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         add(lblStatusImage, gridBagConstraints);
-
-        jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 11;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        add(jSeparator2, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        add(lblStatus, gridBagConstraints);
-
-        jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 7;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        add(jSeparator3, gridBagConstraints);
+        add(lblStatus, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 8;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        add(gluFiller, gridBagConstraints);
 
         lblScale.setComponentPopupMenu(pomScale);
         lblScale.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -484,47 +531,17 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
+        gridBagConstraints.gridx = 9;
         gridBagConstraints.gridy = 0;
         add(lblScale, gridBagConstraints);
 
-        jSeparator4.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        sepScale.setOrientation(javax.swing.SwingConstants.VERTICAL);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridx = 10;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        add(jSeparator4, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 0;
-        add(lblMeasurement, gridBagConstraints);
-
-        jSeparator5.setOrientation(javax.swing.SwingConstants.VERTICAL);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 9;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        add(jSeparator5, gridBagConstraints);
-
-        lblWgs84Coordinates.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        lblWgs84Coordinates.setToolTipText(org.openide.util.NbBundle.getMessage(
-                StatusBar.class,
-                "StatusBar.lblWgs84Coordinates.toolTipText")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 12;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        add(lblWgs84Coordinates, gridBagConstraints);
-
-        jSeparator6.setOrientation(javax.swing.SwingConstants.VERTICAL);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        add(jSeparator6, gridBagConstraints);
+        add(sepScale, gridBagConstraints);
 
         lblCrs.setComponentPopupMenu(pomCrs);
         lblCrs.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -535,33 +552,43 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 8;
+        gridBagConstraints.gridx = 11;
         gridBagConstraints.gridy = 0;
         add(lblCrs, gridBagConstraints);
 
-        pnlServicesStatus.setLayout(new java.awt.BorderLayout());
-        pnlServicesStatus.add(servicesRetrievedPanel1, java.awt.BorderLayout.CENTER);
-
+        sepCrs.setOrientation(javax.swing.SwingConstants.VERTICAL);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 12;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
-        add(pnlServicesStatus, gridBagConstraints);
-
-        pnlFixMapExtent.setLayout(new java.awt.BorderLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-        add(pnlFixMapExtent, gridBagConstraints);
+        add(sepCrs, gridBagConstraints);
 
-        pnlFixMapScale.setLayout(new java.awt.BorderLayout());
+        lblCoordinates.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
-        add(pnlFixMapScale, gridBagConstraints);
+        gridBagConstraints.gridx = 13;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        add(lblCoordinates, gridBagConstraints);
+
+        sepCoordinates.setOrientation(javax.swing.SwingConstants.VERTICAL);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        add(gluFiller, gridBagConstraints);
-    } // </editor-fold>//GEN-END:initComponents
+        gridBagConstraints.gridx = 14;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+        add(sepCoordinates, gridBagConstraints);
+
+        lblWgs84Coordinates.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblWgs84Coordinates.setToolTipText(org.openide.util.NbBundle.getMessage(
+                StatusBar.class,
+                "StatusBar.lblWgs84Coordinates.toolTipText")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 15;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        add(lblWgs84Coordinates, gridBagConstraints);
+    }                                                          // </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
@@ -778,17 +805,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     @Override
     public void layerRemoved(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof ServiceLayer) {
-            final ServiceLayer service = (ServiceLayer)e.getLayer();
-            if (services.contains(service)) {
-//                services.remove(service);
-//                servicesCounter--;
-
-//                if(service instanceof RetrievalServiceLayer && ((RetrievalServiceLayer)service).hasErrors()) {
-//                    servicesErroneousCounter--;
-//                }
-
-                statusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_ABORTED, service));
-            }
+            statusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_REMOVED, (ServiceLayer)e.getLayer()));
         }
     }
 
@@ -800,6 +817,16 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     @Override
     public void layerVisibilityChanged(final ActiveLayerEvent e) {
         // NOP
+    }
+
+    @Override
+    public void layerAvailabilityChanged(final ActiveLayerEvent e) {
+        if (e.getLayer() instanceof ServiceLayer) {
+            final ServiceLayer layer = (ServiceLayer)e.getLayer();
+            if (!layer.isEnabled()) {
+                statusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_REMOVED, layer));
+            }
+        }
     }
 
     @Override
