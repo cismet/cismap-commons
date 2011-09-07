@@ -265,7 +265,8 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
             if (value instanceof WMSServiceLayer) {
                 final WMSServiceLayer wmsLayer = (WMSServiceLayer)layer;
                 if (wmsLayer.getWMSLayers().size() == 1) {
-                    if (((WMSLayer)wmsLayer.getWMSLayers().get(0)).getOgcCapabilitiesLayer().isQueryable()) {
+                    if (!wmsLayer.isDummy()
+                                && ((WMSLayer)wmsLayer.getWMSLayers().get(0)).getOgcCapabilitiesLayer().isQueryable()) {
                         ret.setIcon(getRightIcon(
                                 SINGLE
                                         + DL

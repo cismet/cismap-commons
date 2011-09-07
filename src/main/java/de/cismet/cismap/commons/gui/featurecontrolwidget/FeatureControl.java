@@ -123,8 +123,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      */
     public FeatureControl(final de.cismet.cismap.commons.gui.MappingComponent mappingComponent) {
         initComponents();
-        jxtFeatures.setModel(new FeatureCollectionTableModel());
         this.mappingComponent = mappingComponent;
+        jxtFeatures.setModel(new FeatureCollectionTableModel());
 //        Enumeration en = jxtFeatures.getColumnModel().getColumns();
 //        while ( en.hasMoreElements() ) {
 //            TableColumn tc = (TableColumn)en.nextElement();

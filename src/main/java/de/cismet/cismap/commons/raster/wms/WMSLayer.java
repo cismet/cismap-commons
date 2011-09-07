@@ -25,6 +25,8 @@ public class WMSLayer implements LayerInfoProvider {
     private boolean querySelected;
     private Layer ogcCapabilitiesLayer;
     private WMSServiceLayer parentServiceLayer = null;
+    private String name;
+    private String styleName;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -42,6 +44,21 @@ public class WMSLayer implements LayerInfoProvider {
         this.selectedStyle = selectedStyle;
     }
 
+    /**
+     * Creates a new instance of WMSLayer.
+     *
+     * @param  name           ogcCapabilitiesLayer DOCUMENT ME!
+     * @param  styleName      DOCUMENT ME!
+     * @param  enabled        DOCUMENT ME!
+     * @param  querySelected  DOCUMENT ME!
+     */
+    public WMSLayer(final String name, final String styleName, final boolean enabled, final boolean querySelected) {
+        this.name = name;
+        this.styleName = styleName;
+        this.enabled = enabled;
+        this.querySelected = querySelected;
+    }
+
     //~ Methods ----------------------------------------------------------------
 
     @Override
@@ -49,7 +66,7 @@ public class WMSLayer implements LayerInfoProvider {
         if (ogcCapabilitiesLayer != null) {
             return ogcCapabilitiesLayer.getTitle();
         } else {
-            return super.toString();
+            return name;
         }
     }
 
@@ -176,11 +193,42 @@ public class WMSLayer implements LayerInfoProvider {
 
     @Override
     public boolean isQueryable() {
-        return getOgcCapabilitiesLayer().isQueryable();
+        if (isDummy()) {
+            return querySelected;
+        } else {
+            return getOgcCapabilitiesLayer().isQueryable();
+        }
     }
 
     @Override
     public Layer getLayerInformation() {
         return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isDummy() {
+        return ogcCapabilitiesLayer == null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the styleName
+     */
+    public String getStyleName() {
+        return styleName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  styleName  the styleName to set
+     */
+    public void setStyleName(final String styleName) {
+        this.styleName = styleName;
     }
 }

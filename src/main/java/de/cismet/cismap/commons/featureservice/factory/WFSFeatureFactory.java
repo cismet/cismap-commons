@@ -18,8 +18,10 @@ import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.GMLFeatureCollectionDocument;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 
 import java.net.URL;
 
@@ -143,7 +145,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         }
         // check if canceled .......................................................
         if (logger.isDebugEnabled()) {
-            logger.debug("FRW[" + workerThread + "]: WFS Query: \n" + postString);
+            logger.debug("FRW[" + workerThread + "]: Host name: " + hostname + "\nWFS Query: \n" + postString);
         }
 
         long start = System.currentTimeMillis();
@@ -179,7 +181,19 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             }
             // check if canceled .......................................................
 
-            featureCollectionDocument.load(reader, "http://dummyID");
+            // debug
+            String res = "";
+            String tmp;
+            final BufferedReader br = new BufferedReader(reader);
+            while ((tmp = br.readLine()) != null) {
+                res += tmp;
+            }
+
+            logger.error("response: " + res);
+            final StringReader re = new StringReader(res);
+            // debug
+
+            featureCollectionDocument.load(re, "http://dummyID");
 
             // check if canceled .......................................................
             if (this.checkCancelled(workerThread, "loading features")) {

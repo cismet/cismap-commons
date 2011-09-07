@@ -270,7 +270,9 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
                 }
             }
             try {
-                scrollToLegend(layer.getSelectedStyle().getLegendURL()[0].toString());
+                if (!layer.isDummy()) {
+                    scrollToLegend(layer.getSelectedStyle().getLegendURL()[0].toString());
+                }
             } catch (Exception ex) {
                 if (log.isDebugEnabled()) {
                     log.debug("Cannot scroll to legend of " + e.getLayer(), ex); // NOI18N
@@ -321,28 +323,30 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
      * @param  wmsLayer  DOCUMENT ME!
      */
     private void addWmsServiceLayer(final WMSServiceLayer wmsLayer) {
-        final List v = wmsLayer.getWMSLayers();
-        final Iterator it = v.iterator();
-        while (it.hasNext()) {
-            final Object elem = it.next();
-            if (elem instanceof WMSLayer) {
-                final WMSLayer wl = (WMSLayer)elem;
-                final String title = wl.getOgcCapabilitiesLayer().getTitle();
-                final String name = wl.getOgcCapabilitiesLayer().getName();
-                String url = null;
-                try {
-                    final URL[] lua = wl.getSelectedStyle().getLegendURL();
-                    url = lua[0].toString();
-                } catch (final Exception t) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Could not find legend for " + title, t); // NOI18N
+        if (!wmsLayer.isDummy()) {
+            final List v = wmsLayer.getWMSLayers();
+            final Iterator it = v.iterator();
+            while (it.hasNext()) {
+                final Object elem = it.next();
+                if (elem instanceof WMSLayer) {
+                    final WMSLayer wl = (WMSLayer)elem;
+                    final String title = wl.getOgcCapabilitiesLayer().getTitle();
+                    final String name = wl.getOgcCapabilitiesLayer().getName();
+                    String url = null;
+                    try {
+                        final URL[] lua = wl.getSelectedStyle().getLegendURL();
+                        url = lua[0].toString();
+                    } catch (final Exception t) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Could not find legend for " + title, t); // NOI18N
+                        }
                     }
-                }
-                if (url != null) {
-                    wmsCapabilities.put(url, wmsLayer.getWmsCapabilities());
-                    this.addLegend(url, name);
-                    if (log.isDebugEnabled()) {
-                        log.debug("added legend:" + name + "=" + url);      // NOI18N
+                    if (url != null) {
+                        wmsCapabilities.put(url, wmsLayer.getWmsCapabilities());
+                        this.addLegend(url, name);
+                        if (log.isDebugEnabled()) {
+                            log.debug("added legend:" + name + "=" + url);      // NOI18N
+                        }
                     }
                 }
             }
