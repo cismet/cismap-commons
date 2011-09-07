@@ -286,9 +286,9 @@ public class CrsTransformer {
                 crs = CismapBroker.getInstance().getDefaultCrs();
             }
 
-            return Integer.parseInt(crs.substring(crs.indexOf(":") + 1)); // NOI18N
+            return Integer.parseInt(crs.substring(crs.lastIndexOf(":") + 1)); // NOI18N
         } catch (final Exception e) {
-            LOG.error("Cannot extract the SRID from the CRS " + crs);     // NOI18N
+            LOG.error("Cannot extract the SRID from the CRS " + crs);         // NOI18N
             return -1;
         }
     }

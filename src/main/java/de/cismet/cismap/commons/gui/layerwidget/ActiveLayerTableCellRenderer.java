@@ -229,7 +229,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                         log.warn(value + " isRefreshNeeded");                 // NOI18N
                     }
                     setIcon(refreshNeededIcon);
-                } else if ((progress != 0) && (progress != 100)) {
+                } else if ((progress > 0) && (progress < 100)) {
                     if (DEBUG) {
                         if (log.isDebugEnabled()) {
                             log.debug(value + " isInProgress");               // NOI18N
@@ -289,21 +289,35 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     setText("");                                              // NOI18N
                     // label.setIconTextGap(4);
                     Style selectedStyle = null;
+                    String styleName = null;
 
                     int styleCount = 0;
                     if (value instanceof WMSLayer) {
-                        selectedStyle = ((WMSLayer)value).getSelectedStyle();
-                        styleCount = ((WMSLayer)value).getOgcCapabilitiesLayer().getStyles().length;
+                        if (!((WMSLayer)value).isDummy()) {
+                            selectedStyle = ((WMSLayer)value).getSelectedStyle();
+                            styleCount = ((WMSLayer)value).getOgcCapabilitiesLayer().getStyles().length;
+                        } else {
+                            styleName = ((WMSLayer)value).getStyleName();
+                        }
                     } else if (value instanceof WMSServiceLayer) {
                         // Kann nur ein WMSLayer haben (wegen Bedingung weiter oben)
-                        selectedStyle = ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0)).getSelectedStyle();
-                        styleCount =
-                            ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0)).getOgcCapabilitiesLayer()
-                                    .getStyles().length;
+                        if (!((WMSServiceLayer)value).isDummy()) {
+                            selectedStyle = ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0))
+                                        .getSelectedStyle();
+                            styleCount =
+                                ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0)).getOgcCapabilitiesLayer()
+                                        .getStyles().length;
+                        } else {
+                            styleName = ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0)).getStyleName();
+                        }
                     }
                     if (selectedStyle != null) {
-                        setText(selectedStyle.getTitle());
+                        styleName = selectedStyle.getTitle();
                     }
+                    if (styleName != null) {
+                        setText(styleName);
+                    }
+
                     if (styleCount <= 1) {
                         setIcon(unselectedStyleIcon);
                     } else {

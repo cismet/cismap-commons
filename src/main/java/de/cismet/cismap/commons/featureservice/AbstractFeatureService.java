@@ -100,6 +100,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected LayerInitWorker layerInitWorker = null;
     protected LayerProperties layerProperties = null;
     protected FeatureFactory featureFactory = null;
+    private boolean initialisationError = false;
+    private Element initElement = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -191,6 +193,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         this.setFeatureServiceAttributes(attriuteMap);
 
         this.setInitialized(afs.isInitialized());
+        this.setInitialisationError(afs.getInitialisationError());
+        this.setInitElement(afs.getInitElement());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -915,7 +919,13 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      * @throws  Exception  DOCUMENT ME!
      */
     @Override
-    public void initFromElement(final Element element) throws Exception {
+    public void initFromElement(Element element) throws Exception {
+        if (element == null) {
+            element = this.getInitElement();
+        } else {
+            this.setInitElement((Element)element.clone());
+        }
+
         if (element.getAttributeValue("name") != null)                                                  // NOI18N
         {
             this.setName(element.getAttributeValue("name"));                                            // NOI18N
@@ -1034,6 +1044,24 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  initialisationError  DOCUMENT ME!
+     */
+    public void setInitialisationError(final boolean initialisationError) {
+        this.initialisationError = initialisationError;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean getInitialisationError() {
+        return this.initialisationError;
+    }
+
+    /**
      * This operation class the {@code createFeatures()} operation of the current FeatureFactory. Implementation classes
      * may override this method to pass additional parameters to the {@code createFeatures()} operation of the specific
      * FeatureFactory implementation.
@@ -1045,6 +1073,14 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      * @throws  Exception  DOCUMENT ME!
      */
     protected List<FT> retrieveFeatures(final FeatureRetrievalWorker worker) throws Exception {
+        if (initialisationError) {
+            initFromElement(null);
+            setInitialized(false);
+            featureFactory = createFeatureFactory();
+            this.featureFactory.setMaxFeatureCount(this.getMaxFeatureCount());
+            this.featureFactory.setLayerProperties(layerProperties);
+            initConcreteInstance();
+        }
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("FRW[" + worker.getId() + "]: retrieveFeatures started"); // NOI18N
@@ -1072,6 +1108,24 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
         }
         return features;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the initElement
+     */
+    public Element getInitElement() {
+        return initElement;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  initElement  the initElement to set
+     */
+    public void setInitElement(final Element initElement) {
+        this.initElement = initElement;
     }
 
     //~ Inner Classes ----------------------------------------------------------

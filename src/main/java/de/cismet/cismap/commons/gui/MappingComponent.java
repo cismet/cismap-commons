@@ -2261,11 +2261,11 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                 log.debug("handleMapService: " + rs); // NOI18N
             }
         }
+        rs.setSize(height, width);
         if (((ServiceLayer)rs).isEnabled()) {
             synchronized (serviceFuturesMap) {
                 final Future<?> sf = serviceFuturesMap.get(rs);
                 if ((sf == null) || sf.isDone()) {
-                    rs.setSize(height, width);
                     final Runnable serviceCall = new Runnable() {
 
                             @Override

@@ -146,7 +146,6 @@ public class CreateSearchGeometryListener extends CreateGeometryListener {
      */
     private void showFeature(final PureNewFeature feature) {
         if (feature != null) {
-
             feature.setEditable(feature.getGeometryType() != PureNewFeature.geomTypes.MULTIPOLYGON);
 
             mc.getFeatureCollection().addFeature(feature);

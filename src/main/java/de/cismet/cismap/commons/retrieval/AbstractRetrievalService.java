@@ -40,10 +40,10 @@ public abstract class AbstractRetrievalService implements RetrievalService {
     //~ Instance fields --------------------------------------------------------
 
     protected int progress = -1;
-    protected Object errorObject = null;
     protected boolean refreshNeeded = false;
     protected List<RetrievalListener> listeners = new ArrayList<RetrievalListener>();
     protected PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    protected Object errorObject = null;
     final Object fireRetrievalStartedLock = new Object();
     final Object fireRetrievalProgressLock = new Object();
     final Object fireRetrievalCompleteLock = new Object();
