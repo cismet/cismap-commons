@@ -224,16 +224,16 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             this.initialiseFeature(featureServiceFeature, degreeFeature, false, i);
             // this.tempFeatureCollection[i] = shapeFile.getFeatureByRecNo(i + 1);
 
-            //debug
-//            final Geometry geom = featureServiceFeature.getGeometry();
-//            if (geom != null) {
-//                if (extend == null) {
-//                    extend = geom.getEnvelope();
-//                } else {
-//                    extend = getExtend().getEnvelope().union(geom.getEnvelope());
-//                }
-//            }
-            //debug
+            // debug
+// final Geometry geom = featureServiceFeature.getGeometry();
+// if (geom != null) {
+// if (extend == null) {
+// extend = geom.getEnvelope();
+// } else {
+// extend = getExtend().getEnvelope().union(geom.getEnvelope());
+// }
+// }
+            // debug
 
             final int newProgress = (int)((double)i / (double)max * 100d);
             if ((workerThread != null) && (newProgress > currentProgress) && (newProgress >= 5)

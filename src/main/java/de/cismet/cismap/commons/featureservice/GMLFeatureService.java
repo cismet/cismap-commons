@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.Element;
 
 import java.net.URI;
@@ -39,6 +41,8 @@ public class GMLFeatureService extends DocumentFeatureService<FeatureServiceFeat
         implements LayerInfoProvider {
 
     //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(GMLFeatureService.class);
 
     public static final String GML_FEATURELAYER_TYPE = "GMLFeatureServiceLayer"; // NOI18N
     public static final Map<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
