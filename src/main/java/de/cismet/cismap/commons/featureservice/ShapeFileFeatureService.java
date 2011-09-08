@@ -11,12 +11,15 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.Element;
 
 import java.net.URI;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -24,8 +27,6 @@ import javax.swing.ImageIcon;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
-
-import de.cismet.tools.collections.TypeSafeCollections;
 
 /**
  * DOCUMENT ME!
@@ -38,8 +39,8 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
 
     //~ Static fields/initializers ---------------------------------------------
 
-    // public final static String SHAPE_FEATURELAYER_TYPE = "ShapeFileFeatureServiceLayer";
-    public static final Map<Integer, Icon> layerIcons = TypeSafeCollections.newHashMap();
+    private static final transient Logger LOG = Logger.getLogger(ShapeFileFeatureService.class);
+    public static final Map<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
     public static final String SHAPE_FEATURELAYER_TYPE = "ShapeFeatureServiceLayer"; // NOI18N
 
     static {
@@ -96,7 +97,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
     public ShapeFileFeatureService(final String name,
             final URI documentURI,
             final long documentSize,
-            final Vector<FeatureServiceAttribute> attributes) throws Exception {
+            final List<FeatureServiceAttribute> attributes) throws Exception {
         super(name, documentURI, documentSize, attributes);
         this.maxFeatureCount = 5000;
     }

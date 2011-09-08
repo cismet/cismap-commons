@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
 
+import org.apache.log4j.Logger;
+
 import java.awt.Image;
 
 import de.cismet.cismap.commons.BoundingBox;
@@ -27,6 +29,10 @@ import de.cismet.tools.CurrentStackTrace;
 public abstract class AbstractWMS extends AbstractRetrievalService implements MapService,
     RetrievalListener,
     ServiceLayer {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(AbstractWMS.class);
 
     //~ Instance fields --------------------------------------------------------
 

@@ -13,6 +13,8 @@ package de.cismet.cismap.commons.featureservice;
 
 import edu.umd.cs.piccolo.PNode;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.Element;
 
 import java.awt.Color;
@@ -62,6 +64,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             Cloneable {
 
     //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(AbstractFeatureService.class);
 
     /* defaulttype-constant */
     public static final String DEFAULT_TYPE = "default"; // NOI18N
