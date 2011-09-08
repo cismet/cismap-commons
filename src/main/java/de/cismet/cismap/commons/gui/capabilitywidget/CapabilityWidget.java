@@ -140,11 +140,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
     //~ Instance fields --------------------------------------------------------
 
-    /**
-     * Invoked when the target of the listener has changed its state.
-     *
-     * @param  e  a ChangeEvent object
-     */
     int selectedIndex = -1;
     private int maxServerNameLength = 14;
     private ImageIcon icoConnect = new ImageIcon(getClass().getResource(
@@ -166,7 +161,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private CapabilitiesPreferences preferences = new CapabilitiesPreferences();
     private JPopupMenu capabilityList = new JPopupMenu();
     private CapabilityWidget thisWidget = null;
-//    private URL postURL;
     private Element serverElement;
     private JPopupMenu treePopMenu = new JPopupMenu();
 
