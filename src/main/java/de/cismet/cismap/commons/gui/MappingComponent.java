@@ -167,7 +167,6 @@ import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDebuggingTools;
 
-
 import de.cismet.tools.configuration.Configurable;
 
 import de.cismet.tools.gui.historybutton.DefaultHistoryModel;
@@ -664,7 +663,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     LOG.debug(ret);
                 }
             }
-            
+
             return ret;
         } catch (final Exception exception) {
             LOG.error("Error during the creation of an image from features", exception); // NOI18N
@@ -1397,7 +1396,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  mm  the new mappingmodel
      */
     public void setMappingModel(final MappingModel mm) {
-        LOG.info("setMappingModel");                        // NOI18N
+        LOG.info("setMappingModel"); // NOI18N
         // FIXME: why is the default uncaught exception handler set in such a random place?
         if (Thread.getDefaultUncaughtExceptionHandler() == null) {
             LOG.info("setDefaultUncaughtExceptionHandler"); // NOI18N
@@ -1567,7 +1566,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @return      DOCUMENT ME!
      *
-     * @depreacted  DOCUMENT ME!
+     * @deprecated  DOCUMENT ME!
      */
     @Deprecated
     public NewSimpleInternalLayerWidget getInternalLayerWidget() {
@@ -2084,7 +2083,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
         }
     }
-    
+
     /**
      * Creates a new WorldToScreenTransform for the current screensize (boundingbox) and returns it.
      *
@@ -2122,15 +2121,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     clip_offset_y = 0;
                     clip_offset_x = 0;                            // (x_screen-clip_width)/2;
                 }
-                
+
                 wtst = new WorldToScreenTransform(mappingModel.getInitialBoundingBox().getX1(),
                         mappingModel.getInitialBoundingBox().getY2());
             }
-            
+
             return wtst;
         } catch (final Exception t) {
             LOG.error("Fehler in getWtst()", t); // NOI18N
-            
+
             return null;
         }
     }
@@ -2477,7 +2476,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     }
                 }
             });
-        
+
         // check whether the feature has a rasterSupportLayer or not
         for (final Feature f : features) {
             if ((f instanceof RasterLayerSupportedFeature)
@@ -2508,7 +2507,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             curMapListener.featuresAddedToMap(cf);
         }
     }
-    
+
     /**
      * Creates an envelope around all features from the given array.
      *
@@ -2819,7 +2818,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             if ((getHeight() == 0) || (getWidth() == 0)) {
                 LOG.warn("DIVISION BY ZERO"); // NOI18N
             }
-            
+
             // dreisatz.de
             final double hBuff = g.getEnvelopeInternal().getHeight() / ((double)getHeight()) * 10;
             final double vBuff = g.getEnvelopeInternal().getWidth() / ((double)getWidth()) * 10;
@@ -3030,11 +3029,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @return  a String-object like "(X,Y)"
      */
     public static String getCoordinateString(final double x, final double y) {
-        final DecimalFormat df = new DecimalFormat("0.00");   // NOI18N
+        final DecimalFormat df = new DecimalFormat("0.00"); // NOI18N
         final DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
-        
+
         return "(" + df.format(x) + "," + df.format(y) + ")"; // NOI18N
     }
 
@@ -3050,7 +3049,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         final double yCoord = getWtst().getSourceY(event.getPosition().getY() - getClip_offset_y());
         final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
                 CrsTransformer.extractSridFromCrs(getMappingModel().getSrs().getCode()));
-        
+
         return gf.createPoint(new Coordinate(xCoord, yCoord));
     }
 
@@ -3449,7 +3448,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         if (external) {
             this.gotoBoundsWithoutHistory(fwd);
         }
-        
+
         return fwd;
     }
 
@@ -3471,7 +3470,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         if (external) {
             this.gotoBoundsWithoutHistory(back);
         }
-        
+
         return back;
     }
 
@@ -3607,7 +3606,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         // funktioniert nur bei metrischen SRS's
         final double h = getCamera().getViewBounds().getHeight() / getHeight();
         final double w = getCamera().getViewBounds().getWidth() / getWidth();
-        
+
         return Math.sqrt((h * h) + (w * w));
     }
 
@@ -4034,17 +4033,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     final String creationMode = prefs.getAttribute("creationMode").getValue();     // NOI18N
                     ((CreateNewGeometryListener)getInputListener(MappingComponent.NEW_POLYGON)).setMode(creationMode);
                 } catch (final Exception ex) {
-                    LOG.warn("Fehler beim Setzen des CreationInteractionMode", ex);                 // NOI18N
+                    LOG.warn("Fehler beim Setzen des CreationInteractionMode", ex);                // NOI18N
                 }
             }
         } catch (final Exception ex) {
-            LOG.warn("Fehler beim Setzen des InteractionMode", ex);                                 // NOI18N
+            LOG.warn("Fehler beim Setzen des InteractionMode", ex);                                // NOI18N
         }
         try {
             final String handleInterMode = prefs.getAttribute("handleInteractionMode").getValue(); // NOI18N
             setHandleInteractionMode(handleInterMode);
         } catch (final Exception ex) {
-            LOG.warn("Fehler beim Setzen des HandleInteractionMode", ex);                           // NOI18N
+            LOG.warn("Fehler beim Setzen des HandleInteractionMode", ex);                          // NOI18N
         }
         try {
             final boolean snapping = prefs.getAttribute("snapping").getBooleanValue();             // NOI18N
@@ -4059,25 +4058,25 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         // aktuelle Position
         try {
-            final Element pos = prefs.getChild("Position");                                        // NOI18N
+            final Element pos = prefs.getChild("Position");                                   // NOI18N
             final BoundingBox b = new BoundingBox(pos);
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Position:" + b);                                                    // NOI18N
+                    LOG.debug("Position:" + b);                                               // NOI18N
                 }
             }
             final PBounds pb = b.getPBounds(getWtst());
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("PositionPb:" + pb);                                                 // NOI18N
+                    LOG.debug("PositionPb:" + pb);                                            // NOI18N
                 }
             }
             if (Double.isNaN(b.getX1())
                         || Double.isNaN(b.getX2())
                         || Double.isNaN(b.getY1())
                         || Double.isNaN(b.getY2())) {
-                    LOG.warn("BUGFINDER:Es war ein Wert in der BoundingBox NaN. Setze auf HOME"); // NOI18N
-                    
+                LOG.warn("BUGFINDER:Es war ein Wert in der BoundingBox NaN. Setze auf HOME"); // NOI18N
+
                 this.currentBoundingBox = getMappingModel().getInitialBoundingBox();
                 final String crsCode = ((pos.getAttribute("CRS") != null) ? pos.getAttribute("CRS").getValue() : null);
                 addToHistory(new PBoundsWithCleverToString(

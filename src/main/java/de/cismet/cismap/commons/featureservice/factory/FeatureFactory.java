@@ -11,7 +11,7 @@
  */
 package de.cismet.cismap.commons.featureservice.factory;
 
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.SwingWorker;
 
@@ -53,7 +53,7 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      * @throws  TooManyFeaturesException  if the maximum number of features is reached during processing
      * @throws  Exception                 if something went wrong during parsing
      */
-    Vector<FT> createFeatures(QT query, BoundingBox boundingBox, SwingWorker workerThread)
+    List<FT> createFeatures(QT query, BoundingBox boundingBox, SwingWorker workerThread)
             throws TooManyFeaturesException, Exception;
 
     /**
@@ -63,7 +63,7 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      *
      * @return  the features created during the last call to {@code createFeatures()}
      */
-    Vector<FT> getLastCreatedFeatures();
+    List<FT> getLastCreatedFeatures();
 
     /**
      * Method that does not create FeatureServiceAttributes. In general, FeatureServiceAttributes need only to be
@@ -77,7 +77,7 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      * @throws  UnsupportedOperationException  if the factory does not support the creation attributes
      * @throws  Exception                      if something went wrong during parsing
      */
-    Vector<FeatureServiceAttribute> createAttributes(SwingWorker workerThread) throws TooManyFeaturesException,
+    List<FeatureServiceAttribute> createAttributes(SwingWorker workerThread) throws TooManyFeaturesException,
         UnsupportedOperationException,
         Exception;
 
@@ -117,18 +117,16 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      */
     void setMaxFeatureCount(int maxFeatureCount);
 
-    //~ Inner Classes ----------------------------------------------------------
-
+    //J-
     /**
      * DOCUMENT ME!
      *
      * @return   DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
      */
-    //J-
     FeatureFactory clone();
     //J+
+
+    //~ Inner Classes ----------------------------------------------------------
 
     /**
      * Exception that is thrown when the features to be process by a feature factory exceeds the maximum number of

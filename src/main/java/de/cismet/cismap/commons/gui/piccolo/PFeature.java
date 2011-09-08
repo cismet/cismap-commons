@@ -1899,10 +1899,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     /**
      * DOCUMENT ME!
      *
-     * @return    DOCUMENT ME!
-     *
-     * @Override  public boolean equals(Object obj) { try { return
-     *            this.getFeature().equals(((PFeature)obj).getFeature()); } catch(Throwable t) { return false; } }
+     * @return  DOCUMENT ME!
      */
     public boolean isInfoNodeExpanded() {
         return (infoPanel != null) && infoPanel.isExpanded();
