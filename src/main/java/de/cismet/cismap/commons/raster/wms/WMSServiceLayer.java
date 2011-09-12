@@ -570,7 +570,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
             url += "&FORMAT=" + imageFormat;                                                                  // NOI18N
             url += "&TRANSPARENT=" + Boolean.valueOf(transparentImage).toString().toUpperCase();              // NOI18N
             url += "&BGCOLOR=" + backgroundColor;                                                             // NOI18N
-            // url+="&EXCEPTIONS="+"text/html";//exceptionsFormat;
+            url += "&EXCEPTIONS=" + exceptionsFormat;                                                         // exceptionsFormat;
             url += getLayersString(wmsLayers);
 
             if (hasEveryLayerAStyle(wmsLayers)) {
