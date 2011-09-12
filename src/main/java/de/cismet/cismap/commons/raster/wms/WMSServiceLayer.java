@@ -438,7 +438,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
      * @param  exceptionsFormat  DOCUMENT ME!
      */
     public void setExceptionsFormat(final String exceptionsFormat) {
-        final List<String> exceptions = wmsCapabilities.getExceptions();
+        final List<String> exceptions = (wmsCapabilities != null ? wmsCapabilities.getExceptions() : null);
 
         if ((exceptions != null) && (exceptions.size() > 0) && !exceptions.contains(exceptionsFormat)) {
             // the preferred exception format is not supported. Use an other one
