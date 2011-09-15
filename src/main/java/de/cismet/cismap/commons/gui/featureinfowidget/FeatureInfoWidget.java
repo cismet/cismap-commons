@@ -174,13 +174,20 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                     display = displayRepo.getDisplay(layer.getClass(), layer);
                     if (display == null) {
                         // TODO: use default display? or should even a default be delivered by the repo?
-                        throw new IllegalStateException("dispay info for layer is null: " + layer); // NOI18N
+                        throw new IllegalStateException("dispay info for layer is null: " + layer);                   // NOI18N
                     }
                     display.init(layer, tbpFeatureInfos);
+                    final CismapPlugin cismapPlugin = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
+                    final MappingComponent mc = cismapPlugin.getMappingComponent();
+                    final GetFeatureInfoClickDetectionListener listener = (GetFeatureInfoClickDetectionListener)
+                        mc.getInputListener(MappingComponent.FEATURE_INFO);
+                    if ((listener != null) && (display instanceof MultipleFeatureInfoRequestsDisplay)) {
+                        ((MultipleFeatureInfoRequestsDisplay)display).addHoldListener(listener);
+                    }
                     tbpFeatureInfos.add(layer.toString(), display.getDisplayComponent());
                     displays.put(layer, display);
                 } catch (final Exception exception) {
-                    LOG.error("Exception in creating featureInfoDisplay component", exception);     // NOI18N
+                    LOG.error("Exception in creating featureInfoDisplay component", exception);                       // NOI18N
                     layer.setLayerQuerySelected(false);
                 }
             }
@@ -253,6 +260,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
     public Map<Object, FeatureInfoDisplay> getDisplays() {
         return displays;
     }
+
     @Override
     public void clickedOnMap(final MapClickedEvent mce) {
         if (mce.getMode().equals(GetFeatureInfoClickDetectionListener.FEATURE_INFO_MODE)) {
