@@ -116,7 +116,6 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                             if (((MultipleFeatureInfoRequestsDisplay)d).isOnHold()) {
                                 paintFeatureInfoIcon = false;
                             }
-                            ((MultipleFeatureInfoRequestsDisplay)d).addHoldListener(this);
                         }
                     }
                 }
@@ -166,13 +165,6 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
      */
     private void showCustomFeatureInfo(final Collection<SignaturedFeature> c,
             final MultipleFeatureInfoRequestsDisplay display) {
-        SwingUtilities.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    display.removeHoldListener(GetFeatureInfoClickDetectionListener.this);
-                }
-            });
 
         final CismapPlugin cismapPl = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
         final MappingComponent mc = cismapPl.getMappingComponent();
@@ -198,8 +190,10 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                 featureInfoIcon = ImageIO.read(is);
                 is.close();
                 is = this.getClass().getResourceAsStream("/de/cismet/cismap/commons/gui/res/lastFeatureInfo.png");
-                lastFeatureInfoIcon = ImageIO.read(is);
-                is.close();
+                if (is != null) {
+                    lastFeatureInfoIcon = ImageIO.read(is);
+                    is.close();
+                }
             } catch (IOException ex) {
                 LOG.warn("Could not load featureInfo icon", ex);                                                       // NO18N
             }
@@ -210,7 +204,7 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
             } else if (lastFeatureInfoIcon == null) {
                 final String msg = "Could not load lastFeatureInfoIcon";                                               // NOI18N
                 LOG.error(msg);
-                throw new IllegalStateException(msg);
+//                throw new IllegalStateException(msg);
             }
 
             // set the overlay on the lower left edge of the icon as default..
@@ -298,9 +292,13 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                     if (nr == (c.size() - 1)) {
                         if (lastFeatureInfoIcon != null) {
                             g2d = (Graphics2D)lastFeatureInfoIcon.getSubimage(xPos, yPos, width, height).getGraphics();
+                            g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, cismapPl);
+                            symb = new FeatureAnnotationSymbol(lastFeatureInfoIcon);
+                        } else {
+                            g2d = (Graphics2D)featureInfoIcon.getSubimage(xPos, yPos, width, height).getGraphics();
+                            g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, cismapPl);
+                            symb = new FeatureAnnotationSymbol(featureInfoIcon);
                         }
-                        g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, cismapPl);
-                        symb = new FeatureAnnotationSymbol(lastFeatureInfoIcon);
                     } else {
                         g2d.drawImage(f.getOverlayIcon(), 0, 0, standardBG, cismapPl);
                         symb = new FeatureAnnotationSymbol(featureInfoIcon);
