@@ -433,6 +433,12 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                         indeterminateProgressTimers[realRow].setRepeats(true);
                     }
 
+                    // In this scenario of displaying a JSlider in a JProgressBar as renderer for a table cell, the JSlider
+                    // component resizes sloppy. But only the JSlider in the firt row shows this effect. If you don't set
+                    // the size of the JSlider you easily can reconstruct this effect by forcing the layer widget to resize
+                    // with the help of the docking framework.
+                    // See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7092176 for more details.
+                    this.slider2.setSize(ZERO_DIMENSION);
                     this.slider2.updateUI();
                     return progressIndeterminate;
                 } else {
@@ -474,9 +480,15 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 // TableModelEvent evt = new TableModelEvent(table.getModel(), realRow, realRow,
                 // TableModelEvent.UPDATE); ((TreeTableModelAdapter) (table.getModel())).fireTableChanged(evt);
 
+                // In this scenario of displaying a JSlider in a JProgressBar as renderer for a table cell, the JSlider
+                // component resizes sloppy. But only the JSlider in the firt row shows this effect. If you don't set
+                // the size of the JSlider you easily can reconstruct this effect by forcing the layer widget to resize
+                // with the help of the docking framework.
+                // See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=7092176 for more details.
                 this.slider.setSize(ZERO_DIMENSION);
+
                 this.slider.updateUI();
-                
+
                 return this.progressBar;
             } else {
                 setIcon(null);
