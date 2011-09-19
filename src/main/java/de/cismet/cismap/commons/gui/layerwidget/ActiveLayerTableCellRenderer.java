@@ -11,6 +11,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
@@ -55,6 +56,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
     //~ Static fields/initializers ---------------------------------------------
 
     protected static final boolean DEBUG = Debug.DEBUG;
+    private static final Dimension ZERO_DIMENSION = new Dimension(0, 0);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -472,6 +474,9 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 // TableModelEvent evt = new TableModelEvent(table.getModel(), realRow, realRow,
                 // TableModelEvent.UPDATE); ((TreeTableModelAdapter) (table.getModel())).fireTableChanged(evt);
 
+                this.slider.setSize(ZERO_DIMENSION);
+                this.slider.updateUI();
+                
                 return this.progressBar;
             } else {
                 setIcon(null);
