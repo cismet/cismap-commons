@@ -70,9 +70,10 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
     @Override
     public void update() {
-        final CreateGeometryListener listener = ((CreateGeometryListener)CismapBroker.getInstance()
-                        .getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
-        numOfEllipseEdges = listener.getNumOfEllipseEdges();
+        final CreateGeometryListener listener = getListener();
+        if (listener != null) {
+            numOfEllipseEdges = listener.getNumOfEllipseEdges();
+        }
 
         jTextField1.setText(String.valueOf(numOfEllipseEdges));
     }
@@ -81,9 +82,10 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
     public void applyChanges() {
         numOfEllipseEdges = Integer.valueOf(jTextField1.getText());
 
-        final CreateGeometryListener listener = ((CreateGeometryListener)CismapBroker.getInstance()
-                        .getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
-        listener.setNumOfEllipseEdges(numOfEllipseEdges);
+        final CreateGeometryListener listener = getListener();
+        if (listener != null) {
+            listener.setNumOfEllipseEdges(numOfEllipseEdges);
+        }
     }
 
     @Override
@@ -101,6 +103,24 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
     @Override
     public String getTooltip() {
         return "";
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private CreateGeometryListener getListener() {
+        CreateGeometryListener result = null;
+        if ((CismapBroker.getInstance() != null)
+                    && (CismapBroker.getInstance().getMappingComponent() != null)
+                    && (CismapBroker.getInstance().getMappingComponent().getInputListener(
+                            MappingComponent.CREATE_SEARCH_POLYGON) != null)) {
+            result = (CreateGeometryListener)CismapBroker.getInstance().getMappingComponent()
+                        .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON);
+        }
+
+        return result;
     }
 
     @Override
