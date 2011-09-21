@@ -51,8 +51,6 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
     private boolean holdGeometries;
     private float geometryTransparency;
     private Color geometryColor;
-    private CreateSearchGeometryListener listener = ((CreateSearchGeometryListener)CismapBroker.getInstance()
-                    .getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
@@ -86,6 +84,8 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
     @Override
     public void update() {
+        final CreateSearchGeometryListener listener = ((CreateSearchGeometryListener)CismapBroker.getInstance()
+                        .getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
         holdGeometries = listener.isHoldingGeometries();
         geometryColor = listener.getSearchColor();
         geometryTransparency = listener.getSearchTransparency();
@@ -101,6 +101,8 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         geometryColor = jPanel1.getBackground();
         geometryTransparency = jSlider1.getValue() / 100f;
 
+        final CreateSearchGeometryListener listener = ((CreateSearchGeometryListener)CismapBroker.getInstance()
+                        .getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
         listener.setHoldGeometries(holdGeometries);
         listener.setSearchColor(geometryColor);
         listener.setSearchTransparency(geometryTransparency);
