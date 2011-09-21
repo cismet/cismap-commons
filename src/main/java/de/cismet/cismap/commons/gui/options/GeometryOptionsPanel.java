@@ -45,9 +45,6 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
     private int numOfEllipseEdges;
 
-    private CreateGeometryListener listener = ((CreateGeometryListener)CismapBroker.getInstance().getMappingComponent()
-                    .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -73,6 +70,8 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
     @Override
     public void update() {
+        final CreateGeometryListener listener = ((CreateGeometryListener)CismapBroker.getInstance()
+                        .getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
         numOfEllipseEdges = listener.getNumOfEllipseEdges();
 
         jTextField1.setText(String.valueOf(numOfEllipseEdges));
@@ -82,6 +81,8 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
     public void applyChanges() {
         numOfEllipseEdges = Integer.valueOf(jTextField1.getText());
 
+        final CreateGeometryListener listener = ((CreateGeometryListener)CismapBroker.getInstance()
+                        .getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
         listener.setNumOfEllipseEdges(numOfEllipseEdges);
     }
 
