@@ -70,7 +70,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -123,7 +122,6 @@ import de.cismet.cismap.commons.gui.piccolo.PSticky;
 import de.cismet.cismap.commons.gui.piccolo.XPImage;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.AttachFeatureListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateSearchGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CustomFeatureActionListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CustomFeatureInfoListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.DeleteFeatureListener;
@@ -149,7 +147,6 @@ import de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl;
 import de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.CrsChangeListener;
-import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.CrsChangedEvent;
 import de.cismet.cismap.commons.interaction.events.MapDnDEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
@@ -1045,7 +1042,6 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         inputEventListener.put(SELECT, new SelectionListener());
 
         inputEventListener.put(FEATURE_INFO, new GetFeatureInfoClickDetectionListener());
-        inputEventListener.put(CREATE_SEARCH_POLYGON, new CreateSearchGeometryListener(this));
 
         inputEventListener.put(MOVE_POLYGON, new FeatureMoveListener(this));
         inputEventListener.put(NEW_POLYGON, new CreateNewGeometryListener(this));
