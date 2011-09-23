@@ -15,11 +15,8 @@ import org.apache.log4j.Logger;
 
 import org.jfree.util.Log;
 
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Paint;
 import java.awt.image.BufferedImage;
 
 import java.io.IOException;
@@ -33,7 +30,6 @@ import java.util.Vector;
 import javax.imageio.ImageIO;
 
 import javax.swing.ImageIcon;
-import javax.swing.SwingUtilities;
 
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.SignaturedFeature;
@@ -69,6 +65,8 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
 
     private BufferedImage info;
     private FixedPImage pInfo;
+    private double lastClickX = 0;
+    private double lastClickY = 0;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -104,6 +102,8 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
         if (pInputEvent.getComponent() instanceof MappingComponent) {
+            lastClickX = pInputEvent.getPosition().getX();
+            lastClickY = pInputEvent.getPosition().getY();
             boolean paintFeatureInfoIcon = true;
             final Vector<MapClickListener> v = CismapBroker.getInstance().getMapClickListeners();
             for (final MapClickListener listener : v) {
@@ -113,7 +113,10 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                     final Collection<FeatureInfoDisplay> c = displays.values();
                     for (final FeatureInfoDisplay d : c) {
                         if (d instanceof MultipleFeatureInfoRequestsDisplay) {
-                            if (((MultipleFeatureInfoRequestsDisplay)d).isOnHold()) {
+                            final MultipleFeatureInfoRequestsDisplay multiRequestDisplay =
+                                (MultipleFeatureInfoRequestsDisplay)d;
+                            if ( // multiRequestDisplay.isOnHold()&&
+                                multiRequestDisplay.isDisplayVisible()) {
                                 paintFeatureInfoIcon = false;
                             }
                         }
@@ -165,12 +168,13 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
      */
     private void showCustomFeatureInfo(final Collection<SignaturedFeature> c,
             final MultipleFeatureInfoRequestsDisplay display) {
-
         final CismapPlugin cismapPl = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
         final MappingComponent mc = cismapPl.getMappingComponent();
 
         // TODO if !display.isOnHold paint the standard icon...
-        if (!display.isOnHold() || ((c == null) || c.isEmpty())) {
+        if (                                                                                                           /*!display.isOnHold()*/
+            !display.isDisplayVisible()
+                    || ((c == null) || c.isEmpty())) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(
                     "MultipleFeauteInfoRequestsDisplay is not on hold or holdFeautureCollection is null or empty.");   // NOI18N
@@ -204,9 +208,7 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
             } else if (lastFeatureInfoIcon == null) {
                 final String msg = "Could not load lastFeatureInfoIcon";                                               // NOI18N
                 LOG.error(msg);
-//                throw new IllegalStateException(msg);
             }
-
             // set the overlay on the lower left edge of the icon as default..
             int width = 16;
             int height = 16;
@@ -318,5 +320,27 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
             mc.rescaleStickyNodes();
             mc.repaint();
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void addFeatureInfoIconForLastClick() {
+        final CismapPlugin cismapPl = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
+        final MappingComponent mc = cismapPl.getMappingComponent();
+        mc.addStickyNode(getPInfo());
+        mc.getRubberBandLayer().removeAllChildren();
+        mc.getTmpFeatureLayer().removeAllChildren();
+//                pInfo = new PImage(info.getImage());
+        mc.getRubberBandLayer().addChild(getPInfo());
+        getPInfo().setScale(1 / mc.getCamera().getViewScale());
+        getPInfo().setOffset(lastClickX, lastClickY);
+        if (log.isDebugEnabled()) {
+            log.debug(getPInfo().getGlobalBounds().getWidth());
+        }
+        getPInfo().setVisible(true);
+//                 mc.getCasmera().animateViewToCenterBounds(pInfo.getBounds(),true,1000);
+        getPInfo().repaint();
+        mc.repaint();
     }
 }

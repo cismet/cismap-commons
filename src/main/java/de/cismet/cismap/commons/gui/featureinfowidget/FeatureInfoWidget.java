@@ -18,37 +18,21 @@ import com.jgoodies.looks.Options;
 
 import org.apache.log4j.Logger;
 
-import org.jfree.util.Log;
-
 import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Paint;
-import java.awt.image.BufferedImage;
-
-import java.io.IOException;
-import java.io.InputStream;
+import java.awt.Component;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-
-import javax.imageio.ImageIO;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import de.cismet.cismap.commons.ChildrenProvider;
 import de.cismet.cismap.commons.LayerInfoProvider;
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
-import de.cismet.cismap.commons.features.SignaturedFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.GetFeatureInfoClickDetectionListener;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldFeatureChangeEvent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.HoldListener;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.MapClickListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
@@ -236,6 +220,25 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
      * @param  evt  DOCUMENT ME!
      */
     private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpFeatureInfosStateChanged
+        for (final FeatureInfoDisplay d : displays.values()) {
+            if ((d != null) && (d instanceof MultipleFeatureInfoRequestsDisplay)) {
+                final MultipleFeatureInfoRequestsDisplay multiRequestDisplay = (MultipleFeatureInfoRequestsDisplay)d;
+                multiRequestDisplay.setDisplayVisble(false);
+            }
+        }
+
+        final Component c = tbpFeatureInfos.getSelectedComponent();
+        if ((c != null) && (c instanceof MultipleFeatureInfoRequestsDisplay)) {
+            final MultipleFeatureInfoRequestsDisplay multiRequestDisplay = (MultipleFeatureInfoRequestsDisplay)c;
+            multiRequestDisplay.setDisplayVisble(true);
+        } else {
+            final CismapPlugin cismapPlugin = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
+            final MappingComponent mc = cismapPlugin.getMappingComponent();
+            final GetFeatureInfoClickDetectionListener listener = (GetFeatureInfoClickDetectionListener)
+                mc.getInputListener(MappingComponent.FEATURE_INFO);
+            listener.addFeatureInfoIconForLastClick();
+        }
+
         for (int i = 0; i < tbpFeatureInfos.getTabCount(); ++i) {
             tbpFeatureInfos.setForegroundAt(i, null);
         }
