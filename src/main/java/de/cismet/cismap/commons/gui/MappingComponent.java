@@ -121,7 +121,9 @@ import de.cismet.cismap.commons.gui.piccolo.PNodeFactory;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
 import de.cismet.cismap.commons.gui.piccolo.XPImage;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.AttachFeatureListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateLinearReferencedMarksListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateSearchGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CustomFeatureActionListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CustomFeatureInfoListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.DeleteFeatureListener;
@@ -130,7 +132,6 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.GetFeatureInfoClickDet
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.JoinPolygonsListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.KeyboardListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MeasurementListener;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.MeasurementMoveListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.OverviewModeListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PanAndMousewheelZoomListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
@@ -210,7 +211,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
     public static final String REMOVE_HANDLE = "REMOVE_HANDLE";                             // NOI18N
     public static final String ADD_HANDLE = "ADD_HANDLE";                                   // NOI18N
     public static final String MEASUREMENT = "MEASUREMENT";                                 // NOI18N
-    public static final String LINEMEASUREMENT = "LINEMEASUREMENT";                         // NOI18N
+    public static final String LINEAR_REFERENCING = "LINEMEASUREMENT";                      // NOI18N
     public static final String PRINTING_AREA_SELECTION = "PRINTING_AREA_SELECTION";         // NOI18N
     public static final String CUSTOM_FEATUREACTION = "CUSTOM_FEATUREACTION";               // NOI18N
     public static final String CUSTOM_FEATUREINFO = "CUSTOM_FEATUREINFO";                   // NOI18N
@@ -1042,6 +1043,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         inputEventListener.put(SELECT, new SelectionListener());
 
         inputEventListener.put(FEATURE_INFO, new GetFeatureInfoClickDetectionListener());
+        inputEventListener.put(CREATE_SEARCH_POLYGON, new CreateSearchGeometryListener(this));
 
         inputEventListener.put(MOVE_POLYGON, new FeatureMoveListener(this));
         inputEventListener.put(NEW_POLYGON, new CreateNewGeometryListener(this));
@@ -1050,7 +1052,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         inputEventListener.put(ATTACH_POLYGON_TO_ALPHADATA, new AttachFeatureListener());
         inputEventListener.put(JOIN_POLYGONS, new JoinPolygonsListener());
         inputEventListener.put(SPLIT_POLYGON, new SplitPolygonListener(this));
-        inputEventListener.put(LINEMEASUREMENT, new MeasurementMoveListener(this));
+        inputEventListener.put(LINEAR_REFERENCING, new CreateLinearReferencedMarksListener(this));
         inputEventListener.put(MEASUREMENT, new MeasurementListener(this));
         inputEventListener.put(PRINTING_AREA_SELECTION, new PrintingFrameListener(this));
         inputEventListener.put(CUSTOM_FEATUREINFO, new CustomFeatureInfoListener());
@@ -1086,7 +1088,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
         putCursor(JOIN_POLYGONS, new Cursor(Cursor.DEFAULT_CURSOR));
         putCursor(SPLIT_POLYGON, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(MEASUREMENT, new Cursor(Cursor.CROSSHAIR_CURSOR));
-        putCursor(LINEMEASUREMENT, new Cursor(Cursor.DEFAULT_CURSOR));
+        putCursor(LINEAR_REFERENCING, new Cursor(Cursor.DEFAULT_CURSOR));
 
         putCursor(MOVE_HANDLE, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(REMOVE_HANDLE, new Cursor(Cursor.CROSSHAIR_CURSOR));
@@ -1186,7 +1188,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
 
                     featureCollection.unselectAll();
                 }
-                if ((interactionMode.equals(SELECT) || interactionMode.equals(LINEMEASUREMENT)
+                if ((interactionMode.equals(SELECT) || interactionMode.equals(LINEAR_REFERENCING)
                                 || interactionMode.equals(SPLIT_POLYGON))
                             && (this.readOnly == false)) {
 //                if (selectedFeature!=null) {
@@ -3318,7 +3320,7 @@ public class MappingComponent extends PSwingCanvas implements MappingModelListen
                         }
                         if (featureCollection.areFeaturesEditable()
                                     && (getInteractionMode().equals(SELECT)
-                                        || getInteractionMode().equals(LINEMEASUREMENT)
+                                        || getInteractionMode().equals(LINEAR_REFERENCING)
                                         || getInteractionMode().equals(PAN)
                                         || getInteractionMode().equals(ZOOM)
                                         || getInteractionMode().equals(ALKIS_PRINT)

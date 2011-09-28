@@ -7,26 +7,21 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import com.vividsolutions.jts.geom.Coordinate;
+
 import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PPath;
 
 import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.HeadlessException;
+import java.awt.geom.Point2D;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.util.Vector;
 
-import java.util.Collection;
-import java.util.MissingResourceException;
-
-import javax.swing.JOptionPane;
-
+import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.metasearch.MetaSearch;
-import de.cismet.cismap.commons.gui.metasearch.MetaSearchTooltip;
-import de.cismet.cismap.commons.gui.metasearch.SearchTopic;
+import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
@@ -38,7 +33,7 @@ import de.cismet.cismap.commons.tools.PFeatureTools;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class CreateSearchGeometryListener extends CreateGeometryListener implements PropertyChangeListener {
+public class CreateSearchGeometryListener extends CreateGeometryListener {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -75,58 +70,11 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
     @Override
     protected void finishGeometry(final PureNewFeature newFeature) {
         super.finishGeometry(newFeature);
-
-        if (!isSearchTopicsSelected()) {
-            notifyUserAboutMissingSearchTopics();
-            return;
-        }
-
         mc.getFeatureCollection().addFeature(newFeature);
 
         doSearch(newFeature);
 
         cleanup(newFeature);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private boolean isSearchTopicsSelected() {
-        return !MetaSearch.instance().getSelectedSearchTopics().isEmpty();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @throws  HeadlessException         DOCUMENT ME!
-     * @throws  MissingResourceException  DOCUMENT ME!
-     */
-    private void notifyUserAboutMissingSearchTopics() throws HeadlessException, MissingResourceException {
-        if (!isSearchTopicsSelected()) {
-            if (MetaSearch.instance().getSearchTopics().isEmpty()) {
-                JOptionPane.showMessageDialog(
-                    CismapBroker.getInstance().getMappingComponent(),
-                    org.openide.util.NbBundle.getMessage(
-                        CreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized"),       // NOI18N
-                    org.openide.util.NbBundle.getMessage(
-                        CreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized.title"), // NOI18N
-                    JOptionPane.ERROR_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(
-                    CismapBroker.getInstance().getMappingComponent(),
-                    org.openide.util.NbBundle.getMessage(
-                        CreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen"), // NOI18N
-                    org.openide.util.NbBundle.getMessage(
-                        CreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen.title"), // NOI18N
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        }
     }
 
     /**
@@ -290,100 +238,18 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
         super.mousePressed(pInputEvent);
 
         if ((!inProgress || (!progressBefore && inProgress)) && (pInputEvent.getClickCount() == 2)) {
-            if (!isSearchTopicsSelected()) {
-                return;
-            }
-
             final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
-
-            if (!(o instanceof PFeature)) {
-                return;
-            }
-            final PFeature sel = (PFeature)o;
-
-            if (!(sel.getFeature() instanceof SearchFeature)) {
-                return;
-            }
-            final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
-
-            if (!isSearchTopicsSelected()) {
-                // finishGeometry is called before mousePressed. finishGeometry is not called if the user displayed the
-                // last search feature. These conditions ensure that there is only one notification in any case.
-                if (searchFeature.equals(lastFeature)) {
-                    notifyUserAboutMissingSearchTopics();
+            if (o instanceof PFeature) {
+                final PFeature sel = (PFeature)o;
+                if (sel.getFeature() instanceof SearchFeature) {
+                    if (pInputEvent.isLeftMouseButton()) {
+                        mc.getHandleLayer().removeAllChildren();
+                        // neue Suche mit Geometry auslösen
+                        ((CreateSearchGeometryListener)mc.getInputListener(MappingComponent.CREATE_SEARCH_POLYGON))
+                                .search((SearchFeature)sel.getFeature());
+                    }
                 }
-
-                return;
             }
-
-            if (pInputEvent.isLeftMouseButton()) {
-                mc.getHandleLayer().removeAllChildren();
-                // neue Suche mit Geometry auslösen
-                ((CreateSearchGeometryListener)mc.getInputListener(MappingComponent.CREATE_SEARCH_POLYGON)).search(
-                    (SearchFeature)sel.getFeature());
-            }
-        }
-    }
-
-    @Override
-    public void setMode(final String m) throws IllegalArgumentException {
-        super.setMode(m);
-
-        generateAndShowPointerAnnotation();
-    }
-
-    @Override
-    public void propertyChange(final PropertyChangeEvent evt) {
-        if (MappingComponent.PROPERTY_MAP_INTERACTION_MODE.equals(evt.getPropertyName())) {
-            if (MappingComponent.CREATE_SEARCH_POLYGON.equals(evt.getNewValue())) {
-                generateAndShowPointerAnnotation();
-            }
-        } else if (SearchTopic.SELECTED.equals(evt.getPropertyName())) {
-            generateAndShowPointerAnnotation();
-        }
-    }
-
-    @Override
-    public void mouseEntered(final PInputEvent event) {
-        super.mouseEntered(event);
-
-        if (event.isMouseEnteredOrMouseExited()) {
-            generateAndShowPointerAnnotation();
-        }
-    }
-
-    @Override
-    public void mouseExited(final PInputEvent event) {
-        super.mouseExited(event);
-
-        if (event.isMouseEnteredOrMouseExited()) {
-            mc.setPointerAnnotationVisibility(false);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    private void generateAndShowPointerAnnotation() {
-        if (!MappingComponent.CREATE_SEARCH_POLYGON.equals(mc.getInteractionMode())) {
-            return;
-        }
-
-        final Collection<SearchTopic> selectedSearchTopics = MetaSearch.instance().getSelectedSearchTopics();
-
-        final Runnable showPointerAnnotation = new Runnable() {
-
-                @Override
-                public void run() {
-                    mc.setPointerAnnotation(new MetaSearchTooltip(selectedSearchTopics));
-                    mc.setPointerAnnotationVisibility(true);
-                }
-            };
-
-        if (EventQueue.isDispatchThread()) {
-            showPointerAnnotation.run();
-        } else {
-            EventQueue.invokeLater(showPointerAnnotation);
         }
     }
 }

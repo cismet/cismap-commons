@@ -8,9 +8,12 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import com.vividsolutions.jts.linearref.LengthLocationMap;
 import com.vividsolutions.jts.linearref.LinearLocation;
@@ -29,6 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.Feature;
@@ -182,17 +186,22 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     /**
      * DOCUMENT ME!
      *
-     * @param   coord  DOCUMENT ME!
+     * @param   coord     DOCUMENT ME!
+     * @param   lineGeom  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private Coordinate getNearestCoordninateOnLine(final Coordinate coord) {
-        final Coordinate[] neighbours = getNearestNeighbours(coord);
-        final Point2D point = StaticGeometryFunctions.createPointOnLine(
-                new Point2D.Double(neighbours[0].x, neighbours[0].y),
-                new Point2D.Double(neighbours[1].x, neighbours[1].y),
-                new Point2D.Double(coord.x, coord.y));
-        return new Coordinate(point.getX(), point.getY());
+    public static Coordinate getNearestCoordninateOnLine(final Coordinate coord, final Geometry lineGeom) {
+        final Coordinate[] neighbours = getNearestNeighbours(coord, lineGeom);
+        if (neighbours != null) {
+            final Point2D point = StaticGeometryFunctions.createPointOnLine(
+                    new Point2D.Double(neighbours[0].x, neighbours[0].y),
+                    new Point2D.Double(neighbours[1].x, neighbours[1].y),
+                    new Point2D.Double(coord.x, coord.y));
+            return new Coordinate(point.getX(), point.getY());
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -204,26 +213,65 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     public void moveTo(final Coordinate coordinate) {
         if (isMovable()) {
 //        // mauskoordinaten ins selbe coordsys umwandeln wie das der route
-//        Coordinate coord = transformToRouteSrid(coordinate);
+//            coordinate = transformToRouteSrid(coordinate);
 
-            final Coordinate manipulatedCoordinate = getNearestCoordninateOnLine(coordinate);
-            performMove(manipulatedCoordinate);
+            final Geometry cuttedLineGeom = getReducedLineGeometry(
+                    baseLineGeom,
+                    getGeometry().getCoordinate(),
+                    coordinate);
+            final Coordinate manipulatedCoordinate = getNearestCoordninateOnLine(coordinate, cuttedLineGeom);
+            if (manipulatedCoordinate != null) {
+                performMove(manipulatedCoordinate);
+            }
         }
     }
 
-//    private Coordinate transformToRouteSrid(Coordinate coord) {
-//        try {
-//        final CrsTransformer crsT = new CrsTransformer(CrsTransformer.createCrsFromSrid(
-//                        getLineGeometry().getSRID()));
-//
-//            Coordinate[] coords = new Coordinate[] { coord };
-//            coords = crsT.transformGeometry(coords, CismapBroker.getInstance().getSrs().getCode());
-//            return coords[0];
-//        } catch (Exception ex) {
-//            LOG.error("Fehler beim Umrechnen des CRS", ex);
-//        }
-//        return coord;
-//    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   lineGeom        DOCUMENT ME!
+     * @param   lastCoordinate  DOCUMENT ME!
+     * @param   newCoordinate   DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Geometry getReducedLineGeometry(final Geometry lineGeom,
+            final Coordinate lastCoordinate,
+            final Coordinate newCoordinate) {
+        // Kreisgeometrie errechnen um die Suche nach den nächsten Nachbarpunkten
+        // auf einer Teillinie einzuschränken, statt auf der gesamten Linie.
+        final GeometricShapeFactory gsf = new GeometricShapeFactory();
+        // Zentrum auf der Koordinate von der aus gesucht werden soll.
+        gsf.setCentre(newCoordinate);
+        // Umfang des Kreises = doppelter Abstand zur jetzigen Koordinate des Punktes
+        gsf.setSize(newCoordinate.distance(lastCoordinate) * 2);
+        final Geometry circleGeom = gsf.createCircle();
+
+        // Teillinie aus Verschnitt mit dem Kreis erstellen
+        return lineGeom.intersection(circleGeom);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   coord  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Coordinate transformToRouteSrid(final Coordinate coord) {
+        try {
+            final CrsTransformer crsT = new CrsTransformer(CrsTransformer.createCrsFromSrid(
+                        getLineGeometry().getSRID()));
+
+            final CoordinateSequence coordSeq = new CoordinateArraySequence(new Coordinate[] { coord });
+            final Point point = new Point(coordSeq, getLineGeometry().getFactory());
+            final Point transformedPoint = crsT.transformGeometry(point, CismapBroker.getInstance().getSrs().getCode());
+            return transformedPoint.getCoordinate();
+        } catch (Exception ex) {
+            LOG.error("Fehler beim Umrechnen des CRS", ex);
+        }
+        return coord;
+    }
 
     /**
      * DOCUMENT ME!
@@ -306,29 +354,18 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     /**
      * Sucht die Koordinaten der 2 nächsten Punkten der Linie von der Koordinate eines bestimmten Punktes aus.
      *
-     * @param   coord  DOCUMENT ME!
+     * @param   coord     DOCUMENT ME!
+     * @param   lineGeom  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private Coordinate[] getNearestNeighbours(final Coordinate coord) {
+    public static Coordinate[] getNearestNeighbours(final Coordinate coord, final Geometry lineGeom) {
         Coordinate start = null;
         Coordinate end = null;
         double dist = Double.POSITIVE_INFINITY;
 
-        // Kreisgeometrie errechnen um die Suche nach den nächsten Nachbarpunkten
-        // auf einer Teillinie einzuschränken, statt auf der gesamten Linie.
-        final GeometricShapeFactory gsf = new GeometricShapeFactory();
-        // Zentrum auf der Koordinate von der aus gesucht werden soll.
-        gsf.setCentre(coord);
-        // Umfang des Kreises = doppelter Abstand zur jetzigen Koordinate des Punktes
-        gsf.setSize(coord.distance(getGeometry().getCoordinate()) * 2);
-        final Geometry circleGeom = gsf.createCircle();
-
-        // Teillinie aus Verschnitt mit dem Kreis erstellen
-        final Geometry cuttedGeom = baseLineGeom.intersection(circleGeom);
-
         // Suche auf Teillinie
-        final Coordinate[] coords = cuttedGeom.getCoordinates();
+        final Coordinate[] coords = lineGeom.getCoordinates();
         for (int i = 0; i < (coords.length - 1); i++) {
             final Coordinate tmpStart = coords[i];
             final Coordinate tmpEnd = coords[i + 1];
@@ -342,7 +379,11 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
                 end = tmpEnd;
             }
         }
-        return new Coordinate[] { start, end };
+        if ((start != null) && (end != null)) {
+            return new Coordinate[] { start, end };
+        } else {
+            return null;
+        }
     }
 
     /**
