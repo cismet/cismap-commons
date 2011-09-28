@@ -168,8 +168,7 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
      */
     private void showCustomFeatureInfo(final Collection<SignaturedFeature> c,
             final MultipleFeatureInfoRequestsDisplay display) {
-        final CismapPlugin cismapPl = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
-        final MappingComponent mc = cismapPl.getMappingComponent();
+        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
 
         // TODO if !display.isOnHold paint the standard icon...
         if (                                                                                                           /*!display.isOnHold()*/
@@ -294,15 +293,15 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                     if (nr == (c.size() - 1)) {
                         if (lastFeatureInfoIcon != null) {
                             g2d = (Graphics2D)lastFeatureInfoIcon.getSubimage(xPos, yPos, width, height).getGraphics();
-                            g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, cismapPl);
+                            g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, null);
                             symb = new FeatureAnnotationSymbol(lastFeatureInfoIcon);
                         } else {
                             g2d = (Graphics2D)featureInfoIcon.getSubimage(xPos, yPos, width, height).getGraphics();
-                            g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, cismapPl);
+                            g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, null);
                             symb = new FeatureAnnotationSymbol(featureInfoIcon);
                         }
                     } else {
-                        g2d.drawImage(f.getOverlayIcon(), 0, 0, standardBG, cismapPl);
+                        g2d.drawImage(f.getOverlayIcon(), 0, 0, standardBG, null);
                         symb = new FeatureAnnotationSymbol(featureInfoIcon);
                     }
                 }
@@ -326,8 +325,7 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
      * DOCUMENT ME!
      */
     public void addFeatureInfoIconForLastClick() {
-        final CismapPlugin cismapPl = (CismapPlugin)PluginRegistry.getRegistry().getPlugin("cismap"); // NOI18N
-        final MappingComponent mc = cismapPl.getMappingComponent();
+        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
         mc.addStickyNode(getPInfo());
         mc.getRubberBandLayer().removeAllChildren();
         mc.getTmpFeatureLayer().removeAllChildren();
