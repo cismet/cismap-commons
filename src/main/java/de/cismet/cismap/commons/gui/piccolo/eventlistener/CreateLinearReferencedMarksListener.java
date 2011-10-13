@@ -25,6 +25,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -302,6 +303,22 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
 //        if (isDragging()) {
 //            finishLineMark();
 //        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Double[] getMarkPositionsOfSelectedFeature() {
+        final Collection<PointMark> marks = getPointMarks(getSelectedLinePFeature());
+        final Collection<Double> positions = new ArrayList<Double>();
+        for (final PointMark mark : marks) {
+            positions.add(mark.getPosition());
+        }
+        final Double[] result = positions.toArray(new Double[0]);
+        Arrays.sort(result);
+        return result;
     }
 
     /**
@@ -867,7 +884,15 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                 return pf;
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Wrong geometry type: " + geom.getGeometryType());
+                    if (geom == null) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("geom is null");
+                        }
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Wrong geometry type: " + geom.getGeometryType());
+                        }
+                    }
                 }
                 return null;
             }
