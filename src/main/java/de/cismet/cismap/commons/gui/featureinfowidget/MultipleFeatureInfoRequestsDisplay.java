@@ -54,4 +54,18 @@ public interface MultipleFeatureInfoRequestsDisplay {
      * DOCUMENT ME!
      */
     void fireHoldFeatureChanged();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  aFlag  DOCUMENT ME!
+     */
+    void setDisplayVisble(boolean aFlag);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isDisplayVisible();
 }

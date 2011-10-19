@@ -29,14 +29,14 @@ import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.MeasurementMoveListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateLinearReferencedMarksListener;
 
 /**
  * DOCUMENT ME!
  *
  * @version  $Revision$, $Date$
  */
-public class MarkPHandle extends PPath {
+public class LinearReferencedLineMarkPHandle extends PPath {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -46,16 +46,17 @@ public class MarkPHandle extends PPath {
             0f,
             DEFAULT_HANDLE_SIZE,
             DEFAULT_HANDLE_SIZE);
-    public static final Color DEFAULT_COLOR = Color.BLUE;
+    public static final Color DEFAULT_COLOR = Color.GREEN;
+
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(
+            LinearReferencedLineMarkPHandle.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-
     private PLocator locator;
     private MappingComponent mc = null;
-    private LinearReferencingPointInfoPanel measurementPanel;
-    private MeasurementMoveListener measurementListener;
+    private SublinePanel panel;
+    private CreateLinearReferencedMarksListener measurementListener;
     private PSwing pswingComp;
 
     //~ Constructors -----------------------------------------------------------
@@ -67,8 +68,8 @@ public class MarkPHandle extends PPath {
      * @param  measurementListener  DOCUMENT ME!
      * @param  mc                   DOCUMENT ME!
      */
-    public MarkPHandle(final PLocator locator,
-            final MeasurementMoveListener measurementListener,
+    public LinearReferencedLineMarkPHandle(final PLocator locator,
+            final CreateLinearReferencedMarksListener measurementListener,
             final MappingComponent mc) {
         super(DEFAULT_HANDLE_SHAPE);
 
@@ -102,13 +103,13 @@ public class MarkPHandle extends PPath {
 
                 @Override
                 public void mouseEntered(final PInputEvent pInputEvent) {
-                    switch (measurementListener.getModus()) {
-                        case MARK_SELECTION: {
-                            measurementListener.getPLayer().removeChild(MarkPHandle.this);
-                            measurementListener.getPLayer().addChild(MarkPHandle.this);
-                            break;
-                        }
-                    }
+//                    switch (measurementListener.getModus()) {
+//                        case MARK_SELECTION: {
+                    measurementListener.getPLayer().removeChild(LinearReferencedLineMarkPHandle.this);
+                    measurementListener.getPLayer().addChild(LinearReferencedLineMarkPHandle.this);
+//                            break;
+//                        }
+//                    }
                 }
             };
 
@@ -121,41 +122,41 @@ public class MarkPHandle extends PPath {
      * @param  pInputEvent  DOCUMENT ME!
      */
     private void handleClicked(final PInputEvent pInputEvent) {
-        switch (measurementListener.getModus()) {
-            case MARK_SELECTION: {
-                if (log.isDebugEnabled()) {
-                    log.debug("handle selected");
-                }
-                if (pInputEvent.isLeftMouseButton()) {
-                    final MouseEvent swingEvent = ((MouseEvent)pInputEvent.getSourceSwingEvent());
-                    measurementListener.setSelectedMark(this);
-                    measurementListener.getContextMenu()
-                            .show(pswingComp.getComponent(), swingEvent.getX(), swingEvent.getY());
-                }
-                break;
-            }
+//        switch (measurementListener.getModus()) {
+//            case MARK_SELECTION: {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("handle selected");
         }
+        if (pInputEvent.isRightMouseButton()) {
+            final MouseEvent swingEvent = ((MouseEvent)pInputEvent.getSourceSwingEvent());
+//                    measurementListener.setSelectedSubline(this);
+            measurementListener.getContextMenu().show(pswingComp.getComponent(), swingEvent.getX(), swingEvent.getY());
+        }
+//                break;
+//            }
+//        }
     }
 
     /**
      * DOCUMENT ME!
      */
     private void initPanel() {
-        measurementPanel = new LinearReferencingPointInfoPanel();
+        panel = new SublinePanel();
 
-        pswingComp = new PSwing((PSwingCanvas)mc, measurementPanel);
-        measurementPanel.setPNodeParent(pswingComp);
+        pswingComp = new PSwing((PSwingCanvas)mc, panel);
+        panel.setPNodeParent(pswingComp);
         addChild(pswingComp);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  mark  DOCUMENT ME!
+     * @param  start  DOCUMENT ME!
+     * @param  end    DOCUMENT ME!
      */
-    public void setMarkPosition(final double mark) {
-        final String info = new DecimalFormat("0.00").format(mark);
-        measurementPanel.setLengthInfo(info);
+    public void setPositions(final double start, final double end) {
+        panel.setPositionStart(new DecimalFormat("0.00").format(start));
+        panel.setPositionEnd(new DecimalFormat("0.00").format(end));
         relocateHandle();
         repaint();
     }
