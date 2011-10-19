@@ -9,6 +9,8 @@ package de.cismet.cismap.commons.wms.capabilities;
 
 import java.net.URL;
 
+import java.util.List;
+
 import de.cismet.cismap.commons.capabilities.Service;
 
 /**
@@ -52,4 +54,11 @@ public interface WMSCapabilities {
      * @return  DOCUMENT ME!
      */
     URL getURL();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    List<String> getExceptions();
 }

@@ -43,7 +43,7 @@ public class LinearReferencedPointPHandle extends PHandle {
     //~ Instance fields --------------------------------------------------------
 
     private PFeature pfeature;
-    private LinearReferencingPointInfoPanel measurementPanel;
+    private LinearReferencedPointInfoPanel infoPanel;
     private PSwing pswingComp;
 
     //~ Constructors -----------------------------------------------------------
@@ -97,12 +97,21 @@ public class LinearReferencedPointPHandle extends PHandle {
 
     /**
      * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public PFeature getPFeature() {
+        return pfeature;
+    }
+
+    /**
+     * DOCUMENT ME!
      */
     private void initPanel() {
-        measurementPanel = new LinearReferencingPointInfoPanel();
+        infoPanel = new LinearReferencedPointInfoPanel();
 
-        pswingComp = new PSwing((PSwingCanvas)pfeature.getViewer(), measurementPanel);
-        measurementPanel.setPNodeParent(pswingComp);
+        pswingComp = new PSwing((PSwingCanvas)pfeature.getViewer(), infoPanel);
+        infoPanel.setPNodeParent(pswingComp);
         addChild(pswingComp);
     }
 
@@ -161,7 +170,7 @@ public class LinearReferencedPointPHandle extends PHandle {
             } else {
                 info = String.valueOf(linref.getCurrentPosition());
             }
-            measurementPanel.setLengthInfo(info);
+            infoPanel.setLengthInfo(info);
 
             final PBounds b = getBoundsReference();
             final Point2D aPoint = getLocator().locatePoint(null);

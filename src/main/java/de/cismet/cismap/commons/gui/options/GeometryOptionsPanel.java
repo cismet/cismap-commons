@@ -45,9 +45,6 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
     private int numOfEllipseEdges;
 
-    private CreateGeometryListener listener = ((CreateGeometryListener)CismapBroker.getInstance().getMappingComponent()
-                    .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -73,7 +70,10 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
     @Override
     public void update() {
-        numOfEllipseEdges = listener.getNumOfEllipseEdges();
+        final CreateGeometryListener listener = getListener();
+        if (listener != null) {
+            numOfEllipseEdges = listener.getNumOfEllipseEdges();
+        }
 
         jTextField1.setText(String.valueOf(numOfEllipseEdges));
     }
@@ -82,7 +82,10 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
     public void applyChanges() {
         numOfEllipseEdges = Integer.valueOf(jTextField1.getText());
 
-        listener.setNumOfEllipseEdges(numOfEllipseEdges);
+        final CreateGeometryListener listener = getListener();
+        if (listener != null) {
+            listener.setNumOfEllipseEdges(numOfEllipseEdges);
+        }
     }
 
     @Override
@@ -100,6 +103,24 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
     @Override
     public String getTooltip() {
         return "";
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private CreateGeometryListener getListener() {
+        CreateGeometryListener result = null;
+        if ((CismapBroker.getInstance() != null)
+                    && (CismapBroker.getInstance().getMappingComponent() != null)
+                    && (CismapBroker.getInstance().getMappingComponent().getInputListener(
+                            MappingComponent.CREATE_SEARCH_POLYGON) != null)) {
+            result = (CreateGeometryListener)CismapBroker.getInstance().getMappingComponent()
+                        .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON);
+        }
+
+        return result;
     }
 
     @Override

@@ -38,6 +38,8 @@ import java.io.InputStream;
 
 import java.net.URL;
 
+import java.util.List;
+
 import de.cismet.cismap.commons.capabilities.Service;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.Request;
@@ -117,5 +119,10 @@ public class DeegreeWMSCapabilities implements WMSCapabilities {
     @Override
     public URL getURL() {
         return url;
+    }
+
+    @Override
+    public List<String> getExceptions() {
+        return cap.getExceptions();
     }
 }

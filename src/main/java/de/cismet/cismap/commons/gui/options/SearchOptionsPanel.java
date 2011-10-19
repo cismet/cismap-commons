@@ -51,8 +51,6 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
     private boolean holdGeometries;
     private float geometryTransparency;
     private Color geometryColor;
-    private CreateSearchGeometryListener listener = ((CreateSearchGeometryListener)CismapBroker.getInstance()
-                    .getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
@@ -86,9 +84,12 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
     @Override
     public void update() {
-        holdGeometries = listener.isHoldingGeometries();
-        geometryColor = listener.getSearchColor();
-        geometryTransparency = listener.getSearchTransparency();
+        final CreateSearchGeometryListener listener = getListener();
+        if (listener != null) {
+            holdGeometries = listener.isHoldingGeometries();
+            geometryColor = listener.getSearchColor();
+            geometryTransparency = listener.getSearchTransparency();
+        }
 
         jCheckBox1.setSelected(holdGeometries);
         jPanel1.setBackground(geometryColor);
@@ -101,9 +102,12 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         geometryColor = jPanel1.getBackground();
         geometryTransparency = jSlider1.getValue() / 100f;
 
-        listener.setHoldGeometries(holdGeometries);
-        listener.setSearchColor(geometryColor);
-        listener.setSearchTransparency(geometryTransparency);
+        final CreateSearchGeometryListener listener = getListener();
+        if (listener != null) {
+            listener.setHoldGeometries(holdGeometries);
+            listener.setSearchColor(geometryColor);
+            listener.setSearchTransparency(geometryTransparency);
+        }
     }
 
     @Override
@@ -116,6 +120,24 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
     @Override
     public String getTooltip() {
         return "";
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private CreateSearchGeometryListener getListener() {
+        CreateSearchGeometryListener result = null;
+        if ((CismapBroker.getInstance() != null)
+                    && (CismapBroker.getInstance().getMappingComponent() != null)
+                    && (CismapBroker.getInstance().getMappingComponent().getInputListener(
+                            MappingComponent.CREATE_SEARCH_POLYGON) != null)) {
+            result = (CreateSearchGeometryListener)CismapBroker.getInstance().getMappingComponent()
+                        .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON);
+        }
+
+        return result;
     }
 
     @Override
