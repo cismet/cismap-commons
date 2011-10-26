@@ -34,7 +34,7 @@ public interface MultipleFeatureInfoRequestsDisplay {
      *
      * @return  DOCUMENT ME!
      */
-    Collection<SignaturedFeature> getHoldFeautres();
+    Collection<SignaturedFeature> getHoldFeatures();
 
     /**
      * DOCUMENT ME!
@@ -49,11 +49,6 @@ public interface MultipleFeatureInfoRequestsDisplay {
      * @param  o  DOCUMENT ME!
      */
     void removeHoldListener(HoldListener o);
-
-    /**
-     * DOCUMENT ME!
-     */
-    void fireHoldFeatureChanged();
 
     /**
      * DOCUMENT ME!
