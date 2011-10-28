@@ -11,6 +11,9 @@ package pswing;
 import edu.umd.cs.piccolo.PCanvas;
 import edu.umd.cs.piccolo.util.PBounds;
 
+import org.jdesktop.swingx.RepaintManagerX;
+import org.jdesktop.swingx.TranslucentRepaintManager;
+
 import java.awt.*;
 
 import java.util.Vector;
@@ -22,7 +25,6 @@ import javax.swing.*;
  *
  * @version  $Revision$, $Date$
  */
-
 public class PSwingCanvas extends PCanvas {
 
     //~ Static fields/initializers ---------------------------------------------
@@ -101,13 +103,32 @@ public class PSwingCanvas extends PCanvas {
      *
      * @version  $Revision$, $Date$
      */
-    public class ZBasicRepaintManager extends RepaintManager {
+    @TranslucentRepaintManager
+    public class ZBasicRepaintManager extends RepaintManagerX {
 
         //~ Instance fields ----------------------------------------------------
 
         // The components that are currently painting
         // This needs to be a vector for thread safety
         Vector paintingComponents = new Vector();
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new ZBasicRepaintManager object.
+         */
+        public ZBasicRepaintManager() {
+            super(new RepaintManager());
+        }
+
+        /**
+         * Creates a new ZBasicRepaintManager object.
+         *
+         * @param  delegate  DOCUMENT ME!
+         */
+        public ZBasicRepaintManager(final RepaintManager delegate) {
+            super(delegate);
+        }
 
         //~ Methods ------------------------------------------------------------
 
@@ -127,7 +148,9 @@ public class PSwingCanvas extends PCanvas {
          */
         public void unlockRepaint(final JComponent c) {
             synchronized (paintingComponents) {
-                paintingComponents.removeElementAt(paintingComponents.lastIndexOf(c));
+                if (paintingComponents.contains(c)) {
+                    paintingComponents.removeElementAt(paintingComponents.lastIndexOf(c));
+                }
             }
         }
 
