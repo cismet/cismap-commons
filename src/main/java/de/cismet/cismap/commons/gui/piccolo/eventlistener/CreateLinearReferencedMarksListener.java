@@ -856,6 +856,15 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                 final Coordinate erg = LinearReferencedPointFeature.getNearestCoordninateOnLine(
                         triggerCoordinate,
                         lineGeometry);
+                final double dist = LinearReferencedPointFeature.getDistanceOfCoordToLine(
+                        triggerCoordinate,
+                        lineGeometry);
+                if ((dist / mc.getScaleDenominator()) > 0.015) {
+                    cursorPHandle.setVisible(false);
+                } else {
+                    cursorPHandle.setVisible(true);
+                }
+
                 cursorX = (float)mc.getWtst().getDestX(erg.x);
                 cursorY = (float)mc.getWtst().getDestY(erg.y);
 
