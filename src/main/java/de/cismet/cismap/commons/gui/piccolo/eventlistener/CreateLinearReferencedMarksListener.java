@@ -24,6 +24,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +39,8 @@ import javax.swing.JPopupMenu;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
+import de.cismet.cismap.commons.features.FeatureCollectionAdapter;
+import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.LinearReferencedPointMarkPHandle;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -90,6 +95,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     private float cursorX = Float.MIN_VALUE;
     private float cursorY = Float.MIN_VALUE;
     private final LinearReferencedPointMarkPHandle cursorPHandle;
+    private final Collection<PropertyChangeListener> listeners = new ArrayList<PropertyChangeListener>();
 
 //    private double lineStartPosition = -1;
 //    private float lineStartX = Float.MIN_VALUE;
@@ -142,6 +148,30 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
         cursorPHandle.setInfoPanelTransparency(CURSOR_PANEL_TRANSPARENCY);
         cursorPHandle.setPaint(null);
 
+        if (mc != null) {
+            mc.getFeatureCollection().addFeatureCollectionListener(new FeatureCollectionAdapter() {
+
+                    @Override
+                    public void featureSelectionChanged(final FeatureCollectionEvent fce) {
+                        final Collection<Feature> sel = fce.getEventFeatures();
+
+                        // wenn genau 1 Objekt selektiert ist
+                        if (sel.size() == 1) {
+                            // selektiertes feature holen
+                            final Feature[] sels = sel.toArray(new Feature[0]);
+                            final Geometry geom = sels[0].getGeometry();
+                            if ((geom != null) || (geom instanceof MultiLineString) || (geom instanceof LineString)) {
+                                // zugehöriges pfeature holen
+                                // final PFeature pf = mc.getPFeatureHM().get(sels[0]);
+                                // zugehörige geometrie holen
+
+                                // TODO sauberes event
+                                firePropertyChange(null);
+                            }
+                        }
+                    }
+                });
+        }
 //        final PLocator lsl = new PLocator() {
 //
 //                @Override
@@ -164,7 +194,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     /**
      * DOCUMENT ME!
      *
-     * @param  event  DOCUMENT ME!
+     * @param   listener  event DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
 // public SelectionType getSelectionType() {
 // return selectionType;
@@ -173,7 +205,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     /**
      * DOCUMENT ME!
      *
-     * @param  event  selectionType DOCUMENT ME!
+     * @param   listener  event selectionType DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
 // private void setSelectionType(final SelectionType selectionType) {
 // this.selectionType = selectionType;
@@ -182,7 +216,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     /**
      * DOCUMENT ME!
      *
-     * @param  event  DOCUMENT ME!
+     * @param   listener  event DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
 // private Feature createSublineFeature() {
 // final Feature feature = new Feature() {
@@ -235,7 +271,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     /**
      * DOCUMENT ME!
      *
-     * @param  event  DOCUMENT ME!
+     * @param   listener  event DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
 // private void startLineMark() {
 // // addMarkHandle(handleX, handleY);
@@ -259,7 +297,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     /**
      * DOCUMENT ME!
      *
-     * @param  event  DOCUMENT ME!
+     * @param   listener  event DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
 //    private void updateLineMark() {
 //        final LengthIndexedLine lil = new LengthIndexedLine(getSelectedLinePFeature().getFeature().getGeometry());
@@ -273,7 +313,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
     /**
      * DOCUMENT ME!
      *
-     * @param  event  DOCUMENT ME!
+     * @param   listener  event DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
 //    private void finishLineMark() {
 //        // addMarkHandle(handleX, handleY);
@@ -281,6 +323,32 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
 //        setModus(Modus.MARK_ADD);
 //        currentLineMarkPFeature = null;
 //    }
+
+    public boolean addPropertyChangeListener(final PropertyChangeListener listener) {
+        return listeners.add(listener);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   listener  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean removePropertyChangeListener(final PropertyChangeListener listener) {
+        return listeners.remove(listener);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    protected void firePropertyChange(final PropertyChangeEvent evt) {
+        for (final PropertyChangeListener listener : listeners) {
+            listener.propertyChange(evt);
+        }
+    }
 
     /**
      * DOCUMENT ME!
@@ -548,6 +616,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
         if (getSelectedLinePFeature() != null) {
             getPointMarks(getSelectedLinePFeature()).remove(mark);
             getPLayer().removeChild(mark.getPHandle());
+
+            // TODO sauberes event implementieren
+            firePropertyChange(null);
         }
     }
 
@@ -560,6 +631,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
             getPLayer().removeChild(mark.getPHandle());
         }
         pointMarks.clear();
+
+        // TODO sauberes event implementieren
+        firePropertyChange(null);
     }
 
     /**
@@ -689,6 +763,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
             // measurementPHandle wieder nach oben holen
             getPLayer().removeChild(cursorPHandle);
             getPLayer().addChild(cursorPHandle);
+
+            // TODO sauberes event implementieren
+            firePropertyChange(null);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug(
