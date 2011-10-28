@@ -47,9 +47,14 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
  */
 public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler {
 
-    //~ Enums ------------------------------------------------------------------
+    //~ Static fields/initializers ---------------------------------------------
 
     // private static final Color COLOR_SUBLINE = new Color(255, 91, 0);
+    private static final double IDENTICAL_POSITION_DELTA = 1d;
+    private static final float CURSOR_PANEL_TRANSPARENCY = 0.7f;
+    private static final double INVISIBLE_CURSOR_DISTANCE = 0.015;
+
+    //~ Enums ------------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
@@ -134,7 +139,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                 }
             };
         cursorPHandle = new LinearReferencedPointMarkPHandle(l, this, mc);
-        cursorPHandle.setInfoPanelTransparency(0.7f);
+        cursorPHandle.setInfoPanelTransparency(CURSOR_PANEL_TRANSPARENCY);
         cursorPHandle.setPaint(null);
 
 //        final PLocator lsl = new PLocator() {
@@ -665,15 +670,31 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
         final double currentPosition = getCurrentPosition();
         markHandle.setMarkPosition(currentPosition);
 
-        final PointMark pointMark = new PointMark(currentPosition, markHandle);
-        getPointMarks(getSelectedLinePFeature()).add(pointMark);
-        getPLayer().addChild(markHandle);
+        final Collection<PointMark> pointMarks = getPointMarks(getSelectedLinePFeature());
+        boolean pointMarkStillExists = false;
+        for (final PointMark pointMark : pointMarks) {
+            if (Math.abs(pointMark.getPosition() - currentPosition) < IDENTICAL_POSITION_DELTA) {
+                pointMarkStillExists = true;
+                break;
+            }
+        }
 
-        setSelectedMark(markHandle);
+        if (!pointMarkStillExists) {
+            final PointMark pointMark = new PointMark(currentPosition, markHandle);
+            pointMarks.add(pointMark);
+            getPLayer().addChild(markHandle);
 
-        // measurementPHandle wieder nach oben holen
-        getPLayer().removeChild(cursorPHandle);
-        getPLayer().addChild(cursorPHandle);
+            setSelectedMark(markHandle);
+
+            // measurementPHandle wieder nach oben holen
+            getPLayer().removeChild(cursorPHandle);
+            getPLayer().addChild(cursorPHandle);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                    "Markierung mit (fast) der selben Position existiert bereits, neue Markierung wird also ignoriert.");
+            }
+        }
     }
 
     /**
@@ -859,12 +880,9 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                 final double dist = LinearReferencedPointFeature.getDistanceOfCoordToLine(
                         triggerCoordinate,
                         lineGeometry);
-                if ((dist / mc.getScaleDenominator()) > 0.015) {
-                    cursorPHandle.setVisible(false);
-                } else {
-                    cursorPHandle.setVisible(true);
-                }
+                final boolean cursorIsVisible = (dist / mc.getScaleDenominator()) < INVISIBLE_CURSOR_DISTANCE;
 
+                cursorPHandle.setVisible(cursorIsVisible);
                 cursorX = (float)mc.getWtst().getDestX(erg.x);
                 cursorY = (float)mc.getWtst().getDestY(erg.y);
 
