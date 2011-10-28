@@ -134,6 +134,8 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                 }
             };
         cursorPHandle = new LinearReferencedPointMarkPHandle(l, this, mc);
+        cursorPHandle.setInfoPanelTransparency(0.7f);
+        cursorPHandle.setPaint(null);
 
 //        final PLocator lsl = new PLocator() {
 //
@@ -856,6 +858,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                         lineGeometry);
                 cursorX = (float)mc.getWtst().getDestX(erg.x);
                 cursorY = (float)mc.getWtst().getDestY(erg.y);
+
 //                cursorPosition = getCurrentPosition();
             }
         }
