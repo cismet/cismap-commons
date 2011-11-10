@@ -154,7 +154,7 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
     }
 
     @Override
-    public void holdFeautresChanged(final HoldFeatureChangeEvent evt) {
+    public void holdFeaturesChanged(final HoldFeatureChangeEvent evt) {
         showCustomFeatureInfo(evt.getHoldFeatures(), evt.getMultipleFeautureInfoRequestDisplay());
     }
 
