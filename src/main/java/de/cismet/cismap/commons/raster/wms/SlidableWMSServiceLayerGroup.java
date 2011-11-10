@@ -33,6 +33,7 @@ import org.jdom.Element;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Image;
 import java.awt.geom.Point2D;
 
@@ -78,7 +79,7 @@ import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
  * @author   thorsten
  * @version  $Revision$, $Date$
  */
-public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService implements RetrievalServiceLayer,
+public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService implements RetrievalServiceLayer,
     FloatingControlProvider,
     RasterMapService,
     ChangeListener,
@@ -88,12 +89,12 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 
     //~ Static fields/initializers ---------------------------------------------
 
+    private static final transient Logger LOG = Logger.getLogger(SlidableWMSServiceLayerGroup.class);
+
     public static final String XML_ELEMENT_NAME = "SlidableWMSServiceLayerGroup";
     private static final String SLIDER_PREFIX = "Slider";
     private static List<Integer> uniqueNumbers = new ArrayList<Integer>();
     private static String addedInternalWidget = null;
-
-    private static final transient Logger LOG = Logger.getLogger(SlidableWMSServiceLayerGroup.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -114,8 +115,6 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
     private String preferredExceptionsFormat;
     private String capabilitiesUrl = null;
     private WMSCapabilities wmsCapabilities;
-
-    private boolean enabled;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -164,14 +163,6 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
             LOG.warn("Attribute visible has wrong data type.", e);
         } catch (final NullPointerException e) {
             LOG.warn("Attribute visible not found.", e);
-        }
-
-        try {
-            enabled = element.getAttribute("enabled").getBooleanValue();
-        } catch (final DataConversionException e) {
-            LOG.warn("Attribute enabled has wrong data type.", e);
-        } catch (final NullPointerException e) {
-            LOG.warn("Attribute enabled not found.", e);
         }
 
         try {
@@ -244,11 +235,7 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
             }
 
             wsl.setPNode(new XPImage());
-//            final Point2D localOrigin = CismapBroker.getInstance().getMappingComponent().getCamera().getViewBounds().getOrigin();
-//            final double localScale = CismapBroker.getInstance().getMappingComponent().getCamera().getViewScale();
             pnode.addChild(wsl.getPNode());
-//            wsl.getPNode().setScale(1 / localScale);
-//            wsl.getPNode().setOffset(localOrigin);
             wsl.addRetrievalListener(new RetrievalListener() {
 
                     @Override
@@ -303,7 +290,6 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
                                     re.setRetrievalService(SlidableWMSServiceLayerGroup.this);
                                     re.setHasErrors(false);
 
-//                                re.setRetrievedObject(((XPImage) layers.get(0).getPNode()).getImage());
                                     re.setRetrievedObject(null);
                                     fireRetrievalComplete(re);
                                     stateChanged(new ChangeEvent(this));
@@ -342,17 +328,9 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
      * DOCUMENT ME!
      */
     private void setDefaults() {
-        // srs="EPSG:4326";
-        preferredRasterFormat = "image/png"; // NOI18N
-        preferredBGColor = "0xF0F0F0";       // NOI18N
-        // preferredExceptionsFormat="application/vnd.ogc.se_inimage";
+        preferredRasterFormat = "image/png";                      // NOI18N
+        preferredBGColor = "0xF0F0F0";                            // NOI18N
         preferredExceptionsFormat = "application/vnd.ogc.se_xml"; // NOI18N
-
-//        srs="EPSG:31466";
-//        preferredRasterFormat="image/png";
-//        preferredBGColor="0xF0F0F0";
-//        preferredExceptionsFormat="application/vnd.ogc.se_inimage";
-//        initialBoundingBox=new BoundingBox(2569442.79,5668858.33,2593744.91,5688416.22);
     }
 
     /**
@@ -408,17 +386,18 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
         final Hashtable lableTable = new Hashtable();
         int x = 0;
         for (final WMSServiceLayer wsl : layers) {
-            final JLabel label = new JLabel(wsl.getName());
-            // label.setBorder(new EmptyBorder(1,5,1,5));
-            lableTable.put(new Integer(x * 100), label);
+            String layerName = wsl.getName();
+            if (layerName.length() > 6) {
+                layerName = layerName.charAt(0) + "." + layerName.substring(layerName.length() - 4); // NOI18N
+            }
+
+            final JLabel label = new JLabel(layerName);
+            final Font font = label.getFont().deriveFont(10f);
+            label.setFont(font);
+            lableTable.put(Integer.valueOf(x * 100), label);
             x++;
         }
         slider.setLabelTable(lableTable);
-
-//        dialog.getContentPane().add(slider, BorderLayout.CENTER);
-//
-//        dialog.pack();
-//        dialog.setVisible(true);
         internalFrame.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N
         internalFrame.getContentPane().add(slider);
         slider.setSnapToTicks(true);
@@ -457,7 +436,6 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
         final int i = (slider.getValue() / 100);
         final int rest = slider.getValue() % 100;
 
-        // ((XPImage) getPNode()).setImage(((XPImage) layers.get(i).getPNode()).getImage());
         for (int j = 0; j < getPNode().getChildrenCount(); ++j) {
             if (i == j) {
                 getPNode().getChild(i).setTransparency(1f);
@@ -519,7 +497,7 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
 
     @Override
     public void setEnabled(final boolean enabled) {
-        this.enabled = enabled;
+        // won't do anything
     }
 
     @Override
@@ -688,7 +666,6 @@ public class SlidableWMSServiceLayerGroup extends AbstractRetrievalService imple
         element.setAttribute("exceptionFormat", preferredExceptionsFormat);
         element.setAttribute("completePath", completePath);
         final Element capElement = new Element("capabilities"); // NOI18N
-        // capElement.addContent(new CDATA(capabilitiesUrl));
         final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, capabilitiesUrl, false);
         capElement.addContent(capLink.getElement());
 

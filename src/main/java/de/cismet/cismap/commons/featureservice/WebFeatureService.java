@@ -18,6 +18,8 @@ package de.cismet.cismap.commons.featureservice;
 //import org.deegree2.model.feature.FeatureCollection;
 //import org.deegree2.model.feature.GMLFeatureCollectionDocument;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.Element;
 
 import java.awt.Font;
@@ -33,7 +35,6 @@ import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.wfs.WFSFacade;
@@ -50,9 +51,11 @@ import de.cismet.cismap.commons.wms.capabilities.Layer;
  * @author   Sebastian Puhl
  * @version  $Revision$, $Date$
  */
-public class WebFeatureService extends AbstractFeatureService<WFSFeature, String> implements LayerInfoProvider {
+public final class WebFeatureService extends AbstractFeatureService<WFSFeature, String> implements LayerInfoProvider {
 
     //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(WebFeatureService.class);
 
     public static HashMap<String, WFSCapabilities> capCache = new HashMap<String, WFSCapabilities>();
     public static final String WFS_FEATURELAYER_TYPE = "WebFeatureServiceLayer"; // NOI18N

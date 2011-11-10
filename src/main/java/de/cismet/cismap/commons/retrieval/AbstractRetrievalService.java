@@ -35,7 +35,7 @@ public abstract class AbstractRetrievalService implements RetrievalService {
 
     protected static final boolean DEBUG = Debug.DEBUG;
 
-    protected static final Logger LOG = Logger.getLogger(AbstractRetrievalService.class);
+    private static final Logger LOG = Logger.getLogger(AbstractRetrievalService.class);
 
     //~ Instance fields --------------------------------------------------------
 

@@ -6,12 +6,20 @@
 *
 ****************************************************/
 package de.cismet.cismap.commons.demo;
-import java.awt.*;
-import java.awt.event.*;
 
-import java.io.*;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import javax.swing.*;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+
+import java.util.Observable;
+
+import javax.swing.ProgressMonitor;
+import javax.swing.Timer;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -24,7 +32,7 @@ import de.cismet.tools.CismetThreadPool;
  *
  * @version  $Revision$, $Date$
  */
-public class ProgressMonitoredDataTransfer extends java.util.Observable implements Runnable, ActionListener {
+public class ProgressMonitoredDataTransfer extends Observable implements Runnable, ActionListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -117,9 +125,7 @@ public class ProgressMonitoredDataTransfer extends java.util.Observable implemen
     /**
      * Retrieve the value of current, which is the number of bytes transferred so far.
      *
-     * @return   DOCUMENT ME!
-     *
-     * @returns  number of bytes transfered
+     * @return  number of bytes transfered
      */
     public synchronized int getCurrent() {
         return current;
@@ -161,11 +167,8 @@ public class ProgressMonitoredDataTransfer extends java.util.Observable implemen
         return;
     }
 
-    /**
-     * Dont override this.
-     */
     @Override
-    public void run() {
+    public final void run() {
         try {
             final byte[] buf = new byte[BUFSIZ];
             int cc;

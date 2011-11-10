@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.Element;
 
 import java.net.URI;
@@ -31,7 +33,7 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
 
     //~ Static fields/initializers ---------------------------------------------
 
-    // public static String DOCUMENT_FEATURELAYER_TYPE = "DocumentFeatureServiceLayer";
+    private static final transient Logger LOG = Logger.getLogger(DocumentFeatureService.class);
 
     // TODO where are the deegree Constants
     public static final int GML_GEOMETRY_TYPE = 10012;
