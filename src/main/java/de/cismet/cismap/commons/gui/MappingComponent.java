@@ -124,6 +124,7 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.AttachFeatureListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateLinearReferencedMarksListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateSearchGeometryListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateSimpleGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CustomFeatureActionListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CustomFeatureInfoListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.DeleteFeatureListener;
@@ -197,6 +198,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public static final String ALKIS_PRINT = "ALKIS_PRINT";                                 // NOI18N
     public static final String FEATURE_INFO = "FEATURE_INFO";                               // NOI18N
     public static final String CREATE_SEARCH_POLYGON = "SEARCH_POLYGON";                    // NOI18N
+    public static final String CREATE_SIMPLE_GEOMETRY = "CREATE_SIMPLE_GEOMETRY";           // NOI18N
     public static final String MOVE_POLYGON = "MOVE_POLYGON";                               // NOI18N
     public static final String REMOVE_POLYGON = "REMOVE_POLYGON";                           // NOI18N
     public static final String NEW_POLYGON = "NEW_POLYGON";                                 // NOI18N
@@ -970,6 +972,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         inputEventListener.put(FEATURE_INFO, new GetFeatureInfoClickDetectionListener());
         inputEventListener.put(CREATE_SEARCH_POLYGON, new CreateSearchGeometryListener(this));
+        inputEventListener.put(CREATE_SIMPLE_GEOMETRY, new CreateSimpleGeometryListener(this));
 
         inputEventListener.put(MOVE_POLYGON, new FeatureMoveListener(this));
         inputEventListener.put(NEW_POLYGON, new CreateNewGeometryListener(this));
@@ -1015,6 +1018,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         putCursor(SPLIT_POLYGON, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(MEASUREMENT, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(LINEAR_REFERENCING, new Cursor(Cursor.DEFAULT_CURSOR));
+        putCursor(CREATE_SIMPLE_GEOMETRY, new Cursor(Cursor.CROSSHAIR_CURSOR));
 
         putCursor(MOVE_HANDLE, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(REMOVE_HANDLE, new Cursor(Cursor.CROSSHAIR_CURSOR));
