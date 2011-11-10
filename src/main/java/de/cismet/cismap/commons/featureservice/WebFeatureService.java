@@ -107,7 +107,6 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
      */
     public WebFeatureService(final Element e) throws Exception {
         super(e);
-        LOG.error("WebFeatureService Element drin 1 bf " + this.hashCode(), new Exception());
     }
 
     /**
@@ -131,7 +130,6 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         setFeature(feature);
         setQueryElement(query);
         setHostname(host);
-        LOG.error("WebFeatureService drin 1 bf " + this.hashCode(), new Exception());
         // defaults for new services
         this.setTranslucency(0.2f);
         this.setMaxFeatureCount(2900);
@@ -205,19 +203,25 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         super.initFromElement(element);
         final CapabilityLink cp = new CapabilityLink(element);
         final Element query = element.getChild(FeatureServiceUtilities.GET_FEATURE, FeatureServiceUtilities.WFS);
-        WFSCapabilities cap = capCache.get(cp.getLink());
+        final String capLink = cp.getLink() + "?VERSION=" + cp.getVersion();
+        WFSCapabilities cap = capCache.get(capLink);
 
         try {
             if (cap == null) {
                 final WFSCapabilitiesFactory fac = new WFSCapabilitiesFactory();
-                cap = fac.createCapabilities(cp.getLink());
-                capCache.put(cp.getLink(), cap);
+                cap = fac.createCapabilities(capLink);
+
+                capCache.put(capLink, cap);
+            }
+
+            if ((cap != null) && !cap.getVersion().equals(cp.getVersion())) {
+                LOG.warn("Cannot retrieve the wfs capabilities for version " + cp.getVersion() + " but for version "
+                            + cap.getVersion());
             }
 
             feature = WFSFacade.extractRequestedFeatureType(FeatureServiceUtilities.elementToString(query), cap);
             setInitialisationError(false);
         } catch (Exception ex) {
-            this.setEnabled(false);
             this.setErrorObject(ex.toString());
             this.backupVersion = cp.getVersion();
             this.setQueryElement(query);
@@ -361,7 +365,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         if (feature != null) {
             return feature.getWFSCapabilities().getVersion();
         } else {
-            LOG.error("Version is not set.");
+            LOG.warn("Version is not set. Use backup version " + backupVersion);
             return backupVersion;
         }
     }

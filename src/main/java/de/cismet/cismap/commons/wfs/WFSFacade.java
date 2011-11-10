@@ -219,10 +219,14 @@ public class WFSFacade {
         final Geometry geom = CrsTransformer.transformToGivenCrs(bbox.getGeometry(), crs);
         final XBoundingBox tbbox = new XBoundingBox(geom);
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("optimal crs: " + crs);
+        }
+
         if ((cap.getVersion() != null) && cap.getVersion().equals("1.0.0")) {                             // NOI18N
-            envelope = "<gml:Box><gml:coord><gml:X>" + bbox.getX1() + "</gml:X><gml:Y>" + bbox.getY1()    // NOI18N
-                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + bbox.getX2()                    // NOI18N
-                        + "</gml:X><gml:Y>" + bbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";       // NOI18N
+            envelope = "<gml:Box><gml:coord><gml:X>" + tbbox.getX1() + "</gml:X><gml:Y>" + tbbox.getY1()  // NOI18N
+                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + tbbox.getX2()                   // NOI18N
+                        + "</gml:X><gml:Y>" + tbbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";      // NOI18N
         } else if ((cap.getVersion() != null) && cap.getVersion().equals("1.1.0")) {                      // NOI18N
             envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
                         + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
