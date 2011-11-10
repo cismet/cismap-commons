@@ -218,7 +218,6 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 this.addLayer(l, style, isEnabled, info);
             } else {
                 this.addLayer(name, styleName, enabled, info);
-                setEnabled(false);
             }
         }
     }
@@ -331,7 +330,6 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             init(wmsServiceLayerElement, capabilities);
             if (!isDummy()) {
                 dummyLayer = null;
-                setEnabled(false);
             }
         }
         if (DEBUG) {
@@ -445,7 +443,8 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     public void setExceptionsFormat(final String exceptionsFormat) {
         final List<String> exceptions = ((wmsCapabilities != null) ? wmsCapabilities.getExceptions() : null);
 
-        if ((exceptions != null) && (exceptions.size() > 0) && !exceptions.contains(exceptionsFormat)) {
+        if ((exceptionsFormat != null) && (exceptions != null) && (exceptions.size() > 0)
+                    && !exceptions.contains(exceptionsFormat)) {
             // the preferred exception format is not supported. Use an other one
             String format = null;
             for (final String tmp : exceptions) {

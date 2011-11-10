@@ -189,7 +189,9 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                 res += tmp;
             }
 
-            logger.error("response: " + res);
+            if (logger.isDebugEnabled()) {
+                logger.debug("wfs response: " + res);
+            }
             final StringReader re = new StringReader(res);
             // debug
 

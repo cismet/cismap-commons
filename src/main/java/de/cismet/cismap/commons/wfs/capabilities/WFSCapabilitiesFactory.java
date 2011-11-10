@@ -49,7 +49,6 @@ public class WFSCapabilitiesFactory extends AbstractVersionNegotiator {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger logger = Logger.getLogger(WFSCapabilitiesFactory.class);
-    private static boolean geotools = false;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -75,6 +74,9 @@ public class WFSCapabilitiesFactory extends AbstractVersionNegotiator {
         NoHandlerForURLException,
         ParserException,
         Exception {
+        if (logger.isDebugEnabled()) {
+            logger.debug("create capabilities from link: " + link);
+        }
         String document = getCapabilitiesDocument(link);
         ByteArrayInputStream docStream = new ByteArrayInputStream(document.getBytes());
         WFSCapabilities result = null;

@@ -136,18 +136,19 @@ public abstract class AbstractVersionNegotiator {
 
         if (startVersion == null) {
             if (logger.isDebugEnabled()) {
-                logger.debug("No version string found in the link. Add parameter"); // NOI18N
+                logger.debug("No version string found in the link: " + link); // NOI18N
             }
-            if (link.indexOf("?") != -1) {                                          // NOI18N
-                link = link.substring(0, link.indexOf("?"));                        // NOI18N
-            }
-
             // set the version to the latest one
             startVersion = supportedVersions[supportedVersions.length - 1];
-            link += "?SERVICE=" + serviceName + "&REQUEST=GetCapabilities&VERSION=" + startVersion; // NOI18N
         }
+
+        if (link.indexOf("?") != -1) {                                                          // NOI18N
+            link = link.substring(0, link.indexOf("?"));                                        // NOI18N
+        }
+        link += "?SERVICE=" + serviceName + "&REQUEST=GetCapabilities&VERSION=" + startVersion; // NOI18N
+
         if (logger.isDebugEnabled()) {
-            logger.debug("start version = " + startVersion);                                        // NOI18N
+            logger.debug("start version = " + startVersion); // NOI18N
         }
         document = readStringFromlink(link);
         currentVersion = getDocumentVersion(document);
