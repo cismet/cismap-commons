@@ -26,5 +26,5 @@ public interface HoldListener {
      *
      * @param  event  c DOCUMENT ME!
      */
-    void holdFeautresChanged(HoldFeatureChangeEvent event);
+    void holdFeaturesChanged(HoldFeatureChangeEvent event);
 }

@@ -207,6 +207,27 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
     /**
      * DOCUMENT ME!
      *
+     * @param   coord     DOCUMENT ME!
+     * @param   lineGeom  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static double getDistanceOfCoordToLine(final Coordinate coord, final Geometry lineGeom) {
+        final Coordinate[] neighbours = getNearestNeighbours(coord, lineGeom);
+        if (neighbours != null) {
+            final double distance = StaticGeometryFunctions.distanceToLine(
+                    new Point2D.Double(neighbours[0].x, neighbours[0].y),
+                    new Point2D.Double(neighbours[1].x, neighbours[1].y),
+                    new Point2D.Double(coord.x, coord.y));
+            return distance;
+        } else {
+            return -1d;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  coordinate  DOCUMENT ME!
      */
     @Override
