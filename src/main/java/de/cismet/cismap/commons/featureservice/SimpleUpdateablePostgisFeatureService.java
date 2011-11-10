@@ -7,12 +7,13 @@
 ****************************************************/
 package de.cismet.cismap.commons.featureservice;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.CDATA;
 import org.jdom.Element;
 
 import javax.swing.ImageIcon;
 
-import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.PostgisAction;
 import de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory;
 
@@ -23,6 +24,10 @@ import de.cismet.cismap.commons.featureservice.factory.PostgisFeatureFactory;
  * @version  $Revision$, $Date$
  */
 public class SimpleUpdateablePostgisFeatureService extends SimplePostgisFeatureService {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(SimpleUpdateablePostgisFeatureService.class);
 
     //~ Instance fields --------------------------------------------------------
 

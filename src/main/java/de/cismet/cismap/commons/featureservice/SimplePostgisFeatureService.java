@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.featureservice;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.CDATA;
 import org.jdom.Element;
 
@@ -36,6 +38,8 @@ public class SimplePostgisFeatureService
         extends AbstractFeatureService<PostgisFeature, SimpleFeatureServiceSqlStatement> implements LayerInfoProvider {
 
     //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(SimplePostgisFeatureService.class);
 
     public static final String POSTGIS_FEATURELAYER_TYPE = "simplePostgisFeatureService"; // NOI18N
     public static final HashMap<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
