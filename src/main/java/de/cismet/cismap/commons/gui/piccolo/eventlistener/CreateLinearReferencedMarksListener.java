@@ -156,7 +156,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
                         final Collection<Feature> sel = fce.getEventFeatures();
 
                         // wenn genau 1 Objekt selektiert ist
-                        if (sel != null && sel.size() == 1) {
+                        if ((sel != null) && (sel.size() == 1)) {
                             // selektiertes feature holen
                             final Feature[] sels = sel.toArray(new Feature[0]);
                             final Geometry geom = sels[0].getGeometry();
