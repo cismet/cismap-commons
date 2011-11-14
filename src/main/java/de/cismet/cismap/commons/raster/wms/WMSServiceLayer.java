@@ -9,6 +9,8 @@ package de.cismet.cismap.commons.raster.wms;
 
 import edu.umd.cs.piccolo.PNode;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
@@ -23,7 +25,6 @@ import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.ChildrenProvider;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
@@ -42,11 +43,15 @@ import de.cismet.tools.PropertyEqualsProvider;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class WMSServiceLayer extends AbstractWMSServiceLayer implements RetrievalServiceLayer,
+public final class WMSServiceLayer extends AbstractWMSServiceLayer implements RetrievalServiceLayer,
     RasterMapService,
     PropertyEqualsProvider,
     LayerInfoProvider,
     ChildrenProvider {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(WMSServiceLayer.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -184,12 +189,12 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
         final Iterator<Element> it = layerList.iterator();
         while (it.hasNext()) {
             final Element elem = it.next();
-            final String name = elem.getAttribute("name").getValue();          // NOI18N
+            final String lName = elem.getAttribute("name").getValue();         // NOI18N
             String styleName = null;
-            boolean enabled = true;
+            boolean isEnabled = true;
             boolean info = false;
             try {
-                enabled = elem.getAttribute("enabled").getBooleanValue();      // NOI18N
+                isEnabled = elem.getAttribute("enabled").getBooleanValue();    // NOI18N
             } catch (Exception ex) {
             }
             try {
@@ -201,7 +206,7 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
             } catch (Exception ex) {
             }
             if (wmsCaps != null) {
-                final Layer l = searchForLayer(getWmsCapabilities().getLayer(), name);
+                final Layer l = searchForLayer(getWmsCapabilities().getLayer(), lName);
                 if (layerList.size() == 1) {
                     setName(l.getTitle());
                 }
@@ -210,10 +215,9 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
                 if (styleName != null) {
                     style = l.getStyleResource(styleName);
                 }
-                this.addLayer(l, style, enabled, info);
+                this.addLayer(l, style, isEnabled, info);
             } else {
                 this.addLayer(name, styleName, enabled, info);
-                setEnabled(false);
             }
         }
     }
@@ -326,7 +330,6 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
             init(wmsServiceLayerElement, capabilities);
             if (!isDummy()) {
                 dummyLayer = null;
-                setEnabled(false);
             }
         }
         if (DEBUG) {
@@ -440,7 +443,8 @@ public class WMSServiceLayer extends AbstractWMSServiceLayer implements Retrieva
     public void setExceptionsFormat(final String exceptionsFormat) {
         final List<String> exceptions = ((wmsCapabilities != null) ? wmsCapabilities.getExceptions() : null);
 
-        if ((exceptions != null) && (exceptions.size() > 0) && !exceptions.contains(exceptionsFormat)) {
+        if ((exceptionsFormat != null) && (exceptions != null) && (exceptions.size() > 0)
+                    && !exceptions.contains(exceptionsFormat)) {
             // the preferred exception format is not supported. Use an other one
             String format = null;
             for (final String tmp : exceptions) {

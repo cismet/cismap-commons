@@ -18,6 +18,8 @@ package de.cismet.cismap.commons.featureservice;
 //import org.deegree2.model.feature.FeatureCollection;
 //import org.deegree2.model.feature.GMLFeatureCollectionDocument;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.Element;
 
 import java.awt.Font;
@@ -33,7 +35,6 @@ import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.wfs.WFSFacade;
@@ -50,9 +51,11 @@ import de.cismet.cismap.commons.wms.capabilities.Layer;
  * @author   Sebastian Puhl
  * @version  $Revision$, $Date$
  */
-public class WebFeatureService extends AbstractFeatureService<WFSFeature, String> implements LayerInfoProvider {
+public final class WebFeatureService extends AbstractFeatureService<WFSFeature, String> implements LayerInfoProvider {
 
     //~ Static fields/initializers ---------------------------------------------
+
+    private static final transient Logger LOG = Logger.getLogger(WebFeatureService.class);
 
     public static HashMap<String, WFSCapabilities> capCache = new HashMap<String, WFSCapabilities>();
     public static final String WFS_FEATURELAYER_TYPE = "WebFeatureServiceLayer"; // NOI18N
@@ -104,7 +107,6 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
      */
     public WebFeatureService(final Element e) throws Exception {
         super(e);
-        LOG.error("WebFeatureService Element drin 1 bf " + this.hashCode(), new Exception());
     }
 
     /**
@@ -128,7 +130,6 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
         setFeature(feature);
         setQueryElement(query);
         setHostname(host);
-        LOG.error("WebFeatureService drin 1 bf " + this.hashCode(), new Exception());
         // defaults for new services
         this.setTranslucency(0.2f);
         this.setMaxFeatureCount(2900);
@@ -202,19 +203,25 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
         super.initFromElement(element);
         final CapabilityLink cp = new CapabilityLink(element);
         final Element query = element.getChild(FeatureServiceUtilities.GET_FEATURE, FeatureServiceUtilities.WFS);
-        WFSCapabilities cap = capCache.get(cp.getLink());
+        final String capLink = cp.getLink() + "?VERSION=" + cp.getVersion();
+        WFSCapabilities cap = capCache.get(capLink);
 
         try {
             if (cap == null) {
                 final WFSCapabilitiesFactory fac = new WFSCapabilitiesFactory();
-                cap = fac.createCapabilities(cp.getLink());
-                capCache.put(cp.getLink(), cap);
+                cap = fac.createCapabilities(capLink);
+
+                capCache.put(capLink, cap);
+            }
+
+            if ((cap != null) && !cap.getVersion().equals(cp.getVersion())) {
+                LOG.warn("Cannot retrieve the wfs capabilities for version " + cp.getVersion() + " but for version "
+                            + cap.getVersion());
             }
 
             feature = WFSFacade.extractRequestedFeatureType(FeatureServiceUtilities.elementToString(query), cap);
             setInitialisationError(false);
         } catch (Exception ex) {
-            this.setEnabled(false);
             this.setErrorObject(ex.toString());
             this.backupVersion = cp.getVersion();
             this.setQueryElement(query);
@@ -358,7 +365,7 @@ public class WebFeatureService extends AbstractFeatureService<WFSFeature, String
         if (feature != null) {
             return feature.getWFSCapabilities().getVersion();
         } else {
-            LOG.error("Version is not set.");
+            LOG.warn("Version is not set. Use backup version " + backupVersion);
             return backupVersion;
         }
     }

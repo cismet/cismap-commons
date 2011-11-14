@@ -10,19 +10,15 @@ package de.cismet.cismap.commons.gui.capabilitywidget;
 import com.jgoodies.looks.Options;
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 
-import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
 
 import org.openide.util.NbBundle;
 
-import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Robot;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -44,9 +40,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -77,7 +71,6 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -85,7 +78,6 @@ import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
 import de.cismet.cismap.commons.exceptions.ConvertException;
-import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
@@ -97,11 +89,9 @@ import de.cismet.cismap.commons.preferences.CapabilitiesPreferences;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
-import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
-import de.cismet.cismap.commons.wfs.capabilities.deegree.DeegreeFeatureType;
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
@@ -140,11 +130,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
     //~ Instance fields --------------------------------------------------------
 
-    /**
-     * Invoked when the target of the listener has changed its state.
-     *
-     * @param  e  a ChangeEvent object
-     */
     int selectedIndex = -1;
     private int maxServerNameLength = 14;
     private ImageIcon icoConnect = new ImageIcon(getClass().getResource(
@@ -162,11 +147,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private HashMap<Component, JTree> wmsCapabilitiesTrees = new HashMap<Component, JTree>();
     private HashMap<Component, WFSCapabilities> wfsCapabilities = new HashMap<Component, WFSCapabilities>();
     private HashMap<Component, JTree> wfsCapabilitiesTrees = new HashMap<Component, JTree>();
-    private HashMap<Component, URL> wfsPostUrls = new HashMap<Component, URL>();
     private CapabilitiesPreferences preferences = new CapabilitiesPreferences();
     private JPopupMenu capabilityList = new JPopupMenu();
     private CapabilityWidget thisWidget = null;
-//    private URL postURL;
     private Element serverElement;
     private JPopupMenu treePopMenu = new JPopupMenu();
 
@@ -639,7 +622,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 }
                 wfsCapabilities.remove(tbpCapabilities.getSelectedComponent());
                 wfsCapabilitiesTrees.remove(tbpCapabilities.getSelectedComponent());
-                wfsPostUrls.remove(tbpCapabilities.getSelectedComponent());
                 tbpCapabilities.remove(tbpCapabilities.indexOfComponent(tbpCapabilities.getSelectedComponent()));
             } else {
                 log.warn("Keine Component zum entfernen aktiv"); // NOI18N
@@ -654,7 +636,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 capabilityUrlsReverse.remove(tbpCapabilities.getSelectedComponent());
                 wmsCapabilities.remove(tbpCapabilities.getSelectedComponent());
                 wfsCapabilities.remove(tbpCapabilities.getSelectedComponent());
-                wfsPostUrls.remove(tbpCapabilities.getSelectedComponent());
                 tbpCapabilities.remove(tbpCapabilities.getSelectedComponent());
             } else {
                 log.warn("The link was not removed from the capabilitiyURLs");
@@ -1063,8 +1044,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                 // !!!ToDo WebAccessMananger testen
                                 final WFSCapabilitiesFactory capFact = new WFSCapabilitiesFactory();
 
-                                final WFSCapabilities cap = capFact.createCapabilities(finalPostUrl.toString()
-                                                + "?REQUEST=GetCapabilities&service=WFS");
+                                final WFSCapabilities cap = capFact.createCapabilities(link);
                                 final String name = FeatureServiceUtilities.getServiceName(cap);
 
                                 capTreeModel = new WFSCapabilitiesTreeModel(cap);
@@ -1082,11 +1062,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                     final WMSCapabilitiesFactory capFact = new WMSCapabilitiesFactory();
                                     if (log.isDebugEnabled()) {
                                         log.debug("Capability Widget: Creating WMScapabilities for URL: "
-                                                    + finalPostUrl.toString());               // NOI18N
+                                                    + link);                                  // NOI18N
                                     }
                                     // ToDO Langsam
-                                    final WMSCapabilities capWMS = capFact.createCapabilities(finalPostUrl.toString()
-                                                    + "?REQUEST=GetCapabilities&service=WMS");
+                                    final WMSCapabilities capWMS = capFact.createCapabilities(link);
                                     if (log.isDebugEnabled()) {
                                         log.debug("Erstelle WMSCapabilitiesTreeModel");  // NOI18N
                                     }
@@ -1126,7 +1105,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                 }
                                 wfsCapabilities.remove(comp);
                                 wfsCapabilitiesTrees.remove(comp);
-                                wfsPostUrls.remove(comp);
                                 tbpCapabilities.remove(comp);
                             } else {
                                 log.warn("Keine Component zum entfernen aktiv");                               // NOI18N
@@ -1184,7 +1162,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                             sPane,
                                             ((WFSCapabilitiesTreeModel)capTreeModel).getCapabilities());
                                         wfsCapabilitiesTrees.put(sPane, trvCap);
-                                        wfsPostUrls.put(sPane, finalPostUrl);
                                         trvCap.setCellRenderer(new WFSCapabilitiesTreeCellRenderer(name));
                                         stateChanged(null);
                                     } else {
@@ -1289,7 +1266,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
                         final URL finalPostUrl = postURL;
                         final WFSCapabilitiesFactory capFact = new WFSCapabilitiesFactory();
-                        final WFSCapabilities cap = capFact.createCapabilities(finalPostUrl.toString());
+                        final WFSCapabilities cap = capFact.createCapabilities(link);
                         trvCap.setWfsCapabilities(cap);
                         final String name = FeatureServiceUtilities.getServiceName(cap);
                         if (log.isDebugEnabled()) {
@@ -1318,7 +1295,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
                                     wfsCapabilities.put(sPane, cap);
                                     wfsCapabilitiesTrees.put(sPane, trvCap);
-                                    wfsPostUrls.put(sPane, finalPostUrl);
                                     stateChanged(null);
 
                                     capabilityUrls.put(new LinkWithSubparent(link, null), sPane);

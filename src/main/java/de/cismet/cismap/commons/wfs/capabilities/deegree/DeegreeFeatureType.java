@@ -111,7 +111,10 @@ public class DeegreeFeatureType implements FeatureType {
 
     @Override
     public String[] getSupportedSRS() {
-        final URI[] uris = feature.getOtherSrs();
+        URI[] uris = feature.getOtherSrs();
+        if (uris == null) {
+            uris = new URI[0];
+        }
         final String[] srs = new String[uris.length];
 
         for (int i = 0; i < uris.length; ++i) {

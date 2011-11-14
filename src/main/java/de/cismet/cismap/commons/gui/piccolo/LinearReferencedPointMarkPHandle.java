@@ -92,6 +92,15 @@ public class LinearReferencedPointMarkPHandle extends PPath {
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  zeroToOne  DOCUMENT ME!
+     */
+    public void setInfoPanelTransparency(final float zeroToOne) {
+        pswingComp.setTransparency(zeroToOne);
+    }
+
+    /**
+     * DOCUMENT ME!
      */
     private void installEventListener() {
         final PBasicInputEventHandler moveAndClickListener = new PBasicInputEventHandler() {

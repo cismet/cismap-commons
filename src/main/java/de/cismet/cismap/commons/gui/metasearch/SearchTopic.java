@@ -69,7 +69,7 @@ public class SearchTopic extends AbstractAction implements Comparable<SearchTopi
 
         searchClasses = new LinkedHashSet<SearchClass>();
 
-        final URL urlToIcon = getClass().getResource(PATH_TO_ICONS + this.iconName + ".png");
+        final URL urlToIcon = getClass().getResource(PATH_TO_ICONS + this.iconName);
 
         if (urlToIcon != null) {
             this.icon = new ImageIcon(urlToIcon);
