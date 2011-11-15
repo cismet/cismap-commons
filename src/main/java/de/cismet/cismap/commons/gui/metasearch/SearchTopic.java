@@ -11,6 +11,8 @@ import org.apache.log4j.Logger;
 
 import java.awt.event.ActionEvent;
 
+import java.io.File;
+
 import java.net.URL;
 
 import java.util.Collection;
@@ -74,6 +76,8 @@ public class SearchTopic extends AbstractAction implements Comparable<SearchTopi
         if (urlToIcon != null) {
             this.icon = new ImageIcon(urlToIcon);
             putValue(SMALL_ICON, this.icon);
+        } else {
+            this.icon = new ImageIcon();
         }
 
         putValue(SHORT_DESCRIPTION, this.description);

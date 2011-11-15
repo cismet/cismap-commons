@@ -79,7 +79,13 @@ public class MetaSearchTooltip extends PNode {
         double maxWidth = lastLabel.getWidth();
         double totalHeight = lastLabel.getHeight();
         for (final SearchTopic searchTopic : searchTopics) {
-            final PImage lblIcon = new PImage(searchTopic.getIcon().getImage());
+            PImage lblIcon = null;
+            if ((searchTopic.getIcon() != null) && (searchTopic.getIcon().getImage() != null)) {
+                lblIcon = new PImage(searchTopic.getIcon().getImage());
+            } else {
+                lblIcon = new PImage();
+                lblIcon.setWidth((lastIcon != null) ? lastIcon.getWidth() : 16.0D);
+            }
             lblIcon.setOffset(rowX, rowY);
             lastIcon = lblIcon;
 
