@@ -323,6 +323,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private ButtonGroup interactionButtonGroup;
     private boolean mainMappingComponent = false;
 
+    /**
+     * Creates new PFeatures for all features in the given array and adds them to the PFeatureHashmap. Then adds the
+     * PFeature to the featurelayer.
+     *
+     * <p>DANGER: there's a bug risk here because the method runs in an own thread! It is possible that a PFeature of a
+     * feature is demanded but not yet added to the hashmap which causes in most cases a NullPointerException!</p>
+     *
+     * @param  features  array with features to add
+     */
+    private final HashMap<String, PLayer> featureGrpLayerMap = new HashMap<String, PLayer>();
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -703,16 +714,34 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 list.add(p);
             }
         }
+
+        /* Prüfe alle Features der Gruppen Layer (welche auch Kinder des Feature-Layers sind)
+         * und füge sie der Liste für alle zum malen anstehenden Features hinzu, wenn - der Gruppen-Layer sichtbar ist
+         * und - das Feature im Druckbereich liegt
+         */
+        final Collection<PLayer> groupLayers = this.featureGrpLayerMap.values();
+        List<PNode> grpMembers;
+        for (final PLayer layer : groupLayers) {
+            if (layer.getVisible()) {
+                grpMembers = layer.getChildrenReference();
+                for (final PNode p : grpMembers) {
+                    if (p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
+                        list.add(p);
+                    }
+                }
+            }
+        }
+
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("intersecting feature count: " + list.size());                           // NOI18N
+                LOG.debug("intersecting feature count: " + list.size()); // NOI18N
             }
         }
         pc.getCamera().animateViewToCenterBounds(pfl.getPrintingRectangle().getBounds(), true, 0);
         final double scale = 1 / pc.getCamera().getViewScale();
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("subPCscale:" + scale);                                                  // NOI18N
+                LOG.debug("subPCscale:" + scale);                        // NOI18N
             }
         }
 
@@ -2216,7 +2245,20 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     @Override
     public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-        final Collection<PFeature> all = featureLayer.getChildrenReference();
+        final Collection allChildren = featureLayer.getChildrenReference();
+        final ArrayList<PFeature> all = new ArrayList<PFeature>();
+
+        for (final Object o : allChildren) {
+            if (o instanceof PFeature) {
+                all.add((PFeature)o);
+            } else if (o instanceof PLayer) {
+                // Handling von Feature-Gruppen-Layer, welche als Kinder dem Feature Layer hinzugefügt wurden
+                all.addAll(((PLayer)o).getChildrenReference());
+            }
+        }
+
+//        final Collection<PFeature> all = featureLayer.getChildrenReference();
+
         for (final PFeature f : all) {
             f.setSelected(false);
         }
@@ -2242,8 +2284,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 final PFeature feature = getPFeatureHM().get(f);
 
                 if (feature != null) {
+                    feature.getParent().moveToFront();
                     feature.setSelected(true);
                     feature.moveToFront();
+
                     // Fuer den selectedObjectPresenter (Eigener PCanvas)
                     syncSelectedObjectPresenter(1000);
                 } else {
@@ -2335,6 +2379,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         stickyPNodes.clear();
         pFeatureHM.clear();
         featureLayer.removeAllChildren();
+
+        // Lösche alle Features in den Gruppen-Layer, aber füge den Gruppen-Layer wieder dem FeatureLayer hinzu
+        for (final PLayer layer : featureGrpLayerMap.values()) {
+            layer.removeAllChildren();
+            featureLayer.addChild(layer);
+        }
+
         checkFeatureSupportingRasterServiceAfterFeatureRemoval(fce);
     }
 
@@ -2417,13 +2468,27 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
-     * Creates new PFeatures for all features in the given array and adds them to the PFeatureHashmap. Then adds the
-     * PFeature to the featurelayer.
+     * public void showFeatureCollection(Feature[] features) { com.vividsolutions.jts.geom.Envelope
+     * env=computeFeatureEnvelope(features); showFeatureCollection(features,env); } public void
+     * showFeatureCollection(Feature[] f,com.vividsolutions.jts.geom.Envelope featureEnvelope) { selectedFeature=null;
+     * handleLayer.removeAllChildren(); //setRasterServiceLayerImagesVisibility(false); Envelope eSquare=null; HashSet<Feature>
+     * featureSet=new HashSet<Feature>(); featureSet.addAll(holdFeatures);
+     * featureSet.addAll(java.util.Arrays.asList(f)); Feature[] features=featureSet.toArray(new Feature[0]);
+     * pFeatureHM.clear(); addFeaturesToMap(features); zoomToFullFeatureCollectionBounds(); }.
      *
-     * <p>DANGER: there's a bug risk here because the method runs in an own thread! It is possible that a PFeature of a
-     * feature is demanded but not yet added to the hashmap which causes in most cases a NullPointerException!</p>
+     * @param  groupId  DOCUMENT ME!
+     * @param  visible  DOCUMENT ME!
+     */
+    public void setGroupLayerVisibility(final String groupId, final boolean visible) {
+        final PLayer layer = this.featureGrpLayerMap.get(groupId);
+        if (layer != null) {
+            layer.setVisible(visible);
+        }
+    }
+    /**
+     * is called when new feature is added to FeatureCollection.
      *
-     * @param  features  array with features to add
+     * @param  features  DOCUMENT ME!
      */
     public void addFeaturesToMap(final Feature[] features) {
         final double local_clip_offset_y = clip_offset_y;
@@ -2431,38 +2496,75 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         /// Hier muss der layer bestimmt werdenn
         for (int i = 0; i < features.length; ++i) {
+            final Feature feature = features[i];
+
             final PFeature p = new PFeature(
-                    features[i],
+                    feature,
                     getWtst(),
                     local_clip_offset_x,
                     local_clip_offset_y,
                     MappingComponent.this);
             try {
-                if (features[i] instanceof StyledFeature) {
-                    p.setTransparency(((StyledFeature)(features[i])).getTransparency());
+                if (feature instanceof StyledFeature) {
+                    p.setTransparency(((StyledFeature)(feature)).getTransparency());
                 } else {
                     p.setTransparency(cismapPrefs.getLayersPrefs().getAppFeatureLayerTranslucency());
                 }
-            } catch (final Exception e) {
-                p.setTransparency(0.8f);
-                LOG.info("Fehler beim Setzen der Transparenzeinstellungen", e); // NOI18N
-            }
-            // So kann man es Piccolo überlassen (müsste nur noch ein transformation machen, die die y achse spiegelt)
-            if (features[i].getGeometry() != null) {
-                pFeatureHM.put(p.getFeature(), p);
-                final int ii = i;
+
                 EventQueue.invokeLater(new Runnable() {
 
                         @Override
                         public void run() {
-                            featureLayer.addChild(p);
-                            if (!(features[ii].getGeometry() instanceof com.vividsolutions.jts.geom.Point)) {
-                                p.moveToFront();
+                            if (feature instanceof FeatureGroupMember) {
+                                final FeatureGroupMember fgm = (FeatureGroupMember)feature;
+                                final String groupId = fgm.getGroupId();
+
+                                PLayer groupLayer = featureGrpLayerMap.get(groupId);
+                                if (groupLayer == null) {
+                                    groupLayer = new PLayer();
+                                    featureLayer.addChild(groupLayer);
+                                    featureGrpLayerMap.put(groupId, groupLayer);
+                                    if (LOG.isDebugEnabled()) {
+                                        LOG.debug("created layer for group " + groupId);
+                                    }
+                                }
+
+                                groupLayer.addChild(p);
+
+                                if (fgm.getGeometry() != null) {
+                                    pFeatureHM.put(fgm.getFeature(), p);
+                                }
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("added feature to group " + groupId);
+                                }
                             }
                         }
                     });
+            } catch (final Exception e) {
+                p.setTransparency(0.8f);
+                LOG.info("Fehler beim Setzen der Transparenzeinstellungen", e); // NOI18N
+            }
+
+            // So kann man es Piccolo überlassen (müsste nur noch ein transformation machen, die die y achse spiegelt)
+            if (!(feature instanceof FeatureGroupMember)) {
+                if (feature.getGeometry() != null) {
+                    pFeatureHM.put(p.getFeature(), p);
+                    final int ii = i;
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                featureLayer.addChild(p);
+
+                                if (!(features[ii].getGeometry() instanceof com.vividsolutions.jts.geom.Point)) {
+                                    p.moveToFront();
+                                }
+                            }
+                        });
+                }
             }
         }
+
         EventQueue.invokeLater(new Runnable() {
 
                 @Override
@@ -2681,6 +2783,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Map<String, PLayer> getFeatureGroupLayers() {
+        return this.featureGrpLayerMap;
+    }
+
+    /**
      * Adds a PFeature to the PFeatureHashmap.
      *
      * @param  p  PFeature to add
@@ -2735,9 +2846,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             pFeatureHM.remove(f);
             stickyPNodes.remove(pf);
             try {
-                LOG.info("Entferne Feature " + f);                                                 // NOI18N
+                LOG.info("Entferne Feature " + f); // NOI18N
                 featureLayer.removeChild(pf);
-            } catch (final Exception ex) {
+
+                for (final PLayer grpLayer : this.featureGrpLayerMap.values()) {
+                    if (grpLayer.removeChild(pf) != null) {
+                        break;
+                    }
+                }
+            } catch (Exception ex) {
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Remove Child ging Schief. Ist beim Splitten aber normal.", ex); // NOI18N
