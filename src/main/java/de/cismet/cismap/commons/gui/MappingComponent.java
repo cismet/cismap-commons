@@ -1464,13 +1464,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                     adjustLayers();
 
-                    final NewSimpleInternalLayerWidget simpleInternalLayerWidget = new NewSimpleInternalLayerWidget(
-                            MappingComponent.this);
-                    MappingComponent.this.addInternalWidget(
-                        LAYERWIDGET,
-                        MappingComponent.POSITION_SOUTHEAST,
-                        simpleInternalLayerWidget);
-
                     if (DEBUG) {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("Set Mapping Modell done"); // NOI18N
@@ -3660,6 +3653,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  internalLayerWidgetAvailable  true, if available
      */
+    
     @Deprecated
     public void setInternalLayerWidgetAvailable(final boolean internalLayerWidgetAvailable) {
         if (!internalLayerWidgetAvailable && (this.getInternalWidget(LAYERWIDGET) != null)) {
@@ -5126,7 +5120,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     pi.setScale(3 / localScale);
                                     pi.setOffset(x, y);
                                 } else {
-                                    pi.setImage(i, 1000);
+                                    pi.setImage(i, animationDuration * 2);
                                     pi.setScale(1 / localScale);
                                     pi.setOffset(localOrigin);
                                     MappingComponent.this.repaint();
