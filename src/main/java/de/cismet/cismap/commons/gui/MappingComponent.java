@@ -3653,7 +3653,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  internalLayerWidgetAvailable  true, if available
      */
-    
+
     @Deprecated
     public void setInternalLayerWidgetAvailable(final boolean internalLayerWidgetAvailable) {
         if (!internalLayerWidgetAvailable && (this.getInternalWidget(LAYERWIDGET) != null)) {
