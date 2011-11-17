@@ -57,6 +57,19 @@ public class XBoundingBox extends BoundingBox {
     /**
      * Creates a new XBoundingBox object.
      *
+     * @param  geom    DOCUMENT ME!
+     * @param  crs     DOCUMENT ME!
+     * @param  metric  DOCUMENT ME!
+     */
+    public XBoundingBox(final Geometry geom, final String crs, final boolean metric) {
+        super(geom);
+        this.srs = crs;
+        this.metric = metric;
+    }
+
+    /**
+     * Creates a new XBoundingBox object.
+     *
      * @param   boundingBoxElementParent  DOCUMENT ME!
      * @param   srs                       DOCUMENT ME!
      * @param   metric                    DOCUMENT ME!
