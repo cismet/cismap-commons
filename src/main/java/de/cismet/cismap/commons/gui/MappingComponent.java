@@ -2277,7 +2277,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 final PFeature feature = getPFeatureHM().get(f);
 
                 if (feature != null) {
-                    feature.getParent().moveToFront();
+                    if (feature.getParent() != null) {
+                        feature.getParent().moveToFront();
+                    }
                     feature.setSelected(true);
                     feature.moveToFront();
 
