@@ -242,7 +242,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpFeatureInfosStateChanged
+    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpFeatureInfosStateChanged
         for (final FeatureInfoDisplay d : displays.values()) {
             if ((d != null) && (d instanceof MultipleFeatureInfoRequestsDisplay)) {
                 final MultipleFeatureInfoRequestsDisplay multiRequestDisplay = (MultipleFeatureInfoRequestsDisplay)d;
@@ -282,7 +282,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 }
             }
         }
-    }                                                          //GEN-LAST:event_tbpFeatureInfosStateChanged
+    }//GEN-LAST:event_tbpFeatureInfosStateChanged
 
     /**
      * DOCUMENT ME!
