@@ -263,6 +263,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private final HashMap<String, PLayer> featureGrpLayerMap = new HashMap<String, PLayer>();
     private BoundingBox initialBoundingBox;
 
+    /**
+     * Creates new PFeatures for all features in the given array and adds them to the PFeatureHashmap. Then adds the
+     * PFeature to the featurelayer.
+     *
+     * <p>DANGER: there's a bug risk here because the method runs in an own thread! It is possible that a PFeature of a
+     * feature is demanded but not yet added to the hashmap which causes in most cases a NullPointerException!</p>
+     *
+     * @param  features  array with features to add
+     */
+    private final HashMap<String, PLayer> featureGrpLayerMap = new HashMap<String, PLayer>();
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -3587,6 +3598,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  internalLayerWidgetAvailable  true, if available
      */
+
     @Deprecated
     public void setInternalLayerWidgetAvailable(final boolean internalLayerWidgetAvailable) {
         if (!internalLayerWidgetAvailable && (this.getInternalWidget(LAYERWIDGET) != null)) {
