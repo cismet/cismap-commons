@@ -79,6 +79,7 @@ import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.DrawSelectionFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CurrentStackTrace;
 
@@ -496,6 +497,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (log.isDebugEnabled()) {
                 log.debug("feature and pfeature geometry differ, but have the same crs and will be synchronized."); // NOI18N
             }
+
+            if (CrsTransformer.isDefaultCrs(newCrs)) {
+                newGeom.setSRID(CismapBroker.getInstance().getDefaultCrsAlias());
+            }
             feature.setGeometry(newGeom);
         } else {
             try {
@@ -510,6 +515,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         log.debug("feature and pfeature geometry differ and will be synchronized."); // NOI18N
                     }
 
+                    if (CrsTransformer.isDefaultCrs(oldCrs)) {
+                        newGeomWithOldSrid.setSRID(CismapBroker.getInstance().getDefaultCrsAlias());
+                    }
                     feature.setGeometry(newGeomWithOldSrid);
                 } else {
                     if (log.isDebugEnabled()) {
