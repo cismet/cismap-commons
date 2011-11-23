@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 
 import org.apache.log4j.Logger;
@@ -42,7 +41,6 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapClickListener;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
-
 
 /**
  * DOCUMENT ME!

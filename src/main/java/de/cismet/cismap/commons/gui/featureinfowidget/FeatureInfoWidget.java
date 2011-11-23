@@ -12,7 +12,6 @@
  */
 package de.cismet.cismap.commons.gui.featureinfowidget;
 
-
 import com.jgoodies.looks.Options;
 
 import org.apache.log4j.Logger;
@@ -40,7 +39,6 @@ import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
-
 
 /**
  * DOCUMENT ME!
@@ -217,7 +215,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpFeatureInfosStateChanged
+    private void tbpFeatureInfosStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpFeatureInfosStateChanged
         for (final FeatureInfoDisplay d : displays.values()) {
             if ((d != null) && (d instanceof MultipleFeatureInfoRequestsDisplay)) {
                 final MultipleFeatureInfoRequestsDisplay multiRequestDisplay = (MultipleFeatureInfoRequestsDisplay)d;
@@ -250,7 +248,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                 }
             }
         }
-    }//GEN-LAST:event_tbpFeatureInfosStateChanged
+    }                                                          //GEN-LAST:event_tbpFeatureInfosStateChanged
 
     /**
      * DOCUMENT ME!
