@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import Sirius.navigator.plugin.PluginRegistry;
 
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 
@@ -44,7 +43,6 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapClickListener;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 
-import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
 /**
  * DOCUMENT ME!
@@ -208,19 +206,20 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                 final String msg = "Could not load lastFeatureInfoIcon";                                               // NOI18N
                 LOG.error(msg);
             }
-            // set the overlay on the lower left edge of the icon as default..
+
+            // set default values for the overlay area to the upper right edge of the icon..
             int width = 16;
             int height = 16;
             int xPos = featureInfoIcon.getWidth() - width;
-            int yPos = featureInfoIcon.getHeight() - height;
+            int yPos = 0;
             int bgR = 255;
             int bgG = 255;
             int bgB = 255;
-            Color standardBG = new Color(bgR, bgG, bgB);
+            Color standardBG = new Color(bgR, bgG, bgB, 1);
             int lastBGR = 255;
             int lastBGG = 255;
             int lastBGB = 255;
-            Color lastBG = new Color(lastBGR, lastBGG, lastBGB);
+            Color lastBG = new Color(lastBGR, lastBGG, lastBGB, 1);
             BufferedImage subimage = featureInfoIcon.getSubimage(xPos, yPos, width, height);
             Graphics2D g2d = (Graphics2D)subimage.getGraphics();
 
@@ -245,37 +244,40 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
 
             if (iconProps.isEmpty()
                         || !(iconProps.containsKey("overlayPositionX")
-                            && iconProps.containsKey("overlayPositionY")                                       // NOI18N
-                            && iconProps.containsKey("overlayWidth") && iconProps.containsKey("overlayHeigth") // NOI18N
-                            && iconProps.containsKey("overlayBackgroundColorR")                                // NOI18N
-                            && iconProps.containsKey("overlayBackgroundColorG")                                // NOI18N
+                            && iconProps.containsKey("overlayPositionY")                                                                                            // NOI18N
+                            && iconProps.containsKey("overlayWidth") && iconProps.containsKey("overlayHeigth")                                                      // NOI18N
+                            && iconProps.containsKey("overlayBackgroundColorR")                                                                                     // NOI18N
+                            && iconProps.containsKey("overlayBackgroundColorG")                                                                                     // NOI18N
                             && iconProps.containsKey("overlayBackgroundColorB")
-                            && iconProps.containsKey("lastOverlayBackgroundColorR")                            // NOI18N
-                            && iconProps.containsKey("lastOverlayBackgroundColorG")                            // NOI18N
-                            && iconProps.containsKey("lastOverlayBackgroundColorB"))) {                        // NOI18N
-                // TODO ERROR LOG EXCPETION
+                            && iconProps.containsKey("lastOverlayBackgroundColorR")                                                                                 // NOI18N
+                            && iconProps.containsKey("lastOverlayBackgroundColorG")                                                                                 // NOI18N
+                            && iconProps.containsKey("lastOverlayBackgroundColorB"))) {                                                                             // NOI18N
                 LOG.warn(
-                    "featureInfoIcon.properties file does not contain all needed keys. Default values for overlay area are used"); // NOI18N
+                    "featureInfoIcon.properties file does not contain all needed keys. Default values for overlay area are used");                                  // NOI18N
             } else {
                 try {
-                    xPos = Integer.parseInt((String)iconProps.get("overlayPositionX"));                                            // NOI18N
-                    yPos = Integer.parseInt((String)iconProps.get("overlayPositionY"));                                            // NOI18N
-                    width = Integer.parseInt((String)iconProps.get("overlayWidth"));                                               // NOI18N
-                    height = Integer.parseInt((String)iconProps.get("overlayHeigth"));                                             // NOI18N
-                    bgR = Integer.parseInt((String)iconProps.get("overlayBackgroundColorR"));                                      // NOI18N
-                    bgG = Integer.parseInt((String)iconProps.get("overlayBackgroundColorG"));                                      // NOI18N
-                    bgB = Integer.parseInt((String)iconProps.get("overlayBackgroundColorB"));                                      // NOI18N
-                    lastBGR = Integer.parseInt((String)iconProps.get("lastOverlayBackgroundColorR"));                              // NOI18N
-                    lastBGG = Integer.parseInt((String)iconProps.get("lastOverlayBackgroundColorG"));                              // NOI18N
-                    lastBGB = Integer.parseInt((String)iconProps.get("lastOverlayBackgroundColorB"));                              // NOI18N
+                    xPos = Integer.parseInt((String)iconProps.get("overlayPositionX"));                                                                             // NOI18N
+                    yPos = Integer.parseInt((String)iconProps.get("overlayPositionY"));                                                                             // NOI18N
+                    width = Integer.parseInt((String)iconProps.get("overlayWidth"));                                                                                // NOI18N
+                    height = Integer.parseInt((String)iconProps.get("overlayHeigth"));                                                                              // NOI18N
+                    bgR = Integer.parseInt((String)iconProps.get("overlayBackgroundColorR"));                                                                       // NOI18N
+                    bgG = Integer.parseInt((String)iconProps.get("overlayBackgroundColorG"));                                                                       // NOI18N
+                    bgB = Integer.parseInt((String)iconProps.get("overlayBackgroundColorB"));                                                                       // NOI18N
+                    lastBGR = Integer.parseInt((String)iconProps.get("lastOverlayBackgroundColorR"));                                                               // NOI18N
+                    lastBGG = Integer.parseInt((String)iconProps.get("lastOverlayBackgroundColorG"));                                                               // NOI18N
+                    lastBGB = Integer.parseInt((String)iconProps.get("lastOverlayBackgroundColorB"));                                                               // NOI18N
+                    subimage = featureInfoIcon.getSubimage(xPos, yPos, width, height);
                     standardBG = new Color(bgR, bgG, bgB);
                     lastBG = new Color(lastBGR, lastBGG, lastBGB);
-                    subimage = featureInfoIcon.getSubimage(xPos, yPos, width, height);
                     g2d = (Graphics2D)subimage.getGraphics();
                 } catch (NumberFormatException ex) {
                     Log.error(
-                        "Error while retrieving properties for overlay area. Default values for overlay area are used",            // NOI18N
+                        "Error while retrieving properties for overlay area. Default values for overlay area are used",                                             // NOI18N
                         ex);
+                } catch (Exception e) {
+                    Log.error(
+                        "Could not compute ovaerlay area for feature Info Icon.Default Area is used. Maybe you should check the properties in the properties file", // NOI18N
+                        e);
                 }
             }
 
@@ -290,16 +292,21 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                     Log.warn(
                         "OverlayIcon for MultipleFeautreInfoRequestDisplay is null, default FeatureInfoIcon is used"); // NOI18N
                 } else {
-                    if (nr == (c.size() - 1)) {
-                        if (lastFeatureInfoIcon != null) {
+                    if ((nr == (c.size() - 1)) && (lastFeatureInfoIcon != null)) {
+                        // default
+                        g2d = (Graphics2D)lastFeatureInfoIcon.getSubimage(lastFeatureInfoIcon.getWidth() - 16,
+                                    0,
+                                    16,
+                                    16).getGraphics();
+                        try {
                             g2d = (Graphics2D)lastFeatureInfoIcon.getSubimage(xPos, yPos, width, height).getGraphics();
-                            g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, null);
-                            symb = new FeatureAnnotationSymbol(lastFeatureInfoIcon);
-                        } else {
-                            g2d = (Graphics2D)featureInfoIcon.getSubimage(xPos, yPos, width, height).getGraphics();
-                            g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, null);
-                            symb = new FeatureAnnotationSymbol(featureInfoIcon);
+                        } catch (Exception e) {
+                            Log.error(
+                                "Could not compute ovaerlay area for lastFeatureInfoIcon. Default Area is used. Maybe you should check the properties in the properties file", // NOI18N
+                                e);
                         }
+                        g2d.drawImage(f.getOverlayIcon(), 0, 0, lastBG, null);
+                        symb = new FeatureAnnotationSymbol(lastFeatureInfoIcon);
                     } else {
                         g2d.drawImage(f.getOverlayIcon(), 0, 0, standardBG, null);
                         symb = new FeatureAnnotationSymbol(featureInfoIcon);
