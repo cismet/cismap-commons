@@ -11,8 +11,6 @@ import org.apache.log4j.Logger;
 
 import java.awt.event.ActionEvent;
 
-import java.io.File;
-
 import java.net.URL;
 
 import java.util.Collection;
