@@ -87,9 +87,9 @@ public class SearchTopic extends AbstractAction implements Comparable<SearchTopi
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Add a new search class to this search topic. The given search class won't be added if it's already added to this search topic.
      *
-     * @param  searchClass  DOCUMENT ME!
+     * @param  searchClass  The search class to add.
      */
     public void insert(final SearchClass searchClass) {
         if (searchClass == null) {
@@ -174,7 +174,7 @@ public class SearchTopic extends AbstractAction implements Comparable<SearchTopi
      *
      * @param  selected  DOCUMENT ME!
      */
-    void setSelected(final boolean selected) {
+    public void setSelected(final boolean selected) {
         this.selected = selected;
         putValue(SELECTED_KEY, this.selected);
     }
