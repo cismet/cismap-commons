@@ -227,7 +227,8 @@ public class BoundingBox implements Cloneable, Serializable {
     }
 
     /**
-     * Creates a geometry out of this BoundingBox by using a GeometryFactory with floating precision and the specified SRID.
+     * Creates a geometry out of this BoundingBox by using a GeometryFactory with floating precision and the specified
+     * SRID.
      *
      * @param   srid  SRID
      *

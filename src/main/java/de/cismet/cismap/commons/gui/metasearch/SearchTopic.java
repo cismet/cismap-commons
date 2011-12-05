@@ -87,7 +87,8 @@ public class SearchTopic extends AbstractAction implements Comparable<SearchTopi
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * Add a new search class to this search topic. The given search class won't be added if it's already added to this search topic.
+     * Add a new search class to this search topic. The given search class won't be added if it's already added to this
+     * search topic.
      *
      * @param  searchClass  The search class to add.
      */
