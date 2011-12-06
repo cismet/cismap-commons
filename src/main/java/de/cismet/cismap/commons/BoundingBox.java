@@ -7,10 +7,12 @@
 ****************************************************/
 package de.cismet.cismap.commons;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 import edu.umd.cs.piccolo.util.PBounds;
 
@@ -222,6 +224,20 @@ public class BoundingBox implements Cloneable, Serializable {
      */
     public void setY2(final double y2) {
         this.y2 = y2;
+    }
+
+    /**
+     * Creates a geometry out of this BoundingBox by using a GeometryFactory with floating precision and the specified
+     * SRID.
+     *
+     * @param   srid  SRID
+     *
+     * @return  A geometry created by enveloping the current BoundingBox.
+     */
+    public Geometry getGeometry(final int srid) {
+        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+        final Envelope envelope = new Envelope(x1, x2, y1, y2);
+        return factory.toGeometry(envelope);
     }
 
     /**
