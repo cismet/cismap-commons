@@ -121,6 +121,7 @@ import de.cismet.cismap.commons.gui.piccolo.PNodeFactory;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
 import de.cismet.cismap.commons.gui.piccolo.XPImage;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.AttachFeatureListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateLinearReferencedMarksListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateSearchGeometryListener;
@@ -3934,15 +3935,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     @Override
     public Element getConfiguration() {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("writing configuration <cismapMappingPreferences>");                          // NOI18N
+            LOG.debug("writing configuration <cismapMappingPreferences>");         // NOI18N
         }
-        final Element ret = new Element("cismapMappingPreferences");                                // NOI18N
-        ret.setAttribute("interactionMode", getInteractionMode());                                  // NOI18N
-        ret.setAttribute(
-            "creationMode",
-            ((CreateNewGeometryListener)getInputListener(MappingComponent.NEW_POLYGON)).getMode()); // NOI18N
-        ret.setAttribute("handleInteractionMode", getHandleInteractionMode());                      // NOI18N
-        ret.setAttribute("snapping", new Boolean(isSnappingEnabled()).toString());                  // NOI18N
+        final Element ret = new Element("cismapMappingPreferences");               // NOI18N
+        ret.setAttribute("interactionMode", getInteractionMode());                 // NOI18N
+        ret.setAttribute("creationMode", ((CreateGeometryListener)getInputListener(getInteractionMode())).getMode());
+        ret.setAttribute("handleInteractionMode", getHandleInteractionMode());     // NOI18N
+        ret.setAttribute("snapping", new Boolean(isSnappingEnabled()).toString()); // NOI18N
 
         // Position
         final Element currentPosition = new Element("Position"); // NOI18N
@@ -4145,16 +4144,14 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         try {
             final String interactMode = prefs.getAttribute("interactionMode").getValue();          // NOI18N
             setInteractionMode(interactMode);
-            if (interactMode.equals(MappingComponent.NEW_POLYGON)) {
-                try {
-                    final String creationMode = prefs.getAttribute("creationMode").getValue();     // NOI18N
-                    ((CreateNewGeometryListener)getInputListener(MappingComponent.NEW_POLYGON)).setMode(creationMode);
-                } catch (final Exception ex) {
-                    LOG.warn("Fehler beim Setzen des CreationInteractionMode", ex);                // NOI18N
-                }
-            }
         } catch (final Exception ex) {
             LOG.warn("Fehler beim Setzen des InteractionMode", ex);                                // NOI18N
+        }
+        try {
+            final String creationMode = prefs.getAttribute("creationMode").getValue();             // NOI18N
+            ((CreateGeometryListener)getInputListener(getInteractionMode())).setMode(creationMode);
+        } catch (final Exception ex) {
+            LOG.warn("Fehler beim Setzen des CreationInteractionMode", ex);                        // NOI18N
         }
         try {
             final String handleInterMode = prefs.getAttribute("handleInteractionMode").getValue(); // NOI18N
