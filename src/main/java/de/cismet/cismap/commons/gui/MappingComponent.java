@@ -3885,15 +3885,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     @Override
     public Element getConfiguration() {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("writing configuration <cismapMappingPreferences>");                          // NOI18N
+            LOG.debug("writing configuration <cismapMappingPreferences>");         // NOI18N
         }
-        final Element ret = new Element("cismapMappingPreferences");                                // NOI18N
-        ret.setAttribute("interactionMode", getInteractionMode());                                  // NOI18N
-        ret.setAttribute(
-            "creationMode",
-            ((CreateNewGeometryListener)getInputListener(MappingComponent.NEW_POLYGON)).getMode()); // NOI18N
-        ret.setAttribute("handleInteractionMode", getHandleInteractionMode());                      // NOI18N
-        ret.setAttribute("snapping", new Boolean(isSnappingEnabled()).toString());                  // NOI18N
+        final Element ret = new Element("cismapMappingPreferences");               // NOI18N
+        ret.setAttribute("interactionMode", getInteractionMode());                 // NOI18N
+        ret.setAttribute("creationMode", ((CreateGeometryListener)getInputListener(getInteractionMode())).getMode());
+        ret.setAttribute("handleInteractionMode", getHandleInteractionMode());     // NOI18N
+        ret.setAttribute("snapping", new Boolean(isSnappingEnabled()).toString()); // NOI18N
 
         final Object inputListener = getInputListener(CREATE_SEARCH_POLYGON);
         if (inputListener instanceof CreateSearchGeometryListener) {
@@ -4127,6 +4125,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             LOG.warn("Fehler beim Setzen des CreateSearchMode", ex); // NOI18N
         }
 
+        try {
+            final String creationMode = prefs.getAttribute("creationMode").getValue();             // NOI18N
+            ((CreateGeometryListener)getInputListener(getInteractionMode())).setMode(creationMode);
+        } catch (final Exception ex) {
+            LOG.warn("Fehler beim Setzen des CreationInteractionMode", ex);                        // NOI18N
+        }
         try {
             final String handleInterMode = prefs.getAttribute("handleInteractionMode").getValue(); // NOI18N
             setHandleInteractionMode(handleInterMode);
