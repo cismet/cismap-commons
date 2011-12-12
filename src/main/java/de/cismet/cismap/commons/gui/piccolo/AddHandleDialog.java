@@ -16,7 +16,8 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
-import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -42,11 +43,17 @@ public class AddHandleDialog extends javax.swing.JDialog {
 
     private int returnStatus = STATUS_NONE;
 
-    private boolean updateLeft = true;
-    private boolean updateRight = true;
+    private boolean sliderLocked = false;
+    private boolean updateLeftLocked = false;
+    private boolean updateRightLocked = false;
+
+    private double distanceToLeft = 0d;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOK;
+    private javax.swing.JSpinner jSpinner1;
+    private javax.swing.JSpinner jSpinner2;
     private javax.swing.JLabel lblDescription;
     private javax.swing.JLabel lblDescriptionImage;
     private javax.swing.JLabel lblDistanceLeft;
@@ -64,8 +71,6 @@ public class AddHandleDialog extends javax.swing.JDialog {
     private javax.swing.JPanel panButtons;
     private javax.swing.JPanel panFooter;
     private javax.swing.JSlider sliDistance;
-    private javax.swing.JTextField txtLeft;
-    private javax.swing.JTextField txtRight;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -97,8 +102,6 @@ public class AddHandleDialog extends javax.swing.JDialog {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        txtLeft = new javax.swing.JTextField();
-        txtRight = new javax.swing.JTextField();
         lblNew = new javax.swing.JLabel();
         sliDistance = new javax.swing.JSlider();
         lblLeftNeighbour = new javax.swing.JLabel();
@@ -118,33 +121,13 @@ public class AddHandleDialog extends javax.swing.JDialog {
         lblTopLeftSpacer = new javax.swing.JLabel();
         lblRightSpacer = new javax.swing.JLabel();
         lblTopRightSpacer = new javax.swing.JLabel();
+        jSpinner1 = new javax.swing.JSpinner();
+        jSpinner2 = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.title")); // NOI18N
         setResizable(false);
         getContentPane().setLayout(new java.awt.GridBagLayout());
-
-        txtLeft.getDocument().addDocumentListener(new LeftDocumentListener());
-        txtLeft.setText(String.valueOf(getDistanceToLeft()));
-        txtLeft.setPreferredSize(new java.awt.Dimension(50, 27));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(txtLeft, gridBagConstraints);
-
-        txtRight.getDocument().addDocumentListener(new RightDocumentListener());
-        txtRight.setText(String.valueOf(getDistanceToRight()));
-        txtRight.setPreferredSize(new java.awt.Dimension(50, 27));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(txtRight, gridBagConstraints);
 
         lblNew.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblNew.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblNew.text")); // NOI18N
@@ -348,6 +331,42 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints.weighty = 1.0;
         getContentPane().add(lblTopRightSpacer, gridBagConstraints);
 
+        jSpinner1.setValue(getDistanceToLeft());
+        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(
+                Double.valueOf(0.0d),
+                Double.valueOf(0.0d),
+                null,
+                Double.valueOf(1.0d)));
+        jSpinner1.setMinimumSize(new java.awt.Dimension(75, 26));
+        jSpinner1.setPreferredSize(new java.awt.Dimension(75, 26));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        getContentPane().add(jSpinner1, gridBagConstraints);
+        ((JSpinner.DefaultEditor)jSpinner1.getEditor()).getTextField()
+                .getDocument()
+                .addDocumentListener(new LeftDocumentListener());
+
+        jSpinner2.setValue(getDistanceToRight());
+        jSpinner2.setModel(new javax.swing.SpinnerNumberModel(
+                Double.valueOf(0.0d),
+                Double.valueOf(0.0d),
+                null,
+                Double.valueOf(1.0d)));
+        jSpinner2.setMinimumSize(new java.awt.Dimension(75, 26));
+        jSpinner2.setPreferredSize(new java.awt.Dimension(75, 26));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridheight = 2;
+        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
+        getContentPane().add(jSpinner2, gridBagConstraints);
+        ((JSpinner.DefaultEditor)jSpinner2.getEditor()).getTextField()
+                .getDocument()
+                .addDocumentListener(new RightDocumentListener());
+
         pack();
     } // </editor-fold>//GEN-END:initComponents
 
@@ -356,31 +375,29 @@ public class AddHandleDialog extends javax.swing.JDialog {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOKActionPerformed
-        if (checkTextFields()) {
-            returnStatus = STATUS_OK;
-            dispose();
-        }
-    }                                                                         //GEN-LAST:event_btnOKActionPerformed
+    private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
+        returnStatus = STATUS_OK;
+        dispose();
+    }//GEN-LAST:event_btnOKActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnCancelActionPerformed
+    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         returnStatus = STATUS_CANCELED;
         dispose();
-    }                                                                             //GEN-LAST:event_btnCancelActionPerformed
+    }//GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void sliDistanceStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_sliDistanceStateChanged
+    private void sliDistanceStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliDistanceStateChanged
         sliderValueChanged();
-    }                                                                               //GEN-LAST:event_sliDistanceStateChanged
+    }//GEN-LAST:event_sliDistanceStateChanged
 
     /**
      * DOCUMENT ME!
@@ -390,40 +407,63 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * @return  DOCUMENT ME!
      */
     private double cut(final double value) {
-        return Math.round(value * PRECISION) / PRECISION;
+        return (int)(value * PRECISION) / PRECISION;
     }
 
     /**
      * DOCUMENT ME!
      */
     private void sliderValueChanged() {
-        if (updateLeft) {  // Endlos-Schleife vermeiden
-            txtLeft.setText(String.valueOf(getDistanceToLeft()));
+        // update für den Slider kurzfristig deaktivieren (sonst endlos-Schleife)
+        sliderLocked = true;
+        try {
+            setDistanceToLeft(sliDistance.getValue() / PRECISION);
+        } finally {
+            // update für den Slider wieder aktivieren
+            sliderLocked = false;
         }
-        if (updateRight) { // Endlos-Schleife vermeiden
-            txtRight.setText(String.valueOf(getDistanceToRight()));
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  distanceToLeft  DOCUMENT ME!
+     */
+    public void setDistanceToLeft(final double distanceToLeft) {
+        this.distanceToLeft = cut(distanceToLeft);
+
+        if (!sliderLocked) {      // Endlos-Schleife vermeiden
+            sliDistance.setValue((int)(this.distanceToLeft * PRECISION));
         }
+        if (!updateLeftLocked) {  // Endlos-Schleife vermeiden
+            jSpinner1.setValue(this.distanceToLeft);
+        }
+        if (!updateRightLocked) { // Endlos-Schleife vermeiden
+            jSpinner2.setValue(cut(getDistanceTotal() - this.distanceToLeft));
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  distanceToRight  DOCUMENT ME!
+     */
+    public void setDistanceToRight(final double distanceToRight) {
+        setDistanceToLeft(getDistanceTotal() - distanceToRight);
     }
 
     /**
      * DOCUMENT ME!
      */
     private void leftTextChanged() {
-        double distanceToLeft = 0;
+        // update für das linke Feld kurzfristig deaktivieren (sonst endlos-Schleife)
+        updateLeftLocked = true;
         try {
             // Abstand vom linken Punkt anhand des linken Feldes setzen
-            distanceToLeft = Double.valueOf(txtLeft.getText());
-            // nur was tun wenn der Abstand innerhalb der gültigen Grenzen liegt
-            if ((distanceToLeft >= 0) && (distanceToLeft <= getDistanceTotal())) {
-                // update für das linke Feld kurzfristig deaktivieren (sonst endlos-Schleife)
-                updateLeft = false;
-                // Slider auf den Wert des linken Feldes setzen
-                setDistanceToLeft(distanceToLeft);
-                // update für das linke Feld wieder aktivieren
-                updateLeft = true;
-            }
-        } catch (NumberFormatException ex) {
-            // keine Nummer eingegeben => nichts tun
+            setDistanceToLeft((Double)jSpinner1.getValue());
+        } finally {
+            // update für das linke Feld wieder aktivieren
+            updateLeftLocked = false;
         }
     }
 
@@ -431,121 +471,15 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * DOCUMENT ME!
      */
     private void rightTextChanged() {
-        double distanceToRight = 0;
+        // update für das rechte Feld kurzfristig deaktivieren (sonst endlos-Schleife)
+        updateRightLocked = true;
         try {
             // Abstand vom linken Punkt anhand des Wertes im linken Feld berechnen
-            distanceToRight = Double.valueOf(txtRight.getText());
-            // nur was tun wenn der Abstand innerhalb der gültigen Grenzen liegt
-            if ((distanceToRight >= 0) && (distanceToRight <= getDistanceTotal())) {
-                // update für das rechte Feld kurzfristig deaktivieren (sonst endlos-Schleife)
-                updateRight = false;
-                // Slider auf den Wert des rechten Feldes setzen
-                setDistanceToRight(distanceToRight);
-                // update für das rechte Feld wieder aktivieren
-                updateRight = true;
-            }
-        } catch (NumberFormatException ex) {
-            // keine Nummer eingegeben => nichts tun
+            setDistanceToRight((Double)jSpinner2.getValue());
+        } finally {
+            // update für das rechte Feld wieder aktivieren
+            updateRightLocked = false;
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private boolean checkTextFields() {
-        final double distanceToLeft;
-        final double distanceToRight;
-
-        // LINKS
-        // - ist eine Zahl?
-        try {
-            distanceToLeft = Double.valueOf(txtLeft.getText());
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(
-                null,
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane1.message"), // NOI18N
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane1.title"), // NOI18N
-                JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        // - ist kleiner Gesamt-Abstand
-        if (distanceToLeft > getDistanceTotal()) {
-            JOptionPane.showMessageDialog(
-                null,
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane2.message"), // NOI18N
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane2.title"), // NOI18N
-                JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        // - ist größer 0
-        if (distanceToLeft < 0) {
-            JOptionPane.showMessageDialog(
-                null,
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane3.message"), // NOI18N
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane3.title"), // NOI18N
-                JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-
-        // RECHTS
-        // - ist eine Zahl?
-        try {
-            distanceToRight = Double.valueOf(txtRight.getText());
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(
-                null,
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane4.message"), // NOI18N
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane4.title"), // NOI18N
-                JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        // - ist kleiner Gesamt-Abstand
-        if (distanceToRight > getDistanceTotal()) {
-            JOptionPane.showMessageDialog(
-                null,
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane5.message"), // NOI18N
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane5.title"), // NOI18N
-                JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        // - ist größer 0
-        if (distanceToRight < 0) {
-            JOptionPane.showMessageDialog(
-                null,
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane6.message"), // NOI18N
-                org.openide.util.NbBundle.getMessage(
-                    AddHandleDialog.class,
-                    "AddHandleDialog.checkTextFields().JOptionPane6.title"), // NOI18N
-                JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-
-        // keine Fehler
-        return true;
     }
 
     /**
@@ -572,7 +506,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * @return  DOCUMENT ME!
      */
     public double getDistanceToLeft() {
-        return sliDistance.getValue() / PRECISION;
+        return distanceToLeft;
     }
 
     /**
@@ -581,7 +515,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * @return  DOCUMENT ME!
      */
     public double getDistanceToRight() {
-        return cut(getDistanceTotal() - getDistanceToLeft());
+        return cut(getDistanceTotal() - distanceToLeft);
     }
 
     /**
@@ -590,25 +524,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * @param  distanceTotal  DOCUMENT ME!
      */
     private void setDistanceTotal(final double distanceTotal) {
-        sliDistance.setMaximum((int)(cut(distanceTotal) * PRECISION));
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  distanceToLeft  DOCUMENT ME!
-     */
-    public void setDistanceToLeft(final double distanceToLeft) {
-        sliDistance.setValue((int)(cut(distanceToLeft) * PRECISION));
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  distanceToRight  DOCUMENT ME!
-     */
-    public void setDistanceToRight(final double distanceToRight) {
-        sliDistance.setValue((int)((getDistanceTotal() - cut(distanceToRight)) * PRECISION));
+        sliDistance.setMaximum((int)(distanceTotal * PRECISION));
+        ((SpinnerNumberModel)jSpinner1.getModel()).setMaximum(distanceTotal);
+        ((SpinnerNumberModel)jSpinner2.getModel()).setMaximum(distanceTotal);
     }
 
     /**
