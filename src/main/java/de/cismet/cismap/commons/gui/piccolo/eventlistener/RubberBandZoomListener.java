@@ -132,17 +132,16 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
             CismapBroker.getInstance().fireMapBoundsChanged();
         }
 
+        if (zoomListener != null) {
+            timer.removeActionListener(zoomListener);
+        }
+        zoomListener = new ZoomAction(b, e);
+        timer.addActionListener(zoomListener);
+
         timer.setInitialDelay(delayTime);
         if (timer.isRunning()) {
             timer.restart();
         } else {
-            if (zoomListener != null) {
-                timer.removeActionListener(zoomListener);
-            }
-
-            zoomListener = new ZoomAction(b, e);
-
-            timer.addActionListener(zoomListener);
             timer.start();
         }
     }
