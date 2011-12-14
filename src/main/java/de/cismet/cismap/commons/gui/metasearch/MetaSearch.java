@@ -289,7 +289,9 @@ public class MetaSearch implements Configurable {
             searchTopicElement.setAttribute(CONF_SEARCHTOPIC_ATTR_NAME, searchTopic.getName());
             searchTopicElement.setAttribute(CONF_SEARCHTOPIC_ATTR_DESCRIPTION, searchTopic.getDescription());
             searchTopicElement.setAttribute(CONF_SEARCHTOPIC_ATTR_KEY, searchTopic.getKey());
-            searchTopicElement.setAttribute(CONF_SEARCHTOPIC_ATTR_ICON, searchTopic.getIconName());
+            searchTopicElement.setAttribute(
+                CONF_SEARCHTOPIC_ATTR_ICON,
+                ((searchTopic.getIconName() != null) ? searchTopic.getIconName() : ""));
             searchTopicElement.setAttribute(CONF_SEARCHTOPIC_ATTR_SELECTED, Boolean.toString(searchTopic.isSelected()));
 
             result.addContent(searchTopicElement);
