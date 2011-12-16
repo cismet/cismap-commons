@@ -239,10 +239,10 @@ public class MetaSearch implements Configurable {
                 continue;
             }
 
-            boolean isSelected = true;
+            boolean isSelected = false;
             if ((selected != null) && (selected.trim().length() > 0)
-                        && ("false".equalsIgnoreCase(selected) || "0".equalsIgnoreCase(selected))) {
-                isSelected = false;
+                        && ("true".equalsIgnoreCase(selected) || "1".equalsIgnoreCase(selected))) {
+                isSelected = true;
             }
 
             final SearchTopic searchTopic = new SearchTopic(name, description, key, icon, isSelected);
