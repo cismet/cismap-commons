@@ -19,7 +19,6 @@ import edu.umd.cs.piccolo.event.PInputEventListener;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 
@@ -134,15 +133,11 @@ public class PSwingEventHandler implements PInputEventListener {
             if (listenNode != null) {
                 this.active = false;
                 listenNode.removeInputEventListener(this);
-//                listenNode.removeMouseListener( this );
-//                listenNode.removeMouseMotionListener( this );
             }
         } else if (!this.active && active) {
             if (listenNode != null) {
                 this.active = true;
                 listenNode.addInputEventListener(this);
-//                listenNode.addMouseListener( this );
-//                listenNode.addMouseMotionListener( this );
             }
         }
     }
@@ -155,50 +150,7 @@ public class PSwingEventHandler implements PInputEventListener {
     public boolean isActive() {
         return active;
     }
-//
-//    // Forwards mousePressed events to Swing components used in Jazz,
-//    // if any should receive the event
-//    public void mousePressed( ZMouseEvent e1 ) {
-//        dispatchEvent( e1 );
-//    }
-//
-//    // Forwards mouseReleased events to Swing components used in Jazz,
-//    // if any should receive the event
-//    public void mouseReleased( ZMouseEvent e1 ) {
-//        dispatchEvent( e1 );
-//    }
-//
-//    // Forwards mouseClicked events to Swing components used in Jazz,
-//    // if any should receive the event
-//    public void mouseClicked( ZMouseEvent e1 ) {
-//        dispatchEvent( e1 );
-//    }
-//
-//    // We'll have to implement this ourselves later
-//    // since it only tells us when we exit the
-//    // PNode
-//    public void mouseExited( ZMouseEvent e1 ) {
-//        dispatchEvent( e1 );
-//    }
-//
-//    // We'll have to implement this ourselves later
-//    // since it only tells us when we enter the
-//    // PNode
-//    public void mouseEntered( ZMouseEvent e1 ) {
-//        dispatchEvent( e1 );
-//    }
-//
-//    // Forwards mouseMoved events to Swing components used in Jazz,
-//    // if any should receive the event
-//    public void mouseMoved( ZMouseEvent e1 ) {
-//        dispatchEvent( e1 );
-//    }
-//
-//    // Forwards mouseDragged events to Swing components used in Jazz,
-//    // if any should receive the event
-//    public void mouseDragged( ZMouseEvent e1 ) {
-//        dispatchEvent( e1 );
-//    }
+
     /**
      * A re-implementation of Container.findComponentAt that ensures that the returned component is *SHOWING* not just
      * visible.
@@ -245,7 +197,6 @@ public class PSwingEventHandler implements PInputEventListener {
      * @param  aEvent  DOCUMENT ME!
      */
     void dispatchEvent(final PSwingMouseEvent e1, final PInputEvent aEvent) {
-//        System.out.println( "PSwingEventHandler.dispatchEvent: event=" + e1 );
         PNode grabNode = null;
         Component comp = null;
         Point2D pt = null;
@@ -255,313 +206,290 @@ public class PSwingEventHandler implements PInputEventListener {
         int offX = 0;
         int offY = 0;
 
-//        if( currentNode instanceof ZVisualLeaf || currentNode instanceof ZVisualGroup ) {
-        if (true) {
-            final PNode vc = e1.getCurrentNode();
-            final PNode visualNode = currentNode;
+        final PNode vc = e1.getCurrentNode();
+        final PNode visualNode = currentNode;
 
-            if (vc instanceof PSwing) {
-                final PSwing swing = (PSwing)vc;
-                grabNode = visualNode;
+        if (vc instanceof PSwing) {
+            final PSwing swing = (PSwing)vc;
+            grabNode = visualNode;
 
-                if (grabNode.isDescendentOf(canvas.getRoot())) {
-                    pt = new Point2D.Double(e1.getX(), e1.getY());
-//                    e1.getPath().getTopCamera().cameraToLocal( pt, grabNode );
-                    cameraToLocal(e1.getPath().getTopCamera(), pt, grabNode);
-                    prevPoint = (Point2D)pt.clone();
+            if (grabNode.isDescendentOf(canvas.getRoot())) {
+                pt = new Point2D.Double(e1.getX(), e1.getY());
+                cameraToLocal(e1.getPath().getTopCamera(), pt, grabNode);
+                prevPoint = (Point2D)pt.clone();
 
-                    // This is only partially fixed to find the deepest
-                    // component at pt.  It needs to do something like
-                    // package private method:
-                    // Container.getMouseEventTarget(int,int,boolean)
-                    comp = findComponentAt(swing.getComponent(), (int)pt.getX(), (int)pt.getY());
+                // This is only partially fixed to find the deepest
+                // component at pt.  It needs to do something like
+                // package private method:
+                // Container.getMouseEventTarget(int,int,boolean)
+                comp = findComponentAt(swing.getComponent(), (int)pt.getX(), (int)pt.getY());
 
-                    // We found the right component - but we need to
-                    // get the offset to put the event in the component's
-                    // coordinates
-                    if ((comp != null) && (comp != swing.getComponent())) {
-                        for (Component c = comp; c != swing.getComponent(); c = c.getParent()) {
-                            offX += c.getLocation().getX();
-                            offY += c.getLocation().getY();
-                        }
+                // We found the right component - but we need to
+                // get the offset to put the event in the component's
+                // coordinates
+                if ((comp != null) && (comp != swing.getComponent())) {
+                    for (Component c = comp; c != swing.getComponent(); c = c.getParent()) {
+                        offX += c.getLocation().getX();
+                        offY += c.getLocation().getY();
                     }
+                }
 
-                    // Mouse Pressed gives focus - effects Mouse Drags and
-                    // Mouse Releases
-                    if ((comp != null) && (e1.getID() == MouseEvent.MOUSE_PRESSED)) {
-                        if (SwingUtilities.isLeftMouseButton(e1)) {
-                            focusPSwingLeft = swing;
-                            focusComponentLeft = comp;
-                            focusNodeLeft = visualNode;
-                            focusOffXLeft = offX;
-                            focusOffYLeft = offY;
-                        } else if (SwingUtilities.isMiddleMouseButton(e1)) {
-                            focusPSwingMiddle = swing;
-                            focusComponentMiddle = comp;
-                            focusNodeMiddle = visualNode;
-                            focusOffXMiddle = offX;
-                            focusOffYMiddle = offY;
-                        } else if (SwingUtilities.isRightMouseButton(e1)) {
-                            focusPSwingRight = swing;
-                            focusComponentRight = comp;
-                            focusNodeRight = visualNode;
-                            focusOffXRight = offX;
-                            focusOffYRight = offY;
-                        }
+                // Mouse Pressed gives focus - effects Mouse Drags and
+                // Mouse Releases
+                if ((comp != null) && (e1.getID() == MouseEvent.MOUSE_PRESSED)) {
+                    if (SwingUtilities.isLeftMouseButton(e1)) {
+                        focusPSwingLeft = swing;
+                        focusComponentLeft = comp;
+                        focusNodeLeft = visualNode;
+                        focusOffXLeft = offX;
+                        focusOffYLeft = offY;
+                    } else if (SwingUtilities.isMiddleMouseButton(e1)) {
+                        focusPSwingMiddle = swing;
+                        focusComponentMiddle = comp;
+                        focusNodeMiddle = visualNode;
+                        focusOffXMiddle = offX;
+                        focusOffYMiddle = offY;
+                    } else if (SwingUtilities.isRightMouseButton(e1)) {
+                        focusPSwingRight = swing;
+                        focusComponentRight = comp;
+                        focusNodeRight = visualNode;
+                        focusOffXRight = offX;
+                        focusOffYRight = offY;
                     }
                 }
             }
-        }
 
-        // This first case we don't want to give events to just
-        // any Swing component - but to the one that got the
-        // original mousePressed
-        if ((e1.getID() == MouseEvent.MOUSE_DRAGGED)
-                    || (e1.getID() == MouseEvent.MOUSE_RELEASED)) {
-            // LEFT MOUSE BUTTON
-            if (SwingUtilities.isLeftMouseButton(e1)
-                        && (focusComponentLeft != null)) {
-                if (focusNodeLeft.isDescendentOf(canvas.getRoot())) {
-                    pt = new Point2D.Double(e1.getX(), e1.getY());
-//                    e1.getPath().getTopCamera().cameraToLocal( pt, focusNodeLeft );
-                    cameraToLocal(e1.getPath().getTopCamera(), pt, focusNodeLeft);
-                    final MouseEvent e_temp = new MouseEvent(
-                            focusComponentLeft,
-                            e1.getID(),
-                            e1.getWhen(),
-                            e1.getModifiers(),
-                            (int)pt.getX()
-                                    - focusOffXLeft,
-                            (int)pt.getY()
-                                    - focusOffYLeft,
-                            e1.getClickCount(),
-                            e1.isPopupTrigger());
+            // This first case we don't want to give events to just
+            // any Swing component - but to the one that got the
+            // original mousePressed
+            if ((e1.getID() == MouseEvent.MOUSE_DRAGGED)
+                        || (e1.getID() == MouseEvent.MOUSE_RELEASED)) {
+                // LEFT MOUSE BUTTON
+                if (SwingUtilities.isLeftMouseButton(e1)
+                            && (focusComponentLeft != null)) {
+                    if (focusNodeLeft.isDescendentOf(canvas.getRoot())) {
+                        pt = new Point2D.Double(e1.getX(), e1.getY());
+                        cameraToLocal(e1.getPath().getTopCamera(), pt, focusNodeLeft);
+                        final MouseEvent e_temp = new MouseEvent(
+                                focusComponentLeft,
+                                e1.getID(),
+                                e1.getWhen(),
+                                e1.getModifiers(),
+                                (int)pt.getX()
+                                        - focusOffXLeft,
+                                (int)pt.getY()
+                                        - focusOffYLeft,
+                                e1.getXOnScreen(),
+                                e1.getYOnScreen(),
+                                e1.getClickCount(),
+                                e1.isPopupTrigger(),
+                                e1.getButton());
 
-                    final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
-//                    System.out.println( "focusComponentLeft.getClass() = " + focusComponentLeft.getClass() );
-                    dispatchEvent(focusComponentLeft, e2);
-//                    focusComponentLeft.dispatchEvent( e2 );
-                } else {
-                    dispatchEvent(focusComponentLeft, e1);
-//                    focusComponentLeft.dispatchEvent( e1 );
-                }
+                        final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
+                        if ((pt.getX() > 0) && (pt.getY() > 0) && (pt.getX() < focusPSwingLeft.getWidth())
+                                    && (pt.getY() < focusPSwingLeft.getHeight())) {
+                            dispatchEvent(focusComponentLeft, e2);
+                        } else {
+                            dispatchEvent(focusComponentLeft, e1);
+                        }
+                    } else {
+                        dispatchEvent(focusComponentLeft, e1);
+                    }
 
-                focusPSwingLeft.repaint();
+                    focusPSwingLeft.repaint();
 
-                e1.consume();
-
-                if (e1.getID() == MouseEvent.MOUSE_RELEASED) {
-                    focusComponentLeft = null;
-                    focusNodeLeft = null;
-                }
-            }
-
-            // MIDDLE MOUSE BUTTON
-            if (SwingUtilities.isMiddleMouseButton(e1)
-                        && (focusComponentMiddle != null)) {
-                if (focusNodeMiddle.isDescendentOf(canvas.getRoot())) {
-                    pt = new Point2D.Double(e1.getX(), e1.getY());
-//                    e1.getPath().getTopCamera().cameraToLocal( pt, focusNodeMiddle );
-                    cameraToLocal(e1.getPath().getTopCamera(), pt, focusNodeMiddle);
-
-                    final MouseEvent e_temp = new MouseEvent(
-                            focusComponentMiddle,
-                            e1.getID(),
-                            e1.getWhen(),
-                            e1.getModifiers(),
-                            (int)pt.getX()
-                                    - focusOffXMiddle,
-                            (int)pt.getY()
-                                    - focusOffYMiddle,
-                            e1.getClickCount(),
-                            e1.isPopupTrigger());
-
-                    final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
-
-                    focusComponentMiddle.dispatchEvent(e2);
-                } else {
-                    focusComponentMiddle.dispatchEvent(e1);
-                }
-
-                focusPSwingMiddle.repaint();
-
-                e1.consume();
-
-                if (e1.getID() == MouseEvent.MOUSE_RELEASED) {
-                    focusComponentMiddle = null;
-                    focusNodeMiddle = null;
-                }
-            }
-
-            // RIGHT MOUSE BUTTON
-            if (SwingUtilities.isRightMouseButton(e1)
-                        && (focusComponentRight != null)) {
-                if (focusNodeRight.isDescendentOf(canvas.getRoot())) {
-                    pt = new Point2D.Double(e1.getX(), e1.getY());
-//                    e1.getPath().getTopCamera().cameraToLocal( pt, focusNodeRight );
-                    cameraToLocal(e1.getPath().getTopCamera(), pt, focusNodeRight);
-                    final MouseEvent e_temp = new MouseEvent(
-                            focusComponentRight,
-                            e1.getID(),
-                            e1.getWhen(),
-                            e1.getModifiers(),
-                            (int)pt.getX()
-                                    - focusOffXRight,
-                            (int)pt.getY()
-                                    - focusOffYRight,
-                            e1.getClickCount(),
-                            e1.isPopupTrigger());
-
-                    final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
-
-                    focusComponentRight.dispatchEvent(e2);
-                } else {
-                    focusComponentRight.dispatchEvent(e1);
-                }
-
-                focusPSwingRight.repaint();
-
-                e1.consume();
-
-                if (e1.getID() == MouseEvent.MOUSE_RELEASED) {
-                    focusComponentRight = null;
-                    focusNodeRight = null;
-                }
-            }
-        }
-        // This case covers the cases mousePressed, mouseClicked,
-        // and mouseMoved events
-        else if (((e1.getID() == MouseEvent.MOUSE_PRESSED)
-                        || (e1.getID() == MouseEvent.MOUSE_CLICKED)
-                        || (e1.getID() == MouseEvent.MOUSE_MOVED))
-                    && (comp != null)) {
-            final MouseEvent e_temp = new MouseEvent(
-                    comp,
-                    e1.getID(),
-                    e1.getWhen(),
-                    e1.getModifiers(),
-                    (int)pt.getX()
-                            - offX,
-                    (int)pt.getY()
-                            - offY,
-                    e1.getClickCount(),
-                    e1.isPopupTrigger());
-
-            final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
-            dispatchEvent(comp, e2);
-//            comp.dispatchEvent( e2 );
-
-            e1.consume();
-        }
-
-        // Now we need to check if an exit or enter event needs to
-        // be dispatched - this code is independent of the mouseButtons.
-        // I tested in normal Swing to see the correct behavior.
-        if (prevComponent != null) {
-            // This means mouseExited
-
-            // This shouldn't happen - since we're only getting node events
-            if ((comp == null) || (e1.getID() == MouseEvent.MOUSE_EXITED)) {
-                final MouseEvent e_temp = new MouseEvent(
-                        prevComponent,
-                        MouseEvent.MOUSE_EXITED,
-                        e1.getWhen(),
-                        0,
-                        (int)prevPoint.getX()
-                                - (int)prevOff.getX(),
-                        (int)prevPoint.getY()
-                                - (int)prevOff.getY(),
-                        e1.getClickCount(),
-                        e1.isPopupTrigger());
-
-                final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
-
-                dispatchEvent(prevComponent, e2);
-//                prevComponent.dispatchEvent( e2 );
-                prevComponent = null;
-
-                if (e1.getID() == MouseEvent.MOUSE_EXITED) {
                     e1.consume();
+
+                    if (e1.getID() == MouseEvent.MOUSE_RELEASED) {
+                        focusComponentLeft = null;
+                        focusNodeLeft = null;
+                    }
+                }
+
+                // MIDDLE MOUSE BUTTON
+                if (SwingUtilities.isMiddleMouseButton(e1)
+                            && (focusComponentMiddle != null)) {
+                    if (focusNodeMiddle.isDescendentOf(canvas.getRoot())) {
+                        pt = new Point2D.Double(e1.getX(), e1.getY());
+                        cameraToLocal(e1.getPath().getTopCamera(), pt, focusNodeMiddle);
+
+                        final MouseEvent e_temp = new MouseEvent(
+                                focusComponentMiddle,
+                                e1.getID(),
+                                e1.getWhen(),
+                                e1.getModifiers(),
+                                (int)pt.getX()
+                                        - focusOffXMiddle,
+                                (int)pt.getY()
+                                        - focusOffYMiddle,
+                                e1.getClickCount(),
+                                e1.isPopupTrigger());
+
+                        final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
+
+                        dispatchEvent(focusComponentMiddle, e2);
+                    } else {
+                        dispatchEvent(focusComponentMiddle, e1);
+                    }
+
+                    focusPSwingMiddle.repaint();
+
+                    e1.consume();
+
+                    if (e1.getID() == MouseEvent.MOUSE_RELEASED) {
+                        focusComponentMiddle = null;
+                        focusNodeMiddle = null;
+                    }
+                }
+
+                // RIGHT MOUSE BUTTON
+                if (SwingUtilities.isRightMouseButton(e1)
+                            && (focusComponentRight != null)) {
+                    if (focusNodeRight.isDescendentOf(canvas.getRoot())) {
+                        pt = new Point2D.Double(e1.getX(), e1.getY());
+                        cameraToLocal(e1.getPath().getTopCamera(), pt, focusNodeRight);
+                        final MouseEvent e_temp = new MouseEvent(
+                                focusComponentRight,
+                                e1.getID(),
+                                e1.getWhen(),
+                                e1.getModifiers(),
+                                (int)pt.getX()
+                                        - focusOffXRight,
+                                (int)pt.getY()
+                                        - focusOffYRight,
+                                e1.getClickCount(),
+                                e1.isPopupTrigger());
+
+                        final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
+
+                        dispatchEvent(focusComponentRight, e2);
+                    } else {
+                        dispatchEvent(focusComponentRight, e1);
+                    }
+
+                    focusPSwingRight.repaint();
+
+                    e1.consume();
+
+                    if (e1.getID() == MouseEvent.MOUSE_RELEASED) {
+                        focusComponentRight = null;
+                        focusNodeRight = null;
+                    }
                 }
             }
-
-            // This means mouseExited prevComponent and mouseEntered comp
-            else if (prevComponent != comp) {
-                MouseEvent e_temp = new MouseEvent(
-                        prevComponent,
-                        MouseEvent.MOUSE_EXITED,
-                        e1.getWhen(),
-                        0,
-                        (int)prevPoint.getX()
-                                - (int)prevOff.getX(),
-                        (int)prevPoint.getY()
-                                - (int)prevOff.getY(),
-                        e1.getClickCount(),
-                        e1.isPopupTrigger());
-
-                PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
-
-                dispatchEvent(prevComponent, e2);
-//                prevComponent.dispatchEvent( e2 );
-                e_temp = new MouseEvent(
-                        comp,
-                        MouseEvent.MOUSE_ENTERED,
-                        e1.getWhen(),
-                        0,
-                        (int)prevPoint.getX()
-                                - offX,
-                        (int)prevPoint.getY()
-                                - offY,
-                        e1.getClickCount(),
-                        e1.isPopupTrigger());
-
-                e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
-
-                comp.dispatchEvent(e2);
-            }
-        } else {
-            // This means mouseEntered
-            if (comp != null) {
+            // This case covers the cases mousePressed, mouseClicked,
+            // and mouseMoved events
+            else if (((e1.getID() == MouseEvent.MOUSE_PRESSED)
+                            || (e1.getID() == MouseEvent.MOUSE_CLICKED)
+                            || (e1.getID() == MouseEvent.MOUSE_MOVED))
+                        && (comp != null)) {
                 final MouseEvent e_temp = new MouseEvent(
                         comp,
-                        MouseEvent.MOUSE_ENTERED,
+                        e1.getID(),
                         e1.getWhen(),
-                        0,
-                        (int)prevPoint.getX()
+                        e1.getModifiers(),
+                        (int)pt.getX()
                                 - offX,
-                        (int)prevPoint.getY()
+                        (int)pt.getY()
                                 - offY,
                         e1.getClickCount(),
                         e1.isPopupTrigger());
 
                 final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
                 dispatchEvent(comp, e2);
-//                comp.dispatchEvent( e2 );
+
+                e1.consume();
             }
-        }
 
-        // todo add cursors
-// // We have to manager our own Cursors since this is normally
-// // done on the native side
-// if( comp != cursorComponent &&
-// focusNodeLeft == null &&
-// focusNodeMiddle == null &&
-// focusNodeRight == null ) {
-// if( comp != null ) {
-// cursorComponent = comp;
-// canvas.setCursor( comp.getCursor(), false );
-// }
-// else {
-// cursorComponent = null;
-// canvas.resetCursor();
-// }
-// }
+            // Now we need to check if an exit or enter event needs to
+            // be dispatched - this code is independent of the mouseButtons.
+            // I tested in normal Swing to see the correct behavior.
+            if (prevComponent != null) {
+                // This means mouseExited
 
-        // Set the previous variables for next time
-        prevComponent = comp;
+                // This shouldn't happen - since we're only getting node events
+                if ((comp == null) || (e1.getID() == MouseEvent.MOUSE_EXITED)) {
+                    final MouseEvent e_temp = new MouseEvent(
+                            prevComponent,
+                            MouseEvent.MOUSE_EXITED,
+                            e1.getWhen(),
+                            0,
+                            (int)prevPoint.getX()
+                                    - (int)prevOff.getX(),
+                            (int)prevPoint.getY()
+                                    - (int)prevOff.getY(),
+                            e1.getClickCount(),
+                            e1.isPopupTrigger());
 
-        if (comp != null) {
-            prevOff = new Point2D.Double(offX, offY);
+                    final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
+
+                    dispatchEvent(prevComponent, e2);
+                    prevComponent = null;
+
+                    if (e1.getID() == MouseEvent.MOUSE_EXITED) {
+                        e1.consume();
+                    }
+                }
+
+                // This means mouseExited prevComponent and mouseEntered comp
+                else if (prevComponent != comp) {
+                    MouseEvent e_temp = new MouseEvent(
+                            prevComponent,
+                            MouseEvent.MOUSE_EXITED,
+                            e1.getWhen(),
+                            0,
+                            (int)prevPoint.getX()
+                                    - (int)prevOff.getX(),
+                            (int)prevPoint.getY()
+                                    - (int)prevOff.getY(),
+                            e1.getClickCount(),
+                            e1.isPopupTrigger());
+
+                    PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
+
+                    dispatchEvent(prevComponent, e2);
+                    e_temp = new MouseEvent(
+                            comp,
+                            MouseEvent.MOUSE_ENTERED,
+                            e1.getWhen(),
+                            0,
+                            (int)prevPoint.getX()
+                                    - offX,
+                            (int)prevPoint.getY()
+                                    - offY,
+                            e1.getClickCount(),
+                            e1.isPopupTrigger());
+
+                    e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
+
+                    comp.dispatchEvent(e2);
+                }
+            } else {
+                // This means mouseEntered
+                if (comp != null) {
+                    final MouseEvent e_temp = new MouseEvent(
+                            comp,
+                            MouseEvent.MOUSE_ENTERED,
+                            e1.getWhen(),
+                            0,
+                            (int)prevPoint.getX()
+                                    - offX,
+                            (int)prevPoint.getY()
+                                    - offY,
+                            e1.getClickCount(),
+                            e1.isPopupTrigger());
+
+                    final PSwingMouseEvent e2 = PSwingMouseEvent.createMouseEvent(e_temp.getID(), e_temp, aEvent);
+                    dispatchEvent(comp, e2);
+                }
+            }
+
+            // Set the previous variables for next time
+            prevComponent = comp;
+
+            if (comp != null) {
+                prevOff = new Point2D.Double(offX, offY);
+            }
         }
     }
 
@@ -576,18 +504,7 @@ public class PSwingEventHandler implements PInputEventListener {
 
                 @Override
                 public void run() {
-//                System.out.println( "PSwingEventHandler.dispatchEvent: " );
-//                String note = "PSwingEventHandler.dispatchEvent: ";
-//                if( event.getID() == MouseEvent.MOUSE_PRESSED ) {
-//                    System.out.println( note + "mouse press" );
-//                }
-//                if( event.getID() == MouseEvent.MOUSE_RELEASED ) {
-//                    System.out.println( note + "mouse release" );
-//                }
-//                System.out.println( "target class=" + target.getClass() + ", event=" + event + ", target=" + target );
                     target.dispatchEvent(event);
-//                System.out.println( "</finished dispatch>" );
-//                System.out.println( "" );
                 }
             });
     }
@@ -600,36 +517,18 @@ public class PSwingEventHandler implements PInputEventListener {
      * @param  node       DOCUMENT ME!
      */
     private void cameraToLocal(final PCamera topCamera, final Point2D pt, final PNode node) {
-        AffineTransform inverse = null;
         try {
-            inverse = topCamera.getViewTransform().createInverse();
+            topCamera.getViewTransform().inverseTransform(pt, pt);
         } catch (NoninvertibleTransformException e) {
             e.printStackTrace();
         }
-        inverse.transform(pt, pt);
         if (node != null) {
-//            PLayer layer = topCamera.getgetAncestorLayerFor( node );
-//
-//            if( layer == null ) {
-//                // Oops - this node can't be seen through the camera
-//                throw new ZNodeNotFoundException( "Node " + node + " is not accessible from camera " + this );
-//            }
-//            else {
             node.globalToLocal(pt);
-//            }
         }
-        return;
     }
 
     @Override
     public void processEvent(final PInputEvent aEvent, final int type) {
-//        String note = "PSwingEventHandler.processEvent: ";
-//        if( aEvent.getSourceSwingEvent().getID() == MouseEvent.MOUSE_PRESSED ) {
-//            System.out.println( note + "MOUSE PRESSED" );
-//        }
-//        if( aEvent.getSourceSwingEvent().getID() == MouseEvent.MOUSE_RELEASED ) {
-//            System.out.println( note + "MOUSE RELEASED" );
-//        }
         if (aEvent.isMouseEvent()) {
             final InputEvent sourceSwingEvent = aEvent.getSourceSwingEvent();
             final PSwingMouseEvent pSwingMouseEvent = PSwingMouseEvent.createMouseEvent(sourceSwingEvent.getID(),
