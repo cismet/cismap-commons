@@ -75,8 +75,11 @@ public class PSwingMouseEvent extends MouseEvent implements Serializable {
             e.getModifiers(),
             e.getX(),
             e.getY(),
+            e.getXOnScreen(),
+            e.getYOnScreen(),
             e.getClickCount(),
-            e.isPopupTrigger());
+            e.isPopupTrigger(),
+            e.getButton());
         this.id = id;
         this.event = event;
     }
