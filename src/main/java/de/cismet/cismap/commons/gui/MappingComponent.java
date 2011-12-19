@@ -1678,8 +1678,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         final int positionX;
         final int positionY;
         final int widgetPosition = this.getInternalWidgetPosition(name);
-        final boolean isHigher = getHeight() < (internalWidget.getHeight() + 2);
-        final boolean isWider = getWidth() < (internalWidget.getWidth() + 2);
+        final boolean isHigher = (getHeight() < (internalWidget.getHeight() + 2)) && (getHeight() > 0);
+        final boolean isWider = (getWidth() < (internalWidget.getWidth() + 2)) && (getWidth() > 0);
         switch (widgetPosition) {
             case POSITION_NORTHWEST: {
                 positionX = 1;
