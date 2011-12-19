@@ -59,6 +59,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
         super(mc, SearchFeature.class);
 
         this.mc = mc;
+        setMode(CreateGeometryListener.RECTANGLE);
     }
 
     //~ Methods ----------------------------------------------------------------
