@@ -150,6 +150,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private double sweetPureY = 0;
     private double sweetSelX = 0;
     private double sweetSelY = 0;
+    private boolean snappable = true;
 
     // r/w access only in synchronized(this) block
     private transient PImage rdfImage;
@@ -2449,6 +2450,24 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public Coordinate[] getCoordArr() {
         return coordArr;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isSnappable() {
+        return snappable;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  snappable  DOCUMENT ME!
+     */
+    public void setSnappable(final boolean snappable) {
+        this.snappable = snappable;
     }
 
     //~ Inner Classes ----------------------------------------------------------

@@ -70,7 +70,9 @@ public class PFeatureTools {
             next = it.next();
             if (next instanceof PFeature) {
                 final PFeature pf = (PFeature)next;
-                vRet.add(pf);
+                if (pf.isSnappable()) {
+                    vRet.add(pf);
+                }
             } else {
                 // log.fatal(next.getClass()+" ist nicht vom Typ PFeature ("+next+")");
             }
