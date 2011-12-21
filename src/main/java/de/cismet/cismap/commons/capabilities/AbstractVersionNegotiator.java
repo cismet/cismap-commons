@@ -142,10 +142,28 @@ public abstract class AbstractVersionNegotiator {
             startVersion = supportedVersions[supportedVersions.length - 1];
         }
 
-        if (link.indexOf("?") != -1) {                                                          // NOI18N
-            link = link.substring(0, link.indexOf("?"));                                        // NOI18N
+        if (link.indexOf("?") != -1) { // NOI18N
+            // some GetCapabilities links contains special parameter, which should not cut off
+            if (link.toLowerCase().indexOf("version") == -1) { // NOI18N
+                link += "&VERSION=" + startVersion;
+            } else {
+                String linkTmp = link.substring(0, link.toLowerCase().indexOf("version") + "version".length());
+                linkTmp += "=" + startVersion;
+                int indexAfterVersionString;
+                for (indexAfterVersionString = 0; indexAfterVersionString < link.length(); ++indexAfterVersionString) {
+                    if (link.charAt(indexAfterVersionString) == '&') {
+                        break;
+                    }
+                }
+                if (indexAfterVersionString < link.length()) {
+                    linkTmp += link.substring(indexAfterVersionString);
+                }
+
+                link = linkTmp;
+            }
+        } else {
+            link += "?SERVICE=" + serviceName + "&REQUEST=GetCapabilities&VERSION=" + startVersion; // NOI18N
         }
-        link += "?SERVICE=" + serviceName + "&REQUEST=GetCapabilities&VERSION=" + startVersion; // NOI18N
 
         if (logger.isDebugEnabled()) {
             logger.debug("start version = " + startVersion); // NOI18N
