@@ -149,8 +149,8 @@ public abstract class AbstractVersionNegotiator {
             } else {
                 String linkTmp = link.substring(0, link.toLowerCase().indexOf("version") + "version".length());
                 linkTmp += "=" + startVersion;
-                int indexAfterVersionString;
-                for (indexAfterVersionString = 0; indexAfterVersionString < link.length(); ++indexAfterVersionString) {
+                int indexAfterVersionString = link.toLowerCase().indexOf("version");
+                for (; indexAfterVersionString < link.length(); ++indexAfterVersionString) {
                     if (link.charAt(indexAfterVersionString) == '&') {
                         break;
                     }
@@ -166,6 +166,7 @@ public abstract class AbstractVersionNegotiator {
         }
 
         if (logger.isDebugEnabled()) {
+            logger.debug("send request = " + link);          // NOI18N
             logger.debug("start version = " + startVersion); // NOI18N
         }
         document = readStringFromlink(link);
