@@ -12,8 +12,6 @@
  */
 package de.cismet.cismap.commons.gui.featureinfowidget;
 
-import Sirius.navigator.plugin.PluginRegistry;
-
 import com.jgoodies.looks.Options;
 
 import org.apache.log4j.Logger;
@@ -41,8 +39,6 @@ import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
-
-import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
 /**
  * DOCUMENT ME!
