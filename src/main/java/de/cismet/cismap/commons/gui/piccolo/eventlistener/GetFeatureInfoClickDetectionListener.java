@@ -7,20 +7,15 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import Sirius.navigator.plugin.PluginRegistry;
-
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 
 import org.apache.log4j.Logger;
 
 import org.jfree.util.Log;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorConvertOp;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,8 +41,6 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapClickListener;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
-
-import de.cismet.cismap.navigatorplugin.CismapPlugin;
 
 /**
  * DOCUMENT ME!
