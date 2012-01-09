@@ -16,7 +16,6 @@ import java.awt.HeadlessException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import java.util.Collection;
 import java.util.MissingResourceException;
 
 import javax.swing.JOptionPane;
@@ -24,9 +23,6 @@ import javax.swing.JOptionPane;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.metasearch.MetaSearch;
-import de.cismet.cismap.commons.gui.metasearch.MetaSearchTooltip;
-import de.cismet.cismap.commons.gui.metasearch.SearchTopic;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
@@ -47,6 +43,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
     private Color searchColor = Color.GREEN;
     private float searchTransparency = 0.5f;
     private PureNewFeature lastFeature;
+    private MetaSearchFacade metaSearch;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -62,7 +59,28 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
         setMode(CreateGeometryListener.RECTANGLE);
     }
 
+    /**
+     * Creates a new CreateSearchGeometryListener object.
+     *
+     * @param  mc          DOCUMENT ME!
+     * @param  metaSearch  DOCUMENT ME!
+     */
+    public CreateSearchGeometryListener(final MappingComponent mc, final MetaSearchFacade metaSearch) {
+        this(mc);
+
+        this.metaSearch = metaSearch;
+    }
+
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  metaSearch  DOCUMENT ME!
+     */
+    public void setMetaSearch(final MetaSearchFacade metaSearch) {
+        this.metaSearch = metaSearch;
+    }
 
     @Override
     protected Color getFillingColor() {
@@ -95,7 +113,13 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
      * @return  DOCUMENT ME!
      */
     private boolean isSearchTopicsSelected() {
-        return !MetaSearch.instance().getSelectedSearchTopics().isEmpty();
+        boolean result = false;
+
+        if (metaSearch != null) {
+            result = metaSearch.hasSelectedSearchTopics();
+        }
+
+        return result;
     }
 
     /**
@@ -105,8 +129,8 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
      * @throws  MissingResourceException  DOCUMENT ME!
      */
     private void notifyUserAboutMissingSearchTopics() throws HeadlessException, MissingResourceException {
-        if (!isSearchTopicsSelected()) {
-            if (MetaSearch.instance().getSearchTopics().isEmpty()) {
+        if (!isSearchTopicsSelected() && (metaSearch != null)) {
+            if (metaSearch.hasSearchTopics()) {
                 JOptionPane.showMessageDialog(
                     CismapBroker.getInstance().getMappingComponent(),
                     org.openide.util.NbBundle.getMessage(
@@ -339,7 +363,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
             if (MappingComponent.CREATE_SEARCH_POLYGON.equals(evt.getNewValue())) {
                 generateAndShowPointerAnnotation();
             }
-        } else if (SearchTopic.SELECTED.equals(evt.getPropertyName())) {
+        } else if ((metaSearch != null) && metaSearch.isSearchTopicSelectedEvent(evt.getPropertyName())) {
             generateAndShowPointerAnnotation();
         }
     }
@@ -366,17 +390,15 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
      * DOCUMENT ME!
      */
     private void generateAndShowPointerAnnotation() {
-        if (!MappingComponent.CREATE_SEARCH_POLYGON.equals(mc.getInteractionMode())) {
+        if (!MappingComponent.CREATE_SEARCH_POLYGON.equals(mc.getInteractionMode()) || (metaSearch == null)) {
             return;
         }
-
-        final Collection<SearchTopic> selectedSearchTopics = MetaSearch.instance().getSelectedSearchTopics();
 
         final Runnable showPointerAnnotation = new Runnable() {
 
                 @Override
                 public void run() {
-                    mc.setPointerAnnotation(new MetaSearchTooltip(selectedSearchTopics));
+                    mc.setPointerAnnotation(metaSearch.generatePointerAnnotationForSelectedSearchTopics());
                     mc.setPointerAnnotationVisibility(true);
                 }
             };

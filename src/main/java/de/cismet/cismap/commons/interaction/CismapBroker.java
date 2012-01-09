@@ -33,6 +33,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.LayerWidget;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MeasurementListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.MetaSearchFacade;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
@@ -100,6 +101,7 @@ public class CismapBroker {
     private boolean serverAliasesInited = false;
     private String defaultCrs = "EPSG:31466";
     private int DefaultCrsAlias = -1;
+    private MetaSearchFacade metaSearch;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -641,6 +643,24 @@ public class CismapBroker {
                     "selectionChanged", // NOI18N
                     PSelectionEventHandler.SELECTION_CHANGED_NOTIFICATION,
                     mappingComponent.getInputListener(MappingComponent.SELECT));
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public MetaSearchFacade getMetaSearch() {
+        return metaSearch;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  metaSearch  DOCUMENT ME!
+     */
+    public void setMetaSearch(final MetaSearchFacade metaSearch) {
+        this.metaSearch = metaSearch;
     }
 
     /**
