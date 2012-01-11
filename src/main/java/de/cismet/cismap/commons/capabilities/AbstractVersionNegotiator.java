@@ -165,6 +165,18 @@ public abstract class AbstractVersionNegotiator {
             link += "?SERVICE=" + serviceName + "&REQUEST=GetCapabilities&VERSION=" + startVersion; // NOI18N
         }
 
+        if (link.indexOf("?") != -1) {
+            final String parameter = link.substring(link.indexOf("?"));
+
+            if (parameter.toLowerCase().indexOf("request") == -1) {
+                link += "&REQUEST=GetCapabilities";
+            }
+
+            if (parameter.toLowerCase().indexOf("service") == -1) {
+                link += "&SERVICE=" + serviceName;
+            }
+        }
+
         if (logger.isDebugEnabled()) {
             logger.debug("send request = " + link);          // NOI18N
             logger.debug("start version = " + startVersion); // NOI18N
