@@ -10,6 +10,9 @@ package de.cismet.cismap.commons.gui.capabilitywidget;
 import com.jgoodies.looks.Options;
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
 import org.jdom.Element;
 
 import org.openide.util.NbBundle;
@@ -52,6 +55,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -951,16 +955,18 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         }
 
                         if (interactive) {
-                            JOptionPane.showMessageDialog(
-                                thisWidget,
-                                org.openide.util.NbBundle.getMessage(
-                                    CapabilityWidget.class,
-                                    "CapabilityWidget.addOGCWMSCapabilitiesTree.JOptionPane.message",
-                                    new Object[] { message }),                                       // NOI18N
-                                org.openide.util.NbBundle.getMessage(
-                                    CapabilityWidget.class,
-                                    "CapabilityWidget.addOGCWMSCapabilitiesTree.JOptionPane.title"), // NOI18N
-                                JOptionPane.ERROR_MESSAGE);
+                            final ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(
+                                        CapabilityWidget.class,
+                                        "CapabilityWidget.addOGCWMSCapabilitiesTree.JOptionPane.title"),   // NOI18N
+                                    org.openide.util.NbBundle.getMessage(
+                                        CapabilityWidget.class,
+                                        "CapabilityWidget.addOGCWMSCapabilitiesTree.JOptionPane.message"), // NOI18N
+                                    null,
+                                    null,
+                                    e,
+                                    Level.SEVERE,
+                                    null);
+                            JXErrorPane.showDialog(thisWidget, ei);
                         }
                         // TODO: Error \u00FCber die Statuszeile bekanntgeben
                         log.error("Error while loading server capabilities: " + message, e); // NOI18N

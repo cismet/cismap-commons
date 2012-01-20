@@ -26,6 +26,7 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 import javax.swing.JTree;
+import javax.swing.SwingWorker;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.tree.TreePath;
@@ -63,7 +64,9 @@ import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
 import de.cismet.security.AccessHandler;
 import de.cismet.security.WebAccessManager;
 
+import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.PropertyEqualsProvider;
+import de.cismet.tools.TimeoutThread;
 
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
@@ -97,7 +100,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     private String preferredTransparentPref;
     private String preferredBGColor;
     private String preferredExceptionsFormat;
-    private CyclicBarrier currentBarrier = null;
     private TreeTableModelAdapter tableModel;
     private boolean initalLayerConfigurationFromServer = false;
     private HashMap<String, Element> masterLayerHashmap = new HashMap<String, Element>();
@@ -174,8 +176,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 wmsLayer.setImageFormat(preferredRasterFormat);
             }
             wmsLayer.setSrs(srs.getCode());
-        }
-        if (layer instanceof SlidableWMSServiceLayerGroup) {
+        } else if (layer instanceof SlidableWMSServiceLayerGroup) {
             ((SlidableWMSServiceLayerGroup)layer).setSrs(srs.getCode());
         }
 
@@ -1192,7 +1193,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      * @return  DOCUMENT ME!
      */
     private String getKeyForRetrievalService(final RetrievalServiceLayer layer) {
-        final String keyString = null;
         if (layer != null) {
             try {
                 if (layer instanceof WMSServiceLayer) {                     // NOI18N
@@ -1298,154 +1298,27 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     log.debug("Capabilties links: " + links);                  // NOI18N
                 }
             }
-            // Laden der Capabilities vom Server und Speichern in einer HashMap<String url,Capabilities>;
             final HashMap<String, WMSCapabilities> capabilities = new HashMap<String, WMSCapabilities>();
 
-            if (DEBUG) {
-                if (log.isDebugEnabled()) {
-                    log.debug("vor CyclicBarrier"); // NOI18N
-                }
-            }
-
             if (links.size() > 0) {
-                // Das Runnable Objekt wird ausgef\u00FChrt wenn alle Capabilities geladen worden sind oder ein Fehler
-                // aufgetreten ist
-                if (currentBarrier != null) {
-                    if (DEBUG) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("reseting cyclicBarrier"); // NOI18N
+                final Runnable createLayerThread = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            createLayers(conf, capabilities);
                         }
-                    }
-                    currentBarrier.reset();
-                }
-
-                currentBarrier = new CyclicBarrier(links.size(), new Runnable() {
-
-                            @Override
-                            public void run() {
-                                createLayers(conf, capabilities);
-                            }
-                        });
-
-                // Zuerst werden alle Capabilities geladen und in eine HashMap gesteckt
-                // Ist das Laden beednet wird das dem Barrier durch ein await() gesagt
-                for (final String link : links) {
-                    final Thread retrieval = new Thread() {
-
-                            @Override
-                            public void run() {
-                                URL getCapURL = null;
-                                try {
-//                                InputStreamReader reader = null;
-                                    getCapURL = new URL(link);
-                                    final URL finalPostUrl = (link.indexOf('?') != -1)
-                                        ? new URL(link.substring(0, link.indexOf('?'))) : new URL(link);
-
-//              OGCWMSCapabilitiesFactory capFact = new OGCWMSCapabilitiesFactory();
-                                    final CismapBroker broker = CismapBroker.getInstance();
-//                                try {
-//                                    if(DEBUG)log.debug("Layer Widget: Creating WMScapabilities for URL: " + getCapURL.toString());
-//                                    reader = HttpAuthentication.getInputStreamReaderFromURL(CismapBroker.getInstance().getMappingComponent(), getCapURL);
-//                                } catch (AuthenticationCanceledException ex) {
-//                                    log.warn(ex);
-//                                    String title = CismapBroker.getInstance().getProperty(getCapURL.toString());
-//
-//                                    if (title != null) {
-//                                        JXErrorDialog.showDialog(CismapBroker.getInstance().getMappingComponent(),
-//                                                "Authenfication failed!"),
-//                                                "The authentication was canceled.\nAll current layers from server\n") +
-//                                                "\"" +
-//                                                title +
-//                                                "\" " +
-//                                                "were removed"));//NOI18N
-//                                    } else {
-//                                        title = getCapURL.toString();
-//                                        if (title.startsWith("http://") && title.length() > 21) {
-//                                            title = title.substring(7, 21) + "...";
-//                                        } else if (title.length() > 14) {
-//                                            title = title.substring(0, 14) + "...";
-//                                        }
-//                                        JXErrorDialog.showDialog(CismapBroker.getInstance().getMappingComponent(),
-//                                                "Authenfication failed!"),
-//                                                "The authentication was canceled.\nAll current layers from server\n") +
-//                                                "\"" + title + "\" " +
-//                                                "were removed"));
-//                                    }
-//                                }
-                                    // ToDo Probleme mit WFS wird aber denke ich nicht gebraucht
-                                    if (DEBUG) {
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("read WMSCapabilities for " + finalPostUrl);                 // NOI18N
-                                        }
-                                    }
-                                    final WMSCapabilitiesFactory capFact = new WMSCapabilitiesFactory();
-                                    if (link.toLowerCase().contains("service=wss")) {                              // NOI18N
-                                        try {
-                                            if (DEBUG) {
-                                                if (log.isDebugEnabled()) {
-                                                    log.debug("WSS Capabilties Link added");                       // NOI18N
-                                                }
-                                            }
-                                            final URL url = new URL(link.substring(0, link.indexOf('?')));
-                                            if (DEBUG) {
-                                                if (log.isDebugEnabled()) {
-                                                    log.debug("URL of the WSS: " + url.toString());                // NOI18N
-                                                }
-                                            }
-                                            if (!WebAccessManager.getInstance().isHandlerForURLRegistered(url)) {
-                                                WebAccessManager.getInstance()
-                                                        .registerAccessHandler(
-                                                            url,
-                                                            AccessHandler.ACCESS_HANDLER_TYPES.WSS);
-                                            } else {
-                                                if (DEBUG) {
-                                                    if (log.isDebugEnabled()) {
-                                                        log.debug("Handler is already registered");                // NOI18N
-                                                    }
-                                                }
-                                            }
-                                        } catch (MalformedURLException ex) {
-                                            log.error("Url is not wellformed no wss authentication possible", ex); // NOI18N
-                                        }
-                                    }
-                                    // ToDO Langsam
-                                    final WMSCapabilities cap = capFact.createCapabilities(link);
-//ToDo funktionalität abgeschaltet steckt zur zeit in CismetGUICommons --> refactoring
-//                                broker.addHttpCredentialProviderCapabilities(cap, broker.getHttpCredentialProviderURL(getCapURL));
-//                                if (broker.isServerSecuredByPassword(cap)) {
-//                                    broker.addProperty(getCapURL.toString(), cap.getCapability().getLayer().getTitle());
-//                                }
-                                    capabilities.put(link, cap);
-                                } catch (Exception ex) {
-                                    if (DEBUG) {
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("Exception for URL: " + link, ex);       // NOI18N
-                                        }
-                                    }
-                                    log.warn("Error while retrieving Capabilities" + ":", ex); // NOI18N
-                                }
-                                try {
-                                    currentBarrier.await();
-                                } catch (InterruptedException ex) {
-                                    log.warn("Thread was interrupted TODO CUSTOMIZE TEXT" + ":", ex); // NOI18N
-                                } catch (BrokenBarrierException ex) {
-                                    log.warn("No layers available TODO CUSTOMIZE TEXT" + ":", ex); // NOI18N
-                                }
-                            }
-                        };
-                    retrieval.setPriority(Thread.NORM_PRIORITY);
-                    retrieval.start();
-                }
+                    };
+                CismetThreadPool.execute(createLayerThread);
             } else {
                 if (DEBUG) {
                     if (log.isDebugEnabled()) {
-                        log.debug("No Barrier");                                               // NOI18N
+                        log.debug("No Capabilities links"); // NOI18N
                     }
                 }
                 createLayers(conf, capabilities);
             }
         } catch (Throwable ex) {
-            log.error("Error during the configuration of the ActiveLayerModell", ex);          // NOI18N
+            log.error("Error during the configuration of the ActiveLayerModell", ex); // NOI18N
         }
     }
 
@@ -1519,147 +1392,203 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             log.warn("LayerElement not found! Check for old version child \"RasterLayers\"");          // NOI18N
             layerElement = conf.getChild("RasterLayers");                                              // NOI18N
             if (layerElement == null) {
-                log.error("no vlaid layers element found");                                            // NOI18N
+                log.error("no valid layers element found");                                            // NOI18N
                 return;
             }
         }
         log.info("restoring " + layerElement.getChildren().size() + " layers from xml configuration"); // NOI18N
         final Element[] orderedLayers = orderLayers(layerElement);
         for (final Element element : orderedLayers) {
-            if (DEBUG) {
-                if (log.isDebugEnabled()) {
-                    log.debug("trying to add Layer '" + element.getName() + "'");                      // NOI18N
-                }
-            }
-            final String currentKeyString = getKeyforLayerElement(element);
-            if (isInitalLayerConfigurationFromServer()
-                        && !masterLayerHashmap.containsKey(currentKeyString)) {
-                log.info("Layer in Serverkonfiguration nicht vorhanden, wird nicht hinzugefügt KeyString: "
-                            + currentKeyString);
-                continue;
-            }
-            try {
-                if (element.getName().equals("WMSServiceLayer")) {                                     // NOI18N
-                    final WMSServiceLayer wmsServiceLayer = new WMSServiceLayer(element, capabilities);
-                    if (wmsServiceLayer.getWMSLayers().size() > 0) {
-                        if (EventQueue.isDispatchThread()) {
-                            log.fatal("InvokeLater in EDT");                                           // NOI18N
-                        }
-                        EventQueue.invokeLater(new Runnable() {
+            final Runnable r = new Runnable() {
 
-                                @Override
-                                public void run() {
+                    @Override
+                    public void run() {
+                        createLayer(element, capabilities);
+                    }
+                };
+
+            CismetThreadPool.execute(r);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  element       DOCUMENT ME!
+     * @param  capabilities  DOCUMENT ME!
+     */
+    private void createLayer(final Element element, final HashMap<String, WMSCapabilities> capabilities) {
+        if (DEBUG) {
+            if (log.isDebugEnabled()) {
+                log.debug("trying to add Layer '" + element.getName() + "'"); // NOI18N
+            }
+        }
+        final String currentKeyString = getKeyforLayerElement(element);
+        if (isInitalLayerConfigurationFromServer()
+                    && !masterLayerHashmap.containsKey(currentKeyString)) {
+            log.info("Layer in Serverkonfiguration nicht vorhanden, wird nicht hinzugefügt KeyString: "
+                        + currentKeyString);
+            return;
+        }
+        try {
+            if (element.getName().equals("WMSServiceLayer")) {                // NOI18N
+                final WMSServiceLayer wmsServiceLayer = new WMSServiceLayer(element, capabilities);
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                if (wmsServiceLayer.getWMSLayers().size() > 0) {
                                     try {
-                                        log.info("addLayer WMSServiceLayer (" + wmsServiceLayer.getName() + ")"); // NOI18N
+                                        log.info(
+                                            "addLayer WMSServiceLayer ("
+                                                    + wmsServiceLayer.getName()
+                                                    + ")");                         // NOI18N
                                         addLayer(wmsServiceLayer);
                                     } catch (IllegalArgumentException schonVorhanden) {
                                         log.warn(
                                             "Layer WMSServiceLayer '"
                                                     + wmsServiceLayer.getName()
                                                     + "' already existed. Do not add the Layer. \n"
-                                                    + schonVorhanden.getMessage());                               // NOI18N
+                                                    + schonVorhanden.getMessage()); // NOI18N
                                     }
                                 }
-                            });
-                    }
-                } else if (element.getName().equals(WebFeatureService.WFS_FEATURELAYER_TYPE)) {
-                    final WebFeatureService wfs = new WebFeatureService(element);
-                    if (EventQueue.isDispatchThread()) {
-                        log.fatal("InvokeLater in EDT");                                                          // NOI18N
-                    }
-                    EventQueue.invokeLater(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                try {
-                                    log.info(
-                                        "addLayer "
-                                                + WebFeatureService.WFS_FEATURELAYER_TYPE
-                                                + " ("
-                                                + wfs.getName()
-                                                + ")");                         // NOI18N
-                                    addLayer(wfs);
-                                } catch (IllegalArgumentException schonVorhanden) {
-                                    log.warn(
-                                        "Layer "
-                                                + WebFeatureService.WFS_FEATURELAYER_TYPE
-                                                + " '"
-                                                + wfs.getName()
-                                                + "' already existed. Do not add the Layer. \n"
-                                                + schonVorhanden.getMessage()); // NOI18N
-                                }
+                            } catch (Exception e) {
+                                log.error("Error while initialising WMS", e);
                             }
-                        });
-                } else if (element.getName().equals("DocumentFeatureServiceLayer")) { // NOI18N
-                    log.error("DocumentFeatureServiceLayer not supported");     // NOI18N
-                    // throw new UnsupportedOperationException("DocumentFeatureServiceLayer not supported");
-                    // if(DEBUG)log.debug("DocumentFeatureLayer von ConfigFile wird hinzugefügt"); URI documentURI =
-                    // new URI(element.getChildText("documentURI").trim()); File testFile = new File(documentURI); if
-                    // (!testFile.exists()) { log.warn("Das Angebene Document(" + testFile.getAbsolutePath() + ")
-                    // exisitiert nicht ---> abbruch, es wird kein Layer angelegt"); continue; }
-                    //
-                    // final GMLFeatureService gfs = new GMLFeatureService(element); //langsam sollte nicht im EDT
-                    // ausgeführt werden final DocumentFeatureService dfs =
-                    // DocumentFeatureServiceFactory.createDocumentFeatureService(element); //final
-                    // ShapeFileFeatureService sfs = new ShapeFileFeatureService(element); EventQueue.invokeLater(new
-                    // Runnable() {
-                    //
-                    // @Override public void run() { try { log.info("addLayer DocumentFeatureServiceLayer (" +
-                    // dfs.getName() + ")"); addLayer(dfs); } catch (IllegalArgumentException schonVorhanden) {
-                    // log.warn("Layer DocumentFeatureServiceLayer '" + dfs.getName() + "' already existed. Do not
-                    // add the Layer. \n" + schonVorhanden.getMessage()); } } });
-                } else if (element.getName().equals("simpleWms")) { // NOI18N
-                    final SimpleWMS simpleWMS = new SimpleWMS(element);
-                    if (EventQueue.isDispatchThread()) {
-                        log.fatal("InvokeLater in EDT");            // NOI18N
-                    }
-                    EventQueue.invokeLater(new Runnable() {
+                        }
+                    });
+            } else if (element.getName().equals(WebFeatureService.WFS_FEATURELAYER_TYPE)) {
+                final WebFeatureService wfs = new WebFeatureService(element);
+                if (EventQueue.isDispatchThread()) {
+                    log.fatal("InvokeLater in EDT");                                // NOI18N
+                }
+                EventQueue.invokeLater(new Runnable() {
 
-                            @Override
-                            public void run() {
-                                log.info("addLayer SimpleWMS (" + simpleWMS.getName() + ")"); // NOI18N
-                                try {
-                                    addLayer(simpleWMS);
-                                } catch (IllegalArgumentException schonVorhanden) {
-                                    log.warn(
-                                        "Layer SimpleWMS '"
-                                                + simpleWMS.getName()
-                                                + "' already existed. Do not add the Layer. \n"
-                                                + schonVorhanden.getMessage());               // NOI18N
-                                }
+                        @Override
+                        public void run() {
+                            try {
+                                log.info(
+                                    "addLayer "
+                                            + WebFeatureService.WFS_FEATURELAYER_TYPE
+                                            + " ("
+                                            + wfs.getName()
+                                            + ")");                         // NOI18N
+                                addLayer(wfs);
+                            } catch (IllegalArgumentException schonVorhanden) {
+                                log.warn(
+                                    "Layer "
+                                            + WebFeatureService.WFS_FEATURELAYER_TYPE
+                                            + " '"
+                                            + wfs.getName()
+                                            + "' already existed. Do not add the Layer. \n"
+                                            + schonVorhanden.getMessage()); // NOI18N
                             }
-                        });
-                } else if (element.getName().equals(SlidableWMSServiceLayerGroup.XML_ELEMENT_NAME)) { // NOI18N
-                    final SlidableWMSServiceLayerGroup wms = new SlidableWMSServiceLayerGroup(element, capabilities);
-                    if (EventQueue.isDispatchThread()) {
-                        log.fatal("InvokeLater in EDT");                                      // NOI18N
-                    }
-                    EventQueue.invokeLater(new Runnable() {
+                        }
+                    });
+            } else if (element.getName().equals("DocumentFeatureServiceLayer")) { // NOI18N
+                log.error("DocumentFeatureServiceLayer not supported");     // NOI18N
+                // throw new UnsupportedOperationException("DocumentFeatureServiceLayer not supported");
+                // if(DEBUG)log.debug("DocumentFeatureLayer von ConfigFile wird hinzugefügt"); URI documentURI =
+                // new URI(element.getChildText("documentURI").trim()); File testFile = new File(documentURI); if
+                // (!testFile.exists()) { log.warn("Das Angebene Document(" + testFile.getAbsolutePath() + ")
+                // exisitiert nicht ---> abbruch, es wird kein Layer angelegt"); continue; }
+                //
+                // final GMLFeatureService gfs = new GMLFeatureService(element); //langsam sollte nicht im EDT
+                // ausgeführt werden final DocumentFeatureService dfs =
+                // DocumentFeatureServiceFactory.createDocumentFeatureService(element); //final
+                // ShapeFileFeatureService sfs = new ShapeFileFeatureService(element); EventQueue.invokeLater(new
+                // Runnable() {
+                //
+                // @Override public void run() { try { log.info("addLayer DocumentFeatureServiceLayer (" +
+                // dfs.getName() + ")"); addLayer(dfs); } catch (IllegalArgumentException schonVorhanden) {
+                // log.warn("Layer DocumentFeatureServiceLayer '" + dfs.getName() + "' already existed. Do not
+                // add the Layer. \n" + schonVorhanden.getMessage()); } } });
+            } else if (element.getName().equals("simpleWms")) { // NOI18N
+                final SimpleWMS simpleWMS = new SimpleWMS(element);
+                if (EventQueue.isDispatchThread()) {
+                    log.fatal("InvokeLater in EDT");            // NOI18N
+                }
+                EventQueue.invokeLater(new Runnable() {
 
-                            @Override
-                            public void run() {
-                                log.info("addLayer SlidableWMSServiceLayerGroup (" + wms.getName() + ")"); // NOI18N
-                                try {
-                                    addLayer(wms);
-                                } catch (IllegalArgumentException schonVorhanden) {
-                                    log.warn(
-                                        "Layer SimpleWMS '"
-                                                + wms.getName()
-                                                + "' already existed. Do not add the Layer. \n"
-                                                + schonVorhanden.getMessage());                            // NOI18N
-                                }
+                        @Override
+                        public void run() {
+                            log.info("addLayer SimpleWMS (" + simpleWMS.getName() + ")"); // NOI18N
+                            try {
+                                addLayer(simpleWMS);
+                            } catch (IllegalArgumentException schonVorhanden) {
+                                log.warn(
+                                    "Layer SimpleWMS '"
+                                            + simpleWMS.getName()
+                                            + "' already existed. Do not add the Layer. \n"
+                                            + schonVorhanden.getMessage());               // NOI18N
                             }
-                        });
-                } else if (element.getName().equals("simplePostgisFeatureService")) {                      // NOI18N
-                    SimplePostgisFeatureService spfs;
-                    if ((element.getAttributeValue("updateable") != null)
-                                && element.getAttributeValue("updateable").equals("true")) {               // NOI18N
-                        spfs = new SimpleUpdateablePostgisFeatureService(element);
-                    } else {
-                        spfs = new SimplePostgisFeatureService(element);
-                    }
+                        }
+                    });
+            } else if (element.getName().equals(SlidableWMSServiceLayerGroup.XML_ELEMENT_NAME)) { // NOI18N
+                final SlidableWMSServiceLayerGroup wms = new SlidableWMSServiceLayerGroup(element, capabilities);
+                if (EventQueue.isDispatchThread()) {
+                    log.fatal("InvokeLater in EDT");                                      // NOI18N
+                }
+                EventQueue.invokeLater(new Runnable() {
 
-                    final SimplePostgisFeatureService simplePostgisFeatureService = spfs;
+                        @Override
+                        public void run() {
+                            log.info("addLayer SlidableWMSServiceLayerGroup (" + wms.getName() + ")"); // NOI18N
+                            try {
+                                addLayer(wms);
+                            } catch (IllegalArgumentException schonVorhanden) {
+                                log.warn(
+                                    "Layer SimpleWMS '"
+                                            + wms.getName()
+                                            + "' already existed. Do not add the Layer. \n"
+                                            + schonVorhanden.getMessage());                            // NOI18N
+                            }
+                        }
+                    });
+            } else if (element.getName().equals("simplePostgisFeatureService")) {                      // NOI18N
+                SimplePostgisFeatureService spfs;
+                if ((element.getAttributeValue("updateable") != null)
+                            && element.getAttributeValue("updateable").equals("true")) {               // NOI18N
+                    spfs = new SimpleUpdateablePostgisFeatureService(element);
+                } else {
+                    spfs = new SimplePostgisFeatureService(element);
+                }
+
+                final SimplePostgisFeatureService simplePostgisFeatureService = spfs;
+                if (EventQueue.isDispatchThread()) {
+                    log.fatal("InvokeLater in EDT"); // NOI18N
+                }
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                log.info(
+                                    "addLayer SimplePostgisFeatureService ("
+                                            + simplePostgisFeatureService.getName()
+                                            + ")");                         // NOI18N
+                                addLayer(simplePostgisFeatureService);
+                            } catch (IllegalArgumentException schonVorhanden) {
+                                log.warn(
+                                    "Layer SimplePostgisFeatureService '"
+                                            + simplePostgisFeatureService.getName()
+                                            + "' already existed. Do not add the Layer. \n"
+                                            + schonVorhanden.getMessage()); // NOI18N
+                            }
+                        }
+                    });
+            } else {
+                try {
+                    if (DEBUG) {
+                        if (log.isDebugEnabled()) {
+                            log.debug("restoring generic layer configuration from xml element '" + element.getName()
+                                        + "'");                             // NOI18N
+                        }
+                    }
+                    final RetrievalServiceLayer layer = (RetrievalServiceLayer)XMLObjectFactory
+                                .restoreObjectfromElement(element);
+
                     if (EventQueue.isDispatchThread()) {
                         log.fatal("InvokeLater in EDT"); // NOI18N
                     }
@@ -1668,59 +1597,25 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                             @Override
                             public void run() {
                                 try {
-                                    log.info(
-                                        "addLayer SimplePostgisFeatureService ("
-                                                + simplePostgisFeatureService.getName()
-                                                + ")");                         // NOI18N
-                                    addLayer(simplePostgisFeatureService);
+                                    log.info("addLayer generic layer configuration (" + layer.getName() + ")"); // NOI18N
+                                    addLayer(layer);
                                 } catch (IllegalArgumentException schonVorhanden) {
                                     log.warn(
                                         "Layer SimplePostgisFeatureService '"
-                                                + simplePostgisFeatureService.getName()
+                                                + layer.getName()
                                                 + "' already existed. Do not add the Layer. \n"
-                                                + schonVorhanden.getMessage()); // NOI18N
+                                                + schonVorhanden.getMessage());                                 // NOI18N
                                 }
                             }
                         });
-                } else {
-                    try {
-                        if (DEBUG) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("restoring generic layer configuration from xml element '" + element
-                                            .getName() + "'");                  // NOI18N
-                            }
-                        }
-                        final RetrievalServiceLayer layer = (RetrievalServiceLayer)XMLObjectFactory
-                                    .restoreObjectfromElement(element);
-
-                        if (EventQueue.isDispatchThread()) {
-                            log.fatal("InvokeLater in EDT"); // NOI18N
-                        }
-                        EventQueue.invokeLater(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    try {
-                                        log.info("addLayer generic layer configuration (" + layer.getName() + ")"); // NOI18N
-                                        addLayer(layer);
-                                    } catch (IllegalArgumentException schonVorhanden) {
-                                        log.warn(
-                                            "Layer SimplePostgisFeatureService '"
-                                                    + layer.getName()
-                                                    + "' already existed. Do not add the Layer. \n"
-                                                    + schonVorhanden.getMessage());                                 // NOI18N
-                                    }
-                                }
-                            });
-                    } catch (Throwable t) {
-                        log.error("unsupported xml configuration, layer '" + element.getName()
-                                    + "' could not be created: \n" + t.getLocalizedMessage(),
-                            t);                                                                                     // NOI18N
-                    }
+                } catch (Throwable t) {
+                    log.error("unsupported xml configuration, layer '" + element.getName()
+                                + "' could not be created: \n" + t.getLocalizedMessage(),
+                        t);                                                                                     // NOI18N
                 }
-            } catch (Throwable t) {
-                log.error("Layer layer '" + element.getName() + "' could not be created: \n" + t.getMessage(), t);  // NOI18N
             }
+        } catch (Throwable t) {
+            log.error("Layer layer '" + element.getName() + "' could not be created: \n" + t.getMessage(), t);  // NOI18N
         }
     }
 

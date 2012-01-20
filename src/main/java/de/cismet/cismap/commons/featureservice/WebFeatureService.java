@@ -57,7 +57,6 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
 
     private static final transient Logger LOG = Logger.getLogger(WebFeatureService.class);
 
-    public static HashMap<String, WFSCapabilities> capCache = new HashMap<String, WFSCapabilities>();
     public static final String WFS_FEATURELAYER_TYPE = "WebFeatureServiceLayer"; // NOI18N
     public static final HashMap<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
 
@@ -195,7 +194,19 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     }
 
     @Override
-    public void initFromElement(Element element) throws Exception {
+    public void initFromElement(final Element element) throws Exception {
+        initFromElement(element, getInitialisationError());
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   element     DOCUMENT ME!
+     * @param   loadCapDoc  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public void initFromElement(Element element, final boolean loadCapDoc) throws Exception {
         if (element == null) {
             element = this.getInitElement();
         }
@@ -203,32 +214,40 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         super.initFromElement(element);
         final CapabilityLink cp = new CapabilityLink(element);
         final Element query = element.getChild(FeatureServiceUtilities.GET_FEATURE, FeatureServiceUtilities.WFS);
-        final String capLink = cp.getLink() + "?VERSION=" + cp.getVersion();
-        WFSCapabilities cap = capCache.get(capLink);
+        String capLink = cp.getLink();
 
-        try {
-            if (cap == null) {
+        if ((cp.getVersion() != null) && !cp.getVersion().equals("")) {
+            capLink += "?VERSION=" + cp.getVersion();
+        }
+
+        if (loadCapDoc && (feature == null)) {
+            try {
                 final WFSCapabilitiesFactory fac = new WFSCapabilitiesFactory();
-                cap = fac.createCapabilities(capLink);
+                final WFSCapabilities cap = fac.createCapabilities(capLink);
 
-                capCache.put(capLink, cap);
+                if ((cap != null) && !cap.getVersion().equals(cp.getVersion())) {
+                    LOG.warn("Cannot retrieve the wfs capabilities for version " + cp.getVersion() + " but for version "
+                                + cap.getVersion());
+                }
+
+                feature = WFSFacade.extractRequestedFeatureType(FeatureServiceUtilities.elementToString(query), cap);
+                this.setErrorObject(null);
+                setInitialisationError(false);
+            } catch (Exception ex) {
+                this.setErrorObject(ex.toString());
+                this.backupVersion = cp.getVersion();
+                this.setQueryElement(query);
+                this.setHostname(cp.getLink());
+//                if (getInitialisationError()) {
+//                    throw ex;
+//                }
+                setInitialisationError(true);
             }
-
-            if ((cap != null) && !cap.getVersion().equals(cp.getVersion())) {
-                LOG.warn("Cannot retrieve the wfs capabilities for version " + cp.getVersion() + " but for version "
-                            + cap.getVersion());
-            }
-
-            feature = WFSFacade.extractRequestedFeatureType(FeatureServiceUtilities.elementToString(query), cap);
-            setInitialisationError(false);
-        } catch (Exception ex) {
-            this.setErrorObject(ex.toString());
+        } else {
+            this.setErrorObject(null);
             this.backupVersion = cp.getVersion();
             this.setQueryElement(query);
             this.setHostname(cp.getLink());
-            if (getInitialisationError()) {
-                throw ex;
-            }
             setInitialisationError(true);
         }
         // query string will be set, when the query element will be set

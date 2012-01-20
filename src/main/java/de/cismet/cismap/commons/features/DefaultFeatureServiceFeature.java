@@ -150,9 +150,6 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public Object getProperty(final String propertyName) {
-        if (container.get(propertyName) == null) {
-            logger.warn("getProperty " + propertyName, new Exception());
-        }
         return container.get(propertyName);
     }
 

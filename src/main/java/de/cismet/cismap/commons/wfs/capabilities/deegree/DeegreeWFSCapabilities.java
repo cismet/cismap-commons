@@ -31,6 +31,9 @@ import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.deegree.DeegreeFeatureTypeDescription;
 import de.cismet.cismap.commons.wms.capabilities.FeatureTypeList;
 
+import de.cismet.tools.CalculationCache;
+import de.cismet.tools.Calculator;
+
 /**
  * Parses WFS Capabilities documents.
  *
@@ -46,10 +49,11 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
     //~ Instance fields --------------------------------------------------------
 
     private org.deegree.ogcwebservices.wfs.capabilities.WFSCapabilities cap;
+    private CalculationCache<String, FeatureTypeList> cache = new CalculationCache<String, FeatureTypeList>(
+            new FeatureTypeListRetriever());
     private URL url;
     private Service service;
     private WFSFacade facade;
-    private FeatureTypeList list;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -82,17 +86,9 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
 
     @Override
     public FeatureTypeList getFeatureTypeList() throws IOException, Exception {
-        if (list == null) {
-            list = new FeatureTypeList();
-            final org.deegree.ogcwebservices.wfs.capabilities.FeatureTypeList tmpList = cap.getFeatureTypeList();
-
-            for (final WFSFeatureType type : tmpList.getFeatureTypes()) {
-                final DeegreeFeatureType tmpType = new DeegreeFeatureType(type, this);
-                list.put(tmpType.getName(), tmpType);
-            }
-        }
-
-        return list;
+        // the String "id" is arbitrarily value that is only required to fulfil the
+        // requirement of the class CalculationCache
+        return cache.calcValue("id");
     }
 
     @Override
@@ -124,6 +120,32 @@ public class DeegreeWFSCapabilities implements WFSCapabilities {
     }
 
     //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class FeatureTypeListRetriever implements Calculator<String, FeatureTypeList> {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public FeatureTypeList calculate(final String input) throws Exception {
+            final FeatureTypeList list = new FeatureTypeList();
+            final org.deegree.ogcwebservices.wfs.capabilities.FeatureTypeList tmpList = cap.getFeatureTypeList();
+
+            for (final WFSFeatureType type : tmpList.getFeatureTypes()) {
+                if (type == null) {
+                    logger.error("TEST feature type == null " + type);
+                }
+                final DeegreeFeatureType tmpType = new DeegreeFeatureType(type, DeegreeWFSCapabilities.this);
+                list.put(tmpType.getName(), tmpType);
+            }
+
+            return list;
+        }
+    }
 
     /**
      * DOCUMENT ME!
