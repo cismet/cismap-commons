@@ -424,8 +424,6 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         if ((workerThread != null) && (!workerThread.isDone() || !workerThread.isCancelled())) {
             if (workerThread != null) {
                 LOG.warn("canceling Worker Thread: " + workerThread);    // NOI18N
-            }
-            if (workerThread != null) {
                 final boolean cancel = workerThread.cancel(true);
                 if (DEBUG) {
                     if (LOG.isDebugEnabled()) {
@@ -517,7 +515,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
-     * This operation is invoked after the default initialisation. Implementation classes may implement this merzhod to
+     * This operation is invoked after the default initialisation. Implementation classes may implement this method to
      * perform addditional initialisations.
      *
      * @throws  Exception  if the initialisation fails
@@ -1077,13 +1075,20 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      * @throws  Exception  DOCUMENT ME!
      */
     protected List<FT> retrieveFeatures(final FeatureRetrievalWorker worker) throws Exception {
-        if (initialisationError) {
+        if (initialisationError
+                    || ((this instanceof WebFeatureService) && (((WebFeatureService)this).getFeature() == null))) {
+            if (((this instanceof WebFeatureService) && (((WebFeatureService)this).getFeature() == null))) {
+                initialisationError = true;
+            }
             initFromElement(null);
             setInitialized(false);
             featureFactory = createFeatureFactory();
             this.featureFactory.setMaxFeatureCount(this.getMaxFeatureCount());
             this.featureFactory.setLayerProperties(layerProperties);
             initConcreteInstance();
+            if (initialisationError) {
+                throw new Exception(getErrorObject().toString());
+            }
         }
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {

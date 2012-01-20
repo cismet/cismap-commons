@@ -140,7 +140,8 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         this.wmsServiceLayerElement = wmsServiceLayerElement;
         this.capabilities = capabilities;
 
-        init(wmsServiceLayerElement, capabilities);
+        // a dummy object without a capabilities document will be created
+        init(wmsServiceLayerElement, capabilities, false);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -150,8 +151,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      *
      * @param  wmsServiceLayerElement  DOCUMENT ME!
      * @param  capabilities            DOCUMENT ME!
+     * @param  loadCapDoc              refCaps DOCUMENT ME!
      */
-    private void init(final Element wmsServiceLayerElement, final HashMap<String, WMSCapabilities> capabilities) {
+    private void init(final Element wmsServiceLayerElement,
+            final HashMap<String, WMSCapabilities> capabilities,
+            final boolean loadCapDoc) {
         setName(wmsServiceLayerElement.getAttribute("name").getValue()); // NOI18N
 
         try {
@@ -171,7 +175,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         setExceptionsFormat(wmsServiceLayerElement.getAttribute("exceptionFormat").getValue());   // NOI18N
         final CapabilityLink cp = new CapabilityLink(wmsServiceLayerElement);
         WMSCapabilities wmsCaps = capabilities.get(cp.getLink());
-        if (wmsCaps == null) {
+        if (loadCapDoc && (wmsCaps == null)) {
             try {
                 wmsCaps = createCapabilitiesDocument();
                 capabilities.put(cp.getLink(), wmsCaps);
@@ -207,17 +211,20 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             }
             if (wmsCaps != null) {
                 final Layer l = searchForLayer(getWmsCapabilities().getLayer(), lName);
-                if (layerList.size() == 1) {
-                    setName(l.getTitle());
-                }
 
-                Style style = null;
-                if (styleName != null) {
-                    style = l.getStyleResource(styleName);
+                if (l != null) {
+                    if (layerList.size() == 1) {
+                        setName(l.getTitle());
+                    }
+
+                    Style style = null;
+                    if (styleName != null) {
+                        style = l.getStyleResource(styleName);
+                    }
+                    this.addLayer(l, style, isEnabled, info);
                 }
-                this.addLayer(l, style, isEnabled, info);
             } else {
-                this.addLayer(name, styleName, enabled, info);
+                this.addLayer(lName, styleName, enabled, info);
             }
         }
     }
@@ -327,7 +334,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     @Override
     public void retrieve(final boolean forced) {
         if (isDummy()) {
-            init(wmsServiceLayerElement, capabilities);
+            init(wmsServiceLayerElement, capabilities, true);
             if (!isDummy()) {
                 dummyLayer = null;
             }

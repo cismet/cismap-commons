@@ -9,14 +9,7 @@ package de.cismet.cismap.commons.capabilities;
 
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import java.net.MalformedURLException;
-import java.net.URL;
-
-import de.cismet.security.WebAccessManager;
 
 import de.cismet.security.exceptions.AccessMethodIsNotSupportedException;
 import de.cismet.security.exceptions.MissingArgumentException;
@@ -290,22 +283,8 @@ public abstract class AbstractVersionNegotiator {
         RequestFailedException,
         NoHandlerForURLException,
         Exception {
-        final StringBuilder sb = new StringBuilder("");                          // NOI18N
-        if (logger.isDebugEnabled()) {
-            logger.debug("send Getcapabilities request to the service: " + url); // NOI18N
-        }
-        final URL getCapURL = new URL(url);
-        final InputStream is = WebAccessManager.getInstance().doRequest(getCapURL);
-        final BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        String buffer = br.readLine();
+        final CapabilitiesCache cache = CapabilitiesCache.getInstance();
 
-        while (buffer != null) {
-            sb.append(buffer + "\n"); // NOI18N
-            buffer = br.readLine();
-        }
-
-        is.close();
-
-        return sb;
+        return new StringBuilder(cache.calcValue(url));
     }
 }

@@ -337,13 +337,17 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 if (log.isDebugEnabled()) {
                     log.debug("is it null? " + ((AbstractFeatureService)value).getLayerProperties());
                 }
-                styleLabel.style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
+
+                if (((AbstractFeatureService)value).getLayerProperties() != null) {
+                    styleLabel.style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
+                }
+
                 styleLabel.repaint();
                 return styleLabel;
             }
         } else if (realColumn == 3) {
             final WMSLayer wmsLayer = null;
-            setText("");                                                                           // NOI18N
+            setText(""); // NOI18N
             setIcon(null);
             setHorizontalAlignment(JLabel.LEFT);
 //            if (value instanceof WMSServiceLayer && ((WMSServiceLayer) value).getWMSLayers().size() > 1) {
@@ -529,18 +533,20 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
         @Override
         protected void paintComponent(final Graphics g) {
             try {
-                final Graphics2D g2d = (Graphics2D)g;
-                g.setColor(ActiveLayerTableCellRenderer.this.getBackground());
-                g.fillRect(0, 0, getWidth(), getHeight());
-                if (style.isDrawFill() && (style.getFillColor() != null)) {
-                    g2d.setColor((Color)style.getFillColor());
-                    g2d.fillRect(10, 4, getWidth() - 20, getHeight() - 8);
-                }
-                if (style.isDrawLine() && (style.getLineColor() != null)) {
-                    g2d.setColor((Color)style.getLineColor());
-                    final float width = new Float(Math.min(3.0f, style.getLineWidth())).intValue();
-                    g2d.setStroke(new BasicStroke(width));
-                    g2d.drawRect(10, 4, getWidth() - 20, getHeight() - 8);
+                if (style != null) {
+                    final Graphics2D g2d = (Graphics2D)g;
+                    g.setColor(ActiveLayerTableCellRenderer.this.getBackground());
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                    if (style.isDrawFill() && (style.getFillColor() != null)) {
+                        g2d.setColor((Color)style.getFillColor());
+                        g2d.fillRect(10, 4, getWidth() - 20, getHeight() - 8);
+                    }
+                    if (style.isDrawLine() && (style.getLineColor() != null)) {
+                        g2d.setColor((Color)style.getLineColor());
+                        final float width = new Float(Math.min(3.0f, style.getLineWidth())).intValue();
+                        g2d.setStroke(new BasicStroke(width));
+                        g2d.drawRect(10, 4, getWidth() - 20, getHeight() - 8);
+                    }
                 }
             } catch (Exception ex) {
             }
