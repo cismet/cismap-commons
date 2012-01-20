@@ -38,6 +38,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolTip;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -404,23 +405,29 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      */
     private void cmdRefreshSingleLayerActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshSingleLayerActionPerformed
         final TreePath tp = treeTable.getTree().getSelectionPath();
-        if ((tp != null) && (tp.getLastPathComponent() instanceof RetrievalServiceLayer)) {
-            ((MapService)tp.getLastPathComponent()).setBoundingBox(mapC.getCurrentBoundingBox());
-            ((RetrievalServiceLayer)tp.getLastPathComponent()).retrieve(true);
-        } else if ((tp != null) && (tp.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer)) {
-            ((RetrievalServiceLayer)tp.getParentPath().getLastPathComponent()).retrieve(true);
-        }
-        if (EventQueue.isDispatchThread()) {
-            log.warn("InvokeLater in EDT");
-        }                                                                                     // NOI18N
-        EventQueue.invokeLater(new Runnable() {
+        final SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 
                 @Override
-                public void run() {
+                protected Void doInBackground() throws Exception {
+                    if ((tp != null) && (tp.getLastPathComponent() instanceof RetrievalServiceLayer)) {
+                        ((MapService)tp.getLastPathComponent()).setBoundingBox(mapC.getCurrentBoundingBox());
+                        ((RetrievalServiceLayer)tp.getLastPathComponent()).retrieve(true);
+                    } else if ((tp != null)
+                                && (tp.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer)) {
+                        ((RetrievalServiceLayer)tp.getParentPath().getLastPathComponent()).retrieve(true);
+                    }
+
+                    return null;
+                }
+
+                @Override
+                protected void done() {
                     treeTable.getTree().setSelectionPath(tp);
                     StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                 }
-            });
+            };
+
+        worker.execute();
     } //GEN-LAST:event_cmdRefreshSingleLayerActionPerformed
 
     /**
