@@ -59,11 +59,9 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
     //~ Instance fields --------------------------------------------------------
 
     private int maxWidth = 0;
-
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private HashMap<String, WMSCapabilities> wmsCapabilities = new HashMap<String, WMSCapabilities>();
     private LegendModel tableModel = new LegendModel();
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane scpLegends;
     private javax.swing.JTable tblLegends;
@@ -233,19 +231,27 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
      * @param  wl  DOCUMENT ME!
      */
     private void removeWMSLayer(final WMSLayer wl) {
-        final String title = wl.getOgcCapabilitiesLayer().getTitle();
-        final String name = wl.getOgcCapabilitiesLayer().getName();
-        String url = null;
-        try {
-            final URL[] lua = wl.getSelectedStyle().getLegendURL();
-            url = lua[0].toString();
-        } catch (final Exception t) {
+        assert (wl != null);
+        if (wl.getOgcCapabilitiesLayer() == null) {
             if (log.isDebugEnabled()) {
-                log.debug("Could not find a legend for " + title, t); // NOI18N
+                log.debug(
+                    "in removeWMSLayer waren die capabilities null. kann die Legende nicht entferenen. Wahrscheinlich war deshalb auch gar keine drin. ");
             }
-        }
-        if (url != null) {
-            this.removeLegendByName(name);
+        } else {
+            final String title = wl.getOgcCapabilitiesLayer().getTitle();
+            final String name = wl.getOgcCapabilitiesLayer().getName();
+            String url = null;
+            try {
+                final URL[] lua = wl.getSelectedStyle().getLegendURL();
+                url = lua[0].toString();
+            } catch (final Exception t) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Could not find a legend for " + title, t); // NOI18N
+                }
+            }
+            if (url != null) {
+                this.removeLegendByName(name);
+            }
         }
     }
 
@@ -441,7 +447,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         //~ Instance fields ----------------------------------------------------
 
         JLabel lblImage = new JLabel();
-
         private String url = ""; // NOI18N
 
         //~ Constructors -------------------------------------------------------
@@ -624,7 +629,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         //~ Instance fields ----------------------------------------------------
 
         // private LinkedHashMap<String,LegendPanel> panels=new LinkedHashMap<String,LegendPanel>();
-
         private List<LegendPanel> panels = new ArrayList<LegendPanel>();
         private HashMap<String, LegendPanel> panelsByName = new HashMap<String, LegendPanel>();
         private HashMap<String, LegendPanel> panelsByUrl = new HashMap<String, LegendPanel>();

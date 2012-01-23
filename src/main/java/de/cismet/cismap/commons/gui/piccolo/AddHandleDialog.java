@@ -375,29 +375,29 @@ public class AddHandleDialog extends javax.swing.JDialog {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
+    private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOKActionPerformed
         returnStatus = STATUS_OK;
         dispose();
-    }//GEN-LAST:event_btnOKActionPerformed
+    }                                                                         //GEN-LAST:event_btnOKActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnCancelActionPerformed
         returnStatus = STATUS_CANCELED;
         dispose();
-    }//GEN-LAST:event_btnCancelActionPerformed
+    }                                                                             //GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void sliDistanceStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sliDistanceStateChanged
+    private void sliDistanceStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_sliDistanceStateChanged
         sliderValueChanged();
-    }//GEN-LAST:event_sliDistanceStateChanged
+    }                                                                               //GEN-LAST:event_sliDistanceStateChanged
 
     /**
      * DOCUMENT ME!
