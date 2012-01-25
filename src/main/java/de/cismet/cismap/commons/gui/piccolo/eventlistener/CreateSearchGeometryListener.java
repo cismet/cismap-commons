@@ -129,26 +129,26 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
      * @throws  MissingResourceException  DOCUMENT ME!
      */
     private void notifyUserAboutMissingSearchTopics() throws HeadlessException, MissingResourceException {
-        if (!isSearchTopicsSelected() && (metaSearch != null)) {
-            if (metaSearch.hasSearchTopics()) {
+        if (!isSearchTopicsSelected()) {
+            if ((metaSearch != null) && metaSearch.hasSearchTopics()) {
                 JOptionPane.showMessageDialog(
                     CismapBroker.getInstance().getMappingComponent(),
                     org.openide.util.NbBundle.getMessage(
                         CreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized"),       // NOI18N
+                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen"),       // NOI18N
                     org.openide.util.NbBundle.getMessage(
                         CreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized.title"), // NOI18N
+                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen.title"), // NOI18N
                     JOptionPane.ERROR_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(
                     CismapBroker.getInstance().getMappingComponent(),
                     org.openide.util.NbBundle.getMessage(
                         CreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen"), // NOI18N
+                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized"),             // NOI18N
                     org.openide.util.NbBundle.getMessage(
                         CreateSearchGeometryListener.class,
-                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen.title"), // NOI18N
+                        "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized.title"),       // NOI18N
                     JOptionPane.ERROR_MESSAGE);
             }
         }
