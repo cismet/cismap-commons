@@ -1399,15 +1399,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         log.info("restoring " + layerElement.getChildren().size() + " layers from xml configuration"); // NOI18N
         final Element[] orderedLayers = orderLayers(layerElement);
         for (final Element element : orderedLayers) {
-            final Runnable r = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        createLayer(element, capabilities);
-                    }
-                };
-
-            CismetThreadPool.execute(r);
+            createLayer(element, capabilities);
         }
     }
 
