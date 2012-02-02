@@ -164,7 +164,11 @@ public class ImageRetrieval extends Thread {
             image = Toolkit.getDefaultToolkit().createImage(byteArrayOut.toByteArray());
             observer.prepareImage(image, observer);
             while ((observer.checkImage(image, observer) & ImageObserver.ALLBITS) != ImageObserver.ALLBITS) {
-                Thread.sleep(10);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
                 if (youngerCall || isInterrupted()) {
                     fireLoadingAborted();
                     if (log.isDebugEnabled()) {
