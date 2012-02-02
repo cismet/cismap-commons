@@ -191,22 +191,25 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
         final List layerList = wmsServiceLayerElement.getChildren("wmsLayer"); // NOI18N
         final Iterator<Element> it = layerList.iterator();
+        wmsLayers.clear();
+        ogcLayers.clear();
+
         while (it.hasNext()) {
             final Element elem = it.next();
-            final String lName = elem.getAttribute("name").getValue();         // NOI18N
+            final String lName = elem.getAttribute("name").getValue();      // NOI18N
             String styleName = null;
             boolean isEnabled = true;
             boolean info = false;
             try {
-                isEnabled = elem.getAttribute("enabled").getBooleanValue();    // NOI18N
+                isEnabled = elem.getAttribute("enabled").getBooleanValue(); // NOI18N
             } catch (Exception ex) {
             }
             try {
-                info = elem.getAttribute("info").getBooleanValue();            // NOI18N
+                info = elem.getAttribute("info").getBooleanValue();         // NOI18N
             } catch (Exception ex) {
             }
             try {
-                styleName = elem.getAttribute("style").getValue();             // NOI18N
+                styleName = elem.getAttribute("style").getValue();          // NOI18N
             } catch (Exception ex) {
             }
             if (wmsCaps != null) {
@@ -221,7 +224,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                     if (styleName != null) {
                         style = l.getStyleResource(styleName);
                     }
-                    this.addLayer(l, style, isEnabled, info);
+                    this.addLayer(l, style, isEnabled, info, false);
                 }
             } else {
                 this.addLayer(lName, styleName, enabled, info);
@@ -237,7 +240,27 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @param  enabled        DOCUMENT ME!
      * @param  info           DOCUMENT ME!
      */
-    protected void addLayer(final Layer nextLayer, Style selectedStyle, final boolean enabled, final boolean info) {
+    protected void addLayer(final Layer nextLayer,
+            final Style selectedStyle,
+            final boolean enabled,
+            final boolean info) {
+        addLayer(nextLayer, selectedStyle, enabled, info, true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  nextLayer      DOCUMENT ME!
+     * @param  selectedStyle  DOCUMENT ME!
+     * @param  enabled        DOCUMENT ME!
+     * @param  info           DOCUMENT ME!
+     * @param  addSubLayer    DOCUMENT ME!
+     */
+    protected void addLayer(final Layer nextLayer,
+            Style selectedStyle,
+            final boolean enabled,
+            final boolean info,
+            final boolean addSubLayer) {
         if ((nextLayer.getName() != null) && !nextLayer.getName().equals("")) // NOI18N
         {
             if (selectedStyle == null) {
@@ -256,9 +279,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             }
         }
 
-        for (int i = 0; i < nextLayer.getChildren().length; ++i) {
-            final Layer childLayer = nextLayer.getChildren()[i];
-            addLayer(childLayer);
+        if (addSubLayer) {
+            for (int i = 0; i < nextLayer.getChildren().length; ++i) {
+                final Layer childLayer = nextLayer.getChildren()[i];
+                addLayer(childLayer);
+            }
         }
     }
 
