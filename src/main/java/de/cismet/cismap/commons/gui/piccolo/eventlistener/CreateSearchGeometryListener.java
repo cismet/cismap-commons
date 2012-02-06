@@ -15,6 +15,7 @@ import java.awt.HeadlessException;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 import java.util.MissingResourceException;
 
@@ -36,13 +37,27 @@ import de.cismet.cismap.commons.tools.PFeatureTools;
  */
 public class CreateSearchGeometryListener extends CreateGeometryListener implements PropertyChangeListener {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    public static final String PROPERTY_LAST_FEATURE = "PROPERTY_LAST_FEATURE";
+    public static final String PROPERTY_MODE = "PROPERTY_MODE";
+    public static final String PROPERTY_NUM_OF_ELLIPSE_EDGES = "PROPERTY_NUM_OF_ELLIPSE_EDGES";
+    public static final String PROPERTY_HOLD_GEOMETRIES = "PROPERTY_HOLD_GEOMETRIES";
+    public static final String PROPERTY_SEARCH_COLOR = "PROPERTY_SEARCH_COLOR";
+    public static final String PROPERTY_SEARCH_TRANSPARENCY = "PROPERTY_SEARCH_TRANSPARENCY";
+
+    public static final String PROPERTY_FORGUI_LAST_FEATURE = "PROPERTY_FORGUI_LAST_FEATURE";
+    public static final String PROPERTY_FORGUI_MODE = "PROPERTY_FORGUI_MODE";
+
     //~ Instance fields --------------------------------------------------------
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private boolean holdGeometries = false;
-    private Color searchColor = Color.GREEN;
-    private float searchTransparency = 0.5f;
-    private PureNewFeature lastFeature;
+    protected final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    protected boolean holdGeometries = false;
+    protected Color searchColor = Color.GREEN;
+    protected float searchTransparency = 0.5f;
+    protected PureNewFeature lastFeature;
+    protected PureNewFeature recentlyCreatedFeature;
+    protected PropertyChangeSupport propertyChangeSupport;
     private MetaSearchFacade metaSearch;
 
     //~ Constructors -----------------------------------------------------------
@@ -55,8 +70,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
     public CreateSearchGeometryListener(final MappingComponent mc) {
         super(mc, SearchFeature.class);
 
-        this.mc = mc;
-        setMode(CreateGeometryListener.RECTANGLE);
+        propertyChangeSupport = new PropertyChangeSupport(this);
     }
 
     /**
@@ -72,6 +86,15 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  listener  DOCUMENT ME!
+     */
+    public void addPropertyChangeListener(final PropertyChangeListener listener) {
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
 
     /**
      * DOCUMENT ME!
@@ -95,16 +118,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
     protected void finishGeometry(final PureNewFeature newFeature) {
         super.finishGeometry(newFeature);
 
-        if (!isSearchTopicsSelected()) {
-            notifyUserAboutMissingSearchTopics();
-            return;
-        }
-
-        mc.getFeatureCollection().addFeature(newFeature);
-
-        doSearch(newFeature);
-
-        cleanup(newFeature);
+        recentlyCreatedFeature = newFeature;
     }
 
     /**
@@ -159,7 +173,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
      *
      * @param  feature  DOCUMENT ME!
      */
-    private void cleanup(final PureNewFeature feature) {
+    protected void cleanup(final PureNewFeature feature) {
         final PFeature pFeature = (PFeature)mc.getPFeatureHM().get(feature);
         if (isHoldingGeometries()) {
             pFeature.moveToFront(); // funktioniert nicht?!
@@ -192,14 +206,18 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
      *
      * @param  searchFeature  DOCUMENT ME!
      */
-    private void doSearch(final PureNewFeature searchFeature) {
+    protected void doSearch(final PureNewFeature searchFeature) {
         // Suche
         final MapSearchEvent mse = new MapSearchEvent();
         mse.setGeometry(searchFeature.getGeometry());
         CismapBroker.getInstance().fireMapSearchInited(mse);
 
         // letzte Suchgeometrie merken
+        final PureNewFeature oldFeature = lastFeature;
         lastFeature = searchFeature;
+
+        propertyChangeSupport.firePropertyChange(PROPERTY_LAST_FEATURE, oldFeature, searchFeature);
+        propertyChangeSupport.firePropertyChange(PROPERTY_FORGUI_LAST_FEATURE, oldFeature, searchFeature);
     }
 
     /**
@@ -221,7 +239,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
      *
      * @param  feature  DOCUMENT ME!
      */
-    private void showFeature(final PureNewFeature feature) {
+    protected void showFeature(final PureNewFeature feature) {
         if (feature != null) {
             feature.setEditable(feature.getGeometryType() != PureNewFeature.geomTypes.MULTIPOLYGON);
 
@@ -247,7 +265,10 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
      * @param  holdGeometries  DOCUMENT ME!
      */
     public void setHoldGeometries(final boolean holdGeometries) {
+        final boolean oldValue = this.holdGeometries;
         this.holdGeometries = holdGeometries;
+
+        propertyChangeSupport.firePropertyChange(PROPERTY_HOLD_GEOMETRIES, oldValue, this.holdGeometries);
     }
 
     /**
@@ -265,7 +286,10 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
      * @param  searchTransparency  DOCUMENT ME!
      */
     public void setSearchTransparency(final float searchTransparency) {
+        final float oldValue = this.searchTransparency;
         this.searchTransparency = searchTransparency;
+
+        propertyChangeSupport.firePropertyChange(PROPERTY_SEARCH_TRANSPARENCY, oldValue, this.searchTransparency);
     }
 
     /**
@@ -284,7 +308,19 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
      * @param  color  DOCUMENT ME!
      */
     public void setSearchColor(final Color color) {
+        final Color oldValue = this.searchColor;
         this.searchColor = color;
+
+        propertyChangeSupport.firePropertyChange(PROPERTY_SEARCH_COLOR, oldValue, this.searchColor);
+    }
+
+    @Override
+    public void setNumOfEllipseEdges(final int numOfEllipseEdges) {
+        final int oldValue = getNumOfEllipseEdges();
+
+        super.setNumOfEllipseEdges(numOfEllipseEdges);
+
+        propertyChangeSupport.firePropertyChange(PROPERTY_NUM_OF_ELLIPSE_EDGES, oldValue, getNumOfEllipseEdges());
     }
 
     /**
@@ -314,45 +350,87 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
         final boolean progressBefore = inProgress;
         super.mousePressed(pInputEvent);
 
-        if ((!inProgress || (!progressBefore && inProgress)) && (pInputEvent.getClickCount() == 2)) {
-            if (!isSearchTopicsSelected()) {
-                return;
+        if (recentlyCreatedFeature != null) {
+            // super.mousePressed(pInputEvent) called this.finishGeometry(Feature) since the user created a new search
+            // geometry
+            handleUserFinishedSearchGeometry(recentlyCreatedFeature);
+            recentlyCreatedFeature = null;
+        } else if ((!inProgress || (!progressBefore && inProgress)) && (pInputEvent.getClickCount() == 2)) {
+            handleDoubleClickInMap(pInputEvent);
+        }
+    }
+
+    @Override
+    public void mouseReleased(final PInputEvent arg0) {
+        super.mouseReleased(arg0);
+
+        if (recentlyCreatedFeature != null) {
+            // super.mousePressed(pInputEvent) called finishGeometry since the user created a new search geometry
+            handleUserFinishedSearchGeometry(recentlyCreatedFeature);
+            recentlyCreatedFeature = null;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  feature  DOCUMENT ME!
+     */
+    protected void handleUserFinishedSearchGeometry(final PureNewFeature feature) {
+        if (!isSearchTopicsSelected()) {
+            notifyUserAboutMissingSearchTopics();
+            return;
+        }
+
+        mc.getFeatureCollection().addFeature(feature);
+
+        doSearch(feature);
+
+        cleanup(feature);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pInputEvent  DOCUMENT ME!
+     */
+    protected void handleDoubleClickInMap(final PInputEvent pInputEvent) {
+        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
+
+        if (!(o instanceof PFeature)) {
+            return;
+        }
+        final PFeature sel = (PFeature)o;
+
+        if (!(sel.getFeature() instanceof SearchFeature)) {
+            return;
+        }
+        final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
+
+        if (!isSearchTopicsSelected()) {
+            // finishGeometry is called before mousePressed. finishGeometry is not called if the user displayed the
+            // last search feature. These conditions ensure that there is only one notification in any case.
+            if (searchFeature.equals(lastFeature)) {
+                notifyUserAboutMissingSearchTopics();
             }
 
-            final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
+            return;
+        }
 
-            if (!(o instanceof PFeature)) {
-                return;
-            }
-            final PFeature sel = (PFeature)o;
-
-            if (!(sel.getFeature() instanceof SearchFeature)) {
-                return;
-            }
-            final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
-
-            if (!isSearchTopicsSelected()) {
-                // finishGeometry is called before mousePressed. finishGeometry is not called if the user displayed the
-                // last search feature. These conditions ensure that there is only one notification in any case.
-                if (searchFeature.equals(lastFeature)) {
-                    notifyUserAboutMissingSearchTopics();
-                }
-
-                return;
-            }
-
-            if (pInputEvent.isLeftMouseButton()) {
-                mc.getHandleLayer().removeAllChildren();
-                // neue Suche mit Geometry auslösen
-                ((CreateSearchGeometryListener)mc.getInputListener(MappingComponent.CREATE_SEARCH_POLYGON)).search(
-                    (SearchFeature)sel.getFeature());
-            }
+        if (pInputEvent.isLeftMouseButton()) {
+            mc.getHandleLayer().removeAllChildren();
+            // neue Suche mit Geometry auslösen
+            ((CreateSearchGeometryListener)mc.getInputListener(MappingComponent.CREATE_SEARCH_POLYGON)).search(
+                searchFeature);
         }
     }
 
     @Override
     public void setMode(final String m) throws IllegalArgumentException {
+        final String oldMode = getMode();
         super.setMode(m);
+
+        propertyChangeSupport.firePropertyChange(PROPERTY_MODE, oldMode, m);
 
         generateAndShowPointerAnnotation();
     }
@@ -365,6 +443,15 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
             }
         } else if ((metaSearch != null) && metaSearch.isSearchTopicSelectedEvent(evt.getPropertyName())) {
             generateAndShowPointerAnnotation();
+        } else if (PROPERTY_LAST_FEATURE.equals(evt.getPropertyName())) {
+            lastFeature = (PureNewFeature)evt.getNewValue();
+            propertyChangeSupport.firePropertyChange(
+                PROPERTY_FORGUI_LAST_FEATURE,
+                evt.getOldValue(),
+                evt.getNewValue());
+        } else if (PROPERTY_MODE.equals(evt.getPropertyName())) {
+            super.setMode(evt.getNewValue().toString());
+            propertyChangeSupport.firePropertyChange(PROPERTY_FORGUI_MODE, evt.getOldValue(), evt.getNewValue());
         }
     }
 
@@ -389,7 +476,7 @@ public class CreateSearchGeometryListener extends CreateGeometryListener impleme
     /**
      * DOCUMENT ME!
      */
-    private void generateAndShowPointerAnnotation() {
+    protected void generateAndShowPointerAnnotation() {
         if (!MappingComponent.CREATE_SEARCH_POLYGON.equals(mc.getInteractionMode()) || (metaSearch == null)) {
             return;
         }

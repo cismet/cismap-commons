@@ -59,7 +59,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     public static final String RECTANGLE = "BOUNDING_BOX";                                      // NOI18N
     public static final String RECTANGLE_FROM_LINE = "RECTANGLE_FROM_LINE";                     // NOI18N
     public static final String ELLIPSE = "ELLIPSE";                                             // NOI18N
-    private static final int NUMOF_ELLIPSE_EDGES = 36;
+    protected static final int DEFAULT_NUMOF_ELLIPSE_EDGES = 36;
     public static final String GEOMETRY_CREATED_NOTIFICATION = "GEOMETRY_CREATED_NOTIFICATION"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
@@ -68,11 +68,11 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     protected PPath tempFeature;
     protected MappingComponent mc;
     protected boolean inProgress;
+    protected int numOfEllipseEdges = DEFAULT_NUMOF_ELLIPSE_EDGES;
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Vector<Point2D> points;
     private Stack<Point2D> undoPoints;
-    private int numOfEllipseEdges;
     private SimpleMoveListener moveListener;
     private String mode = POLYGON;
     private Class<? extends PureNewFeature> geometryFeatureClass = null;
@@ -650,7 +650,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      */
     public void setNumOfEllipseEdges(int numOfEllipseEdges) {
         if (numOfEllipseEdges <= 2) {
-            numOfEllipseEdges = NUMOF_ELLIPSE_EDGES;
+            numOfEllipseEdges = DEFAULT_NUMOF_ELLIPSE_EDGES;
         }
         this.numOfEllipseEdges = numOfEllipseEdges;
     }
