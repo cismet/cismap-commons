@@ -17,7 +17,7 @@ import de.cismet.cismap.commons.features.PureNewFeature;
  */
 public interface CreateGeometryListenerInterface {
 
-    //~ Static fields/initializers ---------------------------------------------
+    //~ Instance fields --------------------------------------------------------
 
     String LINESTRING = "LINESTRING";                   // NOI18N
     String POINT = "POINT";                             // NOI18N
