@@ -12,11 +12,7 @@ import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 import org.openide.util.Lookup;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.Action;
 import javax.swing.JPopupMenu;
@@ -174,8 +170,8 @@ public class SelectionListener extends RectangleRubberBandListener {
                             ((DefaultFeatureCollection)mc.getFeatureCollection()).unselectAll();
                             mc.getHandleLayer().removeAllChildren();
                             // neue Suche mit Geometry auslösen
-                            ((CreateSearchGeometryListener)mc.getInputListener(MappingComponent.CREATE_SEARCH_POLYGON))
-                                    .search((SearchFeature)sel.getFeature());
+                            ((MetaSearchCreateSearchGeometryListener)mc.getInputListener(
+                                    MappingComponent.CREATE_SEARCH_POLYGON)).search((SearchFeature)sel.getFeature());
                         }
                     }
                 }

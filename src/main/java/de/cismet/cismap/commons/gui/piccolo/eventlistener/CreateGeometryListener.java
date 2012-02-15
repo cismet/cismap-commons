@@ -14,6 +14,8 @@ import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 
+import org.apache.log4j.Logger;
+
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.geom.Point2D;
@@ -23,17 +25,12 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Stack;
-import java.util.Vector;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
-import de.cismet.cismap.commons.features.DefaultFeatureCollection;
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.FeatureCollectionEvent;
-import de.cismet.cismap.commons.features.FeatureCollectionListener;
-import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.EllipsePHandle;
 import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
@@ -49,29 +46,25 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class CreateGeometryListener extends PBasicInputEventHandler implements FeatureCollectionListener {
+public class CreateGeometryListener extends PBasicInputEventHandler implements FeatureCollectionListener,
+    CreateGeometryListenerInterface {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String LINESTRING = "LINESTRING";                                       // NOI18N
-    public static final String POINT = "POINT";                                                 // NOI18N
-    public static final String POLYGON = "POLYGON";                                             // NOI18N
-    public static final String RECTANGLE = "BOUNDING_BOX";                                      // NOI18N
-    public static final String RECTANGLE_FROM_LINE = "RECTANGLE_FROM_LINE";                     // NOI18N
-    public static final String ELLIPSE = "ELLIPSE";                                             // NOI18N
-    protected static final int DEFAULT_NUMOF_ELLIPSE_EDGES = 36;
+    private static final Logger LOG = Logger.getLogger(CreateGeometryListener.class);
     public static final String GEOMETRY_CREATED_NOTIFICATION = "GEOMETRY_CREATED_NOTIFICATION"; // NOI18N
+
+    protected static final int DEFAULT_NUMOF_ELLIPSE_EDGES = 36;
 
     //~ Instance fields --------------------------------------------------------
 
-    protected Point2D startPoint;
-    protected PPath tempFeature;
-    protected MappingComponent mc;
-    protected boolean inProgress;
-    protected int numOfEllipseEdges = DEFAULT_NUMOF_ELLIPSE_EDGES;
+    private Point2D startPoint;
+    private PPath tempFeature;
+    private MappingComponent mc;
+    private boolean inProgress;
+    private int numOfEllipseEdges = DEFAULT_NUMOF_ELLIPSE_EDGES;
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private Vector<Point2D> points;
+    private ArrayList<Point2D> points;
     private Stack<Point2D> undoPoints;
     private SimpleMoveListener moveListener;
     private String mode = POLYGON;
@@ -109,10 +102,29 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    protected MappingComponent getMappingComponent() {
+        return mc;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected boolean isInProgress() {
+        return inProgress;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   m  DOCUMENT ME!
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
+    @Override
     public void setMode(final String m) throws IllegalArgumentException {
         if (m.equals(LINESTRING) || m.equals(POINT) || m.equals(POLYGON) || m.equals(ELLIPSE) || m.equals(RECTANGLE)
                     || m.equals(RECTANGLE_FROM_LINE)) {
@@ -130,7 +142,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
         if (moveListener != null) {
             moveListener.mouseMoved(pInputEvent);
         } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
+            LOG.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
         }
         if (inProgress) {                                                           // && (!isInMode(POINT))) {
             Point2D point = null;
@@ -159,7 +171,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                 if (point == null) {
                     point = pInputEvent.getPosition();
                 }
-                points = new Vector<Point2D>();
+                points = new ArrayList<Point2D>();
                 points.add(point);
                 createPureNewFeature(PureNewFeature.geomTypes.POINT);
             }
@@ -185,7 +197,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     inProgress = true;
                     initTempFeature(true);
                     startPoint = point;
-                    points = new Vector<Point2D>(5);
+                    points = new ArrayList<Point2D>(5);
                     points.add(startPoint);
                 } else {
                     final Point2D stopPoint = point;
@@ -273,7 +285,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     }
 
                     // Polygon erzeugen
-                    points = new Vector<Point2D>();
+                    points = new ArrayList<Point2D>();
                     // Ersten Punkt anlegen
                     startPoint = point;
                     points.add(startPoint);
@@ -304,14 +316,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     Point2D[].class,
                     WorldToScreenTransform.class);
             final Point2D[] p = getFinalPoints(null);
-            if (log.isDebugEnabled()) {
-                log.debug("point count:" + p.length + " (" + Arrays.deepToString(p) + ")"); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("point count:" + p.length + " (" + Arrays.deepToString(p) + ")"); // NOI18N
             }
             final PureNewFeature pnf = c.newInstance(p, mc.getWtst());
             pnf.setGeometryType(geomType);
             finishGeometry(pnf);
         } catch (Throwable t) {
-            log.error("Error during the creation of the geometry", t);                      // NOI18N
+            LOG.error("Error during the creation of the geometry", t);                      // NOI18N
         }
     }
 
@@ -341,22 +353,22 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     mc.getTmpFeatureLayer().removeAllChildren();
                     inProgress = false;
                 }
-                if (log.isDebugEnabled()) {
-                    log.debug("Backspace gedr\u00FCckt: letzter eingef\u00FCgter Punkt gel\u00F6scht.");               // NOI18N
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Backspace gedr\u00FCckt: letzter eingef\u00FCgter Punkt gel\u00F6scht.");               // NOI18N
                 }
                 updatePolygon(null);
             } else if (event.isControlDown()) {                                                                        // Strg gedr\u00FCckt
                 if (!undoPoints.isEmpty()) {
                     points.add(undoPoints.pop());
-                    if (log.isDebugEnabled()) {
-                        log.debug("Backspace + STRG gedr\u00FCckt: letzter gel\u00F6schter Punkt wiederhergestellt."); // NOI18N
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Backspace + STRG gedr\u00FCckt: letzter gel\u00F6schter Punkt wiederhergestellt."); // NOI18N
                     }
                     updatePolygon(null);
                 }
             }
         } else if (!inProgress && points.isEmpty() && event.isControlDown()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Versuche Polygon und Startpunkt wiederherzustellen");                                       // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Versuche Polygon und Startpunkt wiederherzustellen");                                       // NOI18N
             }
 
             initTempFeature(true);
@@ -400,13 +412,13 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
             final Constructor c = geometryFeatureClass.getConstructor(Point2D[].class, WorldToScreenTransform.class);
             pnf = (Feature)c.newInstance(p, mc.getWtst());
         } catch (Throwable t) {
-            log.error("Error during the creation of a geometry", t); // NOI18N
+            LOG.error("Error during the creation of a geometry", t); // NOI18N
         }
         // pnf=new PureNewFeature(p,mc.getWtst());
         final ArrayList<Feature> v = new ArrayList<Feature>();
         v.add(pnf);
-        if (log.isDebugEnabled()) {
-            log.debug("added:" + pnf); // NOI18N
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("added:" + pnf); // NOI18N
         }
         ((DefaultFeatureCollection)mc.getFeatureCollection()).fireFeaturesChanged(v);
         tempFeature.setPathToPolyline(p);
@@ -474,8 +486,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
             }
 
             if (movin) {
-                if (log.isDebugEnabled()) {
-                    log.debug("movin"); // NOI18N
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("movin"); // NOI18N
                 }
                 p[points.size()] = lastPoint;
                 if (isInMode(POLYGON)) {
@@ -483,8 +495,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     p[points.size() + 1] = startPoint;
                 }
             } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("not movin"); // NOI18N
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("not movin"); // NOI18N
                 }
                 if ((points.size() > 2) && isInMode(POLYGON)) {
                     // close it
@@ -493,7 +505,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
             }
             return p;
         } catch (Exception e) {
-            log.warn("Error in getPoints()", e); // NOI18N
+            LOG.warn("Error in getPoints()", e); // NOI18N
             return new Point2D[0];
         }
     }
@@ -505,6 +517,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public boolean isInMode(final String mode) {
         return (this.mode.equals(mode));
     }
@@ -514,6 +527,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public String getMode() {
         return mode;
     }
@@ -523,6 +537,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public Class getGeometryFeatureClass() {
         return geometryFeatureClass;
     }
@@ -532,7 +547,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      *
      * @param  geometryFeatureClass  DOCUMENT ME!
      */
-    public void setGeometryFeatureClass(final Class<? extends PureNewFeature> geometryFeatureClass) {
+    @Override
+    public final void setGeometryFeatureClass(final Class<? extends PureNewFeature> geometryFeatureClass) {
         this.geometryFeatureClass = geometryFeatureClass;
     }
 
@@ -562,7 +578,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
             inProgress = true;
 
             // 4 Punkte, und der erste Punkt nochmal als letzter Punkt
-            points = new Vector<Point2D>(5);
+            points = new ArrayList<Point2D>(5);
             points.add(startPoint);
             points.add(new Point2D.Double(startPoint.getX(), pInputEvent.getPosition().getY()));
             points.add(pInputEvent.getPosition());
@@ -573,8 +589,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
         } else if (isInMode(ELLIPSE)) {
             inProgress = true;
             final Point2D dragPoint = pInputEvent.getPosition();
-            if (log.isDebugEnabled()) {
-                log.debug("pInputEvent.getModifiers() = " + pInputEvent.getModifiers()); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("pInputEvent.getModifiers() = " + pInputEvent.getModifiers()); // NOI18N
             }
 
             final double a = startPoint.getX() - dragPoint.getX();
@@ -589,7 +605,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     pInputEvent.isControlDown(),
                     pInputEvent.isShiftDown());
 
-            points = new Vector<Point2D>(coordArr.length);
+            points = new ArrayList<Point2D>(coordArr.length);
             for (int i = 0; i < coordArr.length; i++) {
                 points.add(new Point2D.Double(startX - coordArr[i].x, startY - coordArr[i].y));
             }
@@ -612,13 +628,13 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
 
     @Override
     public void featuresAdded(final FeatureCollectionEvent fce) {
-        if (log.isDebugEnabled()) {
-            log.debug("Features added to map");                                                      // NOI18N
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Features added to map");                                                      // NOI18N
         }
         for (final Feature curFeature : fce.getEventFeatures()) {
             if (curFeature instanceof PureNewFeature) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Added Feature is PureNewFeature. PostingGeometryCreateNotification"); // NOI18N
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Added Feature is PureNewFeature. PostingGeometryCreateNotification"); // NOI18N
                 }
                 postGeometryCreatedNotificaton((PureNewFeature)curFeature);
                 createAction(mc, (PureNewFeature)curFeature);
@@ -648,6 +664,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      *
      * @param  numOfEllipseEdges  DOCUMENT ME!
      */
+    @Override
     public void setNumOfEllipseEdges(int numOfEllipseEdges) {
         if (numOfEllipseEdges <= 2) {
             numOfEllipseEdges = DEFAULT_NUMOF_ELLIPSE_EDGES;
@@ -660,6 +677,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public int getNumOfEllipseEdges() {
         return numOfEllipseEdges;
     }

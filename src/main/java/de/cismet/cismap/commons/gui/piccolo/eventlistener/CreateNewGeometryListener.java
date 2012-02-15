@@ -7,10 +7,10 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import com.vividsolutions.jts.geom.Geometry;
-
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
+
+import org.apache.log4j.Logger;
 
 import java.awt.Color;
 
@@ -27,9 +27,12 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  */
 public class CreateNewGeometryListener extends CreateGeometryListener {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final Logger LOG = Logger.getLogger(CreateNewGeometryListener.class);
+
     //~ Instance fields --------------------------------------------------------
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     // delegate to enable zoom during creation.
     private final PBasicInputEventHandler zoomDelegate;
 
@@ -66,16 +69,16 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     protected void finishGeometry(final PureNewFeature newFeature) {
         final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
 
-        if (log.isDebugEnabled()) {
-            log.debug("new geometry" + newFeature.getGeometry().toText() + " srid: " + currentSrid);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("new geometry" + newFeature.getGeometry().toText() + " srid: " + currentSrid);
         }
 
         newFeature.getGeometry().setSRID(currentSrid);
         super.finishGeometry(newFeature);
 
         newFeature.setEditable(true);
-        mc.getFeatureCollection().addFeature(newFeature);
-        mc.getFeatureCollection().holdFeature(newFeature);
+        getMappingComponent().getFeatureCollection().addFeature(newFeature);
+        getMappingComponent().getFeatureCollection().holdFeature(newFeature);
     }
 
     @Override

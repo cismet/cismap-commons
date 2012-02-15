@@ -16,7 +16,7 @@ import java.awt.geom.Point2D;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateSearchGeometryListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.MetaSearchCreateSearchGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
@@ -27,9 +27,9 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  */
 public class SearchFeature extends PureNewFeature {
 
-    //~ Instance fields --------------------------------------------------------
+    //~ Static fields/initializers ---------------------------------------------
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(SearchFeature.class);
 
     //~ Constructors -----------------------------------------------------------
 
@@ -76,8 +76,9 @@ public class SearchFeature extends PureNewFeature {
 
     @Override
     public Paint getFillingPaint() {
-        final CreateSearchGeometryListener searchListener = ((CreateSearchGeometryListener)CismapBroker.getInstance()
-                        .getMappingComponent().getInputListener(MappingComponent.CREATE_SEARCH_POLYGON));
+        final MetaSearchCreateSearchGeometryListener searchListener = ((MetaSearchCreateSearchGeometryListener)
+                CismapBroker.getInstance().getMappingComponent().getInputListener(
+                    MappingComponent.CREATE_SEARCH_POLYGON));
         final Color color = searchListener.getSearchColor();
         return new Color(color.getRed(),
                 color.getGreen(),
@@ -141,6 +142,6 @@ public class SearchFeature extends PureNewFeature {
 
     @Override
     public String getType() {
-        return "Metasuche";
+        return "Suche";
     }
 }
