@@ -17,10 +17,11 @@ import java.awt.Color;
 import javax.swing.JColorChooser;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateSearchGeometryListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.MetaSearchCreateSearchGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
-import de.cismet.lookupoptions.*;
+import de.cismet.lookupoptions.AbstractOptionsPanel;
+import de.cismet.lookupoptions.OptionsPanelController;
 
 import de.cismet.tools.configuration.NoWriteError;
 
@@ -84,7 +85,7 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
 
     @Override
     public void update() {
-        final CreateSearchGeometryListener listener = getListener();
+        final MetaSearchCreateSearchGeometryListener listener = getListener();
         if (listener != null) {
             holdGeometries = listener.isHoldingGeometries();
             geometryColor = listener.getSearchColor();
@@ -102,7 +103,7 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
         geometryColor = jPanel1.getBackground();
         geometryTransparency = jSlider1.getValue() / 100f;
 
-        final CreateSearchGeometryListener listener = getListener();
+        final MetaSearchCreateSearchGeometryListener listener = getListener();
         if (listener != null) {
             listener.setHoldGeometries(holdGeometries);
             listener.setSearchColor(geometryColor);
@@ -127,13 +128,13 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
      *
      * @return  DOCUMENT ME!
      */
-    private CreateSearchGeometryListener getListener() {
-        CreateSearchGeometryListener result = null;
+    private MetaSearchCreateSearchGeometryListener getListener() {
+        MetaSearchCreateSearchGeometryListener result = null;
         if ((CismapBroker.getInstance() != null)
                     && (CismapBroker.getInstance().getMappingComponent() != null)
                     && (CismapBroker.getInstance().getMappingComponent().getInputListener(
                             MappingComponent.CREATE_SEARCH_POLYGON) != null)) {
-            result = (CreateSearchGeometryListener)CismapBroker.getInstance().getMappingComponent()
+            result = (MetaSearchCreateSearchGeometryListener)CismapBroker.getInstance().getMappingComponent()
                         .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON);
         }
 

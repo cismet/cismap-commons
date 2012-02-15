@@ -14,6 +14,7 @@ import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.lookupoptions.*;
@@ -70,7 +71,7 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
     @Override
     public void update() {
-        final CreateGeometryListener listener = getListener();
+        final CreateGeometryListenerInterface listener = getListener();
         if (listener != null) {
             numOfEllipseEdges = listener.getNumOfEllipseEdges();
         }
@@ -82,7 +83,7 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
     public void applyChanges() {
         numOfEllipseEdges = Integer.valueOf(jTextField1.getText());
 
-        final CreateGeometryListener listener = getListener();
+        final CreateGeometryListenerInterface listener = getListener();
         if (listener != null) {
             listener.setNumOfEllipseEdges(numOfEllipseEdges);
         }
@@ -110,13 +111,13 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
      *
      * @return  DOCUMENT ME!
      */
-    private CreateGeometryListener getListener() {
-        CreateGeometryListener result = null;
+    private CreateGeometryListenerInterface getListener() {
+        CreateGeometryListenerInterface result = null;
         if ((CismapBroker.getInstance() != null)
                     && (CismapBroker.getInstance().getMappingComponent() != null)
                     && (CismapBroker.getInstance().getMappingComponent().getInputListener(
                             MappingComponent.CREATE_SEARCH_POLYGON) != null)) {
-            result = (CreateGeometryListener)CismapBroker.getInstance().getMappingComponent()
+            result = (CreateGeometryListenerInterface)CismapBroker.getInstance().getMappingComponent()
                         .getInputListener(MappingComponent.CREATE_SEARCH_POLYGON);
         }
 
