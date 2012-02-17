@@ -10,12 +10,13 @@ package de.cismet.cismap.commons.features;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 
-import java.awt.Color;
-import java.awt.Paint;
+import java.awt.*;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MetaSearchCreateSearchGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -143,5 +144,27 @@ public class SearchFeature extends PureNewFeature {
     @Override
     public String getType() {
         return "Suche";
+    }
+
+    @Override
+    public FeatureAnnotationSymbol getPointAnnotationSymbol() {
+        final int strokeWidth = 4;
+        final int imageSize = 24;
+        final int circleSize = imageSize - (strokeWidth * 2);
+        // 0 | strokeWidth | circleSize | strokeWidth | imageSize
+
+        final Color color = (Color)getFillingPaint();
+        final BufferedImage bufferedImage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
+        final Graphics2D graphics = (Graphics2D)bufferedImage.getGraphics();
+
+        graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics.setColor(color);
+        graphics.setStroke(new BasicStroke(strokeWidth));
+        graphics.drawOval(strokeWidth, strokeWidth, circleSize, circleSize);
+
+        final FeatureAnnotationSymbol pointAnnotationSymbol = FeatureAnnotationSymbol
+                    .newCustomSweetSpotFeatureAnnotationSymbol(bufferedImage, null, 0.5, 0.5);
+
+        return pointAnnotationSymbol;
     }
 }
