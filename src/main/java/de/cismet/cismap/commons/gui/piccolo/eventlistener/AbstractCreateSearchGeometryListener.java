@@ -39,18 +39,18 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
 
     private static final Logger LOG = Logger.getLogger(AbstractCreateSearchGeometryListener.class);
 
-    //Now some property change event types.
-    //We need to synchronize the mode and the last feature between AbstractCreateSearchGeometryListeners.
+    // Now some property change event types.
+    // We need to synchronize the mode and the last feature between AbstractCreateSearchGeometryListeners.
     public static final String PROPERTY_LAST_FEATURE = "PROPERTY_LAST_FEATURE";
     public static final String PROPERTY_MODE = "PROPERTY_MODE";
-    //It's not enough to synchronize the mode and the last feature between AbstractCreateSearchGeometryListeners. Mostly
-    //they have a visualizing component (like the white m on a green ball button). They have to be notified of changes
-    //regarding mode or last feature.
+    // It's not enough to synchronize the mode and the last feature between AbstractCreateSearchGeometryListeners.
+    // Mostly they have a visualizing component (like the white m on a green ball button). They have to be notified of
+    // changes regarding mode or last feature.
     public static final String PROPERTY_FORGUI_LAST_FEATURE = "PROPERTY_FORGUI_LAST_FEATURE";
     public static final String PROPERTY_FORGUI_MODE = "PROPERTY_FORGUI_MODE";
 
-    //Additionally we want an AbstractCreateSearchGeometryListener to be the same color, ... as the
-    //MetaSearchCreateSearchGeometryListener, since it's the only one which can be set by its own option dialog.
+    // Additionally we want an AbstractCreateSearchGeometryListener to be the same color, ... as the
+    // MetaSearchCreateSearchGeometryListener, since it's the only one which can be set by its own option dialog.
     public static final String PROPERTY_NUM_OF_ELLIPSE_EDGES = "PROPERTY_NUM_OF_ELLIPSE_EDGES";
     public static final String PROPERTY_HOLD_GEOMETRIES = "PROPERTY_HOLD_GEOMETRIES";
     public static final String PROPERTY_SEARCH_COLOR = "PROPERTY_SEARCH_COLOR";
@@ -154,11 +154,11 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
         final PureNewFeature oldValue = this.lastFeature;
         this.lastFeature = newValue;
 
-        //Notify other AbstractCreateSearchGeometryListeners about the change.
+        // Notify other AbstractCreateSearchGeometryListeners about the change.
         propertyChangeSupport.firePropertyChange(PROPERTY_LAST_FEATURE, oldValue, newValue);
-        //And notify the visualizing component of this AbstractCreateSearchGeometryListener about the change.
-        //setLastFeature(PureNewFeature) is called by this AbstractCreateSearchGeometryListener itself so the
-        //visualizing component doesn't know about the new last feature.
+        // And notify the visualizing component of this AbstractCreateSearchGeometryListener about the change.
+        // setLastFeature(PureNewFeature) is called by this AbstractCreateSearchGeometryListener itself so the
+        // visualizing component doesn't know about the new last feature.
         propertyChangeSupport.firePropertyChange(PROPERTY_FORGUI_LAST_FEATURE, oldValue, newValue);
     }
 
@@ -214,10 +214,10 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
         final boolean oldValue = this.holdGeometries;
         this.holdGeometries = newValue;
 
-        //Notify other AbstractCreateSearchGeometryListeners about the change.
+        // Notify other AbstractCreateSearchGeometryListeners about the change.
         propertyChangeSupport.firePropertyChange(PROPERTY_HOLD_GEOMETRIES, oldValue, newValue);
-        //But here we don't need to notify the visualizing component of this AbstractCreateSearchGeometryListener about
-        //the change, since this method is invoked by it. It already knows about the change.
+        // But here we don't need to notify the visualizing component of this AbstractCreateSearchGeometryListener about
+        // the change, since this method is invoked by it. It already knows about the change.
     }
 
     /**
