@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons.raster.wms.featuresupportlayer;
 
-import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 
 /**
@@ -21,7 +20,6 @@ public class SimpleFeatureSupporterRasterServiceUrl extends SimpleWmsGetMapUrl {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String FILTER_TOKEN = "<cismap:filterString>"; // NOI18N
-    public static final String SRS_TOKEN = "<cismap:srs>";             // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -47,9 +45,6 @@ public class SimpleFeatureSupporterRasterServiceUrl extends SimpleWmsGetMapUrl {
         if (filter != null) {
             retValue = retValue.replaceAll(FILTER_TOKEN, filter);
         }
-
-        // we can always replace all since the code is always present, requests without SRS_TOKEN won't be affected
-        retValue = retValue.replaceAll(SRS_TOKEN, CismapBroker.getInstance().getSrs().getCode());
 
         return retValue;
     }
