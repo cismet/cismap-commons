@@ -12,7 +12,7 @@
  */
 package de.cismet.cismap.commons.raster.wms.simple;
 
-import de.cismet.cismap.commons.rasterservice.*;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * Einfache Klasse um einen WMS Aufruf zu parametrisieren nur eine WMS String mitschneiden und dann einfach die Breite,
@@ -33,6 +33,7 @@ public class SimpleWmsGetMapUrl {
     public static final String WIDTH_TOKEN = "<cismap:width>";              // NOI18N
     public static final String HEIGHT_TOKEN = "<cismap:height>";            // NOI18N
     public static final String BOUNDING_BOX_TOKEN = "<cismap:boundingBox>"; // NOI18N
+    public static final String SRS_TOKEN = "<cismap:srs>";             // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -165,27 +166,11 @@ public class SimpleWmsGetMapUrl {
                         + new Double(x2).toString()
                         + "," // NOI18N
                         + new Double(y2).toString());
+        
+        // we can always replace all since the code is always present, requests without SRS_TOKEN won't be affected
+        url = url.replaceAll(SRS_TOKEN, CismapBroker.getInstance().getSrs().getCode());
+        
         return url;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        final SimpleWmsGetMapUrl test = new SimpleWmsGetMapUrl(
-                "http://geoportal.wuppertal.de/wms/wms?null&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&WIDTH=<cids:width>&HEIGHT=<cids:height>&BBOX=<cids:boundingBox>&SRS=EPSG:31466&FORMAT=image/png&TRANSPARENT=false&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=R102:DGK5", // NOI18N
-                "<cids:width>",
-                "<cids:height>",
-                "<cids:boundingBox>"); // NOI18N
-        test.setWidth(47);
-        test.setHeight(11);
-        test.setX1(1.1);
-        test.setY1(2.2);
-        test.setX2(3.3);
-        test.setY2(4.4);
-        System.out.println(test);
     }
 
     /**
