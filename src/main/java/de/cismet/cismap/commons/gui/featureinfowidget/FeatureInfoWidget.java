@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import java.awt.Color;
 import java.awt.Component;
 
+import java.util.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
 
     private final transient Map<Object, FeatureInfoDisplay> displays;
     private final transient FeatureInfoDisplayRepository displayRepo;
+    private final transient Map<String, List<AggregateableFeatureInfoDisplay>> aggregatableDisplayMap;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JTabbedPane tbpFeatureInfos;
@@ -69,7 +71,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
     public FeatureInfoWidget() {
         displays = new HashMap<Object, FeatureInfoDisplay>();
         displayRepo = new FeatureInfoDisplayRepository();
-
+        aggregatableDisplayMap = new HashMap<String, List<AggregateableFeatureInfoDisplay>>();
         initComponents();
 
         tbpFeatureInfos.putClientProperty(Options.NO_CONTENT_BORDER_KEY, Boolean.FALSE);
@@ -144,6 +146,16 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
             final LayerInfoProvider layer = (LayerInfoProvider)o;
             FeatureInfoDisplay display = displays.get(layer);
             if ((display != null) && ((layer.isLayerQuerySelected() == false) || remove)) {
+                final FeatureInfoDisplay d = displays.get(layer);
+                if (d instanceof AggregateableFeatureInfoDisplay) {
+                    final AggregateableFeatureInfoDisplay aggrDisplay = ((AggregateableFeatureInfoDisplay)d);
+                    final String aggregateType = aggrDisplay.getAggregateTypeID();
+                    aggregatableDisplayMap.get(aggregateType).remove(aggrDisplay);
+
+                    for (final AggregateableFeatureInfoDisplay displ : aggregatableDisplayMap.get(aggregateType)) {
+                        displ.setAggregatableDisplayList(aggregatableDisplayMap.get(aggregateType));
+                    }
+                }
                 try {
                     tbpFeatureInfos.remove(display.getDisplayComponent());
                     displays.remove(layer);
@@ -158,6 +170,21 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                         throw new IllegalStateException("dispay info for layer is null: " + layer); // NOI18N
                     }
                     display.init(layer, tbpFeatureInfos);
+
+                    if (display instanceof AggregateableFeatureInfoDisplay) {
+                        final String aggregateType = ((AggregateableFeatureInfoDisplay)display).getAggregateTypeID();
+                        if (!aggregatableDisplayMap.containsKey(aggregateType)) {
+                            final ArrayList<AggregateableFeatureInfoDisplay> displayList =
+                                new ArrayList<AggregateableFeatureInfoDisplay>();
+                            aggregatableDisplayMap.put(aggregateType, displayList);
+                        }
+
+                        aggregatableDisplayMap.get(aggregateType).add((AggregateableFeatureInfoDisplay)display);
+
+                        for (final AggregateableFeatureInfoDisplay d : aggregatableDisplayMap.get(aggregateType)) {
+                            d.setAggregatableDisplayList(aggregatableDisplayMap.get(aggregateType));
+                        }
+                    }
                     final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
                     final GetFeatureInfoClickDetectionListener listener = (GetFeatureInfoClickDetectionListener)
                         mc.getInputListener(MappingComponent.FEATURE_INFO);
@@ -167,7 +194,7 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
                     tbpFeatureInfos.add(layer.toString(), display.getDisplayComponent());
                     displays.put(layer, display);
                 } catch (final Exception exception) {
-                    LOG.error("Exception in creating featureInfoDisplay component", exception);     // NOI18N
+                    LOG.error("Exception in creating featureInfoDisplay component", exception); // NOI18N
                     layer.setLayerQuerySelected(false);
                 }
             }
