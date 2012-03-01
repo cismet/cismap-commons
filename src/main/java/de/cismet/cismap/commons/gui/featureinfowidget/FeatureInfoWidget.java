@@ -253,6 +253,13 @@ public class FeatureInfoWidget extends JPanel implements ActiveLayerListener, Ma
         final Component c = tbpFeatureInfos.getSelectedComponent();
         if ((c != null) && (c instanceof MultipleFeatureInfoRequestsDisplay)) {
             final MultipleFeatureInfoRequestsDisplay multiRequestDisplay = (MultipleFeatureInfoRequestsDisplay)c;
+            final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+            final GetFeatureInfoClickDetectionListener listener = (GetFeatureInfoClickDetectionListener)
+                mc.getInputListener(MappingComponent.FEATURE_INFO);
+            if (listener != null) {
+                multiRequestDisplay.removeHoldListener(listener);
+                multiRequestDisplay.addHoldListener(listener);
+            }
             multiRequestDisplay.setDisplayVisble(true);
         } else {
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
