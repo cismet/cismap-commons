@@ -3867,6 +3867,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         ret.setAttribute("handleInteractionMode", getHandleInteractionMode());                      // NOI18N
         ret.setAttribute("snapping", new Boolean(isSnappingEnabled()).toString());                  // NOI18N
 
+        final Object inputListener = getInputListener(CREATE_SEARCH_POLYGON);
+        if (inputListener instanceof CreateSearchGeometryListener) {
+            final CreateSearchGeometryListener listener = (CreateSearchGeometryListener)inputListener;
+
+            ret.setAttribute("createSearchMode", listener.getMode());
+        }
+
         // Position
         final Element currentPosition = new Element("Position"); // NOI18N
         currentPosition.addContent(currentBoundingBox.getJDOMElement());
@@ -4066,19 +4073,32 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         // InteractionMode
         try {
-            final String interactMode = prefs.getAttribute("interactionMode").getValue();          // NOI18N
+            final String interactMode = prefs.getAttribute("interactionMode").getValue();      // NOI18N
             setInteractionMode(interactMode);
             if (interactMode.equals(MappingComponent.NEW_POLYGON)) {
                 try {
-                    final String creationMode = prefs.getAttribute("creationMode").getValue();     // NOI18N
+                    final String creationMode = prefs.getAttribute("creationMode").getValue(); // NOI18N
                     ((CreateNewGeometryListener)getInputListener(MappingComponent.NEW_POLYGON)).setMode(creationMode);
                 } catch (final Exception ex) {
-                    LOG.warn("Fehler beim Setzen des CreationInteractionMode", ex);                // NOI18N
+                    LOG.warn("Fehler beim Setzen des CreationInteractionMode", ex);            // NOI18N
                 }
             }
         } catch (final Exception ex) {
-            LOG.warn("Fehler beim Setzen des InteractionMode", ex);                                // NOI18N
+            LOG.warn("Fehler beim Setzen des InteractionMode", ex);                            // NOI18N
         }
+
+        try {
+            final String createSearchMode = prefs.getAttribute("createSearchMode").getValue();
+            final Object inputListener = getInputListener(CREATE_SEARCH_POLYGON);
+            if ((inputListener instanceof CreateSearchGeometryListener) && (createSearchMode != null)) {
+                final CreateSearchGeometryListener listener = (CreateSearchGeometryListener)inputListener;
+
+                listener.setMode(createSearchMode);
+            }
+        } catch (final Exception ex) {
+            LOG.warn("Fehler beim Setzen des CreateSearchMode", ex); // NOI18N
+        }
+
         try {
             final String handleInterMode = prefs.getAttribute("handleInteractionMode").getValue(); // NOI18N
             setHandleInteractionMode(handleInterMode);
