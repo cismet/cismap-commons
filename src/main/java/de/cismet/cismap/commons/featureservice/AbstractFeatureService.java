@@ -719,6 +719,60 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
+     * Sets the new layer properties of the service and.
+     */
+    public void refresh() {
+        if (this.featureFactory != null) {
+            if (DEBUG) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("setLayerProperties: new layer properties are also applied to all cached features!"); // NOI18N
+                }
+            }
+            // layer properties are appiled to last created features
+            if ((featureRetrievalWorker != null) && !featureRetrievalWorker.isDone()) {
+                LOG.warn("must wait until thread '" + featureRetrievalWorker
+                            + "' is finished before applying new layer properties");   // NOI18N
+                while (!featureRetrievalWorker.isDone()) {
+                    // wait ....
+                }
+                if (DEBUG) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("thread '" + featureRetrievalWorker
+                                    + "' is finished, applying new layer properties"); // NOI18N
+                    }
+                }
+            }
+
+            this.featureFactory.setLayerProperties(layerProperties);
+            final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
+            if (lastCreatedFeatures.size() > 0) {
+                if (DEBUG) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(lastCreatedFeatures.size()
+                                    + " last created features refreshed, fiering retrival event"); // NOI18N
+                    }
+                }
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            final RetrievalEvent re = new RetrievalEvent();
+                            re.setIsComplete(true);
+                            re.setHasErrors(false);
+                            re.setRefreshExisting(true);
+                            re.setRetrievedObject(lastCreatedFeatures);
+                            re.setRequestIdentifier(System.currentTimeMillis());
+                            fireRetrievalStarted(re);
+                            fireRetrievalComplete(re);
+                        }
+                    });
+            } else {
+                LOG.warn("no last created features that could be refreshed found"); // NOI18N
+            }
+        }
+    }
+
+    /**
      * Deliveres the transparency value of the Featues.
      *
      * @return  the translucency value

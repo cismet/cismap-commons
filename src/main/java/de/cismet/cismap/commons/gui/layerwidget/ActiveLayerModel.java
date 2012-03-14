@@ -45,6 +45,7 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.XMLObjectFactory;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
+import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.SimpleUpdateablePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
@@ -322,6 +323,21 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
         for (final WebFeatureService tmp : removedLayer) {
             addLayer((WebFeatureService)tmp.clone());
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void refreshShapeFileLayer() {
+        final Object[] oa = layers.toArray();
+
+        for (int i = 0; i < oa.length; i++) {
+            if (oa[i] instanceof ShapeFileFeatureService) {
+                ((ShapeFileFeatureService)oa[i]).getPNode().removeAllChildren();
+                ((ShapeFileFeatureService)oa[i]).setCrs(srs);
+                ((ShapeFileFeatureService)oa[i]).retrieve(true);
+            }
         }
     }
 
@@ -909,6 +925,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 ((SlidableWMSServiceLayerGroup)layer).setSrs(srs.getCode());
             } else if (layer instanceof WebFeatureService) {
                 ((WebFeatureService)layer).setCrs(srs);
+            } else if (layer instanceof ShapeFileFeatureService) {
+                ((ShapeFileFeatureService)layer).setCrs(srs);
             } else {
                 log.error("The SRS of a layer cannot be changed. Layer is of type  " + layer.getClass().getName());
             }

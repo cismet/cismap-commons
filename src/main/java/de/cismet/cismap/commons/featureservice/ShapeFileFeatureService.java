@@ -24,6 +24,7 @@ import java.util.Map;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
@@ -190,6 +191,15 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
      */
     public boolean isErrorInGeometryFound() {
         return errorInGeometryFound;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crs  DOCUMENT ME!
+     */
+    public void setCrs(final Crs crs) {
+        ((ShapeFeatureFactory)featureFactory).setCrs(crs);
     }
 
 // breaks DocumentFeatureServiceFactory
