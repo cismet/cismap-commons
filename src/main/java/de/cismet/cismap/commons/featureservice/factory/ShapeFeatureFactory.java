@@ -12,7 +12,6 @@
 package de.cismet.cismap.commons.featureservice.factory;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -24,7 +23,14 @@ import org.deegree.model.feature.schema.FeatureType;
 import org.deegree.model.feature.schema.PropertyType;
 import org.deegree.model.spatialschema.JTSAdapter;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
 import java.net.URI;
+
+import java.nio.charset.Charset;
 
 import java.util.List;
 import java.util.Vector;
@@ -32,8 +38,8 @@ import java.util.Vector;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
@@ -62,6 +68,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 //    private Geometry extend;
     private boolean noGeometryRecognised = false;
     private boolean errorInGeometryFound = false;
+    private Crs shapeCrs = null;
+    private int shapeSrid = 0;
+    private Crs crs = CismapBroker.getInstance().getSrs();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -110,6 +119,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         this.degreeFeaturesTree = shpff.degreeFeaturesTree;
         this.featureServiceAttributes = new Vector(shpff.featureServiceAttributes);
         this.initialised = shpff.initialised;
+        this.crs = shpff.crs;
+        this.shapeCrs = shpff.shapeCrs;
+        this.shapeSrid = shpff.shapeSrid;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -134,13 +146,11 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         }
 
         if (shapeFeature.getGeometry() != null) {
-            shapeFeature.getGeometry()
-                    .setSRID(CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getDefaultCrs()));
-        }
-
-        if (shapeFeature.getGeometry() != null) {
+//            if (logger.isDebugEnabled()) {
+//                logger.debug("srid of feature = " + shapeFeature.getGeometry().getSRID());
+//            }
+            shapeFeature.getGeometry().setSRID(shapeSrid);
             // store the feature in the spatial index structure
-            shapeFeature.setGeometry(CrsTransformer.transformToDefaultCrs(shapeFeature.getGeometry()));
             this.degreeFeaturesTree.insert(shapeFeature.getGeometry().getEnvelopeInternal(), shapeFeature);
         }
 
@@ -166,6 +176,52 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    private Charset getCharsetDefinition() {
+        Charset cs = null;
+        String cpgFilename = null;
+        File cpgFile = null;
+
+        if (this.documentURI.getPath().endsWith(".shp")) {
+            cpgFilename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
+        } else {
+            cpgFilename = this.documentURI.getPath();
+        }
+
+        cpgFile = new File(cpgFilename + ".cpg");
+        if (!cpgFile.exists()) {
+            cpgFile = new File(cpgFilename + ".CPG");
+        }
+
+        try {
+            if (cpgFile.exists()) {
+                final BufferedReader br = new BufferedReader(new FileReader(cpgFile));
+                final String csName = br.readLine();
+                if (logger.isDebugEnabled()) {
+                    logger.debug("cpg file with charset " + csName + " found");
+                }
+                if ((csName != null) && Charset.isSupported(csName)) {
+                    cs = Charset.forName(csName);
+                } else {
+                    logger.warn("The given charset is not supported. Charset: " + csName);
+                }
+                br.close();
+            } else {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("No cpg file found.");
+                }
+            }
+        } catch (IOException e) {
+            logger.error("Error while reading the cpg file.");
+        }
+
+        return cs;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   workerThread  DOCUMENT ME!
      *
      * @throws  Exception  DOCUMENT ME!
@@ -173,11 +229,18 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     protected synchronized void parseShapeFile(final SwingWorker workerThread) throws Exception {
         logger.info("SW[" + workerThread + "]: initialising ShapeFeatureFactory with document: '" + documentURI + "'");
         final long start = System.currentTimeMillis();
+        if (shapeCrs == null) {
+            shapeCrs = CismapBroker.getInstance().getSrs();
+            shapeSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
+        }
+
+        final Charset cs = getCharsetDefinition();
 
         if (this.documentURI.getPath().endsWith(".shp")) {
-            shapeFile = new ShapeFile(this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4));
+            shapeFile = new ShapeFile(this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4),
+                    cs);
         } else {
-            shapeFile = new ShapeFile(this.documentURI.getPath());
+            shapeFile = new ShapeFile(this.documentURI.getPath(), cs);
         }
 
         int max = shapeFile.getRecordNum();
@@ -205,6 +268,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
         // parse features ........................................................
         int currentProgress = 0;
+        int newProgress;
         for (int i = 0; i < max; i++) {
             final Feature degreeFeature = shapeFile.getFeatureByRecNo(i + 1);
             if (i == 0) {
@@ -234,10 +298,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 // }
 // }
             // debug
-
-            final int newProgress = (int)((double)i / (double)max * 100d);
-            if ((workerThread != null) && (newProgress > currentProgress) && (newProgress >= 5)
-                        && ((newProgress % 5) == 0)) {
+            newProgress = (int)((double)i / (double)max * 100d);
+            if ((workerThread != null) && ((newProgress % 5) == 0) && (newProgress > currentProgress)
+                        && (newProgress >= 5)) {
                 // set to progress to -1 (indeterminate progress bar)
                 currentProgress = (newProgress <= 100) ? newProgress : -1;
                 if (DEBUG) {
@@ -259,25 +322,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     public synchronized void flush() {
         logger.warn("flushing cached features");
         this.lastCreatedfeatureVector.clear();
-        // this.initialised = false;
-        // this.tempFeatureCollection = null;
-        // this.degreeFeaturesTree = null;
-        // this.shapeFile = null;
         System.gc();
-
-//    try
-//    {
-//      this.parseShapeFile(null);
-//
-//    } catch (Exception ex)
-//    {
-//      logger.error("error parsing shape file", ex);
-//      if (DEBUG && shapeFile != null)
-//      {
-//        logger.debug(shapeFile.getFileMBR());
-//      }
-//      this.cleanup();
-//    }
     }
 
     @Override
@@ -335,13 +380,17 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         polyCords[4] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
         // The GeometryFactory must use the same srid as the elements in the deegreeFeaturesTree
         final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
+                CrsTransformer.extractSridFromCrs(crs.getCode()));
         Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
-        boundingPolygon = (Polygon)CrsTransformer.transformToDefaultCrs(boundingPolygon);
+        boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
         final List<ShapeFeature> selectedFeatures = this.degreeFeaturesTree.query(boundingPolygon
                         .getEnvelopeInternal());
-
+        if (logger.isDebugEnabled()) {
+            logger.debug("feature crs: " + shapeCrs.getCode() + " features " + selectedFeatures.size()
+                        + " boundingbox: "
+                        + boundingPolygon.getEnvelopeInternal());
+        }
         // check if thread is canceled .........................................
         if (this.checkCancelled(workerThread, " quering spatial index structure")) {
             return null;
@@ -382,7 +431,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     public synchronized Vector<FeatureServiceAttribute> createAttributes(final SwingWorker workerThread)
             throws TooManyFeaturesException, Exception {
         if ((this.featureServiceAttributes == null) || (this.featureServiceAttributes.size() == 0)) {
-            logger.warn("SW[" + workerThread + "]: Factory not correctopy initialised, parsing shape file");
+            logger.warn("SW[" + workerThread + "]: Factory not correctly initialised, parsing shape file");
             this.parseShapeFile(workerThread);
         }
 
@@ -434,5 +483,14 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      */
     public boolean isErrorInGeometryFound() {
         return errorInGeometryFound;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crs  DOCUMENT ME!
+     */
+    public void setCrs(final Crs crs) {
+        this.crs = crs;
     }
 }

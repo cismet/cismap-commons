@@ -4866,13 +4866,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 gotoBoundingBoxWithoutHistory(newBbox, 0);
 
                 final ArrayList<Feature> list = new ArrayList<Feature>(featureCollection.getAllFeatures());
-                removeFeatures(list);
-                addFeaturesToMap(list.toArray(new Feature[list.size()]));
+                featureCollection.removeAllFeatures();
+                featureCollection.addFeatures(list);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("debug features added: " + list.size());
+                }
 
                 // refresh all wfs layer
                 if (getMappingModel() instanceof ActiveLayerModel) {
                     final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
                     alm.refreshWebFeatureServices();
+                    alm.refreshShapeFileLayer();
                 }
 
                 // transform the highlighting layer
