@@ -12,9 +12,7 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.*;
 
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
@@ -144,10 +142,10 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                 final Point2D trigger = event.getPosition();
                                 final Point2D[] neighbours = getNearestNeighbours(trigger, sel);
 
-                                final Point2D erg = StaticGeometryFunctions.createPointOnLine(
-                                        neighbours[0],
-                                        neighbours[1],
-                                        trigger);
+                                final Point2D p0 = neighbours[0];
+                                final Point2D p1 = neighbours[1];
+                                if ((p0 != null) && (p1 != null)) {
+                                    final Point2D erg = StaticGeometryFunctions.createPointOnLine(p0, p1, trigger);
 //                            Point2D erg;
 //                            // CTRL-Taste gedrückt
 //                            if (event.getModifiers() == InputEvent.CTRL_MASK) {
@@ -159,23 +157,24 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
 //                                // Handle folgt auf der Linie der Maus
 //                                erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
 //                            }
-                                handleX = (float)erg.getX();
-                                handleY = (float)erg.getY();
-                                boolean found = false;
-                                for (final Object o : mc.getHandleLayer().getChildrenReference()) {
-                                    if ((o instanceof PHandle) && ((PHandle)o == newPointHandle)) {
-                                        found = true;
+                                    handleX = (float)erg.getX();
+                                    handleY = (float)erg.getY();
+                                    boolean found = false;
+                                    for (final Object o : mc.getHandleLayer().getChildrenReference()) {
+                                        if ((o instanceof PHandle) && ((PHandle)o == newPointHandle)) {
+                                            found = true;
+                                        }
                                     }
+                                    if (!found) {
+                                        // EventQueue.invokeLater(new Runnable() {
+                                        // public void run() {
+                                        mc.getHandleLayer().addChild(newPointHandle);
+                                        log.info("tempor\u00E4res Handle eingef\u00FCgt"); // NOI18N
+                                        // }
+                                        // });
+                                    }
+                                    newPointHandle.relocateHandle();
                                 }
-                                if (!found) {
-//                                EventQueue.invokeLater(new Runnable() {
-//                                    public void run() {
-                                    mc.getHandleLayer().addChild(newPointHandle);
-                                    log.info("tempor\u00E4res Handle eingef\u00FCgt"); // NOI18N
-//                                    }
-//                                });
-                                }
-                                newPointHandle.relocateHandle();
                             }
                         }
                         xCoord = mc.getWtst().getSourceX(event.getPosition().getX() - mc.getClip_offset_x());
@@ -252,9 +251,11 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
         double dist = Double.POSITIVE_INFINITY;
         for (final Object o : sel) {
             if (o instanceof Feature) {
-                final PFeature pfeature = (PFeature)mc.getPFeatureHM().get(o);
-                if ((pfeature.getFeature().getGeometry() instanceof Polygon)
-                            || (pfeature.getFeature().getGeometry() instanceof LineString)) {
+                final Feature feature = (Feature)o;
+                final PFeature pfeature = (PFeature)mc.getPFeatureHM().get(feature);
+                final Geometry geometry = pfeature.getFeature().getGeometry();
+                if ((geometry instanceof Polygon) || (geometry instanceof LineString)
+                            || (geometry instanceof MultiPolygon)) {
                     for (int i = 0; i < (pfeature.getXp().length - 1); i++) {
                         final Point2D tmpStart = new Point2D.Double(pfeature.getXp()[i], pfeature.getYp()[i]);
                         final Point2D tmpEnd = new Point2D.Double(pfeature.getXp()[i + 1], pfeature.getYp()[i + 1]);
@@ -343,85 +344,89 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                 final Point2D newPoint = new Point2D.Float(handleX, handleY);
                 final Point2D[] neighbours = getNearestNeighbours(newPoint, sel);
 
-                // CTRL-Taste beim Klicken gedrückt
-                if (event.getModifiers() == (InputEvent.CTRL_MASK + InputEvent.BUTTON1_MASK)) {
-                    // welcher Nachbar ist weiter Links/Rechts?
-                    Point2D leftNeighbour;
-                    Point2D rightNeighbour;
-                    if (neighbours[0].getX() < neighbours[1].getX()) {
-                        // Nachbar "0" ist weiter Links
-                        leftNeighbour = neighbours[0];
-                        rightNeighbour = neighbours[1];
-                    } else if (neighbours[1].getX() < neighbours[0].getX()) {
-                        // Nachbar "1" ist weiter Links
-                        leftNeighbour = neighbours[1];
-                        rightNeighbour = neighbours[0];
-                    } else {
-                        // Nachbar "0" und "1" liegen genau übereinander
-                        if (neighbours[0].getY() <= neighbours[1].getY()) {
-                            // Nachbar "0" ist weiter oben (wird als weiter Links interpretiert)
-                            leftNeighbour = neighbours[0];
-                            rightNeighbour = neighbours[1];
+                final Point2D p0 = neighbours[0];
+                final Point2D p1 = neighbours[1];
+                if ((p0 != null) && (p1 != null)) {
+                    // CTRL-Taste beim Klicken gedrückt
+                    if (event.getModifiers() == (InputEvent.CTRL_MASK + InputEvent.BUTTON1_MASK)) {
+                        // welcher Nachbar ist weiter Links/Rechts?
+                        Point2D leftNeighbour;
+                        Point2D rightNeighbour;
+                        if (p0.getX() < p1.getX()) {
+                            // Nachbar "0" ist weiter Links
+                            leftNeighbour = p0;
+                            rightNeighbour = p1;
+                        } else if (p1.getX() < p0.getX()) {
+                            // Nachbar "1" ist weiter Links
+                            leftNeighbour = p1;
+                            rightNeighbour = p0;
                         } else {
-                            // Nachbar "1" ist weiter oben (wird als weiter Links interpretiert)
-                            leftNeighbour = neighbours[1];
-                            rightNeighbour = neighbours[0];
+                            // Nachbar "0" und "1" liegen genau übereinander
+                            if (p0.getY() <= p1.getY()) {
+                                // Nachbar "0" ist weiter oben (wird als weiter Links interpretiert)
+                                leftNeighbour = p0;
+                                rightNeighbour = p1;
+                            } else {
+                                // Nachbar "1" ist weiter oben (wird als weiter Links interpretiert)
+                                leftNeighbour = p1;
+                                rightNeighbour = p0;
+                            }
                         }
-                    }
 
-                    // Abstand zum linken Nachbar berechnen
-                    Double distanceLeft = leftNeighbour.distance(newPoint);
-                    if (log.isDebugEnabled()) {
-                        log.debug("distanceLeft: " + distanceLeft); // NOI18N
-                    }
-
-                    // Gesamt-Abstand berechnen
-                    final Double distanceTotal = leftNeighbour.distance(rightNeighbour);
-                    if (log.isDebugEnabled()) {
-                        log.debug("distanceTotal: " + distanceTotal); // NOI18N
-                    }
-
-                    // MainFrame holen
-                    final Frame frame = StaticSwingTools.getParentFrame(mc);
-
-                    // Dialog modal aufrufen und Werte übergeben
-                    final AddHandleDialog dialog = new AddHandleDialog(frame, true, distanceTotal);
-                    dialog.setDistanceToLeft(distanceLeft);
-
-                    // Dialog zentrieren und sichtbar machen
-                    dialog.setLocationRelativeTo(frame);
-                    dialog.setVisible(true);
-
-                    // wenn der Dialog mit OK geschlossen wurde
-                    if (dialog.getReturnStatus() == AddHandleDialog.STATUS_OK) {
-                        // ist der gewählte Punkt näher an Links
-                        if (dialog.getDistanceToLeft() < dialog.getDistanceToRight()) {
-                            // Abstand von Links aus berechnen
-                            distanceLeft = dialog.getDistanceToLeft();
-                        } else { // ist der gewählte Punkt nächer an rechts
-                            // Abstand von Rechts aus berechnen
-                            distanceLeft = distanceTotal - dialog.getDistanceToRight();
+                        // Abstand zum linken Nachbar berechnen
+                        Double distanceLeft = leftNeighbour.distance(newPoint);
+                        if (log.isDebugEnabled()) {
+                            log.debug("distanceLeft: " + distanceLeft); // NOI18N
                         }
-                        // Abstand kann nicht größer als Gesamt-Abstand sein
-                        distanceLeft = (distanceLeft > distanceTotal) ? distanceTotal : distanceLeft;
-                        // ist die Gesamtlänge ungleich 0 (division durch null verhindern)
-                        if (distanceTotal != 0) {
-                            // Handle-Koordinaten anhand des Abstands berechnen
-                            handleX = (float)(leftNeighbour.getX()
-                                            + ((rightNeighbour.getX() - leftNeighbour.getX())
-                                                * (distanceLeft / distanceTotal)));
-                            handleY = (float)(leftNeighbour.getY()
-                                            + ((rightNeighbour.getY() - leftNeighbour.getY())
-                                                * (distanceLeft / distanceTotal)));
-                        } else { // ist die Gesamtlänge 0
-                            // Handle-Koordinaten sind gleich die des linken Nachbarn
-                            handleX = (float)leftNeighbour.getX();
-                            handleY = (float)leftNeighbour.getY();
+
+                        // Gesamt-Abstand berechnen
+                        final Double distanceTotal = leftNeighbour.distance(rightNeighbour);
+                        if (log.isDebugEnabled()) {
+                            log.debug("distanceTotal: " + distanceTotal); // NOI18N
                         }
-                    } else { // wenn der Dialog nicht mit OK geschlossen wurde
-                        // nichts tun
-                        super.mouseClicked(event);
-                        return;
+
+                        // MainFrame holen
+                        final Frame frame = StaticSwingTools.getParentFrame(mc);
+
+                        // Dialog modal aufrufen und Werte übergeben
+                        final AddHandleDialog dialog = new AddHandleDialog(frame, true, distanceTotal);
+                        dialog.setDistanceToLeft(distanceLeft);
+
+                        // Dialog zentrieren und sichtbar machen
+                        dialog.setLocationRelativeTo(frame);
+                        dialog.setVisible(true);
+
+                        // wenn der Dialog mit OK geschlossen wurde
+                        if (dialog.getReturnStatus() == AddHandleDialog.STATUS_OK) {
+                            // ist der gewählte Punkt näher an Links
+                            if (dialog.getDistanceToLeft() < dialog.getDistanceToRight()) {
+                                // Abstand von Links aus berechnen
+                                distanceLeft = dialog.getDistanceToLeft();
+                            } else { // ist der gewählte Punkt nächer an rechts
+                                // Abstand von Rechts aus berechnen
+                                distanceLeft = distanceTotal - dialog.getDistanceToRight();
+                            }
+                            // Abstand kann nicht größer als Gesamt-Abstand sein
+                            distanceLeft = (distanceLeft > distanceTotal) ? distanceTotal : distanceLeft;
+                            // ist die Gesamtlänge ungleich 0 (division durch null verhindern)
+                            if (distanceTotal != 0) {
+                                // Handle-Koordinaten anhand des Abstands berechnen
+                                handleX = (float)(leftNeighbour.getX()
+                                                + ((rightNeighbour.getX() - leftNeighbour.getX())
+                                                    * (distanceLeft / distanceTotal)));
+                                handleY = (float)(leftNeighbour.getY()
+                                                + ((rightNeighbour.getY() - leftNeighbour.getY())
+                                                    * (distanceLeft / distanceTotal)));
+                            } else { // ist die Gesamtlänge 0
+                                // Handle-Koordinaten sind gleich die des linken Nachbarn
+                                handleX = (float)leftNeighbour.getX();
+                                handleY = (float)leftNeighbour.getY();
+                            }
+                        } else { // wenn der Dialog nicht mit OK geschlossen wurde
+                            // nichts tun
+                            super.mouseClicked(event);
+                            return;
+                        }
                     }
                 }
 // =====================================================================================
@@ -441,11 +446,15 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                 featureCollection);
 
                         // sind die 2 Nachbarpunkte identisch mit den 2 Nachbarn des neuen Punktes => identische Linie
-                        if ((tmpneighbours[0].equals(neighbours[0]) && tmpneighbours[1].equals(neighbours[1]))
-                                    || (tmpneighbours[0].equals(neighbours[1])
-                                        && tmpneighbours[1].equals(neighbours[0]))) {
-                            // Punkt dem jeweiligen Feature hinzufügen
-                            addPoint((PFeature)mc.getPFeatureHM().get(feature), handleX, handleY);
+                        final Point2D t0 = tmpneighbours[0];
+                        final Point2D t1 = tmpneighbours[1];
+                        if ((t0 != null) && (t1 != null)) {
+                            if ((t0.equals(neighbours[0]) && t1.equals(neighbours[1]))
+                                        || (t0.equals(neighbours[1])
+                                            && t1.equals(neighbours[0]))) {
+                                // Punkt dem jeweiligen Feature hinzufügen
+                                addPoint((PFeature)mc.getPFeatureHM().get(feature), handleX, handleY);
+                            }
                         }
                     }
                 } else { // kein Snapping Modus
