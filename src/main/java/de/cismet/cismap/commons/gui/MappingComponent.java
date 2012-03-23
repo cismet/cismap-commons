@@ -2451,6 +2451,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                                 if (fgm.getGeometry() != null) {
                                     pFeatureHM.put(fgm.getFeature(), p);
+                                    pFeatureHM.put(fgm, p);
                                 }
                                 if (LOG.isDebugEnabled()) {
                                     LOG.debug("added feature to group " + groupId);
