@@ -19,6 +19,8 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.util.List;
+
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -294,25 +296,17 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     String styleName = null;
 
                     int styleCount = 0;
-                    if (value instanceof WMSLayer) {
-                        if (!((WMSLayer)value).isDummy()) {
-                            selectedStyle = ((WMSLayer)value).getSelectedStyle();
-                            styleCount = ((WMSLayer)value).getOgcCapabilitiesLayer().getStyles().length;
-                        } else {
-                            styleName = ((WMSLayer)value).getStyleName();
-                        }
-                    } else if (value instanceof WMSServiceLayer) {
-                        // Kann nur ein WMSLayer haben (wegen Bedingung weiter oben)
-                        if (!((WMSServiceLayer)value).isDummy()) {
-                            selectedStyle = ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0))
-                                        .getSelectedStyle();
-                            styleCount =
-                                ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0)).getOgcCapabilitiesLayer()
-                                        .getStyles().length;
-                        } else {
-                            styleName = ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0)).getStyleName();
-                        }
+
+                    // Kann nur ein WMSLayer haben (wegen Bedingung weiter oben)
+                    final List<WMSLayer> wmsLayers = ((WMSServiceLayer)value).getWMSLayers();
+
+                    if (!((WMSServiceLayer)value).isDummy() && !wmsLayers.isEmpty()) {
+                        selectedStyle = wmsLayers.get(0).getSelectedStyle();
+                        styleCount = wmsLayers.get(0).getOgcCapabilitiesLayer().getStyles().length;
+                    } else if (!wmsLayers.isEmpty()) {
+                        styleName = wmsLayers.get(0).getStyleName();
                     }
+
                     if (selectedStyle != null) {
                         styleName = selectedStyle.getTitle();
                     }
