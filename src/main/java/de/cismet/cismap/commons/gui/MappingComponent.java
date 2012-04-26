@@ -26,6 +26,8 @@ import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
+import org.openide.util.NbBundle;
+
 import pswing.PSwingCanvas;
 
 import java.awt.*;
@@ -93,6 +95,8 @@ import de.cismet.tools.StaticDebuggingTools;
 
 import de.cismet.tools.configuration.Configurable;
 
+import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.WaitDialog;
 import de.cismet.tools.gui.historybutton.DefaultHistoryModel;
 import de.cismet.tools.gui.historybutton.HistoryModel;
 
@@ -2030,6 +2034,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     }
                 }
             }
+        } else {
+            rs.setBoundingBox(bb);
         }
     }
 
@@ -4850,63 +4856,87 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             if (locked) {
                 return;
             }
-
-            try {
-                // the wtst object should not be null, so the getWtst method will be invoked
-                final WorldToScreenTransform oldWtst = getWtst();
-                final BoundingBox bbox = getCurrentBoundingBox(); // getCurrentBoundingBox();
-                final CrsTransformer crsTransformer = new CrsTransformer(event.getCurrentCrs().getCode());
-                final BoundingBox newBbox = crsTransformer.transformBoundingBox(bbox, event.getFormerCrs().getCode());
-
-                if (getMappingModel() instanceof ActiveLayerModel) {
-                    final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
-                    alm.setSrs(event.getCurrentCrs());
-                }
-                wtst = null;
-                getWtst();
-                gotoBoundingBoxWithoutHistory(newBbox, 0);
-
-                final ArrayList<Feature> list = new ArrayList<Feature>(featureCollection.getAllFeatures());
-                featureCollection.removeAllFeatures();
-                featureCollection.addFeatures(list);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("debug features added: " + list.size());
-                }
-
-                // refresh all wfs layer
-                if (getMappingModel() instanceof ActiveLayerModel) {
-                    final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
-                    alm.refreshWebFeatureServices();
-                    alm.refreshShapeFileLayer();
-                }
-
-                // transform the highlighting layer
-                for (int i = 0; i < highlightingLayer.getChildrenCount(); ++i) {
-                    final PNode node = highlightingLayer.getChild(i);
-                    CrsTransformer.transformPNodeToGivenCrs(
-                        node,
-                        event.getFormerCrs().getCode(),
-                        event.getCurrentCrs().getCode(),
-                        oldWtst,
-                        getWtst());
-                    rescaleStickyNode(node);
-                }
-            } catch (final Exception e) {
-                JOptionPane.showMessageDialog(
-                    this,
-                    org.openide.util.NbBundle.getMessage(
+            final WaitDialog dialog = new WaitDialog(StaticSwingTools.getParentFrame(this),
+                    false,
+                    NbBundle.getMessage(
                         MappingComponent.class,
-                        "MappingComponent.crsChanged(CrsChangedEvent).JOptionPane.message"),
-                    org.openide.util.NbBundle.getMessage(
-                        MappingComponent.class,
-                        "MappingComponent.crsChanged(CrsChangedEvent).JOptionPane.title"),
-                    JOptionPane.ERROR_MESSAGE);
-                LOG.error("Cannot transform the current bounding box to the CRS " + event.getCurrentCrs(), e);
-                resetCrs = true;
-                final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
-                alm.setSrs(event.getCurrentCrs());
-                CismapBroker.getInstance().setSrs(event.getFormerCrs());
-            }
+                        "MappingComponent.crsChanged(CrsChangedEvent).wait"),
+                    null);
+
+            dialog.setLocationRelativeTo(MappingComponent.this);
+            dialog.setVisible(true);
+
+            EventQueue.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        try {
+                            // the wtst object should not be null, so the getWtst method will be invoked
+                            final WorldToScreenTransform oldWtst = getWtst();
+                            final BoundingBox bbox = getCurrentBoundingBox(); // getCurrentBoundingBox();
+                            final CrsTransformer crsTransformer = new CrsTransformer(event.getCurrentCrs().getCode());
+                            final BoundingBox newBbox = crsTransformer.transformBoundingBox(
+                                    bbox,
+                                    event.getFormerCrs().getCode());
+
+                            if (getMappingModel() instanceof ActiveLayerModel) {
+                                final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
+                                alm.setSrs(event.getCurrentCrs());
+                            }
+                            wtst = null;
+                            getWtst();
+                            gotoBoundingBoxWithoutHistory(newBbox, 0);
+
+                            final ArrayList<Feature> list = new ArrayList<Feature>(featureCollection.getAllFeatures());
+                            featureCollection.removeAllFeatures();
+                            featureCollection.addFeatures(list);
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("debug features added: " + list.size());
+                            }
+
+                            // refresh all wfs layer
+                            if (getMappingModel() instanceof ActiveLayerModel) {
+                                final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
+                                alm.refreshWebFeatureServices();
+                                alm.refreshShapeFileLayer();
+                            }
+
+                            // transform the highlighting layer
+                            for (int i = 0; i < highlightingLayer.getChildrenCount(); ++i) {
+                                final PNode node = highlightingLayer.getChild(i);
+                                CrsTransformer.transformPNodeToGivenCrs(
+                                    node,
+                                    event.getFormerCrs().getCode(),
+                                    event.getCurrentCrs().getCode(),
+                                    oldWtst,
+                                    getWtst());
+                                rescaleStickyNode(node);
+                            }
+                        } catch (final Exception e) {
+                            JOptionPane.showMessageDialog(
+                                MappingComponent.this,
+                                org.openide.util.NbBundle.getMessage(
+                                    MappingComponent.class,
+                                    "MappingComponent.crsChanged(CrsChangedEvent).JOptionPane.message"),
+                                org.openide.util.NbBundle.getMessage(
+                                    MappingComponent.class,
+                                    "MappingComponent.crsChanged(CrsChangedEvent).JOptionPane.title"),
+                                JOptionPane.ERROR_MESSAGE);
+                            LOG.error(
+                                "Cannot transform the current bounding box to the CRS "
+                                        + event.getCurrentCrs(),
+                                e);
+                            resetCrs = true;
+                            final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
+                            alm.setSrs(event.getCurrentCrs());
+                            CismapBroker.getInstance().setSrs(event.getFormerCrs());
+                        } finally {
+                            if (dialog != null) {
+                                dialog.setVisible(false);
+                            }
+                        }
+                    }
+                });
         } else {
             resetCrs = false;
         }
