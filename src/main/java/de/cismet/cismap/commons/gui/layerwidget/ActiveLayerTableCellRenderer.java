@@ -12,6 +12,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
@@ -38,6 +39,8 @@ import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.wms.capabilities.Style;
@@ -359,6 +362,25 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
 //                }
 //            }
             if ((value instanceof LayerInfoProvider) && ((LayerInfoProvider)value).isQueryable()) {
+                if (((LayerInfoProvider)value).isLayerQuerySelected()) {
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                try {
+                                    if (value instanceof LayerInfoProvider) {
+                                        ((LayerInfoProvider)value).setLayerQuerySelected(true);
+                                        final ActiveLayerEvent ale = new ActiveLayerEvent();
+                                        ale.setLayer(value);
+                                        CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
+                                    }
+                                } catch (Exception ex) {
+                                    log.error("Error in actionPerformed of the informationCheckBos", ex);
+                                }
+                            }
+                        });
+                }
+
                 return booleanRenderer.getTableCellRendererComponent(
                         table,
                         ((LayerInfoProvider)value).isLayerQuerySelected(),
