@@ -561,22 +561,21 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 
                     @Override
                     public void run() {
-                        treeTable.getSelectionModel().setSelectionInterval(row, row);
+                        int selectedRow = row;
+                        if (selectedRow >= treeTable.getRowCount()) {
+                            selectedRow = treeTable.getRowCount() - 1;
+                        }
+                        treeTable.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
                     }
                 };
 
-            if (EventQueue.isDispatchThread()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("try to do InvokeLater in EDT. I will fix that"); // NOI18N
-                }
-                r.run();
-            } else {
-                EventQueue.invokeLater(r);
-            }
+            // do invoke later in EDT is required, because the selection should be adopted
+            // after the layer is removed
+            EventQueue.invokeLater(r);
         } catch (Exception e) {
             log.error("Error during romaval of layer", e);
         }
-    }                                                                           //GEN-LAST:event_cmdRemoveActionPerformed
+    } //GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * DOCUMENT ME!
