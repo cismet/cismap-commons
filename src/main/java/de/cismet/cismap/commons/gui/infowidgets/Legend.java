@@ -36,7 +36,9 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
+import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
+import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
@@ -54,7 +56,7 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
+public class Legend extends javax.swing.JPanel implements ActiveLayerListener, StatusListener {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -435,6 +437,15 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
         setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 1, 5, 1));
     } // </editor-fold>//GEN-END:initComponents
 
+    @Override
+    public void statusValueChanged(final StatusEvent e) {
+        if (e.getName().equals(StatusEvent.AWAKED_FROM_DUMMY)) {
+            if (e.getValue() instanceof WMSServiceLayer) {
+                addWmsServiceLayer((WMSServiceLayer)e.getValue());
+            }
+        }
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -681,7 +692,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener {
          */
         public void refreshLegend(final String url, final String layername) {
             final String oldUrl = urlsByName.get(layername);
-            if (!oldUrl.equals(url)) {
+            if ((oldUrl != null) && !oldUrl.equals(url)) {
                 urlsByName.put(layername, url);
                 final LegendPanel lp = panelsByName.get(layername);
                 lp.setUrl(url);
