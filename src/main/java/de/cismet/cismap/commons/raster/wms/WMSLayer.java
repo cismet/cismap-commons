@@ -7,6 +7,7 @@
 ****************************************************/
 package de.cismet.cismap.commons.raster.wms;
 import de.cismet.cismap.commons.LayerInfoProvider;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.Style;
 
@@ -86,6 +87,12 @@ public class WMSLayer implements LayerInfoProvider {
      */
     public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
+
+        if (!enabled) {
+            if (parentServiceLayer != null) {
+                parentServiceLayer.disableWhenChildrenDisabled();
+            }
+        }
     }
 
     /**

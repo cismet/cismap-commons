@@ -25,6 +25,8 @@ import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.ChildrenProvider;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.rasterservice.ImageRetrieval;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
@@ -227,9 +229,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                     this.addLayer(l, style, isEnabled, info, false);
                 }
             } else {
-                this.addLayer(lName, styleName, enabled, info);
+                this.addLayer(lName, styleName, true, info);
             }
         }
+
+        setEnabled(isEnabled());
     }
 
     /**
@@ -330,6 +334,64 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     public void removeLayer(final WMSLayer layer) {
         wmsLayers.remove(layer);
         ogcLayers.remove(layer.getOgcCapabilitiesLayer());
+        disableWhenChildrenDisabled();
+    }
+
+    @Override
+    public void setEnabled(final boolean enabled) {
+        super.setEnabled(enabled);
+
+        // if enabled is true and no sublayer is enabled, then enable all sublayer
+        if (enabled) {
+            boolean enableAll = true;
+            Iterator it = getWMSLayers().iterator();
+
+            while (it.hasNext()) {
+                final Object o = it.next();
+
+                if (o instanceof WMSLayer) {
+                    if (((WMSLayer)o).isEnabled()) {
+                        enableAll = false;
+                        break;
+                    }
+                }
+            }
+
+            if (enableAll) {
+                it = getWMSLayers().iterator();
+
+                while (it.hasNext()) {
+                    final Object o = it.next();
+
+                    if (o instanceof WMSLayer) {
+                        ((WMSLayer)o).setEnabled(enabled);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * disables the layer, if all child layers are disabled.
+     */
+    public void disableWhenChildrenDisabled() {
+        boolean childrenDisabled = true;
+        final Iterator it = getWMSLayers().iterator();
+
+        while (it.hasNext()) {
+            final Object o = it.next();
+
+            if (o instanceof WMSLayer) {
+                if (((WMSLayer)o).isEnabled()) {
+                    childrenDisabled = false;
+                    break;
+                }
+            }
+        }
+
+        if (childrenDisabled) {
+            setEnabled(false);
+        }
     }
 
     @Override
@@ -361,7 +423,10 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         if (isDummy()) {
             init(wmsServiceLayerElement, capabilities, true);
             if (!isDummy()) {
+                setEnabled(true);
                 dummyLayer = null;
+                final StatusEvent se = new StatusEvent(StatusEvent.AWAKED_FROM_DUMMY, this);
+                CismapBroker.getInstance().fireStatusValueChanged(se);
             }
         }
         if (DEBUG) {
@@ -375,6 +440,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 // macht nix
                 // mehrfachaufruf mit der gleichen url = unsinn
                 LOG.debug("multiple invocations with the same url = humbug"); // NOI18N
+            }
+        } else if ((width < 1) || (height < 1)) {
+            if (LOG.isDebugEnabled()) {
+                // do nothing. Otherwise the wms will response with an exception
+                LOG.debug("width or height is less then 1");
             }
         } else {
             if ((ir != null) && ir.isAlive()) {
