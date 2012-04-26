@@ -7,6 +7,12 @@
 ****************************************************/
 package de.cismet.cismap.commons.tools;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.PrecisionModel;
+
 import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PInputEvent;
@@ -21,8 +27,11 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Vector;
 
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.ParentNodeIsAPFeature;
@@ -52,12 +61,15 @@ public class PFeatureTools {
      */
     public static PFeature[] getPFeaturesInArea(final MappingComponent mc, final PBounds bounds) {
         final ArrayList al = new ArrayList();
-        mc.getFeatureLayer().findIntersectingNodes(bounds, al);
+        final WorldToScreenTransform wtst = mc.getWtst();
+        final Geometry bBox = getGeometryFromPBounds(bounds, wtst, mc.getMappingModel().getSrs().getCode());
+
+        findIntersectingPFeatures(mc.getFeatureLayer(), bBox, al);
 
         for (int i = 0; i < mc.getMapServiceLayer().getChildrenCount(); ++i) {
             final PNode p = mc.getMapServiceLayer().getChild(i);
             if (p instanceof PLayer) {
-                mc.getMapServiceLayer().getChild(i).findIntersectingNodes(bounds, al);
+                findIntersectingPFeatures(mc.getMapServiceLayer().getChild(i), bBox, al);
             }
         }
         Iterator it = al.iterator();
@@ -78,6 +90,63 @@ public class PFeatureTools {
             }
         }
         return vRet.toArray(new PFeature[0]);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   bounds  a PBounds object, that should contain screen coordinates. (See the class WorldToScreenTransform)
+     * @param   wtst    DOCUMENT ME!
+     * @param   crs     DOCUMENT ME!
+     *
+     * @return  a Geometry object that represents the given PBounds object.
+     */
+    public static Geometry getGeometryFromPBounds(final PBounds bounds,
+            final WorldToScreenTransform wtst,
+            final String crs) {
+        final int srs = CrsTransformer.extractSridFromCrs(crs);
+        final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srs);
+        final double x1 = wtst.getWorldX(bounds.x);
+        final double x2 = wtst.getWorldX(bounds.x + bounds.width);
+        final double y1 = wtst.getWorldY(bounds.y);
+        final double y2 = wtst.getWorldY(bounds.y + bounds.height);
+        final Coordinate[] polyCords = new Coordinate[5];
+
+        polyCords[0] = new Coordinate(x1, y1);
+        polyCords[1] = new Coordinate(x1, y2);
+        polyCords[2] = new Coordinate(x2, y2);
+        polyCords[3] = new Coordinate(x2, y1);
+        polyCords[4] = new Coordinate(x1, y1);
+
+        return gf.createPolygon(gf.createLinearRing(polyCords), null);
+    }
+
+    /**
+     * This should be used instead of the findIntersectingNodes method of the PNode class. The differences between this
+     * methods and the findIntersectingNodes method are, that this method only finds PFeature objects and this method
+     * works properly.
+     *
+     * @param  node      The node, the PFeatures should be find in
+     * @param  geometry  the search geometry
+     * @param  al        the list, the result should be added to.
+     */
+    public static void findIntersectingPFeatures(final PNode node, final Geometry geometry, final ArrayList al) {
+        final List children = node.getChildrenReference();
+        final String srs = CrsTransformer.createCrsFromSrid(geometry.getSRID());
+
+        for (final Object entry : children) {
+            if (entry instanceof PFeature) {
+                Geometry featureGeometry = ((PFeature)entry).getFeature().getGeometry();
+
+                if (featureGeometry.getSRID() != geometry.getSRID()) {
+                    featureGeometry = CrsTransformer.transformToGivenCrs(featureGeometry, srs);
+                }
+
+                if (featureGeometry.intersects(geometry)) {
+                    al.add(entry);
+                }
+            }
+        }
     }
 
     /**
