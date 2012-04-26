@@ -39,7 +39,6 @@ public class SelectionListener extends RectangleRubberBandListener {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION"; // NOI18N
-    private static final double RECT_BUFFER = 0.1d;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -209,8 +208,7 @@ public class SelectionListener extends RectangleRubberBandListener {
                 mc = (MappingComponent)event.getComponent();
                 mc.getHandleLayer().removeAllChildren();
                 // einfacher Klick ohne ziehen des Markiervierecks
-                if ((rectangle != null)
-                            && !((rectangle.getWidth() < RECT_BUFFER) || (rectangle.getHeight() < RECT_BUFFER))) {
+                if ((rectangle != null)) {
                     if (log.isDebugEnabled()) {
                         // Hole alle PFeatures die das Markierviereck schneiden
                         // und Hinzuf\u00FCgen dieser PFeatures zur Selektion
