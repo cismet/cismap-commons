@@ -36,11 +36,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
-import de.cismet.cismap.commons.features.DefaultFeatureCollection;
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.FeatureCollection;
-import de.cismet.cismap.commons.features.FeatureCollectionAdapter;
-import de.cismet.cismap.commons.features.FeatureCollectionEvent;
+import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.LinearReferencedPointMarkPHandle;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -115,11 +111,6 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
 
     private JMenuItem cmdRemoveMark;
     private JMenuItem cmdRemoveAllMarks;
-
-    private ImageIcon icoMenRem = new ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/marker--minus.png")); // NOI18N
-    private ImageIcon icoMenRemAll = new ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/marker--minus.png")); // NOI18N
 
     //~ Constructors -----------------------------------------------------------
 
@@ -564,8 +555,10 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
         cmdRemoveMark = new JMenuItem("Markierung entfernen");            // NOI18N
         cmdRemoveAllMarks = new JMenuItem("alle Markierungen entfernen"); // NOI18N
 
-        cmdRemoveMark.setIcon(icoMenRem);
-        cmdRemoveAllMarks.setIcon(icoMenRemAll);
+        cmdRemoveMark.setIcon(new ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/marker--minus.png")));
+        cmdRemoveAllMarks.setIcon(new ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/res/marker--minus.png")));
 
         cmdRemoveMark.addActionListener(new ActionListener() {
 
