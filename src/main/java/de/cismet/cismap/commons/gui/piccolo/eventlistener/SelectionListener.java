@@ -218,7 +218,10 @@ public class SelectionListener extends RectangleRubberBandListener {
                                     + ",W=" + rectangle.getBounds().getWidth() + ",H="
                                     + rectangle.getBounds().getHeight() + ")"); // NOI18N
                     }
-                    ((DefaultFeatureCollection)mc.getFeatureCollection()).unselectAll();
+
+                    if (!event.isControlDown()) {
+                        ((DefaultFeatureCollection)mc.getFeatureCollection()).unselectAll();
+                    }
                     final PFeature[] pfArr = PFeatureTools.getPFeaturesInArea(mc, rectangle.getBounds());
                     final Vector<Feature> toBeSelected = new Vector<Feature>();
                     final Vector<Feature> toBeUnselected = new Vector<Feature>();
