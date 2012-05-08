@@ -208,7 +208,8 @@ public class SelectionListener extends RectangleRubberBandListener {
                 mc = (MappingComponent)event.getComponent();
                 mc.getHandleLayer().removeAllChildren();
                 // einfacher Klick ohne ziehen des Markiervierecks
-                if ((rectangle != null)) {
+                // rectangle ist bei einem Linksklick nie null. Siehe mousePressed in RectangleRubberBandListener
+                if ((rectangle != null) && !rectangleEmpty) {
                     if (log.isDebugEnabled()) {
                         // Hole alle PFeatures die das Markierviereck schneiden
                         // und Hinzuf\u00FCgen dieser PFeatures zur Selektion

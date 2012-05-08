@@ -40,6 +40,7 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
 
     /** The current drag location. */
     protected Point2D dragPoint;
+    protected boolean rectangleEmpty = true;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
     //~ Constructors -----------------------------------------------------------
@@ -70,6 +71,7 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
                 layer.addChild(rectangle);
                 rectangle.moveToFront();
                 updateRectangle();
+                rectangleEmpty = true;
             }
         } catch (ClassCastException cce) {
             log.error("PCanvas muss vom Typ SimpleFeatureViewer sein", cce); // NOI18N
@@ -81,6 +83,7 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
         super.mouseDragged(e);
         dragPoint = e.getPosition();
         updateRectangle();
+        rectangleEmpty = false;
     }
 
     @Override
