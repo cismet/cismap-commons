@@ -27,6 +27,7 @@ import javax.swing.JOptionPane;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
+import de.cismet.cismap.commons.features.Attachable;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -140,7 +141,7 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
                 // Geometrie sich mit der Geometrie der BoundingBox überschneidet
                 final List<Feature> markedFeatures = new ArrayList<Feature>();
                 for (final Feature feature : mc.getFeatureCollection().getAllFeatures()) {
-                    if (feature.getGeometry().intersects(geom)) {
+                    if ((feature instanceof Attachable) && feature.getGeometry().intersects(geom)) {
                         markedFeatures.add(feature);
                     }
                 }

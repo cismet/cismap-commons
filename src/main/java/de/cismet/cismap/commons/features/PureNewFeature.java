@@ -43,7 +43,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @author   hell
  * @version  $Revision$, $Date$
  */
-public class PureNewFeature extends DefaultStyledFeature implements Cloneable, XStyledFeature {
+public class PureNewFeature extends DefaultStyledFeature implements Cloneable, XStyledFeature, Attachable {
 
     //~ Static fields/initializers ---------------------------------------------
 
