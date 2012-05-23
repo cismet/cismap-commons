@@ -33,7 +33,7 @@ public class SimpleWmsGetMapUrl {
     public static final String WIDTH_TOKEN = "<cismap:width>";              // NOI18N
     public static final String HEIGHT_TOKEN = "<cismap:height>";            // NOI18N
     public static final String BOUNDING_BOX_TOKEN = "<cismap:boundingBox>"; // NOI18N
-    public static final String SRS_TOKEN = "<cismap:srs>";             // NOI18N
+    public static final String SRS_TOKEN = "<cismap:srs>";                  // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -166,10 +166,10 @@ public class SimpleWmsGetMapUrl {
                         + new Double(x2).toString()
                         + "," // NOI18N
                         + new Double(y2).toString());
-        
+
         // we can always replace all since the code is always present, requests without SRS_TOKEN won't be affected
         url = url.replaceAll(SRS_TOKEN, CismapBroker.getInstance().getSrs().getCode());
-        
+
         return url;
     }
 
