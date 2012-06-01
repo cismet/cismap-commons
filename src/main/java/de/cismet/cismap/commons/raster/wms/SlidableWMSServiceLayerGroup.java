@@ -38,6 +38,7 @@ import java.awt.Image;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -202,6 +203,35 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         for (final Object o : layersList) {
             layers.add(new WMSServiceLayer((Element)o, capabilities));
         }
+
+        init();
+    }
+
+    /**
+     * Creates a new SlidableWMSServiceLayerGroup object.
+     *
+     * @param  name             DOCUMENT ME!
+     * @param  completePath     DOCUMENT ME!
+     * @param  layers           DOCUMENT ME!
+     * @param  wmsCapabilities  DOCUMENT ME!
+     * @param  capabilitiesUrl  DOCUMENT ME!
+     */
+    public SlidableWMSServiceLayerGroup(final String name,
+            final String completePath,
+            final Collection<Layer> layers,
+            final WMSCapabilities wmsCapabilities,
+            final String capabilitiesUrl) {
+        sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
+        setName(name);
+        this.completePath = completePath;
+        this.wmsCapabilities = wmsCapabilities;
+
+        for (final Layer layer : layers) {
+            this.layers.add(new WMSServiceLayer(layer));
+        }
+
+        setWmsCapabilities(wmsCapabilities);
+        setCapabilitiesUrl(capabilitiesUrl);
 
         init();
     }
