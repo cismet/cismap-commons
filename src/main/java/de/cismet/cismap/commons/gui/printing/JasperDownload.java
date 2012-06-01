@@ -7,11 +7,16 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
+import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
 
-import org.apache.log4j.Logger;
+import org.openide.util.Exceptions;
+
+import java.util.Map;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
@@ -27,6 +32,9 @@ public class JasperDownload extends AbstractDownload {
     //~ Instance fields --------------------------------------------------------
 
     private JasperPrint print;
+    private JasperReport report;
+    private Map parameters;
+    private JRDataSource dataSource;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -56,6 +64,37 @@ public class JasperDownload extends AbstractDownload {
         }
     }
 
+    /**
+     * Creates a new JasperDownload object.
+     *
+     * @param  report      DOCUMENT ME!
+     * @param  parameters  DOCUMENT ME!
+     * @param  dataSource  DOCUMENT ME!
+     * @param  directory   DOCUMENT ME!
+     * @param  title       DOCUMENT ME!
+     * @param  filename    DOCUMENT ME!
+     */
+    public JasperDownload(final JasperReport report,
+            final Map parameters,
+            final JRDataSource dataSource,
+            final String directory,
+            final String title,
+            final String filename) {
+        this.report = report;
+        this.parameters = parameters;
+        this.dataSource = dataSource;
+        this.directory = directory;
+        this.title = title;
+
+        if (DownloadManager.instance().isEnabled()) {
+            determineDestinationFile(filename, ".pdf");
+            status = State.WAITING;
+        } else {
+            status = State.COMPLETED_WITH_ERROR;
+            caughtException = new Exception("DownloadManager is disabled. Cancelling download.");
+        }
+    }
+
     //~ Methods ----------------------------------------------------------------
 
     @Override
@@ -68,10 +107,20 @@ public class JasperDownload extends AbstractDownload {
 
         stateChanged();
 
-        try {
-            JasperExportManager.exportReportToPdfFile(print, fileToSaveTo.getPath());
-        } catch (JRException ex) {
-            error(ex);
+        if (print == null) {
+            try {
+                print = JasperFillManager.fillReport(report, parameters, dataSource);
+            } catch (JRException ex) {
+                error(ex);
+            }
+        }
+
+        if (print != null) {
+            try {
+                JasperExportManager.exportReportToPdfFile(print, fileToSaveTo.getPath());
+            } catch (JRException ex) {
+                error(ex);
+            }
         }
 
         if (status == State.RUNNING) {
