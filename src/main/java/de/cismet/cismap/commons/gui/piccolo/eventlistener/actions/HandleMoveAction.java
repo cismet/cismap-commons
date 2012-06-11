@@ -39,7 +39,8 @@ public class HandleMoveAction implements CustomAction {
 
     private MultiMap gluedCoordinates;
     private PFeature pf;
-    private int posInArray;
+    private final int coordEntityIndex;
+    private final int posInArray;
     private float startX;
     private float startY;
     private float endX;
@@ -51,15 +52,17 @@ public class HandleMoveAction implements CustomAction {
     /**
      * Erzeugt eine HandleMoveAction-Instanz.
      *
-     * @param  position  Position der HandleKoordinaten im Koordinatenarray des PFeatures
-     * @param  pf        PFeature dem das Handle zugeordnet ist
-     * @param  startX    X-Koordinate des Anfangspunkts
-     * @param  startY    Y-Koordinate des Anfangspunkts
-     * @param  endX      X-Koordinate des Endpunkts
-     * @param  endY      Y-Koordinate des Endpunkts
-     * @param  isGlued   Waren beim Verschieben mehrere Handles gekoppelt?
+     * @param  coordEntityIndex  DOCUMENT ME!
+     * @param  position          Position der HandleKoordinaten im Koordinatenarray des PFeatures
+     * @param  pf                PFeature dem das Handle zugeordnet ist
+     * @param  startX            X-Koordinate des Anfangspunkts
+     * @param  startY            Y-Koordinate des Anfangspunkts
+     * @param  endX              X-Koordinate des Endpunkts
+     * @param  endY              Y-Koordinate des Endpunkts
+     * @param  isGlued           Waren beim Verschieben mehrere Handles gekoppelt?
      */
-    public HandleMoveAction(final int position,
+    public HandleMoveAction(final int coordEntityIndex,
+            final int position,
             final PFeature pf,
             final float startX,
             final float startY,
@@ -67,6 +70,7 @@ public class HandleMoveAction implements CustomAction {
             final float endY,
             final boolean isGlued) {
         this.gluedCoordinates = null;
+        this.coordEntityIndex = coordEntityIndex;
         this.posInArray = position;
         this.pf = pf;
         this.startX = startX;
@@ -84,10 +88,10 @@ public class HandleMoveAction implements CustomAction {
     @Override
     public void doAction() {
         if (isGluedAction) { // werden mehrere Punkte bewegt?
-            gluedCoordinates = pf.checkforGlueCoords(posInArray);
+            gluedCoordinates = pf.checkforGlueCoords(coordEntityIndex, posInArray);
         }
         // Bewege das Handle
-        pf.moveCoordinateToNewPiccoloPosition(posInArray, startX, startY);
+        pf.moveCoordinateToNewPiccoloPosition(coordEntityIndex, posInArray, startX, startY);
 
         // Falls zusammengeh\u00F6rige Punkte gefunden wurden, bewege diese ebenfalls
         if (gluedCoordinates != null) {
@@ -98,7 +102,7 @@ public class HandleMoveAction implements CustomAction {
                     if (coordinates != null) {
                         for (final Object o : coordinates) {
                             final int oIndex = (Integer)o;
-                            gluePFeature.moveCoordinateToNewPiccoloPosition(oIndex, startX, startY);
+                            gluePFeature.moveCoordinateToNewPiccoloPosition(coordEntityIndex, oIndex, startX, startY);
                         }
                     }
                 }
@@ -137,6 +141,6 @@ public class HandleMoveAction implements CustomAction {
      */
     @Override
     public CustomAction getInverse() {
-        return new HandleMoveAction(posInArray, pf, endX, endY, startX, startY, isGluedAction);
+        return new HandleMoveAction(coordEntityIndex, posInArray, pf, endX, endY, startX, startY, isGluedAction);
     }
 }

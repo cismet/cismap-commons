@@ -37,33 +37,33 @@ public class HandleDeleteAction implements CustomAction {
 
     private MappingComponent mc;
     private Feature f;
+    private int coordEntityIndex;
     private int posInArray;
-    private Coordinate c; // wird nur f\u00FCr getInverse() ben\u00F6tigt
     private float x;
-    private float y;      // wird nur f\u00FCr getInverse() ben\u00F6tigt
+    private float y; // wird nur f\u00FCr getInverse() ben\u00F6tigt
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Erzeugt eine HandleDeleteAction-Instanz.
      *
-     * @param  mc   DOCUMENT ME!
-     * @param  f    DOCUMENT ME!
-     * @param  pos  DOCUMENT ME!
-     * @param  c    DOCUMENT ME!
-     * @param  x    DOCUMENT ME!
-     * @param  y    DOCUMENT ME!
+     * @param  mc                DOCUMENT ME!
+     * @param  f                 DOCUMENT ME!
+     * @param  coordEntityIndex  DOCUMENT ME!
+     * @param  pos               DOCUMENT ME!
+     * @param  x                 DOCUMENT ME!
+     * @param  y                 DOCUMENT ME!
      */
     public HandleDeleteAction(final MappingComponent mc,
             final Feature f,
+            final int coordEntityIndex,
             final int pos,
-            final Coordinate c,
             final float x,
             final float y) {
         this.mc = mc;
         this.f = f;
+        this.coordEntityIndex = coordEntityIndex;
         this.posInArray = pos;
-        this.c = c;
         this.x = x;
         this.y = y;
     }
@@ -76,14 +76,7 @@ public class HandleDeleteAction implements CustomAction {
     @Override
     public void doAction() {
         final PFeature pf = (PFeature)mc.getPFeatureHM().get(f);
-        pf.setXp(pf.removeCoordinateFromOutside(posInArray, pf.getXp()));
-        pf.setYp(pf.removeCoordinateFromOutside(posInArray, pf.getYp()));
-        pf.setCoordArr(pf.removeCoordinateFromOutside(posInArray, pf.getCoordArr()));
-        pf.syncGeometry();
-        pf.setPathToPolyline(pf.getXp(), pf.getYp());
-        final Vector v = new Vector();
-        v.add(pf.getFeature());
-        ((DefaultFeatureCollection)pf.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
+        pf.removeCoordinate(coordEntityIndex, posInArray);
     }
 
     /**
@@ -106,6 +99,6 @@ public class HandleDeleteAction implements CustomAction {
      */
     @Override
     public CustomAction getInverse() {
-        return new HandleAddAction(mc, f, posInArray, c, x, y);
+        return new HandleAddAction(mc, f, coordEntityIndex, posInArray, x, y);
     }
 }

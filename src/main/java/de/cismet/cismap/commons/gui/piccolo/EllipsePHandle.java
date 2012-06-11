@@ -27,10 +27,15 @@ import java.awt.geom.Point2D;
  */
 public class EllipsePHandle extends PHandle {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(EllipsePHandle.class);
+
     //~ Instance fields --------------------------------------------------------
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private PFeature pfeature;
+    private final PFeature pfeature;
+    private final int coordEntityIndex;
+
     private Point2D startPoint;
 
     //~ Constructors -----------------------------------------------------------
@@ -38,9 +43,10 @@ public class EllipsePHandle extends PHandle {
     /**
      * Creates a new EllipsePHandle object.
      *
-     * @param  pfeature  DOCUMENT ME!
+     * @param  pfeature          DOCUMENT ME!
+     * @param  coordEntityIndex  DOCUMENT ME!
      */
-    public EllipsePHandle(final PFeature pfeature) {
+    public EllipsePHandle(final PFeature pfeature, final int coordEntityIndex) {
         super(new PLocator() {
 
                 @Override
@@ -55,6 +61,7 @@ public class EllipsePHandle extends PHandle {
             }, pfeature.getViewer());
 
         this.pfeature = pfeature;
+        this.coordEntityIndex = coordEntityIndex;
         this.startPoint = pfeature.getBounds().getOrigin();
     }
 
@@ -62,7 +69,7 @@ public class EllipsePHandle extends PHandle {
 
     @Override
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent pInputEvent) {
-        final int n = pfeature.getXp().length - 1;
+        final int n = pfeature.getCoordEntity(coordEntityIndex).getXp().length - 1;
 
         final Point2D dragPoint = (Point2D)pInputEvent.getPosition();
         final double a = startPoint.getX() - dragPoint.getX();
@@ -78,6 +85,7 @@ public class EllipsePHandle extends PHandle {
                 pInputEvent.isShiftDown());
         for (int i = 0; i < coordArr.length; i++) {
             pfeature.moveCoordinateToNewPiccoloPosition(
+                coordEntityIndex,
                 i,
                 (float)(startX - coordArr[i].x),
                 (float)(startY - coordArr[i].y));
@@ -143,52 +151,5 @@ public class EllipsePHandle extends PHandle {
         }
 
         return coordArr;
-    }
-    /**
-     * TODO move to a static geometryutils class.
-     *
-     * @param   pfeature  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static double area(final PFeature pfeature) {
-        double area = 0;
-
-        final int n = pfeature.getXp().length;
-
-        for (int i = 0; i < n; i++) {
-            final int j = (i + 1) % n;
-            area += pfeature.getXp()[i] * pfeature.getYp()[j];
-            area -= pfeature.getXp()[j] * pfeature.getYp()[i];
-        }
-        area /= 2f;
-        return area;
-    }
-    /**
-     * TODO move to a static geometryutils class.
-     *
-     * @param   pfeature  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static Point2D centroid(final PFeature pfeature) {
-        double cx = 0;
-        double cy = 0;
-
-        final int n = pfeature.getXp().length;
-
-        for (int i = 0; i < n; i++) {
-            final int j = (i + 1) % n;
-            final double factor = ((pfeature.getXp()[i] * pfeature.getYp()[j])
-                            - (pfeature.getXp()[j] * pfeature.getYp()[i]));
-            cx += (pfeature.getXp()[i] + pfeature.getXp()[j]) * factor;
-            cy += (pfeature.getYp()[i] + pfeature.getYp()[j]) * factor;
-        }
-
-        final double factor = 1 / (6.0f * area(pfeature));
-        cx *= factor;
-        cy *= factor;
-
-        return new Point2D.Double(cx, cy);
     }
 }

@@ -12,7 +12,10 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
@@ -30,7 +33,6 @@ import java.awt.geom.Point2D;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Vector;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
@@ -39,12 +41,9 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.AddHandleDialog;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.math.geometry.StaticGeometryFunctions;
-
-import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.gui.StaticSwingTools;
 
@@ -68,6 +67,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private MappingComponent mc;
     private PFeature underlyingObject = null;
+    private int coordEntityIndex;
     private int positionInArray = 0;
     private double xCoord = -1.0d;
     private double yCoord = -1.0d;
@@ -256,16 +256,23 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                 final Geometry geometry = pfeature.getFeature().getGeometry();
                 if ((geometry instanceof Polygon) || (geometry instanceof LineString)
                             || (geometry instanceof MultiPolygon)) {
-                    for (int i = 0; i < (pfeature.getXp().length - 1); i++) {
-                        final Point2D tmpStart = new Point2D.Double(pfeature.getXp()[i], pfeature.getYp()[i]);
-                        final Point2D tmpEnd = new Point2D.Double(pfeature.getXp()[i + 1], pfeature.getYp()[i + 1]);
-                        final double tmpDist = StaticGeometryFunctions.distanceToLine(tmpStart, tmpEnd, trigger);
-                        if (tmpDist < dist) {
-                            dist = tmpDist;
-                            start = tmpStart;
-                            end = tmpEnd;
-                            this.pf = pfeature;
-                            this.positionInArray = i + 1;
+                    for (int coordEntityIndex = 0; coordEntityIndex < pfeature.getCoordEntities().size();
+                                coordEntityIndex++) {
+                        final PFeature.CoordEntity coordEntity = pfeature.getCoordEntity(coordEntityIndex);
+                        final float[] xp = coordEntity.getXp();
+                        final float[] yp = coordEntity.getYp();
+                        for (int i = 0; i < (xp.length - 1); i++) {
+                            final Point2D tmpStart = new Point2D.Double(xp[i], yp[i]);
+                            final Point2D tmpEnd = new Point2D.Double(xp[i + 1], yp[i + 1]);
+                            final double tmpDist = StaticGeometryFunctions.distanceToLine(tmpStart, tmpEnd, trigger);
+                            if (tmpDist < dist) {
+                                dist = tmpDist;
+                                start = tmpStart;
+                                end = tmpEnd;
+                                this.pf = pfeature;
+                                this.coordEntityIndex = coordEntityIndex;
+                                this.positionInArray = i + 1;
+                            }
                         }
                     }
                 }
@@ -437,7 +444,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                     // Alle Objekte durchlaufen
                     for (final Feature feature : mc.getFeatureCollection().getAllFeatures()) {
                         // Collection erzeugen (wird von getNearestNeighbours erwartet)
-                        final LinkedList<Feature> featureCollection = new LinkedList<Feature>();
+                        final Collection<Feature> featureCollection = new LinkedList<Feature>();
                         // und aktuelles Feature hinzufügen
                         featureCollection.add(feature);
 
@@ -479,34 +486,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
      * @param  handleY  DOCUMENT ME!
      */
     private void addPoint(final PFeature pf, final float handleX, final float handleY) {
-        log.info("neues Handle einf\u00FCgen: Anzahl vorher:" + pf.getCoordArr().length); // NOI18N
-        pf.setXp(pf.insertCoordinate(positionInArray, pf.getXp(), handleX));
-        if (log.isDebugEnabled()) {
-            log.debug("Pos=" + positionInArray + ", HandleX=" + handleX);                 // NOI18N
-        }
-        for (final float f : pf.getXp()) {
-            if (log.isDebugEnabled()) {
-                log.debug("X=" + f);                                                      // NOI18N
-            }
-        }
-        pf.setYp(pf.insertCoordinate(positionInArray, pf.getYp(), handleY));
-        if (log.isDebugEnabled()) {
-            log.debug("Pos=" + positionInArray + ", HandleY=" + handleY);                 // NOI18N
-        }
-        for (final float f : pf.getYp()) {
-            if (log.isDebugEnabled()) {
-                log.debug("Y=" + f);                                                      // NOI18N
-            }
-        }
-        final Coordinate c = new Coordinate(mc.getWtst().getSourceX(handleX), mc.getWtst().getSourceY(handleY));
-        pf.setCoordArr(pf.insertCoordinate(positionInArray, pf.getCoordArr(), c));
-        pf.syncGeometry();
-        log.info("neues Handle einf\u00FCge: Anzahl nachher:" + pf.getCoordArr().length); // NOI18N
-        pf.setPathToPolyline(pf.getXp(), pf.getYp());
-        final Vector v = new Vector();
-        v.add(pf.getFeature());
-        ((DefaultFeatureCollection)mc.getFeatureCollection()).fireFeaturesChanged(v);
-        mc.getMemUndo().addAction(new HandleDeleteAction(mc, pf.getFeature(), positionInArray, c, handleX, handleY));
+        pf.insertCoordinate(coordEntityIndex, positionInArray, handleX, handleY);
     }
 
     /**

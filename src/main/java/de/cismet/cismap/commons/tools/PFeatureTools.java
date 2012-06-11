@@ -24,6 +24,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -159,20 +160,22 @@ public class PFeatureTools {
      */
     public static Point2D[] getPointsInArea(final MappingComponent mc, final PBounds bounds) {
         final PFeature[] features = getPFeaturesInArea(mc, bounds);
-        final Vector points = new Vector();
+        final Collection<Point2D> points = new ArrayList<Point2D>();
         if (features == null) {
             return null;
         }
-        for (int i = 0; i < features.length; ++i) {
-            final float[] xp = features[i].getXp();
-            final float[] yp = features[i].getYp();
-            for (int j = 0; j < xp.length; ++j) {
-                if (bounds.contains(xp[j], yp[j])) {
-                    points.add(new Point2D.Float(xp[j], yp[j]));
+        for (final PFeature feature : features) {
+            for (final PFeature.CoordEntity coordEntity : feature.getCoordEntities()) {
+                final float[] xp = coordEntity.getXp();
+                final float[] yp = coordEntity.getYp();
+                for (int position = 0; position < xp.length; position++) {
+                    if (bounds.contains(xp[position], yp[position])) {
+                        points.add(new Point2D.Float(xp[position], yp[position]));
+                    }
                 }
             }
         }
-        return (Point2D[])points.toArray(new Point2D[points.size()]);
+        return points.toArray(new Point2D[0]);
     }
 
     /**
@@ -379,5 +382,60 @@ public class PFeatureTools {
             throw new IllegalArgumentException("ParentNodeIsAPFeature " + child
                         + " has no ParentNode that is a PFeature"); // NOI18N
         }
+    }
+    /**
+     * TODO move to a static geometryutils class.
+     *
+     * @param   pfeature  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Point2D centroid(final PFeature pfeature) {
+        double cx = 0;
+        double cy = 0;
+
+        // TODO centroid wirklich über alle ringe berechnen ?
+        for (final PFeature.CoordEntity coordEntity : pfeature.getCoordEntities()) {
+            final float[] xp = coordEntity.getXp();
+            final float[] yp = coordEntity.getYp();
+            final int n = xp.length;
+
+            for (int i = 0; i < n; i++) {
+                final int j = (i + 1) % n;
+                final double factor = (xp[i] * yp[j]) - (xp[j] * yp[i]);
+                cx += (xp[i] + xp[j]) * factor;
+                cy += (yp[i] + yp[j]) * factor;
+            }
+
+            final double factor = 1 / (6.0f * area(pfeature));
+            cx *= factor;
+            cy *= factor;
+        }
+        return new Point2D.Double(cx, cy);
+    }
+
+    /**
+     * TODO move to a static geometryutils class.
+     *
+     * @param   pfeature  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static double area(final PFeature pfeature) {
+        double area = 0;
+
+        for (final PFeature.CoordEntity coordEntity : pfeature.getCoordEntities()) {
+            final float[] xp = coordEntity.getXp();
+            final float[] yp = coordEntity.getYp();
+            final int n = xp.length;
+
+            for (int i = 0; i < n; i++) {
+                final int j = (i + 1) % n;
+                area += xp[i] * yp[j];
+                area -= xp[j] * yp[i];
+            }
+            area /= 2f;
+        }
+        return area;
     }
 }

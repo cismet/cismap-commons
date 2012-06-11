@@ -21,13 +21,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 
 import de.cismet.cismap.commons.Refreshable;
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.FeatureCollection;
-import de.cismet.cismap.commons.features.FeatureCollectionAdapter;
-import de.cismet.cismap.commons.features.FeatureCollectionEvent;
-import de.cismet.cismap.commons.features.FeatureCollectionListener;
-import de.cismet.cismap.commons.features.XStyledFeature;
+import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -209,24 +203,14 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
             }
             setGeometry(sublineGeom);
 
-            final Coordinate[] coordinates = sublineGeom.getCoordinates();
-
-            final float[] xp = new float[coordinates.length];
-            final float[] yp = new float[coordinates.length];
-            for (int i = 0; i < coordinates.length; i++) {
-                xp[i] = (float)coordinates[i].x;
-                yp[i] = (float)coordinates[i].y;
-            }
-
             final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
             final PFeature pFeature = mc.getPFeatureHM().get(this);
 
             if (pFeature != null) {
-                pFeature.setCoordArr(coordinates);
-                pFeature.setPathToPolyline(xp, yp);
+                pFeature.setCoordArr(sublineGeom.getCoordinates());
+                pFeature.updatePath();
                 pFeature.syncGeometry();
                 pFeature.visualize();
-//            pFeature.resetInfoNodePosition();
             }
         }
     }
