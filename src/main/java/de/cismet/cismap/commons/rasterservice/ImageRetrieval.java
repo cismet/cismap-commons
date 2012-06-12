@@ -46,11 +46,11 @@ public class ImageRetrieval extends Thread {
     private ImageObserverInterceptor observer;
     private RetrievalListener listener = null;
     private ByteArrayOutputStream byteArrayOut = null;
-//    private URLConnection uc = null;
-//    private InputStream is = null;
     private WMSCapabilities cap;
     private HttpClient preferredHttpClient;
     private volatile boolean youngerCall = false;
+
+    private String payload;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -77,22 +77,18 @@ public class ImageRetrieval extends Thread {
         super.interrupt();
         if (log.isDebugEnabled()) {
             log.debug("interrupt())"); // NOI18N
-//            log.debug("interrupt())", new Exception());
         }
-        releaseConnection();
     }
-//    GetMethod getMethod = null;
 
     @Override
     public void run() {
         BufferedInputStream in = null;
-        // new
         try {
             if (log.isDebugEnabled()) {
-                log.debug("start of ImageRetrieval: " + url);                                                  // NOI18N
+                log.debug("start of ImageRetrieval: " + url); // NOI18N
             }
             listener.retrievalStarted(new RetrievalEvent());
-//            URL u = new URL(url.toString());
+
             if (cap != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Retrieve: " + url.toString() + " WMSCapability: " + cap.getLayer().getTitle()); // NOI18N
@@ -102,45 +98,42 @@ public class ImageRetrieval extends Thread {
                     log.debug("Retrieve: " + url.toString());                                                  // NOI18N
                 }
             }
-            // !!! old retrieval !!!
-            // uc=u.openConnection();
-            // log.debug("contenttype: "+uc.getContentType());
-            // uc.connect();
-            // is=uc.getInputStream();
-            // BufferedInputStream in = new BufferedInputStream(is);
 
-//            if (getMethod==null) {
-//                getMethod=new GetMethod();
-//            }
-//            else {
-//                releaseConnection();
-//                getMethod=new GetMethod();
-//            }
-            String urlBase = null;
-            String requestParameter = null;
-            int indexOfCharacter = 0;
-            if ((indexOfCharacter = url.indexOf('?')) != -1) {
-                urlBase = url.substring(0, indexOfCharacter);
-                if ((indexOfCharacter + 1) < url.length()) {
-                    requestParameter = url.substring(indexOfCharacter + 1, url.length());
+            final String urlBase;
+            final String requestParameter;
+            final ACCESS_METHODS method;
+
+            if (payload == null) {
+                // assume GET request
+                int indexOfCharacter = 0;
+                if ((indexOfCharacter = url.indexOf('?')) != -1) {
+                    urlBase = url.substring(0, indexOfCharacter);
+                    if ((indexOfCharacter + 1) < url.length()) {
+                        requestParameter = url.substring(indexOfCharacter + 1, url.length());
+                    } else {
+                        requestParameter = ""; // NOI18N
+                    }
+                } else {
+                    urlBase = url;
+                    requestParameter = "";     // NOI18N
                 }
+
+                method = ACCESS_METHODS.GET_REQUEST;
             } else {
+                // assume POST request
                 urlBase = url;
-                requestParameter = ""; // NOI18N
+                requestParameter = payload;
+                method = ACCESS_METHODS.POST_REQUEST;
+
+                if (log.isDebugEnabled()) {
+                    log.debug("POST payload: " + payload); // NOI18N
+                }
             }
 
-//            if(cap != null){
-//                //ToDO!!! checken ob HTTP AUTH noch funktioniert
-//                //in = new BufferedInputStream(HttpAuthentication.getBufferedInputStreamFromCapabilities(cap,u,getMethod));
-//                in = new BufferedInputStream(WebAccessManager.getInstance().doRequest(new URL(urlBase), requestParameter, ACCESS_METHODS.GET_REQUEST));
-//            } else {
-//                //in = new BufferedInputStream(HttpAuthentication.getBufferedInputStreamFromURL(u,getMethod));
-//                in = new BufferedInputStream(WebAccessManager.getInstance().doRequest(new URL(urlBase), requestParameter, ACCESS_METHODS.GET_REQUEST));
-//            }
             in = new BufferedInputStream(WebAccessManager.getInstance().doRequest(
                         new URL(urlBase),
                         requestParameter,
-                        ACCESS_METHODS.GET_REQUEST));
+                        method));
 
             byteArrayOut = new ByteArrayOutputStream();
 
@@ -153,14 +146,12 @@ public class ImageRetrieval extends Thread {
                     if (log.isDebugEnabled()) {
                         log.debug("interrupt during retrieval"); // NOI18N
                     }
-                    releaseConnection();
+
                     return;
                 }
             }
 
-            // Image image =observer.createImage( (ImageProducer) o);
             observer = new ImageObserverInterceptor();
-            // Image image =Toolkit.getDefaultToolkit().getImage(is);
             image = Toolkit.getDefaultToolkit().createImage(byteArrayOut.toByteArray());
             observer.prepareImage(image, observer);
             while ((observer.checkImage(image, observer) & ImageObserver.ALLBITS) != ImageObserver.ALLBITS) {
@@ -174,7 +165,7 @@ public class ImageRetrieval extends Thread {
                     if (log.isDebugEnabled()) {
                         log.debug("interrupt during assembling"); // NOI18N
                     }
-                    releaseConnection();
+
                     return;
                 }
             }
@@ -184,14 +175,14 @@ public class ImageRetrieval extends Thread {
             if (!youngerCall && !isInterrupted()) {
                 listener.retrievalComplete(e);
                 if (log.isDebugEnabled()) {
-                    log.debug("Retrieval complete");              // NOI18N
+                    log.debug("Retrieval complete"); // NOI18N
                 }
             } else {
                 fireLoadingAborted();
             }
         } catch (Exception e) {
             log.error("Error in ImageRetrieval output has " + ((byteArrayOut != null) ? byteArrayOut.size() : "")
-                        + " bytes.");                             // NOI18N
+                        + " bytes.");                // NOI18N
             final RetrievalEvent re = new RetrievalEvent();
             re.setIsComplete(false);
             if ((e.getMessage() == null) || e.getMessage().equals("null")) { // NOI18N
@@ -216,43 +207,16 @@ public class ImageRetrieval extends Thread {
                 }
             }
         }
-        releaseConnection();
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    private void releaseConnection() {
-//        if (getMethod != null) {
-//            log.debug("Release Connection");
-//            if (getMethod != null) {
-//                getMethod.releaseConnection();
-//            }
-//            if (getMethod != null) {
-//                getMethod.abort();
-//            }
-//            getMethod = null;
-//        }
     }
 
     /**
      * DOCUMENT ME!
      */
     public void fireLoadingAborted() {
-//        RetrievalEvent e=new RetrievalEvent();
-//        listener.retrievalAborted(e);
         // TODO nochmal anschauen
         log.info("Retrieval interrupted"); // NOI18N
         image = null;
         observer = null;
-//        if (is != null) {
-//            try {
-//                is.close();
-//            } catch (IOException ioe) {
-//                log.warn("Exception during premature closing of the inputstream", ioe);
-//            }
-//        }
-//        System.gc();
     }
 
     /**
@@ -272,6 +236,25 @@ public class ImageRetrieval extends Thread {
     public void setUrl(final String url) {
         this.url = url;
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getPayload() {
+        return payload;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  payload  DOCUMENT ME!
+     */
+    public void setPayload(final String payload) {
+        this.payload = payload;
+    }
+
     /**
      * new.
      *
@@ -318,9 +301,6 @@ public class ImageRetrieval extends Thread {
                 final int width,
                 final int height) {
             final boolean ret = super.imageUpdate(img, infoflags, x, y, width, height);
-//            log.debug("ImageUpdate");
-//            log.debug("y "+height);
-//            log.debug("img.getHeight"+img.getHeight(this));
 
             if ((infoflags & ImageObserver.SOMEBITS) != 0) {
                 final RetrievalEvent e = new RetrievalEvent();
