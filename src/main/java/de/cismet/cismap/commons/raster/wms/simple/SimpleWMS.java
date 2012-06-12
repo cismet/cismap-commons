@@ -177,19 +177,17 @@ public class SimpleWMS extends AbstractWMS implements MapService,
                 ir.youngerWMSCall();
                 ir.interrupt();
                 retrievalAborted(new RetrievalEvent());
-//                try {
-//                    ir.join();
-//                }
-//                catch (InterruptedException iex){
-//                    log.warn("ir.join() wurde unterbrochen",iex);
-//                }
             }
+
             ir = new ImageRetrieval(this);
             ir.setPreferredHttpClient(preferredClient);
             ir.setUrl(gmUrl.toString());
+            ir.setPayload(gmUrl.createPayload());
+
             if (log.isDebugEnabled()) {
-                log.debug("ir.start();");                                     // NOI18N
+                log.debug("ir.start();"); // NOI18N
             }
+
             ir.setPriority(Thread.NORM_PRIORITY);
             ir.start();
         }

@@ -8,12 +8,12 @@
 package de.cismet.cismap.commons.features;
 
 /**
- * Marker interface for attachable features handled in 
- * {@link de.cismet.cismap.commons.gui.piccolo.eventlistener.AttachFeatureListener }
+ * Marker interface for attachable features handled in
+ * {@link de.cismet.cismap.commons.gui.piccolo.eventlistener.AttachFeatureListener }.
  *
- * @see      de.cismet.cismap.commons.gui.piccolo.eventlistener.AttachFeatureListener
  * @author   Benjamin Friedrich (benjamin.friedrich@cismet.de)
  * @version  $Revision$, $Date$
+ * @see      de.cismet.cismap.commons.gui.piccolo.eventlistener.AttachFeatureListener
  */
 public interface Attachable {
 }
