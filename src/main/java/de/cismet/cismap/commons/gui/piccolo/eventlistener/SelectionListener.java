@@ -7,10 +7,17 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
+
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 import org.openide.util.Lookup;
+
+import java.awt.geom.Point2D;
 
 import java.util.*;
 
@@ -18,10 +25,13 @@ import javax.swing.Action;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.SearchFeature;
+import de.cismet.cismap.commons.gui.MapPopupAction;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
@@ -88,10 +98,10 @@ public class SelectionListener extends RectangleRubberBandListener {
             if (log.isDebugEnabled()) {
                 log.debug("right mouseclick"); // NOI18N
             }
-            final JPopupMenu popup = new JPopupMenu("Test");
+            final JPopupMenu popup = new JPopupMenu("MapPopup");
 
-            if ((o instanceof PFeature)) {
-                final PFeature pf = ((PFeature)o);
+            if (o instanceof PFeature) {
+                final PFeature pf = (PFeature)o;
                 if (pf.getFeature() instanceof ActionsProvider) {
                     final ActionsProvider ap = (ActionsProvider)((PFeature)o).getFeature();
                     final Collection<? extends Action> ac = ap.getActions();
@@ -119,23 +129,35 @@ public class SelectionListener extends RectangleRubberBandListener {
                 if (commonActionCounter == 0) {
                     popup.remove(sep);
                 }
-                if (popup.getComponentCount() > 0) {
-                    popup.show(
-                        mc,
-                        (int)pInputEvent.getCanvasPosition().getX(),
-                        (int)pInputEvent.getCanvasPosition().getY());
+            }
+
+            // we build a popup menu from all the registered generic point actions
+            final Point point = createPointFromInput(pInputEvent);
+
+            final Collection<? extends MapPopupAction> lookupResult = Lookup.getDefault()
+                        .lookupAll(MapPopupAction.class);
+            final ArrayList<MapPopupAction> popupActions = new ArrayList<MapPopupAction>(lookupResult);
+            Collections.sort(popupActions);
+
+            boolean first = true;
+            for (final MapPopupAction action : popupActions) {
+                if (action.isActive(o instanceof PFeature)) {
+                    if (first && (popup.getComponentCount() > 0)) {
+                        popup.add(new JSeparator());
+                        first = false;
+                    }
+
+                    action.setPoint(point);
+                    popup.add(action);
                 }
             }
 
-//            if (o instanceof PFeature && ((PFeature)o).getFeature() instanceof XStyledFeature) {
-//                XStyledFeature xf=(XStyledFeature)((PFeature)o).getFeature();
-//                log.debug("valid object under pointer");
-//                JPopupMenu popup=new JPopupMenu("Test");
-//                JMenuItem m=new JMenuItem("TIM Merker anlegen");
-//                m.setIcon(xf.getIconImage());
-//                popup.add(m);
-//                popup.show(mc,(int)pInputEvent.getCanvasPosition().getX(),(int)pInputEvent.getCanvasPosition().getY());
-//            }
+            if (popup.getComponentCount() > 0) {
+                popup.show(
+                    mc,
+                    (int)pInputEvent.getCanvasPosition().getX(),
+                    (int)pInputEvent.getCanvasPosition().getY());
+            }
         } else {
             if (o instanceof PFeature) {
                 super.mouseClicked(pInputEvent);
@@ -179,19 +201,24 @@ public class SelectionListener extends RectangleRubberBandListener {
                     ((DefaultFeatureCollection)mc.getFeatureCollection()).unselectAll();
                 }
             }
-//        else if(o instanceof ParentNodeIsAPFeature && o instanceof PNode) {
-//            super.mouseClicked(pInputEvent);
-//            Object test=o;
-//            do {
-//                test=((PNode)test).getParent();
-//            }
-//            while(!(test instanceof PFeature));
-//            if (test instanceof PFeature) {
-//                sel=(PFeature)test;
-//            }
-//            postSelectionChanged();
-//        }
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   event  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Point createPointFromInput(final PInputEvent event) {
+        final Point2D pos = event.getPosition();
+        final WorldToScreenTransform wtst = mc.getWtst();
+        final Coordinate coord = new Coordinate(wtst.getSourceX(pos.getX()), wtst.getSourceY(pos.getY()));
+        final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.getCurrentSrid());
+
+        return gf.createPoint(coord);
     }
 
     /**
