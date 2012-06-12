@@ -32,8 +32,9 @@ public class HandleAddAction implements CustomAction {
 
     private MappingComponent mc;
     private Feature f;
-    private int coordEntityIndex;
-    private int posInArray;
+    private int entityPosition;
+    private int ringPosition;
+    private int coordPosition;
     private float x;
     private float y;
 
@@ -42,23 +43,27 @@ public class HandleAddAction implements CustomAction {
     /**
      * Erzeugt eine HandleAddAction-Instanz.
      *
-     * @param  mc                h das Handle selbst
-     * @param  f                 PFeature dem das Handle zugeordnet ist
-     * @param  coordEntityIndex  DOCUMENT ME!
-     * @param  pos               Position der HandleKoordinaten im Koordinatenarray des PFeatures
-     * @param  x                 DOCUMENT ME!
-     * @param  y                 DOCUMENT ME!
+     * @param  mc              h das Handle selbst
+     * @param  f               PFeature dem das Handle zugeordnet ist
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   Position der HandleKoordinaten im Koordinatenarray des PFeatures
+     * @param  x               DOCUMENT ME!
+     * @param  y               DOCUMENT ME!
      */
-    public HandleAddAction(final MappingComponent mc,
+    public HandleAddAction(
+            final MappingComponent mc,
             final Feature f,
-            final int coordEntityIndex,
-            final int pos,
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
             final float x,
             final float y) {
         this.mc = mc;
         this.f = f;
-        this.coordEntityIndex = coordEntityIndex;
-        this.posInArray = pos;
+        this.entityPosition = entityPosition;
+        this.ringPosition = ringPosition;
+        this.coordPosition = coordPosition;
         this.x = x;
         this.y = y;
     }
@@ -71,7 +76,7 @@ public class HandleAddAction implements CustomAction {
     @Override
     public void doAction() {
         final PFeature pf = (PFeature)mc.getPFeatureHM().get(f);
-        pf.insertCoordinate(coordEntityIndex, posInArray, x, y);
+        pf.insertCoordinate(entityPosition, ringPosition, coordPosition, x, y);
     }
 
     /**
@@ -84,7 +89,7 @@ public class HandleAddAction implements CustomAction {
         return org.openide.util.NbBundle.getMessage(
                 HandleAddAction.class,
                 "HandleAddAction.info().return",
-                new Object[] { posInArray, x, y }); // NOI18N
+                new Object[] { coordPosition, x, y }); // NOI18N
     }
 
     /**
@@ -94,6 +99,6 @@ public class HandleAddAction implements CustomAction {
      */
     @Override
     public CustomAction getInverse() {
-        return new HandleDeleteAction(mc, f, coordEntityIndex, posInArray, x, y);
+        return new HandleDeleteAction(mc, f, entityPosition, ringPosition, coordPosition, x, y);
     }
 }

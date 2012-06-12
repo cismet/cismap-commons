@@ -94,7 +94,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private Paint nonSelectedPaint = null;
     private boolean highlighted = false;
     private Paint nonHighlightingPaint = null;
-    private final ArrayList<CoordEntity> coordEntityList = new ArrayList<CoordEntity>();
+    private Coordinate[][][] entityRingCoordArr = null;
+    private float[][][] entityRingXArr = null;
+    private float[][][] entityRingYArr = null;
+    // private final ArrayList<CoordEntity> coordEntityList = new ArrayList<CoordEntity>();
     private MappingComponent viewer;
     private Stroke stroke = null;
     private Paint strokePaint = null;
@@ -355,8 +358,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     }
                 }
                 addChild(pi);
-                pi.setOffset(wtst.getScreenX(coordEntityList.get(0).getCoordArr()[0].x),
-                    wtst.getScreenY(coordEntityList.get(0).getCoordArr()[0].y));
+                pi.setOffset(wtst.getScreenX(entityRingCoordArr[0][0][0].x),
+                    wtst.getScreenY(entityRingCoordArr[0][0][0].y));
             }
             if (pi != null) {
                 sweetPureX = pi.getSweetSpotX();
@@ -371,51 +374,52 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     /**
      * Dupliziert eine Koordinate.
      *
-     * @param  coordEntity  DOCUMENT ME!
-     * @param  position     Position der zu duplizierenden Koordinate
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   Position der zu duplizierenden Koordinate
      */
-    public void duplicateCoordinate(final CoordEntity coordEntity, final int position) {
-        final Coordinate[] coordArr = coordEntity.getCoordArr();
-        final float[] xp = coordEntity.getXp();
-        final float[] yp = coordEntity.getYp();
+    public void duplicateCoordinate(final int entityPosition, final int ringPosition, final int coordPosition) {
+        final Coordinate[] origCoordArr = entityRingCoordArr[entityPosition][ringPosition];
+        final float[] origXp = entityRingXArr[entityPosition][ringPosition];
+        final float[] origYp = entityRingYArr[entityPosition][ringPosition];
         final Geometry geometry = getFeature().getGeometry();
 
-        if (((geometry instanceof Polygon) && (coordArr != null)
-                        && ((coordArr.length - 1) > position))
-                    || ((geometry instanceof LineString) && (coordArr != null)
-                        && (coordArr.length > position)
-                        && (coordArr.length > 2))) {
-            final Coordinate[] newCoordArr = new Coordinate[coordArr.length + 1];
-            final float[] newX = new float[xp.length + 1];
-            final float[] newY = new float[yp.length + 1];
+        if (((geometry instanceof Polygon) && (origCoordArr != null)
+                        && ((origCoordArr.length - 1) > coordPosition))
+                    || ((geometry instanceof LineString) && (origCoordArr != null)
+                        && (origCoordArr.length > coordPosition)
+                        && (origCoordArr.length > 2))) {
+            final Coordinate[] newCoordArr = new Coordinate[origCoordArr.length + 1];
+            final float[] newX = new float[origXp.length + 1];
+            final float[] newY = new float[origYp.length + 1];
 
             // vorher
-            for (int i = 0; i <= position; ++i) {
-                newCoordArr[i] = coordArr[i];
-                newX[i] = xp[i];
-                newY[i] = yp[i];
+            for (int i = 0; i <= coordPosition; ++i) {
+                newCoordArr[i] = origCoordArr[i];
+                newX[i] = origXp[i];
+                newY[i] = origYp[i];
             }
 
             // zu entferndes Element duplizieren, hier muss geklont werden
-            newCoordArr[position + 1] = (Coordinate)(coordArr[position].clone());
-            newX[position + 1] = xp[position];
-            newY[position + 1] = yp[position];
+            newCoordArr[coordPosition + 1] = (Coordinate)(origCoordArr[coordPosition].clone());
+            newX[coordPosition + 1] = origXp[coordPosition];
+            newY[coordPosition + 1] = origYp[coordPosition];
 
             // nachher
-            for (int i = position + 1; i < coordArr.length; ++i) {
-                newCoordArr[i + 1] = coordArr[i];
-                newX[i + 1] = xp[i];
-                newY[i + 1] = yp[i];
+            for (int i = coordPosition + 1; i < origCoordArr.length; ++i) {
+                newCoordArr[i + 1] = origCoordArr[i];
+                newX[i + 1] = origXp[i];
+                newY[i + 1] = origYp[i];
             }
 
             // Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist
-            if ((position == 0) && (geometry instanceof Polygon)) {
+            if ((coordPosition == 0) && (geometry instanceof Polygon)) {
                 newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
                 newX[newX.length - 1] = newX[0];
                 newY[newX.length - 1] = newY[0];
             }
 
-            setNewCoordinates(coordEntity, newX, newY, newCoordArr);
+            setNewCoordinates(entityPosition, ringPosition, newX, newY, newCoordArr);
         }
     }
 
@@ -441,46 +445,43 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     /**
      * DOCUMENT ME!
      *
-     * @param   coordEntity      DOCUMENT ME!
+     * @param   coord            coordEntity DOCUMENT ME!
      * @param   geometryFactory  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private static Point createPoint(final CoordEntity coordEntity, final GeometryFactory geometryFactory) {
-        final Coordinate[] coordArray = coordEntity.getCoordArr();
-        return geometryFactory.createPoint(coordArray[0]);
+    private static Point createPoint(final Coordinate coord, final GeometryFactory geometryFactory) {
+        return geometryFactory.createPoint(coord);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   coordEntity      DOCUMENT ME!
+     * @param   coordArray       coordEntity DOCUMENT ME!
      * @param   geometryFactory  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private static LineString createLineString(final CoordEntity coordEntity, final GeometryFactory geometryFactory) {
-        final Coordinate[] coordArray = coordEntity.getCoordArr();
+    private static LineString createLineString(final Coordinate[] coordArray, final GeometryFactory geometryFactory) {
         return geometryFactory.createLineString(coordArray);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   coordEntity      DOCUMENT ME!
+     * @param   ringCoordArray   coordEntity DOCUMENT ME!
      * @param   geometryFactory  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private static Polygon createPolygon(final CoordEntity coordEntity, final GeometryFactory geometryFactory) {
+    private static Polygon createPolygon(final Coordinate[][] ringCoordArray, final GeometryFactory geometryFactory) {
         // ring des polygons erstellen
-        final LinearRing shell = geometryFactory.createLinearRing(coordEntity.getCoordArr());
+        final LinearRing shell = geometryFactory.createLinearRing(ringCoordArray[0]);
 
         // ringe der löscher erstellen
-        final Collection<Coordinate[]> holeCoords = coordEntity.getHolesCoords();
-        final Collection<LinearRing> holes = new ArrayList<LinearRing>(holeCoords.size());
-        for (final Coordinate[] holesCoords : holeCoords) {
-            final LinearRing holeShell = geometryFactory.createLinearRing(holesCoords);
+        final Collection<LinearRing> holes = new ArrayList<LinearRing>();
+        for (int ringIndex = 1; ringIndex < ringCoordArray.length; ringIndex++) {
+            final LinearRing holeShell = geometryFactory.createLinearRing(ringCoordArray[ringIndex]);
             holes.add(holeShell);
         }
 
@@ -504,9 +505,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 // sonderfall multipolygon TODO eigentlich garkein sonderfall, multipoint und multilinestring müssen
                 // langfristig genauso behandelt werden
                 if (getFeature().getGeometry() instanceof MultiPolygon) {
-                    final Collection<Polygon> polygons = new ArrayList<Polygon>(coordEntityList.size());
-                    for (final CoordEntity coordEntity : coordEntityList) {
-                        final Polygon polygon = createPolygon(coordEntity, geometryFactory);
+                    final Collection<Polygon> polygons = new ArrayList<Polygon>(entityRingCoordArr.length);
+                    for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+                        final Polygon polygon = createPolygon(entityRingCoordArr[entityIndex], geometryFactory);
                         polygons.add(polygon);
                     }
 
@@ -516,24 +517,23 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
                     assignSynchronizedGeometry(multiPolygon);
                 } else {
-                    final boolean isSingle = coordEntityList.size() == 1;
+                    final boolean isSingle = entityRingCoordArr.length == 1;
                     if (isSingle) {
-                        final CoordEntity coordEntity = coordEntityList.get(0);
-                        final Coordinate[] coordArr = coordEntity.getCoordArr();
-                        if (coordArr == null) {
+                        if (entityRingCoordArr[0][0] == null) {
                             log.warn("coordArr==null"); // NOI18N
                         } else {
-                            final boolean isPoint = coordArr.length == 1;
-                            final boolean isPolygon = (coordArr.length > 3)
-                                        && coordArr[0].equals(coordArr[coordArr.length - 1]);
+                            final boolean isPoint = entityRingCoordArr[0][0].length == 1;
+                            final boolean isPolygon = (entityRingCoordArr[0][0].length > 3)
+                                        && entityRingCoordArr[0][0][0].equals(
+                                            entityRingCoordArr[0][0][entityRingCoordArr[0][0].length - 1]);
                             final boolean isLineString = !isPoint && !isPolygon;
 
                             if (isPoint) {
-                                assignSynchronizedGeometry(createPoint(coordEntity, geometryFactory));
+                                assignSynchronizedGeometry(createPoint(entityRingCoordArr[0][0][0], geometryFactory));
                             } else if (isLineString) {
-                                assignSynchronizedGeometry(createLineString(coordEntity, geometryFactory));
+                                assignSynchronizedGeometry(createLineString(entityRingCoordArr[0][0], geometryFactory));
                             } else if (isPolygon) {
-                                assignSynchronizedGeometry(createPolygon(coordEntity, geometryFactory));
+                                assignSynchronizedGeometry(createPolygon(entityRingCoordArr[0], geometryFactory));
                             }
                         }
                     }
@@ -598,29 +598,52 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  geom  vorhandenes Geometry-Objekt
      */
     private void doGeometry(final Geometry geom) {
-        coordEntityList.clear();
         if (geom instanceof Point) {
-            coordEntityList.add(new CoordEntity(((Point)geom).getCoordinate()));
+            entityRingCoordArr = new Coordinate[][][] {
+                    {
+                        { ((Point)geom).getCoordinate() }
+                    }
+                };
         } else if (geom instanceof LineString) {
-            coordEntityList.add(new CoordEntity(((LineString)geom).getCoordinates()));
+            entityRingCoordArr = new Coordinate[][][] {
+                    { ((LineString)geom).getCoordinates() }
+                };
         } else if (geom instanceof Polygon) {
-            doPolygon((Polygon)geom);
-        } else if (geom instanceof LinearRing) {
-            doPolygon((Polygon)geom);
-        } else if (geom instanceof MultiPoint) {
-            for (final Coordinate coord : ((MultiPoint)geom).getCoordinates()) {
-                coordEntityList.add(new CoordEntity(coord));
+            final Polygon polygon = (Polygon)geom;
+            final int numOfHoles = polygon.getNumInteriorRing();
+            entityRingCoordArr = new Coordinate[1][1 + numOfHoles][];
+            entityRingCoordArr[0][0] = polygon.getExteriorRing().getCoordinates();
+            for (int ringIndex = 1; ringIndex < entityRingCoordArr[0].length; ++ringIndex) {
+                entityRingCoordArr[0][ringIndex] = polygon.getInteriorRingN(ringIndex - 1).getCoordinates();
             }
+        } else if (geom instanceof LinearRing) {
+            // doPolygon((Polygon)geom);
+        } else if (geom instanceof MultiPoint) {
+            entityRingCoordArr = new Coordinate[][][] {
+                    { ((MultiPoint)geom).getCoordinates() }
+                };
         } else if (geom instanceof MultiLineString) {
             final MultiLineString multiLineString = (MultiLineString)geom;
-            for (int i = 0; i < multiLineString.getNumGeometries(); ++i) {
-                final Coordinate[] coordSubArr = ((LineString)multiLineString.getGeometryN(i)).getCoordinates();
-                coordEntityList.add(new CoordEntity(coordSubArr));
+            final int numOfGeoms = multiLineString.getNumGeometries();
+            entityRingCoordArr = new Coordinate[numOfGeoms][][];
+            for (int entityIndex = 0; entityIndex < numOfGeoms; ++entityIndex) {
+                final Coordinate[] coordSubArr = ((LineString)multiLineString.getGeometryN(entityIndex))
+                            .getCoordinates();
+                entityRingCoordArr[entityIndex] = new Coordinate[][] { coordSubArr };
             }
         } else if (geom instanceof MultiPolygon) {
             final MultiPolygon multiPolygon = (MultiPolygon)geom;
-            for (int i = 0; i < multiPolygon.getNumGeometries(); ++i) {
-                doPolygon((Polygon)multiPolygon.getGeometryN(i));
+            final int numOfEntities = multiPolygon.getNumGeometries();
+            entityRingCoordArr = new Coordinate[numOfEntities][][];
+            for (int entityIndex = 0; entityIndex < numOfEntities; ++entityIndex) {
+                final Polygon polygon = (Polygon)multiPolygon.getGeometryN(entityIndex);
+                final int numOfHoles = polygon.getNumInteriorRing();
+                entityRingCoordArr[entityIndex] = new Coordinate[1 + numOfHoles][];
+                entityRingCoordArr[entityIndex][0] = polygon.getExteriorRing().getCoordinates();
+                for (int ringIndex = 1; ringIndex < entityRingCoordArr[entityIndex].length; ++ringIndex) {
+                    entityRingCoordArr[entityIndex][ringIndex] = polygon.getInteriorRingN(ringIndex - 1)
+                                .getCoordinates();
+                }
             }
         }
 
@@ -634,33 +657,59 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * DOCUMENT ME!
      */
     private void updateXpAndYp() {
-        for (final CoordEntity coordEntity : coordEntityList) {
-            final Coordinate[] transformedCoordArr = transformCoordinateArr(coordEntity.getCoordArr());
-            final int length = transformedCoordArr.length;
-            final float[] xp = new float[length];
-            final float[] yp = new float[length];
-            for (int index = 0; index < length; index++) {
-                xp[index] = (float)transformedCoordArr[index].x;
-                yp[index] = (float)transformedCoordArr[index].y;
+        entityRingXArr = new float[entityRingCoordArr.length][][];
+        entityRingYArr = new float[entityRingCoordArr.length][][];
+        for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+            entityRingXArr[entityIndex] = new float[entityRingCoordArr[entityIndex].length][];
+            entityRingYArr[entityIndex] = new float[entityRingCoordArr[entityIndex].length][];
+            for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                final Coordinate[] transformedCoordArr = transformCoordinateArr(
+                        entityRingCoordArr[entityIndex][ringIndex]);
+                final int length = transformedCoordArr.length;
+                entityRingXArr[entityIndex][ringIndex] = new float[length];
+                entityRingYArr[entityIndex][ringIndex] = new float[length];
+                for (int coordIndex = 0; coordIndex < length; coordIndex++) {
+                    entityRingXArr[entityIndex][ringIndex][coordIndex] = (float)transformedCoordArr[coordIndex].x;
+                    entityRingYArr[entityIndex][ringIndex][coordIndex] = (float)transformedCoordArr[coordIndex].y;
+                }
             }
-            coordEntity.setXp(xp);
-            coordEntity.setYp(yp);
         }
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  polygon  DOCUMENT ME!
+     * @param   entityPosition  DOCUMENT ME!
+     * @param   ringPosition    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    private void doPolygon(final Polygon polygon) {
-        final Coordinate[] coordArr = polygon.getExteriorRing().getCoordinates();
-        final Collection<Coordinate[]> holes = new ArrayList<Coordinate[]>();
-        for (int i = 0; i < polygon.getNumInteriorRing(); ++i) {
-            final Coordinate[] hole = polygon.getInteriorRingN(i).getCoordinates();
-            holes.add(hole);
-        }
-        coordEntityList.add(new CoordEntity(coordArr, holes));
+    public Coordinate[] getCoordArr(final int entityPosition, final int ringPosition) {
+        return entityRingCoordArr[entityPosition][ringPosition];
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   entityPosition  DOCUMENT ME!
+     * @param   ringPosition    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public float[] getXp(final int entityPosition, final int ringPosition) {
+        return entityRingXArr[entityPosition][ringPosition];
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   entityPosition  DOCUMENT ME!
+     * @param   ringPosition    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public float[] getYp(final int entityPosition, final int ringPosition) {
+        return entityRingYArr[entityPosition][ringPosition];
     }
 
     /**
@@ -843,113 +892,113 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     /**
      * F\u00FCgt eine neue \u00FCbergebene Koordinate in das Koordinatenarray ein, statt nur einen Punkt zu duplizieren.
      *
-     * @param  coordEntityIndex  DOCUMENT ME!
-     * @param  position          die Position des neuen Punktes im Array
-     * @param  newValueX         original das Original-Array
-     * @param  newValueY         der einzuf\u00FCgende Wert
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   die Position des neuen Punktes im Array
+     * @param  newValueX       original das Original-Array
+     * @param  newValueY       der einzuf\u00FCgende Wert
      */
-    public void insertCoordinate(final int coordEntityIndex,
-            final int position,
+    public void insertCoordinate(final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
             final float newValueX,
             final float newValueY) {
-        final CoordEntity coordEntity = getCoordEntity(coordEntityIndex);
-        final Coordinate[] originalCoordinates = coordEntity.getCoordArr();
-        final float[] originalX = coordEntity.getXp();
-        final float[] originalY = coordEntity.getYp();
+        final Coordinate[] originalCoordArr = entityRingCoordArr[entityPosition][ringPosition];
+        final float[] originalXArr = entityRingXArr[entityPosition][ringPosition];
+        final float[] originalYArr = entityRingYArr[entityPosition][ringPosition];
 
         if ((((getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon))
-                        && (originalX != null)
-                        && ((originalX.length - 1) >= position))
-                    || ((getFeature().getGeometry() instanceof LineString) && (originalX != null)
-                        && (originalX.length > position)
-                        && (originalX.length > 2))) {
-            final Coordinate[] newCoordinates = new Coordinate[originalCoordinates.length + 1];
-
-            final Coordinate newCoord = new Coordinate(viewer.getWtst().getSourceX(newValueX),
-                    viewer.getWtst().getSourceY(newValueY));
-            final float[] newX = new float[originalX.length + 1];
-            final float[] newY = new float[originalY.length + 1];
+                        && (originalXArr != null)
+                        && ((originalXArr.length - 1) >= coordPosition))
+                    || ((getFeature().getGeometry() instanceof LineString) && (originalXArr != null)
+                        && (originalXArr.length > coordPosition)
+                        && (originalXArr.length > 2))) {
+            final Coordinate[] newCoordArr = new Coordinate[originalCoordArr.length + 1];
+            final float[] newXArr = new float[originalXArr.length + 1];
+            final float[] newYArr = new float[originalYArr.length + 1];
 
             // vorher
-            for (int i = 0; i < position; ++i) {
-                newCoordinates[i] = originalCoordinates[i];
-                newX[i] = originalX[i];
-                newY[i] = originalY[i];
+            for (int i = 0; i < coordPosition; ++i) {
+                newCoordArr[i] = originalCoordArr[i];
+                newXArr[i] = originalXArr[i];
+                newYArr[i] = originalYArr[i];
             }
 
-            newCoordinates[position] = newCoord;
-            newX[position] = newValueX;
-            newY[position] = newValueY;
+            newCoordArr[coordPosition] = new Coordinate(viewer.getWtst().getSourceX(newValueX),
+                    viewer.getWtst().getSourceY(newValueY));
+            newXArr[coordPosition] = newValueX;
+            newYArr[coordPosition] = newValueY;
 
             // nachher
-            for (int i = position; i < originalCoordinates.length; ++i) {
-                newCoordinates[i + 1] = originalCoordinates[i];
-                newX[i + 1] = originalX[i];
-                newY[i + 1] = originalY[i];
+            for (int i = coordPosition; i < originalCoordArr.length; ++i) {
+                newCoordArr[i + 1] = originalCoordArr[i];
+                newXArr[i + 1] = originalXArr[i];
+                newYArr[i + 1] = originalYArr[i];
             }
 
             // Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist
-            if ((position == 0) && (getFeature().getGeometry() instanceof Polygon)) {
-                newCoordinates[newCoordinates.length - 1] = newCoordinates[0];
-                newX[newX.length - 1] = newX[0];
-                newY[newY.length - 1] = newY[0];
-            } else if ((position == (originalCoordinates.length - 1))
+            if ((coordPosition == 0) && (getFeature().getGeometry() instanceof Polygon)) {
+                newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
+                newXArr[newXArr.length - 1] = newXArr[0];
+                newYArr[newYArr.length - 1] = newYArr[0];
+            } else if ((coordPosition == (originalCoordArr.length - 1))
                         && ((getFeature().getGeometry() instanceof Polygon)
                             || (getFeature().getGeometry() instanceof MultiPolygon))) {
-                newCoordinates[newCoordinates.length - 1] = newCoordinates[0];
-                newX[newX.length - 1] = newX[0];
-                newY[newY.length - 1] = newY[0];
+                newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
+                newXArr[newXArr.length - 1] = newXArr[0];
+                newYArr[newYArr.length - 1] = newYArr[0];
             }
 
-            setNewCoordinates(coordEntity, newX, newY, newCoordinates);
+            setNewCoordinates(entityPosition, ringPosition, newXArr, newYArr, newCoordArr);
         }
     }
 
     /**
      * Entfernt eine Koordinate aus der Geometrie, z.B. beim L\u00F6schen eines Handles.
      *
-     * @param  coordEntityIndex  DOCUMENT ME!
-     * @param  position          Position des zu l\u00F6schenden Punkes im Koordinatenarray
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   Position des zu l\u00F6schenden Punkes im Koordinatenarray
      */
-    public void removeCoordinate(final int coordEntityIndex, final int position) {
-        final CoordEntity coordEntity = getCoordEntity(coordEntityIndex);
-        final Coordinate[] originalCoordinates = coordEntity.getCoordArr();
-        final float[] xp = coordEntity.getXp();
-        final float[] yp = coordEntity.getYp();
+    public void removeCoordinate(final int entityPosition, final int ringPosition, final int coordPosition) {
+        final Coordinate[] originalCoordArr = entityRingCoordArr[entityPosition][ringPosition];
+        final float[] originalXp = entityRingXArr[entityPosition][ringPosition];
+        final float[] originalYp = entityRingYArr[entityPosition][ringPosition];
 
         if ((((getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon))
-                        && (originalCoordinates != null)
-                        && ((originalCoordinates.length - 1) > position))
-                    || ((getFeature().getGeometry() instanceof LineString) && (originalCoordinates != null)
-                        && (originalCoordinates.length > position)
-                        && (originalCoordinates.length > 2))) {
-            final Coordinate[] newCoordinates = new Coordinate[originalCoordinates.length - 1];
-            final float[] newXp = new float[xp.length - 1];
-            final float[] newYp = new float[yp.length - 1];
+                        && (originalCoordArr != null)
+                        && ((originalCoordArr.length - 1) > coordPosition))
+                    || ((getFeature().getGeometry() instanceof LineString) && (originalCoordArr != null)
+                        && (originalCoordArr.length > coordPosition)
+                        && (originalCoordArr.length > 2))) {
+            final Coordinate[] newCoordArr = new Coordinate[originalCoordArr.length - 1];
+            final float[] newXp = new float[originalXp.length - 1];
+            final float[] newYp = new float[originalYp.length - 1];
 
             // vorher
-            for (int i = 0; i < position; ++i) {
-                newCoordinates[i] = originalCoordinates[i];
-                newXp[i] = xp[i];
-                newYp[i] = yp[i];
+            for (int i = 0; i < coordPosition; ++i) {
+                newCoordArr[i] = originalCoordArr[i];
+                newXp[i] = originalXp[i];
+                newYp[i] = originalYp[i];
             }
             // zu entferndes Element \u00FCberspringen
 
             // nachher
-            for (int i = position; i < newCoordinates.length; ++i) {
-                newCoordinates[i] = originalCoordinates[i + 1];
-                newXp[i] = xp[i + 1];
-                newYp[i] = yp[i + 1];
+            for (int i = coordPosition; i < newCoordArr.length; ++i) {
+                newCoordArr[i] = originalCoordArr[i + 1];
+                newXp[i] = originalXp[i + 1];
+                newYp[i] = originalYp[i + 1];
             }
 
             // Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist (nur beim Polygon)
-            if ((position == 0) && (getFeature().getGeometry() instanceof Polygon)) {
-                newCoordinates[newCoordinates.length - 1] = newCoordinates[0];
+            if (((coordPosition == 0) && (getFeature().getGeometry() instanceof Polygon))
+                        || (getFeature().getGeometry() instanceof MultiPolygon)) {
+                newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
                 newXp[newXp.length - 1] = newXp[0];
                 newXp[newYp.length - 1] = newYp[0];
             }
 
-            setNewCoordinates(coordEntity, newXp, newYp, newCoordinates);
+            setNewCoordinates(entityPosition, ringPosition, newXp, newYp, newCoordArr);
 
             // Jetzt sind allerdings alle Locator noch falsch und das handle existiert noch
             // handleLayer.removeChild(this);
@@ -970,16 +1019,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     && (((PureNewFeature)getFeature()).getGeometryType() == PureNewFeature.geomTypes.ELLIPSE)) {
             addEllipseHandle(handleLayer);
         } else {
-            for (int coordEntityIndex = 0; coordEntityIndex < coordEntityList.size(); coordEntityIndex++) {
-                final CoordEntity coordEntity = coordEntityList.get(coordEntityIndex);
-                int length = coordEntity.getCoordArr().length;
+            for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+                for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                    final Coordinate[] coordArr = entityRingCoordArr[entityIndex][ringIndex];
+                    int length = coordArr.length;
 
-                final Geometry geometry = getFeature().getGeometry();
-                if ((geometry instanceof Polygon) || (geometry instanceof MultiPolygon)) {
-                    length--; // xp.length-1 weil der erste und letzte Punkt identisch sind
-                }
-                for (int i = 0; i < length; ++i) {
-                    addHandle(handleLayer, coordEntityIndex, i);
+                    final Geometry geometry = getFeature().getGeometry();
+                    if ((geometry instanceof Polygon) || (geometry instanceof MultiPolygon)) {
+                        length--; // xp.length-1 weil der erste und letzte Punkt identisch sind
+                    }
+                    for (int coordIndex = 0; coordIndex < length; ++coordIndex) {
+                        addHandle(handleLayer, entityIndex, ringIndex, coordIndex);
+                    }
                 }
             }
         }
@@ -989,21 +1040,27 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * Erzeugt ein PHandle an den Koordinaten eines bestimmten Punktes des Koordinatenarrays und f\u00FCgt es dem
      * HandleLayer hinzu.
      *
-     * @param  handleLayer       PLayer dem das Handle als Kind hinzugef\u00FCgt wird
-     * @param  coordEntityIndex  DOCUMENT ME!
-     * @param  position          Position des Punktes im Koordinatenarray
+     * @param  handleLayer     PLayer dem das Handle als Kind hinzugef\u00FCgt wird
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   Position des Punktes im Koordinatenarray
      */
-    public void addHandle(final PNode handleLayer, final int coordEntityIndex, final int position) {
-        final int positionInArray = position;
+    public void addHandle(final PNode handleLayer,
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition) {
+        final int positionInArray = coordPosition;
 
-        final PHandle h = new TransformationPHandle(this, coordEntityIndex, positionInArray);
+        final PHandle h = new TransformationPHandle(this, entityPosition, ringPosition, positionInArray);
 
 //        EventQueue.invokeLater(new Runnable() {
 //
 //            public void run() {
         handleLayer.addChild(h);
-        h.addClientProperty("coordinate", getCoordEntity(coordEntityIndex).getCoordArr()[position]); // NOI18N
-        h.addClientProperty("coordinate_position_in_arr", new Integer(position));                    // NOI18N
+        h.addClientProperty("coordinate", entityRingCoordArr[entityPosition][ringPosition][coordPosition]); // NOI18N
+        h.addClientProperty("coordinate_position_entity", new Integer(entityPosition));                     // NOI18N
+        h.addClientProperty("coordinate_position_ring", new Integer(ringPosition));                         // NOI18N
+        h.addClientProperty("coordinate_position_coord", new Integer(coordPosition));                       // NOI18N
 //            }
 //        });
     }
@@ -1013,13 +1070,16 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * als 1cm vom angeklickten Handle entfernt ist. Falls beides zutrifft, wird eine MultiMap mit diesen Features
      * gef\u00FCllt und zur\u00FCckgegeben.
      *
-     * @param   coordEntityIndex  DOCUMENT ME!
-     * @param   posInArray        Postion des geklickten Handles im Koordinatenarray um Koordinaten herauszufinden
+     * @param   entityPosition  DOCUMENT ME!
+     * @param   ringPosition    DOCUMENT ME!
+     * @param   coordPosition   Postion des geklickten Handles im Koordinatenarray um Koordinaten herauszufinden
      *
      * @return  MultiMap mit Features, die die Bedingungen erf\u00FCllen
      */
-    public de.cismet.tools.collections.MultiMap checkforGlueCoords(final int coordEntityIndex,
-            final int posInArray) {
+    public de.cismet.tools.collections.MultiMap checkforGlueCoords(
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition) {
         final GeometryFactory gf = new GeometryFactory();
         final MultiMap glueCoords = new MultiMap();
 
@@ -1033,8 +1093,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 final Geometry thisGeo = CrsTransformer.transformToGivenCrs(PFeature.this.getFeature().getGeometry(),
                         getViewerCrs().getCode());
                 if (fgeo.buffer(0.01).intersects(thisGeo.buffer(0.01))) {
-                    final Coordinate[] coordArr = getCoordEntity(coordEntityIndex).getCoordArr();
-                    final Point p = gf.createPoint(coordArr[posInArray]);
+                    final Coordinate coord = entityRingCoordArr[entityPosition][ringPosition][coordPosition];
+                    final Point p = gf.createPoint(coord);
                     // Erzeuge Array mit allen Eckpunkten
                     final Coordinate[] ca = fgeo.getCoordinates();
 
@@ -1097,16 +1157,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
 
         // Handles einfügen
-        for (int coordEntityIndex = 0; coordEntityIndex < coordEntityList.size(); coordEntityIndex++) {
-            final CoordEntity coordEntity = getCoordEntity(coordEntityIndex);
-            int length = coordEntity.getCoordArr().length;
+        for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+            for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                final Coordinate[] coordArr = entityRingCoordArr[entityIndex][ringIndex];
+                int length = coordArr.length;
 
-            final Geometry geometry = getFeature().getGeometry();
-            if ((geometry instanceof Polygon) || (geometry instanceof MultiPolygon)) {
-                length--; // xp.length-1 weil der erste und letzte Punkt identisch sind
-            }
-            for (int i = 0; i < length; ++i) {
-                addRotationHandle(handleLayer, coordEntityIndex, i);
+                final Geometry geometry = getFeature().getGeometry();
+                if ((geometry instanceof Polygon) || (geometry instanceof MultiPolygon)) {
+                    length--; // xp.length-1 weil der erste und letzte Punkt identisch sind
+                }
+                for (int coordIndex = 0; coordIndex < length; ++coordIndex) {
+                    addRotationHandle(handleLayer, entityIndex, ringIndex, coordIndex);
+                }
             }
         }
     }
@@ -1115,18 +1177,28 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * F\u00FCgt dem PFeature spezielle Handles zum Rotieren des PFeatures an den Eckpunkten hinzu. Zus\u00E4tzlich ein
      * Handle am Rotationsmittelpunkt, um diesen manuell \u00E4nder nzu k\u00F6nnen.
      *
-     * @param  handleLayer       HandleLayer der MappingComponent
-     * @param  coordEntityIndex  DOCUMENT ME!
-     * @param  position          DOCUMENT ME!
+     * @param  handleLayer     HandleLayer der MappingComponent
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   DOCUMENT ME!
      */
-    private void addRotationHandle(final PNode handleLayer, final int coordEntityIndex, final int position) {
+    private void addRotationHandle(final PNode handleLayer,
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition) {
         if (viewer.isFeatureDebugging()) {
             if (log.isDebugEnabled()) {
-                log.debug("addRotationHandles():add from " + position + ". RotationHandle"); // NOI18N
+                log.debug("addRotationHandles():add from " + coordPosition + ". RotationHandle"); // NOI18N
             }
         }
 
-        final PHandle rotHandle = new RotationPHandle(this, coordEntityIndex, mid, pivotHandle, position);
+        final PHandle rotHandle = new RotationPHandle(
+                this,
+                entityPosition,
+                ringPosition,
+                coordPosition,
+                mid,
+                pivotHandle);
 
         rotHandle.setPaint(new Color(1f, 1f, 0f, 0.7f));
 //        EventQueue.invokeLater(new Runnable() {
@@ -1134,8 +1206,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 //            @Override
 //            public void run() {
         handleLayer.addChild(rotHandle);
-        rotHandle.addClientProperty("coordinate", getCoordEntity(coordEntityIndex).getCoordArr()[position]); // NOI18N
-        rotHandle.addClientProperty("coordinate_position_in_arr", new Integer(position));                    // NOI18N
+        rotHandle.addClientProperty("coordinate", entityRingCoordArr[entityPosition][ringPosition][coordPosition]); // NOI18N
+        rotHandle.addClientProperty("coordinate_position_entity", new Integer(entityPosition));                     // NOI18N
+        rotHandle.addClientProperty("coordinate_position_ring", new Integer(ringPosition));                         // NOI18N
+        rotHandle.addClientProperty("coordinate_position_coord", new Integer(coordPosition));                       // NOI18N
 //            }
 //        });
     }
@@ -1220,18 +1294,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
         }
 
-        for (int coordEntityIndex = 0; coordEntityIndex < coordEntityList.size(); coordEntityIndex++) {
-            ellipseHandle = new EllipsePHandle(this, coordEntityIndex);
+        ellipseHandle = new EllipsePHandle(this);
 
-            ellipseHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
-            // EventQueue.invokeLater(new Runnable() {
-            //
-            // @Override
-            // public void run() {
-            handleLayer.addChild(ellipseHandle);
-            // }
-            // });
-        }
+        ellipseHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
+        handleLayer.addChild(ellipseHandle);
     }
 
     /**
@@ -1273,21 +1339,21 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (tempMid == null) {
             tempMid = mid;
         }
-        for (int coordEntityIndex = 0; coordEntityIndex < coordEntityList.size(); coordEntityIndex++) {
-            final CoordEntity coordEntity = getCoordEntity(coordEntityIndex);
-            final float[] xp = coordEntity.getXp();
-            final float[] yp = coordEntity.getYp();
-            for (int position = xp.length - 1; position >= 0; position--) {
-                final double dx = xp[position] - tempMid.getX();
-                final double dy = yp[position] - tempMid.getY();
+        for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+            for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                for (int coordIndex = entityRingCoordArr[entityIndex][ringIndex].length - 1; coordIndex >= 0;
+                            coordIndex--) {
+                    final double dx = entityRingXArr[entityIndex][ringIndex][coordIndex] - tempMid.getX();
+                    final double dy = entityRingYArr[entityIndex][ringIndex][coordIndex] - tempMid.getY();
 
-                // Clockwise
-                final float resultX = new Double(tempMid.getX() + ((dx * matrix[0][0]) + (dy * matrix[0][1])))
-                            .floatValue();
-                final float resultY = new Double(tempMid.getY() + ((dx * matrix[1][0]) + (dy * matrix[1][1])))
-                            .floatValue();
+                    // Clockwise
+                    final float resultX = new Double(tempMid.getX() + ((dx * matrix[0][0]) + (dy * matrix[0][1])))
+                                .floatValue();
+                    final float resultY = new Double(tempMid.getY() + ((dx * matrix[1][0]) + (dy * matrix[1][1])))
+                                .floatValue();
 
-                moveCoordinateToNewPiccoloPosition(coordEntityIndex, position, resultX, resultY);
+                    moveCoordinateToNewPiccoloPosition(entityIndex, ringIndex, coordIndex, resultX, resultY);
+                }
             }
         }
     }
@@ -1330,39 +1396,38 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     /**
      * Ver\u00E4ndert die PCanvas-Koordinaten eines Punkts des PFeatures.
      *
-     * @param  coordEntityIndex  DOCUMENT ME!
-     * @param  position          Position des Punkts im Koordinatenarray
-     * @param  newX              neue X-Koordinate
-     * @param  newY              neue Y-Koordinate
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   Position des Punkts im Koordinatenarray
+     * @param  newX            neue X-Koordinate
+     * @param  newY            neue Y-Koordinate
      */
-    public void moveCoordinateToNewPiccoloPosition(final int coordEntityIndex,
-            final int position,
+    public void moveCoordinateToNewPiccoloPosition(final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
             final float newX,
             final float newY) {
-        final CoordEntity coordEntity = getCoordEntity(coordEntityIndex);
-        coordEntity.getXp()[position] = newX;
-        coordEntity.getYp()[position] = newY;
+        final Coordinate[] coordArr = entityRingCoordArr[entityPosition][ringPosition];
+        final float[] xArr = entityRingXArr[entityPosition][ringPosition];
+        final float[] yArr = entityRingYArr[entityPosition][ringPosition];
 
-        final Coordinate[] coordArr = coordEntity.getCoordArr();
-        final float[] xp = coordEntity.getXp();
-        final float[] yp = coordEntity.getYp();
+        xArr[coordPosition] = newX;
+        yArr[coordPosition] = newY;
+
         final Geometry geometry = getFeature().getGeometry();
 
         // Originalgeometrie ver\u00E4ndern
         // hin :wtst.getDestX(coordArr[i].x)+x_offset)
-        coordArr[position].x = wtst.getSourceX(xp[position] - x_offset);
-        coordArr[position].y = wtst.getSourceY(yp[position] - y_offset);
-        if ((position == 0) && ((geometry instanceof Polygon) || (geometry instanceof MultiPolygon))) {
-            xp[xp.length - 1] = xp[0];
-            yp[yp.length - 1] = yp[0];
+        coordArr[coordPosition].x = wtst.getSourceX(xArr[coordPosition] - x_offset);
+        coordArr[coordPosition].y = wtst.getSourceY(yArr[coordPosition] - y_offset);
+        if ((coordPosition == 0) && ((geometry instanceof Polygon) || (geometry instanceof MultiPolygon))) {
+            xArr[xArr.length - 1] = xArr[0];
+            yArr[yArr.length - 1] = yArr[0];
             // Originalgeometrie ver\u00E4ndern
             // hin :wtst.getDestX(coordArr[i].x)+x_offset)
-            coordArr[xp.length - 1].x = wtst.getSourceX(xp[position] - x_offset);
-            coordArr[yp.length - 1].y = wtst.getSourceY(yp[position] - y_offset);
+            coordArr[xArr.length - 1].x = wtst.getSourceX(xArr[coordPosition] - x_offset);
+            coordArr[yArr.length - 1].y = wtst.getSourceY(yArr[coordPosition] - y_offset);
         }
-
-        coordEntity.setXp(xp);
-        coordEntity.setYp(yp);
 
         updatePath();
     }
@@ -1520,7 +1585,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             int counter = 0;
 
             // TODO multipolygon / multilinestring
-            final Coordinate[] coordArr = coordEntityList.get(0).getCoordArr();
+            final Coordinate[] coordArr = entityRingCoordArr[0][0];
             for (int i = from; i <= to; ++i) {
                 c1[counter] = (Coordinate)coordArr[i].clone();
                 counter++;
@@ -1629,25 +1694,29 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             final double scale = viewer.getCamera().getViewScale();
             if (viewer.isFeatureDebugging()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Scale=" + scale);            // NOI18N
+                    log.debug("Scale=" + scale); // NOI18N
                 }
             }
-            for (final CoordEntity coordEntity : coordEntityList) {
-                final Coordinate[] coordArr = coordEntity.getCoordArr();
-                final float[] xp = coordEntity.getXp();
-                final float[] yp = coordEntity.getYp();
-                for (int j = 0; j < xp.length; ++j) {
-                    xp[j] = xp[j] + (float)(dim.getWidth() / (float)scale);
-                    yp[j] = yp[j] + (float)(dim.getHeight() / (float)scale);
-                    coordArr[j].x = wtst.getSourceX(xp[j]); // -x_offset);
-                    coordArr[j].y = wtst.getSourceY(yp[j]); // -y_offset);
+            for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+                for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                    for (int coordIndex = 0; coordIndex < entityRingCoordArr[entityIndex][ringIndex].length;
+                                ++coordIndex) {
+                        final Coordinate[] coordArr = entityRingCoordArr[entityIndex][ringIndex];
+                        final float[] xArr = entityRingXArr[entityIndex][ringIndex];
+                        final float[] yArr = entityRingYArr[entityIndex][ringIndex];
+
+                        xArr[coordIndex] = xArr[coordIndex] + (float)(dim.getWidth() / (float)scale);
+                        yArr[coordIndex] = yArr[coordIndex] + (float)(dim.getHeight() / (float)scale);
+                        coordArr[coordIndex].x = wtst.getSourceX(xArr[coordIndex]); // -x_offset);
+                        coordArr[coordIndex].y = wtst.getSourceY(yArr[coordIndex]); // -y_offset);
+                    }
                 }
             }
             updatePath();
             syncGeometry();
             resetInfoNodePosition();
         } catch (NullPointerException npe) {
-            log.warn("error at moveFeature:", npe);         // NOI18N
+            log.warn("error at moveFeature:", npe);                                 // NOI18N
         }
     }
 
@@ -2304,18 +2373,20 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     /**
      * DOCUMENT ME!
      *
-     * @param  coordEntity  DOCUMENT ME!
-     * @param  xp           DOCUMENT ME!
-     * @param  yp           DOCUMENT ME!
-     * @param  coordArr     DOCUMENT ME!
+     * @param  entityPosition  coordEntity DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  xp              DOCUMENT ME!
+     * @param  yp              DOCUMENT ME!
+     * @param  coordArr        DOCUMENT ME!
      */
-    private void setNewCoordinates(final CoordEntity coordEntity,
+    private void setNewCoordinates(final int entityPosition,
+            final int ringPosition,
             final float[] xp,
             final float[] yp,
             final Coordinate[] coordArr) {
-        coordEntity.setCoordArr(coordArr);
-        coordEntity.setXp(xp);
-        coordEntity.setYp(yp);
+        entityRingCoordArr[entityPosition][ringPosition] = coordArr;
+        entityRingXArr[entityPosition][ringPosition] = xp;
+        entityRingYArr[entityPosition][ringPosition] = yp;
 
         syncGeometry();
 
@@ -2334,22 +2405,24 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final Geometry geom = feature.getGeometry();
         if (geom instanceof Point) {
             setPathToPolyline(
-                new float[] { getCoordEntities().get(0).getXp()[0], getCoordEntities().get(0).getXp()[0] },
-                new float[] { getCoordEntities().get(0).getYp()[0], getCoordEntities().get(0).getYp()[0] });
+                new float[] { entityRingXArr[0][0][0], entityRingXArr[0][0][0] },
+                new float[] { entityRingYArr[0][0][0], entityRingYArr[0][0][0] });
         } else if ((geom instanceof LineString) || (geom instanceof MultiPoint)) {
-            setPathToPolyline(getCoordEntities().get(0).getXp(), getCoordEntities().get(0).getXp());
+            setPathToPolyline(entityRingYArr[0][0], entityRingYArr[0][0]);
         } else if ((geom instanceof Polygon) || (geom instanceof MultiPolygon)) {
             getPathReference().setWindingRule(GeneralPath.WIND_EVEN_ODD);
-            for (final CoordEntity coordEntity : coordEntityList) {
-                final Coordinate[] coordArr = coordEntity.getCoordArr();
-                addLinearRing(coordArr);
-                for (final Coordinate[] holeArr : coordEntity.getHolesCoords()) {
-                    addLinearRing(holeArr);
+            for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+                for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                    final Coordinate[] coordArr = entityRingCoordArr[entityIndex][ringIndex];
+                    addLinearRing(coordArr);
                 }
             }
         } else if (geom instanceof MultiLineString) {
-            for (final CoordEntity coordEntity : coordEntityList) {
-                addLinearRing(coordEntity.getCoordArr());
+            for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+                for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                    final Coordinate[] coordArr = entityRingCoordArr[entityIndex][ringIndex];
+                    addLinearRing(coordArr);
+                }
             }
         }
     }
@@ -2411,34 +2484,35 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
-     */
-    public List<CoordEntity> getCoordEntities() {
-        return coordEntityList;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   index  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public CoordEntity getCoordEntity(final int index) {
-        return coordEntityList.get(index);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @param       coordArr  DOCUMENT ME!
      *
      * @deprecated  DOCUMENT ME!
      */
     public void setCoordArr(final Coordinate[] coordArr) {
-        coordEntityList.clear();
-        coordEntityList.add(new CoordEntity(coordArr));
+        entityRingCoordArr = new Coordinate[][][] {
+                { coordArr }
+            };
         updateXpAndYp();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getNumOfEntities() {
+        return entityRingCoordArr.length;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   entityIndex  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getNumOfRings(final int entityIndex) {
+        return entityRingCoordArr[entityIndex].length;
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -2490,117 +2564,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
          */
         public StickyPText(final String text) {
             super(text);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    public class CoordEntity {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private Coordinate[] coordArr;
-        private float[] xp = new float[0];
-        private float[] yp = new float[0];
-        private final Collection<Coordinate[]> holesCoordColl;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new CoordEntity object.
-         *
-         * @param  coord  DOCUMENT ME!
-         */
-        public CoordEntity(final Coordinate coord) {
-            this(new Coordinate[] { coord });
-        }
-
-        /**
-         * Creates a new CoordEntity object.
-         *
-         * @param  coordArr  DOCUMENT ME!
-         */
-        public CoordEntity(final Coordinate[] coordArr) {
-            this(coordArr, new ArrayList<Coordinate[]>());
-        }
-
-        /**
-         * Creates a new CoordEntity object.
-         *
-         * @param  coordArr       DOCUMENT ME!
-         * @param  holesCoordArr  DOCUMENT ME!
-         */
-        public CoordEntity(final Coordinate[] coordArr, final Collection<Coordinate[]> holesCoordArr) {
-            setCoordArr(coordArr);
-            this.holesCoordColl = holesCoordArr;
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  coordArr  DOCUMENT ME!
-         */
-        public final void setCoordArr(final Coordinate[] coordArr) {
-            this.coordArr = coordArr;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public Coordinate[] getCoordArr() {
-            return coordArr;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public Collection<Coordinate[]> getHolesCoords() {
-            return holesCoordColl;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  xp  DOCUMENT ME!
-         */
-        public void setXp(final float[] xp) {
-            this.xp = xp;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  yp  DOCUMENT ME!
-         */
-        public void setYp(final float[] yp) {
-            this.yp = yp;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public float[] getXp() {
-            return xp;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public float[] getYp() {
-            return yp;
         }
     }
 }

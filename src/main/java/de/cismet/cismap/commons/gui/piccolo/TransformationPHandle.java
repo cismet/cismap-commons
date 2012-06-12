@@ -24,11 +24,12 @@ import edu.umd.cs.piccolox.util.PLocator;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
-import java.util.Vector;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
@@ -59,8 +60,9 @@ public class TransformationPHandle extends PHandle {
     private MultiMap glueCoordinates = new MultiMap();
     private Point2D vetoPoint = null;
     private PFeature pfeature;
-    private int coordEntityIndex;
-    private int positionInArray;
+    private int entityPosition;
+    private int ringPosition;
+    private int coordPosition;
     private float startX;
     private float startY;
     private float endX;
@@ -71,19 +73,21 @@ public class TransformationPHandle extends PHandle {
     /**
      * Creates a new TransformationPHandle object.
      *
-     * @param  pfeature          DOCUMENT ME!
-     * @param  coordEntityIndex  DOCUMENT ME!
-     * @param  positionInArray   DOCUMENT ME!
+     * @param  pfeature        DOCUMENT ME!
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   DOCUMENT ME!
      */
     public TransformationPHandle(final PFeature pfeature,
-            final int coordEntityIndex,
-            final int positionInArray) {
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition) {
         super(new PLocator() {
 
                 @Override
                 public double locateX() {
                     try {
-                        return pfeature.getCoordEntity(coordEntityIndex).getXp()[positionInArray];
+                        return pfeature.getXp(entityPosition, ringPosition)[coordPosition];
                     } catch (Exception ex) {
                         return -1;
                     }
@@ -92,7 +96,7 @@ public class TransformationPHandle extends PHandle {
                 @Override
                 public double locateY() {
                     try {
-                        return pfeature.getCoordEntity(coordEntityIndex).getYp()[positionInArray];
+                        return pfeature.getYp(entityPosition, ringPosition)[coordPosition];
                     } catch (Exception ex) {
                         return -1;
                     }
@@ -100,8 +104,9 @@ public class TransformationPHandle extends PHandle {
             }, pfeature.getViewer());
 
         this.pfeature = pfeature;
-        this.coordEntityIndex = coordEntityIndex;
-        this.positionInArray = positionInArray;
+        this.entityPosition = entityPosition;
+        this.ringPosition = ringPosition;
+        this.coordPosition = coordPosition;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -115,9 +120,9 @@ public class TransformationPHandle extends PHandle {
      */
     private int getLeftNeighbourIndex(final int index) {
         if (index == 0) {
-            return pfeature.getCoordEntity(coordEntityIndex).getXp().length - 2;
-        } else if (positionInArray == (pfeature.getCoordEntity(coordEntityIndex).getXp().length - 1)) {
-            return positionInArray - 1;
+            return pfeature.getXp(entityPosition, ringPosition).length - 2;
+        } else if (coordPosition == (pfeature.getXp(entityPosition, ringPosition).length - 1)) {
+            return coordPosition - 1;
         } else {
             return index - 1;
         }
@@ -132,11 +137,11 @@ public class TransformationPHandle extends PHandle {
      */
     private int getRightNeighbourIndex(final int index) {
         if (index == 0) {
-            return positionInArray + 1;
-        } else if (positionInArray == (pfeature.getCoordEntity(coordEntityIndex).getXp().length - 1)) {
+            return coordPosition + 1;
+        } else if (coordPosition == (pfeature.getXp(entityPosition, ringPosition).length - 1)) {
             return 1;
         } else {
-            return positionInArray + 1;
+            return coordPosition + 1;
         }
     }
 
@@ -159,11 +164,11 @@ public class TransformationPHandle extends PHandle {
                     pfeature.getViewer().getCamera().localToView(aLocalDimension);
 //                     if (viewer.isFeatureDebugging()) log.debug("nachher.DRAG.aLocalDimension:"+aLocalDimension);
 
-                    final float[] xp = pfeature.getCoordEntity(coordEntityIndex).getXp();
-                    final float[] yp = pfeature.getCoordEntity(coordEntityIndex).getYp();
+                    final float[] xp = pfeature.getXp(entityPosition, ringPosition);
+                    final float[] yp = pfeature.getYp(entityPosition, ringPosition);
 
-                    float newX = xp[positionInArray] + (float)aLocalDimension.getWidth();
-                    float newY = yp[positionInArray] + (float)aLocalDimension.getHeight();
+                    float newX = xp[coordPosition] + (float)aLocalDimension.getWidth();
+                    float newY = yp[coordPosition] + (float)aLocalDimension.getHeight();
 
                     // if CTRL DOWN
                     if (pInputEvent.isLeftMouseButton() && pInputEvent.isControlDown()) {
@@ -172,8 +177,8 @@ public class TransformationPHandle extends PHandle {
                         final Point2D lineStart = new Point2D.Double();
                         final Point2D lineEnd = new Point2D.Double();
 
-                        final int lineStartIndex = getLeftNeighbourIndex(positionInArray);
-                        final int lineEndIndex = getRightNeighbourIndex(positionInArray);
+                        final int lineStartIndex = getLeftNeighbourIndex(coordPosition);
+                        final int lineEndIndex = getRightNeighbourIndex(coordPosition);
 
 //                        if (positionInArray==0) {
 //                            lineStartIndex=getXp().length-2;
@@ -206,7 +211,7 @@ public class TransformationPHandle extends PHandle {
                     }
                     if (pfeature.getViewer().isFeatureDebugging()) {
                         if (log.isDebugEnabled()) {
-                            log.debug("alter.Wert:" + xp[positionInArray] + "," + yp[positionInArray]);
+                            log.debug("alter.Wert:" + xp[coordPosition] + "," + yp[coordPosition]);
                         }
                     }
                     if (pfeature.getViewer().isFeatureDebugging()) {
@@ -217,7 +222,7 @@ public class TransformationPHandle extends PHandle {
                     if (pfeature.getViewer().isFeatureDebugging()) {
                         if (log.isDebugEnabled()) {
                             log.debug("Berechnung:"
-                                        + ((float)(((double)xp[positionInArray] * 10000)
+                                        + ((float)(((double)xp[coordPosition] * 10000)
                                                 + ((double)aLocalDimension.getWidth() * 10000)) / 10000));
                         }
                     }
@@ -236,7 +241,7 @@ public class TransformationPHandle extends PHandle {
                     endX = newX;
                     endY = newY;
 
-                    updateGeometryPoints(coordEntityIndex, positionInArray, newX, newY);
+                    updateGeometryPoints(newX, newY);
 
                     // pfeature.syncGeometry();
                     relocateHandle();
@@ -249,7 +254,12 @@ public class TransformationPHandle extends PHandle {
                                 if (coordinates != null) {
                                     for (final Object o : coordinates) {
                                         final int oIndex = (Integer)o;
-                                        gluePFeature.moveCoordinateToNewPiccoloPosition(coordEntityIndex, oIndex, newX, newY);
+                                        gluePFeature.moveCoordinateToNewPiccoloPosition(
+                                            entityPosition,
+                                            ringPosition,
+                                            oIndex,
+                                            newX,
+                                            newY);
                                         // gluePFeature.syncGeometry();
                                         if (pfeature.getViewer().isFeatureDebugging()) {
                                             if (log.isDebugEnabled()) {
@@ -285,12 +295,12 @@ public class TransformationPHandle extends PHandle {
                     }
 
                     // Abst\u00E4nde zu den Nachbarn
-                    final PFeature.CoordEntity coordEntity = pfeature.getCoordEntity(coordEntityIndex);
-                    final int lefty = getLeftNeighbourIndex(positionInArray);
-                    final int righty = getRightNeighbourIndex(positionInArray);
-                    final Coordinate lc = coordEntity.getCoordArr()[lefty];
-                    final Coordinate rc = coordEntity.getCoordArr()[righty];
-                    final Coordinate thisC = coordEntity.getCoordArr()[positionInArray];
+                    final Coordinate[] coordArr = pfeature.getCoordArr(entityPosition, ringPosition);
+                    final int lefty = getLeftNeighbourIndex(coordPosition);
+                    final int righty = getRightNeighbourIndex(coordPosition);
+                    final Coordinate lc = coordArr[lefty];
+                    final Coordinate rc = coordArr[righty];
+                    final Coordinate thisC = coordArr[coordPosition];
 
                     final double leftDistance = thisC.distance(lc);
                     final double rightDistance = thisC.distance(rc);
@@ -354,21 +364,20 @@ public class TransformationPHandle extends PHandle {
                 leftInfo.setVisible(true);
                 rightInfo.setVisible(true);
 
-                final PFeature.CoordEntity coordEntity = pfeature.getCoordEntity(coordEntityIndex);
                 // Glue: IdentischePunkte mitverschieben
                 if (pfeature.getViewer().isInGlueIdenticalPointsMode()) {
                     // Features suchen die identische Punkte haben
-                    glueCoordinates = pfeature.checkforGlueCoords(coordEntityIndex, positionInArray);
+                    glueCoordinates = pfeature.checkforGlueCoords(entityPosition, ringPosition, coordPosition);
                     log.info("checkforGlueCoords() aufgerufen und " + glueCoordinates.keySet().size() + " gefunden");
                 }
                 vetoPoint = aLocalPoint;
-                final float[] xp = coordEntity.getXp();
-                final float[] yp = coordEntity.getYp();
-                startX = xp[positionInArray];
-                startY = yp[positionInArray];
+                final float[] xp = pfeature.getXp(entityPosition, ringPosition);
+                final float[] yp = pfeature.getYp(entityPosition, ringPosition);
+                startX = xp[coordPosition];
+                startY = yp[coordPosition];
                 endX = startX;
                 endY = startY;
-                
+
                 super.startHandleDrag(aLocalPoint, aEvent);
             }
         }
@@ -379,9 +388,10 @@ public class TransformationPHandle extends PHandle {
         if (!pfeature.getViewer().getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
             if (pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
                 pfeature.syncGeometry();
-                final Vector v = new Vector();
-                v.add(pfeature.getFeature());
-                ((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
+                final Collection<Feature> featuresures = new ArrayList<Feature>();
+                featuresures.add(pfeature.getFeature());
+                ((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).fireFeaturesChanged(
+                    featuresures);
             } else {
                 pfeature.getViewer().getFeatureCollection().reconsiderFeature(pfeature.getFeature());
             }
@@ -402,12 +412,12 @@ public class TransformationPHandle extends PHandle {
                 boolean isGluedAction = false;
                 if (glueCoordinates.size() != 0) {
                     isGluedAction = true;
-                    final Vector v = new Vector();
+                    final Collection<Feature> features = new ArrayList<Feature>();
                     if (pfeature.getViewer().isInGlueIdenticalPointsMode()) {
                         final Set<PFeature> pFeatureSet = glueCoordinates.keySet();
                         for (final PFeature gluePFeature : pFeatureSet) {
                             if (gluePFeature.getFeature().isEditable()) {
-                                v.add(gluePFeature.getFeature());
+                                features.add(gluePFeature.getFeature());
                                 final Collection coordinates = (Collection)glueCoordinates.get(gluePFeature);
                                 if (coordinates != null) {
                                     for (final Object o : coordinates) {
@@ -423,15 +433,17 @@ public class TransformationPHandle extends PHandle {
                                 }
                             }
                         }
-                        ((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
+                        ((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).fireFeaturesChanged(
+                            features);
                     }
                 }
 
                 pfeature.getViewer()
                         .getMemUndo()
                         .addAction(new HandleMoveAction(
-                                coordEntityIndex,
-                                positionInArray,
+                                entityPosition,
+                                ringPosition,
+                                coordPosition,
                                 pfeature,
                                 startX,
                                 startY,
@@ -451,9 +463,8 @@ public class TransformationPHandle extends PHandle {
                 log.debug("Handle clicked");
             }
         }
-        final PFeature.CoordEntity coordEntity = pfeature.getCoordEntity(coordEntityIndex);
-        final float[] xp = coordEntity.getXp();
-        final float[] yp = coordEntity.getYp();
+        final float[] xp = pfeature.getXp(entityPosition, ringPosition);
+        final float[] yp = pfeature.getYp(entityPosition, ringPosition);
 
         if (pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.REMOVE_HANDLE)) {
             pfeature.getViewer()
@@ -461,10 +472,11 @@ public class TransformationPHandle extends PHandle {
                     .addAction(new HandleAddAction(
                             pfeature.getViewer(),
                             pfeature.getFeature(),
-                            coordEntityIndex,
-                            positionInArray,
-                            xp[positionInArray],
-                            yp[positionInArray]));
+                            entityPosition,
+                            ringPosition,
+                            coordPosition,
+                            xp[coordPosition],
+                            yp[coordPosition]));
             ((PHandle)(pInputEvent.getPickedNode())).removeHandle();
         } else if (pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)) {
             pfeature.getViewer()
@@ -472,10 +484,11 @@ public class TransformationPHandle extends PHandle {
                     .addAction(new HandleDeleteAction(
                             pfeature.getViewer(),
                             pfeature.getFeature(),
-                            coordEntityIndex,
-                            positionInArray,
-                            xp[positionInArray],
-                            yp[positionInArray]));
+                            entityPosition,
+                            ringPosition,
+                            coordPosition,
+                            xp[coordPosition],
+                            yp[coordPosition]));
             ((PHandle)(pInputEvent.getPickedNode())).duplicateHandle();
         } else if (pfeature.getViewer().getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
             pfeature.addSplitHandle(((PHandle)(pInputEvent.getPickedNode())));
@@ -502,13 +515,13 @@ public class TransformationPHandle extends PHandle {
 
     @Override
     public void removeHandle() {
-        final PFeature.CoordEntity coordEntity = pfeature.getCoordEntity(coordEntityIndex);
-        if (((coordEntity.getXp().length > 4)
+        final float[] xp = pfeature.getXp(entityPosition, ringPosition);
+        if (((xp.length > 4)
                         && ((pfeature.getFeature().getGeometry() instanceof Polygon)
                             || (pfeature.getFeature().getGeometry() instanceof MultiPolygon)))
-                    || ((coordEntity.getXp().length > 1)
+                    || ((xp.length > 1)
                         && (pfeature.getFeature().getGeometry() instanceof LineString))) { // DANGER und Linien ???
-            pfeature.removeCoordinate(coordEntityIndex, positionInArray);
+            pfeature.removeCoordinate(entityPosition, ringPosition, coordPosition);
             // deswegen (langsam aber funzt):
             if (isSelected()) {
                 pfeature.getViewer().showHandles(false);
@@ -518,79 +531,84 @@ public class TransformationPHandle extends PHandle {
 
     @Override
     public void duplicateHandle() {
-        pfeature.duplicateCoordinate(pfeature.getCoordEntity(coordEntityIndex), positionInArray);
+        pfeature.duplicateCoordinate(entityPosition, ringPosition, coordPosition);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  coordEntityIndex  DOCUMENT ME!
-     * @param  positionInArray   DOCUMENT ME!
-     * @param  newX              DOCUMENT ME!
-     * @param  newY              DOCUMENT ME!
+     * @param  newX  DOCUMENT ME!
+     * @param  newY  DOCUMENT ME!
      */
-    public void updateGeometryPoints(final int coordEntityIndex,
-            int positionInArray,
-            final float newX,
-            final float newY) {
+    private void updateGeometryPoints(final float newX, final float newY) {
         if (pfeature.getFeature() instanceof PureNewFeature) {
             final PureNewFeature.geomTypes geomType = ((PureNewFeature)pfeature.getFeature()).getGeometryType();
 
             switch (geomType) {
                 case RECTANGLE: {
                     // letzter Punkt ist gleich erster Punkt. Wir arbeiten lieber mit dem ersten
-                    if (positionInArray == 4) {
-                        positionInArray = 0;
+                    if (coordPosition == 4) {
+                        coordPosition = 0;
                     }
 
-                    final int posOpposed = (positionInArray + 2) % 4;
-                    final int posPrevious = (positionInArray + 3) % 4;
-                    final int posNext = (positionInArray + 1) % 4;
+                    final int posOpposed = (coordPosition + 2) % 4;
+                    final int posPrevious = (coordPosition + 3) % 4;
+                    final int posNext = (coordPosition + 1) % 4;
 
-                    final PFeature.CoordEntity coordEntity = pfeature.getCoordEntity(coordEntityIndex);
-                    final float[] xp = coordEntity.getXp();
-                    final float[] yp = coordEntity.getYp();
+                    final float[] xp = pfeature.getXp(entityPosition, ringPosition);
+                    final float[] yp = pfeature.getYp(entityPosition, ringPosition);
                     final Point2D previousPoint = new Point2D.Double(xp[posPrevious], yp[posPrevious]);
                     final Point2D nextPoint = new Point2D.Double(xp[posNext], yp[posNext]);
 
                     // selektierten punkt verschieben
-                    pfeature.moveCoordinateToNewPiccoloPosition(coordEntityIndex, positionInArray, newX, newY);
-                    if ((positionInArray % 2) == 0) {
+                    pfeature.moveCoordinateToNewPiccoloPosition(
+                        entityPosition,
+                        ringPosition,
+                        coordPosition,
+                        newX,
+                        newY);
+                    if ((coordPosition % 2) == 0) {
                         pfeature.moveCoordinateToNewPiccoloPosition(
-                            coordEntityIndex,
+                            entityPosition,
+                            ringPosition,
                             posPrevious,
                             (float)previousPoint.getX(),
                             newY);
                         pfeature.moveCoordinateToNewPiccoloPosition(
-                            coordEntityIndex,
+                            entityPosition,
+                            ringPosition,
                             posNext,
                             newX,
                             (float)nextPoint.getY());
                         pfeature.moveCoordinateToNewPiccoloPosition(
-                            coordEntityIndex,
+                            entityPosition,
+                            ringPosition,
                             posOpposed,
                             (float)previousPoint.getX(),
                             (float)nextPoint.getY());
                     } else {
                         pfeature.moveCoordinateToNewPiccoloPosition(
-                            coordEntityIndex,
+                            entityPosition,
+                            ringPosition,
                             posPrevious,
                             newX,
                             (float)previousPoint.getY());
                         pfeature.moveCoordinateToNewPiccoloPosition(
-                            coordEntityIndex,
+                            entityPosition,
+                            ringPosition,
                             posNext,
                             (float)nextPoint.getX(),
                             newY);
                         pfeature.moveCoordinateToNewPiccoloPosition(
-                            coordEntityIndex,
+                            entityPosition,
+                            ringPosition,
                             posOpposed,
                             (float)nextPoint.getX(),
                             (float)previousPoint.getY());
                     }
 
                     // letzter Punkt ist gleich erster Punkt
-                    pfeature.moveCoordinateToNewPiccoloPosition(coordEntityIndex, 4, xp[0], yp[0]);
+                    pfeature.moveCoordinateToNewPiccoloPosition(entityPosition, ringPosition, 4, xp[0], yp[0]);
 
                     pfeature.updatePath();
                     break;
@@ -601,11 +619,16 @@ public class TransformationPHandle extends PHandle {
                 }
                 // POINT,LINESTRING,POLYGON, UNKNOWN
                 default: {
-                    pfeature.moveCoordinateToNewPiccoloPosition(coordEntityIndex, positionInArray, newX, newY);
+                    pfeature.moveCoordinateToNewPiccoloPosition(
+                        entityPosition,
+                        ringPosition,
+                        coordPosition,
+                        newX,
+                        newY);
                 }
             }
         } else {
-            pfeature.moveCoordinateToNewPiccoloPosition(coordEntityIndex, positionInArray, newX, newY);
+            pfeature.moveCoordinateToNewPiccoloPosition(entityPosition, ringPosition, coordPosition, newX, newY);
         }
 //        pfeature.getCoordArr()[positionInArray].x = wtst.getSourceX(pfeature.getXp()[positionInArray] - x_offset);
 //        pfeature.getCoordArr()[positionInArray].y = wtst.getSourceY(pfeature.getYp()[positionInArray] - y_offset);

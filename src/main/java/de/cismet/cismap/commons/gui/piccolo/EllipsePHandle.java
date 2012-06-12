@@ -34,7 +34,6 @@ public class EllipsePHandle extends PHandle {
     //~ Instance fields --------------------------------------------------------
 
     private final PFeature pfeature;
-    private final int coordEntityIndex;
 
     private Point2D startPoint;
 
@@ -43,10 +42,9 @@ public class EllipsePHandle extends PHandle {
     /**
      * Creates a new EllipsePHandle object.
      *
-     * @param  pfeature          DOCUMENT ME!
-     * @param  coordEntityIndex  DOCUMENT ME!
+     * @param  pfeature  DOCUMENT ME!
      */
-    public EllipsePHandle(final PFeature pfeature, final int coordEntityIndex) {
+    public EllipsePHandle(final PFeature pfeature) {
         super(new PLocator() {
 
                 @Override
@@ -61,7 +59,6 @@ public class EllipsePHandle extends PHandle {
             }, pfeature.getViewer());
 
         this.pfeature = pfeature;
-        this.coordEntityIndex = coordEntityIndex;
         this.startPoint = pfeature.getBounds().getOrigin();
     }
 
@@ -69,7 +66,7 @@ public class EllipsePHandle extends PHandle {
 
     @Override
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent pInputEvent) {
-        final int n = pfeature.getCoordEntity(coordEntityIndex).getXp().length - 1;
+        final int n = pfeature.getXp(0, 0).length - 1;
 
         final Point2D dragPoint = (Point2D)pInputEvent.getPosition();
         final double a = startPoint.getX() - dragPoint.getX();
@@ -85,7 +82,8 @@ public class EllipsePHandle extends PHandle {
                 pInputEvent.isShiftDown());
         for (int i = 0; i < coordArr.length; i++) {
             pfeature.moveCoordinateToNewPiccoloPosition(
-                coordEntityIndex,
+                0,
+                0,
                 i,
                 (float)(startX - coordArr[i].x),
                 (float)(startY - coordArr[i].y));

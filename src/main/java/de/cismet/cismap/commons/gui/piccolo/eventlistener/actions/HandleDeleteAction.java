@@ -37,8 +37,9 @@ public class HandleDeleteAction implements CustomAction {
 
     private MappingComponent mc;
     private Feature f;
-    private int coordEntityIndex;
-    private int posInArray;
+    private int entityPosition;
+    private int ringPosition;
+    private int coordPosition;
     private float x;
     private float y; // wird nur f\u00FCr getInverse() ben\u00F6tigt
 
@@ -47,23 +48,26 @@ public class HandleDeleteAction implements CustomAction {
     /**
      * Erzeugt eine HandleDeleteAction-Instanz.
      *
-     * @param  mc                DOCUMENT ME!
-     * @param  f                 DOCUMENT ME!
-     * @param  coordEntityIndex  DOCUMENT ME!
-     * @param  pos               DOCUMENT ME!
-     * @param  x                 DOCUMENT ME!
-     * @param  y                 DOCUMENT ME!
+     * @param  mc              DOCUMENT ME!
+     * @param  f               DOCUMENT ME!
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   DOCUMENT ME!
+     * @param  x               DOCUMENT ME!
+     * @param  y               DOCUMENT ME!
      */
     public HandleDeleteAction(final MappingComponent mc,
             final Feature f,
-            final int coordEntityIndex,
-            final int pos,
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
             final float x,
             final float y) {
         this.mc = mc;
         this.f = f;
-        this.coordEntityIndex = coordEntityIndex;
-        this.posInArray = pos;
+        this.entityPosition = entityPosition;
+        this.ringPosition = ringPosition;
+        this.coordPosition = coordPosition;
         this.x = x;
         this.y = y;
     }
@@ -76,7 +80,7 @@ public class HandleDeleteAction implements CustomAction {
     @Override
     public void doAction() {
         final PFeature pf = (PFeature)mc.getPFeatureHM().get(f);
-        pf.removeCoordinate(coordEntityIndex, posInArray);
+        pf.removeCoordinate(entityPosition, ringPosition, coordPosition);
     }
 
     /**
@@ -89,7 +93,7 @@ public class HandleDeleteAction implements CustomAction {
         return org.openide.util.NbBundle.getMessage(
                 HandleDeleteAction.class,
                 "HandleDeleteAction.info().return",
-                new Object[] { posInArray, x, y }); // NOI18N
+                new Object[] { coordPosition, x, y }); // NOI18N
     }
 
     /**
@@ -99,6 +103,6 @@ public class HandleDeleteAction implements CustomAction {
      */
     @Override
     public CustomAction getInverse() {
-        return new HandleAddAction(mc, f, coordEntityIndex, posInArray, x, y);
+        return new HandleAddAction(mc, f, entityPosition, ringPosition, coordPosition, x, y);
     }
 }

@@ -51,45 +51,49 @@ public class RotationPHandle extends PHandle {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private final PFeature pfeature;
-    private final int coordEntityIndex;
+    private final int entityPosition;
+    private final int ringPosition;
+    private final int coordPosition;
     private double rotation = 0.0d;
     private PHandle pivotHandle;
     private Point2D mid;
-    private int position;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RotationPHandle object.
      *
-     * @param  pfeature          DOCUMENT ME!
-     * @param  coordEntityIndex  DOCUMENT ME!
-     * @param  mid               DOCUMENT ME!
-     * @param  pivotHandle       DOCUMENT ME!
-     * @param  position          DOCUMENT ME!
+     * @param  pfeature        DOCUMENT ME!
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   DOCUMENT ME!
+     * @param  mid             DOCUMENT ME!
+     * @param  pivotHandle     DOCUMENT ME!
      */
     public RotationPHandle(final PFeature pfeature,
-            final int coordEntityIndex,
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
             final Point2D mid,
-            final PHandle pivotHandle,
-            final int position) {
+            final PHandle pivotHandle) {
         super(new PLocator() {
 
                 @Override
                 public double locateX() {
-                    return pfeature.getCoordEntity(coordEntityIndex).getXp()[position];
+                    return pfeature.getXp(entityPosition, ringPosition)[coordPosition];
                 }
 
                 @Override
                 public double locateY() {
-                    return pfeature.getCoordEntity(coordEntityIndex).getYp()[position];
+                    return pfeature.getYp(entityPosition, ringPosition)[coordPosition];
                 }
             }, pfeature.getViewer());
 
         this.mid = mid;
         this.pfeature = pfeature;
-        this.coordEntityIndex = coordEntityIndex;
-        this.position = position;
+        this.entityPosition = entityPosition;
+        this.ringPosition = ringPosition;
+        this.coordPosition = coordPosition;
         this.pivotHandle = pivotHandle;
     }
 
@@ -113,8 +117,8 @@ public class RotationPHandle extends PHandle {
         pfeature.getViewer().getCamera().localToView(aLocalDimension);
         final double dragRot = pfeature.calculateDrag(
                 aEvent,
-                pfeature.getCoordEntity(coordEntityIndex).getXp()[position],
-                pfeature.getCoordEntity(coordEntityIndex).getYp()[position]);
+                pfeature.getXp(entityPosition, ringPosition)[coordPosition],
+                pfeature.getYp(entityPosition, ringPosition)[coordPosition]);
         if ((pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection)
                     && (((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).getSelectedFeatures()
                         .size() > 1)) {

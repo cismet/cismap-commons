@@ -10,7 +10,6 @@ package de.cismet.cismap.commons.tools;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 import edu.umd.cs.piccolo.PLayer;
@@ -25,11 +24,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
@@ -164,13 +158,15 @@ public class PFeatureTools {
         if (features == null) {
             return null;
         }
-        for (final PFeature feature : features) {
-            for (final PFeature.CoordEntity coordEntity : feature.getCoordEntities()) {
-                final float[] xp = coordEntity.getXp();
-                final float[] yp = coordEntity.getYp();
-                for (int position = 0; position < xp.length; position++) {
-                    if (bounds.contains(xp[position], yp[position])) {
-                        points.add(new Point2D.Float(xp[position], yp[position]));
+        for (final PFeature pfeature : features) {
+            for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
+                for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
+                    final float[] xp = pfeature.getXp(entityIndex, ringIndex);
+                    final float[] yp = pfeature.getYp(entityIndex, ringIndex);
+                    for (int position = 0; position < xp.length; position++) {
+                        if (bounds.contains(xp[position], yp[position])) {
+                            points.add(new Point2D.Float(xp[position], yp[position]));
+                        }
                     }
                 }
             }
@@ -395,21 +391,23 @@ public class PFeatureTools {
         double cy = 0;
 
         // TODO centroid wirklich über alle ringe berechnen ?
-        for (final PFeature.CoordEntity coordEntity : pfeature.getCoordEntities()) {
-            final float[] xp = coordEntity.getXp();
-            final float[] yp = coordEntity.getYp();
-            final int n = xp.length;
+        for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
+            for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
+                final float[] xp = pfeature.getXp(entityIndex, ringIndex);
+                final float[] yp = pfeature.getYp(entityIndex, ringIndex);
+                final int n = xp.length;
 
-            for (int i = 0; i < n; i++) {
-                final int j = (i + 1) % n;
-                final double factor = (xp[i] * yp[j]) - (xp[j] * yp[i]);
-                cx += (xp[i] + xp[j]) * factor;
-                cy += (yp[i] + yp[j]) * factor;
+                for (int i = 0; i < n; i++) {
+                    final int j = (i + 1) % n;
+                    final double factor = (xp[i] * yp[j]) - (xp[j] * yp[i]);
+                    cx += (xp[i] + xp[j]) * factor;
+                    cy += (yp[i] + yp[j]) * factor;
+                }
+
+                final double factor = 1 / (6.0f * area(pfeature));
+                cx *= factor;
+                cy *= factor;
             }
-
-            final double factor = 1 / (6.0f * area(pfeature));
-            cx *= factor;
-            cy *= factor;
         }
         return new Point2D.Double(cx, cy);
     }
@@ -422,20 +420,29 @@ public class PFeatureTools {
      * @return  DOCUMENT ME!
      */
     public static double area(final PFeature pfeature) {
-        double area = 0;
+        double areaTotal = 0;
 
-        for (final PFeature.CoordEntity coordEntity : pfeature.getCoordEntities()) {
-            final float[] xp = coordEntity.getXp();
-            final float[] yp = coordEntity.getYp();
-            final int n = xp.length;
+        for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
+            for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
+                final float[] xp = pfeature.getXp(entityIndex, ringIndex);
+                final float[] yp = pfeature.getYp(entityIndex, ringIndex);
+                final int n = xp.length;
 
-            for (int i = 0; i < n; i++) {
-                final int j = (i + 1) % n;
-                area += xp[i] * yp[j];
-                area -= xp[j] * yp[i];
+                double area = 0;
+                for (int i = 0; i < n; i++) {
+                    final int j = (i + 1) % n;
+                    area += xp[i] * yp[j];
+                    area -= xp[j] * yp[i];
+                }
+                area /= 2f;
+                
+                if (ringIndex == 0) { // polygon außenhülle
+                    areaTotal += area;
+                } else { // loch
+                    areaTotal -= area;                    
+                }
             }
-            area /= 2f;
         }
-        return area;
+        return areaTotal;
     }
 }

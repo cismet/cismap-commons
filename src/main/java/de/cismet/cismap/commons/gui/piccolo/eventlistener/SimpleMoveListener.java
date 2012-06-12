@@ -67,8 +67,9 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private MappingComponent mc;
     private PFeature underlyingObject = null;
-    private int coordEntityIndex;
-    private int positionInArray = 0;
+    private int entityPosition;
+    private int ringPosition;
+    private int coordPosition = 0;
     private double xCoord = -1.0d;
     private double yCoord = -1.0d;
     private float handleX = Float.MIN_VALUE;
@@ -256,22 +257,26 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                 final Geometry geometry = pfeature.getFeature().getGeometry();
                 if ((geometry instanceof Polygon) || (geometry instanceof LineString)
                             || (geometry instanceof MultiPolygon)) {
-                    for (int coordEntityIndex = 0; coordEntityIndex < pfeature.getCoordEntities().size();
-                                coordEntityIndex++) {
-                        final PFeature.CoordEntity coordEntity = pfeature.getCoordEntity(coordEntityIndex);
-                        final float[] xp = coordEntity.getXp();
-                        final float[] yp = coordEntity.getYp();
-                        for (int i = 0; i < (xp.length - 1); i++) {
-                            final Point2D tmpStart = new Point2D.Double(xp[i], yp[i]);
-                            final Point2D tmpEnd = new Point2D.Double(xp[i + 1], yp[i + 1]);
-                            final double tmpDist = StaticGeometryFunctions.distanceToLine(tmpStart, tmpEnd, trigger);
-                            if (tmpDist < dist) {
-                                dist = tmpDist;
-                                start = tmpStart;
-                                end = tmpEnd;
-                                this.pf = pfeature;
-                                this.coordEntityIndex = coordEntityIndex;
-                                this.positionInArray = i + 1;
+                    for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
+                        for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
+                            final float[] xp = pfeature.getXp(entityIndex, ringIndex);
+                            final float[] yp = pfeature.getYp(entityIndex, ringIndex);
+                            for (int i = 0; i < (xp.length - 1); i++) {
+                                final Point2D tmpStart = new Point2D.Double(xp[i], yp[i]);
+                                final Point2D tmpEnd = new Point2D.Double(xp[i + 1], yp[i + 1]);
+                                final double tmpDist = StaticGeometryFunctions.distanceToLine(
+                                        tmpStart,
+                                        tmpEnd,
+                                        trigger);
+                                if (tmpDist < dist) {
+                                    dist = tmpDist;
+                                    start = tmpStart;
+                                    end = tmpEnd;
+                                    this.pf = pfeature;
+                                    this.entityPosition = entityIndex;
+                                    this.ringPosition = ringIndex;
+                                    this.coordPosition = i + 1;
+                                }
                             }
                         }
                     }
@@ -355,7 +360,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                 final Point2D p1 = neighbours[1];
                 if ((p0 != null) && (p1 != null)) {
                     // CTRL-Taste beim Klicken gedrückt
-                    if (event.getModifiers() == (InputEvent.CTRL_MASK + InputEvent.BUTTON1_MASK)) {
+                    if (event.isControlDown()) {
                         // welcher Nachbar ist weiter Links/Rechts?
                         Point2D leftNeighbour;
                         Point2D rightNeighbour;
@@ -486,7 +491,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
      * @param  handleY  DOCUMENT ME!
      */
     private void addPoint(final PFeature pf, final float handleX, final float handleY) {
-        pf.insertCoordinate(coordEntityIndex, positionInArray, handleX, handleY);
+        pf.insertCoordinate(entityPosition, ringPosition, coordPosition, handleX, handleY);
     }
 
     /**
@@ -498,7 +503,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
         newPointHandle = null;
         handleX = Float.MIN_VALUE;
         handleY = Float.MIN_VALUE;
-        positionInArray = 0;
+        coordPosition = 0;
         pf = null;
     }
 
