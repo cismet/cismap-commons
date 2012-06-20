@@ -435,11 +435,11 @@ public class PFeatureTools {
                     area -= xp[j] * yp[i];
                 }
                 area /= 2f;
-                
+
                 if (ringIndex == 0) { // polygon außenhülle
                     areaTotal += area;
                 } else { // loch
-                    areaTotal -= area;                    
+                    areaTotal -= area;
                 }
             }
         }

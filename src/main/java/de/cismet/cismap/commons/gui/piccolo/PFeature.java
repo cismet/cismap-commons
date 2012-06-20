@@ -36,7 +36,8 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -117,6 +118,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private double sweetSelX = 0;
     private double sweetSelY = 0;
     private boolean snappable = true;
+    private int selectedEntity = -1;
 
     // r/w access only in synchronized(this) block
     private transient PImage rdfImage;
@@ -936,17 +938,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 newYArr[i + 1] = originalYArr[i];
             }
 
-            // Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist
-            if ((coordPosition == 0) && (getFeature().getGeometry() instanceof Polygon)) {
-                newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
-                newXArr[newXArr.length - 1] = newXArr[0];
-                newYArr[newYArr.length - 1] = newYArr[0];
-            } else if ((coordPosition == (originalCoordArr.length - 1))
-                        && ((getFeature().getGeometry() instanceof Polygon)
-                            || (getFeature().getGeometry() instanceof MultiPolygon))) {
-                newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
-                newXArr[newXArr.length - 1] = newXArr[0];
-                newYArr[newYArr.length - 1] = newYArr[0];
+            if ((getFeature().getGeometry() instanceof Polygon)
+                        || (getFeature().getGeometry() instanceof MultiPolygon)) {
+                // Sicherstellen dass der neue Anfangspunkt auch der Endpukt ist
+                if ((coordPosition == 0) || (coordPosition == (originalCoordArr.length - 1))) {
+                    newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
+                    newXArr[newXArr.length - 1] = newXArr[0];
+                    newYArr[newYArr.length - 1] = newYArr[0];
+                }
             }
 
             setNewCoordinates(entityPosition, ringPosition, newXArr, newYArr, newCoordArr);
@@ -2076,6 +2075,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
 
         this.selected = selected;
+        this.selectedEntity = -1;
 
         boolean showSelected = true;
         if (getFeature() instanceof DrawSelectionFeature) {
@@ -2228,6 +2228,317 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     @Override
     public boolean isSelected() {
         return selected;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  polygon  DOCUMENT ME!
+     */
+    public void addEntity(final Polygon polygon) {
+        if (getFeature().isEditable()) {
+            final int numOfHoles = polygon.getNumInteriorRing();
+            final Coordinate[][][] origEntityCoordArr = entityRingCoordArr;
+
+            // neues entityRingCoordArr mit entity-länge + 1, und alte daten daten darin kopieren
+            final Coordinate[][][] newEntityCoordArr = new Coordinate[origEntityCoordArr.length + 1][][];
+            System.arraycopy(origEntityCoordArr, 0, newEntityCoordArr, 0, origEntityCoordArr.length);
+
+            // neues ringCoordArr für neues entity erzeugen, und Hülle + Löcher darin speicherm
+            final Coordinate[][] newRingCoordArr = new Coordinate[1 + numOfHoles][];
+            newRingCoordArr[0] = polygon.getExteriorRing().getCoordinates();
+            for (int ringIndex = 1; ringIndex < newRingCoordArr.length; ++ringIndex) {
+                newRingCoordArr[ringIndex] = polygon.getInteriorRingN(ringIndex - 1).getCoordinates();
+            }
+
+            // neues entity an letzte stelle speichern, und als neues entityRingCoordArr übernehmen
+            newEntityCoordArr[origEntityCoordArr.length] = newRingCoordArr;
+            entityRingCoordArr = newEntityCoordArr;
+
+            // refresh
+            syncGeometry();
+            updateXpAndYp();
+            updatePath();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  entityPosition  DOCUMENT ME!
+     */
+    public void removeEntity(final int entityPosition) {
+        if (getFeature().isEditable()) {
+            final Coordinate[][][] origEntityCoordArr = entityRingCoordArr;
+
+            final boolean isInBounds = (entityPosition >= 0) && (entityPosition < origEntityCoordArr.length);
+            if (isInBounds) {
+                if (origEntityCoordArr.length == 1) {           // wenn nur ein entity drin
+                    entityRingCoordArr = new Coordinate[0][][]; // dann nur durch leeres ersetzen
+                } else {                                        // wenn mehr als ein entity drin
+                    // neues entityRingCoordArr mit entity-länge - 1, und originaldaten daten darin kopieren außer
+                    // entityPosition
+                    final Coordinate[][][] newEntityCoordArr = new Coordinate[origEntityCoordArr.length - 1][][];
+                    // alles vor entityPosition
+                    System.arraycopy(origEntityCoordArr, 0, newEntityCoordArr, 0, entityPosition);
+                    // alles nach entityPosition
+                    System.arraycopy(
+                        origEntityCoordArr,
+                        entityPosition
+                                + 1,
+                        newEntityCoordArr,
+                        entityPosition,
+                        newEntityCoordArr.length
+                                - entityPosition);
+                    // original durch neues ersetzen
+                    entityRingCoordArr = newEntityCoordArr;
+                }
+
+                // refresh
+                syncGeometry();
+                updateXpAndYp();
+                updatePath();
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  lineString      DOCUMENT ME!
+     */
+    public void addHoleToEntity(final int entityPosition, final LineString lineString) {
+        if (getFeature().isEditable()) {
+            final boolean isInBounds = (entityPosition >= 0) && (entityPosition < entityRingCoordArr.length);
+            if (isInBounds) {
+                final Coordinate[][] origRingCoordArr = entityRingCoordArr[entityPosition];
+                final int origLength = origRingCoordArr.length;
+
+                final Coordinate[][] newRingCoordArr = new Coordinate[origLength + 1][];
+                System.arraycopy(origRingCoordArr, 0, newRingCoordArr, 0, origLength);
+                newRingCoordArr[origLength] = lineString.getCoordinates();
+
+                entityRingCoordArr[entityPosition] = newRingCoordArr;
+            }
+
+            syncGeometry();
+            updateXpAndYp();
+            updatePath();
+        }
+    }
+    /**
+     * alle entities die diesen punkt beinhalten (löscher werden ignoriert, da sonst nur eine entity existieren kann).
+     *
+     * @param   coordinate  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private List<Integer> getEntitiesPositionsUnderCoordinate(final Coordinate coordinate) {
+        final List<Integer> positions = new ArrayList<Integer>();
+        final GeometryFactory geometryFactory = new GeometryFactory(
+                new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(getViewerCrs().getCode()));
+        final Point point = createPoint(coordinate, geometryFactory);
+        for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+            final Coordinate[][] withoutHoles = new Coordinate[1][];
+            withoutHoles[0] = entityRingCoordArr[entityIndex][0];
+            final Polygon polygon = createPolygon(withoutHoles, geometryFactory);
+
+            if (polygon.contains(point)) {
+                positions.add(entityIndex);
+            }
+        }
+        return positions;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  coordinate  DOCUMENT ME!
+     */
+    public void removeHoleUnderCoordinate(final Coordinate coordinate) {
+        final int entityPosition = getMostInnerEntityUnderCoordinate(coordinate);
+
+        if ((entityPosition >= 0) && (entityPosition < entityRingCoordArr.length)) { // in bounds
+            final Coordinate[][] origRingCoordArr = entityRingCoordArr[entityPosition];
+            final int holePosition = getHolePositionUnderCoordinate(coordinate, entityPosition);
+            if ((holePosition >= 0) && (holePosition < origRingCoordArr.length)) {   // in bounds
+                final Coordinate[][] newRingCoordArr = new Coordinate[origRingCoordArr.length - 1][];
+                System.arraycopy(origRingCoordArr, 0, newRingCoordArr, 0, holePosition);
+                System.arraycopy(
+                    origRingCoordArr,
+                    holePosition
+                            + 1,
+                    newRingCoordArr,
+                    holePosition,
+                    newRingCoordArr.length
+                            - holePosition);
+
+                // original durch neues ersetzen
+                entityRingCoordArr[entityPosition] = newRingCoordArr;
+
+                // refresh
+                syncGeometry();
+                updateXpAndYp();
+                updatePath();
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   coordinate      DOCUMENT ME!
+     * @param   entityPosition  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getHolePositionUnderCoordinate(final Coordinate coordinate, final int entityPosition) {
+        final boolean isInBounds = (entityPosition >= 0) && (entityPosition < entityRingCoordArr.length);
+        if (isInBounds) {
+            final Coordinate[][] ringCoordArr = entityRingCoordArr[entityPosition];
+
+            if (ringCoordArr.length > 1) { // hat überhaupt löscher ?
+                final GeometryFactory geometryFactory = new GeometryFactory(
+                        new PrecisionModel(PrecisionModel.FLOATING),
+                        CrsTransformer.extractSridFromCrs(getViewerCrs().getCode()));
+                final Point point = createPoint(coordinate, geometryFactory);
+                for (int ringIndex = 1; ringIndex < ringCoordArr.length; ringIndex++) {
+                    final Coordinate[][] holeCoordArr = new Coordinate[1][];
+                    holeCoordArr[0] = ringCoordArr[ringIndex];
+                    final Polygon polygon = createPolygon(holeCoordArr, geometryFactory);
+                    if (polygon.contains(point)) {
+                        return ringIndex;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   coordinate  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private int getMostInnerEntityUnderCoordinate(final Coordinate coordinate) {
+        // alle außenringe (löscher werden zunächst ignoriert) holen die grundsätzlich unter der koordinate liegen
+        final List<Integer> entityPositions = getEntitiesPositionsUnderCoordinate(coordinate);
+
+        // interessant sind nur entities die Löscher haben
+        final List<Integer> entityPositionsWithHoles = new ArrayList<Integer>();
+        for (final int position : entityPositions) {
+            if (entityRingCoordArr[position].length > 1) {
+                entityPositionsWithHoles.add(position);
+            }
+        }
+
+        final GeometryFactory geometryFactory = new GeometryFactory(
+                new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(getViewerCrs().getCode()));
+
+        if (entityPositionsWithHoles.size() == 1) {
+            return 0; // nur eine entity mit loch, also muss sie das sein
+        } else {
+            // mehrere entities, es wird geprüft welche entity welche andere beinhaltet
+            for (int indexA = 0; indexA < entityPositionsWithHoles.size(); indexA++) {
+                final Coordinate[][] withoutHolesA = new Coordinate[1][];
+                final int entityPositionA = entityPositionsWithHoles.get(indexA);
+                withoutHolesA[0] = entityRingCoordArr[entityPositionA][0];
+                final Polygon polygonA = createPolygon(withoutHolesA, geometryFactory);
+
+                boolean containsAnyOtherRing = false;
+                for (int indexB = 0; indexB < entityPositionsWithHoles.size(); indexB++) {
+                    if (indexA != indexB) {
+                        final Coordinate[][] withoutHolesB = new Coordinate[1][];
+                        final int entityPositionB = entityPositionsWithHoles.get(indexB);
+                        withoutHolesB[0] = entityRingCoordArr[entityPositionB][0];
+                        final Polygon polygonB = createPolygon(withoutHolesB, geometryFactory);
+
+                        if (polygonA.contains(polygonB)) {
+                            containsAnyOtherRing = true;
+                        }
+                    }
+                }
+                if (!containsAnyOtherRing) {
+                    return entityPositionA;
+                }
+            }
+
+            return -1;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   coordinate  point DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getEntityUnderCoordinate(final Coordinate coordinate) {
+        final GeometryFactory geometryFactory = new GeometryFactory(
+                new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(getViewerCrs().getCode()));
+        final Point point = createPoint(coordinate, geometryFactory);
+        for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+            final Polygon polygon = createPolygon(entityRingCoordArr[entityIndex], geometryFactory);
+
+            if (polygon.contains(point)) {
+                return entityIndex;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   coordinate  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Collection<Coordinate[]> getHolesUnderCoordinate(final Coordinate coordinate) {
+        final GeometryFactory geometryFactory = new GeometryFactory(
+                new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(getViewerCrs().getCode()));
+        final Collection<Coordinate[]> holes = new ArrayList<Coordinate[]>();
+
+        final Point point = createPoint(coordinate, geometryFactory);
+        final Geometry geom = feature.getGeometry();
+        if (geom instanceof Polygon) {
+        } else if (geom instanceof MultiPolygon) {
+            for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
+                if (entityRingCoordArr[entityIndex].length > 1) {
+                    for (int ringIndex = 1; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
+                        final Coordinate[][] holeCoordArr = new Coordinate[1][];
+                        holeCoordArr[0] = entityRingCoordArr[entityIndex][ringIndex];
+                        final Polygon polygon = createPolygon(holeCoordArr, geometryFactory);
+                        if (polygon.contains(point)) {
+                        }
+                    }
+                }
+            }
+        }
+
+        return holes;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  entityPosition  DOCUMENT ME!
+     */
+    public void setSelectedEntity(final int entityPosition) {
+        final boolean isInBounds = (entityPosition >= 0) && (entityPosition < entityRingCoordArr.length);
+        if (isInBounds) {
+            selectedEntity = entityPosition;
+        } else {
+            selectedEntity = -1;
+        }
     }
 
     /**

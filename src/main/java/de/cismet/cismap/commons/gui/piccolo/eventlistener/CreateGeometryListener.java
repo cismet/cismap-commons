@@ -120,24 +120,25 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     /**
      * DOCUMENT ME!
      *
-     * @param   m  DOCUMENT ME!
+     * @param   mode  DOCUMENT ME!
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     @Override
-    public void setMode(final String m) throws IllegalArgumentException {
-        if (m.equals(LINESTRING) || m.equals(POINT) || m.equals(POLYGON) || m.equals(ELLIPSE) || m.equals(RECTANGLE)
-                    || m.equals(RECTANGLE_FROM_LINE)) {
-            this.mode = m;
+    public void setMode(final String mode) throws IllegalArgumentException {
+        if (mode.equals(LINESTRING) || mode.equals(POINT) || mode.equals(POLYGON) || mode.equals(ELLIPSE)
+                    || mode.equals(RECTANGLE)
+                    || mode.equals(RECTANGLE_FROM_LINE)) {
+            this.mode = mode;
 //            mc.getTmpFeatureLayer().removeAllChildren();
 //            inProgress = false;
         } else {
-            throw new IllegalArgumentException("Mode:" + m + " is not a valid Mode in this Listener."); // NOI18N
+            throw new IllegalArgumentException("Mode:" + mode + " is not a valid Mode in this Listener."); // NOI18N
         }
     }
 
     @Override
-    public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+    public void mouseMoved(final PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
         if (moveListener != null) {
             moveListener.mouseMoved(pInputEvent);
@@ -157,7 +158,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     }
 
     @Override
-    public void mousePressed(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+    public void mousePressed(final PInputEvent pInputEvent) {
         super.mouseClicked(pInputEvent);
         if (mc.isReadOnly()) {
             ((DefaultFeatureCollection)(mc.getFeatureCollection())).removeFeaturesByInstance(PureNewFeature.class);
@@ -177,12 +178,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
             }
         } else if (isInMode(RECTANGLE)) {
             if (!inProgress) {
-                initTempFeature(true);
+                initTempFeature();
                 startPoint = pInputEvent.getPosition();
             }
         } else if (isInMode(ELLIPSE)) {
             if (!inProgress) {
-                initTempFeature(true);
+                initTempFeature();
                 startPoint = pInputEvent.getPosition();
             }
         } else if (isInMode(RECTANGLE_FROM_LINE)) {
@@ -195,7 +196,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
             if (pInputEvent.isLeftMouseButton()) {
                 if (!inProgress) {
                     inProgress = true;
-                    initTempFeature(true);
+                    initTempFeature();
                     startPoint = point;
                     points = new ArrayList<Point2D>(5);
                     points.add(startPoint);
@@ -277,12 +278,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
 
                 if (!inProgress) {
                     inProgress = true;
-
-                    if (isInMode(POLYGON)) {
-                        initTempFeature(true);
-                    } else {
-                        initTempFeature(false);
-                    }
+                    initTempFeature();
 
                     // Polygon erzeugen
                     points = new ArrayList<Point2D>();
@@ -371,7 +367,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                 LOG.debug("Versuche Polygon und Startpunkt wiederherzustellen");                                       // NOI18N
             }
 
-            initTempFeature(true);
+            initTempFeature();
 
             // Ersten Punkt anlegen
             startPoint = undoPoints.pop();
@@ -685,16 +681,24 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     /**
      * DOCUMENT ME!
      *
-     * @param  filled  DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
-    private void initTempFeature(final boolean filled) {
-        tempFeature = new PPath();
-        tempFeature.setStroke(new FixedWidthStroke());
-        if (filled) {
+    protected PPath createNewTempFeature() {
+        final PPath newTempFeature = new PPath();
+        newTempFeature.setStroke(new FixedWidthStroke());
+        if (isInMode(LINESTRING)) {
             final Color fillingColor = getFillingColor();
-            tempFeature.setStrokePaint(fillingColor.darker());
-            tempFeature.setPaint(fillingColor);
+            newTempFeature.setStrokePaint(fillingColor.darker());
+            newTempFeature.setPaint(fillingColor);
         }
+        return newTempFeature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void initTempFeature() {
+        tempFeature = createNewTempFeature();
         mc.getTmpFeatureLayer().addChild(tempFeature);
     }
 }
