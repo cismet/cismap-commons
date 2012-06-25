@@ -7,26 +7,24 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.*;
 
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.nodes.PPath;
 
 import org.apache.log4j.Logger;
 
 import java.awt.Color;
+import java.awt.geom.Point2D;
 
 import java.util.Collection;
 
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 /**
@@ -48,6 +46,7 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     private PFeature selectedPFeature = null;
     private int selectedEntityPosition = -1;
     private boolean creatingHole = false;
+    private InvalidPolygonTooltip multiPolygonPointerAnnotation = new InvalidPolygonTooltip();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -77,38 +76,66 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     protected Color getFillingColor() {
         return new Color(1f, 0f, 0f, 0.5f);
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   mousePosition  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Point getMousePoint(final Point2D mousePosition) {
+        final WorldToScreenTransform wtst = getMappingComponent().getWtst();
+        final double mouseCoordX = wtst.getSourceX(mousePosition.getX() - getMappingComponent().getClip_offset_x());
+        final double mouseCoordY = wtst.getSourceY(mousePosition.getY() - getMappingComponent().getClip_offset_y());
+        final Coordinate mouseCoord = new Coordinate(mouseCoordX, mouseCoordY);
+        final int currentSrid = CrsTransformer.extractSridFromCrs(getMappingComponent().getMappingModel().getSrs()
+                        .getCode());
+        final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                currentSrid);
+        final Point mousePoint = CrsTransformer.transformToGivenCrs(geometryFactory.createPoint(
+                    mouseCoord),
+                CrsTransformer.createCrsFromSrid(
+                    selectedPFeature.getFeature().getGeometry().getSRID()));
+        return mousePoint;
+    }
+
     @Override
     public void mousePressed(final PInputEvent pInputEvent) {
-        if (!isInProgress() && pInputEvent.isAltDown()) {
-            if (selectedPFeature == null) {
-                final Collection selectedFeatures = getMappingComponent().getFeatureCollection().getSelectedFeatures();
-                if (selectedFeatures.size() == 1) {
-                    final PFeature pFeature = getMappingComponent().getPFeatureHM()
-                                .get((Feature)selectedFeatures.toArray()[0]);
-                    if ((pFeature != null)
-                                && (pFeature.getFeature().getGeometry() instanceof MultiPolygon)) {
-                        selectedPFeature = pFeature;
+        if (pInputEvent.isLeftMouseButton()) {
+            if (!isInProgress() && pInputEvent.isAltDown()) {
+                if (selectedPFeature == null) {
+                    final Collection selectedFeatures = getMappingComponent().getFeatureCollection()
+                                .getSelectedFeatures();
+                    if (selectedFeatures.size() == 1) {
+                        final PFeature pFeature = getMappingComponent().getPFeatureHM()
+                                    .get((Feature)selectedFeatures.toArray()[0]);
+                        if ((pFeature != null)
+                                    && ((pFeature.getFeature().getGeometry() instanceof MultiPolygon)
+                                        || (pFeature.getFeature().getGeometry() instanceof Polygon))) {
+                            selectedPFeature = pFeature;
 
-                        selectedEntityPosition = pFeature.getEntityUnderCoordinate(
-                                new Coordinate(
-                                    getMappingComponent().getWtst().getSourceX(
-                                        pInputEvent.getPosition().getX()
-                                                - getMappingComponent().getClip_offset_x()),
-                                    getMappingComponent().getWtst().getSourceY(
-                                        pInputEvent.getPosition().getY()
-                                                - getMappingComponent().getClip_offset_y())));
-                        creatingHole = selectedEntityPosition != -1;
-                        super.mousePressed(pInputEvent);
+                            final Point mousePoint = getMousePoint(pInputEvent.getPosition());
+                            selectedEntityPosition = pFeature.getEntityPositionUnderPoint(mousePoint);
+                            creatingHole = selectedEntityPosition != -1;
+                            super.mousePressed(pInputEvent);
+                        }
+                    } else {
+                        final PFeature pFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
+                                pInputEvent,
+                                new Class[] { PFeature.class });
+                        if ((pFeature != null)
+                                    && ((pFeature.getFeature().getGeometry() instanceof MultiPolygon)
+                                        || (pFeature.getFeature().getGeometry() instanceof Polygon))) {
+                            getMappingComponent().getFeatureCollection().select(pFeature.getFeature());
+                        }
                     }
                 } else {
-                    final PFeature pFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
-                            pInputEvent,
-                            new Class[] { PFeature.class });
-                    if ((pFeature != null)
-                                && (pFeature.getFeature().getGeometry() instanceof MultiPolygon)) {
-                        getMappingComponent().getFeatureCollection().select(pFeature.getFeature());
-                    }
+                    super.mousePressed(pInputEvent);
+                }
+            } else {
+                if ((selectedPFeature == null) || isTempFeatureValid()) {
+                    super.mousePressed(pInputEvent);
                 }
             }
         } else {
@@ -116,27 +143,69 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean isTempFeatureValid() {
+        final PureNewFeature tempFeature = getCurrentPureNewFeature();
+        final Coordinate[] tempFeatureCoordinates = tempFeature.getGeometry().getCoordinates();
+
+        if (tempFeatureCoordinates.length == 3) {
+            final int currentSrid = selectedPFeature.getFeature().getGeometry().getSRID();
+            final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                    currentSrid);
+            final Point point = geometryFactory.createPoint(tempFeatureCoordinates[1]);
+            if (creatingHole) {
+                return selectedPFeature.getEntityPositionUnderPoint(point) == selectedEntityPosition;
+            } else {
+                return selectedPFeature.getEntityPositionUnderPoint(point) == -1;
+            }
+        }
+        if (creatingHole) {
+            return selectedPFeature.isValidWithThisNewHoleCoordinates(selectedEntityPosition, tempFeatureCoordinates);
+        } else {
+            return selectedPFeature.isValidWithThisNewEntityCoordinates(tempFeatureCoordinates);
+        }
+    }
+
     @Override
-    protected PPath createNewTempFeature() {
-        final PPath newTempFeature = super.createNewTempFeature();
-        final Color fillingColor = getFillingColor();
-        newTempFeature.setStrokePaint(fillingColor.darker());
-        newTempFeature.setPaint(fillingColor);
-        return newTempFeature;
+    public void mouseMoved(final PInputEvent pInputEvent) {
+        super.mouseMoved(pInputEvent);
+
+        if (selectedPFeature == null) {
+            if (pInputEvent.isAltDown()) {
+                multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.SELECT_FEATURE);
+                getMappingComponent().setPointerAnnotation(multiPolygonPointerAnnotation);
+                getMappingComponent().setPointerAnnotationVisibility(true);
+            } else {
+                getMappingComponent().setPointerAnnotationVisibility(false);
+            }
+        } else {
+            if (isInProgress()) {
+                if (!isTempFeatureValid()) {
+                    if (creatingHole) {
+                        multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.HOLE_ERROR);
+                    } else {
+                        multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.ENTITY_ERROR);
+                    }
+                    getMappingComponent().setPointerAnnotation(multiPolygonPointerAnnotation);
+                    getMappingComponent().setPointerAnnotationVisibility(true);
+                } else {
+                    getMappingComponent().setPointerAnnotationVisibility(false);
+                }
+            } else {
+                getMappingComponent().setPointerAnnotationVisibility(false);
+            }
+        }
     }
 
     @Override
     protected void finishGeometry(final PureNewFeature newFeature) {
         super.finishGeometry(newFeature);
+
         if (selectedPFeature == null) {
-            final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("new geometry" + newFeature.getGeometry().toText() + " srid: " + currentSrid);
-            }
-
-            newFeature.getGeometry().setSRID(currentSrid);
-
             newFeature.setEditable(true);
             getMappingComponent().getFeatureCollection().addFeature(newFeature);
             getMappingComponent().getFeatureCollection().holdFeature(newFeature);

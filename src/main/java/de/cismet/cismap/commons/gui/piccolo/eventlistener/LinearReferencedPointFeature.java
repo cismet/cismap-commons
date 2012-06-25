@@ -304,7 +304,7 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         final PFeature pFeature = mc.getPFeatureHM().get(this);
 
         if (pFeature != null) {
-            pFeature.setCoordArr(new Coordinate[] { (Coordinate)coordinate.clone() });
+            pFeature.setCoordArr(0, 0, new Coordinate[] { (Coordinate)coordinate.clone() });
             pFeature.updatePath();
             pFeature.syncGeometry();
             pFeature.resetInfoNodePosition();

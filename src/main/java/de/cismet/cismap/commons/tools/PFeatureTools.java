@@ -438,7 +438,7 @@ public class PFeatureTools {
 
                 if (ringIndex == 0) { // polygon außenhülle
                     areaTotal += area;
-                } else { // loch
+                } else {              // loch
                     areaTotal -= area;
                 }
             }

@@ -40,6 +40,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.AddHandleDialog;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.math.geometry.StaticGeometryFunctions;
@@ -110,8 +111,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                     && mappingComponent.getHandleInteractionMode().equals(
                                         MappingComponent.ADD_HANDLE)) {
                             if ((mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection)
-                                        && (((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).getSelectedFeatures()
-                                            .size() == 1)) {
+                                        && (((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                                            .getSelectedFeatures().size() == 1)) {
                                 if (!newPointHandleExists()) {
                                     createNewPointHandle();
                                 }
@@ -119,7 +120,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                     handleX = (float)event.getPosition().getX();
                                     handleY = (float)event.getPosition().getY();
                                 } else {
-                                    final Collection sel = ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                                    final Collection sel =
+                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
                                                 .getSelectedFeatures();
                                     final Point2D trigger = event.getPosition();
                                     final Point2D[] neighbours = getNearestNeighbours(trigger, sel);
@@ -160,8 +162,10 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                 }
                             }
                         }
-                        xCoord = mappingComponent.getWtst().getSourceX(event.getPosition().getX() - mappingComponent.getClip_offset_x());
-                        yCoord = mappingComponent.getWtst().getSourceY(event.getPosition().getY() - mappingComponent.getClip_offset_y());
+                        xCoord = mappingComponent.getWtst()
+                                    .getSourceX(event.getPosition().getX() - mappingComponent.getClip_offset_x());
+                        yCoord = mappingComponent.getWtst()
+                                    .getSourceY(event.getPosition().getY() - mappingComponent.getClip_offset_y());
 
                         refreshPointerAnnotation(event);
 
@@ -371,7 +375,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                         && mappingComponent.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)
                         && ((pFeature != null) && pFeature.isSelected())) {
                 // Selektiertes Feature holen
-                final Collection sel = ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).getSelectedFeatures();
+                final Collection sel = ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                            .getSelectedFeatures();
 
                 // markiertes Handel auf der Linie holen
                 final Point2D newPoint = new Point2D.Float(handleX, handleY);

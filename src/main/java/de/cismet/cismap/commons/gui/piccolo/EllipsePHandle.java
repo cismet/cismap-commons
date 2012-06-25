@@ -66,7 +66,7 @@ public class EllipsePHandle extends PHandle {
 
     @Override
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent pInputEvent) {
-        final int n = pfeature.getXp(0, 0).length - 1;
+        final int n = pfeature.getCoordArr(0, 0).length - 1;
 
         final Point2D dragPoint = (Point2D)pInputEvent.getPosition();
         final double a = startPoint.getX() - dragPoint.getX();

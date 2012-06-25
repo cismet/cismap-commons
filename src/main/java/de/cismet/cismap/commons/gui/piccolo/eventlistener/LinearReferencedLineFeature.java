@@ -207,7 +207,7 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
             final PFeature pFeature = mc.getPFeatureHM().get(this);
 
             if (pFeature != null) {
-                pFeature.setCoordArr(sublineGeom.getCoordinates());
+                pFeature.setCoordArr(0, 0, sublineGeom.getCoordinates());
                 pFeature.updatePath();
                 pFeature.syncGeometry();
                 pFeature.visualize();
