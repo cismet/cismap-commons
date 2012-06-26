@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
+import javax.swing.SwingWorker;
+
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.PureNewFeature;
@@ -79,7 +81,7 @@ public class TransformationPHandle extends PHandle {
     private Coordinate leftNeighbourCoordinate;
     private Coordinate rightNeighbourCoordinate;
     private Coordinate[] backupCoordArr;
-    private final InvalidPolygonTooltip multiPolygonPointerAnnotation = new InvalidPolygonTooltip();
+    private InvalidPolygonTooltip polygonTooltip = new InvalidPolygonTooltip();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -103,6 +105,8 @@ public class TransformationPHandle extends PHandle {
         this.coordPosition = coordPosition;
         this.currentX = pfeature.getXp(entityPosition, ringPosition)[coordPosition];
         this.currentY = pfeature.getYp(entityPosition, ringPosition)[coordPosition];
+        polygonTooltip.setVisible(false);
+        pfeature.getViewer().getCamera().addChild(polygonTooltip);
 
         setLocator(new PLocator() {
 
@@ -243,14 +247,20 @@ public class TransformationPHandle extends PHandle {
                                     || (pfeature.getFeature().getGeometry() instanceof Polygon))
                                 && !pfeature.isValid(entityPosition, ringPosition)) {
                         final boolean creatingHole = ringPosition > 0;
+
+                        polygonTooltip.setOffset(
+                            pInputEvent.getCanvasPosition().getX()
+                                    + 20.0d,
+                            pInputEvent.getCanvasPosition().getY()
+                                    + 20.0d);
                         if (creatingHole) {
-                            multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.HOLE_ERROR);
+                            polygonTooltip.setMode(InvalidPolygonTooltip.Mode.HOLE_ERROR);
                         } else {
-                            multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.ENTITY_ERROR);
+                            polygonTooltip.setMode(InvalidPolygonTooltip.Mode.ENTITY_ERROR);
                         }
-                        pfeature.getViewer().setPointerAnnotationVisibility(true);
+                        polygonTooltip.setVisible(true);
                     } else {
-                        pfeature.getViewer().setPointerAnnotationVisibility(false);
+                        polygonTooltip.setVisible(false);
                     }
 
                     if (pfeature.getViewer().isInGlueIdenticalPointsMode()) {
@@ -324,8 +334,6 @@ public class TransformationPHandle extends PHandle {
         final float[] xp = pfeature.getXp(entityPosition, ringPosition);
         final float[] yp = pfeature.getYp(entityPosition, ringPosition);
 
-        pfeature.getViewer().setPointerAnnotation(multiPolygonPointerAnnotation);
-
         backupCoordArr = new Coordinate[coordArr.length];
         System.arraycopy(coordArr, 0, backupCoordArr, 0, backupCoordArr.length);
 
@@ -391,7 +399,7 @@ public class TransformationPHandle extends PHandle {
 
     @Override
     public void endHandleDrag(final java.awt.geom.Point2D aLocalPoint, final PInputEvent aEvent) {
-        pfeature.getViewer().setPointerAnnotationVisibility(false);
+//        polygonTooltip.setVisible(false);
         if (!pfeature.getViewer().getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
             // rückgängig machen ungültiger operationen bei (multi)-polygone
             if (((pfeature.getFeature().getGeometry() instanceof MultiPolygon)
@@ -491,7 +499,33 @@ public class TransformationPHandle extends PHandle {
                             coordPosition,
                             xp[coordPosition],
                             yp[coordPosition]));
-            ((PHandle)(pInputEvent.getPickedNode())).removeHandle();
+            final Coordinate[] coordArr = pfeature.getCoordArr(entityPosition, ringPosition);
+            final Coordinate[] newCoordArr = new Coordinate[coordArr.length - 1];
+            System.arraycopy(coordArr, 0, newCoordArr, 0, coordPosition);
+            System.arraycopy(
+                coordArr,
+                coordPosition
+                        + 1,
+                newCoordArr,
+                coordPosition,
+                newCoordArr.length
+                        - coordPosition);
+            newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
+            if (pfeature.isValidWithThisCoordinates(entityPosition, ringPosition, newCoordArr)) {
+                ((PHandle)(pInputEvent.getPickedNode())).removeHandle();
+                polygonTooltip.setVisible(false);
+            } else {
+                polygonTooltip.setOffset(
+                    pInputEvent.getCanvasPosition().getX()
+                            + 20.0d,
+                    pInputEvent.getCanvasPosition().getY()
+                            + 20.0d);
+                if (ringPosition > 0) {
+                    showInvalidPolygonTooltip(InvalidPolygonTooltip.Mode.HOLE_ERROR);
+                } else {
+                    showInvalidPolygonTooltip(InvalidPolygonTooltip.Mode.ENTITY_ERROR);
+                }
+            }
         } else if (pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)) {
             pfeature.getViewer()
                     .getMemUndo()
@@ -652,5 +686,29 @@ public class TransformationPHandle extends PHandle {
 //            pfeature.getCoordArr()[pfeature.getXp().length - 1].x = wtst.getSourceX(pfeature.getXp()[positionInArray] - x_offset);
 //            pfeature.getCoordArr()[pfeature.getXp().length - 1].y = wtst.getSourceY(pfeature.getYp()[positionInArray] - y_offset);
 //        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mode  DOCUMENT ME!
+     */
+    private void showInvalidPolygonTooltip(final InvalidPolygonTooltip.Mode mode) {
+        new SwingWorker<Void, Void>() {
+
+                @Override
+                protected Void doInBackground() throws Exception {
+                    polygonTooltip.setMode(mode);
+                    polygonTooltip.setVisible(true);
+                    Thread.sleep(2000);
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    super.done();
+                    polygonTooltip.setVisible(false);
+                }
+            }.execute();
     }
 }

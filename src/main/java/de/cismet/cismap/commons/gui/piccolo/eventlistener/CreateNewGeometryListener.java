@@ -67,6 +67,7 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     private CreateNewGeometryListener(final MappingComponent mc, final Class geometryFeatureClass) {
         super(mc, geometryFeatureClass);
         zoomDelegate = new RubberBandZoomListener();
+        mc.getCamera().addChild(multiPolygonPointerAnnotation);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -179,15 +180,19 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     @Override
     public void mouseMoved(final PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
+        multiPolygonPointerAnnotation.setOffset(
+            pInputEvent.getCanvasPosition().getX()
+                    + 20.0d,
+            pInputEvent.getCanvasPosition().getY()
+                    + 20.0d);
 
         final Collection selectedFeatures = getMappingComponent().getFeatureCollection().getSelectedFeatures();
         if ((selectedPFeature == null) || (selectedFeatures.size() != 1)) {
             if (pInputEvent.isAltDown()) {
                 multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.SELECT_FEATURE);
-                getMappingComponent().setPointerAnnotation(multiPolygonPointerAnnotation);
-                getMappingComponent().setPointerAnnotationVisibility(true);
+                multiPolygonPointerAnnotation.setVisible(true);
             } else {
-                getMappingComponent().setPointerAnnotationVisibility(false);
+                multiPolygonPointerAnnotation.setVisible(false);
             }
         } else {
             if (isInProgress()) {
@@ -197,13 +202,12 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
                     } else {
                         multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.ENTITY_ERROR);
                     }
-                    getMappingComponent().setPointerAnnotation(multiPolygonPointerAnnotation);
-                    getMappingComponent().setPointerAnnotationVisibility(true);
+                    multiPolygonPointerAnnotation.setVisible(true);
                 } else {
-                    getMappingComponent().setPointerAnnotationVisibility(false);
+                    multiPolygonPointerAnnotation.setVisible(false);
                 }
             } else {
-                getMappingComponent().setPointerAnnotationVisibility(false);
+                multiPolygonPointerAnnotation.setVisible(false);
             }
         }
     }
