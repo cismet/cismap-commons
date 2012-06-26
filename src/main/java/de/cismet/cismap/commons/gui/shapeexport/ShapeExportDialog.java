@@ -377,7 +377,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
      *
      * @param  evt  The action event.
      */
-    private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnOKActionPerformed
+    private void btnOKActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
         cancelled = false;
 
         selectedWFSs = new LinkedList<ExportWFS>();
@@ -389,18 +389,18 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         }
 
         setVisible(false);
-    } //GEN-LAST:event_btnOKActionPerformed
+    }//GEN-LAST:event_btnOKActionPerformed
 
     /**
      * An action listener for the cancel button.
      *
      * @param  evt  The action event.
      */
-    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnCancelActionPerformed
+    private void btnCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         cancelled = true;
         selectedWFSs = new LinkedList<ExportWFS>();
         setVisible(false);
-    }                                                                             //GEN-LAST:event_btnCancelActionPerformed
+    }//GEN-LAST:event_btnCancelActionPerformed
 
     /**
      * Returns a flag indicating whether the user closed the dialog.
@@ -678,8 +678,7 @@ public class ShapeExportDialog extends javax.swing.JDialog {
                     "<gml:Box><gml:coord><gml:X>3.3260837108302265E7</gml:X><gml:Y>5939174.86179747</gml:Y></gml:coord><gml:coord><gml:X>3.3306013669564433E7</gml:X><gml:Y>5954878.55311782</gml:Y></gml:coord></gml:Box>"));
         }
 
-        final JDialog downloadManager = DownloadManagerDialog.instance(StaticSwingTools.getParentFrame(
-                    CismapBroker.getInstance().getMappingComponent()));
+        final JDialog downloadManager = DownloadManagerDialog.instance(CismapBroker.getInstance().getMappingComponent());
         if (!downloadManager.isVisible()) {
             downloadManager.setVisible(true);
             downloadManager.pack();
