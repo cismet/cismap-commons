@@ -21,8 +21,7 @@ import java.util.Collection;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.tools.PFeatureTools;
@@ -103,42 +102,49 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     @Override
     public void mousePressed(final PInputEvent pInputEvent) {
         if (pInputEvent.isLeftMouseButton()) {
-            if (!isInProgress() && pInputEvent.isAltDown()) {
-                if (selectedPFeature == null) {
-                    final Collection selectedFeatures = getMappingComponent().getFeatureCollection()
-                                .getSelectedFeatures();
-                    if (selectedFeatures.size() == 1) {
-                        final PFeature pFeature = getMappingComponent().getPFeatureHM()
-                                    .get((Feature)selectedFeatures.toArray()[0]);
-                        if ((pFeature != null)
-                                    && ((pFeature.getFeature().getGeometry() instanceof MultiPolygon)
-                                        || (pFeature.getFeature().getGeometry() instanceof Polygon))) {
-                            selectedPFeature = pFeature;
-
-                            final Point mousePoint = getMousePoint(pInputEvent.getPosition());
-                            selectedEntityPosition = pFeature.getEntityPositionUnderPoint(mousePoint);
-                            creatingHole = selectedEntityPosition != -1;
-                            super.mousePressed(pInputEvent);
+            if (pInputEvent.getClickCount() == 1) {
+                if (!isInProgress()) {
+                    if (pInputEvent.isAltDown()) {
+                        final Collection selectedFeatures = getMappingComponent().getFeatureCollection()
+                                    .getSelectedFeatures();
+                        if ((selectedPFeature != null) && (selectedFeatures.size() == 1)) {
+                            final PFeature pFeature = getMappingComponent().getPFeatureHM()
+                                        .get((Feature)selectedFeatures.toArray()[0]);
+                            if ((pFeature != null)
+                                        && ((pFeature.getFeature().getGeometry() instanceof MultiPolygon)
+                                            || (pFeature.getFeature().getGeometry() instanceof Polygon))) {
+                                final Point mousePoint = getMousePoint(pInputEvent.getPosition());
+                                selectedEntityPosition = pFeature.getEntityPositionUnderPoint(mousePoint);
+                                creatingHole = selectedEntityPosition != -1;
+                                super.mousePressed(pInputEvent);
+                            }
+                        } else {
+                            final PFeature pFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
+                                    pInputEvent,
+                                    new Class[] { PFeature.class });
+                            if ((pFeature != null)
+                                        && ((pFeature.getFeature().getGeometry() instanceof MultiPolygon)
+                                            || (pFeature.getFeature().getGeometry() instanceof Polygon))) {
+                                getMappingComponent().getFeatureCollection().select(pFeature.getFeature());
+                                selectedPFeature = pFeature;
+                            }
                         }
-                    } else {
-                        final PFeature pFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
-                                pInputEvent,
-                                new Class[] { PFeature.class });
-                        if ((pFeature != null)
-                                    && ((pFeature.getFeature().getGeometry() instanceof MultiPolygon)
-                                        || (pFeature.getFeature().getGeometry() instanceof Polygon))) {
-                            getMappingComponent().getFeatureCollection().select(pFeature.getFeature());
-                        }
+                    } else { // es wird ein normales polygon angefangen
+                        selectedPFeature = null;
+                        super.mousePressed(pInputEvent);
                     }
                 } else {
                     super.mousePressed(pInputEvent);
                 }
-            } else {
+            } else if (pInputEvent.getClickCount() == 2) {
                 if ((selectedPFeature == null) || isTempFeatureValid()) {
                     super.mousePressed(pInputEvent);
                 }
+            } else {
+                super.mousePressed(pInputEvent);
             }
         } else {
+            selectedPFeature = null;
             super.mousePressed(pInputEvent);
         }
     }
@@ -174,7 +180,8 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     public void mouseMoved(final PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
 
-        if (selectedPFeature == null) {
+        final Collection selectedFeatures = getMappingComponent().getFeatureCollection().getSelectedFeatures();
+        if ((selectedPFeature == null) || (selectedFeatures.size() != 1)) {
             if (pInputEvent.isAltDown()) {
                 multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.SELECT_FEATURE);
                 getMappingComponent().setPointerAnnotation(multiPolygonPointerAnnotation);
@@ -217,7 +224,6 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
             } else {
                 selectedPFeature.addEntity(polygon);
             }
-            selectedPFeature = null;
         }
     }
 
