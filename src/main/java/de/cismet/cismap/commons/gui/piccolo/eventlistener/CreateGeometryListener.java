@@ -371,7 +371,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     Point2D[].class,
                     WorldToScreenTransform.class);
             final PureNewFeature pureNewFeature = constructor.newInstance(finalPoints, mappingComponent.getWtst());
-//            pureNewFeature.setGeometryType(geomType);
+            pureNewFeature.setGeometryType(geomType);
             pureNewFeature.getGeometry().setSRID(currentSrid);
             final Geometry geom = CrsTransformer.transformToGivenCrs(pureNewFeature.getGeometry(),
                     mappingComponent.getMappingModel().getSrs().getCode());
