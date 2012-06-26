@@ -1567,8 +1567,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public Feature[] split() {
         if (isSplittable()) {
             final PureNewFeature[] ret = new PureNewFeature[2];
-            int from = ((Integer)(splitPolygonFromHandle.getClientProperty("coordinate_position_in_arr"))).intValue(); // NOI18N
-            int to = ((Integer)(splitPolygonToHandle.getClientProperty("coordinate_position_in_arr"))).intValue();     // NOI18N
+            int from = ((Integer)(splitPolygonFromHandle.getClientProperty("coordinate_position_coord"))).intValue(); // NOI18N
+            int to = ((Integer)(splitPolygonToHandle.getClientProperty("coordinate_position_coord"))).intValue();     // NOI18N
 
             splitPolygonToHandle = null;
             splitPolygonFromHandle = null;
