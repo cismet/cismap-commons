@@ -89,6 +89,7 @@ public class InvalidPolygonTooltip extends PNode {
 
         switch (mode) {
             case SELECT_FEATURE: {
+                title = "Polygon selektieren";
                 content = selectContent;
             }
             break;
