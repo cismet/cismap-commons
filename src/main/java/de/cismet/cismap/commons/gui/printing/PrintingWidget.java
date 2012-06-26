@@ -484,9 +484,9 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdBackActionPerformed
+    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBackActionPerformed
         dispose();
-    }                                                                           //GEN-LAST:event_cmdBackActionPerformed
+    }//GEN-LAST:event_cmdBackActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -551,26 +551,26 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formComponentShown(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentShown
-    }                                                                          //GEN-LAST:event_formComponentShown
+    private void formComponentShown(final java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
+    }//GEN-LAST:event_formComponentShown
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
         mappingComponent.setInteractionMode(interactionModeAfterPrinting);
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
         dispose();
-    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
+    }//GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
         final Runnable r = new Runnable() {
 
                 @Override
@@ -643,8 +643,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                         / 2);
                             aFrame.setVisible(true);
                         } else if (a.getId().equalsIgnoreCase(Action.PDF)) {
-                            if (DownloadManagerDialog.showAskingForUserTitle(
-                                            StaticSwingTools.getParentFrame(PrintingWidget.this))) {
+                            if (DownloadManagerDialog.showAskingForUserTitle(PrintingWidget.this)) {
                                 final String jobname = DownloadManagerDialog.getJobname();
                                 DownloadManager.instance()
                                         .add(new JasperDownload(jasperPrint, jobname, "Cismap-Druck", "cismap"));
@@ -687,7 +686,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             };
         CismetThreadPool.execute(r);
         dispose();
-    } //GEN-LAST:event_cmdOkActionPerformed
+    }//GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!

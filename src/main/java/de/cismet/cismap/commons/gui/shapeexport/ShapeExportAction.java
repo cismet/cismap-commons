@@ -108,8 +108,7 @@ public class ShapeExportAction extends AbstractAction {
         }
 
         if (
-            !DownloadManagerDialog.showAskingForUserTitle(
-                        StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()))) {
+            !DownloadManagerDialog.showAskingForUserTitle(CismapBroker.getInstance().getMappingComponent())) {
             return;
         }
         final String jobname = DownloadManagerDialog.getJobname();
