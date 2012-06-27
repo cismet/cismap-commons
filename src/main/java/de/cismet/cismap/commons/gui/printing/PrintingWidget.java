@@ -12,7 +12,6 @@
  */
 package de.cismet.cismap.commons.gui.printing;
 
-import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperPrintManager;
@@ -31,11 +30,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-import java.io.File;
-
 import java.lang.reflect.Constructor;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -53,7 +49,6 @@ import javax.swing.text.StyledDocument;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.ServiceLayer;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
@@ -86,6 +81,11 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     public static final String WARN = "WARN";                 // NOI18N
     public static final String ERROR = "ERROR";               // NOI18N
     public static final String ERROR_REASON = "ERROR_REASON"; // NOI18N
+
+    public static final String BB_MIN_X = "minX";
+    public static final String BB_MIN_Y = "minY";
+    public static final String BB_MAX_X = "maxX";
+    public static final String BB_MAX_Y = "maxY";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -484,9 +484,9 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBackActionPerformed
+    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdBackActionPerformed
         dispose();
-    }//GEN-LAST:event_cmdBackActionPerformed
+    }                                                                           //GEN-LAST:event_cmdBackActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -544,6 +544,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
         erroneous = new TreeMap<Integer, Object>();
         mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
         prbLoading.setIndeterminate(true);
+
+        super.pack();
     }
 
     /**
@@ -551,26 +553,26 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formComponentShown(final java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
-    }//GEN-LAST:event_formComponentShown
+    private void formComponentShown(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentShown
+    }                                                                          //GEN-LAST:event_formComponentShown
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
         mappingComponent.setInteractionMode(interactionModeAfterPrinting);
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
         dispose();
-    }//GEN-LAST:event_cmdCancelActionPerformed
+    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
         final Runnable r = new Runnable() {
 
                 @Override
@@ -609,20 +611,24 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                         }
                         param.put(t.getScaleDemoninatorPlaceholder(), scaleDenomString);
                         param.putAll(inscriber.getValues());
+
+                        final BoundingBox bbox =
+                            ((PrintingFrameListener)mappingComponent.getInputListener(
+                                    MappingComponent.PRINTING_AREA_SELECTION)).getPrintingBoundingBox();
+                        param.put(BB_MIN_X, bbox.getX1());
+                        param.put(BB_MIN_Y, bbox.getY1());
+                        param.put(BB_MAX_X, bbox.getX2());
+                        param.put(BB_MAX_Y, bbox.getY2());
+
                         if (DEBUG) {
                             if (log.isDebugEnabled()) {
-                                log.debug("Parameter:" + param);                                                      // NOI18N
+                                log.debug("Parameter:" + param); // NOI18N
                             }
                         }
-                        // JasperReport jasperReport=(JasperReport)JRLoader.loadObject(new
-                        // FileInputStream("c:\\Map1.jasper"));
 
                         final JasperReport jasperReport = (JasperReport)JRLoader.loadObject(getClass()
                                         .getResourceAsStream(t.getFile()));
-                        // JasperReport jasperReport=JasperCompileManager.compileReport("c:\\Map1.jrxml");
                         final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, param);
-                        // JasperManager.printReportToPdfFile(jasperPrint, "c:\\\\SampleReport.pdf");
-                        // JasperViewer.viewReport(jasperPrint);
 
                         if (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW)) {
                             final JRViewer aViewer = new JRViewer(jasperPrint);
@@ -676,7 +682,6 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                 Level.ALL,
                                 null);
                         JXErrorPane.showDialog(PrintingWidget.this, ei);
-//                    JXErrorDialog.showDialog(, "Fehler beim Drucken", "Beim Erzeugen des Ausdruckes ist ein Fehler aufgetreten.\nStellen Sie sicher das das PDF aus dem letzen Druckvorgang\ngeschlossen oder unter anderem Namen abgespeichert\nwurde.", tt);
 
                         if (pdfWait.isVisible()) {
                             pdfWait.dispose();
@@ -686,7 +691,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             };
         CismetThreadPool.execute(r);
         dispose();
-    }//GEN-LAST:event_cmdOkActionPerformed
+    } //GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!
