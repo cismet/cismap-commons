@@ -951,6 +951,11 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                 }
             }
 
+            final Graphics2D g2d = (Graphics2D)map.getGraphics();
+
+            g2d.setColor(Color.LIGHT_GRAY);
+            g2d.drawRect(0, 0, map.getWidth() - 1, map.getHeight() - 1);
+
             prbLoading.setIndeterminate(false);
             prbLoading.setValue(100);
             cmdOk.setEnabled(true);
