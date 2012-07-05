@@ -728,7 +728,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     }
                 }
                 final Object o = dtde.getTransferable().getTransferData(TREEPATH_FLAVOR);
-                final List v = new ArrayList();
+                final List<TreePath> v = new ArrayList<TreePath>();
                 dtde.dropComplete(true);
                 if (o instanceof SelectionAndCapabilities) {
                     final TreePath[] tpa = ((SelectionAndCapabilities)o).getSelection();
@@ -736,12 +736,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         v.add(tpa[i]);
                     }
 
-                    if ((((TreePath)v.get(0)).getLastPathComponent()
-                                    instanceof de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)
-                                && (((de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)
-                                        (((TreePath)v.get(0)).getLastPathComponent())).getTitle().endsWith("[]")    // NOI18N
-                                    || ((de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)
-                                        (((TreePath)v.get(0)).getLastPathComponent())).getName().endsWith("[]"))) { // NOI18N
+                    if (isSlidableWMSServiceLayerGroup(v.get(0).getLastPathComponent())) { // NOI18N
                         final SlidableWMSServiceLayerGroup l = new SlidableWMSServiceLayerGroup(v);
                         l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
                         l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
@@ -764,10 +759,11 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("((SelectionAndCapabilities)o).getUrl()"
-                                        + ((SelectionAndCapabilities)o).getUrl());                                  // NOI18N
+                                        + ((SelectionAndCapabilities)o).getUrl());         // NOI18N
                         }
                     }
-                }                                                                                                   // Drop-Objekt war ein WFS-Element
+                }                                                                          // Drop-Objekt war ein
+                                                                                           // WFS-Element
                 else if (o instanceof WFSSelectionAndCapabilities) {
                     final WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities)o;
 
@@ -946,6 +942,31 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      */
     public JTreeTable getTreeTable() {
         return treeTable;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   lastPathComponent  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean isSlidableWMSServiceLayerGroup(final Object lastPathComponent) {
+        de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer layer = null;
+
+        if (lastPathComponent instanceof de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer) {
+            layer = (de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)lastPathComponent;
+        } else {
+            return false;
+        }
+
+        String titleOrName = layer.getTitle();
+
+        if (titleOrName == null) {
+            titleOrName = layer.getName();
+        }
+
+        return (titleOrName != null) && titleOrName.endsWith("[]");
     }
 
     /**
