@@ -76,7 +76,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     MappingComponent mappingComponent;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private GeoTransformer transformer = null;
-    private DecimalFormat df = new DecimalFormat("0.00");      // NOI18N
+    private DecimalFormat df = new DecimalFormat("0.000");     // NOI18N
     private int servicesCounter = 0;
     private int servicesErroneousCounter = 0;
     private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
