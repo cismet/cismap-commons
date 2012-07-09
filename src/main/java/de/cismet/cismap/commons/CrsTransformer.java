@@ -333,13 +333,13 @@ public class CrsTransformer {
     }
 
     /**
-     * transforms the given geometry to the current CRS.
+     * transforms the given geometry to the given CRS.
      *
      * @param   <T>   DOCUMENT ME!
      * @param   geom  the geometry to transform
-     * @param   crs   DOCUMENT ME!
+     * @param   crs   the target crs
      *
-     * @return  the new geomerty or the given geometry, if the given geometry is already in the current CRS
+     * @return  the new geomerty or the given geometry, if the given geometry is already in the right CRS
      */
     public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToGivenCrs(final T geom,
             final String crs) {
@@ -408,6 +408,54 @@ public class CrsTransformer {
     /**
      * transforms the given geometry to a metric CRS.
      *
+     * @param   <T>   DOCUMENT ME!
+     * @param   geom  the geometry to transform
+     *
+     * @return  the new geomerty or the given geometry, if the given geometry is already in the current CRS
+     */
+    public static <T extends com.vividsolutions.jts.geom.Geometry> T transformToMetricCrs(
+            final T geom) {
+        if (geom == null) {
+            return null;
+        }
+        final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
+        com.vividsolutions.jts.geom.Geometry newGeom = null;
+        final String curCrs = "EPSG:" + geom.getSRID(); // NOI18N
+
+        // Wenn SRID nicht gesetzt oder auf -1 gesetzt ist, dann handelt es sich um das default CRS
+        // und das ist immer metrisch
+        if (!isDefaultCrs(curCrs)) {
+            final Crs curCrsObject = new Crs();
+            curCrsObject.setCode(curCrs);
+            final int index = crsList.indexOf(curCrsObject);
+
+            if (index != -1) {
+                final Crs crs = crsList.get(index);
+                if (crs.isMetric()) {
+                    newGeom = geom;
+                }
+            }
+
+            if (newGeom == null) {
+                final String defaultCrs = CismapBroker.getInstance().getDefaultCrs();
+                try {
+                    final CrsTransformer transformer = new CrsTransformer(defaultCrs);
+                    newGeom = transformer.transformGeometry(geom, curCrs);
+                } catch (Exception e) {
+                    LOG.error("Cannot transform the geometry from " + curCrs + " to " + defaultCrs, e); // NOI18N
+                    newGeom = geom;
+                }
+            }
+        } else {
+            newGeom = geom;
+        }
+
+        return (T)newGeom;
+    }
+
+    /**
+     * transforms the given geometry to a metric CRS.
+     *
      * @param   <T>      DOCUMENT ME!
      * @param   geom     the geometry to transform
      * @param   crsList  DOCUMENT ME!
@@ -426,7 +474,10 @@ public class CrsTransformer {
         // Wenn SRID nicht gesetzt oder auf -1 gesetzt ist, dann handelt es sich um das default CRS
         // und das ist immer metrisch
         if (!isDefaultCrs(curCrs)) {
-            final int index = crsList.indexOf(curCrs);
+            final Crs curCrsObject = new Crs();
+            curCrsObject.setCode(curCrs);
+            final int index = crsList.indexOf(curCrsObject);
+
             if (index != -1) {
                 final Crs crs = crsList.get(index);
                 if (crs.isMetric()) {
