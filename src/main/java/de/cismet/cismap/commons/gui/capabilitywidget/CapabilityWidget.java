@@ -552,30 +552,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
+    }//GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
+    }//GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 this,
                 org.openide.util.NbBundle.getMessage(
@@ -588,16 +588,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
+    }//GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
+    }//GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -652,7 +652,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -661,7 +661,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
+    }//GEN-LAST:event_cmdCollapseActionPerformed
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
@@ -1626,14 +1626,39 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
             // search for a bounding box with the right CRS
             if (wmsCap != null) {
-                bestEnvelope = getEnvelopeForSelectedWmsLayer(currentTrvCap);
+                final TreePath currentPath = currentTrvCap.getSelectionPath();
+
+                if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof Layer)) {
+                    bestEnvelope = getEnvelopeForWmsLayer((Layer)currentPath.getLastPathComponent());
+                }
 
                 if (bestEnvelope == null) {
-                    bestEnvelope = getEnvelopeForSelectedWms(wmsCap);
+                    bestEnvelope = getEnvelopeForWmsCaps(wmsCap);
                 }
             } else if (currentTrvCap.getWfsCapabilities() != null) {
                 // the selected server is a wfs
-                bestEnvelope = getWfsEnvelope(currentTrvCap);
+                final TreePath currentPath = currentTrvCap.getSelectionPath();
+                FeatureType selectedFeature = null;
+
+                if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof FeatureType)) {
+                    selectedFeature = (FeatureType)currentPath.getLastPathComponent();
+                } else {
+                    try {
+                        final Iterator<FeatureType> it = currentTrvCap.getWfsCapabilities()
+                                    .getFeatureTypeList()
+                                    .iterator();
+
+                        if (it.hasNext()) {
+                            selectedFeature = it.next();
+                        }
+                    } catch (final Exception e) {
+                        log.error("Cannot receive the feature type list from the capabilities document", e);
+                    }
+                }
+
+                if (selectedFeature != null) {
+                    bestEnvelope = getEnvelopeFromFeatureType(selectedFeature);
+                }
             }
 
             if (bestEnvelope == null) {
@@ -1688,43 +1713,38 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     /**
      * DOCUMENT ME!
      *
-     * @param   currentTrvCap  DOCUMENT ME!
+     * @param   l  currentTrvCap DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private Envelope getEnvelopeForSelectedWmsLayer(final DragTree currentTrvCap) {
-        final TreePath currentPath = currentTrvCap.getSelectionPath();
+    public static Envelope getEnvelopeForWmsLayer(final Layer l) {
         Envelope bestEnvelope = null;
+        final LayerBoundingBox[] boxes = l.getBoundingBoxes();
+        final String currentCrs = CismapBroker.getInstance().getSrs().getCode();
 
-        if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof Layer)) {
-            final Layer l = (Layer)currentPath.getLastPathComponent();
-            final LayerBoundingBox[] boxes = l.getBoundingBoxes();
-            final String currentCrs = CismapBroker.getInstance().getSrs().getCode();
-
-            // search for a bounding box with the right CRS
-            if (boxes != null) {
-                for (final LayerBoundingBox tmp : boxes) {
-                    if (tmp.getSRS().equals(currentCrs)) {
-                        bestEnvelope = tmp;
-                        break;
-                    }
+        // search for a bounding box with the right CRS
+        if (boxes != null) {
+            for (final LayerBoundingBox tmp : boxes) {
+                if (tmp.getSRS().equals(currentCrs)) {
+                    bestEnvelope = tmp;
+                    break;
                 }
             }
+        }
 
-            if (bestEnvelope == null) {
-                if (l.getLatLonBoundingBoxes() != null) {
-                    bestEnvelope = l.getLatLonBoundingBoxes();
-                } else {
-                    if ((boxes != null) && (boxes.length > 0)) {
-                        bestEnvelope = boxes[0];
-                    }
+        if (bestEnvelope == null) {
+            if (l.getLatLonBoundingBoxes() != null) {
+                bestEnvelope = l.getLatLonBoundingBoxes();
+            } else {
+                if ((boxes != null) && (boxes.length > 0)) {
+                    bestEnvelope = boxes[0];
                 }
             }
         }
 
         return bestEnvelope;
     }
-
+    
     /**
      * DOCUMENT ME!
      *
@@ -1732,7 +1752,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @return  DOCUMENT ME!
      */
-    private Envelope getEnvelopeForSelectedWms(final WMSCapabilities caps) {
+    public static Envelope getEnvelopeForWmsCaps(final WMSCapabilities caps) {
         Envelope bestEnvelope = null;
 
         if (caps != null) {
@@ -1761,7 +1781,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
         return bestEnvelope;
     }
-
+    
     /**
      * DOCUMENT ME!
      *
@@ -1769,27 +1789,11 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @return  DOCUMENT ME!
      */
-    private Envelope getWfsEnvelope(final DragTree currentTrvCap) {
-        final TreePath currentPath = currentTrvCap.getSelectionPath();
+    public static Envelope getEnvelopeFromFeatureType(final FeatureType feature) {
         Envelope bestEnvelope = null;
-        FeatureType selectedFeature = null;
 
-        if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof FeatureType)) {
-            selectedFeature = (FeatureType)currentPath.getLastPathComponent();
-        } else {
-            try {
-                final Iterator<FeatureType> it = currentTrvCap.getWfsCapabilities().getFeatureTypeList().iterator();
-
-                if (it.hasNext()) {
-                    selectedFeature = it.next();
-                }
-            } catch (final Exception e) {
-                log.error("Cannot receive the feature type list from the capabilities document", e);
-            }
-        }
-
-        if (selectedFeature != null) {
-            final Envelope[] envs = selectedFeature.getWgs84BoundingBoxes();
+        if (feature != null) {
+            final Envelope[] envs = feature.getWgs84BoundingBoxes();
             if ((envs != null) && (envs.length > 0)) {
                 bestEnvelope = envs[0];
             }
