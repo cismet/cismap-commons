@@ -1042,7 +1042,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     @Override
     public Layer getLayerInformation() {
         if (wmsCapabilities != null) {
-            return wmsCapabilities.getLayer();
+            Layer layer = searchForLayer(wmsCapabilities.getLayer(), name);
+
+            if (layer == null) {
+                layer = wmsCapabilities.getLayer();
+            }
+
+            return layer;
         }
 
         return null;
