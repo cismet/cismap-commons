@@ -32,6 +32,8 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import java.io.File;
 
@@ -157,6 +159,24 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 }
             };
 
+        treeTable.addKeyListener(new KeyListener() {
+
+                @Override
+                public void keyTyped(final KeyEvent e) {
+                }
+
+                @Override
+                public void keyPressed(final KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+                        cmdRemoveActionPerformed(null);
+                        e.consume();
+                    }
+                }
+
+                @Override
+                public void keyReleased(final KeyEvent e) {
+                }
+            });
         treeTable.setAutoCreateColumnsFromModel(true);
         treeTable.setShowGrid(true);
         treeTable.getTableHeader().setReorderingAllowed(true);
