@@ -1626,14 +1626,39 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
             // search for a bounding box with the right CRS
             if (wmsCap != null) {
-                bestEnvelope = getEnvelopeForSelectedWmsLayer(currentTrvCap);
+                final TreePath currentPath = currentTrvCap.getSelectionPath();
+
+                if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof Layer)) {
+                    bestEnvelope = getEnvelopeForWmsLayer((Layer)currentPath.getLastPathComponent());
+                }
 
                 if (bestEnvelope == null) {
-                    bestEnvelope = getEnvelopeForSelectedWms(wmsCap);
+                    bestEnvelope = getEnvelopeForWmsCaps(wmsCap);
                 }
             } else if (currentTrvCap.getWfsCapabilities() != null) {
                 // the selected server is a wfs
-                bestEnvelope = getWfsEnvelope(currentTrvCap);
+                final TreePath currentPath = currentTrvCap.getSelectionPath();
+                FeatureType selectedFeature = null;
+
+                if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof FeatureType)) {
+                    selectedFeature = (FeatureType)currentPath.getLastPathComponent();
+                } else {
+                    try {
+                        final Iterator<FeatureType> it = currentTrvCap.getWfsCapabilities()
+                                    .getFeatureTypeList()
+                                    .iterator();
+
+                        if (it.hasNext()) {
+                            selectedFeature = it.next();
+                        }
+                    } catch (final Exception e) {
+                        log.error("Cannot receive the feature type list from the capabilities document", e);
+                    }
+                }
+
+                if (selectedFeature != null) {
+                    bestEnvelope = getEnvelopeFromFeatureType(selectedFeature);
+                }
             }
 
             if (bestEnvelope == null) {
@@ -1688,36 +1713,31 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     /**
      * DOCUMENT ME!
      *
-     * @param   currentTrvCap  DOCUMENT ME!
+     * @param   l  currentTrvCap DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private Envelope getEnvelopeForSelectedWmsLayer(final DragTree currentTrvCap) {
-        final TreePath currentPath = currentTrvCap.getSelectionPath();
+    public static Envelope getEnvelopeForWmsLayer(final Layer l) {
         Envelope bestEnvelope = null;
+        final LayerBoundingBox[] boxes = l.getBoundingBoxes();
+        final String currentCrs = CismapBroker.getInstance().getSrs().getCode();
 
-        if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof Layer)) {
-            final Layer l = (Layer)currentPath.getLastPathComponent();
-            final LayerBoundingBox[] boxes = l.getBoundingBoxes();
-            final String currentCrs = CismapBroker.getInstance().getSrs().getCode();
-
-            // search for a bounding box with the right CRS
-            if (boxes != null) {
-                for (final LayerBoundingBox tmp : boxes) {
-                    if (tmp.getSRS().equals(currentCrs)) {
-                        bestEnvelope = tmp;
-                        break;
-                    }
+        // search for a bounding box with the right CRS
+        if (boxes != null) {
+            for (final LayerBoundingBox tmp : boxes) {
+                if (tmp.getSRS().equals(currentCrs)) {
+                    bestEnvelope = tmp;
+                    break;
                 }
             }
+        }
 
-            if (bestEnvelope == null) {
-                if (l.getLatLonBoundingBoxes() != null) {
-                    bestEnvelope = l.getLatLonBoundingBoxes();
-                } else {
-                    if ((boxes != null) && (boxes.length > 0)) {
-                        bestEnvelope = boxes[0];
-                    }
+        if (bestEnvelope == null) {
+            if (l.getLatLonBoundingBoxes() != null) {
+                bestEnvelope = l.getLatLonBoundingBoxes();
+            } else {
+                if ((boxes != null) && (boxes.length > 0)) {
+                    bestEnvelope = boxes[0];
                 }
             }
         }
@@ -1732,7 +1752,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @return  DOCUMENT ME!
      */
-    private Envelope getEnvelopeForSelectedWms(final WMSCapabilities caps) {
+    public static Envelope getEnvelopeForWmsCaps(final WMSCapabilities caps) {
         Envelope bestEnvelope = null;
 
         if (caps != null) {
@@ -1765,31 +1785,15 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     /**
      * DOCUMENT ME!
      *
-     * @param   currentTrvCap  DOCUMENT ME!
+     * @param   feature  currentTrvCap DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private Envelope getWfsEnvelope(final DragTree currentTrvCap) {
-        final TreePath currentPath = currentTrvCap.getSelectionPath();
+    public static Envelope getEnvelopeFromFeatureType(final FeatureType feature) {
         Envelope bestEnvelope = null;
-        FeatureType selectedFeature = null;
 
-        if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof FeatureType)) {
-            selectedFeature = (FeatureType)currentPath.getLastPathComponent();
-        } else {
-            try {
-                final Iterator<FeatureType> it = currentTrvCap.getWfsCapabilities().getFeatureTypeList().iterator();
-
-                if (it.hasNext()) {
-                    selectedFeature = it.next();
-                }
-            } catch (final Exception e) {
-                log.error("Cannot receive the feature type list from the capabilities document", e);
-            }
-        }
-
-        if (selectedFeature != null) {
-            final Envelope[] envs = selectedFeature.getWgs84BoundingBoxes();
+        if (feature != null) {
+            final Envelope[] envs = feature.getWgs84BoundingBoxes();
             if ((envs != null) && (envs.length > 0)) {
                 bestEnvelope = envs[0];
             }

@@ -5,22 +5,6 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- *  Copyright (C) 2010 thorsten
- *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package de.cismet.cismap.commons.raster.wms;
 
 import edu.umd.cs.piccolo.PNode;
@@ -38,6 +22,7 @@ import java.awt.Image;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -91,8 +76,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     private static final transient Logger LOG = Logger.getLogger(SlidableWMSServiceLayerGroup.class);
 
-    public static final String XML_ELEMENT_NAME = "SlidableWMSServiceLayerGroup";
-    private static final String SLIDER_PREFIX = "Slider";
+    public static final String XML_ELEMENT_NAME = "SlidableWMSServiceLayerGroup"; // NOI18N
+    private static final String SLIDER_PREFIX = "Slider";                         // NOI18N
     private static List<Integer> uniqueNumbers = new ArrayList<Integer>();
     private static String addedInternalWidget = null;
 
@@ -128,7 +113,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         final TreePath tp = ((TreePath)treePaths.get(0));
         final Layer[] children = ((de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent())
                     .getChildren();
-        setName(((de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent()).getName());
+        setName(((de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent()).getTitle());
 
         for (final Object path : tp.getPath()) {
             if (path instanceof Layer) {
@@ -206,6 +191,35 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         init();
     }
 
+    /**
+     * Creates a new SlidableWMSServiceLayerGroup object.
+     *
+     * @param  name             DOCUMENT ME!
+     * @param  completePath     DOCUMENT ME!
+     * @param  layers           DOCUMENT ME!
+     * @param  wmsCapabilities  DOCUMENT ME!
+     * @param  capabilitiesUrl  DOCUMENT ME!
+     */
+    public SlidableWMSServiceLayerGroup(final String name,
+            final String completePath,
+            final Collection<Layer> layers,
+            final WMSCapabilities wmsCapabilities,
+            final String capabilitiesUrl) {
+        sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
+        setName(name);
+        this.completePath = completePath;
+        this.wmsCapabilities = wmsCapabilities;
+
+        for (final Layer layer : layers) {
+            this.layers.add(new WMSServiceLayer(layer));
+        }
+
+        setWmsCapabilities(wmsCapabilities);
+        setCapabilitiesUrl(capabilitiesUrl);
+
+        init();
+    }
+
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -219,6 +233,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         do {
             number = (new Random(System.currentTimeMillis())).nextInt();
         } while (uniqueNumbers.contains(number));
+
+        uniqueNumbers.add(number);
 
         return number;
     }

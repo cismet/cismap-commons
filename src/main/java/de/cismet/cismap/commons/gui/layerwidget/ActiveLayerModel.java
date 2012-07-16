@@ -13,20 +13,14 @@ import org.jdom.Element;
 import java.awt.EventQueue;
 import java.awt.Image;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
 
 import javax.swing.JTree;
-import javax.swing.SwingWorker;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.tree.TreePath;
@@ -60,14 +54,9 @@ import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
-
-import de.cismet.security.AccessHandler;
-import de.cismet.security.WebAccessManager;
 
 import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.PropertyEqualsProvider;
-import de.cismet.tools.TimeoutThread;
 
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
@@ -498,6 +487,30 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     null);
             }
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   treePath  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getLayerPosition(final TreePath treePath) {
+        final Object layer = treePath.getLastPathComponent();
+
+        if (layer instanceof MapService) {
+            final MapService l = (MapService)layer;
+            final int pos = layers.indexOf(l);
+            return pos;
+        } else if (layer instanceof WMSLayer) {
+            final WMSLayer l = (WMSLayer)layer;
+            final WMSServiceLayer parent = (WMSServiceLayer)treePath.getParentPath().getLastPathComponent();
+            final int pos = parent.getWMSLayers().indexOf(l);
+            return pos;
+        }
+
+        return 0;
     }
 
     /**
@@ -1310,7 +1323,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
         try {
             final Element conf = e.getChild("cismapActiveLayerConfiguration"); // NOI18N
-            final Vector<String> links = LayerWidget.getCapabilities(conf, new Vector<String>());
+            final List<String> links = LayerWidget.getCapabilities(conf, new ArrayList<String>());
             if (DEBUG) {
                 if (log.isDebugEnabled()) {
                     log.debug("Capabilties links: " + links);                  // NOI18N

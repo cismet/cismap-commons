@@ -299,7 +299,7 @@ public class ServerInfo extends javax.swing.JPanel implements CapabilityListener
         }
 
         // Keywords
-        if ((v.keywords != null) & (v.keywords.length > 0)) {
+        if ((v.keywords != null) && (v.keywords.length > 0)) {
             cboKeywords.setModel(new DefaultComboBoxModel(v.keywords));
             setKeywordSectionVisible(true);
         } else {

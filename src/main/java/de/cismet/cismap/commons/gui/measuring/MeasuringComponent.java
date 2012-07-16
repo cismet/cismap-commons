@@ -51,7 +51,6 @@ import de.cismet.cismap.commons.features.RasterDocumentFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MessenGeometryListener;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.collections.TypeSafeCollections;
 
@@ -180,6 +179,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
             if (feature instanceof RasterDocumentFeature) {
                 mainRasterDocumentFeature = (RasterDocumentFeature)feature;
             }
+
             getFeatureCollection().addFeature(feature);
         } else {
             log.warn("Feature is null!");

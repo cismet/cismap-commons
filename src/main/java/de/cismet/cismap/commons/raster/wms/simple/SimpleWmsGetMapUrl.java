@@ -33,20 +33,29 @@ public class SimpleWmsGetMapUrl {
     public static final String WIDTH_TOKEN = "<cismap:width>";              // NOI18N
     public static final String HEIGHT_TOKEN = "<cismap:height>";            // NOI18N
     public static final String BOUNDING_BOX_TOKEN = "<cismap:boundingBox>"; // NOI18N
-    public static final String SRS_TOKEN = "<cismap:srs>";                  // NOI18N
+
+    // NOTE: not configurable
+    public static final String BOUNDING_BOX_TOKEN_LL_X = "<cismap:boundingBox_ll_x>"; // NOI18N
+    public static final String BOUNDING_BOX_TOKEN_LL_Y = "<cismap:boundingBox_ll_y>"; // NOI18N
+    public static final String BOUNDING_BOX_TOKEN_UR_X = "<cismap:boundingBox_ur_x>"; // NOI18N
+    public static final String BOUNDING_BOX_TOKEN_UR_Y = "<cismap:boundingBox_ur_y>"; // NOI18N
+    public static final String SRS_TOKEN = "<cismap:srs>";                            // NOI18N
+
+    public static final String EPSG_NAMESPACE = "http://www.opengis.net/gml/srs/epsg.xml"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
     protected String urlTemplate;
 
-    double x1 = 0.0;
-    double y1 = 0.0;
-    double x2 = 0.0;
-    double y2 = 0.0;
+    private double x1 = 0.0;
+    private double y1 = 0.0;
+    private double x2 = 0.0;
+    private double y2 = 0.0;
 
     private String widthToken;
     private String heightToken;
     private String boundingBoxToken;
+    private String payloadTemplate;
 
     private int width = 0;
     private int height = 0;
@@ -59,10 +68,17 @@ public class SimpleWmsGetMapUrl {
      * @param  urlTemplate  DOCUMENT ME!
      */
     public SimpleWmsGetMapUrl(final String urlTemplate) {
-        this.urlTemplate = urlTemplate;
-        this.widthToken = WIDTH_TOKEN;
-        this.heightToken = HEIGHT_TOKEN;
-        this.boundingBoxToken = BOUNDING_BOX_TOKEN;
+        this(urlTemplate, null);
+    }
+
+    /**
+     * Creates a new SimpleWmsGetMapUrl object.
+     *
+     * @param  urlTemplate      DOCUMENT ME!
+     * @param  payloadTemplate  DOCUMENT ME!
+     */
+    public SimpleWmsGetMapUrl(final String urlTemplate, final String payloadTemplate) {
+        this(urlTemplate, WIDTH_TOKEN, HEIGHT_TOKEN, BOUNDING_BOX_TOKEN, payloadTemplate);
     }
 
     /**
@@ -77,13 +93,74 @@ public class SimpleWmsGetMapUrl {
             final String widthToken,
             final String heightToken,
             final String boundingBoxToken) {
+        this(urlTemplate, widthToken, heightToken, boundingBoxToken, null);
+    }
+
+    /**
+     * Creates a new SimpleWmsGetMapUrl object.
+     *
+     * @param  urlTemplate       DOCUMENT ME!
+     * @param  widthToken        DOCUMENT ME!
+     * @param  heightToken       DOCUMENT ME!
+     * @param  boundingBoxToken  DOCUMENT ME!
+     * @param  payloadTemplate   DOCUMENT ME!
+     */
+    public SimpleWmsGetMapUrl(final String urlTemplate,
+            final String widthToken,
+            final String heightToken,
+            final String boundingBoxToken,
+            final String payloadTemplate) {
         this.urlTemplate = urlTemplate;
         this.widthToken = widthToken;
         this.heightToken = heightToken;
         this.boundingBoxToken = boundingBoxToken;
+        this.payloadTemplate = payloadTemplate;
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getPayloadTemplate() {
+        return payloadTemplate;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  payloadTemplate  DOCUMENT ME!
+     */
+    public void setPayloadTemplate(final String payloadTemplate) {
+        this.payloadTemplate = payloadTemplate;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String createPayload() {
+        if (payloadTemplate == null) {
+            return null;
+        }
+
+        String payload = payloadTemplate;
+        payload = payload.replaceAll(heightToken, String.valueOf(height));
+        payload = payload.replaceAll(widthToken, String.valueOf(width));
+        payload = payload.replaceAll(BOUNDING_BOX_TOKEN_LL_X, String.valueOf(x1));
+        payload = payload.replaceAll(BOUNDING_BOX_TOKEN_LL_Y, String.valueOf(y1));
+        payload = payload.replaceAll(BOUNDING_BOX_TOKEN_UR_X, String.valueOf(x2));
+        payload = payload.replaceAll(BOUNDING_BOX_TOKEN_UR_Y, String.valueOf(y2));
+
+        final String srsCode = CismapBroker.getInstance().getSrs().getCode();
+        final String srs = srsCode.substring(srsCode.indexOf(':') + 1);
+        payload = payload.replaceAll(SRS_TOKEN, EPSG_NAMESPACE + "#" + srs); // NOI18N
+
+        return payload;
+    }
 
     /**
      * DOCUMENT ME!
@@ -155,6 +232,7 @@ public class SimpleWmsGetMapUrl {
 
     @Override
     public String toString() {
+        // NOTE: the payload will not be inserted here, since this is the place where the getMap GET url is built
         String url = urlTemplate.replaceAll(widthToken, new Integer(width).toString());
         url = url.replaceAll(heightToken, new Integer(height).toString());
         url = url.replaceAll(

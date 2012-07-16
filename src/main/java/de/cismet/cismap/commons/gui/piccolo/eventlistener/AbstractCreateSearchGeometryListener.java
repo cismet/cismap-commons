@@ -214,10 +214,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
         final boolean oldValue = this.holdGeometries;
         this.holdGeometries = newValue;
 
-        // Notify other AbstractCreateSearchGeometryListeners about the change.
         propertyChangeSupport.firePropertyChange(PROPERTY_HOLD_GEOMETRIES, oldValue, newValue);
-        // But here we don't need to notify the visualizing component of this AbstractCreateSearchGeometryListener about
-        // the change, since this method is invoked by it. It already knows about the change.
     }
 
     /**
@@ -372,7 +369,10 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
         final String oldValue = getMode();
         super.setMode(newValue);
 
+        // Notify other AbstractCreateSearchGeometryListeners about the change.
         propertyChangeSupport.firePropertyChange(PROPERTY_MODE, oldValue, newValue);
+        // But here we don't need to notify the visualizing component of this AbstractCreateSearchGeometryListener about
+        // the change, since this method is invoked by it. It already knows about the change.
 
         generateAndShowPointerAnnotation();
     }

@@ -12,7 +12,6 @@
  */
 package de.cismet.cismap.commons.gui.printing;
 
-import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperPrintManager;
@@ -31,11 +30,8 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-import java.io.File;
-
 import java.lang.reflect.Constructor;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -53,7 +49,6 @@ import javax.swing.text.StyledDocument;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.ServiceLayer;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
@@ -86,6 +81,11 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     public static final String WARN = "WARN";                 // NOI18N
     public static final String ERROR = "ERROR";               // NOI18N
     public static final String ERROR_REASON = "ERROR_REASON"; // NOI18N
+
+    public static final String BB_MIN_X = "minX";
+    public static final String BB_MIN_Y = "minY";
+    public static final String BB_MAX_X = "maxX";
+    public static final String BB_MAX_Y = "maxY";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -544,6 +544,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
         erroneous = new TreeMap<Integer, Object>();
         mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
         prbLoading.setIndeterminate(true);
+
+        super.pack();
     }
 
     /**
@@ -609,20 +611,24 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                         }
                         param.put(t.getScaleDemoninatorPlaceholder(), scaleDenomString);
                         param.putAll(inscriber.getValues());
+
+                        final BoundingBox bbox =
+                            ((PrintingFrameListener)mappingComponent.getInputListener(
+                                    MappingComponent.PRINTING_AREA_SELECTION)).getPrintingBoundingBox();
+                        param.put(BB_MIN_X, bbox.getX1());
+                        param.put(BB_MIN_Y, bbox.getY1());
+                        param.put(BB_MAX_X, bbox.getX2());
+                        param.put(BB_MAX_Y, bbox.getY2());
+
                         if (DEBUG) {
                             if (log.isDebugEnabled()) {
-                                log.debug("Parameter:" + param);                                                      // NOI18N
+                                log.debug("Parameter:" + param); // NOI18N
                             }
                         }
-                        // JasperReport jasperReport=(JasperReport)JRLoader.loadObject(new
-                        // FileInputStream("c:\\Map1.jasper"));
 
                         final JasperReport jasperReport = (JasperReport)JRLoader.loadObject(getClass()
                                         .getResourceAsStream(t.getFile()));
-                        // JasperReport jasperReport=JasperCompileManager.compileReport("c:\\Map1.jrxml");
                         final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, param);
-                        // JasperManager.printReportToPdfFile(jasperPrint, "c:\\\\SampleReport.pdf");
-                        // JasperViewer.viewReport(jasperPrint);
 
                         if (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW)) {
                             final JRViewer aViewer = new JRViewer(jasperPrint);
@@ -643,8 +649,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                         / 2);
                             aFrame.setVisible(true);
                         } else if (a.getId().equalsIgnoreCase(Action.PDF)) {
-                            if (DownloadManagerDialog.showAskingForUserTitle(
-                                            StaticSwingTools.getParentFrame(PrintingWidget.this))) {
+                            if (DownloadManagerDialog.showAskingForUserTitle(PrintingWidget.this)) {
                                 final String jobname = DownloadManagerDialog.getJobname();
                                 DownloadManager.instance()
                                         .add(new JasperDownload(jasperPrint, jobname, "Cismap-Druck", "cismap"));
@@ -677,7 +682,6 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                 Level.ALL,
                                 null);
                         JXErrorPane.showDialog(PrintingWidget.this, ei);
-//                    JXErrorDialog.showDialog(, "Fehler beim Drucken", "Beim Erzeugen des Ausdruckes ist ein Fehler aufgetreten.\nStellen Sie sicher das das PDF aus dem letzen Druckvorgang\ngeschlossen oder unter anderem Namen abgespeichert\nwurde.", tt);
 
                         if (pdfWait.isVisible()) {
                             pdfWait.dispose();
@@ -946,6 +950,11 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                     log.debug("services:" + services); // NOI18N
                 }
             }
+
+            final Graphics2D g2d = (Graphics2D)map.getGraphics();
+
+            g2d.setColor(Color.LIGHT_GRAY);
+            g2d.drawRect(0, 0, map.getWidth() - 1, map.getHeight() - 1);
 
             prbLoading.setIndeterminate(false);
             prbLoading.setValue(100);
