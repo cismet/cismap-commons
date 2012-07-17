@@ -7,42 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
 
-import org.jdom.Attribute;
-import org.jdom.Element;
-
-import java.awt.EventQueue;
-import java.awt.Image;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.Vector;
-
-import javax.swing.JTree;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.tree.TreePath;
-
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.ConvertableToXML;
-import de.cismet.cismap.commons.Crs;
-import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.Debug;
-import de.cismet.cismap.commons.LayerInfoProvider;
-import de.cismet.cismap.commons.MappingModel;
-import de.cismet.cismap.commons.MappingModelListener;
-import de.cismet.cismap.commons.RetrievalServiceLayer;
-import de.cismet.cismap.commons.ServiceLayer;
-import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.XMLObjectFactory;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
-import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
-import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
-import de.cismet.cismap.commons.featureservice.SimpleUpdateablePostgisFeatureService;
-import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.*;
+import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
@@ -54,17 +20,23 @@ import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
-
 import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.PropertyEqualsProvider;
-
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
-
 import de.cismet.tools.gui.Static2DTools;
 import de.cismet.tools.gui.treetable.AbstractTreeTableModel;
 import de.cismet.tools.gui.treetable.TreeTableModel;
 import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
+import java.awt.EventQueue;
+import java.awt.Image;
+import java.util.*;
+import javax.swing.JTree;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.tree.TreePath;
+import org.jdom.Attribute;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -487,30 +459,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     null);
             }
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   treePath  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public int getLayerPosition(final TreePath treePath) {
-        final Object layer = treePath.getLastPathComponent();
-
-        if (layer instanceof MapService) {
-            final MapService l = (MapService)layer;
-            final int pos = layers.indexOf(l);
-            return pos;
-        } else if (layer instanceof WMSLayer) {
-            final WMSLayer l = (WMSLayer)layer;
-            final WMSServiceLayer parent = (WMSServiceLayer)treePath.getParentPath().getLastPathComponent();
-            final int pos = parent.getWMSLayers().indexOf(l);
-            return pos;
-        }
-
-        return 0;
     }
 
     /**
@@ -1323,7 +1271,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
         try {
             final Element conf = e.getChild("cismapActiveLayerConfiguration"); // NOI18N
-            final List<String> links = LayerWidget.getCapabilities(conf, new ArrayList<String>());
+            final Vector<String> links = LayerWidget.getCapabilities(conf, new Vector<String>());
             if (DEBUG) {
                 if (log.isDebugEnabled()) {
                     log.debug("Capabilties links: " + links);                  // NOI18N
