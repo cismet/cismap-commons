@@ -106,7 +106,7 @@ public class TransformationPHandle extends PHandle {
         this.currentX = pfeature.getXp(entityPosition, ringPosition)[coordPosition];
         this.currentY = pfeature.getYp(entityPosition, ringPosition)[coordPosition];
         polygonTooltip.setVisible(false);
-        pfeature.getViewer().getCamera().addChild(polygonTooltip);
+        addChild(polygonTooltip);
 
         setLocator(new PLocator() {
 

@@ -7,6 +7,19 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import org.jdom.Attribute;
+import org.jdom.Element;
+
+import java.awt.EventQueue;
+import java.awt.Image;
+
+import java.util.*;
+
+import javax.swing.JTree;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.tree.TreePath;
+
 import de.cismet.cismap.commons.*;
 import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -20,23 +33,17 @@ import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
 import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.PropertyEqualsProvider;
+
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
+
 import de.cismet.tools.gui.Static2DTools;
 import de.cismet.tools.gui.treetable.AbstractTreeTableModel;
 import de.cismet.tools.gui.treetable.TreeTableModel;
 import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
-import java.awt.EventQueue;
-import java.awt.Image;
-import java.util.*;
-import javax.swing.JTree;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.tree.TreePath;
-import org.jdom.Attribute;
-import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
