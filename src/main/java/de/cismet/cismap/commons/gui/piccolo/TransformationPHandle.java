@@ -339,8 +339,10 @@ public class TransformationPHandle extends PHandle {
 
         leftNeighbourIndex = getLeftNeighbourIndex(coordPosition);
         rightNeighbourIndex = getRightNeighbourIndex(coordPosition);
-        leftNeighbourPoint = new Point2D.Double(xp[leftNeighbourIndex], yp[leftNeighbourIndex]);
-        rightNeighbourPoint = new Point2D.Double(xp[rightNeighbourIndex], yp[rightNeighbourIndex]);
+        leftNeighbourPoint = pfeature.getViewer().getCamera()
+                    .localToView(new Point2D.Double(xp[leftNeighbourIndex], yp[leftNeighbourIndex]));
+        rightNeighbourPoint = pfeature.getViewer().getCamera()
+                    .localToView(new Point2D.Double(xp[rightNeighbourIndex], yp[rightNeighbourIndex]));
         leftNeighbourCoordinate = coordArr[leftNeighbourIndex];
         rightNeighbourCoordinate = coordArr[rightNeighbourIndex];
 
