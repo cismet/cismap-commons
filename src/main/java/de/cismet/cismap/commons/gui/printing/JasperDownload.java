@@ -14,12 +14,9 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 
-import org.openide.util.Exceptions;
-
 import java.util.Map;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
-import de.cismet.tools.gui.downloadmanager.DownloadManager;
 
 /**
  * DOCUMENT ME!
@@ -55,13 +52,9 @@ public class JasperDownload extends AbstractDownload {
         this.directory = directory;
         this.title = title;
 
-        if (DownloadManager.instance().isEnabled()) {
-            determineDestinationFile(filename, ".pdf");
-            status = State.WAITING;
-        } else {
-            status = State.COMPLETED_WITH_ERROR;
-            caughtException = new Exception("DownloadManager is disabled. Cancelling download.");
-        }
+        status = State.WAITING;
+
+        determineDestinationFile(filename, ".pdf");
     }
 
     /**
@@ -86,13 +79,9 @@ public class JasperDownload extends AbstractDownload {
         this.directory = directory;
         this.title = title;
 
-        if (DownloadManager.instance().isEnabled()) {
-            determineDestinationFile(filename, ".pdf");
-            status = State.WAITING;
-        } else {
-            status = State.COMPLETED_WITH_ERROR;
-            caughtException = new Exception("DownloadManager is disabled. Cancelling download.");
-        }
+        status = State.WAITING;
+
+        determineDestinationFile(filename, ".pdf");
     }
 
     //~ Methods ----------------------------------------------------------------
