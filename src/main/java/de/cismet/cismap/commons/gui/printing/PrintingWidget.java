@@ -583,8 +583,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
 
                                 @Override
                                 public void run() {
-                                    pdfWait.setLocationRelativeTo(PrintingWidget.this);
-                                    pdfWait.setVisible(true);
+                                    StaticSwingTools.showDialog(PrintingWidget.this.mappingComponent, pdfWait, true);
                                 }
                             });
                     }
@@ -649,7 +648,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                         / 2);
                             aFrame.setVisible(true);
                         } else if (a.getId().equalsIgnoreCase(Action.PDF)) {
-                            if (DownloadManagerDialog.showAskingForUserTitle(PrintingWidget.this)) {
+                            if (DownloadManagerDialog.showAskingForUserTitle(PrintingWidget.this.mappingComponent)) {
                                 final String jobname = DownloadManagerDialog.getJobname();
                                 DownloadManager.instance()
                                         .add(new JasperDownload(jasperPrint, jobname, "Cismap-Druck", "cismap"));
@@ -681,7 +680,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                 tt,
                                 Level.ALL,
                                 null);
-                        JXErrorPane.showDialog(PrintingWidget.this, ei);
+                        JXErrorPane.showDialog(PrintingWidget.this.mappingComponent, ei);
 
                         if (pdfWait.isVisible()) {
                             pdfWait.dispose();
