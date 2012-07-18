@@ -991,8 +991,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             printingSettingsDialog = printingSettingsDialog.cloneWithNewParent(true, this);
         }
         printingSettingsDialog.setInteractionModeAfterPrinting(oldInteractionMode);
-        printingSettingsDialog.setLocationRelativeTo(this);
-        printingSettingsDialog.setVisible(true);
+        StaticSwingTools.showDialog(this, printingSettingsDialog, true);
     }
 
     /**
@@ -1008,8 +1007,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         try {
             printingDialog.setInteractionModeAfterPrinting(oldInteractionMode);
             printingDialog.startLoading();
-            printingDialog.setLocationRelativeTo(this);
-            printingDialog.setVisible(true);
+            StaticSwingTools.showDialog(this, printingDialog, true);
         } catch (final Exception e) {
             LOG.error("Fehler beim Anzeigen des Printing Dialogs", e); // NOI18N
         }
@@ -4863,8 +4861,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         "MappingComponent.crsChanged(CrsChangedEvent).wait"),
                     null);
 
-            dialog.setLocationRelativeTo(MappingComponent.this);
-            dialog.setVisible(true);
+            StaticSwingTools.showDialog(MappingComponent.this, dialog, false);
 
             EventQueue.invokeLater(new Runnable() {
 
