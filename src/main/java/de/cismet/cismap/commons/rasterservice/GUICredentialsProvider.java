@@ -219,7 +219,7 @@ public class GUICredentialsProvider extends LoginService implements CredentialsP
         } catch (Exception skip) {
         }
         dialog.setAlwaysOnTop(true);
-        dialog.setVisible(true);
+        StaticSwingTools.showDialog(dialog);
 
         if (!isAuthenticationDone) {
             isAuthenticationCanceled = true;

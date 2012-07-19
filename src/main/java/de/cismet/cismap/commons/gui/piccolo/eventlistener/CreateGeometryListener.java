@@ -243,8 +243,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                         });
 
                     // Dialog mittig anzeigen
-                    dialog.setLocationRelativeTo(parentFrame);
-                    dialog.setVisible(true);
+                    StaticSwingTools.showDialog(dialog);
 
                     // Ergebnis des Dialogs auswerten
                     if (dialog.getReturnStatus() == RectangleFromLineDialog.STATUS_OK) {

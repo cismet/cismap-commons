@@ -987,11 +987,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  oldInteractionMode  String-object
      */
     public void showPrintingSettingsDialog(final String oldInteractionMode) {
-        if (!(printingSettingsDialog.getParent() instanceof JFrame)) {
-            printingSettingsDialog = printingSettingsDialog.cloneWithNewParent(true, this);
-        }
+        printingSettingsDialog = printingSettingsDialog.cloneWithNewParent(true, this);
+
         printingSettingsDialog.setInteractionModeAfterPrinting(oldInteractionMode);
-        StaticSwingTools.showDialog(this, printingSettingsDialog, true);
+        StaticSwingTools.showDialog(printingSettingsDialog);
     }
 
     /**
@@ -1001,13 +1000,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void showPrintingDialog(final String oldInteractionMode) {
         setPointerAnnotationVisibility(false);
-        if (!(printingDialog.getParent() instanceof JFrame)) {
-            printingDialog = printingDialog.cloneWithNewParent(true, this);
-        }
+        printingDialog = printingDialog.cloneWithNewParent(true, this);
+
         try {
             printingDialog.setInteractionModeAfterPrinting(oldInteractionMode);
             printingDialog.startLoading();
-            StaticSwingTools.showDialog(this, printingDialog, true);
+            StaticSwingTools.showDialog(printingDialog);
         } catch (final Exception e) {
             LOG.error("Fehler beim Anzeigen des Printing Dialogs", e); // NOI18N
         }
@@ -4861,7 +4859,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         "MappingComponent.crsChanged(CrsChangedEvent).wait"),
                     null);
 
-            StaticSwingTools.showDialog(MappingComponent.this, dialog, false);
+            StaticSwingTools.showDialog(dialog);
 
             EventQueue.invokeLater(new Runnable() {
 

@@ -43,6 +43,8 @@ import javax.swing.JTextField;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
+import de.cismet.tools.gui.StaticSwingTools;
+
 /**
  * DOCUMENT ME!
  *
@@ -396,7 +398,7 @@ public class HTTPImageRetrievalWithAuth extends Thread {
                 });
 
             requestDialog.pack();
-            requestDialog.setVisible(true);
+            StaticSwingTools.showDialog(requestDialog);
         }
     }
 }

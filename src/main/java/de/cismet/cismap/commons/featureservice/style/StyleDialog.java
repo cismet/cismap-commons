@@ -79,6 +79,7 @@ import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 
 import de.cismet.tools.CismetThreadPool;
 
+import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
@@ -282,7 +283,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         colorChooser.setColor(getStyle().getFillColor());
 
         // show and evaluate ColorChooser (inside Actionlistener)
-        JColorChooser.createDialog(
+        final JDialog colorChooserDialog = JColorChooser.createDialog(
                 this,
                 COLORCHOOSER_TITLE,
                 true,
@@ -292,7 +293,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("new filling = " + colorChooser.getColor());     // NOI18N
+                            logger.debug("new filling = " + colorChooser.getColor()); // NOI18N
                         }
                         setFillColor(true, colorChooser.getColor());
 
@@ -308,12 +309,13 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("ColorChooser cancelled");     // NOI18N
+                            logger.debug("ColorChooser cancelled"); // NOI18N
                         }
                     }
-                })
-                .setVisible(true);
-    }                                                                   //GEN-LAST:event_cmdFillActionPerformed
+                });
+
+        StaticSwingTools.showDialog(colorChooserDialog);
+    } //GEN-LAST:event_cmdFillActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -325,7 +327,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         colorChooser.setColor(getStyle().getLineColor());
 
         // show and evaluate ColorChooser (inside Actionlistener)
-        JColorChooser.createDialog(
+        StaticSwingTools.showDialog(JColorChooser.createDialog(
                 this,
                 COLORCHOOSER_TITLE,
                 true,
@@ -335,7 +337,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("new line color = " + colorChooser.getColor());     // NOI18N
+                            logger.debug("new line color = " + colorChooser.getColor()); // NOI18N
                         }
                         StyleDialog.this.setLineColor(true, colorChooser.getColor());
                         updatePreview();
@@ -346,11 +348,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("ColorChooser cancelled");     // NOI18N
+                            logger.debug("ColorChooser cancelled"); // NOI18N
                         }
                     }
-                })
-                .setVisible(true);
+                }));
     }
 
     /**
@@ -424,7 +425,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         colorChooser.setColor(getStyle().getFontColor());
 
         // show and evaluate ColorChooser (inside Actionlistener)
-        JColorChooser.createDialog(
+        StaticSwingTools.showDialog(JColorChooser.createDialog(
                 this,
                 COLORCHOOSER_TITLE,
                 true,
@@ -434,7 +435,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("new font color = " + colorChooser.getColor());     // NOI18N
+                            logger.debug("new font color = " + colorChooser.getColor()); // NOI18N
                         }
                         setFontColor(colorChooser.getColor());
 
@@ -446,11 +447,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("ColorChooser cancelled");     // NOI18N
+                            logger.debug("ColorChooser cancelled"); // NOI18N
                         }
                     }
-                })
-                .setVisible(true);
+                }));
     }
 
     /**
@@ -462,7 +462,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         // show and evaluate FontChooser
         final Font temp = getStyle().getFont();
         fontChooser.setSelectedFont(temp, temp.getSize(), temp.isBold(), temp.isItalic());
-        fontChooser.setVisible(true);
+        StaticSwingTools.showDialog(fontChooser, false);
 
         if (fontChooser.getReturnStatus() != null) {
             setFontType(fontChooser.getReturnStatus());
