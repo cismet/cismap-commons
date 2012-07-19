@@ -82,13 +82,10 @@ public class ShapeExportAction extends AbstractAction {
     @Override
     public void actionPerformed(final ActionEvent e) {
         Collection<ExportWFS> wfsList = null;
-        final Component parent = StaticSwingTools.getParentFrame(
-                CismapBroker.getInstance().getMappingComponent());
 
         final ShapeExportDialog dialog = new ShapeExportDialog(CismapBroker.getInstance().getMappingComponent(),
                 ShapeExport.getWFSList());
-        dialog.setLocationRelativeTo(parent);
-        dialog.setVisible(true);
+        StaticSwingTools.showDialog(dialog);
 
         if (dialog.isCancelled()) {
             return;

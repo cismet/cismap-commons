@@ -305,7 +305,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                 "OGC-Web Security Service"
                             };                                                                         // NOI18N
                         final Object selectedValue = JOptionPane.showInputDialog(
-                                CapabilityWidget.this,
+                                StaticSwingTools.getParentFrame(CapabilityWidget.this),
                                 org.openide.util.NbBundle.getMessage(
                                     CapabilityWidget.class,
                                     "CapabilityWidget.processUrl(String,String,boolean).JOptionPane.message",

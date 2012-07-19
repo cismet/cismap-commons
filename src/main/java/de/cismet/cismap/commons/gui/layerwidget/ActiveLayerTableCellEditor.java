@@ -252,7 +252,9 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                             StaticSwingTools.getParentFrame(moreButton),
                             true,
                             ((WebFeatureService)value).getQuery());
-                    dia.setVisible(true);
+
+                    StaticSwingTools.showDialog(dia);
+
                     if (dia.getReturnStatus() == QueryEditorDialog.RET_OK) {
                         ((WebFeatureService)value).setQuery(dia.getQueryString());
                     }
@@ -309,7 +311,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                                     logger.debug("set dialog visible"); // NOI18N
                                 }
                             }
-                            styleDialog.setVisible(true);
+                            StaticSwingTools.showDialog(styleDialog);
                         } catch (Throwable t) {
                             logger.error("could not configure StyleDialog: " + t.getMessage(), t); // NOI18N
                         }

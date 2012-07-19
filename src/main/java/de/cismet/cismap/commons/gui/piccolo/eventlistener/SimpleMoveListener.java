@@ -393,8 +393,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                         dialog.setDistanceToLeft(distanceLeft);
 
                         // Dialog zentrieren und sichtbar machen
-                        dialog.setLocationRelativeTo(frame);
-                        dialog.setVisible(true);
+                        StaticSwingTools.showDialog(dialog);
 
                         // wenn der Dialog mit OK geschlossen wurde
                         if (dialog.getReturnStatus() == AddHandleDialog.STATUS_OK) {

@@ -583,7 +583,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
 
                                 @Override
                                 public void run() {
-                                    StaticSwingTools.showDialog(PrintingWidget.this.mappingComponent, pdfWait, true);
+                                    StaticSwingTools.showDialog(pdfWait);
                                 }
                             });
                     }
