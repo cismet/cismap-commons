@@ -24,17 +24,34 @@ public class WFSSelectionAndCapabilities {
 
     //~ Instance fields --------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @deprecated  the features array should be used instead
+     */
     private FeatureType feature;
+    private FeatureType[] features;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new WFSSelectionAndCapabilities object.
      *
-     * @param  feature  DOCUMENT ME!
+     * @param       feature  DOCUMENT ME!
+     *
+     * @deprecated  the constructor with the FeatureType array should be used instead
      */
     public WFSSelectionAndCapabilities(final FeatureType feature) {
         this.feature = feature;
+    }
+
+    /**
+     * Creates a new WFSSelectionAndCapabilities object.
+     *
+     * @param  features  DOCUMENT ME!
+     */
+    public WFSSelectionAndCapabilities(final FeatureType[] features) {
+        this.features = features;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -44,26 +61,53 @@ public class WFSSelectionAndCapabilities {
      *
      * @return  DOCUMENT ME!
      */
-    public String getName() {
-        return feature.getPrefixedNameString();
+    public FeatureType[] getFeatures() {
+        return features;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return      DOCUMENT ME!
+     *
+     * @deprecated  getFeatures()[0].getPrefixedNameString() should be used
+     */
+    public String getName() {
+        if (feature != null) {
+            return feature.getPrefixedNameString();
+        } else {
+            return getFeatures()[0].getPrefixedNameString();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return      DOCUMENT ME!
+     *
+     * @deprecated  getFeatures()[0].getWfsCapabilities().getURL().toString() should be used
      */
     public String getHost() {
-        return feature.getWFSCapabilities().getURL().toString();
+        if (feature != null) {
+            return feature.getWFSCapabilities().getURL().toString();
+        } else {
+            return getFeatures()[0].getWFSCapabilities().getURL().toString();
+        }
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return      DOCUMENT ME!
+     *
+     * @deprecated  getFeatures()[0].getWFSQuery() should be used
      */
     public Element getQuery() {
-        return feature.getWFSQuery();
+        if (feature != null) {
+            return feature.getWFSQuery();
+        } else {
+            return getFeatures()[0].getWFSQuery();
+        }
     }
 
     /**
@@ -78,18 +122,30 @@ public class WFSSelectionAndCapabilities {
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return      DOCUMENT ME!
+     *
+     * @deprecated  getFeatures()[0] should be used
      */
     public FeatureType getFeature() {
-        return feature;
+        if (feature != null) {
+            return feature;
+        } else {
+            return getFeatures()[0];
+        }
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return      DOCUMENT ME!
+     *
+     * @deprecated  getFeatures()[0].getFeatureAttributes() should be used
      */
     public Vector<FeatureServiceAttribute> getAttributes() {
-        return feature.getFeatureAttributes();
+        if (feature != null) {
+            return feature.getFeatureAttributes();
+        } else {
+            return getFeatures()[0].getFeatureAttributes();
+        }
     }
 }

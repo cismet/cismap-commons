@@ -1999,13 +1999,19 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 }
                 // TODO ein Transferable zum Testen erstellen
                 if (getSelectionModel().getSelectionPath().getLastPathComponent() instanceof FeatureType) {
-                    final FeatureType feature = (FeatureType)getSelectionModel().getSelectionPath()
-                                .getLastPathComponent();
-                    trans = new DefaultTransferable(new WFSSelectionAndCapabilities(feature));
+                    final TreePath[] paths = getSelectionModel().getSelectionPaths();
+                    final FeatureType[] features = new FeatureType[paths.length];
+
+                    for (int i = 0; i < paths.length; ++i) {
+                        features[i] = (FeatureType)paths[i].getLastPathComponent();
+                    }
+
+                    trans = new DefaultTransferable(new WFSSelectionAndCapabilities(features));
                 }
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
         }
+
         /**
          * unbenutzte DnD-Methoden.
          *
