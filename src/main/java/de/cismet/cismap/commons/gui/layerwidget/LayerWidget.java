@@ -71,6 +71,7 @@ import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.util.DnDUtils;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wms.capabilities.*;
 
 import de.cismet.tools.configuration.Configurable;
@@ -990,39 +991,53 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 else if (o instanceof WFSSelectionAndCapabilities) {
                     final WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities)o;
 
-                    final WebFeatureService wfs = new WebFeatureService(sac.getName(),
-                            sac.getHost(),
-                            sac.getQuery(),
-                            sac.getAttributes(),
-                            sac.getFeature());
-                    if ((sac.getIdentifier() != null) && (sac.getIdentifier().length() > 0)) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier()
-                                        + "' (EXPRESSIONTYPE_PROPERTYNAME)");        // NOI18N
-                        }
-                        wfs.getLayerProperties()
-                                .setPrimaryAnnotationExpression(sac.getIdentifier(),
-                                    LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-                    } else {
-                        LOG.warn("could not determine PrimaryAnnotationExpression"); // NOI18N
-                    }
+                    for (final FeatureType feature : sac.getFeatures()) {
+                        try {
+                            final WebFeatureService wfs = new WebFeatureService(feature.getPrefixedNameString(),
+                                    feature.getWFSCapabilities().getURL().toString(),
+                                    feature.getWFSQuery(),
+                                    feature.getFeatureAttributes(),
+                                    feature);
+                            if ((sac.getIdentifier() != null) && (sac.getIdentifier().length() > 0)) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("setting PrimaryAnnotationExpression of WFS Layer to '"
+                                                + sac.getIdentifier()
+                                                + "' (EXPRESSIONTYPE_PROPERTYNAME)");        // NOI18N
+                                }
+                                wfs.getLayerProperties()
+                                        .setPrimaryAnnotationExpression(sac.getIdentifier(),
+                                            LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+                            } else {
+                                LOG.warn("could not determine PrimaryAnnotationExpression"); // NOI18N
+                            }
 
-                    activeLayerModel.addLayer(wfs);
+                            activeLayerModel.addLayer(wfs);
+                        } catch (IllegalArgumentException schonVorhanden) {
+                            JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
+                                org.openide.util.NbBundle.getMessage(
+                                    LayerWidget.class,
+                                    "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                                org.openide.util.NbBundle.getMessage(
+                                    LayerWidget.class,
+                                    "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
+                                JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
                 }
             } catch (IllegalArgumentException schonVorhanden) {
                 JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
                     org.openide.util.NbBundle.getMessage(
                         LayerWidget.class,
-                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"),           // NOI18N
                     org.openide.util.NbBundle.getMessage(
                         LayerWidget.class,
-                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
+                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"),             // NOI18N
                     JOptionPane.ERROR_MESSAGE);
             } catch (Exception e) {
                 LOG.error(e, e);
             }
         } else {
-            LOG.warn("No Matching dataFlavour: " + dtde.getCurrentDataFlavorsAsList()); // NOI18N
+            LOG.warn("No Matching dataFlavour: " + dtde.getCurrentDataFlavorsAsList());         // NOI18N
         }
     }
 
