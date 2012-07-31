@@ -218,7 +218,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
         getPrintingRectangle().moveToFront();
         getPrintingRectangle().repaint();
 
-        if ((this.scaleDenominator != 0) && !mappingComponent.isFixedMapScale()) {
+        if ((this.scaleDenominator != 0)) {
             final PBounds b = getPrintingRectangle().getBounds();
             final PBounds mover = new PBounds(b.getX() - (b.getWidth() * (0.25 / 2.0)),
                     b.getY()
