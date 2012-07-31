@@ -10,6 +10,7 @@ package de.cismet.cismap.commons.gui;
 import com.vividsolutions.jts.geom.Point;
 
 import javax.swing.Action;
+import javax.swing.JMenu;
 
 /**
  * DOCUMENT ME!
@@ -51,4 +52,12 @@ public interface MapPopupAction extends Action, Comparable<MapPopupAction> {
      * @return  <code>true</code>, if the action shall be displayed, <code>false</code> otherwise
      */
     boolean isActive(boolean featuresSubjacent);
+
+    /**
+     * In some cases it's preferred to show a whole menu in the upcoming popup menu and not only one single menu item.
+     * If this method returns a JMenu object, it will be added to the popup menu instead of the MapPopupAction instance.
+     *
+     * @return  The menu to be shown in the upcoming popup menu.
+     */
+    JMenu getSubmenu();
 }
