@@ -22,6 +22,8 @@ import java.awt.geom.Point2D;
 import java.util.*;
 
 import javax.swing.Action;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
@@ -142,14 +144,21 @@ public class SelectionListener extends RectangleRubberBandListener {
 
             boolean first = true;
             for (final MapPopupAction action : popupActions) {
+                action.setPoint(point);
+
                 if (action.isActive(o instanceof PFeature)) {
                     if (first && (popup.getComponentCount() > 0)) {
                         popup.add(new JSeparator());
                         first = false;
                     }
 
-                    action.setPoint(point);
-                    popup.add(action);
+                    final JMenu submenu = action.getSubmenu();
+
+                    if (submenu != null) {
+                        popup.add(submenu);
+                    } else {
+                        popup.add(action);
+                    }
                 }
             }
 

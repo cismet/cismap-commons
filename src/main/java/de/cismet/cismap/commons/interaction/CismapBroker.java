@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
@@ -905,5 +906,64 @@ public class CismapBroker {
      */
     public void setDefaultCrsAlias(final int DefaultCrsAlias) {
         this.DefaultCrsAlias = DefaultCrsAlias;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   code  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Crs crsFromCode(final String code) {
+        Crs result = null;
+
+        if ((code == null) || code.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("The given code is null or empty. Can't find a Crs object without a code.");
+            }
+
+            return result;
+        }
+
+        if (mappingComponent == null) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                    "CismapBroker didn't provide a mapping component. So it's impossible to retrieve the crs list.");
+            }
+
+            return result;
+        }
+
+        final List<Crs> crsList = mappingComponent.getCrsList();
+        if ((crsList == null) || crsList.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                    "The crs list of the mapping component is empty. So it's impossible to find a matching Crs object.");
+            }
+
+            return result;
+        }
+
+        final String matchCode;
+        if (!code.toUpperCase().startsWith("EPSG:")) {
+            matchCode = "EPSG:".concat(code);
+        } else {
+            matchCode = code;
+        }
+
+        for (final Crs crs : crsList) {
+            if ((crs != null) && (crs.getCode() != null) && crs.getCode().equalsIgnoreCase(matchCode)) {
+                result = crs;
+            }
+        }
+
+        if (result == null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Couldn't find a crs for code '" + code + "' in crs list '" + crsList + "'.");
+            }
+        }
+
+        return result;
     }
 }

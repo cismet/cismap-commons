@@ -113,6 +113,7 @@ import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.configuration.Configurable;
 
+import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
@@ -305,7 +306,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                 "OGC-Web Security Service"
                             };                                                                         // NOI18N
                         final Object selectedValue = JOptionPane.showInputDialog(
-                                CapabilityWidget.this,
+                                StaticSwingTools.getParentFrame(CapabilityWidget.this),
                                 org.openide.util.NbBundle.getMessage(
                                     CapabilityWidget.class,
                                     "CapabilityWidget.processUrl(String,String,boolean).JOptionPane.message",
@@ -1605,7 +1606,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      * @param  trvCap  DOCUMENT ME!
      */
     private void addPopupMenu(final DragTree trvCap) {
-        trvCap.addMouseListener(new LayerMouseListener());
+        trvCap.addMouseListener(new DefaultPopupMenuListener(treePopMenu));
     }
 
     /**
@@ -1854,61 +1855,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @version  $Revision$, $Date$
      */
-    class LayerMouseListener extends MouseAdapter {
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  e  DOCUMENT ME!
-         */
-        @Override
-        public void mousePressed(final MouseEvent e) {
-            processPopup(e);
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  e  DOCUMENT ME!
-         */
-        @Override
-        public void mouseReleased(final MouseEvent e) {
-            processPopup(e);
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  e  DOCUMENT ME!
-         */
-        public void processPopup(final MouseEvent e) {
-            // Under Windows: isPopupTrigger returns true when the right mouse button is pressed
-            // and a mouse released event is thrown
-            // Under Linux: isPopupTrigger returns true when the right mouse button is pressed
-            // and a mouse pressed event is thrown
-            if ((e.isPopupTrigger()) && (e.getSource() instanceof DragTree)) {
-                try {
-                    final JTree currentTree = (JTree)e.getSource();
-                    final TreePath selPath = currentTree.getPathForLocation(e.getX(), e.getY());
-                    if (selPath != null) {
-                        currentTree.setSelectionPath(selPath);
-                    }
-                } catch (Exception ex) {
-                    log.error("Error during on-the-fly-selection", ex);
-                }
-
-                CapabilityWidget.this.treePopMenu.show(e.getComponent(), e.getX(), e.getY());
-            }
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
     class DragTree extends JTree implements DragGestureListener, DragSourceListener {
 
         //~ Instance fields ----------------------------------------------------
@@ -1999,13 +1945,19 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 }
                 // TODO ein Transferable zum Testen erstellen
                 if (getSelectionModel().getSelectionPath().getLastPathComponent() instanceof FeatureType) {
-                    final FeatureType feature = (FeatureType)getSelectionModel().getSelectionPath()
-                                .getLastPathComponent();
-                    trans = new DefaultTransferable(new WFSSelectionAndCapabilities(feature));
+                    final TreePath[] paths = getSelectionModel().getSelectionPaths();
+                    final FeatureType[] features = new FeatureType[paths.length];
+
+                    for (int i = 0; i < paths.length; ++i) {
+                        features[i] = (FeatureType)paths[i].getLastPathComponent();
+                    }
+
+                    trans = new DefaultTransferable(new WFSSelectionAndCapabilities(features));
                 }
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
         }
+
         /**
          * unbenutzte DnD-Methoden.
          *

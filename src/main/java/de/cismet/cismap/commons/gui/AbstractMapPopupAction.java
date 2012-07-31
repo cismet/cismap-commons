@@ -10,6 +10,7 @@ package de.cismet.cismap.commons.gui;
 import com.vividsolutions.jts.geom.Point;
 
 import javax.swing.AbstractAction;
+import javax.swing.JMenu;
 
 /**
  * DOCUMENT ME!
@@ -77,5 +78,10 @@ public abstract class AbstractMapPopupAction extends AbstractAction implements M
     @Override
     public int compareTo(final MapPopupAction other) {
         return getPosition() - other.getPosition();
+    }
+
+    @Override
+    public JMenu getSubmenu() {
+        return null;
     }
 }

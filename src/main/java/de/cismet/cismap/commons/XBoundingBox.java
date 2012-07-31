@@ -14,6 +14,7 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.impl.CoordinateArraySequence;
 
+import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
@@ -57,6 +58,32 @@ public class XBoundingBox extends BoundingBox {
     /**
      * Creates a new XBoundingBox object.
      *
+     * @param   boundingBoxElementParent  DOCUMENT ME!
+     *
+     * @throws  DataConversionException  DOCUMENT ME!
+     */
+    public XBoundingBox(final Element boundingBoxElementParent) throws DataConversionException {
+        super(boundingBoxElementParent);
+
+        final Element conf = boundingBoxElementParent.getChild("BoundingBox"); // NOI18N
+        final Attribute attributeSrs = conf.getAttribute("srs");               // NOI18N
+        final Attribute attributeMetric = conf.getAttribute("metric");         // NOI18N
+
+        if (attributeSrs != null) {
+            this.srs = attributeSrs.getValue();
+        } else {
+            this.srs = null;
+        }
+        if (attributeMetric != null) {
+            this.metric = attributeMetric.getBooleanValue();
+        } else {
+            this.metric = false;
+        }
+    }
+
+    /**
+     * Creates a new XBoundingBox object.
+     *
      * @param  geom    DOCUMENT ME!
      * @param  crs     DOCUMENT ME!
      * @param  metric  DOCUMENT ME!
@@ -82,6 +109,7 @@ public class XBoundingBox extends BoundingBox {
         this.srs = srs;
         this.metric = metric;
     }
+
     /**
      * Creates a new instance of XBoundingBox.
      *
@@ -160,5 +188,15 @@ public class XBoundingBox extends BoundingBox {
         final LinearRing ring = new LinearRing(new CoordinateArraySequence(bbox), factory);
 
         return factory.createPolygon(ring, new LinearRing[0]);
+    }
+
+    @Override
+    public Element getJDOMElement() {
+        final Element result = super.getJDOMElement();
+
+        result.setAttribute(new Attribute("srs", srs));
+        result.setAttribute(new Attribute("metric", Boolean.toString(metric)));
+
+        return result;
     }
 }

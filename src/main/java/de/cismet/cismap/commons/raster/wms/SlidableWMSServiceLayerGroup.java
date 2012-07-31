@@ -11,6 +11,7 @@ import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
 
+import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
@@ -41,8 +42,10 @@ import javax.swing.event.ChangeListener;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.FloatingControlProvider;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.XPImage;
@@ -55,7 +58,10 @@ import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
+import de.cismet.cismap.commons.wms.capabilities.Envelope;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
+import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
+import de.cismet.cismap.commons.wms.capabilities.Position;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 /**
@@ -100,6 +106,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private String preferredExceptionsFormat;
     private String capabilitiesUrl = null;
     private WMSCapabilities wmsCapabilities;
+    private XBoundingBox boundingBox;
+    private String customSLD;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -111,9 +119,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     public SlidableWMSServiceLayerGroup(final List treePaths) {
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         final TreePath tp = ((TreePath)treePaths.get(0));
-        final Layer[] children = ((de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent())
-                    .getChildren();
-        setName(((de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent()).getTitle());
+        final Layer selectedLayer = (de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent();
+        final Layer[] children = selectedLayer.getChildren();
+
+        setName(selectedLayer.getTitle());
 
         for (final Object path : tp.getPath()) {
             if (path instanceof Layer) {
@@ -125,10 +134,71 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
         }
 
+        double maxx = Double.NaN;
+        double minx = Double.NaN;
+        double maxy = Double.NaN;
+        double miny = Double.NaN;
+        String srsCode = null;
+        boolean usesMultipleSrs = false;
         for (final Layer l : children) {
             final WMSServiceLayer wsl = new WMSServiceLayer(l);
             layers.add(wsl);
+
+            final Position min;
+            final Position max;
+            final LayerBoundingBox[] boundingBoxes = l.getBoundingBoxes();
+            if (boundingBoxes.length > 0) {
+                min = boundingBoxes[0].getMin();
+                max = boundingBoxes[0].getMax();
+
+                if (srsCode == null) {
+                    srsCode = boundingBoxes[0].getSRS();
+                } else if (!srsCode.equalsIgnoreCase(boundingBoxes[0].getSRS())) {
+                    usesMultipleSrs = true;
+                }
+            } else {
+                final Envelope envelope = l.getLatLonBoundingBoxes();
+                min = envelope.getMin();
+                max = envelope.getMax();
+
+                if (srsCode == null) {
+                    srsCode = "EPSG:4326";
+                } else if (!srsCode.equalsIgnoreCase("EPSG:4326")) {
+                    usesMultipleSrs = true;
+                }
+            }
+            if ((Double.isNaN(maxx)) || (maxx < max.getX())) {
+                maxx = max.getX();
+            }
+            if ((Double.isNaN(minx)) || (minx > min.getX())) {
+                minx = min.getX();
+            }
+            if ((Double.isNaN(maxy)) || (maxy < max.getY())) {
+                maxy = max.getY();
+            }
+            if ((Double.isNaN(miny)) || (miny > min.getY())) {
+                miny = min.getY();
+            }
         }
+
+        if (!usesMultipleSrs && (maxx != Double.NaN) && (minx != Double.NaN) && (maxy != Double.NaN)
+                    && (miny != Double.NaN)) {
+            final Crs srs = CismapBroker.getInstance().crsFromCode(srsCode);
+
+            if (srs != null) {
+                this.boundingBox = new XBoundingBox(minx, miny, maxx, maxy, srs.getCode(), srs.isMetric());
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Layer's SRS code '" + srsCode + "' isn't available in cismap.");
+                }
+            }
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("The children of '" + getName()
+                            + "' whether use multiple srs or don't have valid bounding boxes.");
+            }
+        }
+
         init();
     }
 
@@ -181,6 +251,12 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             LOG.warn("Child element capabilities not found.", e);
         }
 
+        try {
+            boundingBox = new XBoundingBox(element);
+        } catch (final Exception ex) {
+            LOG.warn("Child element BoundingBox not found.", ex);
+        }
+
         final Element layersElement = element.getChild("layers");
         final List layersList = layersElement.getChildren();
 
@@ -199,19 +275,53 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * @param  layers           DOCUMENT ME!
      * @param  wmsCapabilities  DOCUMENT ME!
      * @param  capabilitiesUrl  DOCUMENT ME!
+     * @param  srs              DOCUMENT ME!
      */
     public SlidableWMSServiceLayerGroup(final String name,
             final String completePath,
             final Collection<Layer> layers,
             final WMSCapabilities wmsCapabilities,
-            final String capabilitiesUrl) {
+            final String capabilitiesUrl,
+            final Crs srs) {
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         setName(name);
         this.completePath = completePath;
         this.wmsCapabilities = wmsCapabilities;
 
-        for (final Layer layer : layers) {
-            this.layers.add(new WMSServiceLayer(layer));
+        double maxx = Double.NaN;
+        double minx = Double.NaN;
+        double maxy = Double.NaN;
+        double miny = Double.NaN;
+        for (final Layer l : layers) {
+            this.layers.add(new WMSServiceLayer(l));
+
+            final Position min;
+            final Position max;
+            final LayerBoundingBox[] boundingBoxes = l.getBoundingBoxes();
+            if (boundingBoxes.length > 0) {
+                min = boundingBoxes[0].getMin();
+                max = boundingBoxes[0].getMax();
+            } else {
+                final Envelope envelope = l.getLatLonBoundingBoxes();
+                min = envelope.getMin();
+                max = envelope.getMax();
+            }
+            if ((Double.isNaN(maxx)) || (maxx < max.getX())) {
+                maxx = max.getX();
+            }
+            if ((Double.isNaN(minx)) || (minx > min.getX())) {
+                minx = min.getX();
+            }
+            if ((Double.isNaN(maxy)) || (maxy < max.getY())) {
+                maxy = max.getY();
+            }
+            if ((Double.isNaN(miny)) || (miny > min.getY())) {
+                miny = min.getY();
+            }
+        }
+
+        if ((maxx != Double.NaN) && (minx != Double.NaN) && (maxy != Double.NaN) && (miny != Double.NaN)) {
+            this.boundingBox = new XBoundingBox(minx, miny, maxx, maxy, srs.getCode(), srs.isMetric());
         }
 
         setWmsCapabilities(wmsCapabilities);
@@ -402,12 +512,20 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         final Hashtable lableTable = new Hashtable();
         int x = 0;
         for (final WMSServiceLayer wsl : layers) {
-            String layerName = wsl.getName();
-            if (layerName.length() > 6) {
-                layerName = layerName.charAt(0) + "." + layerName.substring(layerName.length() - 4); // NOI18N
+            String layerTitle = wsl.getTitle();
+            if (layerTitle == null) {
+                layerTitle = wsl.getName();
             }
 
-            final JLabel label = new JLabel(layerName);
+            if ((layerTitle != null) && (layerTitle.length() > 8)) {
+                layerTitle = layerTitle.substring(0, 3) + "." + layerTitle.substring(layerTitle.length() - 4); // NOI18N
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No title found for WMSServiceLayer '" + wsl + "'.");
+                }
+            }
+
+            final JLabel label = new JLabel(layerTitle);
             final Font font = label.getFont().deriveFont(10f);
             label.setFont(font);
             lableTable.put(Integer.valueOf(x * 100), label);
@@ -504,6 +622,47 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     @Override
     public float getTranslucency() {
         return pnode.getTransparency();
+    }
+
+    /**
+     * Provides the bounding box of this layer. The bounding box represents the extent of the children's bounding boxes.
+     *
+     * @return  Extent of this layer.
+     */
+    public XBoundingBox getBoundingBox() {
+        return boundingBox;
+    }
+
+    /**
+     * Returns the path of this layer. It's formatted by concatenating the names of parent layers with '/' as delimiter.
+     * /[<...>/]<Name of grand parent>/<Name of parent>/<Name of this layer>
+     *
+     * @return  Extent of this layer.
+     */
+    public String getPath() {
+        return completePath;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  customSLD  DOCUMENT ME!
+     */
+    public void setCustomSLD(final String customSLD) {
+        this.customSLD = customSLD;
+
+        for (final WMSServiceLayer layer : layers) {
+            layer.setCustomSLD(this.customSLD);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getCustomSLD() {
+        return customSLD;
     }
 
     @Override
@@ -681,6 +840,11 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         element.setAttribute("imageFormat", preferredRasterFormat);
         element.setAttribute("exceptionFormat", preferredExceptionsFormat);
         element.setAttribute("completePath", completePath);
+
+        if (boundingBox != null) {
+            element.addContent(boundingBox.getJDOMElement());
+        }
+
         final Element capElement = new Element("capabilities"); // NOI18N
         final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, capabilitiesUrl, false);
         capElement.addContent(capLink.getElement());
