@@ -11,6 +11,7 @@ import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
 
+import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
@@ -55,6 +56,43 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
     private static final transient Logger LOG = Logger.getLogger(WMSServiceLayer.class);
 
+    private static final String TEMPLATETOKEN_WIDTH = "<cismap:width>";                       // NOI18N
+    private static final String TEMPLATETOKEN_HEIGHT = "<cismap:height>";                     // NOI18N
+    private static final String TEMPLATETOKEN_BOUNDINGBOX_LL_X = "<cismap:boundingBox_ll_x>"; // NOI18N
+    private static final String TEMPLATETOKEN_BOUNDINGBOX_LL_Y = "<cismap:boundingBox_ll_y>"; // NOI18N
+    private static final String TEMPLATETOKEN_BOUNDINGBOX_UR_X = "<cismap:boundingBox_ur_x>"; // NOI18N
+    private static final String TEMPLATETOKEN_BOUNDINGBOX_UR_Y = "<cismap:boundingBox_ur_y>"; // NOI18N
+    private static final String TEMPLATETOKEN_SRS = "<cismap:srs>";                           // NOI18N
+    private static final String TEMPLATETOKEN_CUSTOMSTYLE = "<cismap:customStyle>";           // NOI18N
+    public static final String TEMPLATETOKEN_CUSTOMSTYLE_LAYERNAME = "<cismap:layerName>";    // NOI18N
+    public static final String TEMPLATETOKEN_CUSTOMSTYLE_TITLE = "<cismap:title>";            // NOI18N
+
+    private static final String EPSG_NAMESPACE = "http://www.opengis.net/gml/srs/epsg.xml"; // NOI18N
+
+    private static final String TEMPLATE_GETMAP_PAYLOAD = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                + "<GetMap xmlns:ows=\"http://www.opengis.net/ows\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:gml=\"http://www.opengis.net/gml\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.1.1\" service=\"WMS\">"
+                + TEMPLATETOKEN_CUSTOMSTYLE
+                + "<BoundingBox srsName=\"" + EPSG_NAMESPACE + "#" + TEMPLATETOKEN_SRS + "\">"
+                + "<gml:coord>"
+                + "<gml:X>" + TEMPLATETOKEN_BOUNDINGBOX_LL_X + "</gml:X>"
+                + "<gml:Y>" + TEMPLATETOKEN_BOUNDINGBOX_LL_Y + "</gml:Y>"
+                + "</gml:coord>"
+                + "<gml:coord>"
+                + "<gml:X>" + TEMPLATETOKEN_BOUNDINGBOX_UR_X + "</gml:X>"
+                + "<gml:Y>" + TEMPLATETOKEN_BOUNDINGBOX_UR_Y + "</gml:Y>"
+                + "</gml:coord>"
+                + "</BoundingBox>"
+                + "<Output>"
+                + "<Format>image/png</Format>"
+                + "<Size>"
+                + "<Width>" + TEMPLATETOKEN_WIDTH + "</Width>"
+                + "<Height>" + TEMPLATETOKEN_HEIGHT + "</Height>"
+                + "</Size>"
+                + "<Transparent>true</Transparent>"
+                + "</Output>"
+                + "<Exceptions>application/vnd.ogc.se+xml</Exceptions>"
+                + "</GetMap>";
+
     //~ Instance fields --------------------------------------------------------
 
     List wmsLayers = new ArrayList();
@@ -66,8 +104,10 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     private String exceptionsFormat = null;
     private boolean transparentImage = true;
     private String srs;
+    private String title;
     private WMSCapabilities wmsCapabilities;
     private String capabilitiesUrl;
+    private String customSLD;
     // Used by clone()
     private List treePaths;
     private Element wmsServiceLayerElement;
@@ -125,10 +165,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     /**
      * Creates a new WMSServiceLayer object.
      *
-     * @param  l  DOCUMENT ME!
+     * @param  l  The layer from which to create a WMSServiceLayer.
      */
     public WMSServiceLayer(final Layer l) {
-        setName(l.getTitle());
+        setTitle(l.getTitle());
+        setName(l.getName());
         addLayer(l);
     }
 
@@ -149,6 +190,24 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     //~ Methods ----------------------------------------------------------------
 
     /**
+     * Sets the tile of this layer. TODO: Move to upper class
+     *
+     * @param  title  The title.
+     */
+    public void setTitle(final String title) {
+        this.title = title;
+    }
+
+    /**
+     * Returns the title of this layer.
+     *
+     * @return  The title.
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
      * DOCUMENT ME!
      *
      * @param  wmsServiceLayerElement  DOCUMENT ME!
@@ -159,6 +218,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             final HashMap<String, WMSCapabilities> capabilities,
             final boolean loadCapDoc) {
         setName(wmsServiceLayerElement.getAttribute("name").getValue()); // NOI18N
+
+        final Attribute attributeTitle = wmsServiceLayerElement.getAttribute("title"); // NOI18N
+        if (attributeTitle != null) {
+            setTitle(attributeTitle.getValue());
+        }
 
         try {
             setEnabled(wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());         // NOI18N
@@ -422,52 +486,66 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     public void retrieve(final boolean forced) {
         if (isDummy()) {
             init(wmsServiceLayerElement, capabilities, true);
+
             if (!isDummy()) {
                 setEnabled(true);
                 dummyLayer = null;
+
                 final StatusEvent se = new StatusEvent(StatusEvent.AWAKED_FROM_DUMMY, this);
                 CismapBroker.getInstance().fireStatusValueChanged(se);
             }
         }
+
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("retrieve()", new Exception()); // NOI18N
             }
         }
+
         setRefreshNeeded(false);
-        if ((ir != null) && ir.isAlive() && ir.getUrl().equals(getGetMapUrl()) && !forced) {
+        final String getMapUrl = getGetMapUrl(customSLD != null);
+        final String getMapPayload = getGetMapPayload();
+
+        if ((ir != null) && ir.isAlive() && ir.getUrl().equals(getMapUrl) && !forced) {
             if (LOG.isDebugEnabled()) {
-                // macht nix
-                // mehrfachaufruf mit der gleichen url = unsinn
-                LOG.debug("multiple invocations with the same url = humbug"); // NOI18N
+                LOG.debug("Multiple invocations with the same url. Skipping this invocation."); // NOI18N
             }
         } else if ((width < 1) || (height < 1)) {
             if (LOG.isDebugEnabled()) {
-                // do nothing. Otherwise the wms will response with an exception
-                LOG.debug("width or height is less then 1");
+                // NoOp. Otherwise the wms will response with an exception.
+                LOG.debug("Width or height is less than 1. Skipping retrieval.");
             }
         } else {
             if ((ir != null) && ir.isAlive()) {
-                // LOG.fatal("Versuche den vorherigen Retrievalprozess zu stoppen. (interrupt())");
                 ir.youngerWMSCall();
                 ir.interrupt();
 
                 retrievalAborted(new RetrievalEvent());
             }
+
             ir = new ImageRetrieval(this);
+
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("getMapURL(): " + getGetMapUrl()); // NOI18N
+                    LOG.debug("getGetMapURL(): " + getMapUrl); // NOI18N
                 }
             }
-            ir.setUrl(getGetMapUrl());
+
+            ir.setUrl(getMapUrl);
+
+            if (getMapPayload != null) {
+                ir.setPayload(getMapPayload);
+            }
+
             // new
             ir.setWMSCapabilities(getWmsCapabilities());
+
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("ir.start();"); // NOI18N
                 }
             }
+
             ir.setPriority(Thread.NORM_PRIORITY);
             ir.start();
         }
@@ -589,56 +667,96 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     }
 
     /**
-     * DOCUMENT ME!
+     * Generates the URL for the GetMap request.
      *
-     * @return  DOCUMENT ME!
+     * @param   minimalUrl  Specifies if the generated url shall only contain the necessary parameters.
+     *
+     * @return  The GetMap request url.
      */
-    private String getGetMapUrl() {
-        String url = getGetMapPrefix();
+    private String getGetMapUrl(final boolean minimalUrl) {
+        final StringBuilder url = new StringBuilder(getGetMapPrefix());
 
-        if ((bb != null) && (url != null)) {
-            if (url.indexOf("?") < 0)                                                                         // NOI18N
-            {
-                url += "?";                                                                                   // NOI18N
-            }
-            final String version = getWmsCapabilities().getVersion();
-            if (version.trim().equals("1.0.0") || version.trim().equals("1.0") || version.trim().equals("1")) // NOI18N
-            {
-                url += "&WMTVER=1.0.0&REQUEST=map";                                                           // NOI18N
-            } else {
-                url += "&VERSION=" + version + "&REQUEST=GetMap";                                             // NOI18N
-            }
-            url += "&BBOX=" + bb.getURLString();                                                              // NOI18N
-            url += "&WIDTH=" + width;                                                                         // NOI18N
-            url += "&HEIGHT=" + height;                                                                       // NOI18N
-
-            if (version.trim().equals("1.3") || version.trim().equals("1.3.0")) {
-                url += "&CRS=" + srs;                                                            // NOI18N
-            } else {
-                url += "&SRS=" + srs;                                                            // NOI18N
-            }
-            url += "&FORMAT=" + imageFormat;                                                     // NOI18N
-            url += "&TRANSPARENT=" + Boolean.valueOf(transparentImage).toString().toUpperCase(); // NOI18N
-            url += "&BGCOLOR=" + getBackgroundColor();                                           // NOI18N
-            url += "&EXCEPTIONS=" + exceptionsFormat;                                            // NOI18N
-            url += getLayersString(wmsLayers);
-            if (hasEveryLayerAStyle(wmsLayers)) {
-                // the styles parameter must contain the same number of values as the layers parameter.
-                // If this requirement cannot be fulfilled, the style parameter should be sent without a value due
-                // to generate a valid request.
-                url += getStylesString(wmsLayers);
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(
-                        "style parameter was added without a value to the getMap Request, because not every layer, " // NOI18N
-                                + "which is used within the request has a selected style");                          // NOI18N
-                }
-                url += "&STYLES=";
-            }
-            return url;
-        } else {
+        if ((bb == null) || (url == null) || (url.length() == 0)) {
             return null;
         }
+
+        if (url.indexOf("?") < 0) {
+            url.append("?"); // NOI18N
+        }
+
+        final String version = getWmsCapabilities().getVersion();
+        if (version.trim().equals("1.0.0") || version.trim().equals("1.0") || version.trim().equals("1")) {
+            url.append("&WMTVER=1.0.0&REQUEST=map"); // NOI18N
+        } else {
+            url.append("&VERSION=").append(version);
+            url.append("&REQUEST=GetMap");           // NOI18N
+        }
+
+        url.append("&BBOX=").append(bb.getURLString()); // NOI18N
+        url.append("&WIDTH=").append(width);            // NOI18N
+        url.append("&HEIGHT=").append(height);          // NOI18N
+
+        if (minimalUrl) {
+            return url.toString();
+        }
+
+        if (version.trim().equals("1.3") || version.trim().equals("1.3.0")) {
+            url.append("&CRS="); // NOI18N
+        } else {
+            url.append("&SRS="); // NOI18N
+        }
+        url.append(srs);
+
+        url.append("&FORMAT=").append(imageFormat);                                                     // NOI18N
+        url.append("&TRANSPARENT=").append(Boolean.valueOf(transparentImage).toString().toUpperCase()); // NOI18N
+        url.append("&BGCOLOR=").append(getBackgroundColor());                                           // NOI18N
+        url.append("&EXCEPTIONS=").append(exceptionsFormat);                                            // NOI18N
+
+        url.append(getLayersString(wmsLayers));
+        if (hasEveryLayerAStyle(wmsLayers)) {
+            // the styles parameter must contain the same number of values as the layers parameter.
+            // If this requirement cannot be fulfilled, the style parameter should be sent without a value due
+            // to generate a valid request.
+            url.append(getStylesString(wmsLayers));
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(
+                    "style parameter was added without a value to the getMap Request, because not every layer, " // NOI18N
+                            + "which is used within the request has a selected style");                          // NOI18N
+            }
+            url.append("&STYLES=");
+        }
+
+        return url.toString();
+    }
+
+    /**
+     * Generates the payload for the GetMap request. The payload will only be generated if there is a custom SLD, a SRS
+     * and a bounding box set.
+     *
+     * @return  The payload for the GetMap request.
+     */
+    private String getGetMapPayload() {
+        if ((customSLD == null) || (srs == null) || (bb == null)) {
+            return null;
+        }
+
+        String result = TEMPLATE_GETMAP_PAYLOAD;
+
+        result = result.replaceAll(
+                TEMPLATETOKEN_CUSTOMSTYLE,
+                customSLD.replaceAll(TEMPLATETOKEN_CUSTOMSTYLE_LAYERNAME, name));
+        result = result.replaceAll(
+                TEMPLATETOKEN_SRS,
+                srs.startsWith("EPSG:") ? srs.substring(srs.indexOf(':') + 1) : srs);
+        result = result.replaceAll(TEMPLATETOKEN_BOUNDINGBOX_LL_X, Double.toString(bb.getX1()));
+        result = result.replaceAll(TEMPLATETOKEN_BOUNDINGBOX_LL_Y, Double.toString(bb.getY1()));
+        result = result.replaceAll(TEMPLATETOKEN_BOUNDINGBOX_UR_X, Double.toString(bb.getX2()));
+        result = result.replaceAll(TEMPLATETOKEN_BOUNDINGBOX_UR_Y, Double.toString(bb.getY2()));
+        result = result.replaceAll(TEMPLATETOKEN_WIDTH, Integer.toString(width));
+        result = result.replaceAll(TEMPLATETOKEN_HEIGHT, Integer.toString(height));
+
+        return result;
     }
 
     /**
@@ -891,11 +1009,21 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     /**
      * DOCUMENT ME!
      *
+     * @param  customSLD  DOCUMENT ME!
+     */
+    public void setCustomSLD(final String customSLD) {
+        this.customSLD = customSLD;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
     public Element getElement() {
         final Element layerConf = new Element("WMSServiceLayer");                                              // NOI18N
         layerConf.setAttribute("name", getName());                                                             // NOI18N
+        layerConf.setAttribute("title", (title == null) ? "" : title);                                         // NOI18N
         layerConf.setAttribute("visible", Boolean.valueOf(getPNode().getVisible()).toString());                // NOI18N
         layerConf.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString());                            // NOI18N
         layerConf.setAttribute("translucency", new Float(getTranslucency()).toString());                       // NOI18N
@@ -907,6 +1035,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         if (isDummy()) {
             final Element wmsLayerConf = new Element("wmsLayer");                                              // NOI18N
             wmsLayerConf.setAttribute("name", dummyLayer.toString());                                          // NOI18N
+            wmsLayerConf.setAttribute("title", dummyLayer.toString());                                         // NOI18N
             wmsLayerConf.setAttribute("enabled", Boolean.valueOf(dummyLayer.isEnabled()).toString());          // NOI18N
             wmsLayerConf.setAttribute("style", dummyLayer.getStyleName());                                     // NOI18N
             wmsLayerConf.setAttribute("info", Boolean.valueOf(dummyLayer.isQuerySelected()).toString());       // NOI18N
@@ -919,6 +1048,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                     final WMSLayer wmsLayer = (WMSLayer)elem;
                     final Element wmsLayerConf = new Element("wmsLayer");                                      // NOI18N
                     wmsLayerConf.setAttribute("name", wmsLayer.getOgcCapabilitiesLayer().getName());           // NOI18N
+                    wmsLayerConf.setAttribute("title", wmsLayer.getOgcCapabilitiesLayer().getTitle());         // NOI18N
                     wmsLayerConf.setAttribute("enabled", Boolean.valueOf(wmsLayer.isEnabled()).toString());    // NOI18N
                     try {
                         wmsLayerConf.setAttribute("style", wmsLayer.getSelectedStyle().getName());             // NOI18N
