@@ -8,6 +8,8 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 import java.util.Collection;
 
@@ -123,25 +125,29 @@ public final class FeatureGroups {
      * @return  DOCUMENT ME!
      */
     public static Geometry getEnclosingGeometry(final Collection<? extends Feature> featureCollection) {
-        Geometry g = null;
-        for (final Feature f : featureCollection) {
-            final Geometry newGeom = f.getGeometry();
-            if (newGeom != null) {
-                if (g == null) {
-                    g = newGeom;
+        final GeometryFactory factory = new GeometryFactory();
+
+        final Geometry[] array = new Geometry[featureCollection.size()];
+        int i = 0;
+        try {
+            for (final Feature f : featureCollection) {
+                final Geometry newGeom = f.getGeometry();
+                if (newGeom != null) {
                     if (FeatureGroups.SHOW_GROUPS_AS_ENVELOPES) {
-                        g = g.getEnvelope();
-                    }
-                } else {
-                    if (FeatureGroups.SHOW_GROUPS_AS_ENVELOPES) {
-                        g = g.union(newGeom.getEnvelope()).getEnvelope();
+                        array[i++] = newGeom.getEnvelope();
                     } else {
-                        g = g.union(newGeom);
+                        array[i++] = newGeom;
                     }
                 }
             }
+            final GeometryCollection collection = factory.createGeometryCollection(array);
+            final Geometry union = collection.buffer(0);
+            return union;
+        } catch (Exception e) {
+            log.error("Error during creation of enclosing geom", e);
         }
-        return g;
+
+        return null;
     }
 
     /**
