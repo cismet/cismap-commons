@@ -50,14 +50,12 @@ import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
 import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
-import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
-import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerTableCellEditor;
-import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerTableCellRenderer;
-import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerTreeCellRenderer;
+import de.cismet.cismap.commons.gui.layerwidget.*;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
@@ -518,29 +516,43 @@ public class NewSimpleInternalLayerWidget extends JInternalFrame implements Mapp
             }                                                                                                      // Drop-Objekt war ein WFS-Element
             else if (trasferData instanceof WFSSelectionAndCapabilities) {
                 final WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities)trasferData;
-                final WebFeatureService wfs = new WebFeatureService(sac.getName(),
-                        sac.getHost(),
-                        sac.getQuery(),
-                        sac.getAttributes(),
-                        sac.getFeature());
-                if (log.isDebugEnabled()) {
-                    log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier()
-                                + "' (EXPRESSIONTYPE_PROPERTYNAME)");                                              // NOI18N
+                for (final FeatureType feature : sac.getFeatures()) {
+                    try {
+                        final WebFeatureService wfs = new WebFeatureService(feature.getPrefixedNameString(),
+                                feature.getWFSCapabilities().getURL().toString(),
+                                feature.getWFSQuery(),
+                                feature.getFeatureAttributes(),
+                                feature);
+
+                        if (log.isDebugEnabled()) {
+                            log.debug("setting PrimaryAnnotationExpression of WFS Layer to '" + sac.getIdentifier()
+                                        + "' (EXPRESSIONTYPE_PROPERTYNAME)");                 // NOI18N
+                        }
+                        wfs.getLayerProperties()
+                                .setPrimaryAnnotationExpression(sac.getIdentifier(),
+                                    LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
+                        activeLayerModel.addLayer(wfs);
+                    } catch (IllegalArgumentException schonVorhanden) {
+                        JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
+                            org.openide.util.NbBundle.getMessage(
+                                LayerWidget.class,
+                                "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
+                            org.openide.util.NbBundle.getMessage(
+                                LayerWidget.class,
+                                "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"),   // NOI18N
+                            JOptionPane.ERROR_MESSAGE);
+                    }
                 }
-                wfs.getLayerProperties()
-                        .setPrimaryAnnotationExpression(sac.getIdentifier(),
-                            LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-                activeLayerModel.addLayer(wfs);
+                scpMain.setViewportView(treeTable);
             }
-            scpMain.setViewportView(treeTable);
         } catch (IllegalArgumentException schonVorhanden) {
             JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
                     NewSimpleInternalLayerWidget.class,
-                    "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.message"),                 // NOI18N
+                    "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
                 org.openide.util.NbBundle.getMessage(
                     NewSimpleInternalLayerWidget.class,
-                    "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.title"),                   // NOI18N
+                    "NewSimpleInternalLayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
                 JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
             log.error(e, e);
