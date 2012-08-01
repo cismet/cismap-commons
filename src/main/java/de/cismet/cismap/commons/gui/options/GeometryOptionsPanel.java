@@ -103,7 +103,8 @@ public class GeometryOptionsPanel extends AbstractOptionsPanel implements Option
 
     @Override
     public String getTooltip() {
-        return "";
+        return org.openide.util.NbBundle.getMessage(GeometryOptionsPanel.class,
+                "GeometryOptionsPanel.tooltip"); // NOI18N
     }
 
     /**
