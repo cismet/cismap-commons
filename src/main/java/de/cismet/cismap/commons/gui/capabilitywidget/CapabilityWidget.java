@@ -73,6 +73,7 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -157,6 +158,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private CapabilityWidget thisWidget = null;
     private Element serverElement;
     private JPopupMenu treePopMenu = new JPopupMenu();
+    private String filterString = null;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdAddByUrl;
@@ -167,6 +169,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private javax.swing.JPanel jPanel1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JTabbedPane tbpCapabilities;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -202,9 +205,46 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 }
             });
         treePopMenu.add(pmenuItem);
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+
+                @Override
+                public void insertUpdate(final DocumentEvent e) {
+                    check(txtSearch.getText());
+                }
+
+                @Override
+                public void removeUpdate(final DocumentEvent e) {
+                    check(txtSearch.getText());
+                }
+
+                @Override
+                public void changedUpdate(final DocumentEvent e) {
+                    check(txtSearch.getText());
+                }
+
+                private void check(final String text) {
+                    filterString = text;
+                    addFilterToActiveTree();
+                }
+            });
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void addFilterToActiveTree() {
+        final JTree tree = getActiveTree();
+        if (tree != null) {
+            final Object model = tree.getModel();
+
+            if (model instanceof AbstractCapabilitiesTreeModel) {
+                ((AbstractCapabilitiesTreeModel)model).setFilterString(filterString);
+                tree.updateUI();
+            }
+        }
+    }
 
     /**
      * Erzeugt ein neues Tab in der TabbedPane und stoesst das parsen der Capabilities-XML an, die ueber den Link
@@ -450,6 +490,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         cmdAddByUrl = new javax.swing.JButton();
         cmdRemove = new javax.swing.JButton();
         cmdRefresh = new javax.swing.JButton();
+        txtSearch = new javax.swing.JTextField();
         tbpCapabilities = StaticSwingTools.jTabbedPaneWithVerticalTextCreator(
                 JTabbedPane.LEFT,
                 JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -539,6 +580,11 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             });
         jToolBar1.add(cmdRefresh);
 
+        txtSearch.setToolTipText(org.openide.util.NbBundle.getMessage(
+                CapabilityWidget.class,
+                "CapabilityWidget.txtSearch.toolTipText")); // NOI18N
+        jToolBar1.add(txtSearch);
+
         jPanel1.add(jToolBar1, java.awt.BorderLayout.CENTER);
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
@@ -546,6 +592,13 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         tbpCapabilities.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
         tbpCapabilities.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
         tbpCapabilities.setPreferredSize(new java.awt.Dimension(180, 400));
+        tbpCapabilities.addChangeListener(new javax.swing.event.ChangeListener() {
+
+                @Override
+                public void stateChanged(final javax.swing.event.ChangeEvent evt) {
+                    tbpCapabilitiesStateChanged(evt);
+                }
+            });
         add(tbpCapabilities, java.awt.BorderLayout.CENTER);
     } // </editor-fold>//GEN-END:initComponents
     /**
@@ -663,6 +716,15 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             }
         }
     }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpCapabilitiesStateChanged
+        addFilterToActiveTree();
+    }                                                                                   //GEN-LAST:event_tbpCapabilitiesStateChanged
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
