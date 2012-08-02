@@ -811,6 +811,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public Crs getSrs() {
         return srs;
     }
