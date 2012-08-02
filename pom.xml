@@ -6,22 +6,60 @@
     <parent>
         <groupId>de.cismet.cids</groupId>
         <artifactId>cids-parent</artifactId>
-        <version>1.0.5</version>
+        <version>2.0-SNAPSHOT</version>
     </parent>
 
     <groupId>de.cismet.commons</groupId>
     <artifactId>cismap-commons</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>cismap Commons</name>
     <description>This project contains various tools to enable geo-specific within Java applications</description>
+  
+    <prerequisites>
+        <maven>3</maven>
+    </prerequisites>
+
+    <scm>
+        <connection>https://github.com/cismet/cismap-commons.git</connection>
+        <developerConnection>scm:git:git@github.com:cismet/cismap-commons.git</developerConnection>
+        <url>https://github.com/cismet/cismap-commons</url>
+    </scm>
+
+    <repositories>
+        <repository>
+            <id>cismet-repo</id>
+            <url>https://repo.cismet.de/repo</url>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+                <updatePolicy>daily</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <checksumPolicy>warn</checksumPolicy>
+                <updatePolicy>interval:60</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
+        <!-- 
+             swingx in this rather early version is required for this project. Consider refactoring of relevant code.
+             
+             WARN: due to version downgrade of transitively incoming version 1.6.1 there may be class loading issues or
+                   related errors
+        -->
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>swingx</artifactId>
+            <version>0.9.7</version>
+        </dependency>
         <dependency>
             <groupId>de.cismet.commons</groupId>
             <artifactId>cismet-gui-commons</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>edu.umd</groupId>
