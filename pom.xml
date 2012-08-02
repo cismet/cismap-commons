@@ -74,6 +74,31 @@
     <build>
         <finalName>cismapCommons</finalName>
     </build>
+    
+    <!--
+        FIXME: the default cismet profile has to be overridden to prevent jalopy from execution because of the very old
+               code base of this branch. be careful when trying to merge and remove this profile section again.
+     -->
+    <profiles>
+        <profile>
+            <id>cismet-dev</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>triemax</groupId>
+                        <artifactId>jalopy-maven</artifactId>
+                        <version>1.9.4-122</version>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
 
 
