@@ -347,8 +347,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         || ((pi != null) && pi.equals(((StyledFeature) feature).getPointAnnotationSymbol()))) {
                     try {
                         // log.debug("Sweetspot updated");
-                        pi = new FeatureAnnotationSymbol(((StyledFeature) getFeature()).getPointAnnotationSymbol()
-                                .getImage());
+//                        pi = new FeatureAnnotationSymbol(((StyledFeature) getFeature()).getPointAnnotationSymbol()
+//                                .getImage());
+                        pi = ((StyledFeature) getFeature()).getPointAnnotationSymbol();
                         if (log.isDebugEnabled()) {
                             log.debug("newSweetSpotx: "
                                     + ((StyledFeature) getFeature()).getPointAnnotationSymbol().getSweetSpotX()); // NOI18N
