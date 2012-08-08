@@ -118,11 +118,6 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
                     || (geometryTransparency != (jSlider1.getValue() / 100f));
     }
 
-    @Override
-    public String getTooltip() {
-        return "";
-    }
-
     /**
      * DOCUMENT ME!
      *
@@ -398,5 +393,11 @@ public class SearchOptionsPanel extends AbstractOptionsPanel implements OptionsP
             log.debug("newColor: " + newColor);
         }
         jPanel1.setBackground(newColor);
+    }
+
+    @Override
+    public String getTooltip() {
+        return org.openide.util.NbBundle.getMessage(SearchOptionsPanel.class,
+                "SearchOptionsPanel.tooltip"); // NOI18N
     }
 }

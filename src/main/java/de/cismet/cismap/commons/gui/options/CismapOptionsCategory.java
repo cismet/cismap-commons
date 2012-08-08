@@ -31,7 +31,7 @@ public class CismapOptionsCategory extends AbstractOptionsCategory {
 
     @Override
     public String getName() {
-        return "Cismap";
+        return org.openide.util.NbBundle.getMessage(CismapOptionsCategory.class, "CismapOptionsCategory.name"); // NOI18N
     }
 
     @Override
@@ -47,5 +47,10 @@ public class CismapOptionsCategory extends AbstractOptionsCategory {
     @Override
     public int getOrder() {
         return 3;
+    }
+
+    @Override
+    public String getTooltip() {
+        return org.openide.util.NbBundle.getMessage(CismapOptionsCategory.class, "CismapOptionsCategory.tooltip"); // NOI18N
     }
 }
