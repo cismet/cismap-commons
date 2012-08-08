@@ -933,7 +933,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         inputEventListener.put(MOVE_POLYGON, new FeatureMoveListener(this));
         inputEventListener.put(NEW_POLYGON, new CreateNewGeometryListener(this));
         inputEventListener.put(RAISE_POLYGON, new RaisePolygonListener(this));
-        inputEventListener.put(REMOVE_POLYGON, new DeleteFeatureListener());
+        inputEventListener.put(REMOVE_POLYGON, new DeleteFeatureListener(this));
         inputEventListener.put(ATTACH_POLYGON_TO_ALPHADATA, new AttachFeatureListener());
         inputEventListener.put(JOIN_POLYGONS, new JoinPolygonsListener());
         inputEventListener.put(SPLIT_POLYGON, new SplitPolygonListener(this));

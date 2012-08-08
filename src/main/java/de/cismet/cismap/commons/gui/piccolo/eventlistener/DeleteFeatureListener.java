@@ -16,6 +16,7 @@ import com.vividsolutions.jts.geom.*;
 
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.nodes.PText;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
@@ -50,8 +51,42 @@ public class DeleteFeatureListener extends PBasicInputEventHandler {
     //~ Instance fields --------------------------------------------------------
 
     private PFeature featureRequestedForDeletion = null;
+    private InvalidPolygonTooltip multiPolygonPointerAnnotation = new InvalidPolygonTooltip();
+    private MappingComponent mc;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new DeleteFeatureListener object.
+     *
+     * @param  mc  DOCUMENT ME!
+     */
+    public DeleteFeatureListener(final MappingComponent mc) {
+        this.mc = mc;
+        mc.getCamera().addChild(multiPolygonPointerAnnotation);
+    }
 
     //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public void mouseMoved(final PInputEvent pInputEvent) {
+        multiPolygonPointerAnnotation.setOffset(
+            pInputEvent.getCanvasPosition().getX()
+                    + 20.0d,
+            pInputEvent.getCanvasPosition().getY()
+                    + 20.0d);
+        final Collection selectedFeatures = mc.getFeatureCollection().getSelectedFeatures();
+        if (selectedFeatures.size() != 1) {
+            if (pInputEvent.isAltDown()) {
+                multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.SELECT_FEATURE);
+                multiPolygonPointerAnnotation.setVisible(true);
+            } else {
+                multiPolygonPointerAnnotation.setVisible(false);
+            }
+        } else {
+            multiPolygonPointerAnnotation.setVisible(false);
+        }
+    }
 
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
