@@ -302,14 +302,19 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     inProgress = false;
                 }
             } else if (pInputEvent.getClickCount() == 2) {
-                if (isInMode(POLYGON) && (points.size() == 1)) { // bei polygonen mit nur 2 punkten
-                                                                 // wird eine boundingbox angelegt
-                    final Point2D pointA = points.get(0);
-                    final Point2D pointB = pInputEvent.getPosition();
-                    points.add(new Point2D.Double(pointA.getX(), pointB.getY()));
-                    points.add(pointB);
-                    points.add(new Point2D.Double(pointB.getX(), pointA.getY()));
-                    points.add(pointA);
+                if (isInMode(POLYGON)) {
+                    if (points.size() == 2) { // bei polygonen mit nur 2 punkten
+                                              // wird eine boundingbox angelegt
+                        final Point2D pointA = points.get(0);
+                        final Point2D pointB = points.get(1);
+                        points.remove(pointB);
+                        points.add(new Point2D.Double(pointA.getX(), pointB.getY()));
+                        points.add(pointB);
+                        points.add(new Point2D.Double(pointB.getX(), pointA.getY()));
+                        points.add(pointA);
+                    } else if (points.size() < 2) {
+                        return;               // ignorieren, da weniger als 2 Punkte nicht ausreichen
+                    }
                 }
                 readyForFinishing();
                 inProgress = false;
