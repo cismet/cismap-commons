@@ -129,15 +129,35 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      */
     @Override
     public void setMode(final String mode) throws IllegalArgumentException {
-        if (mode.equals(LINESTRING) || mode.equals(POINT) || mode.equals(POLYGON) || mode.equals(ELLIPSE)
-                    || mode.equals(RECTANGLE)
-                    || mode.equals(RECTANGLE_FROM_LINE)) {
-            this.mode = mode;
-//            mc.getTmpFeatureLayer().removeAllChildren();
-//            inProgress = false;
+        if (modeEquals(LINESTRING) || modeEquals(POINT) || modeEquals(POLYGON) || modeEquals(ELLIPSE)
+                    || modeEquals(RECTANGLE)
+                    || modeEquals(RECTANGLE_FROM_LINE)) {
+            if (!modeEquals(mode)) {
+                reset();
+                this.mode = mode;
+            }
         } else {
             throw new IllegalArgumentException("Mode:" + mode + " is not a valid Mode in this Listener."); // NOI18N
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   mode  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean modeEquals(final String mode) {
+        return ((mode == null) ? (this.mode == null) : mode.equals(this.mode));
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    protected void reset() {
+        mc.getTmpFeatureLayer().removeAllChildren();
+        inProgress = false;
     }
 
     @Override
