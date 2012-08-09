@@ -105,7 +105,9 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
         if (pInputEvent.isLeftMouseButton()) {
             if (pInputEvent.getClickCount() == 1) {
                 if (!isInProgress()) {
-                    if (pInputEvent.isAltDown()) {
+                    if (pInputEvent.isAltDown()
+                                && (isInMode(POLYGON) || isInMode(ELLIPSE) || isInMode(RECTANGLE)
+                                    || isInMode(RECTANGLE_FROM_LINE))) {
                         final Collection selectedFeatures = getMappingComponent().getFeatureCollection()
                                     .getSelectedFeatures();
                         if ((selectedPFeature != null) && (selectedFeatures.size() == 1)) {
@@ -178,37 +180,49 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     }
 
     @Override
+    protected void reset() {
+        super.reset();
+        selectedPFeature = null;
+        selectedEntityPosition = -1;
+        creatingHole = false;
+    }
+
+    @Override
     public void mouseMoved(final PInputEvent pInputEvent) {
         super.mouseMoved(pInputEvent);
-        multiPolygonPointerAnnotation.setOffset(
-            pInputEvent.getCanvasPosition().getX()
-                    + 20.0d,
-            pInputEvent.getCanvasPosition().getY()
-                    + 20.0d);
+        if (isInMode(POLYGON) || isInMode(ELLIPSE) || isInMode(RECTANGLE) || isInMode(RECTANGLE_FROM_LINE)) {
+            multiPolygonPointerAnnotation.setOffset(
+                pInputEvent.getCanvasPosition().getX()
+                        + 20.0d,
+                pInputEvent.getCanvasPosition().getY()
+                        + 20.0d);
 
-        final Collection selectedFeatures = getMappingComponent().getFeatureCollection().getSelectedFeatures();
-        if ((selectedPFeature == null) || (selectedFeatures.size() != 1)) {
-            if (pInputEvent.isAltDown()) {
-                multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.SELECT_FEATURE);
-                multiPolygonPointerAnnotation.setVisible(true);
-            } else {
-                multiPolygonPointerAnnotation.setVisible(false);
-            }
-        } else {
-            if (isInProgress()) {
-                if (!isTempFeatureValid()) {
-                    if (creatingHole) {
-                        multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.HOLE_ERROR);
-                    } else {
-                        multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.ENTITY_ERROR);
-                    }
+            final Collection selectedFeatures = getMappingComponent().getFeatureCollection().getSelectedFeatures();
+            if ((selectedPFeature == null) || (selectedFeatures.size() != 1)) {
+                if (pInputEvent.isAltDown()) {
+                    multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.SELECT_FEATURE);
                     multiPolygonPointerAnnotation.setVisible(true);
                 } else {
                     multiPolygonPointerAnnotation.setVisible(false);
                 }
             } else {
-                multiPolygonPointerAnnotation.setVisible(false);
+                if (isInProgress()) {
+                    if (!isTempFeatureValid()) {
+                        if (creatingHole) {
+                            multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.HOLE_ERROR);
+                        } else {
+                            multiPolygonPointerAnnotation.setMode(InvalidPolygonTooltip.Mode.ENTITY_ERROR);
+                        }
+                        multiPolygonPointerAnnotation.setVisible(true);
+                    } else {
+                        multiPolygonPointerAnnotation.setVisible(false);
+                    }
+                } else {
+                    multiPolygonPointerAnnotation.setVisible(false);
+                }
             }
+        } else {
+            multiPolygonPointerAnnotation.setVisible(false);
         }
     }
 

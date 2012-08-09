@@ -156,7 +156,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * DOCUMENT ME!
      */
     protected void reset() {
-        mc.getTmpFeatureLayer().removeAllChildren();
+        mappingComponent.getTmpFeatureLayer().removeAllChildren();
         inProgress = false;
     }
 
