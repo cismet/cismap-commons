@@ -120,20 +120,41 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     /**
      * DOCUMENT ME!
      *
-     * @param   m  DOCUMENT ME!
+     * @param   mode  DOCUMENT ME!
      *
      * @throws  IllegalArgumentException  DOCUMENT ME!
      */
     @Override
-    public void setMode(final String m) throws IllegalArgumentException {
-        if (m.equals(LINESTRING) || m.equals(POINT) || m.equals(POLYGON) || m.equals(ELLIPSE) || m.equals(RECTANGLE)
-                    || m.equals(RECTANGLE_FROM_LINE)) {
-            this.mode = m;
-//            mc.getTmpFeatureLayer().removeAllChildren();
-//            inProgress = false;
+    public void setMode(final String mode) throws IllegalArgumentException {
+        if (modeEquals(LINESTRING) || modeEquals(POINT) || modeEquals(POLYGON) || modeEquals(ELLIPSE)
+                    || modeEquals(RECTANGLE)
+                    || modeEquals(RECTANGLE_FROM_LINE)) {
+            if (!modeEquals(mode)) {
+                reset();
+                this.mode = mode;
+            }
         } else {
-            throw new IllegalArgumentException("Mode:" + m + " is not a valid Mode in this Listener."); // NOI18N
+            throw new IllegalArgumentException("Mode:" + mode + " is not a valid Mode in this Listener."); // NOI18N
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   mode  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean modeEquals(final String mode) {
+        return ((mode == null) ? (this.mode == null) : mode.equals(this.mode));
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    protected void reset() {
+        mc.getTmpFeatureLayer().removeAllChildren();
+        inProgress = false;
     }
 
     @Override
