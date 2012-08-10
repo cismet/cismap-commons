@@ -95,7 +95,6 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
         snapRect.setStroke(null);
         snapRect.setTransparency(0.2f);
         snapRect.setVisible(false);
-        pointerAnnotation.setVisible(false);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -541,13 +540,18 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     @Override
     public void mouseEntered(final PInputEvent event) {
         super.mouseEntered(event);
-        pointerAnnotation.setVisible(true && annotationNodeVisible);
+        if (pointerAnnotation != null) {
+            refreshPointerAnnotation(event);
+            pointerAnnotation.setVisible(annotationNodeVisible);
+        }
     }
 
     @Override
     public void mouseExited(final PInputEvent event) {
         super.mouseExited(event);
-        pointerAnnotation.setVisible(false);
+        if (pointerAnnotation != null) {
+            pointerAnnotation.setVisible(false);
+        }
     }
 
     /**
@@ -556,8 +560,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
      * @param  event  DOCUMENT ME!
      */
     private void refreshPointerAnnotation(final PInputEvent event) {
-        if (annotationNodeVisible) {
-            pointerAnnotation.setVisible(true);
+        if (pointerAnnotation != null) {
             pointerAnnotation.setOffset(event.getCanvasPosition().getX() + 20.0d,
                 event.getCanvasPosition().getY()
                         + 20.0d);
@@ -616,6 +619,19 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
      */
     public void setAnnotationNodeVisible(final boolean annotationNodeVisible) {
         this.annotationNodeVisible = annotationNodeVisible;
+        if (this.pointerAnnotation != null) {
+            try {
+                mappingComponent.getCamera().removeChild(this.pointerAnnotation);
+            } catch (final Exception ex) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("no child to remove", ex);
+                }
+            }
+            if (annotationNodeVisible) {
+                mappingComponent.getCamera().addChild(pointerAnnotation);
+                pointerAnnotation.setVisible(true);
+            }
+        }
     }
 
     /**
@@ -633,11 +649,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
      * @param  pointerAnnotation  DOCUMENT ME!
      */
     public void setPointerAnnotation(final PNode pointerAnnotation) {
-        if (this.pointerAnnotation != null) {
-            mappingComponent.getCamera().removeChild(this.pointerAnnotation);
-        }
+        setAnnotationNodeVisible(false);
         this.pointerAnnotation = pointerAnnotation;
-        mappingComponent.getCamera().addChild(pointerAnnotation);
-        pointerAnnotation.setVisible(false);
     }
 }
