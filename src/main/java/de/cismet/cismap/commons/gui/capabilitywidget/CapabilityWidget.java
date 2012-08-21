@@ -578,7 +578,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      */
     private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
-                this,
+                StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
                     CapabilityWidget.class,
                     "CapabilityWidget.cmdAddByUrlActionPerformed().JOptionPane.message"), // NOI18N
@@ -761,7 +761,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                             "CapabilityWidget.getLink(DropTargetDropEvent).message",
                             new Object[] { ioe.getMessage() });                     // NOI18N
                     JOptionPane.showMessageDialog(
-                        this,
+                        StaticSwingTools.getParentFrame(this),
                         message,
                         org.openide.util.NbBundle.getMessage(
                             CapabilityWidget.class,
@@ -1216,7 +1216,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
                         if (interactive) {
                             JOptionPane.showMessageDialog(
-                                thisWidget,
+                                StaticSwingTools.getParentFrame(thisWidget),
                                 org.openide.util.NbBundle.getMessage(
                                     CapabilityWidget.class,
                                     "CapabilityWidget.addOGCCapabilitiesTree(String,JComponent,boolean).JOptionPane.message",
@@ -1347,7 +1347,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
                         if (interactive) {
                             JOptionPane.showMessageDialog(
-                                thisWidget,
+                                StaticSwingTools.getParentFrame(thisWidget),
                                 org.openide.util.NbBundle.getMessage(
                                     CapabilityWidget.class,
                                     "CapabilityWidget.addOGCWFSCapabilitiesTree(String,JComponent,boolean).JOptionPane.message",
@@ -1665,7 +1665,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             if (bestEnvelope == null) {
                 log.warn("no envelope found in the capabilities document");
                 JOptionPane.showMessageDialog(
-                    null,
+                    StaticSwingTools.getParentFrame(thisWidget),
                     NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.zoomToExtent().JOptionPane.msg"),
                     NbBundle.getMessage(
                         CapabilityWidget.class,
