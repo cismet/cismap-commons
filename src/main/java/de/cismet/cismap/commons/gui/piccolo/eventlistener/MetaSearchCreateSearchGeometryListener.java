@@ -24,6 +24,8 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.MapSearchEvent;
 
+import de.cismet.tools.gui.StaticSwingTools;
+
 /**
  * DOCUMENT ME!
  *
@@ -99,7 +101,7 @@ public class MetaSearchCreateSearchGeometryListener extends AbstractCreateSearch
         if (!isSearchTopicsSelected()) {
             if ((metaSearch != null) && metaSearch.hasSearchTopics()) {
                 JOptionPane.showMessageDialog(
-                    CismapBroker.getInstance().getMappingComponent(),
+                    StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()),
                     org.openide.util.NbBundle.getMessage(
                         MetaSearchCreateSearchGeometryListener.class,
                         "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().noSearchTopicsChosen"),       // NOI18N
@@ -109,7 +111,7 @@ public class MetaSearchCreateSearchGeometryListener extends AbstractCreateSearch
                     JOptionPane.ERROR_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(
-                    CismapBroker.getInstance().getMappingComponent(),
+                    StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()),
                     org.openide.util.NbBundle.getMessage(
                         MetaSearchCreateSearchGeometryListener.class,
                         "CreateSearchGeometryListener.mousePressed(PInputEvent).JOptionPane().notInitialized"),             // NOI18N

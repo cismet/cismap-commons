@@ -681,8 +681,8 @@ public class ShapeExportDialog extends javax.swing.JDialog {
         final JDialog downloadManager = DownloadManagerDialog.instance(CismapBroker.getInstance()
                         .getMappingComponent());
         if (!downloadManager.isVisible()) {
-            downloadManager.setVisible(true);
             downloadManager.pack();
+            StaticSwingTools.showDialog(downloadManager);
         }
 
         /*DownloadManager.instance().add(selectedWFS);

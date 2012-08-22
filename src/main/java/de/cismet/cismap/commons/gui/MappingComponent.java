@@ -4909,7 +4909,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             }
                         } catch (final Exception e) {
                             JOptionPane.showMessageDialog(
-                                MappingComponent.this,
+                                StaticSwingTools.getParentFrame(MappingComponent.this),
                                 org.openide.util.NbBundle.getMessage(
                                     MappingComponent.class,
                                     "MappingComponent.crsChanged(CrsChangedEvent).JOptionPane.message"),

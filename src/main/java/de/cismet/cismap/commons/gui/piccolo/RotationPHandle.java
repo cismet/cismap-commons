@@ -34,6 +34,8 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRotateAction;
 
+import de.cismet.tools.gui.StaticSwingTools;
+
 /**
  * DOCUMENT ME!
  *
@@ -226,7 +228,8 @@ public class RotationPHandle extends PHandle {
                         log.debug("\u00DCberschneidungen nach Drehung der PFeatures");
                     }
                 }
-                final int answer = JOptionPane.showConfirmDialog(pfeature.getViewer(),
+                final int answer = JOptionPane.showConfirmDialog(
+                        StaticSwingTools.getParentFrame(pfeature.getViewer()),
                         DIALOG_TEXT,
                         DIALOG_TITLE,
                         JOptionPane.YES_NO_OPTION,
