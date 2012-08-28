@@ -34,6 +34,8 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
+import de.cismet.tools.gui.StaticSwingTools;
+
 /**
  * DOCUMENT ME!
  *
@@ -153,7 +155,7 @@ public class AttachFeatureListener extends RectangleRubberBandListener {
                     postFeatureAttachRequest();
                 } else {                                 // mehr als ein Feature markiert
                     JOptionPane.showMessageDialog(
-                        mc,
+                        StaticSwingTools.getParentFrame(mc),
                         "Bitte nur ein Objekt zum Zuordnen auswählen.",
                         "Mehr als ein Objekt markiert.",
                         JOptionPane.INFORMATION_MESSAGE);

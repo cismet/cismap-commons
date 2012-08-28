@@ -2461,7 +2461,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     } catch (Exception ex) {
                         logger.error("Error during writing the history.", ex); // NOI18N
                         JOptionPane.showMessageDialog(
-                            StyleDialog.this,
+                            StaticSwingTools.getParentFrame(StyleDialog.this),
                             org.openide.util.NbBundle.getMessage(
                                 StyleDialog.class,
                                 "StyleDialog.writeHistory(File,boolean).JOptionPane.message",
@@ -2512,7 +2512,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     } catch (Exception ex) {
                         logger.error("Error during loading of the history", ex);  // NOI18N
                         JOptionPane.showMessageDialog(
-                            StyleDialog.this,
+                            StaticSwingTools.getParentFrame(StyleDialog.this),
                             org.openide.util.NbBundle.getMessage(
                                 StyleDialog.class,
                                 "StyleDialog.loadHistory().JOptionPane.message",

@@ -643,9 +643,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                         + insets.top
                                         + insets.bottom
                                         + 20);
-                            aFrame.setLocation((screenSize.width - aFrame.getWidth()) / 2,
-                                (screenSize.height - aFrame.getHeight())
-                                        / 2);
+                            aFrame.setLocationRelativeTo(PrintingWidget.this);
                             aFrame.setVisible(true);
                         } else if (a.getId().equalsIgnoreCase(Action.PDF)) {
                             if (DownloadManagerDialog.showAskingForUserTitle(PrintingWidget.this.mappingComponent)) {
