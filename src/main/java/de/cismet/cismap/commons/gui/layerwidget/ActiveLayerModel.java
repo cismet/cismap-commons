@@ -444,11 +444,16 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         if (layer instanceof RetrievalServiceLayer) {
             final RetrievalServiceLayer wmsServiceLayer = ((RetrievalServiceLayer)layer);
             wmsServiceLayer.getPNode().setVisible(!wmsServiceLayer.getPNode().getVisible());
+
             fireTreeNodesChanged(
                 this,
                 new Object[] { root },
                 null,
                 null);
+
+            final ActiveLayerEvent ale = new ActiveLayerEvent();
+            ale.setLayer(wmsServiceLayer);
+            CismapBroker.getInstance().fireLayerVisibilityChanged(ale);
         }
     }
 
