@@ -11,7 +11,6 @@ import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
 
-import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
@@ -108,6 +107,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private WMSCapabilities wmsCapabilities;
     private XBoundingBox boundingBox;
     private String customSLD;
+    private boolean selected = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -892,6 +892,29 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void layerVisibilityChanged(final ActiveLayerEvent e) {
+        if ((e.getLayer() == this) && (getPNode() != null)) {
+            boolean fadeOutOldWidget = false;
+            boolean fadeInThisWidget = false;
+
+            if (!getPNode().getVisible()) {
+                fadeOutOldWidget = (addedInternalWidget != null) && addedInternalWidget.equals(sliderName);
+            } else {
+                fadeInThisWidget = selected;
+            }
+
+            if (fadeOutOldWidget) {
+                CismapBroker.getInstance().getMappingComponent().showInternalWidget(addedInternalWidget, false, 800);
+                addedInternalWidget = null;
+            }
+
+            if (fadeInThisWidget) {
+                CismapBroker.getInstance()
+                        .getMappingComponent()
+                        .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
+                addedInternalWidget = sliderName;
+                CismapBroker.getInstance().getMappingComponent().showInternalWidget(sliderName, true, 800);
+            }
+        }
     }
 
     @Override
@@ -904,16 +927,21 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public synchronized void layerSelectionChanged(final ActiveLayerEvent e) {
+        selected = e.getLayer() == this;
+
         if (e.getLayer() == this) {
             if (addedInternalWidget != null) {
                 CismapBroker.getInstance().getMappingComponent().removeInternalWidget(addedInternalWidget);
                 CismapBroker.getInstance().getMappingComponent().repaint();
             }
-            CismapBroker.getInstance()
-                    .getMappingComponent()
-                    .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
-            addedInternalWidget = sliderName;
-            CismapBroker.getInstance().getMappingComponent().showInternalWidget(sliderName, true, 800);
+
+            if ((getPNode() != null) && getPNode().getVisible()) {
+                CismapBroker.getInstance()
+                        .getMappingComponent()
+                        .addInternalWidget(sliderName, MappingComponent.POSITION_NORTHEAST, internalFrame);
+                addedInternalWidget = sliderName;
+                CismapBroker.getInstance().getMappingComponent().showInternalWidget(sliderName, true, 800);
+            }
         } else {
             if ((addedInternalWidget != null) && !(e.getLayer() instanceof SlidableWMSServiceLayerGroup)) {
                 CismapBroker.getInstance().getMappingComponent().showInternalWidget(addedInternalWidget, false, 800);
