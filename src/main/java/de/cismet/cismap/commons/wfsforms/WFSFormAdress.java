@@ -14,10 +14,7 @@ package de.cismet.cismap.commons.wfsforms;
 
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
-
 import java.awt.BorderLayout;
-import java.awt.Color;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,7 +25,6 @@ import java.util.Vector;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -37,7 +33,9 @@ import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.gui.StaticSwingTools;
 
+import de.cismet.tools.gui.autocomplete.AutoCompleteDecotatorFixer;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
@@ -83,9 +81,9 @@ public class WFSFormAdress extends AbstractWFSForm {
             initComponents();
 //        cboStreets.setEditable(true);
 //        cboNr.setEditable(true);
-            AutoCompleteDecorator.decorate(cboStreets);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboStreets);
 
-            AutoCompleteDecorator.decorate(cboNr);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboNr);
             prbStreets.setPreferredSize(new java.awt.Dimension(1, 5));
             prbNr.setPreferredSize(new java.awt.Dimension(1, 5));
 
@@ -310,13 +308,6 @@ public class WFSFormAdress extends AbstractWFSForm {
                     cboStreetsActionPerformed(evt);
                 }
             });
-        cboStreets.addKeyListener(new java.awt.event.KeyAdapter() {
-
-                @Override
-                public void keyTyped(final java.awt.event.KeyEvent evt) {
-                    cboStreetsKeyTyped(evt);
-                }
-            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -344,7 +335,7 @@ public class WFSFormAdress extends AbstractWFSForm {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkVisualizeActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkVisualizeActionPerformed
+    private void chkVisualizeActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVisualizeActionPerformed
         if (mappingComponent == null) {
             mappingComponent = CismapBroker.getInstance().getMappingComponent();
         }
@@ -354,14 +345,14 @@ public class WFSFormAdress extends AbstractWFSForm {
         } else if (strasse != null) {
             visualizePosition(strasse, chkVisualize.isSelected());
         }
-    } //GEN-LAST:event_chkVisualizeActionPerformed
+    }//GEN-LAST:event_chkVisualizeActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboStreetsActionPerformed(final java.awt.event.ActionEvent evt) {               //GEN-FIRST:event_cboStreetsActionPerformed
+    private void cboStreetsActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboStreetsActionPerformed
         if (log.isDebugEnabled()) {
             log.debug("cboStreetsActionPerformed()");                                            // NOI18N
         }
@@ -371,22 +362,14 @@ public class WFSFormAdress extends AbstractWFSForm {
             requestRefresh("cboNumbersOfAStreet", (WFSFormFeature)cboStreets.getSelectedItem()); // NOI18N
             fireWfsFormAddressStreetSelected();
         }
-    }                                                                                            //GEN-LAST:event_cboStreetsActionPerformed
+    }//GEN-LAST:event_cboStreetsActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboStreetsKeyTyped(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_cboStreetsKeyTyped
-    }                                                                    //GEN-LAST:event_cboStreetsKeyTyped
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
         final boolean history = true;
         MappingComponent mc = getMappingComponent();
         if (mc == null) {
@@ -413,7 +396,7 @@ public class WFSFormAdress extends AbstractWFSForm {
         mc.gotoBoundingBox(bb, history, scaling, animation);
         chkVisualizeActionPerformed(null);
         fireWfsFormAddressPositioned(bb);
-    }                                                                         //GEN-LAST:event_cmdOkActionPerformed
+    }//GEN-LAST:event_cmdOkActionPerformed
 
     @Override
     public void garbageDuringAutoCompletion(final JComboBox box) {
@@ -425,7 +408,7 @@ public class WFSFormAdress extends AbstractWFSForm {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboNrActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboNrActionPerformed
+    private void cboNrActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboNrActionPerformed
         if (log.isDebugEnabled()) {
             log.debug("cboNrActionPerformed()");                              // NOI18N
         }
@@ -433,7 +416,7 @@ public class WFSFormAdress extends AbstractWFSForm {
             nr = (WFSFormFeature)cboNr.getSelectedItem();
             fireWfsFormAddressNrSelected();
         }
-    }                                                                         //GEN-LAST:event_cboNrActionPerformed
+    }//GEN-LAST:event_cboNrActionPerformed
 
     /**
      * DOCUMENT ME!

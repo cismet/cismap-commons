@@ -34,6 +34,7 @@ import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.gui.StaticSwingTools;
 
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
@@ -77,8 +78,8 @@ public class WFSFormPOI extends AbstractWFSForm {
 //        cboStreets.setEditable(true);
 //        cboNr.setEditable(true);
 
-            AutoCompleteDecorator.decorate(cboLocationtypes);
-            AutoCompleteDecorator.decorate(cboPois);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboLocationtypes);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboPois);
             prbLocationtypes.setPreferredSize(new java.awt.Dimension(1, 5));
             prbPois.setPreferredSize(new java.awt.Dimension(1, 5));
 
@@ -313,7 +314,7 @@ public class WFSFormPOI extends AbstractWFSForm {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkVisualizeActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkVisualizeActionPerformed
+    private void chkVisualizeActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVisualizeActionPerformed
         MappingComponent mc = getMappingComponent();
         if (mc == null) {
             mc = CismapBroker.getInstance().getMappingComponent();
@@ -322,14 +323,14 @@ public class WFSFormPOI extends AbstractWFSForm {
         if (poi != null) {
             visualizePosition(poi, chkVisualize.isSelected());
         }
-    } //GEN-LAST:event_chkVisualizeActionPerformed
+    }//GEN-LAST:event_chkVisualizeActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboLocationtypesActionPerformed(final java.awt.event.ActionEvent evt) {                  //GEN-FIRST:event_cboLocationtypesActionPerformed
+    private void cboLocationtypesActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboLocationtypesActionPerformed
         if (log.isDebugEnabled()) {
             log.debug("cboStreetsActionPerformed()");                                                     // NOI18N
         }
@@ -338,22 +339,22 @@ public class WFSFormPOI extends AbstractWFSForm {
             poi = null;
             requestRefresh("cboPoisOfALocationtype", (WFSFormFeature)cboLocationtypes.getSelectedItem()); // NOI18N
         }
-    }                                                                                                     //GEN-LAST:event_cboLocationtypesActionPerformed
+    }//GEN-LAST:event_cboLocationtypesActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboLocationtypesKeyTyped(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_cboLocationtypesKeyTyped
-    }                                                                          //GEN-LAST:event_cboLocationtypesKeyTyped
+    private void cboLocationtypesKeyTyped(final java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cboLocationtypesKeyTyped
+    }//GEN-LAST:event_cboLocationtypesKeyTyped
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
         final boolean history = true;
         MappingComponent mc = getMappingComponent();
         if (mc == null) {
@@ -373,21 +374,21 @@ public class WFSFormPOI extends AbstractWFSForm {
         }
         mc.gotoBoundingBox(bb, history, scaling, animation);
         chkVisualizeActionPerformed(null);
-    }                                                                         //GEN-LAST:event_cmdOkActionPerformed
+    }//GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboPoisActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboPoisActionPerformed
+    private void cboPoisActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboPoisActionPerformed
         if (log.isDebugEnabled()) {
             log.debug("cboPoisActionPerformed()");                              // NOI18N
         }
         if (cboPois.getSelectedItem() instanceof WFSFormFeature) {
             poi = (WFSFormFeature)cboPois.getSelectedItem();
         }
-    }                                                                           //GEN-LAST:event_cboPoisActionPerformed
+    }//GEN-LAST:event_cboPoisActionPerformed
 
     /**
      * DOCUMENT ME!
