@@ -446,7 +446,8 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     if (tps != null) {
                         for (final TreePath tp : tps) {
                             if ((tp != null) && (tp.getLastPathComponent() instanceof RetrievalServiceLayer)) {
-                                ((MapService)tp.getLastPathComponent()).setBoundingBox(mapC.getCurrentBoundingBox());
+                                ((MapService)tp.getLastPathComponent()).setBoundingBox(
+                                    mapC.getCurrentBoundingBoxFromCamera());
                                 ((RetrievalServiceLayer)tp.getLastPathComponent()).retrieve(true);
                             } else if ((tp != null)
                                         && (tp.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer)) {

@@ -316,7 +316,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
      */
     private void applyScaling(final double scalefactor) {
         // save camera position
-        final BoundingBox oldViewBounds = map.getCurrentBoundingBox();
+        final BoundingBox oldViewBounds = map.getCurrentBoundingBoxFromCamera();
         double vX1 = oldViewBounds.getX1();
         double vY1 = oldViewBounds.getY1();
         double vX2 = oldViewBounds.getX2();
