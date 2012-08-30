@@ -26,6 +26,7 @@ import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -67,9 +68,9 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
 //        prbFlur.setPreferredSize(new Dimension(1,5));
 //        prbFlurstueck.setPreferredSize(new Dimension(1,5));
 //        prbGem.setPreferredSize(new Dimension(1,5));
-            AutoCompleteDecorator.decorate(cboGem);
-            AutoCompleteDecorator.decorate(cboFlur);
-            AutoCompleteDecorator.decorate(cboFlurstueck);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboGem);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboFlur);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboFlurstueck);
             listComponents.put("cboGem", cboGem);                       // NOI18N
             listComponents.put("cboGemProgress", prbGem);               // NOI18N
             listComponents.put("cboFlur", cboFlur);                     // NOI18N
@@ -358,7 +359,7 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdPosActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdPosActionPerformed
+    private void cmdPosActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdPosActionPerformed
         final boolean history = true;
         MappingComponent mc = getMappingComponent();
         if (mc == null) {
@@ -392,26 +393,26 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         }
         mc.gotoBoundingBox(bb, history, scaling, animation);
         chkVisualizeActionPerformed(null);
-    } //GEN-LAST:event_cmdPosActionPerformed
+    }//GEN-LAST:event_cmdPosActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboFlurstueckActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboFlurstueckActionPerformed
+    private void cboFlurstueckActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFlurstueckActionPerformed
         final Object selected = cboFlurstueck.getSelectedItem();
         if (selected instanceof WFSFormFeature) {
             flurstueck = (WFSFormFeature)selected;
         }
-    }                                                                                 //GEN-LAST:event_cboFlurstueckActionPerformed
+    }//GEN-LAST:event_cboFlurstueckActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboFlurActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboFlurActionPerformed
+    private void cboFlurActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboFlurActionPerformed
 
         final Object selected = cboFlur.getSelectedItem();
         if (log.isDebugEnabled()) {
@@ -422,14 +423,14 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
             flurstueck = null;
             requestRefresh("cboFlurstueck", (WFSFormFeature)selected); // NOI18N
         }
-    }                                                                  //GEN-LAST:event_cboFlurActionPerformed
+    }//GEN-LAST:event_cboFlurActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboGemActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboGemActionPerformed
+    private void cboGemActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboGemActionPerformed
         final Object selected = cboGem.getSelectedItem();
         if (selected instanceof WFSFormFeature) {
             gemarkung = (WFSFormFeature)selected;
@@ -439,14 +440,14 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
             cboFlurstueck.setEnabled(false);
             cboFlurstueck.setModel(new DefaultComboBoxModel(new Vector()));
         }
-    }                                                                          //GEN-LAST:event_cboGemActionPerformed
+    }//GEN-LAST:event_cboGemActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkVisualizeActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkVisualizeActionPerformed
+    private void chkVisualizeActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVisualizeActionPerformed
         if (mappingComponent == null) {
             mappingComponent = CismapBroker.getInstance().getMappingComponent();
         }
@@ -458,5 +459,5 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
         } else if (gemarkung != null) {
             visualizePosition(gemarkung, chkVisualize.isSelected());
         }
-    } //GEN-LAST:event_chkVisualizeActionPerformed
+    }//GEN-LAST:event_chkVisualizeActionPerformed
 }
