@@ -66,7 +66,7 @@ public class CustomFeatureInfoListener extends PBasicInputEventHandler {
             url.setY((int)pInputEvent.getCanvasPosition().getY());
             url.setHeight(mc.getHeight());
             url.setWidth(mc.getWidth());
-            final BoundingBox bb = mc.getCurrentBoundingBox();
+            final BoundingBox bb = mc.getCurrentBoundingBoxFromCamera();
             url.setX1(bb.getX1());
             url.setX2(bb.getX2());
             url.setY1(bb.getY1());
