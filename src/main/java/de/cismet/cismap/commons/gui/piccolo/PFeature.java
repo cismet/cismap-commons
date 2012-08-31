@@ -315,53 +315,48 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             doGeometry(geom);
         } else {
             doGeometry(geom);
-            if ((geom instanceof Point) || (geom instanceof MultiPoint)) {
-                if (feature instanceof StyledFeature) {
-                    if ((pi == null)
-                                || ((pi != null) && pi.equals(((StyledFeature)feature).getPointAnnotationSymbol()))) {
-                        try {
-                            // log.debug("Sweetspot updated");
-                            pi = new FeatureAnnotationSymbol(((StyledFeature)getFeature()).getPointAnnotationSymbol()
-                                            .getImage());
-                            if (log.isDebugEnabled()) {
-                                log.debug("newSweetSpotx: "
-                                            + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX()); // NOI18N
-                            }
-                            pi.setSweetSpotX(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());
-                            pi.setSweetSpotY(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY());
-                        } catch (Throwable ex) {
-                            log.warn("No PointAnnotationSymbol found", ex);                                              // NOI18N
-                            pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
-                            pi.setSweetSpotX(0.46d);
-                            pi.setSweetSpotY(0.9d);
-                        }
-                    } else if ((pi != null) && (getFeature() != null) && (getFeature() instanceof StyledFeature)
-                                && (((StyledFeature)getFeature()).getPointAnnotationSymbol() != null)) {
-//                        log.fatal("Sweetspot updated");                                                                  // NOI18N
+            if (feature instanceof StyledFeature) {
+                if ((pi == null)
+                            || ((pi != null) && pi.equals(((StyledFeature)feature).getPointAnnotationSymbol()))) {
+                    try {
+                        // log.debug("Sweetspot updated");
+// pi = new FeatureAnnotationSymbol(((StyledFeature) getFeature()).getPointAnnotationSymbol()
+// .getImage());
+                        pi = ((StyledFeature)getFeature()).getPointAnnotationSymbol();
                         if (log.isDebugEnabled()) {
                             log.debug("newSweetSpotx: "
-                                        + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());     // NOI18N
+                                        + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX()); // NOI18N
                         }
                         pi.setSweetSpotX(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());
                         pi.setSweetSpotY(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY());
+                    } catch (Throwable ex) {
+                        log.warn("No PointAnnotationSymbol found", ex);                                              // NOI18N
+                        pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
+                        pi.setSweetSpotX(0.46d);
+                        pi.setSweetSpotY(0.9d);
                     }
+                } else if ((pi != null) && (getFeature() != null) && (getFeature() instanceof StyledFeature)
+                            && (((StyledFeature)getFeature()).getPointAnnotationSymbol() != null)) {
+//                        log.fatal("Sweetspot updated");                                                                  // NOI18N
+                    if (log.isDebugEnabled()) {
+                        log.debug("newSweetSpotx: "
+                                    + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());     // NOI18N
+                    }
+                    pi.setSweetSpotX(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());
+                    pi.setSweetSpotY(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY());
                 }
-                if (!ignoreStickyFeature) {
-                    viewer.addStickyNode(pi);
-                }
+            }
 
-                // Hier soll getestet werden ob bei einem Punkt der pushpin schon hinzugef\u00FCgt wurde. Wegen
-                // reconsider Feature
-                if (stickyChild == null) {
-                    stickyChild = pi;
-                } else {
-                    if (stickyChild instanceof StickyPText) {
-                        secondStickyChild = pi;
-                    }
+            if (geom instanceof Polygon) {
+                if (pi instanceof ShowAlsoOnPolygons) {
+                    final Point p = ((Polygon)geom).getInteriorPoint();
+                    addAnnotation(p.getX(), p.getY());
                 }
-                addChild(pi);
-                pi.setOffset(wtst.getScreenX(entityRingCoordArr[0][0][0].x),
-                    wtst.getScreenY(entityRingCoordArr[0][0][0].y));
+            } else if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
+            } else if (geom instanceof MultiPolygon) {
+//                MultiPolygon mp = (MultiPolygon) geom;
+            } else if ((geom instanceof Point) || (geom instanceof MultiPoint)) {
+                addAnnotation(entityRingCoordArr[0][0][0].x, entityRingCoordArr[0][0][0].y);
             }
             if (pi != null) {
                 sweetPureX = pi.getSweetSpotX();
@@ -371,6 +366,30 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             setSelected(isSelected());
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  real_x  DOCUMENT ME!
+     * @param  real_y  DOCUMENT ME!
+     */
+    private void addAnnotation(final double real_x, final double real_y) {
+        if (!ignoreStickyFeature) {
+            viewer.addStickyNode(pi);
+        }
+
+        // Hier soll getestet werden ob bei einem Punkt der pushpin schon hinzugef\u00FCgt wurde. Wegen
+        // reconsider Feature
+        if (stickyChild == null) {
+            stickyChild = pi;
+        } else {
+            if (stickyChild instanceof StickyPText) {
+                secondStickyChild = pi;
+            }
+        }
+        addChild(pi);
+        pi.setOffset(wtst.getScreenX(real_x), wtst.getScreenY(real_y));
     }
 
     /**
