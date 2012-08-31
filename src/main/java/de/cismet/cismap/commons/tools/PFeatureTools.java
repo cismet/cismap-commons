@@ -28,6 +28,8 @@ import java.util.*;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.StyledFeatureGroupMember;
+import de.cismet.cismap.commons.gui.StyledFeatureGroupWrapper;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.ParentNodeIsAPFeature;
 
@@ -126,10 +128,10 @@ public class PFeatureTools {
      * @param  al        the list, the result should be added to.
      */
     public static void findIntersectingPFeatures(final PNode node, final Geometry geometry, final ArrayList al) {
-        final List children = node.getChildrenReference();
+        final List<PNode> children = node.getChildrenReference();
         final String srs = CrsTransformer.createCrsFromSrid(geometry.getSRID());
 
-        for (final Object entry : children) {
+        for (final PNode entry : children) {
             if (entry instanceof PFeature) {
                 Geometry featureGeometry = ((PFeature)entry).getFeature().getGeometry();
 
@@ -140,6 +142,8 @@ public class PFeatureTools {
                 if (featureGeometry.intersects(geometry)) {
                     al.add(entry);
                 }
+            } else {
+                findIntersectingPFeatures(entry, geometry, al);
             }
         }
     }
