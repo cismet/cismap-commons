@@ -406,26 +406,31 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      * @param  evt  DOCUMENT ME!
      */
     private void cmdRefreshSingleLayerActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshSingleLayerActionPerformed
-        final TreePath tp = treeTable.getTree().getSelectionPath();
+        final TreePath[] tps = treeTable.getTree().getSelectionPaths();
         final SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 
                 @Override
                 protected Void doInBackground() throws Exception {
-                    if ((tp != null) && (tp.getLastPathComponent() instanceof RetrievalServiceLayer)) {
-                        ((MapService)tp.getLastPathComponent()).setBoundingBox(mapC.getCurrentBoundingBox());
-                        ((RetrievalServiceLayer)tp.getLastPathComponent()).retrieve(true);
-                    } else if ((tp != null)
-                                && (tp.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer)) {
-                        ((RetrievalServiceLayer)tp.getParentPath().getLastPathComponent()).retrieve(true);
+                    if (tps != null) {
+                        for (final TreePath tp : tps) {
+                            if ((tp != null) && (tp.getLastPathComponent() instanceof RetrievalServiceLayer)) {
+                                ((MapService)tp.getLastPathComponent()).setBoundingBox(
+                                    mapC.getCurrentBoundingBoxFromCamera());
+                                ((RetrievalServiceLayer)tp.getLastPathComponent()).retrieve(true);
+                            } else if ((tp != null)
+                                        && (tp.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer)) {
+                                ((RetrievalServiceLayer)tp.getParentPath().getLastPathComponent()).retrieve(true);
+                            }
+                        }
                     }
-
                     return null;
                 }
 
                 @Override
                 protected void done() {
-                    treeTable.getTree().setSelectionPath(tp);
+                    treeTable.getTree().setSelectionPaths(tps);
                     StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
+                    treeTable.getTree().setSelectionPaths(tps);
                 }
             };
 

@@ -92,7 +92,7 @@ public class ShapeExportAction extends AbstractAction {
         }
 
         XBoundingBox boundingBox = (XBoundingBox)CismapBroker.getInstance().getMappingComponent()
-                    .getCurrentBoundingBox();
+                    .getCurrentBoundingBoxFromCamera();
 
         wfsList = dialog.getSelectedWFSs();
         for (final ExportWFS wfs : wfsList) {
