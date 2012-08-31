@@ -29,6 +29,8 @@ import de.cismet.cismap.commons.gui.printing.PrintingToolTip;
 
 import de.cismet.tools.CismetThreadPool;
 
+import de.cismet.tools.gui.StaticSwingTools;
+
 /**
  * DOCUMENT ME!
  *
@@ -171,7 +173,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
         // calculate realworldsize
         if (this.scaleDenominator == -1) {
             final String s = JOptionPane.showInputDialog(
-                    mappingComponent,
+                    StaticSwingTools.getParentFrame(mappingComponent),
                     org.openide.util.NbBundle.getMessage(
                         PrintingFrameListener.class,
                         "PrintingFrameListener.init(double,int,int,String).message"),

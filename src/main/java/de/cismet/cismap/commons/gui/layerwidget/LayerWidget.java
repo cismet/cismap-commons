@@ -704,7 +704,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 
                                             if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
                                                 JOptionPane.showMessageDialog(
-                                                    LayerWidget.this,
+                                                    StaticSwingTools.getParentFrame(LayerWidget.this),
                                                     NbBundle.getMessage(
                                                         LayerWidget.class,
                                                         "LayerWidget.drop().errorInShapeGeometryFoundMessage"),
@@ -714,7 +714,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                                                     JOptionPane.ERROR_MESSAGE);
                                             } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
                                                 JOptionPane.showMessageDialog(
-                                                    LayerWidget.this,
+                                                    StaticSwingTools.getParentFrame(LayerWidget.this),
                                                     NbBundle.getMessage(
                                                         LayerWidget.class,
                                                         "LayerWidget.drop().noGeometryFoundInShapeMessage"),
