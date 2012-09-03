@@ -14,10 +14,7 @@ package de.cismet.cismap.commons.wfsforms;
 
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
-
 import java.awt.BorderLayout;
-import java.awt.Color;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,7 +25,6 @@ import java.util.Vector;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -38,6 +34,7 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
+import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
@@ -83,9 +80,9 @@ public class WFSFormAdress extends AbstractWFSForm {
             initComponents();
 //        cboStreets.setEditable(true);
 //        cboNr.setEditable(true);
-            AutoCompleteDecorator.decorate(cboStreets);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboStreets);
 
-            AutoCompleteDecorator.decorate(cboNr);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboNr);
             prbStreets.setPreferredSize(new java.awt.Dimension(1, 5));
             prbNr.setPreferredSize(new java.awt.Dimension(1, 5));
 
@@ -310,13 +307,6 @@ public class WFSFormAdress extends AbstractWFSForm {
                     cboStreetsActionPerformed(evt);
                 }
             });
-        cboStreets.addKeyListener(new java.awt.event.KeyAdapter() {
-
-                @Override
-                public void keyTyped(final java.awt.event.KeyEvent evt) {
-                    cboStreetsKeyTyped(evt);
-                }
-            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -372,14 +362,6 @@ public class WFSFormAdress extends AbstractWFSForm {
             fireWfsFormAddressStreetSelected();
         }
     }                                                                                            //GEN-LAST:event_cboStreetsActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void cboStreetsKeyTyped(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_cboStreetsKeyTyped
-    }                                                                    //GEN-LAST:event_cboStreetsKeyTyped
 
     /**
      * DOCUMENT ME!

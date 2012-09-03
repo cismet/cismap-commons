@@ -13,36 +13,15 @@ import org.jdom.Element;
 import java.awt.EventQueue;
 import java.awt.Image;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.JTree;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.tree.TreePath;
 
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.ConvertableToXML;
-import de.cismet.cismap.commons.Crs;
-import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.Debug;
-import de.cismet.cismap.commons.LayerInfoProvider;
-import de.cismet.cismap.commons.MappingModel;
-import de.cismet.cismap.commons.MappingModelListener;
-import de.cismet.cismap.commons.RetrievalServiceLayer;
-import de.cismet.cismap.commons.ServiceLayer;
-import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.XMLObjectFactory;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
-import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
-import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
-import de.cismet.cismap.commons.featureservice.SimpleUpdateablePostgisFeatureService;
-import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.*;
+import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
@@ -444,11 +423,16 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         if (layer instanceof RetrievalServiceLayer) {
             final RetrievalServiceLayer wmsServiceLayer = ((RetrievalServiceLayer)layer);
             wmsServiceLayer.getPNode().setVisible(!wmsServiceLayer.getPNode().getVisible());
+
             fireTreeNodesChanged(
                 this,
                 new Object[] { root },
                 null,
                 null);
+
+            final ActiveLayerEvent ale = new ActiveLayerEvent();
+            ale.setLayer(wmsServiceLayer);
+            CismapBroker.getInstance().fireLayerVisibilityChanged(ale);
         }
     }
 
@@ -487,30 +471,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     null);
             }
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   treePath  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public int getLayerPosition(final TreePath treePath) {
-        final Object layer = treePath.getLastPathComponent();
-
-        if (layer instanceof MapService) {
-            final MapService l = (MapService)layer;
-            final int pos = layers.indexOf(l);
-            return pos;
-        } else if (layer instanceof WMSLayer) {
-            final WMSLayer l = (WMSLayer)layer;
-            final WMSServiceLayer parent = (WMSServiceLayer)treePath.getParentPath().getLastPathComponent();
-            final int pos = parent.getWMSLayers().indexOf(l);
-            return pos;
-        }
-
-        return 0;
     }
 
     /**
@@ -1323,7 +1283,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
         try {
             final Element conf = e.getChild("cismapActiveLayerConfiguration"); // NOI18N
-            final List<String> links = LayerWidget.getCapabilities(conf, new ArrayList<String>());
+            final Vector<String> links = LayerWidget.getCapabilities(conf, new Vector<String>());
             if (DEBUG) {
                 if (log.isDebugEnabled()) {
                     log.debug("Capabilties links: " + links);                  // NOI18N

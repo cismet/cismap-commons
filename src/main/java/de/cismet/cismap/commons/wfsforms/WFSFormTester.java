@@ -29,6 +29,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
+import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
@@ -64,8 +65,8 @@ public class WFSFormTester extends AbstractWFSForm {
             log.debug("new WFSFormTester");                       // NOI18N
         }
         initComponents();
-        AutoCompleteDecorator.decorate(cboStreets);
-        AutoCompleteDecorator.decorate(cboNr);
+        StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboStreets);
+        StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboNr);
         prbStreets.setPreferredSize(new Dimension(10, 5));
         prbNr.setPreferredSize(new Dimension(10, 5));
         listComponents.put("cboAllStreets", cboStreets);          // NOI18N
