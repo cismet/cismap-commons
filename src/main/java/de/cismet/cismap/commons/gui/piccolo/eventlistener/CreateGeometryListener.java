@@ -325,15 +325,34 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                 if (isInMode(POLYGON)) {
                     if (points.size() == 2) { // bei polygonen mit nur 2 punkten
                                               // wird eine boundingbox angelegt
-                        final Point2D pointA = points.get(0);
-                        final Point2D pointB = points.get(1);
-                        points.remove(pointB);
-                        points.add(new Point2D.Double(pointA.getX(), pointB.getY()));
-                        points.add(pointB);
-                        points.add(new Point2D.Double(pointB.getX(), pointA.getY()));
-                        points.add(pointA);
+                        //
+                        // Rectangle QuickSnap
+                        //
+                        // because of this code one is able to create a rectangular polygon with a click and a following
+                        // doubleclick
+                        //
+                        // .....P1--------------P2 .....|               | .....|               | .....|               |
+                        // .....P3--------------P4
+                        //
+                        //
+
+                        final Point2D pointP1 = points.get(0);
+                        final Point2D pointP4 = points.get(1);
+                        points.remove(pointP4);
+
+                        // P2
+                        points.add(new Point2D.Double(pointP1.getX(), pointP4.getY()));
+
+                        // P4
+                        points.add(pointP4);
+
+                        // P3
+                        points.add(new Point2D.Double(pointP4.getX(), pointP1.getY()));
+
+                        // No need to add P1 to close the polygon, because the polygon part of the code will care
+                        // about that
                     } else if (points.size() < 2) {
-                        return;               // ignorieren, da weniger als 2 Punkte nicht ausreichen
+                        return; // ignorieren, da weniger als 2 Punkte nicht ausreichen
                     }
                 }
                 readyForFinishing();
