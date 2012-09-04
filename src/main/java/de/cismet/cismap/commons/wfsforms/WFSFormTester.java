@@ -13,7 +13,6 @@
 package de.cismet.cismap.commons.wfsforms;
 
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
-import de.cismet.tools.gui.StaticSwingTools;
 
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
@@ -30,6 +29,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
+import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
@@ -183,29 +183,29 @@ public class WFSFormTester extends AbstractWFSForm {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboNrActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboNrActionPerformed
+    private void cboNrActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboNrActionPerformed
 // TODO add your handling code here:
-    }//GEN-LAST:event_cboNrActionPerformed
+    } //GEN-LAST:event_cboNrActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboStreetsKeyTyped(final java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cboStreetsKeyTyped
+    private void cboStreetsKeyTyped(final java.awt.event.KeyEvent evt) { //GEN-FIRST:event_cboStreetsKeyTyped
         if (cboNr.getSelectedItem() instanceof WFSFormFeature) {
             nr = (WFSFormFeature)cboNr.getSelectedItem();
         } else {
             nr = null;
         }
-    }//GEN-LAST:event_cboStreetsKeyTyped
+    }                                                                    //GEN-LAST:event_cboStreetsKeyTyped
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboStreetsActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboStreetsActionPerformed
+    private void cboStreetsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboStreetsActionPerformed
 //        log.debug(!cboStreets.isPopupVisible());
 //        String s="";
 //        if (cboStreets.getSelectedItem()!=null)  {
@@ -216,7 +216,7 @@ public class WFSFormTester extends AbstractWFSForm {
             strasse = (WFSFormFeature)cboStreets.getSelectedItem();
             requestRefresh("cboNumbersOfAStreet", (WFSFormFeature)cboStreets.getSelectedItem()); // NOI18N
         }
-    }//GEN-LAST:event_cboStreetsActionPerformed
+    }                                                                                            //GEN-LAST:event_cboStreetsActionPerformed
 
     /**
      * DOCUMENT ME!

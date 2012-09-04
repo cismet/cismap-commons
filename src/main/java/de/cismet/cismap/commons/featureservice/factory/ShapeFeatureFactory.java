@@ -12,7 +12,6 @@
 package de.cismet.cismap.commons.featureservice.factory;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -72,7 +71,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     private Crs shapeCrs = null;
     private int shapeSrid = 0;
     private Crs crs = CismapBroker.getInstance().getSrs();
-    private Geometry envelope;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -153,14 +151,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 //            }
             shapeFeature.getGeometry().setSRID(shapeSrid);
             // store the feature in the spatial index structure
-            final Geometry geom = shapeFeature.getGeometry();
-            this.degreeFeaturesTree.insert(geom.getEnvelopeInternal(), shapeFeature);
-
-            if (envelope == null) {
-                envelope = geom.getEnvelope();
-            } else {
-                envelope = envelope.getEnvelope().union(geom.getEnvelope());
-            }
+            this.degreeFeaturesTree.insert(shapeFeature.getGeometry().getEnvelopeInternal(), shapeFeature);
         }
 
         return shapeFeature;
@@ -238,7 +229,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     protected synchronized void parseShapeFile(final SwingWorker workerThread) throws Exception {
         logger.info("SW[" + workerThread + "]: initialising ShapeFeatureFactory with document: '" + documentURI + "'");
         final long start = System.currentTimeMillis();
-        envelope = null;
         if (shapeCrs == null) {
             shapeCrs = CismapBroker.getInstance().getSrs();
             shapeSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
@@ -298,6 +288,16 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             this.initialiseFeature(featureServiceFeature, degreeFeature, false, i);
             // this.tempFeatureCollection[i] = shapeFile.getFeatureByRecNo(i + 1);
 
+            // debug
+// final Geometry geom = featureServiceFeature.getGeometry();
+// if (geom != null) {
+// if (extend == null) {
+// extend = geom.getEnvelope();
+// } else {
+// extend = getExtend().getEnvelope().union(geom.getEnvelope());
+// }
+// }
+            // debug
             newProgress = (int)((double)i / (double)max * 100d);
             if ((workerThread != null) && ((newProgress % 5) == 0) && (newProgress > currentProgress)
                         && (newProgress >= 5)) {
@@ -314,10 +314,8 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
 //        CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(new XBoundingBox(extend));
         this.cleanup();
-        if (logger.isDebugEnabled()) {
-            logger.debug("parsing, converting and initialising " + max + " shape features took "
-                        + (System.currentTimeMillis() - start) + " ms");
-        }
+        logger.info("parsing, converting and initialising " + max + " shape features took "
+                    + (System.currentTimeMillis() - start) + " ms");
     }
 
     @Override
@@ -494,14 +492,5 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      */
     public void setCrs(final Crs crs) {
         this.crs = crs;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public Geometry getEnvelope() {
-        return envelope;
     }
 }

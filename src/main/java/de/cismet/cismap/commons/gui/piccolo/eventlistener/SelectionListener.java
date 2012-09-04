@@ -36,6 +36,7 @@ import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MapPopupAction;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.tools.gui.ActionsProvider;
@@ -56,7 +57,7 @@ public class SelectionListener extends RectangleRubberBandListener {
 
     PFeature sel = null;
     Vector<PFeature> pfVector = new Vector<PFeature>();
-    MappingComponent mc = null;
+    MappingComponent mappingComponent = null;
     ArrayList<? extends CommonFeatureAction> commonFeatureActions = null;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private int clickCount = 0;
@@ -93,7 +94,7 @@ public class SelectionListener extends RectangleRubberBandListener {
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
         clickCount = pInputEvent.getClickCount();
         if (pInputEvent.getComponent() instanceof MappingComponent) {
-            mc = (MappingComponent)pInputEvent.getComponent();
+            mappingComponent = (MappingComponent)pInputEvent.getComponent();
         }
 
         if (pInputEvent.isRightMouseButton()) {
@@ -163,7 +164,7 @@ public class SelectionListener extends RectangleRubberBandListener {
 
             if (popup.getComponentCount() > 0) {
                 popup.show(
-                    mc,
+                    mappingComponent,
                     (int)pInputEvent.getCanvasPosition().getX(),
                     (int)pInputEvent.getCanvasPosition().getY());
             }
@@ -172,42 +173,65 @@ public class SelectionListener extends RectangleRubberBandListener {
                 super.mouseClicked(pInputEvent);
                 sel = (PFeature)o;
                 if (sel.getFeature().canBeSelected()) {
-                    if ((mc != null) && pInputEvent.isLeftMouseButton() && pInputEvent.isControlDown()) {
-                        if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                            if (!((DefaultFeatureCollection)mc.getFeatureCollection()).isSelected(sel.getFeature())) {
-                                ((DefaultFeatureCollection)mc.getFeatureCollection()).addToSelection(sel.getFeature());
+                    if ((mappingComponent != null) && pInputEvent.isLeftMouseButton() && pInputEvent.isControlDown()) {
+                        if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                            if (
+                                !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
+                                            sel.getFeature())) {
+                                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(
+                                    sel.getFeature());
                             } else {
-                                ((DefaultFeatureCollection)mc.getFeatureCollection()).unselect(sel.getFeature());
+                                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(
+                                    sel.getFeature());
                             }
                         } else {
                             log.warn("mc.getFeatureCollection() instanceof DefaultFeatureCollection == false !!!!!!!"); // NOI18N
                         }
                     } else {
-                        mc.getFeatureCollection().select(sel.getFeature());
+                        mappingComponent.getFeatureCollection().select(sel.getFeature());
+                        if (pInputEvent.isAltDown()) {
+                            final Coordinate mouseCoord = new Coordinate(
+                                    mappingComponent.getWtst().getSourceX(
+                                        pInputEvent.getPosition().getX()
+                                                - mappingComponent.getClip_offset_x()),
+                                    mappingComponent.getWtst().getSourceY(
+                                        pInputEvent.getPosition().getY()
+                                                - mappingComponent.getClip_offset_y()));
+
+                            final GeometryFactory geometryFactory = new GeometryFactory(
+                                    new PrecisionModel(PrecisionModel.FLOATING),
+                                    CrsTransformer.extractSridFromCrs(
+                                        mappingComponent.getMappingModel().getSrs().getCode()));
+                            final Point mousePoint = CrsTransformer.transformToGivenCrs(geometryFactory.createPoint(
+                                        mouseCoord),
+                                    CismapBroker.getInstance().getDefaultCrs());
+
+                            sel.setSelectedEntity(sel.getEntityPositionUnderPoint(mousePoint));
+                        }
                     }
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("Feature cannot be selected");                                                        // NOI18N
+                        log.debug("Feature cannot be selected"); // NOI18N
                     }
-                    if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                        ((DefaultFeatureCollection)mc.getFeatureCollection()).unselectAll();
+                    if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                     }
                 }
                 postSelectionChanged();
                 if (pInputEvent.getClickCount() == 2) {
                     if (sel.getFeature() instanceof SearchFeature) {
                         if (pInputEvent.isLeftMouseButton()) {
-                            ((DefaultFeatureCollection)mc.getFeatureCollection()).unselectAll();
-                            mc.getHandleLayer().removeAllChildren();
+                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                            mappingComponent.getHandleLayer().removeAllChildren();
                             // neue Suche mit Geometry auslösen
-                            ((MetaSearchCreateSearchGeometryListener)mc.getInputListener(
+                            ((MetaSearchCreateSearchGeometryListener)mappingComponent.getInputListener(
                                     MappingComponent.CREATE_SEARCH_POLYGON)).search((SearchFeature)sel.getFeature());
                         }
                     }
                 }
             } else {
-                if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                    ((DefaultFeatureCollection)mc.getFeatureCollection()).unselectAll();
+                if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                    ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                 }
             }
         }
@@ -222,7 +246,7 @@ public class SelectionListener extends RectangleRubberBandListener {
      */
     private Point createPointFromInput(final PInputEvent event) {
         final Point2D pos = event.getPosition();
-        final WorldToScreenTransform wtst = mc.getWtst();
+        final WorldToScreenTransform wtst = mappingComponent.getWtst();
         final Coordinate coord = new Coordinate(wtst.getSourceX(pos.getX()), wtst.getSourceY(pos.getY()));
         final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
                 CrsTransformer.getCurrentSrid());
@@ -241,8 +265,8 @@ public class SelectionListener extends RectangleRubberBandListener {
         if (event.getButton() == 1) { // linke Maustaste
             // Mouseevent muss von einer MappingComponent gefeuert werden
             if (event.getComponent() instanceof MappingComponent) {
-                mc = (MappingComponent)event.getComponent();
-                mc.getHandleLayer().removeAllChildren();
+                mappingComponent = (MappingComponent)event.getComponent();
+                mappingComponent.getHandleLayer().removeAllChildren();
                 // einfacher Klick ohne ziehen des Markiervierecks
                 // rectangle ist bei einem Linksklick nie null. Siehe mousePressed in RectangleRubberBandListener
                 if ((rectangle != null) && !rectangleEmpty) {
@@ -256,16 +280,17 @@ public class SelectionListener extends RectangleRubberBandListener {
                     }
 
                     if (!event.isControlDown()) {
-                        ((DefaultFeatureCollection)mc.getFeatureCollection()).unselectAll();
+                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                     }
-                    final PFeature[] pfArr = PFeatureTools.getPFeaturesInArea(mc, rectangle.getBounds());
+                    final PFeature[] pfArr = PFeatureTools.getPFeaturesInArea(mappingComponent, rectangle.getBounds());
                     final Vector<Feature> toBeSelected = new Vector<Feature>();
                     final Vector<Feature> toBeUnselected = new Vector<Feature>();
 
                     for (final PFeature pf : pfArr) {
                         if (pf.getFeature().canBeSelected()) {
-                            if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                                if (!((DefaultFeatureCollection)mc.getFeatureCollection()).isSelected(
+                            if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                                if (
+                                    !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
                                                 pf.getFeature())) {
                                     if (log.isDebugEnabled()) {
                                         log.debug("Feature markiert: " + pf); // NOI18N
@@ -273,26 +298,29 @@ public class SelectionListener extends RectangleRubberBandListener {
                                     toBeSelected.add(pf.getFeature());
                                 } else {
                                     toBeUnselected.add(pf.getFeature());
-                                    // mc.getFeatureCollection().unselect(pf.getFeature()); //war vorher unselectAll()
+                                    // mappingComponent.getFeatureCollection().unselect(pf.getFeature()); //war vorher
+                                    // unselectAll()
                                 }
                             }
                         } else {
                             if (log.isDebugEnabled()) {
                                 log.debug("Feature cannot be selected");      // NOI18N
                             }
-                            if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                            if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
                                 toBeUnselected.add(pf.getFeature());
                                 // ((DefaultFeatureCollection)
-                                // mc.getFeatureCollection()).unselect(pf.getFeature());//war vorher unselectAll()
+                                // mappingComponent.getFeatureCollection()).unselect(pf.getFeature());//war vorher
+                                // unselectAll()
                             }
                         }
                     }
 
                     // Hier passierts
-                    ((DefaultFeatureCollection)mc.getFeatureCollection()).addToSelection(toBeSelected);
-                    ((DefaultFeatureCollection)mc.getFeatureCollection()).unselect(toBeUnselected);
+                    ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(toBeSelected);
+                    ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(toBeUnselected);
 
-                    pfVector = new Vector(((DefaultFeatureCollection)mc.getFeatureCollection()).getSelectedFeatures());
+                    pfVector = new Vector(((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                                    .getSelectedFeatures());
                     postSelectionChanged();
                 }
             }

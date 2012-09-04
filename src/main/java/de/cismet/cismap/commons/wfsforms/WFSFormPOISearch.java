@@ -42,6 +42,7 @@ import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+
 import de.cismet.tools.gui.StaticSwingTools;
 
 /**
@@ -382,16 +383,16 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void txtSearchInputMethodTextChanged(final java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_txtSearchInputMethodTextChanged
+    private void txtSearchInputMethodTextChanged(final java.awt.event.InputMethodEvent evt) { //GEN-FIRST:event_txtSearchInputMethodTextChanged
         log.fatal("kik");                                                                     // NOI18N
-    }//GEN-LAST:event_txtSearchInputMethodTextChanged
+    }                                                                                         //GEN-LAST:event_txtSearchInputMethodTextChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkVisualizeActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVisualizeActionPerformed
+    private void chkVisualizeActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkVisualizeActionPerformed
         MappingComponent mc = getMappingComponent();
         if (mc == null) {
             mc = CismapBroker.getInstance().getMappingComponent();
@@ -400,14 +401,14 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         if (poi != null) {
             visualizePosition(poi, chkVisualize.isSelected());
         }
-    }//GEN-LAST:event_chkVisualizeActionPerformed
+    } //GEN-LAST:event_chkVisualizeActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
         final boolean history = true;
         MappingComponent mc = getMappingComponent();
         if (mc == null) {
@@ -423,21 +424,21 @@ public class WFSFormPOISearch extends AbstractWFSForm implements ActionListener 
         }
         mc.gotoBoundingBox(bb, history, scaling, animation);
         chkVisualizeActionPerformed(null);
-    }//GEN-LAST:event_cmdOkActionPerformed
+    }                                                                         //GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboPoisActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboPoisActionPerformed
+    private void cboPoisActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboPoisActionPerformed
         if (log.isDebugEnabled()) {
             log.debug("cboPoisActionPerformed()");                              // NOI18N
         }
         if (cboPois.getSelectedItem() instanceof WFSFormFeature) {
             poi = (WFSFormFeature)cboPois.getSelectedItem();
         }
-    }//GEN-LAST:event_cboPoisActionPerformed
+    }                                                                           //GEN-LAST:event_cboPoisActionPerformed
 
     @Override
     public void actionPerformed(final ActionEvent e) {

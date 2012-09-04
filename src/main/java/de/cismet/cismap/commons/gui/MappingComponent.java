@@ -934,7 +934,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         inputEventListener.put(MOVE_POLYGON, new FeatureMoveListener(this));
         inputEventListener.put(NEW_POLYGON, new CreateNewGeometryListener(this));
         inputEventListener.put(RAISE_POLYGON, new RaisePolygonListener(this));
-        inputEventListener.put(REMOVE_POLYGON, new DeleteFeatureListener());
+        inputEventListener.put(REMOVE_POLYGON, new DeleteFeatureListener(this));
         inputEventListener.put(ATTACH_POLYGON_TO_ALPHADATA, new AttachFeatureListener());
         inputEventListener.put(JOIN_POLYGONS, new JoinPolygonsListener());
         inputEventListener.put(SPLIT_POLYGON, new SplitPolygonListener(this));
@@ -1170,7 +1170,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         if (bounds != null) {
                             gotoBoundsWithoutHistory(bounds);
                         } else {
-                            gotoBoundsWithoutHistory(initialBoundingBox.getPBounds(wtst));
+                            gotoBoundsWithoutHistory(getInitialBoundingBox().getPBounds(wtst));
                         }
 
                         // move internal widgets
@@ -1207,6 +1207,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
         } else {
             LOG.warn("in syncSelectedObjectPresenter(" + i + "): selectedFeature==null"); // NOI18N
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public BoundingBox getInitialBoundingBox() {
+        if (initialBoundingBox == null) {
+            return mappingModel.getInitialBoundingBox();
+        } else {
+            return initialBoundingBox;
         }
     }
 
@@ -4781,7 +4794,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 //                LOG.debug("currentBoundingBox:" + currentBoundingBox); // NOI18N
 //            }
 //        }
-        gotoBoundingBoxWithHistory(initialBoundingBox);
+        gotoBoundingBoxWithHistory(getInitialBoundingBox());
     }
 
     /**
