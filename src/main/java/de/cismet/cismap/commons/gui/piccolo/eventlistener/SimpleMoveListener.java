@@ -12,10 +12,8 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
@@ -36,6 +34,7 @@ import java.util.LinkedList;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.Highlightable;
+import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.AddHandleDialog;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -59,6 +58,8 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
 
     public static final String COORDINATES_CHANGED = "COORDINATES_CHANGED"; // NOI18N
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(SimpleMoveListener.class);
+    private static Color COLOR_ADD_HANDLE = new Color(255, 0, 0, 150);
+    private static Color COLOR_REFLECT_HANDLE = new Color(205, 133, 0, 150);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -107,14 +108,22 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                 public void run() {
                     try {
                         if (mappingComponent.getInteractionMode().equals(MappingComponent.SELECT)
-                                    && mappingComponent.getHandleInteractionMode().equals(
-                                        MappingComponent.ADD_HANDLE)) {
+                                    && (mappingComponent.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)
+                                        || mappingComponent.getHandleInteractionMode().equals(
+                                            MappingComponent.REFLECT_POLYGON))) {
                             if ((mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection)
                                         && (((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
                                             .getSelectedFeatures().size() == 1)) {
                                 if (!newPointHandleExists()) {
                                     createNewPointHandle();
                                 }
+                                if (mappingComponent.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)) {
+                                    newPointHandle.setPaint(COLOR_ADD_HANDLE);
+                                } else if (mappingComponent.getHandleInteractionMode().equals(
+                                                MappingComponent.REFLECT_POLYGON)) {
+                                    newPointHandle.setPaint(COLOR_REFLECT_HANDLE);
+                                }
+
                                 if (event.isAltDown()) {
                                     handleX = (float)event.getPosition().getX();
                                     handleY = (float)event.getPosition().getY();
@@ -129,17 +138,6 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                     final Point2D p1 = neighbours[1];
                                     if ((p0 != null) && (p1 != null)) {
                                         final Point2D erg = StaticGeometryFunctions.createPointOnLine(p0, p1, trigger);
-//                            Point2D erg;
-//                            // CTRL-Taste gedrückt
-//                            if (event.getModifiers() == InputEvent.CTRL_MASK) {
-//                                // Handle zwischen dem linken und rechten Nachbar zentrieren
-//                                Double centerX = (neighbours[0].getX() + neighbours[1].getX()) / (double) 2;
-//                                Double centerY = (neighbours[0].getY() + neighbours[1].getY()) / (double) 2;
-//                                erg = new Point2D.Double(centerX, centerY);
-//                            } else { // CTRL-Taste nicht gedrückt
-//                                // Handle folgt auf der Linie der Maus
-//                                erg = StaticGeometryFunctions.createPointOnLine(neighbours[0], neighbours[1], trigger);
-//                            }
                                         handleX = (float)erg.getX();
                                         handleY = (float)erg.getY();
                                     }
@@ -215,10 +213,6 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                     handleHighlightingStuff(event);
                 }
             };
-        // t.setPriority(Thread.NORM_PRIORITY);
-        // t.start();
-        // CismetThreadPool.execute(t);
-        // Workaround für Issue 0001202 (http://bugs.cismet.de/mantis/view.php?id=1202)
         EventQueue.invokeLater(t);
     }
 
@@ -258,7 +252,6 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                     // super.handleClicked(pInputEvent);
                 }
             };
-        newPointHandle.setPaint(new Color(255, 0, 0, 150));
     }
 
     /**
@@ -371,133 +364,137 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     public void mouseClicked(final PInputEvent event) {
         try {
             if ((event.getClickCount() == 2) && mappingComponent.getInteractionMode().equals(MappingComponent.SELECT)
-                        && mappingComponent.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)
                         && ((pFeature != null) && pFeature.isSelected())) {
                 // Selektiertes Feature holen
                 final Collection sel = ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
                             .getSelectedFeatures();
 
-                // markiertes Handel auf der Linie holen
-                final Point2D newPoint = new Point2D.Float(handleX, handleY);
-                final Point2D[] neighbours = getNearestNeighbours(newPoint, sel);
+                if (mappingComponent.getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)) {
+                    // markiertes Handel auf der Linie holen
+                    final Point2D newPoint = new Point2D.Float(handleX, handleY);
+                    final Point2D[] neighbours = getNearestNeighbours(newPoint, sel);
 
-                final Point2D p0 = neighbours[0];
-                final Point2D p1 = neighbours[1];
-                if ((p0 != null) && (p1 != null)) {
-                    // CTRL-Taste beim Klicken gedrückt
-                    if (event.isControlDown()) {
-                        // welcher Nachbar ist weiter Links/Rechts?
-                        Point2D leftNeighbour;
-                        Point2D rightNeighbour;
-                        if (p0.getX() < p1.getX()) {
-                            // Nachbar "0" ist weiter Links
-                            leftNeighbour = p0;
-                            rightNeighbour = p1;
-                        } else if (p1.getX() < p0.getX()) {
-                            // Nachbar "1" ist weiter Links
-                            leftNeighbour = p1;
-                            rightNeighbour = p0;
-                        } else {
-                            // Nachbar "0" und "1" liegen genau übereinander
-                            if (p0.getY() <= p1.getY()) {
-                                // Nachbar "0" ist weiter oben (wird als weiter Links interpretiert)
+                    final Point2D p0 = neighbours[0];
+                    final Point2D p1 = neighbours[1];
+                    if ((p0 != null) && (p1 != null)) {
+                        // CTRL-Taste beim Klicken gedrückt
+                        if (event.isControlDown()) {
+                            // welcher Nachbar ist weiter Links/Rechts?
+                            Point2D leftNeighbour;
+                            Point2D rightNeighbour;
+                            if (p0.getX() < p1.getX()) {
+                                // Nachbar "0" ist weiter Links
                                 leftNeighbour = p0;
                                 rightNeighbour = p1;
-                            } else {
-                                // Nachbar "1" ist weiter oben (wird als weiter Links interpretiert)
+                            } else if (p1.getX() < p0.getX()) {
+                                // Nachbar "1" ist weiter Links
                                 leftNeighbour = p1;
                                 rightNeighbour = p0;
+                            } else {
+                                // Nachbar "0" und "1" liegen genau übereinander
+                                if (p0.getY() <= p1.getY()) {
+                                    // Nachbar "0" ist weiter oben (wird als weiter Links interpretiert)
+                                    leftNeighbour = p0;
+                                    rightNeighbour = p1;
+                                } else {
+                                    // Nachbar "1" ist weiter oben (wird als weiter Links interpretiert)
+                                    leftNeighbour = p1;
+                                    rightNeighbour = p0;
+                                }
                             }
-                        }
 
-                        // Abstand zum linken Nachbar berechnen
-                        Double distanceLeft = leftNeighbour.distance(newPoint);
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("distanceLeft: " + distanceLeft); // NOI18N
-                        }
-
-                        // Gesamt-Abstand berechnen
-                        final Double distanceTotal = leftNeighbour.distance(rightNeighbour);
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("distanceTotal: " + distanceTotal); // NOI18N
-                        }
-
-                        // MainFrame holen
-                        final Frame frame = StaticSwingTools.getParentFrame(mappingComponent);
-
-                        // Dialog modal aufrufen und Werte übergeben
-                        final AddHandleDialog dialog = new AddHandleDialog(frame, true, distanceTotal);
-                        dialog.setDistanceToLeft(distanceLeft);
-
-                        // Dialog zentrieren und sichtbar machen
-                        StaticSwingTools.showDialog(dialog);
-
-                        // wenn der Dialog mit OK geschlossen wurde
-                        if (dialog.getReturnStatus() == AddHandleDialog.STATUS_OK) {
-                            // ist der gewählte Punkt näher an Links
-                            if (dialog.getDistanceToLeft() < dialog.getDistanceToRight()) {
-                                // Abstand von Links aus berechnen
-                                distanceLeft = dialog.getDistanceToLeft();
-                            } else { // ist der gewählte Punkt nächer an rechts
-                                // Abstand von Rechts aus berechnen
-                                distanceLeft = distanceTotal - dialog.getDistanceToRight();
+                            // Abstand zum linken Nachbar berechnen
+                            Double distanceLeft = leftNeighbour.distance(newPoint);
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("distanceLeft: " + distanceLeft); // NOI18N
                             }
-                            // Abstand kann nicht größer als Gesamt-Abstand sein
-                            distanceLeft = (distanceLeft > distanceTotal) ? distanceTotal : distanceLeft;
-                            // ist die Gesamtlänge ungleich 0 (division durch null verhindern)
-                            if (distanceTotal != 0) {
-                                // Handle-Koordinaten anhand des Abstands berechnen
-                                handleX = (float)(leftNeighbour.getX()
-                                                + ((rightNeighbour.getX() - leftNeighbour.getX())
-                                                    * (distanceLeft / distanceTotal)));
-                                handleY = (float)(leftNeighbour.getY()
-                                                + ((rightNeighbour.getY() - leftNeighbour.getY())
-                                                    * (distanceLeft / distanceTotal)));
-                            } else { // ist die Gesamtlänge 0
-                                // Handle-Koordinaten sind gleich die des linken Nachbarn
-                                handleX = (float)leftNeighbour.getX();
-                                handleY = (float)leftNeighbour.getY();
+
+                            // Gesamt-Abstand berechnen
+                            final Double distanceTotal = leftNeighbour.distance(rightNeighbour);
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("distanceTotal: " + distanceTotal); // NOI18N
                             }
-                        } else { // wenn der Dialog nicht mit OK geschlossen wurde
-                            // nichts tun
-                            super.mouseClicked(event);
-                            return;
-                        }
-                    }
-                }
-// =====================================================================================
-                if (mappingComponent.isSnappingEnabled()) { // Snapping Modus
-                    // Features suchen bei denen der zukünftige neue
-                    // Punkt auf einer identischen Linie sitzt
 
-                    // Alle Objekte durchlaufen
-                    for (final Feature feature : mappingComponent.getFeatureCollection().getAllFeatures()) {
-                        // Collection erzeugen (wird von getNearestNeighbours erwartet)
-                        final Collection<Feature> featureCollection = new LinkedList<Feature>();
-                        // und aktuelles Feature hinzufügen
-                        featureCollection.add(feature);
+                            // MainFrame holen
+                            final Frame frame = StaticSwingTools.getParentFrame(mappingComponent);
 
-                        // die 2 Nachbarpunkte ermitteln, dessen Linie dem zukünftigen neuen Punkt am Nächsten ist
-                        final Point2D[] tmpneighbours = getNearestNeighbours(new Point2D.Float(handleX, handleY),
-                                featureCollection);
+                            // Dialog modal aufrufen und Werte übergeben
+                            final AddHandleDialog dialog = new AddHandleDialog(frame, true, distanceTotal);
+                            dialog.setDistanceToLeft(distanceLeft);
 
-                        // sind die 2 Nachbarpunkte identisch mit den 2 Nachbarn des neuen Punktes => identische Linie
-                        final Point2D t0 = tmpneighbours[0];
-                        final Point2D t1 = tmpneighbours[1];
-                        if ((t0 != null) && (t1 != null)) {
-                            if ((t0.equals(neighbours[0]) && t1.equals(neighbours[1]))
-                                        || (t0.equals(neighbours[1])
-                                            && t1.equals(neighbours[0]))) {
-                                // Punkt dem jeweiligen Feature hinzufügen
-                                addPoint((PFeature)mappingComponent.getPFeatureHM().get(feature), handleX, handleY);
+                            // Dialog zentrieren und sichtbar machen
+                            StaticSwingTools.showDialog(dialog);
+
+                            // wenn der Dialog mit OK geschlossen wurde
+                            if (dialog.getReturnStatus() == AddHandleDialog.STATUS_OK) {
+                                // ist der gewählte Punkt näher an Links
+                                if (dialog.getDistanceToLeft() < dialog.getDistanceToRight()) {
+                                    // Abstand von Links aus berechnen
+                                    distanceLeft = dialog.getDistanceToLeft();
+                                } else { // ist der gewählte Punkt nächer an rechts
+                                    // Abstand von Rechts aus berechnen
+                                    distanceLeft = distanceTotal - dialog.getDistanceToRight();
+                                }
+                                // Abstand kann nicht größer als Gesamt-Abstand sein
+                                distanceLeft = (distanceLeft > distanceTotal) ? distanceTotal : distanceLeft;
+                                // ist die Gesamtlänge ungleich 0 (division durch null verhindern)
+                                if (distanceTotal != 0) {
+                                    // Handle-Koordinaten anhand des Abstands berechnen
+                                    handleX = (float)(leftNeighbour.getX()
+                                                    + ((rightNeighbour.getX() - leftNeighbour.getX())
+                                                        * (distanceLeft / distanceTotal)));
+                                    handleY = (float)(leftNeighbour.getY()
+                                                    + ((rightNeighbour.getY() - leftNeighbour.getY())
+                                                        * (distanceLeft / distanceTotal)));
+                                } else { // ist die Gesamtlänge 0
+                                    // Handle-Koordinaten sind gleich die des linken Nachbarn
+                                    handleX = (float)leftNeighbour.getX();
+                                    handleY = (float)leftNeighbour.getY();
+                                }
+                            } else { // wenn der Dialog nicht mit OK geschlossen wurde
+                                // nichts tun
+                                super.mouseClicked(event);
+                                return;
                             }
                         }
                     }
-                } else { // kein Snapping Modus
-                    // einfach nur den Punkt hinzufügen (wie vorher auch)
-                    addPoint(pFeature, handleX, handleY);
+
+                    if (mappingComponent.isSnappingEnabled()) { // Snapping Modus
+                        // Features suchen bei denen der zukünftige neue
+                        // Punkt auf einer identischen Linie sitzt
+
+                        // Alle Objekte durchlaufen
+                        for (final Feature feature : mappingComponent.getFeatureCollection().getAllFeatures()) {
+                            // Collection erzeugen (wird von getNearestNeighbours erwartet)
+                            final Collection<Feature> featureCollection = new LinkedList<Feature>();
+                            // und aktuelles Feature hinzufügen
+                            featureCollection.add(feature);
+
+                            // die 2 Nachbarpunkte ermitteln, dessen Linie dem zukünftigen neuen Punkt am Nächsten ist
+                            final Point2D[] tmpneighbours = getNearestNeighbours(new Point2D.Float(handleX, handleY),
+                                    featureCollection);
+
+                            // sind die 2 Nachbarpunkte identisch mit den 2 Nachbarn des neuen Punktes => identische
+                            // Linie
+                            final Point2D t0 = tmpneighbours[0];
+                            final Point2D t1 = tmpneighbours[1];
+                            if ((t0 != null) && (t1 != null)) {
+                                if ((t0.equals(neighbours[0]) && t1.equals(neighbours[1]))
+                                            || (t0.equals(neighbours[1])
+                                                && t1.equals(neighbours[0]))) {
+                                    // Punkt dem jeweiligen Feature hinzufügen
+                                    addPoint((PFeature)mappingComponent.getPFeatureHM().get(feature), handleX, handleY);
+                                }
+                            }
+                        }
+                    } else { // kein Snapping Modus
+                        // einfach nur den Punkt hinzufügen (wie vorher auch)
+                        addPoint(pFeature, handleX, handleY);
+                    }
+                } else if (mappingComponent.getHandleInteractionMode().equals(MappingComponent.REFLECT_POLYGON)) {
+                    reflectFeature(pFeature, entityPosition, ringPosition, coordPosition - 1, coordPosition);
                 }
-// =====================================================================================
+
                 mappingComponent.getMemRedo().clear();
                 resetAfterClick();
             }
@@ -519,11 +516,58 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  pf                  DOCUMENT ME!
+     * @param  entityPosition      DOCUMENT ME!
+     * @param  ringPosition        DOCUMENT ME!
+     * @param  leftCoordPosition   DOCUMENT ME!
+     * @param  rightCoordPosition  DOCUMENT ME!
+     */
+    private void reflectFeature(final PFeature pf,
+            final int entityPosition,
+            final int ringPosition,
+            final int leftCoordPosition,
+            final int rightCoordPosition) {
+        final Geometry origGeom = pf.getFeature().getGeometry();
+        final Coordinate[] coordArr = pf.getCoordArr(entityPosition, ringPosition);
+        final Geometry reflectGeom = AffineTransformation.reflectionInstance(
+                    coordArr[leftCoordPosition].x,
+                    coordArr[leftCoordPosition].y,
+                    coordArr[rightCoordPosition].x,
+                    coordArr[rightCoordPosition].y)
+                    .transform(origGeom);
+
+        final PureNewFeature reflectFeature = new PureNewFeature(reflectGeom);
+
+        final PureNewFeature.geomTypes geomType;
+        if (pf.getFeature() instanceof PureNewFeature) {
+            final PureNewFeature origPureNewFeature = (PureNewFeature)pf.getFeature();
+            geomType = origPureNewFeature.getGeometryType();
+        } else if (reflectGeom instanceof MultiPolygon) {
+            geomType = PureNewFeature.geomTypes.MULTIPOLYGON;
+        } else if (reflectGeom instanceof Polygon) {
+            geomType = PureNewFeature.geomTypes.POLYGON;
+        } else if (reflectGeom instanceof LineString) {
+            geomType = PureNewFeature.geomTypes.LINESTRING;
+        } else if (reflectGeom instanceof Point) {
+            geomType = PureNewFeature.geomTypes.POINT;
+        } else {
+            geomType = PureNewFeature.geomTypes.UNKNOWN;
+        }
+
+        reflectFeature.setGeometryType(geomType);
+        reflectFeature.setEditable(true);
+
+        mappingComponent.getFeatureCollection().addFeature(reflectFeature);
+        mappingComponent.getFeatureCollection().holdFeature(reflectFeature);
+    }
+
+    /**
      * Setzt den Listener nach einem erfolgreichen Einf\u00FCgen eines neuen Punkts wieder auf den Anfangszustand
      * zur\u00FCck.
      */
     private void resetAfterClick() {
-//        ((DefaultFeatureCollection) mc.getFeatureCollection()).unselectAll();
         newPointHandle = null;
         handleX = Float.MIN_VALUE;
         handleY = Float.MIN_VALUE;
