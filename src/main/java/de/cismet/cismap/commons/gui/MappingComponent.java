@@ -134,7 +134,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public static final String JOIN_POLYGONS = "JOIN_POLYGONS";                             // NOI18N
     public static final String RAISE_POLYGON = "RAISE_POLYGON";                             // NOI18N
     public static final String ROTATE_POLYGON = "ROTATE_POLYGON";                           // NOI18N
-    public static final String REFLECT_POLYGON = "REFLECT_POLYGON";                         // NOI18N
     public static final String ATTACH_POLYGON_TO_ALPHADATA = "ATTACH_POLYGON_TO_ALPHADATA"; // NOI18N
     public static final String MOVE_HANDLE = "MOVE_HANDLE";                                 // NOI18N
     public static final String REMOVE_HANDLE = "REMOVE_HANDLE";                             // NOI18N
