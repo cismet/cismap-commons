@@ -491,13 +491,14 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     public void setCrs(final Crs crs) {
         this.crs = crs;
     }
-    
+
     /**
      * DOCUMENT ME!
      *
      * @return  the envelope of the currently loaded shape file
      */
     public Geometry getEnvelope() {
+        envelope.setSRID(shapeSrid);
         return envelope;
     }
 }

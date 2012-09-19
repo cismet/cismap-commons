@@ -572,7 +572,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     treeTable.getTree().setSelectionPaths(tps);
                 }
             });
-    } //GEN-LAST:event_cmdMakeInvisibleActionPerformed
+    }//GEN-LAST:event_cmdMakeInvisibleActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -672,7 +672,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
+    private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
         final SwingWorker<Geometry, Geometry> worker = new SwingWorker<Geometry, Geometry>() {
 
@@ -745,13 +745,16 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         if (g != null) {
                             if (geom == null) {
                                 geom = g.getEnvelope();
+                                geom.setSRID(g.getSRID());
                             } else {
                                 if (geom.getSRID() != g.getSRID()) {
                                     g = CrsTransformer.transformToGivenCrs(
                                             g,
                                             CrsTransformer.createCrsFromSrid(geom.getSRID()));
                                 }
-                                geom.union(g.getEnvelope());
+                                final Geometry ge = g.getEnvelope();
+                                ge.setSRID(geom.getSRID());
+                                geom = geom.union(g);
                             }
                         }
                     }
