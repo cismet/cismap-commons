@@ -339,12 +339,10 @@ public class TransformationPHandle extends PHandle {
 
         leftNeighbourIndex = getLeftNeighbourIndex(coordPosition);
         rightNeighbourIndex = getRightNeighbourIndex(coordPosition);
-        leftNeighbourPoint = pfeature.getViewer().getCamera()
-                    .localToView(new Point2D.Double(xp[leftNeighbourIndex], yp[leftNeighbourIndex]));
-        rightNeighbourPoint = pfeature.getViewer().getCamera()
-                    .localToView(new Point2D.Double(xp[rightNeighbourIndex], yp[rightNeighbourIndex]));
         leftNeighbourCoordinate = coordArr[leftNeighbourIndex];
         rightNeighbourCoordinate = coordArr[rightNeighbourIndex];
+        leftNeighbourPoint = new Point2D.Double(xp[leftNeighbourIndex], yp[leftNeighbourIndex]);
+        rightNeighbourPoint = new Point2D.Double(xp[rightNeighbourIndex], yp[rightNeighbourIndex]);
 
         if ((pfeature.getFeature() instanceof PureNewFeature)
                     && ((((PureNewFeature)pfeature.getFeature()).getGeometryType()
@@ -375,10 +373,10 @@ public class TransformationPHandle extends PHandle {
                 leftInfo.setPaint(new Color(255, 255, 255, 100));
                 rightInfo = new PText();
                 rightInfo.setPaint(new Color(255, 255, 255, 100));
-                leftInfo.setX(leftInfoPoint.getX());
-                leftInfo.setY(leftInfoPoint.getY());
-                rightInfo.setX(rightInfoPoint.getX());
-                rightInfo.setY(rightInfoPoint.getY());
+                leftInfo.setX(leftInfoPoint.getX() + 6);
+                leftInfo.setY(leftInfoPoint.getY() - 6);
+                rightInfo.setX(rightInfoPoint.getX() + 6);
+                rightInfo.setY(rightInfoPoint.getY() - 6);
                 leftInfo.setVisible(true);
                 rightInfo.setVisible(true);
                 addChild(leftInfo);
