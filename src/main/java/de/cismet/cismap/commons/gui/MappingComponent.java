@@ -26,6 +26,7 @@ import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import pswing.PSwingCanvas;
@@ -99,7 +100,6 @@ import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitDialog;
 import de.cismet.tools.gui.historybutton.DefaultHistoryModel;
 import de.cismet.tools.gui.historybutton.HistoryModel;
-import org.openide.util.Exceptions;
 
 /**
  * DOCUMENT ME!
@@ -4867,19 +4867,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
 
             final WaitDialog dialog = new WaitDialog(StaticSwingTools.getParentFrame(MappingComponent.this),
-                                                     false,
-                                                     NbBundle.getMessage(
-                                                        MappingComponent.class,
-                                                        "MappingComponent.crsChanged(CrsChangedEvent).wait"),
-                                                     null);
-                                 
+                    false,
+                    NbBundle.getMessage(
+                        MappingComponent.class,
+                        "MappingComponent.crsChanged(CrsChangedEvent).wait"),
+                    null);
+
             EventQueue.invokeLater(new Runnable() {
 
                     @Override
                     public void run() {
                         try {
                             StaticSwingTools.showDialog(dialog);
-                            
+
                             // the wtst object should not be null, so the getWtst method will be invoked
                             final WorldToScreenTransform oldWtst = getWtst();
                             final BoundingBox bbox = getCurrentBoundingBoxFromCamera(); // getCurrentBoundingBox();

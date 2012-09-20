@@ -534,8 +534,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
         return 0;
     }
-    
-    
+
     /**
      * DOCUMENT ME!
      *

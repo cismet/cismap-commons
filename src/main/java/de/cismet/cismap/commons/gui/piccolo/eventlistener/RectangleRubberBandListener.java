@@ -21,6 +21,8 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.tools.PFeatureTools;
 
 /**
  * DOCUMENT ME!
@@ -57,7 +59,7 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
     public void mousePressed(final PInputEvent e) {
         super.mousePressed(e);
         try {
-            if (e.getButton() == 1) { // Linke Maustaste: TODO: konnte die piccolo Konstanten nicht inden
+            if (e.isLeftMouseButton() && !isMouseOverStickyNode(e)) {
                 final PLayer layer = ((MappingComponent)(e.getComponent())).getRubberBandLayer();
                 // Initialize the locations.
                 pressPoint = e.getPosition();
@@ -107,7 +109,7 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
     /**
      * Updates the rectangle shape.
      */
-    public void updateRectangle() {
+    private void updateRectangle() {
         // create a new bounds that contains both the press and
         // current drag point.
         if (rectangle != null) {
@@ -120,5 +122,29 @@ public class RectangleRubberBandListener extends PBasicInputEventHandler {
             rectangle.setPathTo(b);
             b = null;
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pInputEvent  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean isMouseOverStickyNode(final PInputEvent pInputEvent) {
+        final Object firstPFeatureUnderMouse = PFeatureTools.getFirstValidObjectUnderPointer(
+                pInputEvent,
+                new Class[] { PFeature.class });
+
+        if ((firstPFeatureUnderMouse != null) && (firstPFeatureUnderMouse instanceof PFeature)) {
+            final PFeature pFeature = (PFeature)firstPFeatureUnderMouse;
+            final PNode stickyChild = pFeature.getStickyChild();
+            if ((stickyChild != null) && stickyChild.getVisible()) {
+                if (stickyChild.getFullBounds().contains(pInputEvent.getPosition())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
