@@ -572,7 +572,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     treeTable.getTree().setSelectionPaths(tps);
                 }
             });
-    }//GEN-LAST:event_cmdMakeInvisibleActionPerformed
+    } //GEN-LAST:event_cmdMakeInvisibleActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -672,7 +672,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
+    private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
         final SwingWorker<Geometry, Geometry> worker = new SwingWorker<Geometry, Geometry>() {
 
@@ -706,14 +706,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                                 }
 
                                 if (envelope != null) {
-                                    g = createGeometryFromEnvelope(envelope);
+                                    g = CapabilityWidget.createGeometryFromEnvelope(envelope);
                                 }
                             } else if (rsl instanceof WebFeatureService) {
                                 final WebFeatureService l = ((WebFeatureService)rsl);
                                 final Envelope envelope = CapabilityWidget.getEnvelopeFromFeatureType(l.getFeature());
 
                                 if (envelope != null) {
-                                    g = createGeometryFromEnvelope(envelope);
+                                    g = CapabilityWidget.createGeometryFromEnvelope(envelope);
                                 }
                             } else if (rsl instanceof SlidableWMSServiceLayerGroup) {
                                 final Layer l = ((SlidableWMSServiceLayerGroup)rsl).getLayerInformation();
@@ -722,7 +722,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                                     final Envelope envelope = CapabilityWidget.getEnvelopeForWmsLayer(l);
 
                                     if (envelope != null) {
-                                        g = createGeometryFromEnvelope(envelope);
+                                        g = CapabilityWidget.createGeometryFromEnvelope(envelope);
                                     }
                                 }
                             } else if (rsl instanceof SimpleWMS) {
@@ -733,7 +733,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                                     final Envelope envelope = CapabilityWidget.getEnvelopeForWmsLayer(l);
 
                                     if (envelope != null) {
-                                        g = createGeometryFromEnvelope(envelope);
+                                        g = CapabilityWidget.createGeometryFromEnvelope(envelope);
                                     }
                                 }
                             } else if (rsl instanceof ShapeFileFeatureService) {
@@ -776,34 +776,6 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 
         worker.execute();
     } //GEN-LAST:event_cmdZoomToFullExtentActionPerformed
-
-    /**
-     * converts the given envelope to a geometry object.
-     *
-     * @param   env  the envelope to convert
-     *
-     * @return  DOCUMENT ME!
-     */
-    private Geometry createGeometryFromEnvelope(final Envelope env) {
-        final double x1 = env.getMin().getX();
-        final double x2 = env.getMax().getX();
-        final double y1 = env.getMin().getY();
-        final double y2 = env.getMax().getY();
-        final CoordinateSystem cs = env.getCoordinateSystem();
-        String crs = null;
-
-        if (cs != null) {
-            crs = cs.getIdentifier();
-        } else {
-            if (env instanceof LayerBoundingBox) {
-                crs = ((LayerBoundingBox)env).getSRS();
-            }
-        }
-        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                CrsTransformer.extractSridFromCrs(crs));
-        final com.vividsolutions.jts.geom.Envelope envelope = new com.vividsolutions.jts.geom.Envelope(x1, x2, y1, y2);
-        return factory.toGeometry(envelope);
-    }
 
     /**
      * DOCUMENT ME!
