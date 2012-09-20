@@ -7,6 +7,10 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import de.cismet.cismap.commons.*;
 import org.jdom.Element;
 
 import org.openide.util.NbBundle;
@@ -43,16 +47,14 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
-import de.cismet.cismap.commons.MappingModelEvent;
-import de.cismet.cismap.commons.MappingModelListener;
-import de.cismet.cismap.commons.RetrievalServiceLayer;
-import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
 import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -60,6 +62,7 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
@@ -74,6 +77,9 @@ import de.cismet.tools.gui.treetable.JTreeTable;
 import de.cismet.tools.gui.treetable.TreeTableCellEditor;
 import de.cismet.tools.gui.treetable.TreeTableModel;
 import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.*;
 
 /**
  * DOCUMENT ME!
@@ -177,7 +183,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         treeTable.getColumnModel().getColumn(5).setCellRenderer(tableCellRenderer);
 
 //        treeTable.setShowHorizontaLines(true);
-        treeTable.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
+        treeTable.setSelectionMode(DefaultListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         scpMain.setViewportView(treeTable);
 
         treeTable.getTree().getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
@@ -202,7 +208,26 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                 }
             });
 
-        cmdZoomToFullExtent.setVisible(false);
+        treeTable.addKeyListener(new KeyListener() {
+
+                @Override
+                public void keyTyped(final KeyEvent e) {
+                }
+
+                @Override
+                public void keyPressed(final KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+                        cmdRemoveActionPerformed(null);
+                        e.consume();
+                    }
+                }
+
+                @Override
+                public void keyReleased(final KeyEvent e) {
+                }
+            });
+        
+        
         treeTable.setGridColor(this.getBackground());
         addComponentListener(new ComponentListener() {
 
@@ -250,6 +275,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+
         scpMain = new javax.swing.JScrollPane();
         jPanel1 = new javax.swing.JPanel();
         jToolBar1 = new javax.swing.JToolBar();
@@ -262,9 +288,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         cmdRemove = new javax.swing.JButton();
         cmdMakeInvisible = new javax.swing.JButton();
 
-        setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createEtchedBorder(),
-                javax.swing.BorderFactory.createEmptyBorder(4, 4, 4, 4)));
+        setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(4, 4, 4, 4)));
         setPreferredSize(new java.awt.Dimension(211, 114));
         setLayout(new java.awt.BorderLayout());
 
@@ -277,121 +301,90 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         jToolBar1.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         jToolBar1.setRollover(true);
 
-        cmdTreeCollapse.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/collapseTree.png"))); // NOI18N
-        cmdTreeCollapse.setToolTipText(org.openide.util.NbBundle.getMessage(
-                LayerWidget.class,
-                "LayerWidget.cmdTreeCollapse.toolTipText"));                                                // NOI18N
+        cmdTreeCollapse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/collapseTree.png"))); // NOI18N
+        cmdTreeCollapse.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdTreeCollapse.toolTipText")); // NOI18N
         cmdTreeCollapse.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdTreeCollapse.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdTreeCollapseActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdTreeCollapseActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdTreeCollapse);
 
-        cmdRefreshSingleLayer.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/refresh.png"))); // NOI18N
-        cmdRefreshSingleLayer.setToolTipText(org.openide.util.NbBundle.getMessage(
-                LayerWidget.class,
-                "LayerWidget.cmdRefreshSingleLayer.toolTipText"));                                     // NOI18N
+        cmdRefreshSingleLayer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/refresh.png"))); // NOI18N
+        cmdRefreshSingleLayer.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdRefreshSingleLayer.toolTipText")); // NOI18N
         cmdRefreshSingleLayer.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdRefreshSingleLayer.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdRefreshSingleLayerActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdRefreshSingleLayerActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdRefreshSingleLayer);
 
-        cmdDown.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/down.png"))); // NOI18N
-        cmdDown.setToolTipText(org.openide.util.NbBundle.getMessage(
-                LayerWidget.class,
-                "LayerWidget.cmdDown.toolTipText"));                                                // NOI18N
+        cmdDown.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/down.png"))); // NOI18N
+        cmdDown.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdDown.toolTipText")); // NOI18N
         cmdDown.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdDown.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdDownActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdDownActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdDown);
 
-        cmdUp.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/up.png")));                       // NOI18N
+        cmdUp.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/up.png"))); // NOI18N
         cmdUp.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdUp.toolTipText")); // NOI18N
         cmdUp.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdUp.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdUpActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdUpActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdUp);
 
-        cmdZoomToFullExtent.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerZoom.png"))); // NOI18N
-        cmdZoomToFullExtent.setToolTipText(org.openide.util.NbBundle.getMessage(
-                LayerWidget.class,
-                "LayerWidget.cmdZoomToFullExtent.toolTipText"));                                         // NOI18N
+        cmdZoomToFullExtent.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerZoom.png"))); // NOI18N
+        cmdZoomToFullExtent.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdZoomToFullExtent.toolTipText")); // NOI18N
         cmdZoomToFullExtent.setMargin(new java.awt.Insets(2, 1, 2, 1));
+        cmdZoomToFullExtent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdZoomToFullExtentActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdZoomToFullExtent);
 
-        cmdDisable.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disable.png"))); // NOI18N
-        cmdDisable.setToolTipText(org.openide.util.NbBundle.getMessage(
-                LayerWidget.class,
-                "LayerWidget.cmdDisable.toolTipText"));                                                // NOI18N
+        cmdDisable.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disable.png"))); // NOI18N
+        cmdDisable.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdDisable.toolTipText")); // NOI18N
         cmdDisable.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdDisable.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdDisableActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdDisableActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdDisable);
 
-        cmdRemove.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/removeLayer.png"))); // NOI18N
-        cmdRemove.setToolTipText(org.openide.util.NbBundle.getMessage(
-                LayerWidget.class,
-                "LayerWidget.cmdRemove.toolTipText"));                                                     // NOI18N
+        cmdRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/removeLayer.png"))); // NOI18N
+        cmdRemove.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdRemove.toolTipText")); // NOI18N
         cmdRemove.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdRemove.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdRemoveActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdRemoveActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdRemove);
 
-        cmdMakeInvisible.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerDLinvisible.png"))); // NOI18N
-        cmdMakeInvisible.setToolTipText(org.openide.util.NbBundle.getMessage(
-                LayerWidget.class,
-                "LayerWidget.cmdMakeInvisible.toolTipText"));                                                   // NOI18N
+        cmdMakeInvisible.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerDLinvisible.png"))); // NOI18N
+        cmdMakeInvisible.setToolTipText(org.openide.util.NbBundle.getMessage(LayerWidget.class, "LayerWidget.cmdMakeInvisible.toolTipText")); // NOI18N
         cmdMakeInvisible.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdMakeInvisible.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdMakeInvisibleActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdMakeInvisibleActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdMakeInvisible);
 
         jPanel1.add(jToolBar1, java.awt.BorderLayout.CENTER);
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
@@ -405,7 +398,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshSingleLayerActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshSingleLayerActionPerformed
+    private void cmdRefreshSingleLayerActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshSingleLayerActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
         final SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 
@@ -435,105 +428,147 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             };
 
         worker.execute();
-    } //GEN-LAST:event_cmdRefreshSingleLayerActionPerformed
+    }//GEN-LAST:event_cmdRefreshSingleLayerActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdDownActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdDownActionPerformed
-        final TreePath tp = treeTable.getTree().getSelectionPath();
-        if (tp != null) {
-            activeLayerModel.moveLayerDown(tp);
-        }
-        if (EventQueue.isDispatchThread()) {
-            log.warn("InvokeLater in EDT");
-        }                                                                       // NOI18N
+    private void cmdDownActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDownActionPerformed
+        final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
+        if (tps != null) {
+            Arrays.sort(tps, new Comparator<TreePath>() {
+
+                    @Override
+                    public int compare(final TreePath o1, final TreePath o2) {
+                        final Integer pos = activeLayerModel.getLayerPosition(o1);
+
+                        return pos.compareTo(activeLayerModel.getLayerPosition(o2));
+                    }
+                });
+
+            for (final TreePath tp : tps) {
+                if (tp != null) {
+                    activeLayerModel.moveLayerDown(tp);
+                }
+                if (EventQueue.isDispatchThread()) {
+                    log.warn("InvokeLater in EDT");
+                } // NOI18N
+            }
+        }
         EventQueue.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    treeTable.getTree().setSelectionPath(tp);
+                    treeTable.getTree().setSelectionPaths(tps);
                     StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                 }
             });
-    } //GEN-LAST:event_cmdDownActionPerformed
+    }//GEN-LAST:event_cmdDownActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdUpActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdUpActionPerformed
-        final TreePath tp = treeTable.getTree().getSelectionPath();
-        if (tp != null) {
-            activeLayerModel.moveLayerUp(tp);
+    private void cmdUpActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdUpActionPerformed
+        final TreePath[] tps = treeTable.getTree().getSelectionPaths();
+
+        if (tps != null) {
+            Arrays.sort(tps, new Comparator<TreePath>() {
+
+                    @Override
+                    public int compare(final TreePath o1, final TreePath o2) {
+                        final Integer pos = activeLayerModel.getLayerPosition(o1);
+
+                        return pos.compareTo(activeLayerModel.getLayerPosition(o2)) * -1;
+                    }
+                });
+
+            for (final TreePath tp : tps) {
+                if (tp != null) {
+                    activeLayerModel.moveLayerUp(tp);
+                }
+                if (EventQueue.isDispatchThread()) {
+                    log.warn("InvokeLater in EDT");
+                } // NOI18N
+            }
         }
-        if (EventQueue.isDispatchThread()) {
-            log.warn("InvokeLater in EDT");
-        }                                                                     // NOI18N
+        
         EventQueue.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    treeTable.getTree().setSelectionPath(tp);
+                    treeTable.getTree().setSelectionPaths(tps);
                     StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                 }
             });
-    } //GEN-LAST:event_cmdUpActionPerformed
+    }//GEN-LAST:event_cmdUpActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdMakeInvisibleActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdMakeInvisibleActionPerformed
-        final TreePath tp = treeTable.getTree().getSelectionPath();
-        if (tp != null) {
-            activeLayerModel.handleVisibility(tp);
+    private void cmdMakeInvisibleActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMakeInvisibleActionPerformed
+        final TreePath[] tps = treeTable.getTree().getSelectionPaths();
+
+        if (tps != null) {
+            for (final TreePath tp : tps) {
+                if (tp != null) {
+                    activeLayerModel.handleVisibility(tp);
+                }
+            }
         }
+
         if (EventQueue.isDispatchThread()) {
             log.warn("InvokeLater in EDT");
-        }                                                                                // NOI18N
+        } // NOI18N
         EventQueue.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    treeTable.getTree().setSelectionPath(tp);
+                    treeTable.getTree().setSelectionPaths(tps);
                 }
             });
-    } //GEN-LAST:event_cmdMakeInvisibleActionPerformed
+
+    }//GEN-LAST:event_cmdMakeInvisibleActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdDisableActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdDisableActionPerformed
-        final TreePath tp = treeTable.getTree().getSelectionPath();
-        if (tp != null) {
-            activeLayerModel.disableLayer(tp);
+    private void cmdDisableActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDisableActionPerformed
+        final TreePath[] tps = treeTable.getTree().getSelectionPaths();
+
+        if (tps != null) {
+            for (final TreePath tp : tps) {
+                if (tp != null) {
+                    activeLayerModel.disableLayer(tp);
+                }
+                if (EventQueue.isDispatchThread()) {
+                    log.warn("InvokeLater in EDT");
+                } // NOI18N
+            }
         }
-        if (EventQueue.isDispatchThread()) {
-            log.warn("InvokeLater in EDT");
-        }                                                                          // NOI18N
         EventQueue.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
-                    treeTable.getTree().setSelectionPath(tp);
+                    treeTable.getTree().setSelectionPaths(tps);
                 }
             });
-    } //GEN-LAST:event_cmdDisableActionPerformed
+    }//GEN-LAST:event_cmdDisableActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdTreeCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdTreeCollapseActionPerformed
+    private void cmdTreeCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdTreeCollapseActionPerformed
         // StaticSwingTools.jTreeCollapseAllNodes(treeTable.getTree());
 // int sel = treeTable.getSelectionModel().getMinSelectionIndex();
 // if (treeTable.getRowCount() > 0) {
@@ -548,42 +583,184 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 // }
 
         treeTable.getColumnModel().getColumn(3).getCellEditor().stopCellEditing();
-    } //GEN-LAST:event_cmdTreeCollapseActionPerformed
+    }//GEN-LAST:event_cmdTreeCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         try {
-            final TreePath tp = treeTable.getTree().getSelectionPath();
-            final int row = treeTable.getSelectedRow();
+            final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
-            if (tp != null) {
-                activeLayerModel.removeLayer(tp);
-            }
+            if (tps != null) {
+                int row = -1;
+                for (final TreePath tp : tps) {
+                    row = treeTable.getSelectedRow();
 
-            final Runnable r = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        int selectedRow = row;
-                        if (selectedRow >= treeTable.getRowCount()) {
-                            selectedRow = treeTable.getRowCount() - 1;
-                        }
-                        treeTable.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
+                    if (tp != null) {
+                        activeLayerModel.removeLayer(tp);
                     }
-                };
+                }
 
-            // do invoke later in EDT is required, because the selection should be adopted
-            // after the layer is removed
-            EventQueue.invokeLater(r);
-        } catch (Exception e) {
-            log.error("Error during romaval of layer", e);
+                final int lastSelectedRow = row;
+
+                final Runnable r = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            int selectedRow = lastSelectedRow;
+                            if (selectedRow >= treeTable.getRowCount()) {
+                                selectedRow = treeTable.getRowCount() - 1;
+                            }
+                            if (selectedRow != -1) {
+                                treeTable.getSelectionModel().setSelectionInterval(selectedRow, selectedRow);
+                            }
+                        }
+                    };
+
+                // do invoke later in EDT is required, because the selection should be adopted
+                // after the layer is removed
+                EventQueue.invokeLater(r);
+            }
+        } catch (final Exception e) {
+            log.error("Error during removal of layer", e);
         }
-    } //GEN-LAST:event_cmdRemoveActionPerformed
+    }//GEN-LAST:event_cmdRemoveActionPerformed
 
+    private void cmdZoomToFullExtentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
+        final TreePath[] tps = treeTable.getTree().getSelectionPaths();
+        final SwingWorker<Geometry, Geometry> worker = new SwingWorker<Geometry, Geometry>() {
+
+                @Override
+                protected Geometry doInBackground() throws Exception {
+                    Geometry geom = null;
+
+                    for (final TreePath path : tps) {
+                        Geometry g = null;
+                        RetrievalServiceLayer rsl = null;
+                        if ((path != null) && (path.getLastPathComponent() instanceof RetrievalServiceLayer)) {
+                            rsl = (RetrievalServiceLayer)path.getLastPathComponent();
+                        } else if ((path != null)
+                                    && (path.getParentPath().getLastPathComponent() instanceof RetrievalServiceLayer)) {
+                            rsl = (RetrievalServiceLayer)path.getParentPath().getLastPathComponent();
+                        }
+
+                        if (rsl != null) {
+                            if (rsl instanceof WMSServiceLayer) {
+                                final Layer l = ((WMSServiceLayer)rsl).getLayerInformation();
+                                Envelope envelope = null;
+
+                                if (l != null) {
+                                    envelope = CapabilityWidget.getEnvelopeForWmsLayer(l);
+                                } else {
+                                    final WMSCapabilities caps = ((WMSServiceLayer)rsl).getWmsCapabilities();
+
+                                    if (caps != null) {
+                                        envelope = CapabilityWidget.getEnvelopeForWmsCaps(caps);
+                                    }
+                                }
+
+                                if (envelope != null) {
+                                    g = createGeometryFromEnvelope(envelope);
+                                }
+                            } else if (rsl instanceof WebFeatureService) {
+                                final WebFeatureService l = ((WebFeatureService)rsl);
+                                final Envelope envelope = CapabilityWidget.getEnvelopeFromFeatureType(l.getFeature());
+
+                                if (envelope != null) {
+                                    g = createGeometryFromEnvelope(envelope);
+                                }
+                            } else if (rsl instanceof SlidableWMSServiceLayerGroup) {
+                                final Layer l = ((SlidableWMSServiceLayerGroup)rsl).getLayerInformation();
+
+                                if (l != null) {
+                                    final Envelope envelope = CapabilityWidget.getEnvelopeForWmsLayer(l);
+
+                                    if (envelope != null) {
+                                        g = createGeometryFromEnvelope(envelope);
+                                    }
+                                }
+                            } else if (rsl instanceof SimpleWMS) {
+                                final SimpleWMS wms = ((SimpleWMS)rsl);
+                                final Layer l = wms.getLayerInformation();
+
+                                if (l != null) {
+                                    final Envelope envelope = CapabilityWidget.getEnvelopeForWmsLayer(l);
+
+                                    if (envelope != null) {
+                                        g = createGeometryFromEnvelope(envelope);
+                                    }
+                                }
+                            } else if (rsl instanceof ShapeFileFeatureService) {
+                                final ShapeFileFeatureService sffs = (ShapeFileFeatureService)rsl;
+                                g = ((ShapeFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
+                            }
+                        }
+
+                        if (g != null) {
+                            if (geom == null) {
+                                geom = g.getEnvelope();
+                            } else {
+                                if (geom.getSRID() != g.getSRID()) {
+                                    g = CrsTransformer.transformToGivenCrs(
+                                            g,
+                                            CrsTransformer.createCrsFromSrid(geom.getSRID()));
+                                }
+                                geom.union(g.getEnvelope());
+                            }
+                        }
+                    }
+                    return geom;
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        final Geometry geom = get();
+                        CismapBroker.getInstance()
+                                .getMappingComponent()
+                                .gotoBoundingBoxWithHistory(new XBoundingBox(geom));
+                    } catch (Exception e) {
+                        log.error("Error while zooming to extend", e);
+                    }
+                }
+            };
+
+        worker.execute();
+    }//GEN-LAST:event_cmdZoomToFullExtentActionPerformed
+
+    
+    /**
+     * converts the given envelope to a geometry object.
+     *
+     * @param   env  the envelope to convert
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Geometry createGeometryFromEnvelope(final Envelope env) {
+        final double x1 = env.getMin().getX();
+        final double x2 = env.getMax().getX();
+        final double y1 = env.getMin().getY();
+        final double y2 = env.getMax().getY();
+        final CoordinateSystem cs = env.getCoordinateSystem();
+        String crs = null;
+
+        if (cs != null) {
+            crs = cs.getIdentifier();
+        } else {
+            if (env instanceof LayerBoundingBox) {
+                crs = ((LayerBoundingBox)env).getSRS();
+            }
+        }
+        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(crs));
+        final com.vividsolutions.jts.geom.Envelope envelope = new com.vividsolutions.jts.geom.Envelope(x1, x2, y1, y2);
+        return factory.toGeometry(envelope);
+    }
+    
+    
     /**
      * DOCUMENT ME!
      *
@@ -687,9 +864,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         // NO HARDCODING
                         try {
                             log.info("DocumentUri: " + currentFile.toURI()); // NOI18N
-                            // GMLFeatureService gfs = new
-                            // GMLFeatureService(currentFile.getName(),currentFile.toURI(),null); langsam sollte nicht
-                            // im EDT ausgeführt werden
+
                             final DocumentFeatureService dfs = DocumentFeatureServiceFactory
                                         .createDocumentFeatureService(currentFile);
                             activeLayerModel.addLayer(dfs);
@@ -702,7 +877,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                                             do {
                                                 try {
                                                     Thread.sleep(500);
-                                                } catch (InterruptedException e) {
+                                                } catch (final InterruptedException e) {
                                                     // nothing to do
                                                 }
                                             } while (!dfs.isInitialized());
@@ -731,14 +906,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                                         }
                                     }).start();
                             }
-                        } catch (Exception ex) {
+                        } catch (final Exception ex) {
                             log.error("Error during creation of a FeatureServices", ex); // NOI18N
                         }
                     }
                 } else {
                     log.warn("No files available");                                      // NOI18N
                 }
-            } catch (Exception ex) {
+            } catch (final Exception ex) {
                 log.error("Failure during drag & drop opertation", ex);                  // NOI18N
             }
         } else if (dtde.isDataFlavorSupported(TREEPATH_FLAVOR)) {
@@ -752,7 +927,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     }
                 }
                 final Object o = dtde.getTransferable().getTransferData(TREEPATH_FLAVOR);
-                final Vector v = new Vector();
+                final List<TreePath> v = new ArrayList<TreePath>();
                 dtde.dropComplete(true);
                 if (o instanceof SelectionAndCapabilities) {
                     final TreePath[] tpa = ((SelectionAndCapabilities)o).getSelection();
@@ -760,10 +935,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         v.add(tpa[i]);
                     }
 
-                    if ((((TreePath)v.get(0)).getLastPathComponent()
-                                    instanceof de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)
-                                && ((de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)
-                                    (((TreePath)v.get(0)).getLastPathComponent())).getTitle().endsWith("[]")) {
+                    if (isSlidableWMSServiceLayerGroup(v.get(0).getLastPathComponent())) {
                         final SlidableWMSServiceLayerGroup l = new SlidableWMSServiceLayerGroup(v);
                         l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
                         l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
@@ -775,7 +947,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                                 try {
                                     treeTable.getCellEditor(treeTable.getEditingRow(), treeTable.getEditingColumn())
                                             .stopCellEditing();
-                                } catch (Exception e) {
+                                } catch (final Exception e) {
                                     // stopCellEditing went wrong. I don't care ;-)
                                 }
                             }
@@ -814,7 +986,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                             }
 
                             activeLayerModel.addLayer(wfs);
-                        } catch (IllegalArgumentException schonVorhanden) {
+                        } catch (final IllegalArgumentException schonVorhanden) {
                             JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
                                 org.openide.util.NbBundle.getMessage(
                                     LayerWidget.class,
@@ -826,7 +998,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         }
                     }
                 }
-            } catch (IllegalArgumentException schonVorhanden) {
+            } catch (final IllegalArgumentException schonVorhanden) {
                 JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
                     org.openide.util.NbBundle.getMessage(
                         LayerWidget.class,
@@ -835,7 +1007,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         LayerWidget.class,
                         "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"),             // NOI18N
                     JOptionPane.ERROR_MESSAGE);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.error(e, e);
             }
         } else {
@@ -949,7 +1121,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      *
      * @return  DOCUMENT ME!
      */
-    public static Vector<String> getCapabilities(final Element e, final Vector<String> v) {
+    public static List<String> getCapabilities(final Element e, final List<String> v) {
         try {
             if (e.getName().equals("capabilities") && (e.getAttribute("type") != null)
                         && (e.getAttribute("type").getValue().equals(CapabilityLink.OGC)
@@ -970,7 +1142,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             }
             return v;
         } catch (Exception ex) {
-            return new Vector<String>();
+            return new ArrayList<String>(0);
         }
     }
 
@@ -983,6 +1155,31 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         return treeTable;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   lastPathComponent  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean isSlidableWMSServiceLayerGroup(final Object lastPathComponent) {
+        de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer layer = null;
+
+        if (lastPathComponent instanceof de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer) {
+            layer = (de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)lastPathComponent;
+        } else {
+            return false;
+        }
+
+        String titleOrName = layer.getTitle();
+
+        if (titleOrName == null) {
+            titleOrName = layer.getName();
+        }
+
+        return (titleOrName != null) && titleOrName.endsWith("[]");
+    }
+    
     /**
      * This is required to prevent a bug on Macs that causes the first drop operation to fail with an exception,
      * "java.awt.datatransfer.UnsupportedFlavorException: application/x-java-file-list". This bug is related to

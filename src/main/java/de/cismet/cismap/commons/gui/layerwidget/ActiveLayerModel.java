@@ -514,6 +514,31 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     /**
      * DOCUMENT ME!
      *
+     * @param   treePath  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getLayerPosition(final TreePath treePath) {
+        final Object layer = treePath.getLastPathComponent();
+
+        if (layer instanceof MapService) {
+            final MapService l = (MapService)layer;
+            final int pos = layers.indexOf(l);
+            return pos;
+        } else if (layer instanceof WMSLayer) {
+            final WMSLayer l = (WMSLayer)layer;
+            final WMSServiceLayer parent = (WMSServiceLayer)treePath.getParentPath().getLastPathComponent();
+            final int pos = parent.getWMSLayers().indexOf(l);
+            return pos;
+        }
+
+        return 0;
+    }
+    
+    
+    /**
+     * DOCUMENT ME!
+     *
      * @param   column  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -1283,7 +1308,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
         try {
             final Element conf = e.getChild("cismapActiveLayerConfiguration"); // NOI18N
-            final Vector<String> links = LayerWidget.getCapabilities(conf, new Vector<String>());
+            final List<String> links = LayerWidget.getCapabilities(conf, new ArrayList<String>());
             if (DEBUG) {
                 if (log.isDebugEnabled()) {
                     log.debug("Capabilties links: " + links);                  // NOI18N
