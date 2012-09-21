@@ -10,6 +10,10 @@ package de.cismet.cismap.commons.gui.capabilitywidget;
 import com.jgoodies.looks.Options;
 import com.jgoodies.looks.plastic.PlasticXPLookAndFeel;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
@@ -80,6 +84,8 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
 import de.cismet.cismap.commons.exceptions.ConvertException;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
@@ -96,11 +102,7 @@ import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
-import de.cismet.cismap.commons.wms.capabilities.Envelope;
-import de.cismet.cismap.commons.wms.capabilities.Layer;
-import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
-import de.cismet.cismap.commons.wms.capabilities.WMSCapabilitiesFactory;
+import de.cismet.cismap.commons.wms.capabilities.*;
 
 import de.cismet.security.AccessHandler;
 import de.cismet.security.WebAccessManager;
@@ -1622,47 +1624,77 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (currentTrvCap != null) {
             final String currentCrs = CismapBroker.getInstance().getSrs().getCode();
             final WMSCapabilities wmsCap = currentTrvCap.getWmsCapabilities();
-            final LayerBoundingBox[] boxes = null;
-            Envelope bestEnvelope = null;
+            Geometry bestGeom = null;
 
             // search for a bounding box with the right CRS
             if (wmsCap != null) {
-                final TreePath currentPath = currentTrvCap.getSelectionPath();
+                final TreePath[] paths = currentTrvCap.getSelectionPaths();
 
-                if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof Layer)) {
-                    bestEnvelope = getEnvelopeForWmsLayer((Layer)currentPath.getLastPathComponent());
-                }
+                for (final TreePath tp : paths) {
+                    Envelope e = null;
+                    if ((tp != null) && (tp.getLastPathComponent() instanceof Layer)) {
+                        e = getEnvelopeForWmsLayer((Layer)tp.getLastPathComponent());
+                    }
 
-                if (bestEnvelope == null) {
-                    bestEnvelope = getEnvelopeForWmsCaps(wmsCap);
+                    if (e == null) {
+                        e = getEnvelopeForWmsCaps(wmsCap);
+                    }
+
+                    if (e != null) {
+                        if (bestGeom == null) {
+                            bestGeom = createGeometryFromEnvelope(e);
+                        } else {
+                            bestGeom = bestGeom.union(createGeometryFromEnvelope(e));
+                        }
+                    }
                 }
             } else if (currentTrvCap.getWfsCapabilities() != null) {
                 // the selected server is a wfs
-                final TreePath currentPath = currentTrvCap.getSelectionPath();
-                FeatureType selectedFeature = null;
+                final TreePath[] paths = currentTrvCap.getSelectionPaths();
 
-                if ((currentPath != null) && (currentPath.getLastPathComponent() instanceof FeatureType)) {
-                    selectedFeature = (FeatureType)currentPath.getLastPathComponent();
-                } else {
-                    try {
-                        final Iterator<FeatureType> it = currentTrvCap.getWfsCapabilities()
-                                    .getFeatureTypeList()
-                                    .iterator();
+                for (final TreePath tp : paths) {
+                    Envelope e = null;
+                    FeatureType selectedFeature = null;
 
-                        if (it.hasNext()) {
-                            selectedFeature = it.next();
+                    if ((tp != null) && (tp.getLastPathComponent() instanceof FeatureType)) {
+                        selectedFeature = (FeatureType)tp.getLastPathComponent();
+                    } else {
+                        try {
+                            final Iterator<FeatureType> it = currentTrvCap.getWfsCapabilities()
+                                        .getFeatureTypeList()
+                                        .iterator();
+
+                            if (it.hasNext()) {
+                                selectedFeature = it.next();
+                            }
+                        } catch (final Exception ex) {
+                            log.error("Cannot receive the feature type list from the capabilities document", ex);
                         }
-                    } catch (final Exception e) {
-                        log.error("Cannot receive the feature type list from the capabilities document", e);
                     }
-                }
 
-                if (selectedFeature != null) {
-                    bestEnvelope = getEnvelopeFromFeatureType(selectedFeature);
+                    if (selectedFeature != null) {
+                        e = getEnvelopeFromFeatureType(selectedFeature);
+                    }
+
+                    if (e != null) {
+                        if (bestGeom == null) {
+                            bestGeom = createGeometryFromEnvelope(e);
+                        } else {
+                            Geometry additionalGeom = createGeometryFromEnvelope(e);
+
+                            if (bestGeom.getSRID() != additionalGeom.getSRID()) {
+                                additionalGeom = CrsTransformer.transformToGivenCrs(
+                                        additionalGeom,
+                                        CrsTransformer.createCrsFromSrid(bestGeom.getSRID()));
+                            }
+
+                            bestGeom = bestGeom.union(additionalGeom);
+                        }
+                    }
                 }
             }
 
-            if (bestEnvelope == null) {
+            if (bestGeom == null) {
                 log.warn("no envelope found in the capabilities document");
                 JOptionPane.showMessageDialog(
                     StaticSwingTools.getParentFrame(thisWidget),
@@ -1673,40 +1705,15 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     JOptionPane.ERROR_MESSAGE);
             }
 
-            try {
-                if (bestEnvelope != null) {
-                    BoundingBox bb = null;
-                    if (bestEnvelope instanceof LayerBoundingBox) {
-                        if (((LayerBoundingBox)bestEnvelope).getSRS().equals(currentCrs)) {
-                            bb = new BoundingBox(bestEnvelope.getMin().getX(),
-                                    bestEnvelope.getMin().getY(),
-                                    bestEnvelope.getMax().getX(),
-                                    bestEnvelope.getMax().getY());
-                        } else {
-                            final Envelope env = bestEnvelope.transform(
-                                    currentCrs,
-                                    ((LayerBoundingBox)bestEnvelope).getSRS());
-                            bb = new BoundingBox(env.getMin().getX(),
-                                    env.getMin().getY(),
-                                    env.getMax().getX(),
-                                    env.getMax().getY());
-                        }
-                    } else {
-                        final Envelope env = bestEnvelope.transform(currentCrs, "EPSG:4326");
-                        bb = new BoundingBox(env.getMin().getX(),
-                                env.getMin().getY(),
-                                env.getMax().getX(),
-                                env.getMax().getY());
-                    }
+            if (bestGeom != null) {
+                final Geometry env = CrsTransformer.transformToCurrentCrs(bestGeom);
+                final XBoundingBox bb = new XBoundingBox(env);
 
-                    if (bb != null) {
-                        CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(bb);
-                    } else {
-                        log.warn("no valid bounding box found.");
-                    }
+                if (bb != null) {
+                    CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(bb);
+                } else {
+                    log.warn("no valid bounding box found.");
                 }
-            } catch (ConvertException e) {
-                log.error("Cannot transform coordinates", e);
             }
         }
     }
@@ -1801,6 +1808,34 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         }
 
         return bestEnvelope;
+    }
+
+    /**
+     * converts the given envelope to a geometry object.
+     *
+     * @param   env  the envelope to convert
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Geometry createGeometryFromEnvelope(final Envelope env) {
+        final double x1 = env.getMin().getX();
+        final double x2 = env.getMax().getX();
+        final double y1 = env.getMin().getY();
+        final double y2 = env.getMax().getY();
+        final CoordinateSystem cs = env.getCoordinateSystem();
+        String crs = null;
+
+        if (cs != null) {
+            crs = cs.getIdentifier();
+        } else {
+            if (env instanceof LayerBoundingBox) {
+                crs = ((LayerBoundingBox)env).getSRS();
+            }
+        }
+        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(crs));
+        final com.vividsolutions.jts.geom.Envelope envelope = new com.vividsolutions.jts.geom.Envelope(x1, x2, y1, y2);
+        return factory.toGeometry(envelope);
     }
 
     //~ Inner Classes ----------------------------------------------------------

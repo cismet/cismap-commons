@@ -143,7 +143,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
         printingRectangle.setStroke(new FixedWidthStroke());
         printingRectangle.setStrokePaint(Color.LIGHT_GRAY);
         printingRectangle.setPaint(new Color(20, 20, 20, 1));
-        
+
         layer = mappingComponent.getPrintingFrameLayer();
     }
 
