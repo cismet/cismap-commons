@@ -26,6 +26,7 @@ import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import pswing.PSwingCanvas;
@@ -133,6 +134,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public static final String JOIN_POLYGONS = "JOIN_POLYGONS";                             // NOI18N
     public static final String RAISE_POLYGON = "RAISE_POLYGON";                             // NOI18N
     public static final String ROTATE_POLYGON = "ROTATE_POLYGON";                           // NOI18N
+    public static final String REFLECT_POLYGON = "REFLECT_POLYGON";                         // NOI18N
     public static final String ATTACH_POLYGON_TO_ALPHADATA = "ATTACH_POLYGON_TO_ALPHADATA"; // NOI18N
     public static final String MOVE_HANDLE = "MOVE_HANDLE";                                 // NOI18N
     public static final String REMOVE_HANDLE = "REMOVE_HANDLE";                             // NOI18N
@@ -4863,20 +4865,21 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             if (locked) {
                 return;
             }
-            final WaitDialog dialog = new WaitDialog(StaticSwingTools.getParentFrame(this),
+
+            final WaitDialog dialog = new WaitDialog(StaticSwingTools.getParentFrame(MappingComponent.this),
                     false,
                     NbBundle.getMessage(
                         MappingComponent.class,
                         "MappingComponent.crsChanged(CrsChangedEvent).wait"),
                     null);
 
-            StaticSwingTools.showDialog(dialog);
-
             EventQueue.invokeLater(new Runnable() {
 
                     @Override
                     public void run() {
                         try {
+                            StaticSwingTools.showDialog(dialog);
+
                             // the wtst object should not be null, so the getWtst method will be invoked
                             final WorldToScreenTransform oldWtst = getWtst();
                             final BoundingBox bbox = getCurrentBoundingBoxFromCamera(); // getCurrentBoundingBox();

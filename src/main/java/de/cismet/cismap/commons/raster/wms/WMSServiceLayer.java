@@ -795,6 +795,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             url += "&TRANSPARENT=" + Boolean.valueOf(transparentImage).toString().toUpperCase();              // NOI18N
             url += "&BGCOLOR=" + backgroundColor;                                                             // NOI18N
             url += "&EXCEPTIONS=" + exceptionsFormat;                                                         // exceptionsFormat;
+            url += "&FEATURE_COUNT=99";
             url += getLayersString(wmsLayers);
 
             if (hasEveryLayerAStyle(wmsLayers)) {
@@ -1171,7 +1172,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     @Override
     public Layer getLayerInformation() {
         if (wmsCapabilities != null) {
-            return wmsCapabilities.getLayer();
+            Layer layer = searchForLayer(wmsCapabilities.getLayer(), name);
+
+            if (layer == null) {
+                layer = wmsCapabilities.getLayer();
+            }
+
+            return layer;
         }
 
         return null;
