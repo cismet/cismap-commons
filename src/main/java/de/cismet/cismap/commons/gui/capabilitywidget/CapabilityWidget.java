@@ -1001,6 +1001,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 public void run() {
                     try {
                         final DragTree trvCap = new DragTree();
+                        addPopupMenu(trvCap);
                         // ToDo outsource/generalise method
                         // URL-String als URL speichern
                         final URL getCapURL = new URL(link);
