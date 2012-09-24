@@ -52,6 +52,7 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
+import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.log4jquickconfig.Log4JQuickConfig;
 
 /**
@@ -95,7 +96,7 @@ public class WFSFormBPlanSearch extends AbstractWFSForm implements ActionListene
             listComponents.put("cboHitsProgress", prbHits); // NOI18N
 //        cboStreets.setEditable(true);
 //        cboNr.setEditable(true);
-            AutoCompleteDecorator.decorate(cboHits);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboHits);
 //        prbLocationtypes.setPreferredSize(new java.awt.Dimension(1,5));
             prbHits.setPreferredSize(new java.awt.Dimension(1, 5));
 

@@ -304,11 +304,8 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
         final PFeature pFeature = mc.getPFeatureHM().get(this);
 
         if (pFeature != null) {
-            final float[] xp = new float[] { (float)coordinate.x };
-            final float[] yp = new float[] { (float)coordinate.y };
-
-            pFeature.setCoordArr(new Coordinate[] { (Coordinate)coordinate.clone() });
-            pFeature.setPathToPolyline(xp, yp);
+            pFeature.setCoordArr(0, 0, new Coordinate[] { (Coordinate)coordinate.clone() });
+            pFeature.updatePath();
             pFeature.syncGeometry();
             pFeature.resetInfoNodePosition();
             pFeature.visualize();

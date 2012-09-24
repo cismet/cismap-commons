@@ -391,7 +391,11 @@ public class PureNewFeature extends DefaultStyledFeature implements Cloneable, X
      * @param  geomType  DOCUMENT ME!
      */
     public void setGeometryType(final geomTypes geomType) {
-        this.geomType = geomType;
+        if (geomType == null) {
+            this.geomType = geomTypes.UNKNOWN;
+        } else {
+            this.geomType = geomType;
+        }
     }
 
     /**

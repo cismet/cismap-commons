@@ -25,6 +25,7 @@ import javax.swing.JOptionPane;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.printing.PrintingToolTip;
 
 import de.cismet.tools.CismetThreadPool;
@@ -139,12 +140,11 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
         west.setStroke(null);
         west.setStrokePaint(null);
 
-        // printingRectangle.setStroke(new FixedWidthStroke());
-        getPrintingRectangle().setStroke(null);
-        getPrintingRectangle().setPaint(Color.yellow);
-        getPrintingRectangle().setPaint(new Color(20, 20, 20, 1));
+        printingRectangle.setStroke(new FixedWidthStroke());
+        printingRectangle.setStrokePaint(Color.LIGHT_GRAY);
+        printingRectangle.setPaint(new Color(20, 20, 20, 1));
+
         layer = mappingComponent.getPrintingFrameLayer();
-        // layer=mappingComponent.getTmpFeatureLayer();
     }
 
     //~ Methods ----------------------------------------------------------------

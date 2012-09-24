@@ -11,11 +11,7 @@
  */
 package de.cismet.cismap.commons.featureservice.factory;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
 import org.deegree.io.shpapi.ShapeFile;
@@ -499,9 +495,10 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return  the envelope of the currently loaded shape file
      */
     public Geometry getEnvelope() {
+        envelope.setSRID(shapeSrid);
         return envelope;
     }
 }

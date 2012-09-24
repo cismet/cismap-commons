@@ -27,6 +27,8 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
+import de.cismet.tools.gui.StaticSwingTools;
+
 /**
  * DOCUMENT ME!
  *
@@ -67,9 +69,9 @@ public class WFSFormGemarkungFlurFlurstueck extends AbstractWFSForm {
 //        prbFlur.setPreferredSize(new Dimension(1,5));
 //        prbFlurstueck.setPreferredSize(new Dimension(1,5));
 //        prbGem.setPreferredSize(new Dimension(1,5));
-            AutoCompleteDecorator.decorate(cboGem);
-            AutoCompleteDecorator.decorate(cboFlur);
-            AutoCompleteDecorator.decorate(cboFlurstueck);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboGem);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboFlur);
+            StaticSwingTools.decorateWithFixedAutoCompleteDecorator(cboFlurstueck);
             listComponents.put("cboGem", cboGem);                       // NOI18N
             listComponents.put("cboGemProgress", prbGem);               // NOI18N
             listComponents.put("cboFlur", cboFlur);                     // NOI18N

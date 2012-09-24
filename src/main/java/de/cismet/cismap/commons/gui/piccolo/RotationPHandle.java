@@ -52,39 +52,50 @@ public class RotationPHandle extends PHandle {
     //~ Instance fields --------------------------------------------------------
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private PFeature pfeature;
+    private final PFeature pfeature;
+    private final int entityPosition;
+    private final int ringPosition;
+    private final int coordPosition;
     private double rotation = 0.0d;
     private PHandle pivotHandle;
     private Point2D mid;
-    private int position;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RotationPHandle object.
      *
-     * @param  pfeature     DOCUMENT ME!
-     * @param  mid          DOCUMENT ME!
-     * @param  pivotHandle  DOCUMENT ME!
-     * @param  position     DOCUMENT ME!
+     * @param  pfeature        DOCUMENT ME!
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   DOCUMENT ME!
+     * @param  mid             DOCUMENT ME!
+     * @param  pivotHandle     DOCUMENT ME!
      */
-    public RotationPHandle(final PFeature pfeature, final Point2D mid, final PHandle pivotHandle, final int position) {
+    public RotationPHandle(final PFeature pfeature,
+            final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
+            final Point2D mid,
+            final PHandle pivotHandle) {
         super(new PLocator() {
 
                 @Override
                 public double locateX() {
-                    return pfeature.getXp()[position];
+                    return pfeature.getXp(entityPosition, ringPosition)[coordPosition];
                 }
 
                 @Override
                 public double locateY() {
-                    return pfeature.getYp()[position];
+                    return pfeature.getYp(entityPosition, ringPosition)[coordPosition];
                 }
             }, pfeature.getViewer());
 
         this.mid = mid;
         this.pfeature = pfeature;
-        this.position = position;
+        this.entityPosition = entityPosition;
+        this.ringPosition = ringPosition;
+        this.coordPosition = coordPosition;
         this.pivotHandle = pivotHandle;
     }
 
@@ -106,12 +117,15 @@ public class RotationPHandle extends PHandle {
             log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
         }
         pfeature.getViewer().getCamera().localToView(aLocalDimension);
-        final double dragRot = pfeature.calculateDrag(aEvent, pfeature.getXp()[position], pfeature.getYp()[position]);
+        final double dragRot = pfeature.calculateDrag(
+                aEvent,
+                pfeature.getXp(entityPosition, ringPosition)[coordPosition],
+                pfeature.getYp(entityPosition, ringPosition)[coordPosition]);
         if ((pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection)
                     && (((DefaultFeatureCollection)pfeature.getViewer().getFeatureCollection()).getSelectedFeatures()
                         .size() > 1)) {
             for (final Object o : pfeature.getViewer().getFeatureCollection().getSelectedFeatures()) {
-                final PFeature pf = (PFeature)pfeature.getViewer().getPFeatureHM().get(o);
+                final PFeature pf = (PFeature)pfeature.getViewer().getPFeatureHM().get((Feature)o);
                 if (pf.getFeature().isEditable()) {
                     pf.rotateAllPoints(dragRot, null);
                     relocateHandle();
