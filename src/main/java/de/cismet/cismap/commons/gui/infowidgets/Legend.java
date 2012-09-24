@@ -5,16 +5,12 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * Legend.java
- *
- * Created on 16. Februar 2006, 13:59
- */
 package de.cismet.cismap.commons.gui.infowidgets;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Image;
 
 import java.net.URL;
@@ -25,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -80,25 +75,17 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
         tblLegends.setModel(tableModel);
         tblLegends.setTableHeader(null);
-        // tblLegends.getColumnModel().getColumn(0).setCellRenderer(new CustomCellRenderer());
         tblLegends.setDefaultRenderer(LegendPanel.class, new CustomCellRenderer());
         tblLegends.setShowHorizontalLines(false);
         tblLegends.setBorder(new EmptyBorder(0, 0, 0, 0));
 
-        // scpLegends
-        // scpLegends.setBorder(new EmptyBorder(0,0,0,0));
         tblLegends.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // scpLegends.setSize(this.getSize());
         tblLegends.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-        // tblLegends.setPreferredScrollableViewportSize(new Dimension(1000,1000));
-// tblLegends.revalidate();
         scpLegends = new JScrollPane(tblLegends);
-        // scpLegends.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         StaticSwingTools.setNiftyScrollBars(scpLegends);
         add(scpLegends, BorderLayout.CENTER);
-        // tblLegends.setPreferredSize(Width(600);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -110,7 +97,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
      * @param  layername  DOCUMENT ME!
      */
     public void addLegend(final String url, final String layername) {
-        // LegendPanel lp = new LegendPanel(url);
         tableModel.addLegend(url, layername);
     }
 
@@ -120,12 +106,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
      * @param  layername  DOCUMENT ME!
      */
     public void removeLegendByName(final String layername) {
-//bizarr
-//        tableModel.getAllUrls().remove(url);
-//        if (!tableModel.getAllUrls().contains(url)) {
-//            tableModel.getAllUrls().add(url);//wird nochmal entfernt
-//            tableModel.removeLegend(url);
-//        }
         tableModel.removeLegendByName(layername);
     }
 
@@ -147,32 +127,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         } else {
             tblLegends.getSelectionModel().clearSelection();
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  args  DOCUMENT ME!
-     */
-    public static void main(final String[] args) {
-        try {
-            org.apache.log4j.PropertyConfigurator.configure(ClassLoader.getSystemResource(
-                    "de/cismet/cismap/commons/demo/log4j.properties")); // NOI18N
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        final JFrame f = new JFrame();
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        final Legend l = new Legend();
-        f.getContentPane().setLayout(new BorderLayout());
-        f.getContentPane().add(l, BorderLayout.CENTER);
-        l.addLegend("http://www.google.de/logos/olympics06_speedskating.gif", "1"); // NOI18N
-        l.addLegend("http://www.google.de/logos/olympics06_ski_jump.gif", "2");     // NOI18N
-        l.addLegend("http://www.google.de/logos/olympics06_curling.gif", "3");      // NOI18N
-        l.addLegend("http://www.google.de/logos/olympics06_speedskating.gif", "4"); // NOI18N
-        f.setSize(100, 400);
-        f.setVisible(true);
     }
 
     @Override
@@ -491,6 +445,19 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
         /**
          * DOCUMENT ME!
+         *
+         * @param  r  DOCUMENT ME!
+         */
+        private void dispatch(final Runnable r) {
+            if (EventQueue.isDispatchThread()) {
+                r.run();
+            } else {
+                EventQueue.invokeLater(r);
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
          */
         public final void refresh() {
             final ImageRetrieval ir = new ImageRetrieval(this);
@@ -502,12 +469,20 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
         @Override
         public void retrievalStarted(final RetrievalEvent e) {
-            lblImage.setIcon(null);
-            lblImage.setText("..."); // NOI18N
-            if (maxWidth > 0) {
-                tblLegends.getColumnModel().getColumn(0).setPreferredWidth(maxWidth);
-            }
-            tableModel.fireTableDataChanged();
+            final Runnable r = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        lblImage.setIcon(null);
+                        lblImage.setText("..."); // NOI18N
+                        if (maxWidth > 0) {
+                            tblLegends.getColumnModel().getColumn(0).setPreferredWidth(maxWidth);
+                        }
+                        tableModel.fireTableDataChanged();
+                    }
+                };
+
+            dispatch(r);
         }
 
         @Override
@@ -516,9 +491,17 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
         @Override
         public void retrievalError(final RetrievalEvent e) {
-            lblImage.setText("");                     // NOI18N
-            log.error("Error while loading legend."); // NOI18N
-            tableModel.fireTableDataChanged();
+            final Runnable r = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        lblImage.setText("");                     // NOI18N
+                        log.error("Error while loading legend."); // NOI18N
+                        tableModel.fireTableDataChanged();
+                    }
+                };
+
+            dispatch(r);
         }
 
         @Override
@@ -526,28 +509,40 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             if (e.getRetrievedObject() instanceof Image) {
                 final Image image = (Image)e.getRetrievedObject();
                 final ImageIcon ii = new ImageIcon(image);
-                lblImage.setText(""); // NOI18N
-                lblImage.setIcon(ii);
-                // setSize(new java.awt.Dimension(image.getWidth(null),image.getHeight(null)));
 
-                tableModel.fireTableDataChanged();
-                int newWidth = image.getWidth(null);
-                if (newWidth < tblLegends.getPreferredSize().width) {
-                    newWidth = tblLegends.getPreferredSize().width;
-                } else {
-                    maxWidth = newWidth;
-                }
-                tblLegends.getColumnModel().getColumn(0).setPreferredWidth(newWidth);
-//                tblLegends.setSize(newWidth,1000);
-//                tblLegends.setPreferredSize(new Dimension(newWidth,(int)tblLegends.getSize().getHeight()+image.getHeight(null)));
-//                tblLegends.setPreferredSize(new Dimension(image.getWidth(null),(int)scpLegends.getSize().getHeight()));
-//
+                final Runnable r = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            lblImage.setText(""); // NOI18N
+                            lblImage.setIcon(ii);
+
+                            tableModel.fireTableDataChanged();
+                            int newWidth = image.getWidth(null);
+                            if (newWidth < tblLegends.getPreferredSize().width) {
+                                newWidth = tblLegends.getPreferredSize().width;
+                            } else {
+                                maxWidth = newWidth;
+                            }
+                            tblLegends.getColumnModel().getColumn(0).setPreferredWidth(newWidth);
+                        }
+                    };
+
+                dispatch(r);
             }
         }
 
         @Override
         public void retrievalAborted(final RetrievalEvent e) {
-            lblImage.setText(""); // NOI18N
+            final Runnable r = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        lblImage.setText(""); // NOI18N
+                    }
+                };
+
+            dispatch(r);
         }
 
         /**
@@ -639,7 +634,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
         //~ Instance fields ----------------------------------------------------
 
-        // private LinkedHashMap<String,LegendPanel> panels=new LinkedHashMap<String,LegendPanel>();
         private List<LegendPanel> panels = new ArrayList<LegendPanel>();
         private HashMap<String, LegendPanel> panelsByName = new HashMap<String, LegendPanel>();
         private HashMap<String, LegendPanel> panelsByUrl = new HashMap<String, LegendPanel>();
@@ -743,8 +737,5 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
             return panels.size() - 1 - panels.indexOf(lp);
         }
-//        public Vector<String> getAllUrls() {
-//            return urlsByName.;
-//        }
     }
 }
