@@ -46,7 +46,6 @@ import java.util.Iterator;
 
 import javax.xml.namespace.QName;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
