@@ -27,6 +27,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import de.cismet.cismap.commons.interaction.CismapBroker;
+
 import de.cismet.tools.CismetThreadPool;
 
 /**
@@ -177,7 +179,9 @@ public class InfoPanel extends JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void cmdMoreActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdMoreActionPerformed
-        setExpanded(!isExpanded());
+        if (CismapBroker.getInstance().getMappingComponent().isInfoNodesVisible()) {
+            setExpanded(!isExpanded());
+        }
     }                                                                           //GEN-LAST:event_cmdMoreActionPerformed
 
     /**
