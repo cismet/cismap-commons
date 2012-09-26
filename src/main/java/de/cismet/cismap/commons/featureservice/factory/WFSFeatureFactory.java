@@ -1,10 +1,12 @@
-/***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+/**
+ * *************************************************
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ * 
+* ... and it just works.
+ * 
+***************************************************
+ */
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -44,32 +46,31 @@ import de.cismet.security.AccessHandler.ACCESS_METHODS;
 import de.cismet.security.WebAccessManager;
 
 /**
- * A FeatureFactory that creates WFSFeatures obtained from a Web Feature Service.<br/>
- * The factory is non-caching, which means that each request to {@code createFeatures} leads to a new WFS request, even
- * if the bounding box is the same. However, it is possible to obtain the features created by the latesd WFS request via
- * the {@code getLastCreatedFeatures()} operation.
+ * A FeatureFactory that creates WFSFeatures obtained from a Web Feature
+ * Service.<br/> The factory is non-caching, which means that each request to {@code createFeatures}
+ * leads to a new WFS request, even if the bounding box is the same. However, it
+ * is possible to obtain the features created by the latesd WFS request via the {@code getLastCreatedFeatures()}
+ * operation.
  *
- * @author   Pascal Dihé
- * @version  $Revision$, $Date$
+ * @author Pascal Dihé
+ * @version $Revision$, $Date$
  */
 public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> {
 
     //~ Instance fields --------------------------------------------------------
-
     protected String hostname = null;
     protected FeatureType featureType;
     private Crs crs;
 
     //~ Constructors -----------------------------------------------------------
-
     /**
-     * private Vector<WFSFeature> wfsFeatureVector = new Vector(); private PostMethod httppost; private
-     * InputStreamReader reader;
+     * private Vector<WFSFeature> wfsFeatureVector = new Vector(); private
+     * PostMethod httppost; private InputStreamReader reader;
      *
-     * @param  layerProperties  DOCUMENT ME!
-     * @param  hostname         DOCUMENT ME!
-     * @param  featureType      wfsVersion DOCUMENT ME!
-     * @param  crs              DOCUMENT ME!
+     * @param layerProperties DOCUMENT ME!
+     * @param hostname DOCUMENT ME!
+     * @param featureType wfsVersion DOCUMENT ME!
+     * @param crs DOCUMENT ME!
      */
     public WFSFeatureFactory(final LayerProperties layerProperties,
             final String hostname,
@@ -85,7 +86,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     /**
      * Creates a new WFSFeatureFactory object.
      *
-     * @param  wfsff  DOCUMENT ME!
+     * @param wfsff DOCUMENT ME!
      */
     protected WFSFeatureFactory(final WFSFeatureFactory wfsff) {
         super(wfsff);
@@ -95,26 +96,26 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     }
 
     //~ Methods ----------------------------------------------------------------
-
     /**
      * DOCUMENT ME!
      *
-     * @param  hostname  DOCUMENT ME!
+     * @param hostname DOCUMENT ME!
      */
     public void setHostname(final String hostname) {
         this.hostname = hostname;
     }
+
     /**
      * TODO: Track Progress?
      *
-     * @param   query         DOCUMENT ME!
-     * @param   boundingBox   DOCUMENT ME!
-     * @param   workerThread  DOCUMENT ME!
+     * @param query DOCUMENT ME!
+     * @param boundingBox DOCUMENT ME!
+     * @param workerThread DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      *
-     * @throws  TooManyFeaturesException  DOCUMENT ME!
-     * @throws  Exception                 DOCUMENT ME!
+     * @throws TooManyFeaturesException DOCUMENT ME!
+     * @throws Exception DOCUMENT ME!
      */
     @Override
     public Vector<WFSFeature> createFeatures(final String query,
@@ -136,8 +137,8 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         final WFSFacade facade = featureType.getWFSCapabilities().getServiceFacade();
         final String postString = facade.setGetFeatureBoundingBox(query, bbox, featureType, getCrs().getCode());
         featureSrid = CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(
-                    featureType,
-                    getCrs().getCode()));
+                featureType,
+                getCrs().getCode()));
 
         // check if canceled .......................................................
         if (this.checkCancelled(workerThread, "creating post string")) {
@@ -150,8 +151,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
 
         long start = System.currentTimeMillis();
 
-        final InputStream respIs = WebAccessManager.getInstance()
-                    .doRequest(new URL(hostname), postString, ACCESS_METHODS.POST_REQUEST);
+        final InputStream respIs = WebAccessManager.getInstance().doRequest(new URL(hostname), postString, ACCESS_METHODS.POST_REQUEST);
 
         // check if canceled .......................................................
         if (this.checkCancelled(workerThread, "executing http request")) {
@@ -204,10 +204,12 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             // check if canceled .......................................................
 
             // getFeatureCount() stimmt nicht mit der zahl der geparsten features überein!?
-            /*if (featureCollectionDocument.getFeatureCount() > this.getMaxFeatureCount())
-             * { throw new TooManyFeaturesException("feature in feature document " +
-             * featureCollectionDocument.getFeatureCount() + " exceeds max feature count " + this.getMaxFeatureCount());
-             * } else
+            /*
+             * if (featureCollectionDocument.getFeatureCount() >
+             * this.getMaxFeatureCount()) { throw new
+             * TooManyFeaturesException("feature in feature document " +
+             * featureCollectionDocument.getFeatureCount() + " exceeds max
+             * feature count " + this.getMaxFeatureCount()); } else
              */
             if (featureCollectionDocument.getFeatureCount() == 0) {
                 logger.warn("FRW[" + workerThread + "]: no features found before parsing");
@@ -218,7 +220,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             if (DEBUG) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("FRW[" + workerThread + "]: parsing " + featureCollectionDocument.getFeatureCount()
-                                + " features");
+                            + " features");
                 }
             }
 
@@ -233,15 +235,12 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             // check if canceled .......................................................
 
             if ((featureCollection.size() == 1) && (featureCollection.getFeature(0).getName() != null)
-                        && featureCollection.getFeature(0).getName().getLocalName().equals("ExceptionText")) {
+                    && featureCollection.getFeature(0).getName().getLocalName().equals("ExceptionText")) {
                 logger.warn(
-                    "The wfs response contains only one feature with the name ExceptionText. "
-                            + "So an error occured. Trying to extract the error message.");
+                        "The wfs response contains only one feature with the name ExceptionText. "
+                        + "So an error occured. Trying to extract the error message.");
                 try {
-                    final String errorMessage = featureCollectionDocument.getRootElement()
-                                .getFirstChild()
-                                .getFirstChild()
-                                .getTextContent();
+                    final String errorMessage = featureCollectionDocument.getRootElement().getFirstChild().getFirstChild().getTextContent();
 
                     throw new Exception(errorMessage);
                 } catch (NullPointerException e) {
@@ -251,11 +250,11 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             }
 
             logger.info("FRW[" + workerThread + "]: parsing " + featureCollection.size() + " features took "
-                        + (System.currentTimeMillis() - start) + " ms");
+                    + (System.currentTimeMillis() - start) + " ms");
 
             if (featureCollection.size() > this.getMaxFeatureCount()) {
                 throw new TooManyFeaturesException("FRW[" + workerThread + "]: feature in feature document "
-                            + featureCollection.size() + " exceeds max feature count " + this.getMaxFeatureCount());
+                        + featureCollection.size() + " exceeds max feature count " + this.getMaxFeatureCount());
             } else if (featureCollection.size() == 0) {
                 logger.warn("FRW[" + workerThread + "]: no features found after parsing");
                 return null;
@@ -283,27 +282,27 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     /**
      * DOCUMENT ME!
      *
-     * @param   workerThread  DOCUMENT ME!
+     * @param workerThread DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      *
-     * @throws  TooManyFeaturesException       DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
-     * @throws  Exception                      DOCUMENT ME!
+     * @throws TooManyFeaturesException DOCUMENT ME!
+     * @throws UnsupportedOperationException DOCUMENT ME!
+     * @throws Exception DOCUMENT ME!
      */
     @Override
     public Vector createAttributes(final SwingWorker workerThread) throws TooManyFeaturesException,
-        UnsupportedOperationException,
-        Exception {
+            UnsupportedOperationException,
+            Exception {
         throw new UnsupportedOperationException("LIW[" + workerThread
-                    + "]: WFSFeatureFactory does not support Attributes");
+                + "]: WFSFeatureFactory does not support Attributes");
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  reader    DOCUMENT ME!
-     * @param  httppost  DOCUMENT ME!
+     * @param reader DOCUMENT ME!
+     * @param httppost DOCUMENT ME!
      */
     protected void cleanup(InputStreamReader reader, PostMethod httppost) {
         if (reader != null) {
@@ -323,12 +322,12 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     /**
      * DOCUMENT ME!
      *
-     * @param   degreeFeature  DOCUMENT ME!
-     * @param   index          DOCUMENT ME!
+     * @param degreeFeature DOCUMENT ME!
+     * @param index DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      *
-     * @throws  Exception  DOCUMENT ME!
+     * @throws Exception DOCUMENT ME!
      */
     @Override
     protected WFSFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
@@ -338,7 +337,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     @Override
     protected boolean isGenerateIds() {
@@ -348,7 +347,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     @Override
     public WFSFeatureFactory clone() {
@@ -358,7 +357,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     /**
      * DOCUMENT ME!
      *
-     * @return  the crs
+     * @return the crs
      */
     public Crs getCrs() {
         return crs;
@@ -367,7 +366,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     /**
      * DOCUMENT ME!
      *
-     * @param  crs  the crs to set
+     * @param crs the crs to set
      */
     public void setCrs(final Crs crs) {
         this.crs = crs;

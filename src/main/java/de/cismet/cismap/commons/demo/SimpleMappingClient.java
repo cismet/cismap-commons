@@ -104,7 +104,9 @@ public class SimpleMappingClient extends javax.swing.JFrame implements Retrieval
 
         final CismapPreferences cismapPrefs = new CismapPreferences(getClass().getResource("/cismapPreferences.xml")); // NOI18N
 
-        validateTree();
+        synchronized (getTreeLock()) {
+            validateTree();
+        }
 
         mapC.setPreferences(cismapPrefs);
 

@@ -70,7 +70,9 @@ public class Tester extends javax.swing.JFrame {
         panCaps.add(capWidget);
         layerWidget = new LayerWidget(mapC);
         panLayerWidget.add(layerWidget);
-        validateTree();
+        synchronized (getTreeLock()) {
+            validateTree();
+        }
         CismapBroker.getInstance().setMappingComponent(mapC);
         mapC.setMappingModel(layerWidget.getMappingModel());
         final ConfigurationManager cm = new ConfigurationManager();
@@ -190,7 +192,9 @@ public class Tester extends javax.swing.JFrame {
      * @param  evt  DOCUMENT ME!
      */
     private void jButton3ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton3ActionPerformed
-        validateTree();
+        synchronized (getTreeLock()) {
+            validateTree();
+        }
         mapC.showInternalLayerWidget(!mapC.isInternalLayerWidgetVisible(), 500);
     }                                                                            //GEN-LAST:event_jButton3ActionPerformed
 
