@@ -124,7 +124,7 @@ public final class FeatureGroups {
      */
     public static Geometry getEnclosingGeometry(final Collection<? extends Feature> featureCollection) {
         final GeometryFactory factory = new GeometryFactory();
-        boolean hasOnlyPolygons = true;
+        boolean hasLinestringOrPoints = false;
         Geometry union = null;
         final Geometry[] array = new Geometry[featureCollection.size()];
         int i = 0;
@@ -133,8 +133,8 @@ public final class FeatureGroups {
             for (final Feature f : featureCollection) {
                 final Geometry newGeom = f.getGeometry();
 
-                if (hasOnlyPolygons && (!((newGeom instanceof Polygon) || (newGeom instanceof MultiPolygon)))) {
-                    hasOnlyPolygons = false;
+                if (!hasLinestringOrPoints && ((newGeom instanceof LineString) || (newGeom instanceof Point))) {
+                    hasLinestringOrPoints = true;
                 }
 
                 if (newGeom != null) {
@@ -146,7 +146,7 @@ public final class FeatureGroups {
                 }
             }
 
-            if (hasOnlyPolygons) {
+            if (!hasLinestringOrPoints) {
                 // The following two lines are more efficient then the union method.
                 // See http://www.vividsolutions.com/JTS/bin/JTS%20Developer%20Guide.pdf
                 // But buffer(0) handles LineStrings and Points as empty polygons, so it can only be used,
