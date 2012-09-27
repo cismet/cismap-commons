@@ -751,9 +751,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final Coordinate[] points = transformCoordinateArr(coordinateArr);
         final GeneralPath gp = new GeneralPath();
         gp.reset();
-        gp.moveTo((float)points[0].x, (float)points[0].y);
-        for (int i = 1; i < points.length; i++) {
-            gp.lineTo((float)points[i].x, (float)points[i].y);
+        if (points.length > 0) {
+            gp.moveTo((float)points[0].x, (float)points[0].y);
+            for (int i = 1; i < points.length; i++) {
+                gp.lineTo((float)points[i].x, (float)points[i].y);
+            }
         }
         append(gp, false);
     }
