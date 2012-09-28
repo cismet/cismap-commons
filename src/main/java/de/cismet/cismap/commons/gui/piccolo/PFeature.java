@@ -327,10 +327,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                             log.debug("newSweetSpotx: "
                                         + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX()); // NOI18N
                         }
+
                         pi.setSweetSpotX(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());
                         pi.setSweetSpotY(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY());
                     } catch (Throwable ex) {
-                        log.warn("No PointAnnotationSymbol found", ex);                                              // NOI18N
+                        log.warn("No PointAnnotationSymbol found", ex); // NOI18N
                         pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
                         pi.setSweetSpotX(0.46d);
                         pi.setSweetSpotY(0.9d);
@@ -340,7 +341,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 //                        log.fatal("Sweetspot updated");                                                                  // NOI18N
                     if (log.isDebugEnabled()) {
                         log.debug("newSweetSpotx: "
-                                    + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());     // NOI18N
+                                    + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX()); // NOI18N
                     }
                     pi.setSweetSpotX(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());
                     pi.setSweetSpotY(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY());
@@ -676,8 +677,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
         }
 
-        updateXpAndYp();
-        updatePath();
+        if (geom != null) {
+            updateXpAndYp();
+            updatePath();
+        }
 
         refreshDesign();
     }
@@ -1858,7 +1861,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if (stickyChild != null) {
                     stickyChild.addChild(p);
                     p.setOffset(stickyChild.getWidth(), 0);
-                } else {
+                } else if (getFeature().getGeometry() != null) {
                     syncGeometry();
                     final Geometry geom = CrsTransformer.transformToGivenCrs(getFeature().getGeometry(),
                             getViewerCrs().getCode());
