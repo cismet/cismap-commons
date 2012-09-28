@@ -374,7 +374,9 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
         // But here we don't need to notify the visualizing component of this AbstractCreateSearchGeometryListener about
         // the change, since this method is invoked by it. It already knows about the change.
 
-        generateAndShowPointerAnnotation();
+        if (getMappingComponent().getInteractionMode().equals(MappingComponent.CREATE_SEARCH_POLYGON)) {
+            generateAndShowPointerAnnotation();
+        }
     }
 
     @Override
