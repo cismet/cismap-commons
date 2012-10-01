@@ -202,8 +202,7 @@ public class TransformationPHandle extends PHandle {
 
                     // CTRL DOWN => an der Linie kleben
                     if (pInputEvent.isLeftMouseButton() && pInputEvent.isControlDown()) {
-                        Point2D trigger = pInputEvent.getCanvasPosition();
-                        trigger = pfeature.getViewer().getCamera().localToView(trigger);
+                        final Point2D trigger = pInputEvent.getCanvasPosition();
 
 //                        if (positionInArray==0) {
 //                            lineStartIndex=getXp().length-2;
@@ -220,8 +219,10 @@ public class TransformationPHandle extends PHandle {
                                 leftNeighbourPoint,
                                 rightNeighbourPoint,
                                 trigger);
-                        currentX = (float)erg.getX();
-                        currentY = (float)erg.getY();
+
+                        final Point2D ergPoint = pfeature.getViewer().getCamera().localToView(erg);
+                        currentX = (float)ergPoint.getX();
+                        currentY = (float)ergPoint.getY();
                     } else {
                         // an der Maus
                         currentX = (float)pInputEvent.getPosition().getX();
