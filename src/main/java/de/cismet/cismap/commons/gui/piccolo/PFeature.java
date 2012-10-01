@@ -2743,14 +2743,28 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     private boolean isValidWithThisEntity(final int entityPosition, final Coordinate[][] ringCoordArr) {
         // polygon für die prüfung erzeugen
-        final Polygon newPolygon;
+        final Geometry newGeometry;
         try {
             final GeometryFactory geometryFactory = new GeometryFactory(
                     new PrecisionModel(PrecisionModel.FLOATING),
                     CrsTransformer.extractSridFromCrs(getViewerCrs().getCode()));
-            newPolygon = createPolygon(ringCoordArr, geometryFactory);
+            if ((getFeature().getGeometry() instanceof Polygon)
+                        || (getFeature().getGeometry() instanceof MultiPolygon)) {
+                newGeometry = createPolygon(ringCoordArr, geometryFactory);
+            } else if ((getFeature().getGeometry() instanceof LineString)
+                        || (getFeature().getGeometry() instanceof MultiLineString)) {
+                newGeometry = createLineString(ringCoordArr[0], geometryFactory);
+            } else if ((getFeature().getGeometry() instanceof Point)
+                        || (getFeature().getGeometry() instanceof MultiPoint)) {
+                newGeometry = createPoint(ringCoordArr[0][0], geometryFactory);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("unknown geometry type");
+                }
+                return false;
+            }
 
-            if (!newPolygon.isValid()) {
+            if (!newGeometry.isValid()) {
                 return false;
             }
 
@@ -2759,7 +2773,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if ((entityPosition < 0) || (entityIndex != entityPosition)) { // nicht mit sich (bzw seinem alten
                                                                                // selbst) selbst vergleichen
                     final Geometry otherGeometry = geometry.getGeometryN(entityIndex);
-                    if (newPolygon.intersects(otherGeometry)) {
+                    if (newGeometry.intersects(otherGeometry)) {
                         // polygon schneidet ein anderes teil-polygon
                         return false;
                     }
@@ -2768,7 +2782,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // alles ok
             return true;
         } catch (final Exception ex) {
-            // verändertes teil-polygon ist selbst schon nicht gültig;
+            if (log.isDebugEnabled()) {
+                // verändertes teil-polygon ist selbst schon nicht gültig;
+                log.debug("invalid geometry", ex);
+            }
             return false;
         }
     }
