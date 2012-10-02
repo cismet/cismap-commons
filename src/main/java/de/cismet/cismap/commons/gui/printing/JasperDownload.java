@@ -117,35 +117,4 @@ public class JasperDownload extends AbstractDownload {
             stateChanged();
         }
     }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (!(obj instanceof JasperDownload)) {
-            return false;
-        }
-
-        final JasperDownload other = (JasperDownload)obj;
-
-        boolean result = true;
-
-        if ((this.print == null) ? (other.print != null) : (!this.print.equals(other.print))) {
-            result &= false;
-        }
-        if ((this.fileToSaveTo == null) ? (other.fileToSaveTo != null)
-                                        : (!this.fileToSaveTo.equals(other.fileToSaveTo))) {
-            result &= false;
-        }
-
-        return result;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-
-        hash = (43 * hash) + ((this.print != null) ? this.print.hashCode() : 0);
-        hash = (43 * hash) + ((this.fileToSaveTo != null) ? this.fileToSaveTo.hashCode() : 0);
-
-        return hash;
-    }
 }
