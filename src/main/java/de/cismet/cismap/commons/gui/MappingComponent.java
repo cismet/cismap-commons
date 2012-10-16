@@ -4132,6 +4132,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             LOG.warn("Fehler beim Setzen des CreationInteractionMode", ex);                        // NOI18N
         }
         try {
+            final String creationMode = prefs.getAttribute("creationMode").getValue();             // NOI18N
+            ((CreateGeometryListener)getInputListener(getInteractionMode())).setMode(creationMode);
+        } catch (final Exception ex) {
+            LOG.warn("Fehler beim Setzen des CreationInteractionMode", ex);                        // NOI18N
+        }
+        try {
             final String handleInterMode = prefs.getAttribute("handleInteractionMode").getValue(); // NOI18N
             setHandleInteractionMode(handleInterMode);
         } catch (final Exception ex) {
