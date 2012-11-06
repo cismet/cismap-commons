@@ -511,7 +511,10 @@ public class TransformationPHandle extends PHandle {
                 coordPosition,
                 newCoordArr.length
                         - coordPosition);
-            newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
+            if ((pfeature.getFeature().getGeometry() instanceof Polygon)
+                        || (pfeature.getFeature().getGeometry() instanceof MultiPolygon)) {
+                newCoordArr[newCoordArr.length - 1] = newCoordArr[0];
+            }
             if (pfeature.isValidWithThisCoordinates(entityPosition, ringPosition, newCoordArr)) {
                 ((PHandle)(pInputEvent.getPickedNode())).removeHandle();
                 polygonTooltip.setVisible(false);
