@@ -294,7 +294,8 @@ public class PFeatureTools {
                 for (int i = 0; i < validClasses.length; ++i) {
 //                    if (o!=null) log.debug("_ getFirstValidObjectUnderPointer teste "+o.getClass()+ ":"+validClasses[i].getName()+" :"+ validClasses[i].isAssignableFrom(o.getClass()));
                     if ((o != null) && validClasses[i].isAssignableFrom(o.getClass())
-                                && (((PNode)o).getParent() != null) && ((PNode)o).getParent().getVisible()) {
+                                && (((PNode)o).getParent() != null) && ((PNode)o).getParent().getVisible()
+                                && ((PNode)o).getVisible()) {
                         if ((o != null) && (o instanceof PPath) && ((PPath)o).getPathReference().contains(xPos, yPos)) {
                             rightType = true;
                             break;
