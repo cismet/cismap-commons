@@ -2942,7 +2942,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         featureCollection.getSelectedFeatures());
                                 for (final Feature selectedFeature : copy) {
                                     if ((selectedFeature instanceof Feature) && selectedFeature.isEditable()) {
-                                        if (pFeatureHM.get(selectedFeature) != null) {
+                                        if ((pFeatureHM.get(selectedFeature) != null)
+                                                    && pFeatureHM.get(selectedFeature).getVisible()) {
                                             // manipulates gui -> edt
                                             EventQueue.invokeLater(new Runnable() {
 
@@ -2961,7 +2962,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         featureCollection.getSelectedFeatures());
                                 for (final Feature selectedFeature : copy) {
                                     if ((selectedFeature != null) && selectedFeature.isEditable()) {
-                                        if (pFeatureHM.get(selectedFeature) != null) {
+                                        if ((pFeatureHM.get(selectedFeature) != null)
+                                                    && pFeatureHM.get(selectedFeature).getVisible()) {
                                             // manipulates gui -> edt
                                             EventQueue.invokeLater(new Runnable() {
 
