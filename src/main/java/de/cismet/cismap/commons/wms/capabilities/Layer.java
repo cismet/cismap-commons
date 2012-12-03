@@ -107,4 +107,11 @@ public interface Layer {
      * @return  DOCUMENT ME!
      */
     Envelope getLatLonBoundingBoxes();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  filterString  DOCUMENT ME!
+     */
+    void setFilterString(String filterString);
 }
