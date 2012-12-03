@@ -169,6 +169,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private javax.swing.JPanel jPanel1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JTabbedPane tbpCapabilities;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -445,6 +446,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+
         jPanel1 = new javax.swing.JPanel();
         jToolBar1 = new javax.swing.JToolBar();
         cmdCollapse = new javax.swing.JButton();
@@ -452,9 +454,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         cmdAddByUrl = new javax.swing.JButton();
         cmdRemove = new javax.swing.JButton();
         cmdRefresh = new javax.swing.JButton();
-        tbpCapabilities = StaticSwingTools.jTabbedPaneWithVerticalTextCreator(
-                JTabbedPane.LEFT,
-                JTabbedPane.SCROLL_TAB_LAYOUT);
+        txtSearch = new javax.swing.JTextField();
+        tbpCapabilities = StaticSwingTools.jTabbedPaneWithVerticalTextCreator(JTabbedPane.LEFT,JTabbedPane.SCROLL_TAB_LAYOUT);
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
         setPreferredSize(new java.awt.Dimension(200, 250));
@@ -466,80 +467,58 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         jToolBar1.setFloatable(false);
         jToolBar1.setRollover(true);
 
-        cmdCollapse.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/collapseTree.png"))); // NOI18N
-        cmdCollapse.setToolTipText(org.openide.util.NbBundle.getMessage(
-                CapabilityWidget.class,
-                "CapabilityWidget.cmdCollapse.toolTipText"));                                                    // NOI18N
+        cmdCollapse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/collapseTree.png"))); // NOI18N
+        cmdCollapse.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdCollapse.toolTipText")); // NOI18N
         cmdCollapse.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdCollapse.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdCollapseActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdCollapseActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdCollapse);
 
-        cmdAddFromList.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/addServerFromList.png"))); // NOI18N
-        cmdAddFromList.setToolTipText(org.openide.util.NbBundle.getMessage(
-                CapabilityWidget.class,
-                "CapabilityWidget.cmdAddFromList.toolTipText"));                                                      // NOI18N
+        cmdAddFromList.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/addServerFromList.png"))); // NOI18N
+        cmdAddFromList.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdAddFromList.toolTipText")); // NOI18N
         cmdAddFromList.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdAddFromList.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdAddFromListActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdAddFromListActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdAddFromList);
 
-        cmdAddByUrl.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/addServerFromUrl.png"))); // NOI18N
-        cmdAddByUrl.setToolTipText(org.openide.util.NbBundle.getMessage(
-                CapabilityWidget.class,
-                "CapabilityWidget.cmdAddByUrl.toolTipText"));                                                        // NOI18N
+        cmdAddByUrl.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/addServerFromUrl.png"))); // NOI18N
+        cmdAddByUrl.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdAddByUrl.toolTipText")); // NOI18N
         cmdAddByUrl.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdAddByUrl.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdAddByUrlActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdAddByUrlActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdAddByUrl);
 
-        cmdRemove.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/tab_remove.png"))); // NOI18N
-        cmdRemove.setToolTipText(org.openide.util.NbBundle.getMessage(
-                CapabilityWidget.class,
-                "CapabilityWidget.cmdRemove.toolTipText"));                                                    // NOI18N
+        cmdRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/tab_remove.png"))); // NOI18N
+        cmdRemove.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdRemove.toolTipText")); // NOI18N
         cmdRemove.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdRemove.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdRemoveActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdRemoveActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdRemove);
 
-        cmdRefresh.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/refresh.png"))); // NOI18N
-        cmdRefresh.setToolTipText(org.openide.util.NbBundle.getMessage(
-                CapabilityWidget.class,
-                "CapabilityWidget.cmdRefresh.toolTipText"));                                                // NOI18N
+        cmdRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/capabilitywidget/res/refresh.png"))); // NOI18N
+        cmdRefresh.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.cmdRefresh.toolTipText")); // NOI18N
         cmdRefresh.setMargin(new java.awt.Insets(2, 1, 2, 1));
         cmdRefresh.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdRefreshActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdRefreshActionPerformed(evt);
+            }
+        });
         jToolBar1.add(cmdRefresh);
+
+        txtSearch.setToolTipText(org.openide.util.NbBundle.getMessage(CapabilityWidget.class, "CapabilityWidget.txtSearch.toolTipText")); // NOI18N
+        jToolBar1.add(txtSearch);
 
         jPanel1.add(jToolBar1, java.awt.BorderLayout.CENTER);
 
@@ -549,36 +528,36 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         tbpCapabilities.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
         tbpCapabilities.setPreferredSize(new java.awt.Dimension(180, 400));
         add(tbpCapabilities, java.awt.BorderLayout.CENTER);
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
+    }//GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
+    }//GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
@@ -591,16 +570,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
+    }//GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
+    }//GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -655,7 +634,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -664,7 +643,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
+    }//GEN-LAST:event_cmdCollapseActionPerformed
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
