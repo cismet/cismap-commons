@@ -696,10 +696,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                             MappingComponent.this,
                                             true);
                                     pc.getLayer().addChild(copy);
-
-                                    copy.setTransparency(original.getTransparency());
+                                    for (final PNode tmp : (Collection<PNode>)copy.getAllNodes()) {
+                                        tmp.setTransparency(1f);
+                                    }
                                     copy.setStrokePaint(original.getStrokePaint());
 
+                                    copy.setStroke(
+                                        new CustomFixedWidthStroke(1));
                                     copy.addInfoNode();
                                     copy.setInfoNodeExpanded(false);
 
@@ -5756,6 +5759,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
     }
 }
+
 /**
  * DOCUMENT ME!
  *
