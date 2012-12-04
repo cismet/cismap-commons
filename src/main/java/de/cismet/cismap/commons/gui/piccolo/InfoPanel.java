@@ -67,11 +67,11 @@ public class InfoPanel extends JPanel {
         try {
             initComponents();
             cmdMore.setIcon(icoMore);
-            cmdMore.setText(""); // NOI18N
+            cmdMore.setText("");           // NOI18N
             this.more = more;
             if (more == null) {
-                // cmdMore.setVisible(false); //macht die Komponente zu klein
-                cmdMore.setEnabled(false);
+                cmdMore.setVisible(false); // macht die Komponente zu klein
+                // cmdMore.setEnabled(false);
             } else {
                 this.add(more, BorderLayout.CENTER);
                 more.setVisible(false);
@@ -137,6 +137,7 @@ public class InfoPanel extends JPanel {
         lblTitle.setBackground(javax.swing.UIManager.getDefaults().getColor("Nb.Desktop.background"));
         lblTitle.setFont(new java.awt.Font("Tahoma", 0, 12));                                              // NOI18N
         lblTitle.setText(org.openide.util.NbBundle.getMessage(InfoPanel.class, "InfoPanel.jLabel1.text")); // NOI18N
+        lblTitle.setBorder(javax.swing.BorderFactory.createEmptyBorder(8, 3, 8, 3));
         lblTitle.addMouseListener(new java.awt.event.MouseAdapter() {
 
                 @Override
@@ -164,6 +165,7 @@ public class InfoPanel extends JPanel {
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
     } // </editor-fold>//GEN-END:initComponents
+
     /**
      * DOCUMENT ME!
      *
