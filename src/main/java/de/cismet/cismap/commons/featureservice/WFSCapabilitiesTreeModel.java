@@ -230,11 +230,31 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
             if (((feature.getTitle() != null)
                             && (feature.getTitle().toLowerCase().indexOf(filterString.toLowerCase()) != -1))
                         || ((feature.getName() != null)
-                            && (feature.getName().toString().toLowerCase().indexOf(filterString.toLowerCase()) != -1))) {
+                            && (feature.getName().toString().toLowerCase().indexOf(filterString.toLowerCase()) != -1))
+                        || (containsFilterString(feature.getKeywords()))) {
                 allValidNodes.add(feature);
             }
         }
 
         return allValidNodes;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   keywords  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean containsFilterString(final String[] keywords) {
+        if (keywords != null) {
+            for (final String tmp : keywords) {
+                if ((tmp != null) && (tmp.toLowerCase().indexOf(filterString.toLowerCase()) != -1)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

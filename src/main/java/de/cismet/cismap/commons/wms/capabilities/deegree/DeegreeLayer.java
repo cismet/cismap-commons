@@ -141,12 +141,33 @@ public class DeegreeLayer implements Layer {
      * @return  DOCUMENT ME!
      */
     private boolean fulfilFilterRequirements(final org.deegree.ogcwebservices.wms.capabilities.Layer l) {
-        if ((l.getTitle().toLowerCase().indexOf(filterString.toLowerCase()) != -1) && (l.getLayer().length == 0)) {
+        if (((l.getTitle().toLowerCase().indexOf(filterString.toLowerCase()) != -1)
+                        || containsFilterString(l.getKeywordList()))
+                    && (l.getLayer().length == 0)) {
             return true;
         } else {
             final org.deegree.ogcwebservices.wms.capabilities.Layer[] children = l.getLayer();
             for (int i = 0; i < children.length; ++i) {
                 if (fulfilFilterRequirements(children[i])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   keywords  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean containsFilterString(final String[] keywords) {
+        if (keywords != null) {
+            for (final String tmp : keywords) {
+                if ((tmp != null) && (tmp.toLowerCase().indexOf(filterString.toLowerCase()) != -1)) {
                     return true;
                 }
             }
