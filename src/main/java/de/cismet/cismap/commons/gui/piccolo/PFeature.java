@@ -80,7 +80,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     PFeature selectedOriginal = null;
     PPath splitPolygonLine;
     List<Point2D> splitPoints = new ArrayList<Point2D>();
-
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Feature feature;
     private WorldToScreenTransform wtst;
@@ -119,7 +118,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private double sweetSelY = 0;
     private boolean snappable = true;
     private int selectedEntity = -1;
-
+    private Image origin;
     // r/w access only in synchronized(this) block
     private transient PImage rdfImage;
 
@@ -1909,7 +1908,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     infoNode.setVisible(false);
                 }
                 pswingComp.addPropertyChangeListener("fullBounds", new PropertyChangeListener() { // NOI18N
-
                         @Override
                         public void propertyChange(final PropertyChangeEvent evt) {
                             p.setWidth(pswingComp.getWidth());
@@ -1918,7 +1916,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     });
             }
         } catch (Throwable t) {
-            log.error("Error in AddInfoNode", t); // NOI18N
+            log.error("Error in AddInfoNode", t);       // NOI18N
         }
     }
 
@@ -2151,6 +2149,17 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                                 .getPointAnnotationSymbol();
                     // assign pure unselected image
                     iconImage = symbolization.getImage();
+                    if ((iconImage == pushpinIco.getImage()) || (iconImage == pushpinSelectedIco.getImage())) {
+                        iconImage = null;
+                    }
+                    if ((iconImage != null) && (origin == null)) {
+                        final BufferedImage img = new BufferedImage(iconImage.getWidth(null),
+                                iconImage.getHeight(null),
+                                BufferedImage.TYPE_INT_ARGB);
+                        final Graphics g = img.getGraphics();
+                        g.drawImage(iconImage, 0, 0, null);
+                        origin = highlightImageAsSelected(img, TRANSPARENT, TRANSPARENT, 10);
+                    }
                     final Image selectedImage = symbolization.getSelectedFeatureAnnotationSymbol();
                     if (selectedImage != null) {
                         if (selected) {
@@ -2158,37 +2167,29 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                             iconImage = selectedImage;
                         }
                     } else if (iconImage != null) {
-                        final Image old = iconImage;
-                        final int inset = 10;
                         if (selected) {
                             // assign unselected image with selection frame
                             iconImage = highlightImageAsSelected(
-                                    iconImage,
+                                    origin,
                                     new Color(0.3f, 0.3f, 1.0f, 0.4f),
                                     new Color(0.2f, 0.2f, 1.0f, 0.8f),
-                                    inset);
+                                    0);
                         } else {
                             // assign unselected image with invisible offset with size of the selection frame
-                            iconImage = highlightImageAsSelected(iconImage, TRANSPARENT, TRANSPARENT, inset);
+                            iconImage = origin;
                         }
-                        // adjust sweetspot if necessary
-                        if (sweetSelX < 0f) {
-                            sweetSelX = ((sweetPureX * old.getWidth(null)) + inset) / iconImage.getWidth(null);
-                            sweetSelY = ((sweetPureY * old.getHeight(null)) + inset) / iconImage.getHeight(null);
-                        }
-                        pi.setSweetSpotX(sweetSelX);
-                        pi.setSweetSpotY(sweetSelY);
                     }
                 }
                 // Fallback case: Pushpin icons
                 if (iconImage == null) {
                     if (selected) {
-                        iconImage = pushpinSelectedIco.getImage();
+                        p.setImage(pushpinSelectedIco.getImage());
                     } else {
-                        iconImage = pushpinIco.getImage();
+                        p.setImage(pushpinIco.getImage());
                     }
+                } else {
+                    p.setImage(iconImage);
                 }
-                p.setImage(iconImage);
                 // Necessary "evil" to refresh sweetspot
                 p.setScale(p.getScale());
             }
@@ -2363,6 +2364,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             updatePath();
         }
     }
+
     /**
      * alle entities die diesen punkt beinhalten (löscher werden ignoriert, da sonst nur eine entity existieren kann).
      *
@@ -2585,8 +2587,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 toSelect.getHeight(null)
                         - 1
                         + doubleInset,
-                insetSize,
-                insetSize);
+                10,
+                10);
             g2d.setPaint(colEdge);
             g2d.drawRoundRect(
                 0,
@@ -2597,8 +2599,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 toSelect.getHeight(null)
                         - 1
                         + doubleInset,
-                insetSize,
-                insetSize);
+                10,
+                10);
             g2d.drawImage(toSelect, insetSize, insetSize, null);
             return tint;
         } else {
@@ -2771,7 +2773,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             final Geometry geometry = getFeature().getGeometry();
             for (int entityIndex = 0; entityIndex < geometry.getNumGeometries(); entityIndex++) {
                 if ((entityPosition < 0) || (entityIndex != entityPosition)) { // nicht mit sich (bzw seinem alten
-                                                                               // selbst) selbst vergleichen
+                    // selbst) selbst vergleichen
                     final Geometry otherGeometry = geometry.getGeometryN(entityIndex);
                     if (newGeometry.intersects(otherGeometry)) {
                         // polygon schneidet ein anderes teil-polygon
