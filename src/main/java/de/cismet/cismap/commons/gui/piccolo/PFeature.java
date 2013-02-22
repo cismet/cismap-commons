@@ -386,9 +386,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                                 new Color(0.2f, 0.2f, 1.0f, 0.8f),
                                 10));
                     final double sweetX = ((10 + (piOrig.getImage().getWidth(null) * sweetSpotX))
-                            / piSelected.getImage().getWidth(null));
+                                    / piSelected.getImage().getWidth(null));
                     final double sweetY = ((10 + (piOrig.getImage().getHeight(null) * sweetSpotY))
-                            / piSelected.getImage().getHeight(null));
+                                    / piSelected.getImage().getHeight(null));
                     piSelected.setSweetSpotX(sweetX);
                     piSelected.setSweetSpotY(sweetY);
                 }
