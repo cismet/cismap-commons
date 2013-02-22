@@ -25,7 +25,7 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
 
     //~ Instance fields --------------------------------------------------------
 
-    private Image selectedFeatureAnnotationSymbol = null;
+    private FeatureAnnotationSymbol selectedFeatureAnnotationSymbol = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -70,7 +70,7 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
      *
      * @return  DOCUMENT ME!
      */
-    public Image getSelectedFeatureAnnotationSymbol() {
+    public FeatureAnnotationSymbol getSelectedFeatureAnnotationSymbol() {
         return selectedFeatureAnnotationSymbol;
     }
 
@@ -80,7 +80,18 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
      * @param  selectedFeatureAnnotationSymbol  DOCUMENT ME!
      */
     public void setSelectedFeatureAnnotationSymbol(final Image selectedFeatureAnnotationSymbol) {
-        this.selectedFeatureAnnotationSymbol = selectedFeatureAnnotationSymbol;
+        this.selectedFeatureAnnotationSymbol = new FeatureAnnotationSymbol(selectedFeatureAnnotationSymbol);
+        this.selectedFeatureAnnotationSymbol.setSweetSpotX(this.getSweetSpotX());
+        this.selectedFeatureAnnotationSymbol.setSweetSpotY(this.getSweetSpotY());
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fas  DOCUMENT ME!
+     */
+    public void setSelectedFeatureAnnotationSymbol(final FeatureAnnotationSymbol fas) {
+        this.selectedFeatureAnnotationSymbol = fas;
     }
 
     /**
