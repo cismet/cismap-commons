@@ -365,6 +365,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             piSelected.setSweetSpotX(0.46d);
             piSelected.setSweetSpotY(0.9d);
         } else {
+            final double sweetSpotX = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX();
+            final double sweetSpotY = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY();
             if ((piOrig != null) && (piOrig.getSelectedFeatureAnnotationSymbol() == null)) {
                 /*
                  * in this case we visualize the selection with a blue box around the icon of the
@@ -383,6 +385,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                                 new Color(0.3f, 0.3f, 1.0f, 0.4f),
                                 new Color(0.2f, 0.2f, 1.0f, 0.8f),
                                 10));
+                    final double sweetX = ((10 + (piOrig.getImage().getWidth(null) * sweetSpotX))
+                            / piSelected.getImage().getWidth(null));
+                    final double sweetY = ((10 + (piOrig.getImage().getHeight(null) * sweetSpotY))
+                            / piSelected.getImage().getHeight(null));
+                    piSelected.setSweetSpotX(sweetX);
+                    piSelected.setSweetSpotY(sweetY);
                 }
             } else {
                 piSelected = piOrig.getSelectedFeatureAnnotationSymbol();
@@ -400,14 +408,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 final Graphics g = img.getGraphics();
                 g.drawImage(iconImage, 0, 0, null);
                 pi.setImage(highlightImageAsSelected(img, TRANSPARENT, TRANSPARENT, 10));
+                final double sweetX = ((10 + (piOrig.getImage().getWidth(null) * sweetSpotX))
+                                / piSelected.getImage().getWidth(null));
+                final double sweetY = ((10 + (piOrig.getImage().getHeight(null) * sweetSpotY))
+                                / piSelected.getImage().getHeight(null));
+                pi.setSweetSpotX(sweetX);
+                pi.setSweetSpotY(sweetY);
             }
             pi.setSelectedFeatureAnnotationSymbol(piSelected);
-            final double sweetSpotX = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX();
-            final double sweetSpotY = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY();
-            pi.setSweetSpotX(sweetSpotX);
-            pi.setSweetSpotY(sweetSpotY);
-            piSelected.setSweetSpotX(sweetSpotX);
-            piSelected.setSweetSpotY(sweetSpotY);
         }
     }
 
