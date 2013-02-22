@@ -80,6 +80,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     PFeature selectedOriginal = null;
     PPath splitPolygonLine;
     List<Point2D> splitPoints = new ArrayList<Point2D>();
+    Image origin = null;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Feature feature;
     private WorldToScreenTransform wtst;
@@ -112,13 +113,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private PSwing pswingComp;
     private PText primaryAnnotation = null;
     private FeatureAnnotationSymbol pi = null;
-    private double sweetPureX = 0;
-    private double sweetPureY = 0;
-    private double sweetSelX = 0;
-    private double sweetSelY = 0;
+    private FeatureAnnotationSymbol piSelected;
     private boolean snappable = true;
     private int selectedEntity = -1;
-    private Image origin;
+    private boolean selectedPiEdited = false;
+    private boolean wasSelected = false;
     // r/w access only in synchronized(this) block
     private transient PImage rdfImage;
 
@@ -317,24 +316,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (feature instanceof StyledFeature) {
                 if ((pi == null)
                             || ((pi != null) && pi.equals(((StyledFeature)feature).getPointAnnotationSymbol()))) {
-                    try {
-                        // log.debug("Sweetspot updated");
+                    // log.debug("Sweetspot updated");
 // pi = new FeatureAnnotationSymbol(((StyledFeature) getFeature()).getPointAnnotationSymbol()
 // .getImage());
-                        pi = ((StyledFeature)getFeature()).getPointAnnotationSymbol();
-                        if (log.isDebugEnabled()) {
-                            log.debug("newSweetSpotx: "
-                                        + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX()); // NOI18N
-                        }
-
-                        pi.setSweetSpotX(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());
-                        pi.setSweetSpotY(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY());
-                    } catch (Throwable ex) {
-                        log.warn("No PointAnnotationSymbol found", ex); // NOI18N
-                        pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
-                        pi.setSweetSpotX(0.46d);
-                        pi.setSweetSpotY(0.9d);
-                    }
+                    setFeatureAnnotationSymbols();
                 } else if ((pi != null) && (getFeature() != null) && (getFeature() instanceof StyledFeature)
                             && (((StyledFeature)getFeature()).getPointAnnotationSymbol() != null)) {
 //                        log.fatal("Sweetspot updated");                                                                  // NOI18N
@@ -344,6 +329,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     }
                     pi.setSweetSpotX(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());
                     pi.setSweetSpotY(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY());
+                    piSelected.setSweetSpotX(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());
+                    piSelected.setSweetSpotY(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY());
                 }
             }
 
@@ -358,13 +345,69 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             } else if ((geom instanceof Point) || (geom instanceof MultiPoint)) {
                 addAnnotation(entityRingCoordArr[0][0][0].x, entityRingCoordArr[0][0][0].y);
             }
-            if (pi != null) {
-                sweetPureX = pi.getSweetSpotX();
-                sweetPureY = pi.getSweetSpotY();
-                sweetSelX = -1.0d;
-                sweetSelY = -1.0d;
-            }
             setSelected(isSelected());
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void setFeatureAnnotationSymbols() {
+        final FeatureAnnotationSymbol piOrig = ((StyledFeature)getFeature()).getPointAnnotationSymbol();
+        if ((piOrig == null) || (piOrig.getImage() == null)) {
+            // no FeatureAnnotationSymbol is set, use PushPin Icons as  fallback case
+            pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
+            piSelected = new FeatureAnnotationSymbol(pushpinSelectedIco.getImage());
+            log.warn("No PointAnnotationSymbol found use PushPinIcons"); // NOI18N
+            pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
+            pi.setSweetSpotX(0.46d);
+            pi.setSweetSpotY(0.9d);
+            piSelected.setSweetSpotX(0.46d);
+            piSelected.setSweetSpotY(0.9d);
+        } else {
+            if ((piOrig != null) && (piOrig.getSelectedFeatureAnnotationSymbol() == null)) {
+                /*
+                 * in this case we visualize the selection with a blue box around the icon of the
+                 * FeatureAnnotationSymbol
+                 */
+                if (!selectedPiEdited) {
+                    selectedPiEdited = true;
+                    final Image iconImage = piOrig.getImage();
+                    final BufferedImage img = new BufferedImage(iconImage.getWidth(null),
+                            iconImage.getHeight(null),
+                            BufferedImage.TYPE_INT_ARGB);
+                    final Graphics g = img.getGraphics();
+                    g.drawImage(iconImage, 0, 0, null);
+                    piSelected = new FeatureAnnotationSymbol(highlightImageAsSelected(
+                                img,
+                                new Color(0.3f, 0.3f, 1.0f, 0.4f),
+                                new Color(0.2f, 0.2f, 1.0f, 0.8f),
+                                10));
+                }
+            } else {
+                piSelected = piOrig.getSelectedFeatureAnnotationSymbol();
+            }
+            if (pi == null) {
+                /*
+                 * draw an invisble frame around the icon, this places the info node at the same position as for the
+                 * selected FeatureAnnotationSymbol
+                 */
+                pi = new FeatureAnnotationSymbol();
+                final Image iconImage = piOrig.getImage();
+                final BufferedImage img = new BufferedImage(iconImage.getWidth(null),
+                        iconImage.getHeight(null),
+                        BufferedImage.TYPE_INT_ARGB);
+                final Graphics g = img.getGraphics();
+                g.drawImage(iconImage, 0, 0, null);
+                pi.setImage(highlightImageAsSelected(img, TRANSPARENT, TRANSPARENT, 10));
+            }
+            pi.setSelectedFeatureAnnotationSymbol(piSelected);
+            final double sweetSpotX = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX();
+            final double sweetSpotY = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY();
+            pi.setSweetSpotX(sweetSpotX);
+            pi.setSweetSpotY(sweetSpotY);
+            piSelected.setSweetSpotX(sweetSpotX);
+            piSelected.setSweetSpotY(sweetSpotY);
         }
     }
 
@@ -377,6 +420,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private void addAnnotation(final double real_x, final double real_y) {
         if (!ignoreStickyFeature) {
             viewer.addStickyNode(pi);
+            viewer.addStickyNode(piSelected);
         }
 
         // Hier soll getestet werden ob bei einem Punkt der pushpin schon hinzugef\u00FCgt wurde. Wegen
@@ -388,6 +432,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 secondStickyChild = pi;
             }
         }
+        addChild(piSelected);
+        piSelected.setOffset(wtst.getScreenX(real_x), wtst.getScreenY(real_y));
         addChild(pi);
         pi.setOffset(wtst.getScreenX(real_x), wtst.getScreenY(real_y));
     }
@@ -2133,66 +2179,25 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
         // PUNKT
         if (getFeature().getGeometry() instanceof Point) {
-            PImage p = null;
-            for (final ListIterator lit = getChildrenIterator(); lit.hasNext();) {
-                final Object elem = (Object)lit.next();
-                if (elem instanceof PImage) {
-                    p = (PImage)elem;
-                    break;
+            if ((pi != null) && (piSelected != null)) {
+                piSelected.setVisible(selected);
+                pi.setVisible(!selected);
+                /*
+                 * since we have two different FeatureAnnotationSymbols for selection and normal we have to switch the
+                 * infoNode to them depending on selection state
+                 */
+                if (selected) {
+                    wasSelected = true;
+//                    addInfoNode();
+                    pi.removeChild(infoNode);
+                    piSelected.addChild(infoNode);
+                } else if (wasSelected) {
+                    wasSelected = false;
+                    piSelected.removeChild(infoNode);
+                    pi.addChild(infoNode);
                 }
             }
-            if (p != null) {
-                Image iconImage = null;
-                if ((feature instanceof StyledFeature)
-                            && (((StyledFeature)getFeature()).getPointAnnotationSymbol() != null)) {
-                    final FeatureAnnotationSymbol symbolization = ((StyledFeature)getFeature())
-                                .getPointAnnotationSymbol();
-                    // assign pure unselected image
-                    iconImage = symbolization.getImage();
-                    if ((iconImage == pushpinIco.getImage()) || (iconImage == pushpinSelectedIco.getImage())) {
-                        iconImage = null;
-                    }
-                    if ((iconImage != null) && (origin == null)) {
-                        final BufferedImage img = new BufferedImage(iconImage.getWidth(null),
-                                iconImage.getHeight(null),
-                                BufferedImage.TYPE_INT_ARGB);
-                        final Graphics g = img.getGraphics();
-                        g.drawImage(iconImage, 0, 0, null);
-                        origin = highlightImageAsSelected(img, TRANSPARENT, TRANSPARENT, 10);
-                    }
-                    final Image selectedImage = symbolization.getSelectedFeatureAnnotationSymbol();
-                    if (selectedImage != null) {
-                        if (selected) {
-                            // assign pure selected image
-                            iconImage = selectedImage;
-                        }
-                    } else if (iconImage != null) {
-                        if (selected) {
-                            // assign unselected image with selection frame
-                            iconImage = highlightImageAsSelected(
-                                    origin,
-                                    new Color(0.3f, 0.3f, 1.0f, 0.4f),
-                                    new Color(0.2f, 0.2f, 1.0f, 0.8f),
-                                    0);
-                        } else {
-                            // assign unselected image with invisible offset with size of the selection frame
-                            iconImage = origin;
-                        }
-                    }
-                }
-                // Fallback case: Pushpin icons
-                if (iconImage == null) {
-                    if (selected) {
-                        p.setImage(pushpinSelectedIco.getImage());
-                    } else {
-                        p.setImage(pushpinIco.getImage());
-                    }
-                } else {
-                    p.setImage(iconImage);
-                }
-                // Necessary "evil" to refresh sweetspot
-                p.setScale(p.getScale());
-            }
+            viewer.rescaleStickyNodes();
         }                                                                                                  // LINESTRING
         else if ((feature.getGeometry() instanceof LineString) || (feature.getGeometry() instanceof MultiLineString)) {
             if (selected) {
