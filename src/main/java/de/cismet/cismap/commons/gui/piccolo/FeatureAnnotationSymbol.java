@@ -80,9 +80,11 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
      * @param  selectedFeatureAnnotationSymbol  DOCUMENT ME!
      */
     public void setSelectedFeatureAnnotationSymbol(final Image selectedFeatureAnnotationSymbol) {
-        this.selectedFeatureAnnotationSymbol = new FeatureAnnotationSymbol(selectedFeatureAnnotationSymbol);
-        this.selectedFeatureAnnotationSymbol.setSweetSpotX(this.getSweetSpotX());
-        this.selectedFeatureAnnotationSymbol.setSweetSpotY(this.getSweetSpotY());
+        if (selectedFeatureAnnotationSymbol != null) {
+            this.selectedFeatureAnnotationSymbol = new FeatureAnnotationSymbol(selectedFeatureAnnotationSymbol);
+            this.selectedFeatureAnnotationSymbol.setSweetSpotX(this.getSweetSpotX());
+            this.selectedFeatureAnnotationSymbol.setSweetSpotY(this.getSweetSpotY());
+        }
     }
 
     /**
