@@ -44,6 +44,31 @@
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>de.cismet.commons</groupId>
+            <artifactId>cismet-gui-commons</artifactId>
+            <version>2.0-b20130305-1-dd</version>
+        </dependency>
+        <dependency>
+            <groupId>de.cismet.commons</groupId>
+            <artifactId>cismet-commons</artifactId>
+            <version>2.0-b20130305-1-dd</version>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jgoodies</groupId>
+            <artifactId>looks</artifactId>
+            <version>2.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+            <version>1.13</version>
+        </dependency>
         <!-- 
              swingx in this rather early version is required for this project. Consider refactoring of relevant code.
              
@@ -56,9 +81,19 @@
             <version>0.9.7</version>
         </dependency>
         <dependency>
-            <groupId>de.cismet.commons</groupId>
-            <artifactId>cismet-gui-commons</artifactId>
-            <version>2.0-b20130305-1</version>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom</artifactId>
+            <version>1.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>RELEASE701</version>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util-lookup</artifactId>
+            <version>RELEASE701</version>
         </dependency>
         <dependency>
             <groupId>edu.umd</groupId>
@@ -71,9 +106,9 @@
             <version>1.2</version>
         </dependency>
         <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>2.8.0</version>
+            <groupId>jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>3.5.2</version>
         </dependency>
         <dependency>
             <groupId>de.cismet.custom</groupId>
@@ -81,14 +116,29 @@
             <version>2.3.3</version>
         </dependency>
         <dependency>
-            <groupId>com.jgoodies</groupId>
-            <artifactId>looks</artifactId>
-            <version>2.2.2</version>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>1.8.5</version>
         </dependency>
         <dependency>
-            <groupId>jasperreports</groupId>
-            <artifactId>jasperreports</artifactId>
-            <version>3.5.2</version>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgis</groupId>
+            <artifactId>postgis</artifactId>
+            <version>1.1.7</version>
+        </dependency>
+        <dependency>
+            <groupId>bounce</groupId>
+            <artifactId>bounce</artifactId>
+            <version>0.14</version>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.1-901-1.jdbc4</version>
         </dependency>
         <dependency>
             <groupId>calpa.html</groupId>
@@ -96,14 +146,71 @@
             <version>2_04</version>
         </dependency>
         <dependency>
-            <groupId>bounce</groupId>
-            <artifactId>bounce</artifactId>
-            <version>0.14</version>
+            <groupId>jfree</groupId>
+            <artifactId>jcommon</artifactId>
+            <version>1.0.15</version>
         </dependency>
+        <dependency>
+            <groupId>de.cismet.custom</groupId>
+            <artifactId>beansbinding</artifactId>
+            <version>1.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>swing-layout</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        
+        <!--<dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.8.0</version>
+        </dependency>-->
     </dependencies>
 
     <build>
-        <finalName>cismapCommons</finalName>
+        <plugins>
+            <plugin>
+                <groupId>de.cismet.cids</groupId>
+                <artifactId>cids-maven-plugin</artifactId>
+                <version>2.0-preview-2</version>
+                <executions>
+                    <execution>
+                        <id>create-compile-classpath</id>
+                        <goals>
+                            <goal>create-direct-cp-property</goal>
+                        </goals>
+                        <configuration>
+                            <includeSystemScope>true</includeSystemScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
+                <executions>
+                    <execution>
+                        <id>default-compile</id>
+                        <phase>none</phase>
+                    </execution>
+                    <execution>
+                        <id>direct-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <compilerArguments>
+                                <sourcepath>${basedir}/src/main/java</sourcepath>
+                                <classpath>${classpath.directDependencies}</classpath>
+                            </compilerArguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 </project>
 
