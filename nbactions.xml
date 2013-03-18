@@ -19,5 +19,14 @@
             <activatedProfile>deploy-public</activatedProfile>
         </activatedProfiles>
     </action>
-
+    <action>
+        <actionName>build</actionName>
+        <goals>
+            <goal>install</goal>
+        </goals>
+        <properties>
+            <maven.test.skip>true</maven.test.skip>
+            <jalopy.skip>true</jalopy.skip>
+        </properties>
+    </action>
 </actions>
