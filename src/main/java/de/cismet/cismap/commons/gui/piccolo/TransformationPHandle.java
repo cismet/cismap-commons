@@ -21,11 +21,16 @@ import edu.umd.cs.piccolo.nodes.PText;
 import edu.umd.cs.piccolo.util.PDimension;
 import edu.umd.cs.piccolox.util.PLocator;
 
+import org.apache.log4j.Logger;
+
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.SwingWorker;
@@ -45,8 +50,6 @@ import de.cismet.math.geometry.StaticGeometryFunctions;
 
 import de.cismet.tools.StaticDecimalTools;
 
-import de.cismet.tools.collections.MultiMap;
-
 /**
  * DOCUMENT ME!
  *
@@ -57,13 +60,13 @@ public class TransformationPHandle extends PHandle {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(TransformationPHandle.class);
+    private static final Logger LOG = Logger.getLogger(TransformationPHandle.class);
 
     //~ Instance fields --------------------------------------------------------
 
     private PText leftInfo;
     private PText rightInfo;
-    private MultiMap glueCoordinates = new MultiMap();
+    private Map<PFeature, LinkedHashSet<Integer>> glueCoordinates = new HashMap<PFeature, LinkedHashSet<Integer>>();
     private Point2D vetoPoint = null;
     private PFeature pfeature;
     private int entityPosition;
@@ -268,43 +271,19 @@ public class TransformationPHandle extends PHandle {
                         final Set<PFeature> pFeatureSet = glueCoordinates.keySet();
                         for (final PFeature gluePFeature : pFeatureSet) {
                             if (gluePFeature.getFeature().isEditable()) {
-                                final Collection coordinates = (Collection)glueCoordinates.get(gluePFeature);
+                                final Collection<Integer> coordinates = glueCoordinates.get(gluePFeature);
                                 if (coordinates != null) {
-                                    for (final Object o : coordinates) {
-                                        final int oIndex = (Integer)o;
+                                    for (final Integer oIndex : coordinates) {
                                         gluePFeature.moveCoordinateToNewPiccoloPosition(
                                             entityPosition,
                                             ringPosition,
                                             oIndex,
                                             currentX,
                                             currentY);
-                                        // gluePFeature.syncGeometry();
                                     }
                                 }
                             }
                         }
-//                        if (viewer.isFeatureDebugging()) log.debug("glueIdenticalPoints==true");
-//                        List<PFeatureCoordinatePosition> l =pfeature.getViewer().getPFeaturesByCoordinates(oldCoordinate);
-//                        if (l!=null) {
-//                            if (viewer.isFeatureDebugging()) log.debug("l.size():"+l.size())   ;
-//                            for (PFeatureCoordinatePosition pc:l){
-//
-//                                if (pc.getPFeature()!=PFeature.this) {
-//                                    if (viewer.isFeatureDebugging()) log.debug("GLUE");
-//                                    //set the x and y value separately, because we don't want to create a flat copy and we don't want to clone
-//                                    pc.getPFeature().getXp()[pc.getPosition()]=getXp()[positionInArray];
-//                                    pc.getPFeature().getYp()[pc.getPosition()]=getYp()[positionInArray];
-//                                    pc.getPFeature().getCoordArr()[pc.getPosition()].x=pfeature.getCoordArr()[positionInArray].x;
-//                                    pc.getPFeature().getCoordArr()[pc.getPosition()].y=pfeature.getCoordArr()[positionInArray].y;
-//                                    pc.getPFeature().setPathToPolyline(pc.getPFeature().getXp(), pc.getPFeature().getYp());
-//                                    pc.getPFeature().syncGeometry();
-//                                    pc.getPFeature().doGeometry(pc.getPFeature().getFeature().getGeometry());
-//                                    pc.getPFeature().getViewer().reconsiderFeature(pc.getPFeature().getFeature());
-//                                } else {
-//                                    if (viewer.isFeatureDebugging()) log.debug("Same Object no GLUE");
-//                                }
-//                            }
-//                        }
                     }
 
                     // Abst\u00E4nde zu den Nachbarn
@@ -318,8 +297,8 @@ public class TransformationPHandle extends PHandle {
                     rightInfo.setText(StaticDecimalTools.round(rightDistance));
                 }
             }
-        } catch (Throwable t) {
-            LOG.error("Error in dragHandle.", t);
+        } catch (final Exception e) {
+            LOG.error("Error in dragHandle.", e);
         }
     }
 
@@ -352,7 +331,7 @@ public class TransformationPHandle extends PHandle {
                             == PureNewFeature.geomTypes.ELLIPSE))) {
             final Collection selArr = pfeature.getViewer().getFeatureCollection().getSelectedFeatures();
             for (final Object o : selArr) {
-                final PFeature pf = (PFeature)(pfeature.getViewer().getPFeatureHM().get(o));
+                final PFeature pf = pfeature.getViewer().getPFeatureHM().get(o);
                 if ((pf != null) && (pf.getInfoNode() != null)) {
                     pf.getInfoNode().setVisible(false);
                 }
@@ -433,7 +412,7 @@ public class TransformationPHandle extends PHandle {
                             && (Math.abs(startX - currentX) > 0.001d))
                         || (Math.abs(startY - currentY) > 0.001d)) {
                 boolean isGluedAction = false;
-                if (glueCoordinates.size() != 0) {
+                if (!glueCoordinates.isEmpty()) {
                     isGluedAction = true;
                     final Collection<Feature> features = new ArrayList<Feature>();
                     if (pfeature.getViewer().isInGlueIdenticalPointsMode()) {

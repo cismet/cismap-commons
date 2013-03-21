@@ -13,12 +13,11 @@ import java.awt.Paint;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-
-import de.cismet.tools.collections.TypeSafeCollections;
 
 /**
  * DOCUMENT ME!
@@ -64,9 +63,9 @@ public class PureFeatureGroup implements FeatureGroup, StyledFeature {
      */
     public PureFeatureGroup(final Collection<? extends Feature> features) {
         if ((features == null) || (features.size() <= 0)) {
-            this.groupFeatures = TypeSafeCollections.newHashSet();
+            this.groupFeatures = new HashSet<Feature>();
         } else {
-            this.groupFeatures = TypeSafeCollections.newHashSet(features);
+            this.groupFeatures = new HashSet<Feature>(features);
         }
         this.readOnlyGroupFeatures = Collections.unmodifiableCollection(groupFeatures);
     }

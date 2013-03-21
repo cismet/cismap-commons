@@ -19,6 +19,7 @@ import java.awt.geom.Point2D;
 
 import java.lang.reflect.Constructor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,8 +35,6 @@ import de.cismet.cismap.commons.gui.piccolo.EllipsePHandle;
 import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureDeleteAction;
 import de.cismet.cismap.commons.tools.PFeatureTools;
-
-import de.cismet.tools.collections.TypeSafeCollections;
 
 /**
  * DOCUMENT ME!
@@ -65,8 +64,8 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
     protected boolean inProgress;
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private final List<Point2D> points = TypeSafeCollections.newArrayList();
-    private final List<Point2D> undoPoints = TypeSafeCollections.newArrayList();
+    private final List<Point2D> points = new ArrayList<Point2D>();
+    private final List<Point2D> undoPoints = new ArrayList<Point2D>();
     private int numOfEllipseEdges;
     private SimpleMoveListener moveListener;
     private String mode = POLYGON;
@@ -380,7 +379,7 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
             log.error("Fehler beim Erzeugen der Geometrie", t);
         }
         // pnf=new PureNewFeature(p,mc.getWtst());
-        final List<Feature> v = TypeSafeCollections.newArrayList(1);
+        final List<Feature> v = new ArrayList<Feature>(1);
         v.add(pnf);
         if (log.isDebugEnabled()) {
             log.debug("hinzugefügt:" + pnf);

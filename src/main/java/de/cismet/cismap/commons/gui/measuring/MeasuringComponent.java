@@ -37,6 +37,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import de.cismet.cismap.commons.BoundingBox;
@@ -51,8 +52,6 @@ import de.cismet.cismap.commons.features.RasterDocumentFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MessenGeometryListener;
-
-import de.cismet.tools.collections.TypeSafeCollections;
 
 /**
  * DOCUMENT ME!
@@ -324,7 +323,7 @@ public class MeasuringComponent extends javax.swing.JPanel {
 
         // unhold all features, so that they all can be scaled
         getFeatureCollection().setHoldAll(false);
-        final List<Feature> backup = TypeSafeCollections.newArrayList();
+        final List<Feature> backup = new ArrayList<Feature>();
         for (final Feature f : map.getFeatureCollection().getAllFeatures()) {
             backup.add(f);
         }

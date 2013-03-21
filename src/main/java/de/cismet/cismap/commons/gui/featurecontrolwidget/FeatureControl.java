@@ -29,6 +29,7 @@ import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +41,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
-import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
@@ -58,8 +58,6 @@ import de.cismet.cismap.commons.interaction.MapBoundsListener;
 
 import de.cismet.tools.CurrentStackTrace;
 import de.cismet.tools.StaticDecimalTools;
-
-import de.cismet.tools.collections.TypeSafeCollections;
 
 import de.cismet.tools.configuration.Configurable;
 
@@ -173,7 +171,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     private void updateSelection() {
         final int[] rows = jxtFeatures.getSelectedRows();
 //            mappingComponent.getFeatureCollection().unselectAll(false);
-        final List<Feature> tableSelection = TypeSafeCollections.newArrayList();
+        final List<Feature> tableSelection = new ArrayList<Feature>();
         for (int i = 0; i < rows.length; i++) {
             final int mappedRow = mapRowToModel(rows[i]);
             tableSelection.add(getFeatureCollection().getFeature(mappedRow));
@@ -584,7 +582,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         mappingComponent.getMemUndo().clear();
         mappingComponent.getMemRedo().clear();
         final int[] rows = jxtFeatures.getSelectedRows();
-        final Set<Feature> toRemove = TypeSafeCollections.newHashSet();
+        final Set<Feature> toRemove = new HashSet<Feature>();
         int firstSelectedRow = -1;
         for (int i = 0; i < rows.length; i++) {
             if (firstSelectedRow == -1) {
@@ -1190,7 +1188,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 
         //~ Instance fields ----------------------------------------------------
 
-        private final List<Integer> toPrevious = TypeSafeCollections.newArrayList();
+        private final List<Integer> toPrevious = new ArrayList<Integer>();
 
         //~ Methods ------------------------------------------------------------
 

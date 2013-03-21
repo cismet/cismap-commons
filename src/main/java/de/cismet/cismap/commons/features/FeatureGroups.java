@@ -7,11 +7,14 @@
 ****************************************************/
 package de.cismet.cismap.commons.features;
 
-import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.Point;
 
+import java.util.ArrayList;
 import java.util.Collection;
-
-import de.cismet.tools.collections.TypeSafeCollections;
 
 /**
  * DOCUMENT ME!
@@ -65,7 +68,7 @@ public final class FeatureGroups {
      * @return  DOCUMENT ME!
      */
     public static Collection<? extends Feature> expand(final FeatureGroup featureGroup, final boolean includeGroups) {
-        final Collection<Feature> result = TypeSafeCollections.newArrayList();
+        final Collection<Feature> result = new ArrayList<Feature>();
         final Collection<? extends Feature> subFeatures = featureGroup.getFeatures();
         if (subFeatures != null) {
             for (final Feature f : featureGroup) {

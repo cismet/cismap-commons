@@ -5,26 +5,20 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * HandleMoveAction.java
- *
- * Created on 11. Dezember 2007, 09:14
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
 import edu.umd.cs.piccolo.PLayer;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-
-import de.cismet.tools.collections.MultiMap;
 
 /**
  * Implementiert das CustomAction-Interface und wird von der Memento-Klasse verwendet, um ein Handle, das vom Benutzer
@@ -37,7 +31,8 @@ public class HandleMoveAction implements CustomAction {
 
     //~ Instance fields --------------------------------------------------------
 
-    private MultiMap gluedCoordinates;
+    private Map<PFeature, LinkedHashSet<Integer>> gluedCoordinates;
+
     private PFeature pf;
     private final int entityPosition;
     private final int ringPosition;
@@ -102,10 +97,9 @@ public class HandleMoveAction implements CustomAction {
             final Set<PFeature> pFeatureSet = gluedCoordinates.keySet();
             for (final PFeature gluePFeature : pFeatureSet) {
                 if (gluePFeature.getFeature().isEditable()) {
-                    final Collection coordinates = (Collection)gluedCoordinates.get(gluePFeature);
+                    final Collection<Integer> coordinates = gluedCoordinates.get(gluePFeature);
                     if (coordinates != null) {
-                        for (final Object o : coordinates) {
-                            final int oIndex = (Integer)o;
+                        for (final Integer oIndex : coordinates) {
                             gluePFeature.moveCoordinateToNewPiccoloPosition(
                                 entityPosition,
                                 ringPosition,
@@ -125,9 +119,10 @@ public class HandleMoveAction implements CustomAction {
             pf.addHandles(handleLayer);
         }
         pf.syncGeometry();
-        final Vector v = new Vector();
-        v.add(pf.getFeature());
-        ((DefaultFeatureCollection)pf.getViewer().getFeatureCollection()).fireFeaturesChanged(v);
+
+        final List<Feature> features = new ArrayList<Feature>();
+        features.add(pf.getFeature());
+        ((DefaultFeatureCollection)pf.getViewer().getFeatureCollection()).fireFeaturesChanged(features);
     }
 
     /**

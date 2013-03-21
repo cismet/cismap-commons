@@ -33,6 +33,7 @@ import org.openide.util.lookup.ServiceProvider;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -43,8 +44,6 @@ import javax.swing.JButton;
 
 import de.cismet.cismap.commons.gui.ToolbarComponentDescription;
 import de.cismet.cismap.commons.gui.ToolbarComponentsProvider;
-
-import de.cismet.tools.collections.TypeSafeCollections;
 
 import de.cismet.tools.configuration.Configurable;
 import de.cismet.tools.configuration.NoWriteError;
@@ -296,7 +295,7 @@ public class ShapeExport implements Configurable, ToolbarComponentsProvider {
             btnShapeExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
             btnShapeExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
 
-            final List<ToolbarComponentDescription> preparationList = TypeSafeCollections.newArrayList();
+            final List<ToolbarComponentDescription> preparationList = new ArrayList<ToolbarComponentDescription>();
             final ToolbarComponentDescription shapeExport = new ToolbarComponentDescription(
                     "tlbMain",
                     btnShapeExport,

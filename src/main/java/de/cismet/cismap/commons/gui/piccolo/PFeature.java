@@ -38,8 +38,10 @@ import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -55,8 +57,6 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointF
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CurrentStackTrace;
-
-import de.cismet.tools.collections.MultiMap;
 
 /**
  * DOCUMENT ME!
@@ -1160,12 +1160,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  MultiMap mit Features, die die Bedingungen erf\u00FCllen
      */
-    public de.cismet.tools.collections.MultiMap checkforGlueCoords(
+    public Map<PFeature, LinkedHashSet<Integer>> checkforGlueCoords(
             final int entityPosition,
             final int ringPosition,
             final int coordPosition) {
         final GeometryFactory gf = new GeometryFactory();
-        final MultiMap glueCoords = new MultiMap();
+        final Map<PFeature, LinkedHashSet<Integer>> glueCoords = new HashMap<PFeature, LinkedHashSet<Integer>>();
 
         // Alle vorhandenen Features holen und pr\u00FCfen
         final List<Feature> allFeatures = getViewer().getFeatureCollection().getAllFeatures();
@@ -1187,7 +1187,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         final Point p2 = gf.createPoint(ca[i]);
                         final double abstand = p.distance(p2);
                         if (abstand < 0.01) {
-                            glueCoords.put(getViewer().getPFeatureHM().get(f), i);
+                            final PFeature key = getViewer().getPFeatureHM().get(f);
+                            LinkedHashSet<Integer> coords = glueCoords.get(key);
+                            if (coords == null) {
+                                coords = new LinkedHashSet<Integer>();
+                                glueCoords.put(key, coords);
+                            }
+                            coords.add(i);
                             if (viewer.isFeatureDebugging()) {
                                 if (log.isDebugEnabled()) {
                                     log.debug("checkforGlueCoords() Abstand kleiner als 1cm: " + abstand + " :: " + f); // NOI18N
@@ -1204,6 +1210,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             }
         }
+
         return glueCoords;
     }
 
