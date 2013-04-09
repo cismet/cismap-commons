@@ -16,6 +16,13 @@
 
     <name>cismap Commons</name>
     <description>This project contains various tools to enable geo-specific within Java applications</description>
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License</name>
+            <distribution>repo</distribution>
+            <url>http://www.gnu.org/licenses/lgpl-3.0.html</url>
+        </license>
+    </licenses>
   
     <prerequisites>
         <maven>3</maven>
