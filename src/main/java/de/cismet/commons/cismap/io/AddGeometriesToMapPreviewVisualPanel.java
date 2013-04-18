@@ -50,7 +50,7 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
 
         modelChangeL = new ModelChangeListener();
         model.addChangeListener(WeakListeners.change(modelChangeL, model));
-        
+
         this.setName("Map preview");
     }
 

@@ -7,7 +7,10 @@
 ****************************************************/
 package de.cismet.commons.cismap.io;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import org.openide.util.NbBundle;
+import org.openide.util.WeakListeners;
 
 /**
  * DOCUMENT ME!
@@ -20,6 +23,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
     //~ Instance fields --------------------------------------------------------
 
     private final transient AddGeometriesToMapEnterDataWizardPanel model;
+    private final transient ChangeListener modelChangeL;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JButton btnOpenFile = new javax.swing.JButton();
@@ -40,12 +44,28 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
      */
     public AddGeometriesToMapEnterDataVisualPanel(final AddGeometriesToMapEnterDataWizardPanel model) {
         this.model = model;
+        this.modelChangeL = new ModelChangeListener();
 
         initComponents();
-        
-        this.setName("Enter data");
-    }
 
+        this.setName("Enter data");
+        
+        this.model.addChangeListener(WeakListeners.change(modelChangeL, model));
+    }
+    
+    private final class ModelChangeListener implements ChangeListener {
+
+        @Override
+        public void stateChanged(ChangeEvent e)
+        {
+            if(e.getSource() instanceof AddGeometriesToMapEnterDataWizardPanel){
+                lblCoordinates.setText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text", model.getEpsgCode())); // NOI18N
+            }
+        }
+    }
+    
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -70,9 +90,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         setOpaque(false);
         setLayout(new java.awt.GridBagLayout());
 
-        lblCoordinates.setText(NbBundle.getMessage(
-                AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text")); // NOI18N
+        lblCoordinates.setText(NbBundle.getMessage(AddGeometriesToMapEnterDataVisualPanel.class, "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -81,12 +99,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblCoordinates, gridBagConstraints);
 
-        final org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                this,
-                org.jdesktop.beansbinding.ELProperty.create("${model.coordinateData}"),
-                edpCoordinates,
-                org.jdesktop.beansbinding.BeanProperty.create("text"));
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, this, org.jdesktop.beansbinding.ELProperty.create("${model.coordinateData}"), edpCoordinates, org.jdesktop.beansbinding.BeanProperty.create("text"));
         bindingGroup.addBinding(binding);
 
         jScrollPane1.setViewportView(edpCoordinates);
@@ -101,9 +114,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jScrollPane1, gridBagConstraints);
 
-        lblFile.setText(NbBundle.getMessage(
-                AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblFile.text")); // NOI18N
+        lblFile.setText(NbBundle.getMessage(AddGeometriesToMapEnterDataVisualPanel.class, "AddGeometriesToMapEnterDataVisualPanel.lblFile.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -112,9 +123,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(lblFile, gridBagConstraints);
 
-        txtFile.setText(NbBundle.getMessage(
-                AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.txtFile.text")); // NOI18N
+        txtFile.setText(NbBundle.getMessage(AddGeometriesToMapEnterDataVisualPanel.class, "AddGeometriesToMapEnterDataVisualPanel.txtFile.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -124,9 +133,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(txtFile, gridBagConstraints);
 
-        btnOpenFile.setText(NbBundle.getMessage(
-                AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.btnOpenFile.text")); // NOI18N
+        btnOpenFile.setText(NbBundle.getMessage(AddGeometriesToMapEnterDataVisualPanel.class, "AddGeometriesToMapEnterDataVisualPanel.btnOpenFile.text")); // NOI18N
         btnOpenFile.setMaximumSize(new java.awt.Dimension(50, 29));
         btnOpenFile.setMinimumSize(new java.awt.Dimension(50, 29));
         btnOpenFile.setPreferredSize(new java.awt.Dimension(50, 29));
@@ -138,5 +145,5 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         add(btnOpenFile, gridBagConstraints);
 
         bindingGroup.bind();
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 }

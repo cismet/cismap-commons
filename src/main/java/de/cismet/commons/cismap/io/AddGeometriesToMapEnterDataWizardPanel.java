@@ -29,6 +29,7 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
     //~ Instance fields --------------------------------------------------------
 
     private transient String coordinateData;
+    private transient String epsgCode;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -49,6 +50,16 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
     public void setCoordinateData(final String coordinateData) {
         this.coordinateData = coordinateData;
 
+        changeSupport.fireChange();
+    }
+    
+    public String getEpsgCode() {
+        return epsgCode;
+    }
+    
+    public void setEpsgCode(final String epsg){
+        this.epsgCode = epsg;
+        
         changeSupport.fireChange();
     }
 
@@ -80,6 +91,7 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
     @Override
     protected void read(final WizardDescriptor wizard) {
         setCoordinateData((String)wizard.getProperty(PROP_COORDINATE_DATA));
+        setEpsgCode((String)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_EPSG_CODE));
     }
 
     @Override

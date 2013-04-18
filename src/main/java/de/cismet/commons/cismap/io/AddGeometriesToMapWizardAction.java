@@ -53,6 +53,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
     public static final String PROP_AVAILABLE_CONVERTERS = "__prop_available_converters__"; // NOI18N
     public static final String PROP_INPUT_FILE = "__prop_input_file__";                     // NOI18N
+    public static final String PROP_CURRENT_EPSG_CODE = "__prop_current_epsg_code__";                     // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -128,8 +129,9 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         // erase previous data
         wizard.putProperty(AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA, null);
         wizard.putProperty(AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY, null);
-        
+
         wizard.putProperty(PROP_AVAILABLE_CONVERTERS, new ArrayList<Converter>(availableConverters));
+        wizard.putProperty(PROP_CURRENT_EPSG_CODE, CismapBroker.getInstance().getSrs().getCode());
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
