@@ -1,13 +1,18 @@
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.commons.cismap.io;
 
 import com.vividsolutions.jts.geom.Geometry;
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.commons.cismap.io.converters.GeometryConverter;
-import de.cismet.commons.converter.Converter;
+
+import org.openide.DialogDisplayer;
+import org.openide.WizardDescriptor;
+import org.openide.util.Lookup;
+
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.EventQueue;
@@ -16,36 +21,62 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
+
 import java.text.MessageFormat;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
-import org.openide.DialogDisplayer;
-import org.openide.WizardDescriptor;
-import org.openide.util.Lookup;
+
+import de.cismet.cismap.commons.features.DefaultStyledFeature;
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+
+import de.cismet.commons.cismap.io.converters.GeometryConverter;
+
+import de.cismet.commons.converter.Converter;
 
 /**
+ * DOCUMENT ME!
  *
- * @author martin.scholl@cismet.de
+ * @author   martin.scholl@cismet.de
+ * @version  $Revision$, $Date$
  */
-public final class AddGeometriesToMapWizardAction extends AbstractAction implements DropTargetListener
-{
+public final class AddGeometriesToMapWizardAction extends AbstractAction implements DropTargetListener {
+
+    //~ Static fields/initializers ---------------------------------------------
+
     public static final String PROP_AVAILABLE_CONVERTERS = "__prop_available_converters__"; // NOI18N
-    public static final String PROP_INPUT_FILE = "__prop_input_file__"; // NOI18N
-    
+    public static final String PROP_INPUT_FILE = "__prop_input_file__";                     // NOI18N
+
+    //~ Instance fields --------------------------------------------------------
+
     private transient WizardDescriptor.Panel<WizardDescriptor>[] panels;
 
-    public AddGeometriesToMapWizardAction()
-    {
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new AddGeometriesToMapWizardAction object.
+     */
+    public AddGeometriesToMapWizardAction() {
 //        super("", ImageUtilities.loadImageIcon("", false)); // NOI18N
         super("AddCoordGeomWizard"); // NOI18N
-        
+
         putValue(Action.SHORT_DESCRIPTION, "Wizard to add geometries from coordinates to the map");
     }
-    
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @SuppressWarnings("unchecked")
     private WizardDescriptor.Panel<WizardDescriptor>[] getPanels() {
         assert EventQueue.isDispatchThread() : "can only be called from EDT"; // NOI18N
@@ -86,13 +117,13 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     }
 
     @Override
-    public void actionPerformed(final ActionEvent e)
-    {
+    public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        wizard.setTitleFormat(new MessageFormat("{0}"));                                    // NOI18N
+        wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
         wizard.setTitle("Add geometry to map");
-        
-        final Collection<? extends GeometryConverter> availableConverters = Lookup.getDefault().lookupAll(GeometryConverter.class);
+
+        final Collection<? extends GeometryConverter> availableConverters = Lookup.getDefault()
+                    .lookupAll(GeometryConverter.class);
 
         wizard.putProperty(PROP_AVAILABLE_CONVERTERS, new ArrayList<Converter>(availableConverters));
 
@@ -103,47 +134,42 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         dialog.toFront();
 
         if (wizard.getValue() != WizardDescriptor.FINISH_OPTION) {
-            Geometry geometry = (Geometry)wizard.getProperty(AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY);
-            if(geometry == null){
+            final Geometry geometry = (Geometry)wizard.getProperty(AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY);
+            if (geometry == null) {
                 // load geometry
             }
-            
+
             final Feature feature = new DefaultStyledFeature();
             feature.setGeometry(geometry);
-            
+
             final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
-            map.addFeaturesToMap(new Feature[] {feature});
+            map.addFeaturesToMap(new Feature[] { feature });
             map.zoomToAFeatureCollection(Arrays.asList(feature), true, false);
         }
     }
 
     @Override
-    public void dragEnter(DropTargetDragEvent dtde)
-    {
+    public void dragEnter(final DropTargetDragEvent dtde) {
         // noop
     }
 
     @Override
-    public void dragOver(DropTargetDragEvent dtde)
-    {
+    public void dragOver(final DropTargetDragEvent dtde) {
         // noop
     }
 
     @Override
-    public void dropActionChanged(DropTargetDragEvent dtde)
-    {
+    public void dropActionChanged(final DropTargetDragEvent dtde) {
         // noop
     }
 
     @Override
-    public void dragExit(DropTargetEvent dte)
-    {
+    public void dragExit(final DropTargetEvent dte) {
         // noop
     }
 
     @Override
-    public void drop(DropTargetDropEvent dtde)
-    {
+    public void drop(final DropTargetDropEvent dtde) {
         // TODO
     }
 }

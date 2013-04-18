@@ -1,61 +1,85 @@
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Geometry;
+
 import de.cismet.commons.converter.ConversionException;
 
 /**
+ * DOCUMENT ME!
  *
- * @author martin.scholl@cismet.de
+ * @author   martin.scholl@cismet.de
+ * @version  $Revision$, $Date$
  */
-public final class PolygonFromTextConverter implements TextToGeometryConverter
-{
+public final class PolygonFromTextConverter implements TextToGeometryConverter {
 
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   from    DOCUMENT ME!
+     * @param   params  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  ConversionException            DOCUMENT ME!
+     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     */
     @Override
-    public Geometry convertForward(String from, String... params) throws ConversionException
-    {
+    public Geometry convertForward(final String from, final String... params) throws ConversionException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   to      DOCUMENT ME!
+     * @param   params  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  ConversionException            DOCUMENT ME!
+     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     */
+    @Override
+    public String convertBackward(final Geometry to, final String... params) throws ConversionException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public String convertBackward(Geometry to, String... params) throws ConversionException
-    {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public String getFormatName()
-    {
+    public String getFormatName() {
         return "PolygonFromTextConverter";
     }
 
     @Override
-    public String getFormatDisplayName()
-    {
+    public String getFormatDisplayName() {
         return "Polygon from text converter";
     }
 
     @Override
-    public String getFormatHtmlName()
-    {
+    public String getFormatHtmlName() {
         return null;
     }
 
     @Override
-    public String getFormatDescription()
-    {
+    public String getFormatDescription() {
         return null;
     }
 
     @Override
-    public String getFormatHtmlDescription()
-    {
+    public String getFormatHtmlDescription() {
         return null;
     }
 
     @Override
-    public Object getFormatExample()
-    {
+    public Object getFormatExample() {
         return null;
     }
 }

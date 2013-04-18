@@ -1,11 +1,17 @@
-
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
 /**
+ * DOCUMENT ME!
  *
- * @author martin.scholl@cismet.de
+ * @author   martin.scholl@cismet.de
+ * @version  $Revision$, $Date$
  */
-public interface BinaryToGeometryConverter extends GeometryConverter<byte[]>
-{
-
+public interface BinaryToGeometryConverter extends GeometryConverter<byte[]> {
 }
