@@ -7,7 +7,9 @@
 ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 import org.openide.util.lookup.ServiceProvider;
 
@@ -20,40 +22,18 @@ import de.cismet.commons.converter.ConversionException;
  * @version  1.0
  */
 @ServiceProvider(service = GeometryConverter.class)
-public final class PointFromTextConverter implements TextToGeometryConverter {
+public final class PointFromTextConverter extends AbstractGeometryFromTextConverter {
 
     //~ Methods ----------------------------------------------------------------
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   from    DOCUMENT ME!
-     * @param   params  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  ConversionException            DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
-     */
     @Override
-    public Geometry convertForward(final String from, final String... params) throws ConversionException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
+            throws ConversionException {
+        if (coordinates.length < 1) {
+            throw new ConversionException("cannot create point from empty coordinate array");
+        }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   to      DOCUMENT ME!
-     * @param   params  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  ConversionException            DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
-     */
-    @Override
-    public String convertBackward(final Geometry to, final String... params) throws ConversionException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return geomFactory.createPoint(coordinates[0]);
     }
 
     @Override
