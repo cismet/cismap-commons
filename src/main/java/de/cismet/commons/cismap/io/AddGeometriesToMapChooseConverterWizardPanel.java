@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.commons.cismap.io;
 
-import org.openide.WizardDescriptor;
 import org.openide.WizardDescriptor.FinishablePanel;
 
 import java.util.List;
@@ -25,24 +24,12 @@ import de.cismet.commos.gui.wizard.converter.AbstractConverterChooseWizardPanel;
 public final class AddGeometriesToMapChooseConverterWizardPanel extends AbstractConverterChooseWizardPanel
         implements FinishablePanel {
 
-    //~ Instance fields --------------------------------------------------------
-
-    private transient List<Converter> availableConverters;
-
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public List<Converter> getAvailableConverters() {
-        return availableConverters;
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
-    protected void read(final WizardDescriptor wizard) {
-        availableConverters = (List<Converter>)wizard.getProperty(
-                AddGeometriesToMapWizardAction.PROP_AVAILABLE_CONVERTERS);
-
-        super.read(wizard);
+    public List<Converter> getAvailableConverters() {
+        return (List<Converter>)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_AVAILABLE_CONVERTERS);
     }
 
     @Override
