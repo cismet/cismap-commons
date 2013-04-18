@@ -53,7 +53,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
     public static final String PROP_AVAILABLE_CONVERTERS = "__prop_available_converters__"; // NOI18N
     public static final String PROP_INPUT_FILE = "__prop_input_file__";                     // NOI18N
-    public static final String PROP_CURRENT_EPSG_CODE = "__prop_current_epsg_code__";                     // NOI18N
+    public static final String PROP_CURRENT_EPSG_CODE = "__prop_current_epsg_code__";       // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 

@@ -52,14 +52,24 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
 
         changeSupport.fireChange();
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getEpsgCode() {
         return epsgCode;
     }
-    
-    public void setEpsgCode(final String epsg){
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  epsg  DOCUMENT ME!
+     */
+    public void setEpsgCode(final String epsg) {
         this.epsgCode = epsg;
-        
+
         changeSupport.fireChange();
     }
 
