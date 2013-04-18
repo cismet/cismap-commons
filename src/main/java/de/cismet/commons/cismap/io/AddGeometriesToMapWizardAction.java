@@ -45,7 +45,7 @@ import de.cismet.commons.converter.Converter;
  * DOCUMENT ME!
  *
  * @author   martin.scholl@cismet.de
- * @version  $Revision$, $Date$
+ * @version  1.0
  */
 public final class AddGeometriesToMapWizardAction extends AbstractAction implements DropTargetListener {
 
@@ -125,6 +125,10 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         final Collection<? extends GeometryConverter> availableConverters = Lookup.getDefault()
                     .lookupAll(GeometryConverter.class);
 
+        // erase previous data
+        wizard.putProperty(AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA, null);
+        wizard.putProperty(AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY, null);
+        
         wizard.putProperty(PROP_AVAILABLE_CONVERTERS, new ArrayList<Converter>(availableConverters));
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
@@ -133,7 +137,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         dialog.setVisible(true);
         dialog.toFront();
 
-        if (wizard.getValue() != WizardDescriptor.FINISH_OPTION) {
+        if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
             final Geometry geometry = (Geometry)wizard.getProperty(AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY);
             if (geometry == null) {
                 // load geometry

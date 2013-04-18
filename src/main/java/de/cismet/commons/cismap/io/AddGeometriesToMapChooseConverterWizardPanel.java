@@ -20,7 +20,7 @@ import de.cismet.commos.gui.wizard.converter.AbstractConverterChooseWizardPanel;
  * DOCUMENT ME!
  *
  * @author   martin.scholl@cismet.de
- * @version  $Revision$, $Date$
+ * @version  1.0
  */
 public final class AddGeometriesToMapChooseConverterWizardPanel extends AbstractConverterChooseWizardPanel
         implements FinishablePanel {
@@ -39,10 +39,10 @@ public final class AddGeometriesToMapChooseConverterWizardPanel extends Abstract
     @Override
     @SuppressWarnings("unchecked")
     protected void read(final WizardDescriptor wizard) {
-        super.read(wizard);
-
         availableConverters = (List<Converter>)wizard.getProperty(
                 AddGeometriesToMapWizardAction.PROP_AVAILABLE_CONVERTERS);
+
+        super.read(wizard);
     }
 
     @Override

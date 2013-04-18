@@ -17,7 +17,7 @@ import de.cismet.commos.gui.wizard.AbstractWizardPanel;
  * DOCUMENT ME!
  *
  * @author   martin.scholl@cismet.de
- * @version  $Revision$, $Date$
+ * @version  1.0
  */
 public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPanel {
 

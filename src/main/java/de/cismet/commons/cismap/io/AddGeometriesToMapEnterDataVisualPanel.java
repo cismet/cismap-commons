@@ -13,7 +13,7 @@ import org.openide.util.NbBundle;
  * DOCUMENT ME!
  *
  * @author   mscholl
- * @version  $Revision$, $Date$
+ * @version  1.0
  */
 public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
@@ -42,6 +42,8 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         this.model = model;
 
         initComponents();
+        
+        this.setName("Enter data");
     }
 
     //~ Methods ----------------------------------------------------------------

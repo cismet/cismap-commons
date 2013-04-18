@@ -18,7 +18,7 @@ import javax.swing.event.ChangeListener;
  * DOCUMENT ME!
  *
  * @author   mscholl
- * @version  $Revision$, $Date$
+ * @version  1.0
  */
 public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
 
@@ -50,6 +50,8 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
 
         modelChangeL = new ModelChangeListener();
         model.addChangeListener(WeakListeners.change(modelChangeL, model));
+        
+        this.setName("Map preview");
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -105,7 +107,7 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
     /**
      * DOCUMENT ME!
      *
-     * @version  $Revision$, $Date$
+     * @version  1.0
      */
     private final class ModelChangeListener implements ChangeListener {
 
