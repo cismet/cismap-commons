@@ -30,8 +30,8 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private final transient javax.swing.JPanel pnlPreview = new javax.swing.JPanel();
-    private final transient de.cismet.commos.gui.progress.BusyStatusPanel pnlStatus =
-        new de.cismet.commos.gui.progress.BusyStatusPanel();
+    private final transient de.cismet.commons.gui.progress.BusyStatusPanel pnlStatus =
+        new de.cismet.commons.gui.progress.BusyStatusPanel();
     private final transient de.cismet.cismap.commons.gui.MappingComponent previewMap =
         new de.cismet.cismap.commons.gui.MappingComponent();
     // End of variables declaration//GEN-END:variables
@@ -63,6 +63,12 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
      */
     public AddGeometriesToMapPreviewWizardPanel getModel() {
         return model;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void initMap() {
     }
 
     /**
@@ -119,6 +125,12 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
             if (e.getSource() instanceof AddGeometriesToMapPreviewWizardPanel) {
                 pnlStatus.setBusy(model.isBusy());
                 pnlStatus.setStatusMessage(model.getStatusMessage());
+
+                // TODO proper initialisation so that overview is loaded and zoom is done here
+                if (model.getGeometry() != null) {
+                    // do zoom to geometry instead of init
+                    initMap();
+                }
             }
         }
     }

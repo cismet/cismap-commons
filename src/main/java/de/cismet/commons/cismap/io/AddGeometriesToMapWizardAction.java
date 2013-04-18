@@ -131,7 +131,9 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         wizard.putProperty(AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY, null);
 
         wizard.putProperty(PROP_AVAILABLE_CONVERTERS, new ArrayList<Converter>(availableConverters));
-        wizard.putProperty(PROP_CURRENT_EPSG_CODE, CismapBroker.getInstance().getSrs().getCode());
+        // FIXME: dummy code to be independent of CismapBroker for testing
+        wizard.putProperty(PROP_CURRENT_EPSG_CODE, "EPSG:4324");
+//        wizard.putProperty(PROP_CURRENT_EPSG_CODE, CismapBroker.getInstance().getSrs().getCode());
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -149,8 +151,9 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
             feature.setGeometry(geometry);
 
             final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
-            map.addFeaturesToMap(new Feature[] { feature });
-            map.zoomToAFeatureCollection(Arrays.asList(feature), true, false);
+            // FIXME: removed for testing purposes
+//            map.addFeaturesToMap(new Feature[] { feature });
+//            map.zoomToAFeatureCollection(Arrays.asList(feature), true, false);
         }
     }
 

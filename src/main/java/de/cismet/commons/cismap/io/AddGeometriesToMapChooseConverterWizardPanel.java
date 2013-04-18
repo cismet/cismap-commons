@@ -13,7 +13,7 @@ import java.util.List;
 
 import de.cismet.commons.converter.Converter;
 
-import de.cismet.commos.gui.wizard.converter.AbstractConverterChooseWizardPanel;
+import de.cismet.commons.gui.wizard.converter.AbstractConverterChooseWizardPanel;
 
 /**
  * DOCUMENT ME!

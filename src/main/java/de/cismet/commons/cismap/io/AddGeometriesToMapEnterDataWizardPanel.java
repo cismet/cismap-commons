@@ -12,7 +12,7 @@ import org.openide.WizardDescriptor.FinishablePanel;
 
 import java.awt.Component;
 
-import de.cismet.commos.gui.wizard.AbstractWizardPanel;
+import de.cismet.commons.gui.wizard.AbstractWizardPanel;
 
 /**
  * DOCUMENT ME!
