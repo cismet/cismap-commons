@@ -159,13 +159,15 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         //~ Methods ------------------------------------------------------------
 
+        // subobtimal, propertychange would be better
         @Override
         public void stateChanged(final ChangeEvent e) {
             if (e.getSource() instanceof AddGeometriesToMapEnterDataWizardPanel) {
                 lblCoordinates.setText(NbBundle.getMessage(
                         AddGeometriesToMapEnterDataVisualPanel.class,
-                        "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text",
-                        model.getEpsgCode())); // NOI18N
+                        "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text", // NOI18N
+                        model.getEpsgCode()));
+                edpCoordinates.setText(model.getCoordinateData());
             }
         }
     }
