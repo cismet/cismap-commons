@@ -10,13 +10,15 @@ package de.cismet.commons.cismap.io.converters;
 import com.vividsolutions.jts.geom.Geometry;
 
 import de.cismet.commons.converter.ConversionException;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * DOCUMENT ME!
  *
  * @author   martin.scholl@cismet.de
- * @version  $Revision$, $Date$
+ * @version  1.0
  */
+@ServiceProvider(service=GeometryConverter.class)
 public final class BoundingBoxFromTextConverter implements TextToGeometryConverter {
 
     //~ Methods ----------------------------------------------------------------
