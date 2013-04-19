@@ -9,6 +9,9 @@ package de.cismet.commons.cismap.io;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import org.jdesktop.swingx.JXErrorPane;
+import org.jdesktop.swingx.error.ErrorInfo;
+
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.Lookup;
@@ -16,17 +19,22 @@ import org.openide.util.Lookup;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 import java.text.MessageFormat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -39,7 +47,13 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.commons.cismap.io.converters.GeometryConverter;
 
+import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter;
+
+import de.cismet.commons.gui.wizard.converter.AbstractConverterChooseWizardPanel;
+
+import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.WaitingDialogThread;
 
 /**
  * DOCUMENT ME!
@@ -131,9 +145,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         wizard.putProperty(AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY, null);
 
         wizard.putProperty(PROP_AVAILABLE_CONVERTERS, new ArrayList<Converter>(availableConverters));
-        // FIXME: dummy code to be independent of CismapBroker for testing
-        wizard.putProperty(PROP_CURRENT_EPSG_CODE, "EPSG:4324");
-//        wizard.putProperty(PROP_CURRENT_EPSG_CODE, CismapBroker.getInstance().getSrs().getCode());
+        wizard.putProperty(PROP_CURRENT_EPSG_CODE, CismapBroker.getInstance().getSrs().getCode());
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -142,18 +154,79 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         dialog.toFront();
 
         if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
-            final Geometry geometry = (Geometry)wizard.getProperty(AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY);
-            if (geometry == null) {
-                // load geometry
-            }
+            final Frame parent = StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent());
+            final WaitingDialogThread<Geometry> wdt = new WaitingDialogThread<Geometry>(
+                    parent,
+                    true,
+                    "waiting",
+                    null,
+                    50) {
 
-            final Feature feature = new DefaultStyledFeature();
-            feature.setGeometry(geometry);
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    protected Geometry doInBackground() throws Exception {
+                        Geometry geometry = (Geometry)wizard.getProperty(
+                                AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY);
 
-            final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
-            // FIXME: removed for testing purposes
-//            map.addFeaturesToMap(new Feature[] { feature });
-//            map.zoomToAFeatureCollection(Arrays.asList(feature), true, false);
+                        if (geometry == null) {
+                            final Converter converter = (Converter)wizard.getProperty(
+                                    AbstractConverterChooseWizardPanel.PROP_CONVERTER);
+                            final Object data = wizard.getProperty(
+                                    AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA);
+                            final String epsgCode = (String)wizard.getProperty(
+                                    AddGeometriesToMapWizardAction.PROP_CURRENT_EPSG_CODE);
+
+                            assert converter instanceof GeometryConverter : "illegal wizard initialisation"; // NOI18N
+
+                            final GeometryConverter geomConverter = (GeometryConverter)converter;
+
+                            geometry = geomConverter.convertForward(data, epsgCode);
+                        }
+
+                        return geometry;
+                    }
+
+                    @Override
+                    protected void done() {
+                        try {
+                            final Feature feature = new DefaultStyledFeature();
+                            feature.setGeometry(get());
+
+                            final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
+                            map.getFeatureCollection().addFeature(feature);
+                            map.zoomToAFeatureCollection(Arrays.asList(feature), true, false);
+                            // TODO: proper feature name
+                        } catch (final Exception ex) {
+                            final ErrorInfo errorInfo;
+                            final StringWriter stacktraceWriter = new StringWriter();
+                            ex.printStackTrace(new PrintWriter(stacktraceWriter));
+                            if (ex instanceof ConversionException) {
+                                errorInfo = new ErrorInfo(
+                                        "Add Geometry Wizard Error",
+                                        "Cannot convert geometry",
+                                        stacktraceWriter.toString(),
+                                        "WARNING",
+                                        ex,
+                                        Level.WARNING,
+                                        null);
+                            } else {
+                                errorInfo = new ErrorInfo(
+                                        "Add Geometry Wizard Error",
+                                        "Cannot add geometry to map because of an unknown error",
+                                        stacktraceWriter.toString(),
+                                        "WARNING",
+                                        ex,
+                                        Level.WARNING,
+                                        null);
+                            }
+
+                            JXErrorPane.showDialog(parent, errorInfo);
+                        }
+                    }
+                };
+
+            // FIXME: the WaitingDialogThread only works properly when using start, thus cannot be put in an executor
+            wdt.start();
         }
     }
 
