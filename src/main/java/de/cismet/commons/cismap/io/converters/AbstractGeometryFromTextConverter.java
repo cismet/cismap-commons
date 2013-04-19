@@ -15,10 +15,12 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import java.util.Arrays;
 import java.util.Locale;
 
+import de.cismet.cismap.commons.CrsTransformer;
+
 import de.cismet.commons.converter.ConversionException;
-import java.util.Arrays;
 
 /**
  * DOCUMENT ME!
@@ -47,13 +49,13 @@ public abstract class AbstractGeometryFromTextConverter implements TextToGeometr
         }
 
         final String[] tokens = from.split("([\\s;:])+"); // NOI18N
-        
+
         System.out.println(Arrays.toString(tokens));
 
         if ((tokens.length % 2) == 0) {
             final int srid;
             try {
-                srid = Integer.parseInt(params[0].substring(params[0].indexOf(':') + 1));
+                srid = CrsTransformer.extractSridFromCrs(params[0]);
             } catch (final Exception e) {
                 throw new ConversionException("unsupported epsg parameter: " + params[0], e); // NOI18Ny
             }
