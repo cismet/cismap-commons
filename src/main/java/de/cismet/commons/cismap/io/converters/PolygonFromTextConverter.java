@@ -7,7 +7,10 @@
 ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LinearRing;
 
 import org.openide.util.lookup.ServiceProvider;
 
@@ -20,40 +23,16 @@ import de.cismet.commons.converter.ConversionException;
  * @version  1.0
  */
 @ServiceProvider(service = GeometryConverter.class)
-public final class PolygonFromTextConverter implements TextToGeometryConverter {
+public final class PolygonFromTextConverter extends AbstractGeometryFromTextConverter {
 
     //~ Methods ----------------------------------------------------------------
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   from    DOCUMENT ME!
-     * @param   params  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  ConversionException            DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
-     */
     @Override
-    public Geometry convertForward(final String from, final String... params) throws ConversionException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    public Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
+            throws ConversionException {
+        final LinearRing ring = geomFactory.createLinearRing(coordinates);
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   to      DOCUMENT ME!
-     * @param   params  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  ConversionException            DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
-     */
-    @Override
-    public String convertBackward(final Geometry to, final String... params) throws ConversionException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return geomFactory.createPolygon(ring, null);
     }
 
     @Override
