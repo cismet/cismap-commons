@@ -12,6 +12,8 @@ import org.openide.WizardDescriptor.FinishablePanel;
 
 import java.awt.Component;
 
+import de.cismet.cismap.commons.Crs;
+
 import de.cismet.commons.gui.wizard.AbstractWizardPanel;
 
 /**
@@ -29,7 +31,7 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
     //~ Instance fields --------------------------------------------------------
 
     private transient String coordinateData;
-    private transient String epsgCode;
+    private transient String crsName;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -58,17 +60,17 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
      *
      * @return  DOCUMENT ME!
      */
-    public String getEpsgCode() {
-        return epsgCode;
+    public String getCrsName() {
+        return crsName;
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  epsg  DOCUMENT ME!
+     * @param  crsName  DOCUMENT ME!
      */
-    public void setEpsgCode(final String epsg) {
-        this.epsgCode = epsg;
+    public void setCrsName(final String crsName) {
+        this.crsName = crsName;
 
         changeSupport.fireChange();
     }
@@ -101,7 +103,7 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
     @Override
     protected void read(final WizardDescriptor wizard) {
         setCoordinateData((String)wizard.getProperty(PROP_COORDINATE_DATA));
-        setEpsgCode((String)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_EPSG_CODE));
+        setCrsName(((Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS)).getShortname());
     }
 
     @Override

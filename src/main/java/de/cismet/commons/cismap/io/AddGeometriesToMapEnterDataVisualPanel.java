@@ -166,7 +166,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
                 lblCoordinates.setText(NbBundle.getMessage(
                         AddGeometriesToMapEnterDataVisualPanel.class,
                         "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text", // NOI18N
-                        model.getEpsgCode()));
+                        model.getCrsName()));
                 edpCoordinates.setText(model.getCoordinateData());
             }
         }

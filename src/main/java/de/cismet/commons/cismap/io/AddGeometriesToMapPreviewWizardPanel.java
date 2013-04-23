@@ -17,6 +17,8 @@ import java.awt.EventQueue;
 
 import java.util.concurrent.ExecutorService;
 
+import de.cismet.cismap.commons.Crs;
+
 import de.cismet.commons.cismap.io.converters.GeometryConverter;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
@@ -169,15 +171,14 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
                     final Converter converter = (Converter)wizard.getProperty(
                             AbstractConverterChooseWizardPanel.PROP_CONVERTER);
                     final Object data = wizard.getProperty(AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA);
-                    final String epsgCode = (String)wizard.getProperty(
-                            AddGeometriesToMapWizardAction.PROP_CURRENT_EPSG_CODE);
+                    final Crs crs = (Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
 
                     assert converter instanceof GeometryConverter : "illegal wizard initialisation"; // NOI18N
 
                     final GeometryConverter geomConverter = (GeometryConverter)converter;
                     try {
                         @SuppressWarnings("unchecked")
-                        final Geometry geom = geomConverter.convertForward(data, epsgCode);
+                        final Geometry geom = geomConverter.convertForward(data, crs.getCode());
 
                         setStatusMessage("Convertion finished successfully");
 

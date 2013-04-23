@@ -75,7 +75,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
     public static final String PROP_AVAILABLE_CONVERTERS = "__prop_available_converters__"; // NOI18N
     public static final String PROP_INPUT_FILE = "__prop_input_file__";                     // NOI18N
-    public static final String PROP_CURRENT_EPSG_CODE = "__prop_current_epsg_code__";       // NOI18N
+    public static final String PROP_CURRENT_CRS = "__prop_current_epsg_code__";             // NOI18N
     public static final String PROP_PREVIEW_GETMAP_URL = "__prop_preview_getmap_url__";     // NOI18N
 
     public static final String CONF_SECTION = "addGeometriesToMapWizardAction";   // NOI18N
@@ -177,7 +177,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
         wizard.putProperty(PROP_PREVIEW_GETMAP_URL, getPreviewGetMapUrl());
         wizard.putProperty(PROP_AVAILABLE_CONVERTERS, new ArrayList<Converter>(availableConverters));
-        wizard.putProperty(PROP_CURRENT_EPSG_CODE, CismapBroker.getInstance().getSrs().getCode());
+        wizard.putProperty(PROP_CURRENT_CRS, CismapBroker.getInstance().getSrs());
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -206,7 +206,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
                             final Object data = wizard.getProperty(
                                     AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA);
                             final String epsgCode = (String)wizard.getProperty(
-                                    AddGeometriesToMapWizardAction.PROP_CURRENT_EPSG_CODE);
+                                    AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
 
                             assert converter instanceof GeometryConverter : "illegal wizard initialisation"; // NOI18N
 
