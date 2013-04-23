@@ -9,8 +9,12 @@ package de.cismet.commons.cismap.io;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import org.apache.log4j.Logger;
+
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
+
+import org.jdom.Element;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
@@ -51,6 +55,10 @@ import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter;
 
 import de.cismet.commons.gui.wizard.converter.AbstractConverterChooseWizardPanel;
+import de.cismet.commons.gui.wizard.converter.ConverterPreselectionMode;
+
+import de.cismet.tools.configuration.Configurable;
+import de.cismet.tools.configuration.NoWriteError;
 
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
@@ -61,7 +69,7 @@ import de.cismet.tools.gui.WaitingDialogThread;
  * @author   martin.scholl@cismet.de
  * @version  1.0
  */
-public final class AddGeometriesToMapWizardAction extends AbstractAction implements DropTargetListener {
+public final class AddGeometriesToMapWizardAction extends AbstractAction implements DropTargetListener, Configurable {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -69,9 +77,19 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     public static final String PROP_INPUT_FILE = "__prop_input_file__";                     // NOI18N
     public static final String PROP_CURRENT_EPSG_CODE = "__prop_current_epsg_code__";       // NOI18N
 
+    public static final String CONF_SECTION = "addGeometriesToMapWizardAction";   // NOI18N
+    public static final String CONF_CONV_PRESELECT = "converterPreselectionMode"; // NOI18N
+    public static final String CONF_PREVIEW_GETMAP_URL = "previewGetMapUrl";      // NOI18N
+
+    /** LOGGER. */
+    private static final transient Logger LOG = Logger.getLogger(AddGeometriesToMapWizardAction.class);
+
     //~ Instance fields --------------------------------------------------------
 
     private transient WizardDescriptor.Panel<WizardDescriptor>[] panels;
+
+    private transient ConverterPreselectionMode converterPreselectionMode;
+    private transient String previewGetMapUrl;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -83,6 +101,8 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         super("AddCoordGeomWizard"); // NOI18N
 
         putValue(Action.SHORT_DESCRIPTION, "Wizard to add geometries from coordinates to the map");
+
+        setConverterPreselectionMode(getDefaultConverterPreselectionMode());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -253,5 +273,129 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     @Override
     public void drop(final DropTargetDropEvent dtde) {
         // TODO
+    }
+
+    @Override
+    public void configure(final Element parent) {
+        doConfigure(parent);
+    }
+
+    @Override
+    public void masterConfigure(final Element parent) {
+        doConfigure(parent);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  parent  DOCUMENT ME!
+     */
+    private void doConfigure(final Element parent) {
+        if (parent == null) {
+            // no configuration section present, simply leave
+            return;
+        }
+
+        final Element actionConfigElement = parent.getChild(CONF_SECTION); // NOI18N
+        if (actionConfigElement == null) {
+            // no configuration section present, simply leave
+            return;
+        }
+
+        final Element convPreselectModeElement = actionConfigElement.getChild(CONF_CONV_PRESELECT);
+        if (convPreselectModeElement == null) {
+            setConverterPreselectionMode(ConverterPreselectionMode.DEFAULT);
+        } else {
+            final String convPreselectModeString = convPreselectModeElement.getText();
+            try {
+                final ConverterPreselectionMode convPreselectMode = ConverterPreselectionMode.valueOf(
+                        convPreselectModeString);
+                setConverterPreselectionMode(convPreselectMode);
+            } catch (final IllegalArgumentException e) {
+                LOG.warn("illegal value for " + CONF_CONV_PRESELECT + ", configuring DEFAULT", e); // NOI18N
+                setConverterPreselectionMode(ConverterPreselectionMode.DEFAULT);
+            }
+        }
+
+        final Element convPreviewGetMapUrlElement = actionConfigElement.getChild(CONF_PREVIEW_GETMAP_URL);
+        if (convPreviewGetMapUrlElement == null) {
+            setPreviewGetMapUrl(null);
+        } else {
+            setPreviewGetMapUrl(convPreviewGetMapUrlElement.getText());
+        }
+    }
+
+    @Override
+    public Element getConfiguration() throws NoWriteError {
+        final Element sectionElement = new Element(CONF_SECTION);
+
+        final Element convPreselectModeElement = new Element(CONF_CONV_PRESELECT);
+        convPreselectModeElement.setText(getConverterPreselectionMode().toString());
+
+        final Element convPreviewGetMapUrlElement = new Element(CONF_PREVIEW_GETMAP_URL);
+        convPreviewGetMapUrlElement.setText(getPreviewGetMapUrl());
+
+        sectionElement.addContent(convPreselectModeElement);
+        sectionElement.addContent(convPreviewGetMapUrlElement);
+
+        return sectionElement;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ConverterPreselectionMode getConverterPreselectionMode() {
+        return converterPreselectionMode;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   converterPreselectionMode  DOCUMENT ME!
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
+     */
+    public void setConverterPreselectionMode(final ConverterPreselectionMode converterPreselectionMode) {
+        switch (converterPreselectionMode) {
+            case AUTO_DETECT:                                                                               // fall-through
+            case CONFIGURE:                                                                                 // fall-through
+            case CONFIGURE_AND_MEMORY:                                                                      // fall-through
+            case PERMANENT_MEMORY: {
+                throw new IllegalArgumentException("mode not supported yet: " + converterPreselectionMode); // NOI18N
+            }
+
+            default: {
+                this.converterPreselectionMode = converterPreselectionMode;
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ConverterPreselectionMode getDefaultConverterPreselectionMode() {
+        return ConverterPreselectionMode.SESSION_MEMORY;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getPreviewGetMapUrl() {
+        return previewGetMapUrl;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  previewGetMapUrl  DOCUMENT ME!
+     */
+    public void setPreviewGetMapUrl(final String previewGetMapUrl) {
+        this.previewGetMapUrl = previewGetMapUrl;
     }
 }
