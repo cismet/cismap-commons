@@ -52,6 +52,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.commons.cismap.io.converters.GeometryConverter;
+import de.cismet.commons.cismap.io.converters.TextToGeometryConverter;
 
 import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter;
@@ -160,8 +161,8 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
         wizard.setTitle("Add geometry to map");
 
-        final Collection<? extends GeometryConverter> availableConverters = Lookup.getDefault()
-                    .lookupAll(GeometryConverter.class);
+        final Collection<? extends TextToGeometryConverter> availableConverters = Lookup.getDefault()
+                    .lookupAll(TextToGeometryConverter.class);
 
         final ConverterPreselectionMode preselectionMode;
         if (ConverterPreselectionMode.DEFAULT == getConverterPreselectionMode()) {
