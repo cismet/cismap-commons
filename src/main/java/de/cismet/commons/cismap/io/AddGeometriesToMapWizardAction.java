@@ -44,8 +44,10 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JComponent;
 
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.PureNewFeature.geomTypes;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -205,14 +207,13 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
                                     AbstractConverterChooseWizardPanel.PROP_CONVERTER);
                             final Object data = wizard.getProperty(
                                     AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA);
-                            final String epsgCode = (String)wizard.getProperty(
-                                    AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
+                            final Crs crs = (Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
 
                             assert converter instanceof GeometryConverter : "illegal wizard initialisation"; // NOI18N
 
                             final GeometryConverter geomConverter = (GeometryConverter)converter;
 
-                            geometry = geomConverter.convertForward(data, epsgCode);
+                            geometry = geomConverter.convertForward(data, crs.getCode());
                         }
 
                         return geometry;
@@ -221,13 +222,19 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
                     @Override
                     protected void done() {
                         try {
-                            final Feature feature = new DefaultStyledFeature();
-                            feature.setGeometry(get());
+                            final Geometry geom = get();
+                            final PureNewFeature feature = new PureNewFeature(geom);
+                            feature.setGeometryType(getGeomType(geom));
 
                             final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
                             map.getFeatureCollection().addFeature(feature);
-                            map.zoomToAFeatureCollection(Arrays.asList(feature), true, false);
-                            // TODO: proper feature name
+
+                            // fixed extent means, don't move map at all
+                            if (!map.isFixedMapExtent()) {
+                                map.zoomToAFeatureCollection(Arrays.asList((Feature)feature),
+                                    true,
+                                    map.isFixedMapScale());
+                            }
                         } catch (final Exception ex) {
                             final ErrorInfo errorInfo;
                             final StringWriter stacktraceWriter = new StringWriter();
@@ -253,6 +260,28 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
                             }
 
                             JXErrorPane.showDialog(parent, errorInfo);
+                        }
+                    }
+
+                    // cannot map to ellipse
+                    private geomTypes getGeomType(final Geometry geom) {
+                        final String jtsGeomType = geom.getGeometryType();
+
+                        // JTS v1.12 strings
+                        if ("Polygon".equals(jtsGeomType)) {             // NOI18N
+                            if (geom.isRectangle()) {
+                                return geomTypes.RECTANGLE;
+                            } else {
+                                return geomTypes.POLYGON;
+                            }
+                        } else if ("Point".equals(jtsGeomType)) {        // NOI18N
+                            return geomTypes.POINT;
+                        } else if ("LineString".equals(jtsGeomType)) {   // NOI18N
+                            return geomTypes.LINESTRING;
+                        } else if ("MultiPolygon".equals(jtsGeomType)) { // NOI18N
+                            return geomTypes.MULTIPOLYGON;
+                        } else {
+                            return geomTypes.UNKNOWN;
                         }
                     }
                 };

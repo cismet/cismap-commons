@@ -16,8 +16,8 @@ import javax.swing.event.ChangeListener;
 
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.features.DefaultStyledFeature;
-import de.cismet.cismap.commons.features.StyledFeature;
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
@@ -87,8 +87,7 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
 
         final SimpleWMS swms = new SimpleWMS(new SimpleWmsGetMapUrl(simpleWms));
         swms.setName("swms");
-        final StyledFeature dsf = new DefaultStyledFeature();
-        dsf.setGeometry(model.getGeometry());
+        final Feature dsf = new PureNewFeature(model.getGeometry());
         // add the raster layer to the model
         mappingModel.addLayer(swms);
         // set the model
