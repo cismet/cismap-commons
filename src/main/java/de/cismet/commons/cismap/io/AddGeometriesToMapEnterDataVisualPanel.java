@@ -19,6 +19,7 @@ import javax.swing.event.ChangeListener;
  * @author   mscholl
  * @version  1.0
  */
+// TODO: implement input from file, file dropable to edp, txt, btn
 public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
     //~ Instance fields --------------------------------------------------------
@@ -123,6 +124,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         txtFile.setText(NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
                 "AddGeometriesToMapEnterDataVisualPanel.txtFile.text")); // NOI18N
+        txtFile.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -135,6 +137,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         btnOpenFile.setText(NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
                 "AddGeometriesToMapEnterDataVisualPanel.btnOpenFile.text")); // NOI18N
+        btnOpenFile.setEnabled(false);
         btnOpenFile.setMaximumSize(new java.awt.Dimension(50, 29));
         btnOpenFile.setMinimumSize(new java.awt.Dimension(50, 29));
         btnOpenFile.setPreferredSize(new java.awt.Dimension(50, 29));
@@ -167,7 +170,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
                         AddGeometriesToMapEnterDataVisualPanel.class,
                         "AddGeometriesToMapEnterDataVisualPanel.lblCoordinates.text", // NOI18N
                         model.getCrsName()));
-                edpCoordinates.setText(model.getCoordinateData());
+                final String text = model.getCoordinateData();
+                if ((text == null) || !text.equals(edpCoordinates.getText())) {
+                    edpCoordinates.setText(text);
+                }
             }
         }
     }
