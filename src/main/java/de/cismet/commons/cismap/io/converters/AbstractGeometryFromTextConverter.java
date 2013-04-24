@@ -15,7 +15,6 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
-import java.util.Arrays;
 import java.util.Locale;
 
 import de.cismet.cismap.commons.CrsTransformer;
@@ -23,34 +22,51 @@ import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.commons.converter.ConversionException;
 
 /**
- * DOCUMENT ME!
+ * Basic <code>TextToGeometryConverter</code> implementation that expects the given text to be separated by white space
+ * characters, ';' or ':'. Additionally it requires a parameter: the EPSG code, e.g. EPSG:4326. The code is used to
+ * interpret the given coordinates. The coordinates are expected to be provided as follows:<br/>
+ * <br/>
+ * northing&lt;separator&gt;easting&lt;separator&gt;northing&lt;separator&gt;easting&lt;separator&gt; ...<br/>
+ * <br/>
+ *
+ * <p>The coordinates are parsed using the currently active {@link Locale} and thus the corresponding
+ * {@link NumberFormat}. Three-dimensional coordinates are not supported.</p>
  *
  * @author   martin.scholl@cismet.de
- * @version  $Revision$, $Date$
+ * @version  1.0
  */
 public abstract class AbstractGeometryFromTextConverter implements TextToGeometryConverter {
 
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Creates a geometry from the given coordinate array and geometry factory. The coordinate array and the geomeetry
+     * factory shall never be <code>null</code>.
      *
-     * @param   from    DOCUMENT ME!
-     * @param   params  DOCUMENT ME!
+     * @param   coordinates  the coordinates to create a geometry from
+     * @param   geomFactory  the geometry factory that may be used to create the geometry
      *
-     * @return  DOCUMENT ME!
+     * @return  a geometry created using the given parameters
      *
-     * @throws  ConversionException  DOCUMENT ME!
+     * @throws  ConversionException  if any error occurs during creation of the geometry
+     */
+    protected abstract Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
+            throws ConversionException;
+
+    // this is because of jalopy as for some reason it generates a javadoc template for this method although overridden
+    /**
+     * {@inheritDoc}
      */
     @Override
     public Geometry convertForward(final String from, final String... params) throws ConversionException {
-        if (params.length < 1) {
-            throw new ConversionException("no parameters provided, epsg is required parameter"); // NOI18N
+        if ((from == null) || from.isEmpty()) {
+            throw new IllegalArgumentException("from must not be null or empty");                         // NOI18N
+        }
+        if ((params == null) || (params.length < 1)) {
+            throw new IllegalArgumentException("no parameters provided, epsgcode is required parameter"); // NOI18N
         }
 
         final String[] tokens = from.split("([\\s;:])+"); // NOI18N
-
-        System.out.println(Arrays.toString(tokens));
 
         if ((tokens.length % 2) == 0) {
             final int srid;
@@ -82,22 +98,22 @@ public abstract class AbstractGeometryFromTextConverter implements TextToGeometr
         }
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   coordinates  DOCUMENT ME!
-     * @param   geomFactory  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  ConversionException  DOCUMENT ME!
-     */
-    public abstract Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
-            throws ConversionException;
-
     @Override
     public String convertBackward(final Geometry to, final String... params) throws ConversionException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (to == null) {
+            throw new IllegalArgumentException("'to' must not be null"); // NOI18N
+        }
+
+        final StringBuilder sb = new StringBuilder();
+        final NumberFormat nf = NumberFormat.getNumberInstance(Locale.getDefault());
+        for (final Coordinate coord : to.getCoordinates()) {
+            sb.append(nf.format(coord.x));
+            sb.append(' ');
+            sb.append(nf.format(coord.y));
+            sb.append('\n');
+        }
+
+        return sb.toString();
     }
 
     // TODO: can provide generic format description

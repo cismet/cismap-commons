@@ -16,21 +16,22 @@ import org.openide.util.lookup.ServiceProvider;
 import de.cismet.commons.converter.ConversionException;
 
 /**
- * DOCUMENT ME!
+ * Creates a point geometry from the provided coordinates. At least one coordinate is expected. If there are more they
+ * are ignored.
  *
  * @author   martin.scholl@cismet.de
  * @version  1.0
  */
-@ServiceProvider(service = GeometryConverter.class)
+@ServiceProvider(service = TextToGeometryConverter.class)
 public final class PointFromTextConverter extends AbstractGeometryFromTextConverter {
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
+    protected Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
             throws ConversionException {
         if (coordinates.length < 1) {
-            throw new ConversionException("cannot create point from empty coordinate array");
+            throw new ConversionException("cannot create point from empty coordinate array"); // NOI18N
         }
 
         return geomFactory.createPoint(coordinates[0]);

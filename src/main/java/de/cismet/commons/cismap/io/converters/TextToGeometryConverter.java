@@ -8,10 +8,11 @@
 package de.cismet.commons.cismap.io.converters;
 
 /**
- * DOCUMENT ME!
+ * Simple interface to further specify that the respective <code>GeometryConverter</code> will take a <code>
+ * String</code> as input.
  *
  * @author   martin.scholl@cismet.de
- * @version  $Revision$, $Date$
+ * @version  1.0
  */
 public interface TextToGeometryConverter extends GeometryConverter<String> {
 }

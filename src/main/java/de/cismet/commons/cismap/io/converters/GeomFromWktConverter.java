@@ -8,52 +8,107 @@
 package de.cismet.commons.cismap.io.converters;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
+import com.vividsolutions.jts.io.WKTWriter;
 
 import org.openide.util.lookup.ServiceProvider;
+
+import de.cismet.cismap.commons.CrsTransformer;
 
 import de.cismet.commons.converter.ConversionException;
 
 /**
- * DOCUMENT ME!
+ * Creates a geometry from (E)WKT. However, the conversion back from a geometry produces WKT only. If the input is EWKT
+ * a possibly provided EPSG is ignored.
  *
  * @author   martin.scholl@cismet.de
  * @version  1.0
  */
-@ServiceProvider(service = GeometryConverter.class)
+@ServiceProvider(service = TextToGeometryConverter.class)
 public final class GeomFromWktConverter implements TextToGeometryConverter {
 
     //~ Methods ----------------------------------------------------------------
 
+    // this is because of jalopy as for some reason it generates a javadoc template for this method although overridden
     /**
-     * DOCUMENT ME!
-     *
-     * @param   from    DOCUMENT ME!
-     * @param   params  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  ConversionException            DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     * {@inheritDoc}
      */
     @Override
     public Geometry convertForward(final String from, final String... params) throws ConversionException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if ((from == null) || from.isEmpty()) {
+            throw new IllegalArgumentException("'from' must not be null or empty");                       // NOI18N
+        }
+        if ((params == null) || (params.length < 1)) {
+            throw new IllegalArgumentException("no parameters provided, epsgcode is required parameter"); // NOI18N
+        }
+
+        final EWKT ewkt;
+        try {
+            ewkt = getEWKT(from);
+        } catch (final RuntimeException e) {
+            throw new ConversionException("illegal (e)wkt format: " + from, e); // NOI18N
+        }
+
+        final int srid;
+        if (ewkt.srid < 0) {
+            try {
+                srid = CrsTransformer.extractSridFromCrs(params[0]);
+            } catch (final Exception e) {
+                throw new ConversionException("unsupported epsg parameter: " + params[0], e); // NOI18Ny
+            }
+        } else {
+            srid = ewkt.srid;
+        }
+
+        final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+        final WKTReader wktReader = new WKTReader(geomFactory);
+        try {
+            return wktReader.read(ewkt.wkt);
+        } catch (final ParseException ex) {
+            throw new ConversionException("cannot create geometry from WKT: " + ewkt.wkt, ex); // NOI18N
+        }
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   to      DOCUMENT ME!
-     * @param   params  DOCUMENT ME!
+     * @param   candidate  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
-     *
-     * @throws  ConversionException            DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
      */
+    private EWKT getEWKT(final String candidate) {
+        final EWKT ewkt = new EWKT();
+
+        final int skIndex = candidate.indexOf(';');
+        if (skIndex > 0) {
+            final String sridKV = candidate.substring(0, skIndex);
+            final int eqIndex = sridKV.indexOf('=');
+
+            if (eqIndex > 0) {
+                ewkt.srid = Integer.parseInt(sridKV.substring(eqIndex + 1));
+                ewkt.wkt = candidate.substring(skIndex + 1);
+            } else {
+                ewkt.wkt = candidate;
+            }
+        } else {
+            ewkt.wkt = candidate;
+        }
+
+        return ewkt;
+    }
+
     @Override
     public String convertBackward(final Geometry to, final String... params) throws ConversionException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (to == null) {
+            throw new IllegalArgumentException("'to' must not be null"); // NOI18N
+        }
+
+        final WKTWriter wktWriter = new WKTWriter();
+
+        return wktWriter.write(to);
     }
 
     @Override
@@ -63,7 +118,7 @@ public final class GeomFromWktConverter implements TextToGeometryConverter {
 
     @Override
     public String getFormatDisplayName() {
-        return "Geometry from WKT converter";
+        return "Geometry from (E)WKT converter";
     }
 
     @Override
@@ -84,5 +139,20 @@ public final class GeomFromWktConverter implements TextToGeometryConverter {
     @Override
     public Object getFormatExample() {
         return null;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static final class EWKT {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private transient int srid = -1;
+        private transient String wkt = null;
     }
 }

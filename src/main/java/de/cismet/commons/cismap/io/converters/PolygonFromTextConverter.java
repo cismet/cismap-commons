@@ -17,20 +17,36 @@ import org.openide.util.lookup.ServiceProvider;
 import de.cismet.commons.converter.ConversionException;
 
 /**
- * DOCUMENT ME!
+ * Creates a polygon geometry from the provided coordinates. At least three coordinates are expected. If the first and
+ * the last coordinate of the given array do not match an additional coordinate is added to close the polygon.
  *
  * @author   martin.scholl@cismet.de
  * @version  1.0
  */
-@ServiceProvider(service = GeometryConverter.class)
+@ServiceProvider(service = TextToGeometryConverter.class)
 public final class PolygonFromTextConverter extends AbstractGeometryFromTextConverter {
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
+    protected Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
             throws ConversionException {
-        final LinearRing ring = geomFactory.createLinearRing(coordinates);
+        if (coordinates.length < 3) {
+            throw new ConversionException("too few coordinates for polygon: " + coordinates.length); // NOI18N
+        }
+
+        final Coordinate[] coords;
+        final Coordinate lastCoord = coordinates[coordinates.length - 1];
+        if (coordinates[0].equals(lastCoord)) {
+            coords = coordinates;
+        } else {
+            // adding closing coordinate for convenience
+            coords = new Coordinate[coordinates.length + 1];
+            System.arraycopy(coordinates, 0, coords, 0, coordinates.length);
+            coords[coordinates.length] = coordinates[0];
+        }
+
+        final LinearRing ring = geomFactory.createLinearRing(coords);
 
         return geomFactory.createPolygon(ring, null);
     }

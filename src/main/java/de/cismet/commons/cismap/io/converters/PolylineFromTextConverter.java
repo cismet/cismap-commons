@@ -7,53 +7,33 @@
 ****************************************************/
 package de.cismet.commons.cismap.io.converters;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.commons.converter.ConversionException;
 
 /**
- * DOCUMENT ME!
+ * Creates a line string geometry from the provided coordinates. At least two coordinates are expected.
  *
  * @author   martin.scholl@cismet.de
  * @version  1.0
  */
-@ServiceProvider(service = GeometryConverter.class)
-public final class PolylineFromTextConverter implements TextToGeometryConverter {
+@ServiceProvider(service = TextToGeometryConverter.class)
+public final class PolylineFromTextConverter extends AbstractGeometryFromTextConverter {
 
     //~ Methods ----------------------------------------------------------------
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   from    DOCUMENT ME!
-     * @param   params  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  ConversionException            DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
-     */
     @Override
-    public Geometry convertForward(final String from, final String... params) throws ConversionException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    protected Geometry createGeometry(final Coordinate[] coordinates, final GeometryFactory geomFactory)
+            throws ConversionException {
+        if (coordinates.length < 2) {
+            throw new ConversionException("cannot create linestring lnfrom empty coordinate array"); // NOI18N
+        }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   to      DOCUMENT ME!
-     * @param   params  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     *
-     * @throws  ConversionException            DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
-     */
-    @Override
-    public String convertBackward(final Geometry to, final String... params) throws ConversionException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return geomFactory.createLineString(coordinates);
     }
 
     @Override
