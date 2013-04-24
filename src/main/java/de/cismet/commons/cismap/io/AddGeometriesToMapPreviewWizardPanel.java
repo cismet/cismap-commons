@@ -23,7 +23,6 @@ import de.cismet.commons.cismap.io.converters.GeometryConverter;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
 
-import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter;
 
 import de.cismet.commons.gui.wizard.AbstractWizardPanel;
@@ -50,6 +49,8 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
     private transient Geometry geometry;
     private transient boolean busy;
     private transient String statusMessage;
+    private transient String previewUrl;
+    private transient Crs currentCrs;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -149,6 +150,46 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getPreviewUrl() {
+        return previewUrl;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  previewUrl  DOCUMENT ME!
+     */
+    public void setPreviewUrl(final String previewUrl) {
+        this.previewUrl = previewUrl;
+
+        changeSupport.fireChange();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Crs getCurrentCrs() {
+        return currentCrs;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  currentCrs  DOCUMENT ME!
+     */
+    public void setCurrentCrs(final Crs currentCrs) {
+        this.currentCrs = currentCrs;
+
+        changeSupport.fireChange();
+    }
+
     @Override
     protected AddGeometriesToMapPreviewVisualPanel createComponent() {
         return new AddGeometriesToMapPreviewVisualPanel(this);
@@ -157,14 +198,17 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
     @Override
     protected void read(final WizardDescriptor wizard) {
         geometry = (Geometry)wizard.getProperty(PROP_GEOMETRY);
+        previewUrl = (String)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_PREVIEW_GETMAP_URL);
+        currentCrs = (Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS);
 
         // TODO: user proper executor
-        final ExecutorService executor = CismetConcurrency.getInstance("cismap-commons").getDefaultExecutor();
+        final ExecutorService executor = CismetConcurrency.getInstance("cismap-commons").getDefaultExecutor(); // NOI18N
 
         executor.execute(new Runnable() {
 
                 @Override
                 public void run() {
+                    setGeometry(null);
                     setStatusMessage("Converting data");
                     setBusy(true);
 
@@ -183,9 +227,9 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
                         setStatusMessage("Convertion finished successfully");
 
                         setGeometry(geom);
-                    } catch (final ConversionException ex) {
+                    } catch (final Exception ex) {
                         LOG.error("cannot convert geometry: [converter=" + geomConverter + "|data=" + data + "]", ex); // NOI18N
-                        setStatusMessage("Error while converting data: " + ex.getLocalizedMessage());                  // NOI18N
+                        setStatusMessage("Error while converting data: " + ex.getLocalizedMessage());
                     } finally {
                         setBusy(false);
                     }
