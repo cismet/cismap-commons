@@ -229,6 +229,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
                             final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
                             map.getFeatureCollection().addFeature(feature);
+                            map.getFeatureCollection().holdFeature(feature);
 
                             // fixed extent means, don't move map at all
                             if (!map.isFixedMapExtent()) {
