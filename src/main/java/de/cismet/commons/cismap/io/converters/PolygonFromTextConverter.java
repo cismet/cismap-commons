@@ -53,7 +53,7 @@ public final class PolygonFromTextConverter extends AbstractGeometryFromTextConv
 
     @Override
     public String getFormatName() {
-        return "PolygonFromTextConverter";
+        return "PolygonFromTextConverter"; // NOI18N
     }
 
     @Override
@@ -68,16 +68,19 @@ public final class PolygonFromTextConverter extends AbstractGeometryFromTextConv
 
     @Override
     public String getFormatDescription() {
-        return null;
+        return
+            "- Requires at least three coordinates\n- Adds closing coordinate if last coordinate does not match the first one\n- Assumes 'easting<sep>northing<sep>easting<sep>...' pattern\n- <sep> may be white-spaces (space, tab, enter, etc.), colons or semi-colons\n- Numbers are parsed dependent on the language settings";
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return null;
+        return
+            "<html>- Requires at least three coordinates<br/>- Adds closing coordinate if last coordinate does not match the first one<br/>- Assumes 'easting&lt;sep&gt;northing&lt;sep&gt;easting&lt;sep&gt;...' pattern<br/>- &lt;sep&gt; may be white-spaces (space, tab, enter, etc.), colons or semi-colons<br/>- Numbers are parsed dependent on the language settings</html>";
     }
 
     @Override
     public Object getFormatExample() {
-        return null;
+        return
+            "<html>2581629.99 5683116<br/>2581706.999 5683180.99<br/>2581780.9 5683220.99<br/>2581852 5683282.9<br/>2581629.99 5683116</html>";
     }
 }

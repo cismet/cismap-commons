@@ -38,7 +38,7 @@ public final class PolylineFromTextConverter extends AbstractGeometryFromTextCon
 
     @Override
     public String getFormatName() {
-        return "PolylineFromTextConverter";
+        return "PolylineFromTextConverter"; // NOI18N
     }
 
     @Override
@@ -53,16 +53,19 @@ public final class PolylineFromTextConverter extends AbstractGeometryFromTextCon
 
     @Override
     public String getFormatDescription() {
-        return null;
+        return
+            "- Requires at least two coordinates\n- Assumes 'easting<sep>northing<sep>easting<sep>...' pattern\n- <sep> may be white-spaces (space, tab, enter, etc.), colons or semi-colons\n- Numbers are parsed dependent on the language settings";
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return null;
+        return
+            "<html>- Requires at least two coordinates<br/>- Assumes 'easting&lt;sep&gt;northing&lt;sep&gt;easting&lt;sep&gt;...' pattern<br/>- &lt;sep&gt; may be white-spaces (space, tab, enter, etc.), colons or semi-colons<br/>- Numbers are parsed dependent on the language settings</html>";
     }
 
     @Override
     public Object getFormatExample() {
-        return null;
+        return
+            "<html>2581629.99 5683116<br/>2581706.999 5683180.99<br/>2581780.9 5683220.99<br/>2581852 5683282.9<br/>2581793.0 5683366.7</html>";
     }
 }

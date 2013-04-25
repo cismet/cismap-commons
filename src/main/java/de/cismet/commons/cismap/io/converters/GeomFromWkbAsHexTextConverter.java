@@ -73,12 +73,12 @@ public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConver
 
     @Override
     public String getFormatName() {
-        return "GeomFromWkbAsTextConverter";
+        return "GeomFromWkbAsTextConverter"; // NOI18N
     }
 
     @Override
     public String getFormatDisplayName() {
-        return "Geometry from WKB as hex text converter";
+        return "Geometry from (E)WKB as hex text converter";
     }
 
     @Override
@@ -88,16 +88,18 @@ public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConver
 
     @Override
     public String getFormatDescription() {
-        return null;
+        return
+            "- Assumes WKB format as hex text\n- Supports PostGIS EWKB format\n- Uses SRID of EWKB instead of current one if data is EWKB";
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return null;
+        return
+            "<html>- Assumes WKB format as hex text<br/>- Supports PostGIS EWKB format<br/>- Uses SRID of EWKB instead of current one if data is EWKB</html>";
     }
 
     @Override
     public Object getFormatExample() {
-        return null;
+        return "<html>0101000020cd0b000014ae47e17a14f23f0000000000000040</html>";
     }
 }

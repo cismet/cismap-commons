@@ -39,7 +39,7 @@ public final class PointFromTextConverter extends AbstractGeometryFromTextConver
 
     @Override
     public String getFormatName() {
-        return "PointFromTextConverter";
+        return "PointFromTextConverter"; // NOI18N
     }
 
     @Override
@@ -54,16 +54,18 @@ public final class PointFromTextConverter extends AbstractGeometryFromTextConver
 
     @Override
     public String getFormatDescription() {
-        return null;
+        return
+            "- Requires one coordinate\n- Surplus coordinates are ignored\n- Assumes 'easting<sep>northing<sep>easting<sep>...' pattern\n- <sep> may be white-spaces (space, tab, enter, etc.), colons or semi-colons\n- Numbers are parsed dependent on the language settings";
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return null;
+        return
+            "<html>- Requires one coordinate<br/>- Surplus coordinates are ignored<br/>- Assumes 'easting&lt;sep&gt;northing&lt;sep&gt;easting&lt;sep&gt;...' pattern<br/>- &lt;sep&gt; may be white-spaces (space, tab, enter, etc.), colons or semi-colons<br/>- Numbers are parsed dependent on the language settings</html>";
     }
 
     @Override
     public Object getFormatExample() {
-        return null;
+        return "<html>2581629.99 5683116</html>";
     }
 }

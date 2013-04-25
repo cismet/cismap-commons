@@ -113,7 +113,7 @@ public final class GeomFromWktConverter implements TextToGeometryConverter {
 
     @Override
     public String getFormatName() {
-        return "GeomFromWktConverter";
+        return "GeomFromWktConverter"; // NOI18N
     }
 
     @Override
@@ -128,17 +128,19 @@ public final class GeomFromWktConverter implements TextToGeometryConverter {
 
     @Override
     public String getFormatDescription() {
-        return null;
+        return
+            "- Assumes WKT format\n- Supports PostGIS EWKT format\n- Uses SRID of EWKT instead of current one if data is EWKT";
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return null;
+        return
+            "<html>- Assumes WKT format<br/>- Supports PostGIS EWKT format<br/>- Uses SRID of EWKT instead of current one if data is EWKT</html>";
     }
 
     @Override
     public Object getFormatExample() {
-        return null;
+        return "<html>SRID=4269;POINT(-71.064544 42.28787)</html>";
     }
 
     //~ Inner Classes ----------------------------------------------------------
