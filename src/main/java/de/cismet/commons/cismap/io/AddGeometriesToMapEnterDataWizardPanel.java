@@ -17,6 +17,7 @@ import de.cismet.cismap.commons.Crs;
 import de.cismet.commons.converter.Converter;
 
 import de.cismet.commons.gui.wizard.AbstractWizardPanel;
+import de.cismet.commons.gui.wizard.converter.ConverterPreselectionMode;
 
 /**
  * DOCUMENT ME!
@@ -35,6 +36,7 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
     private transient String coordinateData;
     private transient String crsName;
     private transient Converter selectedConverter;
+    private transient ConverterPreselectionMode converterPreselectionMode;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -56,6 +58,10 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
         this.coordinateData = coordinateData;
 
         changeSupport.fireChange();
+
+        if (ConverterPreselectionMode.AUTO_DETECT == converterPreselectionMode) {
+            detectFormat();
+        }
     }
 
     /**
@@ -114,7 +120,7 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
     /**
      * DOCUMENT ME!
      */
-    private void guessFormat() {
+    private void detectFormat() {
         // TODO
     }
 
@@ -129,6 +135,8 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
         setCrsName(((Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS)).getShortname());
         setSelectedConverter((Converter)wizard.getProperty(
                 AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER));
+        converterPreselectionMode = (ConverterPreselectionMode)wizard.getProperty(
+                AddGeometriesToMapWizardAction.PROP_CONVERTER_PRESELECT_MODE);
     }
 
     @Override
