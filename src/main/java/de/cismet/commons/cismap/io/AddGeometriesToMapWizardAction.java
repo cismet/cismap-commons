@@ -18,6 +18,7 @@ import org.jdom.Element;
 
 import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
+import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 
 import java.awt.Component;
@@ -104,8 +105,12 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
      * Creates a new AddGeometriesToMapWizardAction object.
      */
     public AddGeometriesToMapWizardAction() {
-//        super("", ImageUtilities.loadImageIcon("", false)); // NOI18N
-        super("AddCoordGeomWizard"); // NOI18N
+        super(
+            "",
+            ImageUtilities.loadImageIcon(
+                AddGeometriesToMapWizardAction.class.getPackage().getName().replace('.', '/')
+                        + "/new_geom_wiz_22.png", // NOI18N
+                false));
 
         putValue(Action.SHORT_DESCRIPTION, "Wizard to add geometries from coordinates to the map");
 
