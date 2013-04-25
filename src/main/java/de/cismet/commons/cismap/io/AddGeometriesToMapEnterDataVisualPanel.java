@@ -13,6 +13,9 @@ import org.openide.util.WeakListeners;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.cismet.commons.converter.Converter;
+import de.cismet.commons.converter.FormatHint;
+
 /**
  * DOCUMENT ME!
  *
@@ -33,6 +36,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
     private final transient javax.swing.JScrollPane jScrollPane1 = new javax.swing.JScrollPane();
     private final transient javax.swing.JLabel lblCoordinates = new javax.swing.JLabel();
     private final transient javax.swing.JLabel lblFile = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblSelectedConverter = new javax.swing.JLabel();
+    private final transient javax.swing.JLabel lblSelectedConverterValue = new javax.swing.JLabel();
+    private final transient javax.swing.JPanel pnlSelectedConverter = new javax.swing.JPanel();
+    private final transient javax.swing.JSeparator sepSelectedConverter = new javax.swing.JSeparator();
     private final transient javax.swing.JTextField txtFile = new javax.swing.JTextField();
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
@@ -147,6 +154,46 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(btnOpenFile, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
+        add(sepSelectedConverter, gridBagConstraints);
+
+        pnlSelectedConverter.setOpaque(false);
+        pnlSelectedConverter.setLayout(new java.awt.GridBagLayout());
+
+        lblSelectedConverterValue.setText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlSelectedConverter.add(lblSelectedConverterValue, gridBagConstraints);
+
+        lblSelectedConverter.setText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        pnlSelectedConverter.add(lblSelectedConverter, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.gridwidth = 3;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        add(pnlSelectedConverter, gridBagConstraints);
 
         bindingGroup.bind();
     } // </editor-fold>//GEN-END:initComponents
@@ -173,6 +220,17 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
                 final String text = model.getCoordinateData();
                 if ((text == null) || !text.equals(edpCoordinates.getText())) {
                     edpCoordinates.setText(text);
+                }
+
+                final Converter conv = model.getSelectedConverter();
+                if (conv instanceof FormatHint) {
+                    lblSelectedConverterValue.setText(((FormatHint)conv).getFormatDisplayName());
+                } else if (conv == null) {
+                    lblSelectedConverter.setText(NbBundle.getMessage(
+                            AddGeometriesToMapEnterDataVisualPanel.class,
+                            "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.text"));
+                } else {
+                    lblSelectedConverterValue.setText(conv.toString());
                 }
             }
         }

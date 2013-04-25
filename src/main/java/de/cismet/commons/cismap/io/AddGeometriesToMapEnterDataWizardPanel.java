@@ -14,6 +14,8 @@ import java.awt.Component;
 
 import de.cismet.cismap.commons.Crs;
 
+import de.cismet.commons.converter.Converter;
+
 import de.cismet.commons.gui.wizard.AbstractWizardPanel;
 
 /**
@@ -32,6 +34,7 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
 
     private transient String coordinateData;
     private transient String crsName;
+    private transient Converter selectedConverter;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -75,6 +78,26 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
         changeSupport.fireChange();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Converter getSelectedConverter() {
+        return selectedConverter;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectedConverter  DOCUMENT ME!
+     */
+    public void setSelectedConverter(final Converter selectedConverter) {
+        this.selectedConverter = selectedConverter;
+
+        changeSupport.fireChange();
+    }
+
     @Override
     public boolean isValid() {
         if ((coordinateData == null) || coordinateData.isEmpty()) {
@@ -104,15 +127,18 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
     protected void read(final WizardDescriptor wizard) {
         setCoordinateData((String)wizard.getProperty(PROP_COORDINATE_DATA));
         setCrsName(((Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS)).getShortname());
+        setSelectedConverter((Converter)wizard.getProperty(
+                AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER));
     }
 
     @Override
     protected void store(final WizardDescriptor wizard) {
         wizard.putProperty(PROP_COORDINATE_DATA, coordinateData);
+        wizard.putProperty(AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER, selectedConverter);
     }
 
     @Override
     public boolean isFinishPanel() {
-        return true;
+        return selectedConverter != null;
     }
 }

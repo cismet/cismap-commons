@@ -76,10 +76,11 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String PROP_AVAILABLE_CONVERTERS = "__prop_available_converters__"; // NOI18N
-    public static final String PROP_INPUT_FILE = "__prop_input_file__";                     // NOI18N
-    public static final String PROP_CURRENT_CRS = "__prop_current_epsg_code__";             // NOI18N
-    public static final String PROP_PREVIEW_GETMAP_URL = "__prop_preview_getmap_url__";     // NOI18N
+    public static final String PROP_AVAILABLE_CONVERTERS = "__prop_available_converters__";         // NOI18N
+    public static final String PROP_INPUT_FILE = "__prop_input_file__";                             // NOI18N
+    public static final String PROP_CURRENT_CRS = "__prop_current_epsg_code__";                     // NOI18N
+    public static final String PROP_PREVIEW_GETMAP_URL = "__prop_preview_getmap_url__";             // NOI18N
+    public static final String PROP_CONVERTER_PRESELECT_MODE = "__prop_converter_preselect_mode__"; // NOI18N
 
     public static final String CONF_SECTION = "addGeometriesToMapWizardAction";   // NOI18N
     public static final String CONF_CONV_PRESELECT = "converterPreselectionMode"; // NOI18N
@@ -89,6 +90,8 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     private static final transient Logger LOG = Logger.getLogger(AddGeometriesToMapWizardAction.class);
 
     //~ Instance fields --------------------------------------------------------
+
+    private transient Converter selectedConverter;
 
     private transient WizardDescriptor.Panel<WizardDescriptor>[] panels;
 
@@ -171,16 +174,12 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
             preselectionMode = getConverterPreselectionMode();
         }
 
-        // erase previous data if not in session memory mode
-        if (ConverterPreselectionMode.SESSION_MEMORY != preselectionMode) {
-            wizard.putProperty(AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA, null);
-        }
-
         wizard.putProperty(AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY, null);
-
+        wizard.putProperty(AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER, selectedConverter);
         wizard.putProperty(PROP_PREVIEW_GETMAP_URL, getPreviewGetMapUrl());
         wizard.putProperty(PROP_AVAILABLE_CONVERTERS, new ArrayList<Converter>(availableConverters));
         wizard.putProperty(PROP_CURRENT_CRS, CismapBroker.getInstance().getSrs());
+        wizard.putProperty(PROP_CONVERTER_PRESELECT_MODE, getConverterPreselectionMode());
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -189,6 +188,16 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         dialog.toFront();
 
         if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
+            // remember the selected converter
+            if ((ConverterPreselectionMode.SESSION_MEMORY == converterPreselectionMode)
+                        || (ConverterPreselectionMode.PERMANENT_MEMORY == converterPreselectionMode)
+                        || (ConverterPreselectionMode.CONFIGURE_AND_MEMORY == converterPreselectionMode)) {
+                setSelectedConverter((Converter)wizard.getProperty(
+                        AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER));
+            } else {
+                setSelectedConverter(null);
+            }
+
             final Frame parent = StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent());
             final WaitingDialogThread<Geometry> wdt = new WaitingDialogThread<Geometry>(
                     parent,
@@ -440,5 +449,23 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
      */
     public void setPreviewGetMapUrl(final String previewGetMapUrl) {
         this.previewGetMapUrl = previewGetMapUrl;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Converter getSelectedConverter() {
+        return selectedConverter;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectedConverter  DOCUMENT ME!
+     */
+    public void setSelectedConverter(final Converter selectedConverter) {
+        this.selectedConverter = selectedConverter;
     }
 }
