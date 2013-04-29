@@ -86,7 +86,7 @@ public final class GeomFromWkbConverter implements BinaryToGeometryConverter {
 
     @Override
     public String getFormatName() {
-        return "GeomFromWkbConverter";
+        return "GeomFromWkbConverter"; // NOI18N
     }
 
     @Override

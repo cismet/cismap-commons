@@ -11,6 +11,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
 
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.commons.converter.ConversionException;
@@ -78,7 +79,9 @@ public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConver
 
     @Override
     public String getFormatDisplayName() {
-        return "Geometry from (E)WKB as hex text converter";
+        return NbBundle.getMessage(
+                GeomFromWkbAsHexTextConverter.class,
+                "GeomFromWkbAsHexTextConverter.getFormatDisplayName().returnValue"); // NOI18N
     }
 
     @Override
@@ -88,18 +91,22 @@ public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConver
 
     @Override
     public String getFormatDescription() {
-        return
-            "- Assumes WKB format as hex text\n- Supports PostGIS EWKB format\n- Uses SRID of EWKB instead of current one if data is EWKB";
+        return NbBundle.getMessage(
+                GeomFromWkbAsHexTextConverter.class,
+                "GeomFromWkbAsHexTextConverter.getFormatDescription().returnValue"); // NOI18N
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return
-            "<html>- Assumes WKB format as hex text<br/>- Supports PostGIS EWKB format<br/>- Uses SRID of EWKB instead of current one if data is EWKB</html>";
+        return NbBundle.getMessage(
+                GeomFromWkbAsHexTextConverter.class,
+                "GeomFromWkbAsHexTextConverter.getFormatHtmlDescription().returnValue"); // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
-        return "<html>0101000020cd0b000014ae47e17a14f23f0000000000000040</html>";
+        return NbBundle.getMessage(
+                GeomFromWkbAsHexTextConverter.class,
+                "GeomFromWkbAsHexTextConverter.getFormatExample().returnValue"); // NOI18N
     }
 }

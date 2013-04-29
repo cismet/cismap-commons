@@ -12,6 +12,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.commons.converter.ConversionException;
@@ -60,7 +61,9 @@ public final class BoundingBoxFromTextConverter extends AbstractGeometryFromText
 
     @Override
     public String getFormatDisplayName() {
-        return "Bounding Box from text converter";
+        return NbBundle.getMessage(
+                BoundingBoxFromTextConverter.class,
+                "BoundingBoxFromTextConverter.getFormatDisplayName().returnValue"); // NOI18N
     }
 
     @Override
@@ -70,18 +73,22 @@ public final class BoundingBoxFromTextConverter extends AbstractGeometryFromText
 
     @Override
     public String getFormatDescription() {
-        return
-            "- Requires two coordinates\n- Surplus coordinates are ignored\n- Assumes first coordinate = lower-left corner\n- Assumes second coordinate = upper-right corner\n- Assumes 'easting<sep>northing<sep>easting<sep>...' pattern\n- <sep> may be white-spaces (space, tab, enter, etc.), colons or semi-colons\n- Numbers are parsed dependent on the language settings";
+        return NbBundle.getMessage(
+                BoundingBoxFromTextConverter.class,
+                "BoundingBoxFromTextConverter.getFormatDescription().returnValue"); // NOI18N
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return
-            "<html>- Requires two coordinates<br/>- Surplus coordinates are ignored<br/>- Assumes first coordinate = lower-left corner<br/>- Assumes second coordinate = upper-right corner<br/>- Assumes 'easting&lt;sep&gt;northing&lt;sep&gt;easting&lt;sep&gt;...' pattern<br/>- &lt;sep&gt; may be white-spaces (space, tab, enter, etc.), colons or semi-colons<br/>- Numbers are parsed dependent on the language settings</html>";
+        return NbBundle.getMessage(
+                BoundingBoxFromTextConverter.class,
+                "BoundingBoxFromTextConverter.getFormatHtmlDescription().returnValue"); // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
-        return "<html>2581629.99 5683116<br/>2581706.999 5683180.99</html>";
+        return NbBundle.getMessage(
+                BoundingBoxFromTextConverter.class,
+                "BoundingBoxFromTextConverter.getFormatExample().returnValue"); // NOI18N
     }
 }

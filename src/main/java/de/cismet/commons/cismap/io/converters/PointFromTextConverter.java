@@ -11,6 +11,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.commons.converter.ConversionException;
@@ -44,7 +45,9 @@ public final class PointFromTextConverter extends AbstractGeometryFromTextConver
 
     @Override
     public String getFormatDisplayName() {
-        return "Point from text converter";
+        return NbBundle.getMessage(
+                PointFromTextConverter.class,
+                "PointFromTextConverter.getFormatDisplayName().returnValue"); // NOI18N
     }
 
     @Override
@@ -54,18 +57,22 @@ public final class PointFromTextConverter extends AbstractGeometryFromTextConver
 
     @Override
     public String getFormatDescription() {
-        return
-            "- Requires one coordinate\n- Surplus coordinates are ignored\n- Assumes 'easting<sep>northing<sep>easting<sep>...' pattern\n- <sep> may be white-spaces (space, tab, enter, etc.), colons or semi-colons\n- Numbers are parsed dependent on the language settings";
+        return NbBundle.getMessage(
+                PointFromTextConverter.class,
+                "PointFromTextConverter.getFormatDescription().returnValue"); // NOI18N
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return
-            "<html>- Requires one coordinate<br/>- Surplus coordinates are ignored<br/>- Assumes 'easting&lt;sep&gt;northing&lt;sep&gt;easting&lt;sep&gt;...' pattern<br/>- &lt;sep&gt; may be white-spaces (space, tab, enter, etc.), colons or semi-colons<br/>- Numbers are parsed dependent on the language settings</html>";
+        return NbBundle.getMessage(
+                PointFromTextConverter.class,
+                "PointFromTextConverter.getFormatHtmlDescription().returnValue"); // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
-        return "<html>2581629.99 5683116</html>";
+        return NbBundle.getMessage(
+                PointFromTextConverter.class,
+                "PointFromTextConverter.getFormatExample().returnValue"); // NOI18N
     }
 }

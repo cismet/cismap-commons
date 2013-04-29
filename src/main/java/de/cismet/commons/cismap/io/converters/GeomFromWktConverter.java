@@ -14,6 +14,7 @@ import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKTWriter;
 
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.cismap.commons.CrsTransformer;
@@ -57,7 +58,7 @@ public final class GeomFromWktConverter implements TextToGeometryConverter {
             try {
                 srid = CrsTransformer.extractSridFromCrs(params[0]);
             } catch (final Exception e) {
-                throw new ConversionException("unsupported epsg parameter: " + params[0], e); // NOI18Ny
+                throw new ConversionException("unsupported epsg parameter: " + params[0], e); // NOI18N
             }
         } else {
             srid = ewkt.srid;
@@ -118,7 +119,9 @@ public final class GeomFromWktConverter implements TextToGeometryConverter {
 
     @Override
     public String getFormatDisplayName() {
-        return "Geometry from (E)WKT converter";
+        return NbBundle.getMessage(
+                GeomFromWktConverter.class,
+                "GeomFromWktConverter.getFormatDisplayName().returnValue"); // NOI18N
     }
 
     @Override
@@ -128,19 +131,21 @@ public final class GeomFromWktConverter implements TextToGeometryConverter {
 
     @Override
     public String getFormatDescription() {
-        return
-            "- Assumes WKT format\n- Supports PostGIS EWKT format\n- Uses SRID of EWKT instead of current one if data is EWKT";
+        return NbBundle.getMessage(
+                GeomFromWktConverter.class,
+                "GeomFromWktConverter.getFormatDescription().returnValue"); // NOI18N
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return
-            "<html>- Assumes WKT format<br/>- Supports PostGIS EWKT format<br/>- Uses SRID of EWKT instead of current one if data is EWKT</html>";
+        return NbBundle.getMessage(
+                GeomFromWktConverter.class,
+                "GeomFromWktConverter.getFormatHtmlDescription().returnValue"); // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
-        return "<html>SRID=4269;POINT(-71.064544 42.28787)</html>";
+        return NbBundle.getMessage(GeomFromWktConverter.class, "GeomFromWktConverter.getFormatExample().returnValue"); // NOI18N
     }
 
     //~ Inner Classes ----------------------------------------------------------
