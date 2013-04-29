@@ -20,6 +20,7 @@ import org.openide.DialogDisplayer;
 import org.openide.WizardDescriptor;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 import java.awt.Dialog;
@@ -106,13 +107,17 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
      */
     public AddGeometriesToMapWizardAction() {
         super(
-            "",
+            "",                                   // NOI18N
             ImageUtilities.loadImageIcon(
                 AddGeometriesToMapWizardAction.class.getPackage().getName().replace('.', '/')
                         + "/new_geom_wiz_22.png", // NOI18N
                 false));
 
-        putValue(Action.SHORT_DESCRIPTION, "Wizard to add geometries from coordinates to the map");
+        putValue(
+            Action.SHORT_DESCRIPTION,
+            NbBundle.getMessage(
+                AddGeometriesToMapWizardAction.class,
+                "AddGeometriesToMapWizardAction.<init>.action.shortDescription")); // NOI18N
 
         setConverterPreselectionMode(getDefaultConverterPreselectionMode());
     }
@@ -166,8 +171,10 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     @Override
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        wizard.setTitleFormat(new MessageFormat("{0}")); // NOI18N
-        wizard.setTitle("Add geometry to map");
+        wizard.setTitleFormat(new MessageFormat("{0}"));                                      // NOI18N
+        wizard.setTitle(NbBundle.getMessage(
+                AddGeometriesToMapWizardAction.class,
+                "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
 
         final Collection<? extends TextToGeometryConverter> availableConverters = Lookup.getDefault()
                     .lookupAll(TextToGeometryConverter.class);
@@ -207,7 +214,9 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
             final WaitingDialogThread<Geometry> wdt = new WaitingDialogThread<Geometry>(
                     parent,
                     true,
-                    "waiting",
+                    NbBundle.getMessage(
+                        AddGeometriesToMapWizardAction.class,
+                        "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.message"), // NOI18N
                     null,
                     50) {
 
@@ -257,19 +266,27 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
                             ex.printStackTrace(new PrintWriter(stacktraceWriter));
                             if (ex instanceof ConversionException) {
                                 errorInfo = new ErrorInfo(
-                                        "Add Geometry Wizard Error",
-                                        "Cannot convert geometry",
+                                        NbBundle.getMessage(
+                                            AddGeometriesToMapWizardAction.class,
+                                            "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.conversionError.title"),   // NOI18N
+                                        NbBundle.getMessage(
+                                            AddGeometriesToMapWizardAction.class,
+                                            "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.conversionError.message"), // NOI18N
                                         stacktraceWriter.toString(),
-                                        "WARNING",
+                                        "WARNING",                                                                                                      // NOI18N
                                         ex,
                                         Level.WARNING,
                                         null);
                             } else {
                                 errorInfo = new ErrorInfo(
-                                        "Add Geometry Wizard Error",
-                                        "Cannot add geometry to map because of an unknown error",
+                                        NbBundle.getMessage(
+                                            AddGeometriesToMapWizardAction.class,
+                                            "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.genericError.title"),      // NOI18N
+                                        NbBundle.getMessage(
+                                            AddGeometriesToMapWizardAction.class,
+                                            "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).waitingDialogThread.genericError.message"),    // NOI18N
                                         stacktraceWriter.toString(),
-                                        "WARNING",
+                                        "WARNING",                                                                                                      // NOI18N
                                         ex,
                                         Level.WARNING,
                                         null);

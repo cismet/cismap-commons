@@ -9,6 +9,7 @@ package de.cismet.commons.cismap.io;
 
 import org.openide.WizardDescriptor;
 import org.openide.WizardDescriptor.FinishablePanel;
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 
@@ -104,14 +105,42 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
         changeSupport.fireChange();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ConverterPreselectionMode getConverterPreselectionMode() {
+        return converterPreselectionMode;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  converterPreselectionMode  DOCUMENT ME!
+     */
+    public void setConverterPreselectionMode(final ConverterPreselectionMode converterPreselectionMode) {
+        this.converterPreselectionMode = converterPreselectionMode;
+
+        changeSupport.fireChange();
+    }
+
     @Override
     public boolean isValid() {
         if ((coordinateData == null) || coordinateData.isEmpty()) {
-            wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, "Please enter coordinate data");
+            wizard.putProperty(
+                WizardDescriptor.PROP_INFO_MESSAGE,
+                NbBundle.getMessage(
+                    AddGeometriesToMapEnterDataWizardPanel.class,
+                    "AddGeometriesToMapEnterDataWizardPanel.isValid().infoMessage.enterCoordinateData")); // NOI18N
 
             return false;
         } else {
-            wizard.putProperty(WizardDescriptor.PROP_INFO_MESSAGE, "Proceed to next step");
+            wizard.putProperty(
+                WizardDescriptor.PROP_INFO_MESSAGE,
+                NbBundle.getMessage(
+                    AddGeometriesToMapEnterDataWizardPanel.class,
+                    "AddGeometriesToMapEnterDataWizardPanel.isValid().infoMessage.proceed")); // NOI18N
 
             return true;
         }
@@ -135,8 +164,8 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
         setCrsName(((Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS)).getShortname());
         setSelectedConverter((Converter)wizard.getProperty(
                 AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER));
-        converterPreselectionMode = (ConverterPreselectionMode)wizard.getProperty(
-                AddGeometriesToMapWizardAction.PROP_CONVERTER_PRESELECT_MODE);
+        setConverterPreselectionMode((ConverterPreselectionMode)wizard.getProperty(
+                AddGeometriesToMapWizardAction.PROP_CONVERTER_PRESELECT_MODE));
     }
 
     @Override

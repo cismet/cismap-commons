@@ -57,7 +57,9 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         initComponents();
 
-        this.setName("Enter data");
+        this.setName(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.<init>(AddGeomtriesToMapEnterDataWizardPanel).panelName")); // NOI18N
 
         this.model.addChangeListener(WeakListeners.change(modelChangeL, model));
     }
@@ -167,7 +169,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         lblSelectedConverterValue.setText(NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.text")); // NOI18N
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.text"));        // NOI18N
+        lblSelectedConverterValue.setToolTipText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -179,7 +184,10 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
 
         lblSelectedConverter.setText(NbBundle.getMessage(
                 AddGeometriesToMapEnterDataVisualPanel.class,
-                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.text")); // NOI18N
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.text"));        // NOI18N
+        lblSelectedConverter.setToolTipText(NbBundle.getMessage(
+                AddGeometriesToMapEnterDataVisualPanel.class,
+                "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -226,12 +234,17 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
                 if (conv instanceof FormatHint) {
                     lblSelectedConverterValue.setText(((FormatHint)conv).getFormatDisplayName());
                 } else if (conv == null) {
-                    lblSelectedConverter.setText(NbBundle.getMessage(
+                    lblSelectedConverterValue.setText(NbBundle.getMessage(
                             AddGeometriesToMapEnterDataVisualPanel.class,
-                            "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverter.text"));
+                            "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.text")); // NOI18N
                 } else {
                     lblSelectedConverterValue.setText(conv.toString());
                 }
+
+                lblSelectedConverterValue.setToolTipText(NbBundle.getMessage(
+                        AddGeometriesToMapEnterDataVisualPanel.class,
+                        "AddGeometriesToMapEnterDataVisualPanel.lblSelectedConverterValue.toolTipText", // NOI18N
+                        model.getConverterPreselectionMode()));
             }
         }
     }

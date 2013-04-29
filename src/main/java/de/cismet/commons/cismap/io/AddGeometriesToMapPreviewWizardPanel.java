@@ -12,6 +12,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 
 import org.openide.WizardDescriptor;
+import org.openide.util.NbBundle;
 
 import java.awt.EventQueue;
 
@@ -209,7 +210,10 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
                 @Override
                 public void run() {
                     setGeometry(null);
-                    setStatusMessage("Converting data");
+                    setStatusMessage(
+                        NbBundle.getMessage(
+                            AddGeometriesToMapPreviewWizardPanel.class,
+                            "AddGeometriesToMapPreviewWizardPanel.read(WizardDescriptor).runnable.statusMessage.convertingData")); // NOI18N
                     setBusy(true);
 
                     final Converter converter = (Converter)wizard.getProperty(
@@ -224,12 +228,19 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
                         @SuppressWarnings("unchecked")
                         final Geometry geom = geomConverter.convertForward(data, crs.getCode());
 
-                        setStatusMessage("Convertion finished successfully");
+                        setStatusMessage(
+                            NbBundle.getMessage(
+                                AddGeometriesToMapPreviewWizardPanel.class,
+                                "AddGeometriesToMapPreviewWizardPanel.read(WizardDescriptor).runnable.statusMessage.conversionSuccessful")); // NOI18N
 
                         setGeometry(geom);
                     } catch (final Exception ex) {
-                        LOG.error("cannot convert geometry: [converter=" + geomConverter + "|data=" + data + "]", ex); // NOI18N
-                        setStatusMessage("Error while converting data: " + ex.getLocalizedMessage());
+                        LOG.error("cannot convert geometry: [converter=" + geomConverter + "|data=" + data + "]", ex);             // NOI18N
+                        setStatusMessage(
+                            NbBundle.getMessage(
+                                AddGeometriesToMapPreviewWizardPanel.class,
+                                "AddGeometriesToMapPreviewWizardPanel.read(WizardDescriptor).runnable.statusMessage.convertError", // NOI18N
+                                ex.getLocalizedMessage()));
                     } finally {
                         setBusy(false);
                     }

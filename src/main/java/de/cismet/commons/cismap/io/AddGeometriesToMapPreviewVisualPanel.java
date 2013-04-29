@@ -61,7 +61,9 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
         modelChangeL = new ModelChangeListener();
         model.addChangeListener(WeakListeners.change(modelChangeL, model));
 
-        this.setName("Map preview");
+        this.setName(NbBundle.getMessage(
+                AddGeometriesToMapPreviewVisualPanel.class,
+                "AddGeometriesToMapPreviewVisualPanel.<init>(AddGeometryToMapPreviewWizardPanel).panelName")); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
