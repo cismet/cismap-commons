@@ -15,6 +15,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.commons.converter.ConversionException;
+import de.cismet.commons.converter.Converter.MatchRating;
 
 /**
  * Creates a geometry from a WKB that is provided in form of a hex string.
@@ -23,7 +24,7 @@ import de.cismet.commons.converter.ConversionException;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConverter {
+public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConverter, MatchRating<String> {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -108,5 +109,19 @@ public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConver
         return NbBundle.getMessage(
                 GeomFromWkbAsHexTextConverter.class,
                 "GeomFromWkbAsHexTextConverter.getFormatExample().returnValue"); // NOI18N
+    }
+
+    @Override
+    public int rate(final String from) {
+        if (from == null) {
+            return 0;
+        }
+
+        // is hex text ?
+        if (from.matches("([0123456789abcdef])+")) { // NOI18N
+            return 100;
+        } else {
+            return 0;
+        }
     }
 }

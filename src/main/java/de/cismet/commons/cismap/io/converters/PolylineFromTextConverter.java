@@ -15,6 +15,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.commons.converter.ConversionException;
+import de.cismet.commons.converter.Converter.MatchRating;
 
 /**
  * Creates a line string geometry from the provided coordinates. At least two coordinates are expected.
@@ -23,7 +24,7 @@ import de.cismet.commons.converter.ConversionException;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class PolylineFromTextConverter extends AbstractGeometryFromTextConverter {
+public final class PolylineFromTextConverter extends AbstractGeometryFromTextConverter implements MatchRating<String> {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -73,5 +74,26 @@ public final class PolylineFromTextConverter extends AbstractGeometryFromTextCon
         return NbBundle.getMessage(
                 PolylineFromTextConverter.class,
                 "PolylineFromTextConverter.getFormatExample().returnValue"); // NOI18N
+    }
+
+    @Override
+    public int rate(final String from) {
+        final int superRating = super.rate(from);
+        if (superRating == 0) {
+            return 0;
+        }
+
+        final String[] tokens = from.split(getTokenRegex());
+
+        if (tokens.length < 6) {
+            return 0;
+        } else {
+            if (tokens[0].equals(tokens[tokens.length - 2]) && tokens[1].equals(tokens[tokens.length - 1])) {
+                // could be polygon
+                return 80;
+            } else {
+                return 100;
+            }
+        }
     }
 }

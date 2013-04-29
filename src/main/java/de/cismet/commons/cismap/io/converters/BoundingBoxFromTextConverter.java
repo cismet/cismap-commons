@@ -15,7 +15,13 @@ import com.vividsolutions.jts.geom.LinearRing;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+import java.util.Locale;
+
 import de.cismet.commons.converter.ConversionException;
+import de.cismet.commons.converter.Converter.MatchRating;
 
 /**
  * Creates a rectangular polygon geometry (a bounding box) from the provided coordinates. At least two coordinates are
@@ -26,7 +32,8 @@ import de.cismet.commons.converter.ConversionException;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class BoundingBoxFromTextConverter extends AbstractGeometryFromTextConverter {
+public final class BoundingBoxFromTextConverter extends AbstractGeometryFromTextConverter
+        implements MatchRating<String> {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -90,5 +97,24 @@ public final class BoundingBoxFromTextConverter extends AbstractGeometryFromText
         return NbBundle.getMessage(
                 BoundingBoxFromTextConverter.class,
                 "BoundingBoxFromTextConverter.getFormatExample().returnValue"); // NOI18N
+    }
+
+    @Override
+    public int rate(final String from) {
+        final int superRating = super.rate(from);
+        if (superRating == 0) {
+            return 0;
+        }
+
+        final String[] tokens = from.split(getTokenRegex());
+
+        if (tokens.length < 4) {
+            return 0;
+        } else if (tokens.length > 4) {
+            return 50;
+        } else {
+            // 4 tokens = 2 coordinates
+            return 100;
+        }
     }
 }

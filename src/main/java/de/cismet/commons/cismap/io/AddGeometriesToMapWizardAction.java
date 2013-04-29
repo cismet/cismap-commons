@@ -433,7 +433,6 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
      */
     public void setConverterPreselectionMode(final ConverterPreselectionMode converterPreselectionMode) {
         switch (converterPreselectionMode) {
-            case AUTO_DETECT:                                                                               // fall-through
             case CONFIGURE:                                                                                 // fall-through
             case CONFIGURE_AND_MEMORY:                                                                      // fall-through
             case PERMANENT_MEMORY: {

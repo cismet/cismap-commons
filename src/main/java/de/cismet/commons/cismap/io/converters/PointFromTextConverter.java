@@ -15,6 +15,7 @@ import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.commons.converter.ConversionException;
+import de.cismet.commons.converter.Converter.MatchRating;
 
 /**
  * Creates a point geometry from the provided coordinates. At least one coordinate is expected. If there are more they
@@ -24,7 +25,7 @@ import de.cismet.commons.converter.ConversionException;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class PointFromTextConverter extends AbstractGeometryFromTextConverter {
+public final class PointFromTextConverter extends AbstractGeometryFromTextConverter implements MatchRating<String> {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -74,5 +75,24 @@ public final class PointFromTextConverter extends AbstractGeometryFromTextConver
         return NbBundle.getMessage(
                 PointFromTextConverter.class,
                 "PointFromTextConverter.getFormatExample().returnValue"); // NOI18N
+    }
+
+    @Override
+    public int rate(final String from) {
+        final int superRating = super.rate(from);
+        if (superRating == 0) {
+            return 0;
+        }
+
+        final String[] tokens = from.split(getTokenRegex());
+
+        if (tokens.length < 2) {
+            return 0;
+        } else if (tokens.length > 2) {
+            return 50;
+        } else {
+            // 2 tokens = 1 coordinates
+            return 100;
+        }
     }
 }
