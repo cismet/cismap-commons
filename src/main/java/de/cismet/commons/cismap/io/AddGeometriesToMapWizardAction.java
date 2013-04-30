@@ -329,7 +329,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
             wdt.start();
         }
     }
-    
+
     @Override
     public void configure(final Element parent) {
         doConfigure(parent);

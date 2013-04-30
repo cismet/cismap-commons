@@ -105,67 +105,66 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
 
         // TODO: use proper executor
         CismetConcurrency.getInstance("cismap-commons") // NOI18N
-                .getDefaultExecutor()
-                .execute(new SwingWorker<XBoundingBox, Void>() {
+        .getDefaultExecutor().execute(new SwingWorker<XBoundingBox, Void>() {
 
-                        @Override
-                        protected XBoundingBox doInBackground() throws Exception {
-                            try {
-                                // home bbox for the current crs
-                                final XBoundingBox box = new XBoundingBox(
-                                        model.getGeometry().getEnvelope().buffer(buffer));
-                                final CrsTransformer transformer = new CrsTransformer(model.getCurrentCrs().getCode());
+                @Override
+                protected XBoundingBox doInBackground() throws Exception {
+                    try {
+                        // home bbox for the current crs
+                        final XBoundingBox box = new XBoundingBox(
+                                model.getGeometry().getEnvelope().buffer(buffer));
+                        final CrsTransformer transformer = new CrsTransformer(model.getCurrentCrs().getCode());
 
-                                return transformer.transformBoundingBox(box);
-                            } catch (final Exception e) {
-                                LOG.warn(
-                                    "cannot create home bbox for current crs, preview most likely without background layer",// NOI18N
-                                    e); 
+                        return transformer.transformBoundingBox(box);
+                    } catch (final Exception e) {
+                        LOG.warn(
+                            "cannot create home bbox for current crs, preview most likely without background layer", // NOI18N
+                            e);
 
-                                return null;
-                            }
-                        }
+                        return null;
+                    }
+                }
 
-                        @Override
-                        protected void done() {
-                            XBoundingBox homeBbox = null;
-                            try {
-                                homeBbox = get(300, TimeUnit.MILLISECONDS);
-                            } catch (final Exception ex) {
-                                LOG.warn("cannot retrieve home boundingbox, preview unusable", ex); // NOI18N
-                            }
+                @Override
+                protected void done() {
+                    XBoundingBox homeBbox = null;
+                    try {
+                        homeBbox = get(300, TimeUnit.MILLISECONDS);
+                    } catch (final Exception ex) {
+                        LOG.warn("cannot retrieve home boundingbox, preview unusable", ex); // NOI18N
+                    }
 
-                            final XBoundingBox box = new XBoundingBox(model.getGeometry().getEnvelope().buffer(buffer));
-                            final ActiveLayerModel mappingModel = (ActiveLayerModel)previewMap.getMappingModel();
-                            mappingModel.setSrs(model.getCurrentCrs());
-                            mappingModel.addHome(box);
-                            if (homeBbox != null) {
-                                mappingModel.addHome(homeBbox);
-                            }
+                    final XBoundingBox box = new XBoundingBox(model.getGeometry().getEnvelope().buffer(buffer));
+                    final ActiveLayerModel mappingModel = (ActiveLayerModel)previewMap.getMappingModel();
+                    mappingModel.setSrs(model.getCurrentCrs());
+                    mappingModel.addHome(box);
+                    if (homeBbox != null) {
+                        mappingModel.addHome(homeBbox);
+                    }
 
-                            final String previewUrl = model.getPreviewUrl();
+                    final String previewUrl = model.getPreviewUrl();
 
-                            // background map cannot be initialised without proper url
-                            if (previewUrl != null) {
-                                final SimpleWMS swms = new SimpleWMS(new SimpleWmsGetMapUrl(previewUrl));
-                                swms.setName("background"); // NOI18N
-                                mappingModel.addLayer(swms);
-                            }
+                    // background map cannot be initialised without proper url
+                    if (previewUrl != null) {
+                        final SimpleWMS swms = new SimpleWMS(new SimpleWmsGetMapUrl(previewUrl));
+                        swms.setName("background"); // NOI18N
+                        mappingModel.addLayer(swms);
+                    }
 
-                            final Feature dsf = new PureNewFeature(model.getGeometry());
-                            previewMap.setMappingModel(mappingModel);
-                            previewMap.setAnimationDuration(0);
-                            previewMap.gotoInitialBoundingBox();
-                            previewMap.setInteractionMode(MappingComponent.ZOOM);
-                            previewMap.setInteractionMode("MUTE"); // NOI18N
-                            previewMap.getFeatureCollection().addFeature(dsf);
-                            previewMap.setAnimationDuration(300);
+                    final Feature dsf = new PureNewFeature(model.getGeometry());
+                    previewMap.setMappingModel(mappingModel);
+                    previewMap.setAnimationDuration(0);
+                    previewMap.gotoInitialBoundingBox();
+                    previewMap.setInteractionMode(MappingComponent.ZOOM);
+                    previewMap.setInteractionMode("MUTE"); // NOI18N
+                    previewMap.getFeatureCollection().addFeature(dsf);
+                    previewMap.setAnimationDuration(300);
 
-                            // finally when all configurations are done the map may animate again
-                            previewMap.unlock();
-                            previewMap.zoomToFeatureCollection();
-                        }
-                    });
+                    // finally when all configurations are done the map may animate again
+                    previewMap.unlock();
+                    previewMap.zoomToFeatureCollection();
+                }
+            });
     }
 
     /**
