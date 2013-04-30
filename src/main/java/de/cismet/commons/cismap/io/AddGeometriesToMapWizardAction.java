@@ -53,6 +53,7 @@ import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.PureNewFeature.geomTypes;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 
 import de.cismet.commons.cismap.io.converters.GeometryConverter;
 import de.cismet.commons.cismap.io.converters.TextToGeometryConverter;
@@ -404,7 +405,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         if (convPreviewGetMapUrlElement == null) {
             setPreviewGetMapUrl(null);
         } else {
-            setPreviewGetMapUrl(convPreviewGetMapUrlElement.getText());
+            setPreviewGetMapUrl(convPreviewGetMapUrlElement.getText().trim());
         }
     }
 

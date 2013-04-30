@@ -7,15 +7,21 @@
 ****************************************************/
 package de.cismet.commons.cismap.io;
 
+import org.apache.log4j.Logger;
+
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 
 import java.awt.EventQueue;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.PureNewFeature;
@@ -24,6 +30,8 @@ import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 
+import de.cismet.commons.concurrency.CismetConcurrency;
+
 /**
  * DOCUMENT ME!
  *
@@ -31,6 +39,11 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
  * @version  1.0
  */
 public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
+
+    //~ Static fields/initializers ---------------------------------------------
+
+    /** LOGGER. */
+    private static final transient Logger LOG = Logger.getLogger(AddGeometriesToMapPreviewVisualPanel.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -81,8 +94,6 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
      * DOCUMENT ME!
      */
     private void initMap() {
-        assert EventQueue.isDispatchThread() : "may only be accessed in EDT"; // NOI18N
-
         // map is locked
 
         final double buffer;
@@ -92,35 +103,69 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
             buffer = 0.001;
         }
 
-        final XBoundingBox box = new XBoundingBox(model.getGeometry().getEnvelope().buffer(buffer));
-        final ActiveLayerModel mappingModel = (ActiveLayerModel)previewMap.getMappingModel();
-        mappingModel.setSrs(model.getCurrentCrs());
-        mappingModel.addHome(box);
+        // TODO: use proper executor
+        CismetConcurrency.getInstance("cismap-commons") // NOI18N
+                .getDefaultExecutor()
+                .execute(new SwingWorker<XBoundingBox, Void>() {
 
-        // FIXME: hardcoded for testing purposes
-// final String previewUrl = model.getPreviewUrl();
-        final String previewUrl =
-            "http://S102X284:8399/arcgis/services/ALKIS-EXPRESS/MapServer/WMSServer?&VERSION=1.1.1&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=FALSE&BGCOLOR=0xF0F0F0&EXCEPTIONS=application/vnd.ogc.se_xml&LAYERS=2,4,5,6,7,8,10,11,12,13,14,16,17,18,19,20,21,22,23,25,26,27,28,29,30,31,32,33,34,35,36,37,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100&STYLES=&BBOX=<cismap:boundingBox>&WIDTH=<cismap:width>&HEIGHT=<cismap:height>&SRS=<cismap:srs>";
+                        @Override
+                        protected XBoundingBox doInBackground() throws Exception {
+                            try {
+                                // home bbox for the current crs
+                                final XBoundingBox box = new XBoundingBox(
+                                        model.getGeometry().getEnvelope().buffer(buffer));
+                                final CrsTransformer transformer = new CrsTransformer(model.getCurrentCrs().getCode());
 
-        // background map cannot be initialised without proper url
-        if (previewUrl != null) {
-            final SimpleWMS swms = new SimpleWMS(new SimpleWmsGetMapUrl(previewUrl));
-            swms.setName("background"); // NOI18N
-            mappingModel.addLayer(swms);
-        }
+                                return transformer.transformBoundingBox(box);
+                            } catch (final Exception e) {
+                                LOG.warn(
+                                    "cannot create home bbox for current crs, preview most likely without background layer",// NOI18N
+                                    e); 
 
-        final Feature dsf = new PureNewFeature(model.getGeometry());
-        previewMap.setMappingModel(mappingModel);
-        previewMap.setAnimationDuration(0);
-        previewMap.gotoInitialBoundingBox();
-        previewMap.setInteractionMode(MappingComponent.ZOOM);
-        previewMap.setInteractionMode("MUTE"); // NOI18N
-        previewMap.getFeatureCollection().addFeature(dsf);
-        previewMap.setAnimationDuration(300);
+                                return null;
+                            }
+                        }
 
-        // finally when all configurations are done the map may animate again
-        previewMap.unlock();
-        previewMap.zoomToFeatureCollection();
+                        @Override
+                        protected void done() {
+                            XBoundingBox homeBbox = null;
+                            try {
+                                homeBbox = get(300, TimeUnit.MILLISECONDS);
+                            } catch (final Exception ex) {
+                                LOG.warn("cannot retrieve home boundingbox, preview unusable", ex); // NOI18N
+                            }
+
+                            final XBoundingBox box = new XBoundingBox(model.getGeometry().getEnvelope().buffer(buffer));
+                            final ActiveLayerModel mappingModel = (ActiveLayerModel)previewMap.getMappingModel();
+                            mappingModel.setSrs(model.getCurrentCrs());
+                            mappingModel.addHome(box);
+                            if (homeBbox != null) {
+                                mappingModel.addHome(homeBbox);
+                            }
+
+                            final String previewUrl = model.getPreviewUrl();
+
+                            // background map cannot be initialised without proper url
+                            if (previewUrl != null) {
+                                final SimpleWMS swms = new SimpleWMS(new SimpleWmsGetMapUrl(previewUrl));
+                                swms.setName("background"); // NOI18N
+                                mappingModel.addLayer(swms);
+                            }
+
+                            final Feature dsf = new PureNewFeature(model.getGeometry());
+                            previewMap.setMappingModel(mappingModel);
+                            previewMap.setAnimationDuration(0);
+                            previewMap.gotoInitialBoundingBox();
+                            previewMap.setInteractionMode(MappingComponent.ZOOM);
+                            previewMap.setInteractionMode("MUTE"); // NOI18N
+                            previewMap.getFeatureCollection().addFeature(dsf);
+                            previewMap.setAnimationDuration(300);
+
+                            // finally when all configurations are done the map may animate again
+                            previewMap.unlock();
+                            previewMap.zoomToFeatureCollection();
+                        }
+                    });
     }
 
     /**
