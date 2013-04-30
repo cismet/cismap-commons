@@ -15,11 +15,6 @@ import com.vividsolutions.jts.geom.LinearRing;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
-import java.util.Locale;
-
 import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter.MatchRating;
 
@@ -100,8 +95,8 @@ public final class BoundingBoxFromTextConverter extends AbstractGeometryFromText
     }
 
     @Override
-    public int rate(final String from) {
-        final int superRating = super.rate(from);
+    public int rate(final String from, final String... params) {
+        final int superRating = super.rate(from, params);
         if (superRating == 0) {
             return 0;
         }

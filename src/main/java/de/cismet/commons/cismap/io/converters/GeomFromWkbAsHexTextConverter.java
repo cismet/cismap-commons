@@ -14,10 +14,7 @@ import com.vividsolutions.jts.io.WKBWriter;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
-import java.util.regex.Pattern;
-
 import de.cismet.commons.converter.ConversionException;
-import de.cismet.commons.converter.Converter.MatchRating;
 
 /**
  * Creates a geometry from a WKB that is provided in form of a hex string.
@@ -26,12 +23,12 @@ import de.cismet.commons.converter.Converter.MatchRating;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConverter, MatchRating<String> {
+public final class GeomFromWkbAsHexTextConverter extends AbstractRatingConverter<String, Geometry>
+        implements TextToGeometryConverter {
 
     //~ Instance fields --------------------------------------------------------
 
     private final transient GeomFromWkbConverter wkbConverter;
-    private final transient Pattern ratePattern;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -40,7 +37,6 @@ public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConver
      */
     public GeomFromWkbAsHexTextConverter() {
         wkbConverter = new GeomFromWkbConverter();
-        ratePattern = Pattern.compile("[0123456789abcdef]+"); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -113,19 +109,5 @@ public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConver
         return NbBundle.getMessage(
                 GeomFromWkbAsHexTextConverter.class,
                 "GeomFromWkbAsHexTextConverter.getFormatExample().returnValue"); // NOI18N
-    }
-
-    @Override
-    public int rate(final String from) {
-        if (from == null) {
-            return 0;
-        }
-
-        // is hex text ?
-        if (ratePattern.matcher(from).matches()) { // NOI18N
-            return 100;
-        } else {
-            return 0;
-        }
     }
 }

@@ -16,7 +16,6 @@ import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 import de.cismet.commons.converter.ConversionException;
-import de.cismet.commons.converter.Converter.MatchRating;
 
 /**
  * Creates a polygon geometry from the provided coordinates. At least three coordinates are expected. If the first and
@@ -26,7 +25,7 @@ import de.cismet.commons.converter.Converter.MatchRating;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class PolygonFromTextConverter extends AbstractGeometryFromTextConverter implements MatchRating<String> {
+public final class PolygonFromTextConverter extends AbstractGeometryFromTextConverter {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -91,9 +90,17 @@ public final class PolygonFromTextConverter extends AbstractGeometryFromTextConv
                 "PolygonFromTextConverter.getFormatExample().returnValue"); // NOI18N
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   from    DOCUMENT ME!
+     * @param   params  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
-    public int rate(final String from) {
-        final int superRating = super.rate(from);
+    public int rate(final String from, final String... params) {
+        final int superRating = super.rate(from, params);
         if (superRating == 0) {
             return 0;
         }

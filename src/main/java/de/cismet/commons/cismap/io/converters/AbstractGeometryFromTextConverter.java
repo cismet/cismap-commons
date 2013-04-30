@@ -12,17 +12,14 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 import de.cismet.cismap.commons.CrsTransformer;
 
 import de.cismet.commons.converter.ConversionException;
-import de.cismet.commons.converter.Converter.MatchRating;
 
 /**
  * Basic <code>TextToGeometryConverter</code> implementation that expects the given text to be separated by white space
@@ -38,7 +35,8 @@ import de.cismet.commons.converter.Converter.MatchRating;
  * @author   martin.scholl@cismet.de
  * @version  1.0
  */
-public abstract class AbstractGeometryFromTextConverter implements TextToGeometryConverter, MatchRating<String> {
+public abstract class AbstractGeometryFromTextConverter extends AbstractRatingConverter<String, Geometry>
+        implements TextToGeometryConverter {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -126,28 +124,5 @@ public abstract class AbstractGeometryFromTextConverter implements TextToGeometr
      */
     protected String getTokenRegex() {
         return "([\\s;:])+"; // NOI18N
-    }
-
-    @Override
-    public int rate(final String from) {
-        if (from == null) {
-            return 0;
-        }
-
-        final DecimalFormat df = (DecimalFormat)NumberFormat.getNumberInstance(Locale.getDefault());
-        final char decimalSep = df.getDecimalFormatSymbols().getDecimalSeparator();
-        final char groupingSep = df.getDecimalFormatSymbols().getGroupingSeparator();
-        final char minus = df.getDecimalFormatSymbols().getMinusSign();
-
-        final String allowedChars = "[\\d" + Pattern.quote(String.valueOf(decimalSep))                               // NOI18N
-                    + Pattern.quote(String.valueOf(groupingSep)) + Pattern.quote(String.valueOf(minus)) + "\\s;:]+"; // NOI18N
-
-        if (from.matches(allowedChars) && ((from.split(getTokenRegex()).length % 2) == 0)) {
-            // as this is only an abstract class, we only want to indicate in priciple we accept the string for
-            // further processing
-            return 1;
-        } else {
-            return 0;
-        }
     }
 }

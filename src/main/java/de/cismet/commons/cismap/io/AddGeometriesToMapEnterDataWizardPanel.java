@@ -422,7 +422,9 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
                     final MatchRating matchRating = (MatchRating)converter;
 
                     @SuppressWarnings("unchecked")
-                    final int converterRating = matchRating.rate(getCoordinateData());
+                    final int converterRating = matchRating.rate(
+                            getCoordinateData(),
+                            ((Crs)wizard.getProperty(AddGeometriesToMapWizardAction.PROP_CURRENT_CRS)).getCode());
                     if (converterRating > highScoreConverterRating) {
                         highScoreConverterRating = converterRating;
                         highScoreConverter = converter;

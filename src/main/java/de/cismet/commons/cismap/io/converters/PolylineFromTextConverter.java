@@ -77,8 +77,8 @@ public final class PolylineFromTextConverter extends AbstractGeometryFromTextCon
     }
 
     @Override
-    public int rate(final String from) {
-        final int superRating = super.rate(from);
+    public int rate(final String from, final String... params) {
+        final int superRating = super.rate(from, params);
         if (superRating == 0) {
             return 0;
         }

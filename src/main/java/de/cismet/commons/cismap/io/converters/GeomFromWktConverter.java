@@ -17,12 +17,9 @@ import com.vividsolutions.jts.io.WKTWriter;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
-import java.util.regex.Pattern;
-
 import de.cismet.cismap.commons.CrsTransformer;
 
 import de.cismet.commons.converter.ConversionException;
-import de.cismet.commons.converter.Converter.MatchRating;
 
 /**
  * Creates a geometry from (E)WKT. However, the conversion back from a geometry produces WKT only. If the input is EWKT
@@ -32,34 +29,8 @@ import de.cismet.commons.converter.Converter.MatchRating;
  * @version  1.0
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
-public final class GeomFromWktConverter implements TextToGeometryConverter, MatchRating<String> {
-
-    //~ Instance fields --------------------------------------------------------
-
-    private final transient Pattern ratePattern;
-
-    //~ Constructors -----------------------------------------------------------
-
-    /**
-     * Creates a new GeomFromWktConverter object.
-     */
-    public GeomFromWktConverter() {
-        ratePattern = Pattern.compile("(?i)"   // NOI18N case insensitive matching
-                        + "^(SRID=.*;)?"       // NOI18N
-                        + "("                  // NOI18N
-                        + "POINT|"             // NOI18N
-                        + "LINESTRING|"        // NOI18N
-                        + "LINEARRING|"        // NOI18N
-                        + "POLYGON|"           // NOI18N
-                        + "MULTIPOINT|"        // NOI18N
-                        + "MULTILINESTRING|"   // NOI18N
-                        + "MULTIPOLYGON|"      // NOI18N
-                        + "GEOMETRYCOLLECTION" // NOI18N
-                        + ")"                  // NOI18N
-                        + "\\("                // NOI18N opening '(' of the coordinate declaration
-                        + ".*"
-                        + "\\)$");             // NOI18N closing ')' of the coordinate declaration);
-    }
+public final class GeomFromWktConverter extends AbstractRatingConverter<String, Geometry>
+        implements TextToGeometryConverter {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -176,19 +147,6 @@ public final class GeomFromWktConverter implements TextToGeometryConverter, Matc
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(GeomFromWktConverter.class, "GeomFromWktConverter.getFormatExample().returnValue"); // NOI18N
-    }
-
-    @Override
-    public int rate(final String from) {
-        if (from == null) {
-            return 0;
-        }
-
-        if (ratePattern.matcher(from).matches()) {
-            return 100;
-        } else {
-            return 0;
-        }
     }
 
     //~ Inner Classes ----------------------------------------------------------
