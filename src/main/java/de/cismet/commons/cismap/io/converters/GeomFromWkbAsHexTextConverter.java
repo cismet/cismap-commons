@@ -14,6 +14,8 @@ import com.vividsolutions.jts.io.WKBWriter;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
+import java.util.regex.Pattern;
+
 import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter.MatchRating;
 
@@ -29,6 +31,7 @@ public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConver
     //~ Instance fields --------------------------------------------------------
 
     private final transient GeomFromWkbConverter wkbConverter;
+    private final transient Pattern ratePattern;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -37,6 +40,7 @@ public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConver
      */
     public GeomFromWkbAsHexTextConverter() {
         wkbConverter = new GeomFromWkbConverter();
+        ratePattern = Pattern.compile("[0123456789abcdef]+"); // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -118,7 +122,7 @@ public final class GeomFromWkbAsHexTextConverter implements TextToGeometryConver
         }
 
         // is hex text ?
-        if (from.matches("([0123456789abcdef])+")) { // NOI18N
+        if (ratePattern.matcher(from).matches()) { // NOI18N
             return 100;
         } else {
             return 0;

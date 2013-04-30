@@ -17,6 +17,8 @@ import com.vividsolutions.jts.io.WKTWriter;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
+import java.util.regex.Pattern;
+
 import de.cismet.cismap.commons.CrsTransformer;
 
 import de.cismet.commons.converter.ConversionException;
@@ -31,6 +33,33 @@ import de.cismet.commons.converter.Converter.MatchRating;
  */
 @ServiceProvider(service = TextToGeometryConverter.class)
 public final class GeomFromWktConverter implements TextToGeometryConverter, MatchRating<String> {
+
+    //~ Instance fields --------------------------------------------------------
+
+    private final transient Pattern ratePattern;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new GeomFromWktConverter object.
+     */
+    public GeomFromWktConverter() {
+        ratePattern = Pattern.compile("(?i)"   // NOI18N case insensitive matching
+                        + "^(SRID=.*;)?"       // NOI18N
+                        + "("                  // NOI18N
+                        + "POINT|"             // NOI18N
+                        + "LINESTRING|"        // NOI18N
+                        + "LINEARRING|"        // NOI18N
+                        + "POLYGON|"           // NOI18N
+                        + "MULTIPOINT|"        // NOI18N
+                        + "MULTILINESTRING|"   // NOI18N
+                        + "MULTIPOLYGON|"      // NOI18N
+                        + "GEOMETRYCOLLECTION" // NOI18N
+                        + ")"                  // NOI18N
+                        + "\\("                // NOI18N opening '(' of the coordinate declaration
+                        + ".*"
+                        + "\\)$");             // NOI18N closing ')' of the coordinate declaration);
+    }
 
     //~ Methods ----------------------------------------------------------------
 
@@ -155,24 +184,7 @@ public final class GeomFromWktConverter implements TextToGeometryConverter, Matc
             return 0;
         }
 
-        final String allowedGeomTypes = "(" // NOI18N
-                    + "POINT|"              // NOI18N
-                    + "LINESTRING|"         // NOI18N
-                    + "LINEARRING|"         // NOI18N
-                    + "POLYGON|"            // NOI18N
-                    + "MULTIPOINT|"         // NOI18N
-                    + "MULTILINESTRING|"    // NOI18N
-                    + "MULTIPOLYGON|"       // NOI18N
-                    + "GEOMETRYCOLLECTION"  // NOI18N
-                    + ")";                  // NOI18N
-        if (from.matches(
-                        "(?i)"              // NOI18N case insensitive matching
-                        + "^(SRID=.*;)?"    // NOI18N
-                        + allowedGeomTypes
-                        + "\\("             // NOI18N opening '(' of the coordinate declaration
-                        + "[\\d\\.\\-,\\s\\(\\)]+"
-                        + "\\)$")) {        // NOI18N closing ')' of the coordinate declaration
-
+        if (ratePattern.matcher(from).matches()) {
             return 100;
         } else {
             return 0;
