@@ -101,6 +101,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     private transient ConverterPreselectionMode converterPreselectionMode;
     private transient String previewGetMapUrl;
     private transient File inputFile;
+    private transient String inputData;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -188,19 +189,25 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
             preselectionMode = getConverterPreselectionMode();
         }
 
-        wizard.putProperty(AddGeometriesToMapPreviewWizardPanel.PROP_GEOMETRY, null);
         wizard.putProperty(AddGeometriesToMapChooseConverterWizardPanel.PROP_CONVERTER, selectedConverter);
         wizard.putProperty(PROP_PREVIEW_GETMAP_URL, getPreviewGetMapUrl());
         wizard.putProperty(PROP_AVAILABLE_CONVERTERS, new ArrayList<Converter>(availableConverters));
         wizard.putProperty(PROP_CURRENT_CRS, CismapBroker.getInstance().getSrs());
-        wizard.putProperty(PROP_CONVERTER_PRESELECT_MODE, getConverterPreselectionMode());
+        wizard.putProperty(PROP_CONVERTER_PRESELECT_MODE, preselectionMode);
         wizard.putProperty(PROP_INPUT_FILE, getInputFile());
+        wizard.putProperty(AddGeometriesToMapEnterDataWizardPanel.PROP_COORDINATE_DATA, getInputData());
 
+        final Frame parent = StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent());
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
-        dialog.setLocationRelativeTo(CismapBroker.getInstance().getMappingComponent());
+        dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
         dialog.toFront();
+
+        // after wizard execution the input file and data is cleared from the action so that it won't be reused
+        // NOTE: this can be changed so that the action may remember previous entries
+        setInputFile(null);
+        setInputData(null);
 
         if (wizard.getValue() == WizardDescriptor.FINISH_OPTION) {
             // remember the selected converter
@@ -213,7 +220,6 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
                 setSelectedConverter(null);
             }
 
-            final Frame parent = StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent());
             final WaitingDialogThread<Geometry> wdt = new WaitingDialogThread<Geometry>(
                     parent,
                     true,
@@ -419,20 +425,21 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     }
 
     /**
-     * DOCUMENT ME!
+     * Gets the current <code>ConverterPreselectionMode</code> that will be used in the wizard.
      *
-     * @return  DOCUMENT ME!
+     * @return  the current <code>ConverterPreselectionMode</code> that will be used in the wizard
      */
     public ConverterPreselectionMode getConverterPreselectionMode() {
         return converterPreselectionMode;
     }
 
     /**
-     * DOCUMENT ME!
+     * Sets the <code>ConverterPreselectionMode</code> that will be used in the wizard.
      *
-     * @param   converterPreselectionMode  DOCUMENT ME!
+     * @param   converterPreselectionMode  the <code>ConverterPreselectionMode</code> to use
      *
-     * @throws  IllegalArgumentException  DOCUMENT ME!
+     * @throws  IllegalArgumentException  if the given <code>ConverterPreselectionMode</code> is not supported by the
+     *                                    wizard (currently CONFIGURE, CONFIGURE_AND_MEMORY and PREMANENT_MEMORY)
      */
     public void setConverterPreselectionMode(final ConverterPreselectionMode converterPreselectionMode) {
         switch (converterPreselectionMode) {
@@ -449,65 +456,87 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     }
 
     /**
-     * DOCUMENT ME!
+     * Gets the default <code>ConverterPreselectionMode</code>, currently <i>SESSION_MEMORY</i>.
      *
-     * @return  DOCUMENT ME!
+     * @return  the default <code>ConverterPreselectionMode</code>, currently <i>SESSION_MEMORY</i>
      */
     public ConverterPreselectionMode getDefaultConverterPreselectionMode() {
         return ConverterPreselectionMode.SESSION_MEMORY;
     }
 
     /**
-     * DOCUMENT ME!
+     * Gets the current map preview url that will be used by the wizard as a background layer for the newly created
+     * geometry. The preview url shall be a string that can be used with {@link SimpleWmsGetMapUrl}.
      *
-     * @return  DOCUMENT ME!
+     * @return  the current map preview url
      */
     public String getPreviewGetMapUrl() {
         return previewGetMapUrl;
     }
 
     /**
-     * DOCUMENT ME!
+     * Sets the map preview url that will be used by the wizard as a background layer for the newly created geometry.
+     * The preview url shall be a string that can be used with {@link SimpleWmsGetMapUrl}.
      *
-     * @param  previewGetMapUrl  DOCUMENT ME!
+     * @param  previewGetMapUrl  the new map preview url
      */
     public void setPreviewGetMapUrl(final String previewGetMapUrl) {
         this.previewGetMapUrl = previewGetMapUrl;
     }
 
     /**
-     * DOCUMENT ME!
+     * Gets the currently selected converter that will be used for the next wizard invocation.
      *
-     * @return  DOCUMENT ME!
+     * @return  the currently selected converter that will for the next wizard invocation
      */
     public Converter getSelectedConverter() {
         return selectedConverter;
     }
 
     /**
-     * DOCUMENT ME!
+     * Sets the selected converter that will be used for the next wizard invocation.
      *
-     * @param  selectedConverter  DOCUMENT ME!
+     * @param  selectedConverter  the new selected converter
      */
     public void setSelectedConverter(final Converter selectedConverter) {
         this.selectedConverter = selectedConverter;
     }
 
     /**
-     * DOCUMENT ME!
+     * Gets the input file that will be used for the next wizard invocation.
      *
-     * @return  DOCUMENT ME!
+     * @return  the input file that will be used for the next wizard invocation
      */
     public File getInputFile() {
         return inputFile;
     }
 
     /**
-     * DOCUMENT ME!
+     * Sets input file that may be used for the next wizard invocation. After an invocation of the wizard the file is
+     * cleared again.
      *
-     * @param  inputFile  DOCUMENT ME!
+     * @param  inputFile  the input file to be used for the next wizard invocation
      */
     public void setInputFile(final File inputFile) {
         this.inputFile = inputFile;
+    }
+
+    /**
+     * Gets the input data that will be used for the next wizard invocation.
+     *
+     * @return  the input data that will be used for the next wizard invocation
+     */
+    public String getInputData() {
+        return inputData;
+    }
+
+    /**
+     * Sets input data that may be used for the next wizard invocation. After an invocation of the wizard the data is
+     * cleared again.
+     *
+     * @param  inputData  the input data to be used for the next wizard invocation
+     */
+    public void setInputData(final String inputData) {
+        this.inputData = inputData;
     }
 }
