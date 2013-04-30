@@ -255,6 +255,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
                             final Geometry geom = get();
                             final PureNewFeature feature = new PureNewFeature(geom);
                             feature.setGeometryType(getGeomType(geom));
+                            feature.setEditable(true);
 
                             final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
                             map.getFeatureCollection().addFeature(feature);
