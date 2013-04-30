@@ -1948,7 +1948,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     }
                 }
                 infoNode = p;
-                if (viewer != null) {
+                if ((viewer != null) && (infoNode != null)) {
                     infoNode.setVisible(viewer.isInfoNodesVisible());
                     if (viewer.isFeatureDebugging()) {
                         if (log.isDebugEnabled()) {
@@ -1959,7 +1959,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     p.setWidth(pswingComp.getWidth());
                     p.setHeight(pswingComp.getHeight());
                 } else {
-                    infoNode.setVisible(false);
+                    if (infoNode != null) {
+                        infoNode.setVisible(false);
+                    }
                 }
                 pswingComp.addPropertyChangeListener("fullBounds", new PropertyChangeListener() { // NOI18N
                         @Override
@@ -2197,12 +2199,16 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if (selected) {
                     wasSelected = true;
 //                    addInfoNode();
-                    pi.removeChild(infoNode);
-                    piSelected.addChild(infoNode);
+                    if (infoNode != null) {
+                        pi.removeChild(infoNode);
+                        piSelected.addChild(infoNode);
+                    }
                 } else if (wasSelected) {
                     wasSelected = false;
-                    piSelected.removeChild(infoNode);
-                    pi.addChild(infoNode);
+                    if (infoNode != null) {
+                        piSelected.removeChild(infoNode);
+                        pi.addChild(infoNode);
+                    }
                 }
             }
             viewer.rescaleStickyNodes();
