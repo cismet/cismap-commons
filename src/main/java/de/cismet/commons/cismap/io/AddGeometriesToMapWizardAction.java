@@ -26,10 +26,6 @@ import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.EventQueue;
 import java.awt.Frame;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 
 import java.io.File;
@@ -76,7 +72,7 @@ import de.cismet.tools.gui.WaitingDialogThread;
  * @author   martin.scholl@cismet.de
  * @version  1.0
  */
-public final class AddGeometriesToMapWizardAction extends AbstractAction implements DropTargetListener, Configurable {
+public final class AddGeometriesToMapWizardAction extends AbstractAction implements Configurable {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -333,32 +329,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
             wdt.start();
         }
     }
-
-    @Override
-    public void dragEnter(final DropTargetDragEvent dtde) {
-        // noop
-    }
-
-    @Override
-    public void dragOver(final DropTargetDragEvent dtde) {
-        // noop
-    }
-
-    @Override
-    public void dropActionChanged(final DropTargetDragEvent dtde) {
-        // noop
-    }
-
-    @Override
-    public void dragExit(final DropTargetEvent dte) {
-        // noop
-    }
-
-    @Override
-    public void drop(final DropTargetDropEvent dtde) {
-        // TODO
-    }
-
+    
     @Override
     public void configure(final Element parent) {
         doConfigure(parent);
