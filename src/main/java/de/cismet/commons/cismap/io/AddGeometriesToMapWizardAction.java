@@ -32,6 +32,7 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -99,6 +100,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
     private transient ConverterPreselectionMode converterPreselectionMode;
     private transient String previewGetMapUrl;
+    private transient File inputFile;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -192,6 +194,7 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         wizard.putProperty(PROP_AVAILABLE_CONVERTERS, new ArrayList<Converter>(availableConverters));
         wizard.putProperty(PROP_CURRENT_CRS, CismapBroker.getInstance().getSrs());
         wizard.putProperty(PROP_CONVERTER_PRESELECT_MODE, getConverterPreselectionMode());
+        wizard.putProperty(PROP_INPUT_FILE, getInputFile());
 
         final Dialog dialog = DialogDisplayer.getDefault().createDialog(wizard);
         dialog.pack();
@@ -488,5 +491,23 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
      */
     public void setSelectedConverter(final Converter selectedConverter) {
         this.selectedConverter = selectedConverter;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public File getInputFile() {
+        return inputFile;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  inputFile  DOCUMENT ME!
+     */
+    public void setInputFile(final File inputFile) {
+        this.inputFile = inputFile;
     }
 }
