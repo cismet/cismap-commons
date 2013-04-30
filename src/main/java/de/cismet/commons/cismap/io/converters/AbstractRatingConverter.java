@@ -11,10 +11,13 @@ import de.cismet.commons.converter.Converter;
 import de.cismet.commons.converter.Converter.MatchRating;
 
 /**
- * DOCUMENT ME!
+ * Abstract implementation of a match rating converter that uses the <code>convertForward</code> operation to determine
+ * if the entry is feasible or not. However, it can only provide a boolean rating, thus any successfully converted
+ * non-null result of <code>convertForward</code> will result in a score of 100. Any other case will result in a score
+ * of 0.
  *
  * @author   martin.scholl@cismet.de
- * @version  $Revision$, $Date$
+ * @version  1.0
  */
 public abstract class AbstractRatingConverter<FROM, TO> implements Converter<FROM, TO>, MatchRating<FROM> {
 
