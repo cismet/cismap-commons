@@ -332,20 +332,11 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
 
     @Override
     public void configure(final Element parent) {
-        doConfigure(parent);
+        // only properties that are directly changable by the user shall be configured here, currently there are non
     }
 
     @Override
     public void masterConfigure(final Element parent) {
-        doConfigure(parent);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  parent  DOCUMENT ME!
-     */
-    private void doConfigure(final Element parent) {
         if (parent == null) {
             // no configuration section present, simply leave
             return;
