@@ -71,26 +71,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
 
     //~ Instance fields --------------------------------------------------------
 
-    String mode;
-    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/map.png")); // NOI18N
-    MappingComponent mappingComponent;
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private GeoTransformer transformer = null;
-    private DecimalFormat df = new DecimalFormat("0.000");     // NOI18N
-    private int servicesCounter = 0;
-    private int servicesErroneousCounter = 0;
-    private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
-    private Collection<ServiceLayer> erroneousServices = new HashSet<ServiceLayer>();
-    private JPanel servicesBusyPanel = new ServicesBusyPanel();
-    private JPanel servicesRetrievedPanel = new ServicesRetrievedPanel();
-    private JPanel servicesErrorPanel = new ServicesErrorPanel();
-    private JPanel mapExtentFixedPanel = new MapExtentFixedPanel();
-    private JPanel mapExtentUnfixedPanel = new MapExtentUnfixedPanel();
-    private JPanel mapScaleFixedPanel = new MapScaleFixedPanel();
-    private JPanel mapScaleUnfixedPanel = new MapScaleUnfixedPanel();
-    // End of variables declaration//GEN-END:variables
-    private boolean developerMode = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.Box.Filler gluFiller;
     private javax.swing.JSeparator jSeparator1;
@@ -112,8 +92,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     private javax.swing.JSeparator sepMeasurement;
     private javax.swing.JSeparator sepScale;
     private de.cismet.cismap.commons.gui.statusbar.ServicesRetrievedPanel servicesRetrievedPanel1;
-
-    //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates new form StatusBar.
@@ -144,8 +122,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
 
         developerMode = StaticDebuggingTools.checkHomeForFile("cismetDeveloper");
     }
-
-    //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
@@ -596,6 +572,31 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         add(lblWgs84Coordinates, gridBagConstraints);
     }                                                          // </editor-fold>//GEN-END:initComponents
+
+    //~ Instance fields --------------------------------------------------------
+
+    String mode;
+    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource(
+                "/de/cismet/cismap/commons/gui/res/map.png")); // NOI18N
+    MappingComponent mappingComponent;
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private GeoTransformer transformer = null;
+    private DecimalFormat df = new DecimalFormat("0.000");     // NOI18N
+    private int servicesCounter = 0;
+    private int servicesErroneousCounter = 0;
+    private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
+    private Collection<ServiceLayer> erroneousServices = new HashSet<ServiceLayer>();
+    private JPanel servicesBusyPanel = new ServicesBusyPanel();
+    private JPanel servicesRetrievedPanel = new ServicesRetrievedPanel();
+    private JPanel servicesErrorPanel = new ServicesErrorPanel();
+    private JPanel mapExtentFixedPanel = new MapExtentFixedPanel();
+    private JPanel mapExtentUnfixedPanel = new MapExtentUnfixedPanel();
+    private JPanel mapScaleFixedPanel = new MapScaleFixedPanel();
+    private JPanel mapScaleUnfixedPanel = new MapScaleUnfixedPanel();
+    // End of variables declaration//GEN-END:variables
+    private boolean developerMode = false;
+
+    //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
