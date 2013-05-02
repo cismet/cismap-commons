@@ -54,6 +54,7 @@ import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 
+import de.cismet.tools.StaticDebuggingTools;
 import de.cismet.tools.StaticDecimalTools;
 
 import de.cismet.tools.gui.Static2DTools;
@@ -88,7 +89,8 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     private JPanel mapExtentUnfixedPanel = new MapExtentUnfixedPanel();
     private JPanel mapScaleFixedPanel = new MapScaleFixedPanel();
     private JPanel mapScaleUnfixedPanel = new MapScaleUnfixedPanel();
-
+    // End of variables declaration//GEN-END:variables
+    private boolean developerMode = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.Box.Filler gluFiller;
     private javax.swing.JSeparator jSeparator1;
@@ -110,7 +112,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     private javax.swing.JSeparator sepMeasurement;
     private javax.swing.JSeparator sepScale;
     private de.cismet.cismap.commons.gui.statusbar.ServicesRetrievedPanel servicesRetrievedPanel1;
-    // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
 
@@ -140,6 +141,8 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         } catch (Exception e) {
             log.error("cannot create a transformer for EPSG:4326.", e);
         }
+
+        developerMode = StaticDebuggingTools.checkHomeForFile("cismetDeveloper");
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -181,7 +184,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                     } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
                         lblStatus.setText(e.getValue().toString());
                     } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
-                        lblStatus.setText("");         // NOI18N
+                        lblStatus.setText("");                                                              // NOI18N
                     } else if (e.getName().equals(StatusEvent.OBJECT_INFOS)) {
                         if ((e.getValue() != null) && (e.getValue() instanceof PFeature)
                                     && (((PFeature)e.getValue()).getFeature() != null)
@@ -216,15 +219,19 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                                 lblStatus.setText(((DefaultFeatureServiceFeature)((PFeature)e.getValue()).getFeature())
                                             .getSecondaryAnnotation());
                             } else {
-                                lblStatus.setText(""); // NOI18N
+                                lblStatus.setText("");                                                      // NOI18N
                             }
                         } else {
-                            lblStatus.setText("");     // NOI18N
+                            lblStatus.setText("");                                                          // NOI18N
                             lblStatusImage.setIcon(defaultIcon);
                         }
                     } else if (e.getName().equals(StatusEvent.SCALE)) {
                         final int sd = (int)(mappingComponent.getScaleDenominator() + 0.5);
-                        lblScale.setText("1:" + sd);   // NOI18N
+                        if (developerMode) {
+                            lblScale.setText("OGC: " + mappingComponent.getCurrentOGCScale() + " 1:" + sd); // NOI18N
+                        } else {
+                            lblScale.setText("1:" + sd);                                                    // NOI18N
+                        }
                     } else if (e.getName().equals(StatusEvent.CRS)) {
                         lblCrs.setText(((Crs)e.getValue()).getShortname());
                         lblCoordinates.setToolTipText(((Crs)e.getValue()).getShortname());
