@@ -145,6 +145,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public static final String CUSTOM_FEATUREACTION = "CUSTOM_FEATUREACTION";               // NOI18N
     public static final String CUSTOM_FEATUREINFO = "CUSTOM_FEATUREINFO";                   // NOI18N
     public static final String OVERVIEW = "OVERVIEW";                                       // NOI18N
+    static final double OGC_DEGREE_TO_METERS = 6378137.0 * 2.0 * Math.PI / 360;
+
     private static MappingComponent THIS;
     /** Name of the internal Simple Layer Widget. */
     public static final String LAYERWIDGET = "SimpleInternalLayerWidget"; // NOI18N
@@ -3657,8 +3659,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public double getCurrentOGCScale() {
         // funktioniert nur bei metrischen SRS's
-        final double h = getCamera().getViewBounds().getHeight() / getHeight();
-        final double w = getCamera().getViewBounds().getWidth() / getWidth();
+
+        final double realWorldWidth = getCamera().getViewBounds().getWidth();
+        final double realWorldHeight = getCamera().getViewBounds().getHeight();
+
+        final double windowWidthInPixel = getWidth();
+        final double windowHeightInPixel = getHeight();
+
+        final double h = realWorldHeight / windowHeightInPixel;
+        final double w = realWorldWidth / windowWidthInPixel;
 
         return Math.sqrt((h * h) + (w * w));
     }
@@ -3690,20 +3699,27 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 final double y2 = y1 - bounds.height;
 
                 final Crs currentCrs = CismapBroker.getInstance().getSrs();
-                final boolean metric;
-                // FIXME: this is a hack to overcome the "metric" issue for 4326 default srs
-                if (CrsTransformer.getCurrentSrid() == 4326) {
-                    metric = false;
-                } else {
-                    metric = currentCrs.isMetric();
-                }
-
-                return new XBoundingBox(x1, y1, x2, y2, currentCrs.getCode(), metric);
+                return new XBoundingBox(x1, y1, x2, y2, currentCrs.getCode(), isInMetricSRS());
             } catch (final Exception e) {
                 LOG.error("cannot create bounding box from current view, return null", e); // NOI18N
 
                 return null;
             }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isInMetricSRS() {
+        final Crs currentCrs = CismapBroker.getInstance().getSrs();
+        // FIXME: this is a hack to overcome the "metric" issue for 4326 default srs
+        if (CrsTransformer.getCurrentSrid() == 4326) {
+            return false;
+        } else {
+            return currentCrs.isMetric();
         }
     }
 
