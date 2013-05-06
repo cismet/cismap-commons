@@ -75,23 +75,31 @@ public final class BoundingBoxFromTextConverter extends AbstractGeometryFromText
 
     @Override
     public String getFormatDescription() {
-        return NbBundle.getMessage(
-                BoundingBoxFromTextConverter.class,
+        final String desc = NbBundle.getMessage(
+                PointFromTextConverter.class,
                 "BoundingBoxFromTextConverter.getFormatDescription().returnValue"); // NOI18N
+        final String superDesc = super.getFormatDescription();
+
+        return desc + "\n" + superDesc;
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return NbBundle.getMessage(
-                BoundingBoxFromTextConverter.class,
-                "BoundingBoxFromTextConverter.getFormatHtmlDescription().returnValue"); // NOI18N
+        final String desc = NbBundle.getMessage(
+                    PointFromTextConverter.class,
+                    "BoundingBoxFromTextConverter.getFormatHtmlDescription().returnValue")
+                    .replaceAll("<[/]?html>", "");                                              // NOI18N
+        final String superDesc = super.getFormatHtmlDescription().replaceAll("<[/]?html>", ""); // NOI18N;
+
+        return "<html>" + desc + "<br/>" + superDesc + "</html>"; // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(
-                BoundingBoxFromTextConverter.class,
-                "BoundingBoxFromTextConverter.getFormatExample().returnValue"); // NOI18N
+                PointFromTextConverter.class,
+                "BoundingBoxFromTextConverter.getFormatExample().returnValue",
+                getDecimalSeparator()); // NOI18N
     }
 
     @Override

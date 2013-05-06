@@ -7,6 +7,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import de.cismet.commons.converter.ConversionException;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
 import org.junit.After;
@@ -135,6 +136,27 @@ public class AbstractGeometryFromTextConverterTest
         AbstractGeometryFromTextConverter conf = new AbstractGeometryFromTextConverterImpl();
         
         conf.convertForward("abcde fghij", "myEpsg");
+    }
+    
+    @Test
+    public void testGetDecimalSeparator() {
+        System.out.println("TEST " + getCurrentMethodName());
+        
+        AbstractGeometryFromTextConverter conf = new AbstractGeometryFromTextConverterImpl();
+        
+        final char defaultSep = ((DecimalFormat)NumberFormat.getInstance(Locale.getDefault())).getDecimalFormatSymbols().getDecimalSeparator();
+        
+        System.setProperty(AbstractGeometryFromTextConverter.SYS_PROP_DECIMAL_SEP, ".");
+        assertEquals('.', conf.getDecimalSeparator());
+        System.setProperty(AbstractGeometryFromTextConverter.SYS_PROP_DECIMAL_SEP, "0x20");
+        assertEquals(defaultSep, conf.getDecimalSeparator());
+        System.setProperty(AbstractGeometryFromTextConverter.SYS_PROP_DECIMAL_SEP, "0x3D");
+        assertEquals('=', conf.getDecimalSeparator());
+        System.setProperty(AbstractGeometryFromTextConverter.SYS_PROP_DECIMAL_SEP, "\\u0040");
+        assertEquals('@', conf.getDecimalSeparator());
+        
+        // reset sep
+        System.setProperty(AbstractGeometryFromTextConverter.SYS_PROP_DECIMAL_SEP, String.valueOf(defaultSep));
     }
 
     @Test
