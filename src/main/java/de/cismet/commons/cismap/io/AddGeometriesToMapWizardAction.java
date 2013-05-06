@@ -51,6 +51,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
 
+import de.cismet.commons.cismap.io.converters.AbstractGeometryFromTextConverter;
 import de.cismet.commons.cismap.io.converters.GeometryConverter;
 import de.cismet.commons.cismap.io.converters.TextToGeometryConverter;
 
@@ -82,9 +83,10 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     public static final String PROP_PREVIEW_GETMAP_URL = "__prop_preview_getmap_url__";             // NOI18N
     public static final String PROP_CONVERTER_PRESELECT_MODE = "__prop_converter_preselect_mode__"; // NOI18N
 
-    public static final String CONF_SECTION = "addGeometriesToMapWizardAction";   // NOI18N
-    public static final String CONF_CONV_PRESELECT = "converterPreselectionMode"; // NOI18N
-    public static final String CONF_PREVIEW_GETMAP_URL = "previewGetMapUrl";      // NOI18N
+    public static final String CONF_SECTION = "addGeometriesToMapWizardAction";                                    // NOI18N
+    public static final String CONF_CONV_PRESELECT = "converterPreselectionMode";                                  // NOI18N
+    public static final String CONF_PREVIEW_GETMAP_URL = "previewGetMapUrl";                                       // NOI18N
+    public static final String CONF_GEOM_FROM_TEXT_CONV_DECIMAL_SEP = "geometryFromTextConverterDecimalSeparator"; // NOI18N
 
     /** LOGGER. */
     private static final transient Logger LOG = Logger.getLogger(AddGeometriesToMapWizardAction.class);
@@ -370,6 +372,11 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         } else {
             setPreviewGetMapUrl(convPreviewGetMapUrlElement.getText().trim());
         }
+
+        final Element convDecimalSeparator = actionConfigElement.getChild(CONF_GEOM_FROM_TEXT_CONV_DECIMAL_SEP);
+        if (convDecimalSeparator != null) {
+            System.setProperty(AbstractGeometryFromTextConverter.SYS_PROP_DECIMAL_SEP, convDecimalSeparator.getText());
+        }
     }
 
     @Override
@@ -382,8 +389,12 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         final Element convPreviewGetMapUrlElement = new Element(CONF_PREVIEW_GETMAP_URL);
         convPreviewGetMapUrlElement.setText(getPreviewGetMapUrl());
 
+        final Element convDecimalSeparator = new Element(CONF_GEOM_FROM_TEXT_CONV_DECIMAL_SEP);
+        convDecimalSeparator.setText(System.getProperty(AbstractGeometryFromTextConverter.SYS_PROP_DECIMAL_SEP)); // NOI18N
+
         sectionElement.addContent(convPreselectModeElement);
         sectionElement.addContent(convPreviewGetMapUrlElement);
+        sectionElement.addContent(convDecimalSeparator);
 
         return sectionElement;
     }
