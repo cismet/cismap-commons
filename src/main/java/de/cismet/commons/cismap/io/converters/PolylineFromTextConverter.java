@@ -57,23 +57,31 @@ public final class PolylineFromTextConverter extends AbstractGeometryFromTextCon
 
     @Override
     public String getFormatDescription() {
-        return NbBundle.getMessage(
-                PolylineFromTextConverter.class,
+        final String desc = NbBundle.getMessage(
+                PointFromTextConverter.class,
                 "PolylineFromTextConverter.getFormatDescription().returnValue"); // NOI18N
+        final String superDesc = super.getFormatDescription();
+
+        return desc + "\n" + superDesc;
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return NbBundle.getMessage(
-                PolylineFromTextConverter.class,
-                "PolylineFromTextConverter.getFormatHtmlDescription().returnValue"); // NOI18N
+        final String desc = NbBundle.getMessage(
+                    PointFromTextConverter.class,
+                    "PolylineFromTextConverter.getFormatHtmlDescription().returnValue")
+                    .replaceAll("<[/]?html>", "");                                              // NOI18N
+        final String superDesc = super.getFormatHtmlDescription().replaceAll("<[/]?html>", ""); // NOI18N;
+
+        return "<html>" + desc + "<br/>" + superDesc + "</html>"; // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(
-                PolylineFromTextConverter.class,
-                "PolylineFromTextConverter.getFormatExample().returnValue"); // NOI18N
+                PointFromTextConverter.class,
+                "PolylineFromTextConverter.getFormatExample().returnValue",
+                getDecimalSeparator()); // NOI18N
     }
 
     @Override
