@@ -303,6 +303,7 @@ public class AddGeometriesToMapEnterDataVisualPanel extends javax.swing.JPanel {
      *
      * @version  $Revision$, $Date$
      */
+    // TODO: use property change listener for more fine grained control
     private final class ModelChangeListener implements ChangeListener {
 
         //~ Methods ------------------------------------------------------------
