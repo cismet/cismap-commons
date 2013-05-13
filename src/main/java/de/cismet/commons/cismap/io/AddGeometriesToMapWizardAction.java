@@ -37,6 +37,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
@@ -58,6 +59,7 @@ import de.cismet.commons.cismap.io.converters.TextToGeometryConverter;
 import de.cismet.commons.converter.ConversionException;
 import de.cismet.commons.converter.Converter;
 
+import de.cismet.commons.gui.wizard.WizardUtils;
 import de.cismet.commons.gui.wizard.converter.AbstractConverterChooseWizardPanel;
 import de.cismet.commons.gui.wizard.converter.ConverterPreselectionMode;
 
@@ -136,9 +138,19 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
         assert EventQueue.isDispatchThread() : "can only be called from EDT"; // NOI18N
 
         if (panels == null) {
+            final AddGeometriesToMapChooseConverterWizardPanel chooseConvPanel =
+                new AddGeometriesToMapChooseConverterWizardPanel();
+            try {
+                final ResourceBundle customBundle = ResourceBundle.getBundle(this.getClass().getPackage().getName()
+                                + ".ConverterPanelL10N");          // NOI18N
+                chooseConvPanel.setResourceBundle(customBundle);
+            } catch (final Exception e) {
+                LOG.warn("cannot set custom converter bundle", e); // NOI18N
+            }
+
             panels = new WizardDescriptor.Panel[] {
                     new AddGeometriesToMapEnterDataWizardPanel(),
-                    new AddGeometriesToMapChooseConverterWizardPanel(),
+                    chooseConvPanel,
                     new AddGeometriesToMapPreviewWizardPanel()
                 };
 
@@ -173,10 +185,16 @@ public final class AddGeometriesToMapWizardAction extends AbstractAction impleme
     @Override
     public void actionPerformed(final ActionEvent e) {
         final WizardDescriptor wizard = new WizardDescriptor(getPanels());
-        wizard.setTitleFormat(new MessageFormat("{0}"));                                      // NOI18N
+        wizard.setTitleFormat(new MessageFormat("{0}"));                                                  // NOI18N
         wizard.setTitle(NbBundle.getMessage(
                 AddGeometriesToMapWizardAction.class,
-                "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).wizard.title")); // NOI18N
+                "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).wizard.title"));             // NOI18N
+        WizardUtils.setCustomButtonText(
+            wizard,
+            WizardDescriptor.FINISH_OPTION,
+            NbBundle.getMessage(
+                AddGeometriesToMapWizardAction.class,
+                "AddGeometriesToMapWizardAction.actionPerformed(ActionEvent).wizard.finishButton.text")); // NOI18N
 
         final Collection<? extends TextToGeometryConverter> availableConverters = Lookup.getDefault()
                     .lookupAll(TextToGeometryConverter.class);
