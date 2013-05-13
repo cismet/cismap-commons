@@ -54,6 +54,7 @@ import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 
+import de.cismet.tools.StaticDebuggingTools;
 import de.cismet.tools.StaticDecimalTools;
 
 import de.cismet.tools.gui.Static2DTools;
@@ -69,25 +70,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     ActiveLayerListener {
 
     //~ Instance fields --------------------------------------------------------
-
-    String mode;
-    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/map.png")); // NOI18N
-    MappingComponent mappingComponent;
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private GeoTransformer transformer = null;
-    private DecimalFormat df = new DecimalFormat("0.000");     // NOI18N
-    private int servicesCounter = 0;
-    private int servicesErroneousCounter = 0;
-    private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
-    private Collection<ServiceLayer> erroneousServices = new HashSet<ServiceLayer>();
-    private JPanel servicesBusyPanel = new ServicesBusyPanel();
-    private JPanel servicesRetrievedPanel = new ServicesRetrievedPanel();
-    private JPanel servicesErrorPanel = new ServicesErrorPanel();
-    private JPanel mapExtentFixedPanel = new MapExtentFixedPanel();
-    private JPanel mapExtentUnfixedPanel = new MapExtentUnfixedPanel();
-    private JPanel mapScaleFixedPanel = new MapScaleFixedPanel();
-    private JPanel mapScaleUnfixedPanel = new MapScaleUnfixedPanel();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.Box.Filler gluFiller;
@@ -110,9 +92,6 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     private javax.swing.JSeparator sepMeasurement;
     private javax.swing.JSeparator sepScale;
     private de.cismet.cismap.commons.gui.statusbar.ServicesRetrievedPanel servicesRetrievedPanel1;
-    // End of variables declaration//GEN-END:variables
-
-    //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates new form StatusBar.
@@ -140,9 +119,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         } catch (Exception e) {
             log.error("cannot create a transformer for EPSG:4326.", e);
         }
-    }
 
-    //~ Methods ----------------------------------------------------------------
+        developerMode = StaticDebuggingTools.checkHomeForFile("cismetDeveloper");
+    }
 
     /**
      * DOCUMENT ME!
@@ -181,7 +160,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                     } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
                         lblStatus.setText(e.getValue().toString());
                     } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
-                        lblStatus.setText("");         // NOI18N
+                        lblStatus.setText("");                                                              // NOI18N
                     } else if (e.getName().equals(StatusEvent.OBJECT_INFOS)) {
                         if ((e.getValue() != null) && (e.getValue() instanceof PFeature)
                                     && (((PFeature)e.getValue()).getFeature() != null)
@@ -216,15 +195,19 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                                 lblStatus.setText(((DefaultFeatureServiceFeature)((PFeature)e.getValue()).getFeature())
                                             .getSecondaryAnnotation());
                             } else {
-                                lblStatus.setText(""); // NOI18N
+                                lblStatus.setText("");                                                      // NOI18N
                             }
                         } else {
-                            lblStatus.setText("");     // NOI18N
+                            lblStatus.setText("");                                                          // NOI18N
                             lblStatusImage.setIcon(defaultIcon);
                         }
                     } else if (e.getName().equals(StatusEvent.SCALE)) {
                         final int sd = (int)(mappingComponent.getScaleDenominator() + 0.5);
-                        lblScale.setText("1:" + sd);   // NOI18N
+                        if (developerMode) {
+                            lblScale.setText("OGC: " + mappingComponent.getCurrentOGCScale() + " 1:" + sd); // NOI18N
+                        } else {
+                            lblScale.setText("1:" + sd);                                                    // NOI18N
+                        }
                     } else if (e.getName().equals(StatusEvent.CRS)) {
                         lblCrs.setText(((Crs)e.getValue()).getShortname());
                         lblCoordinates.setToolTipText(((Crs)e.getValue()).getShortname());
@@ -589,6 +572,31 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         add(lblWgs84Coordinates, gridBagConstraints);
     }                                                          // </editor-fold>//GEN-END:initComponents
+
+    //~ Instance fields --------------------------------------------------------
+
+    String mode;
+    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource(
+                "/de/cismet/cismap/commons/gui/res/map.png")); // NOI18N
+    MappingComponent mappingComponent;
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private GeoTransformer transformer = null;
+    private DecimalFormat df = new DecimalFormat("0.000");     // NOI18N
+    private int servicesCounter = 0;
+    private int servicesErroneousCounter = 0;
+    private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
+    private Collection<ServiceLayer> erroneousServices = new HashSet<ServiceLayer>();
+    private JPanel servicesBusyPanel = new ServicesBusyPanel();
+    private JPanel servicesRetrievedPanel = new ServicesRetrievedPanel();
+    private JPanel servicesErrorPanel = new ServicesErrorPanel();
+    private JPanel mapExtentFixedPanel = new MapExtentFixedPanel();
+    private JPanel mapExtentUnfixedPanel = new MapExtentUnfixedPanel();
+    private JPanel mapScaleFixedPanel = new MapScaleFixedPanel();
+    private JPanel mapScaleUnfixedPanel = new MapScaleUnfixedPanel();
+    // End of variables declaration//GEN-END:variables
+    private boolean developerMode = false;
+
+    //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
