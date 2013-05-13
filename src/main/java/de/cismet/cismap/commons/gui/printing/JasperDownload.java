@@ -14,6 +14,8 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 
+import org.openide.util.Cancellable;
+
 import java.util.Map;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
@@ -24,7 +26,7 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
  * @author   jweintraut
  * @version  $Revision$, $Date$
  */
-public class JasperDownload extends AbstractDownload {
+public class JasperDownload extends AbstractDownload implements Cancellable {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -106,7 +108,13 @@ public class JasperDownload extends AbstractDownload {
 
         if (print != null) {
             try {
-                JasperExportManager.exportReportToPdfFile(print, fileToSaveTo.getPath());
+                if (!Thread.interrupted()) {
+                    JasperExportManager.exportReportToPdfFile(print, fileToSaveTo.getPath());
+                } else {
+                    log.info("Download was interuppted");
+                    deleteFile();
+                    return;
+                }
             } catch (JRException ex) {
                 error(ex);
             }
@@ -115,6 +123,25 @@ public class JasperDownload extends AbstractDownload {
         if (status == State.RUNNING) {
             status = State.COMPLETED;
             stateChanged();
+        }
+    }
+
+    @Override
+    public boolean cancel() {
+        final boolean cancelled = downloadFuture.cancel(true);
+        if (cancelled) {
+            status = State.ABORTED;
+            stateChanged();
+        }
+        return cancelled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void deleteFile() {
+        if (fileToSaveTo.exists() && fileToSaveTo.isFile()) {
+            fileToSaveTo.delete();
         }
     }
 }
