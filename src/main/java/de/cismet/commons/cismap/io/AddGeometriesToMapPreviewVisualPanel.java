@@ -223,6 +223,7 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
      *
      * @version  1.0
      */
+    // TODO: use property change listener for more fine grained control
     private final class ModelChangeListener implements ChangeListener {
 
         //~ Methods ------------------------------------------------------------

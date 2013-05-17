@@ -71,23 +71,31 @@ public final class PolygonFromTextConverter extends AbstractGeometryFromTextConv
 
     @Override
     public String getFormatDescription() {
-        return NbBundle.getMessage(
-                PolygonFromTextConverter.class,
+        final String desc = NbBundle.getMessage(
+                PointFromTextConverter.class,
                 "PolygonFromTextConverter.getFormatDescription().returnValue"); // NOI18N
+        final String superDesc = super.getFormatDescription();
+
+        return desc + "\n" + superDesc;
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return NbBundle.getMessage(
-                PolygonFromTextConverter.class,
-                "PolygonFromTextConverter.getFormatHtmlDescription().returnValue"); // NOI18N
+        final String desc = NbBundle.getMessage(
+                    PointFromTextConverter.class,
+                    "PolygonFromTextConverter.getFormatHtmlDescription().returnValue")
+                    .replaceAll("<[/]?html>", "");                                              // NOI18N
+        final String superDesc = super.getFormatHtmlDescription().replaceAll("<[/]?html>", ""); // NOI18N;
+
+        return "<html>" + desc + "<br/>" + superDesc + "</html>"; // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(
-                PolygonFromTextConverter.class,
-                "PolygonFromTextConverter.getFormatExample().returnValue"); // NOI18N
+                PointFromTextConverter.class,
+                "PolygonFromTextConverter.getFormatExample().returnValue",
+                getDecimalSeparator()); // NOI18N
     }
 
     /**

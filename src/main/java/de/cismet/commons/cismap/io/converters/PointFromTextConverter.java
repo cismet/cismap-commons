@@ -57,23 +57,31 @@ public final class PointFromTextConverter extends AbstractGeometryFromTextConver
 
     @Override
     public String getFormatDescription() {
-        return NbBundle.getMessage(
+        final String desc = NbBundle.getMessage(
                 PointFromTextConverter.class,
                 "PointFromTextConverter.getFormatDescription().returnValue"); // NOI18N
+        final String superDesc = super.getFormatDescription();
+
+        return desc + "\n" + superDesc;
     }
 
     @Override
     public String getFormatHtmlDescription() {
-        return NbBundle.getMessage(
-                PointFromTextConverter.class,
-                "PointFromTextConverter.getFormatHtmlDescription().returnValue"); // NOI18N
+        final String desc = NbBundle.getMessage(
+                    PointFromTextConverter.class,
+                    "PointFromTextConverter.getFormatHtmlDescription().returnValue")
+                    .replaceAll("<[/]?html>", "");                                              // NOI18N
+        final String superDesc = super.getFormatHtmlDescription().replaceAll("<[/]?html>", ""); // NOI18N;
+
+        return "<html>" + desc + "<br/>" + superDesc + "</html>"; // NOI18N
     }
 
     @Override
     public Object getFormatExample() {
         return NbBundle.getMessage(
                 PointFromTextConverter.class,
-                "PointFromTextConverter.getFormatExample().returnValue"); // NOI18N
+                "PointFromTextConverter.getFormatExample().returnValue",
+                getDecimalSeparator()); // NOI18N
     }
 
     /**
