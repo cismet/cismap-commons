@@ -12,6 +12,8 @@ import org.jdom.Element;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
+import org.jdom.Attribute;
+import org.jdom.DataConversionException;
 
 /**
  * DOCUMENT ME!
@@ -29,6 +31,7 @@ public class CapabilitiesPreferences {
 
     private TreeMap<Integer, CapabilityLink> capabilities = new TreeMap<Integer, CapabilityLink>();
     private CapabilitiesListTreeNode capabilitiesListTree;
+    private boolean searchActivated;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -49,6 +52,26 @@ public class CapabilitiesPreferences {
         final List caps = clientRoot.getChildren("capabilities");                          // NOI18N
         final Iterator<Element> it = caps.iterator();
         int counter = 0;
+        Attribute searchActive = serverRoot.getAttribute("searchPanelActivated");
+        
+        if (searchActive != null) {
+            try {
+                searchActivated = searchActive.getBooleanValue();
+            } catch (DataConversionException e) {
+                log.warn("Invalid value for attribute searchPanelActivated found", e);
+            }
+        }
+
+        searchActive = clientRoot.getAttribute("searchPanelActivated");
+        
+        if (searchActive != null) {
+            try {
+                searchActivated = searchActive.getBooleanValue();
+            } catch (DataConversionException e) {
+                log.warn("Invalid value for attribute searchPanelActivated found", e);
+            }
+        }
+        
         while (it.hasNext()) {
             try {
                 final Element elem = it.next();
@@ -139,5 +162,19 @@ public class CapabilitiesPreferences {
      */
     public CapabilitiesListTreeNode getCapabilitiesListTree() {
         return capabilitiesListTree;
+    }
+
+    /**
+     * @return the searchActivated
+     */
+    public boolean isSearchActivated() {
+        return searchActivated;
+    }
+
+    /**
+     * @param searchActivated the searchActivated to set
+     */
+    public void setSearchActivated(boolean searchActivated) {
+        this.searchActivated = searchActivated;
     }
 }
