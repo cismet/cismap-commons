@@ -9,7 +9,9 @@ package de.cismet.cismap.commons.featureservice;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
 
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
@@ -95,7 +97,11 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
     @Override
     public int getChildCount(final Object parent) {
         if (parent instanceof WFSCapabilities) {
-            return nodes.size();
+            if (filterString != null) {
+                return getFilteredNodes().size();
+            } else {
+                return nodes.size();
+            }
         } else {
             return (nodes.get(parent) != null) ? nodes.get(parent).size() : 0;
         }
@@ -155,10 +161,18 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
             return null;
         } else {
             if (parent instanceof WFSCapabilities) {
-                if (index < childs) {
-                    return nodes.keySet().toArray()[index];
+                int correctedIndex = index;
+
+                if (index >= childs) {
+                    correctedIndex = index - childs;
+                }
+
+                if (filterString != null) {
+                    final List<FeatureType> allValidNodes = getFilteredNodes();
+
+                    return allValidNodes.get(correctedIndex);
                 } else {
-                    return nodes.keySet().toArray()[index - childs];
+                    return nodes.keySet().toArray()[correctedIndex];
                 }
             } else {
                 if (index < childs) {
@@ -202,5 +216,45 @@ public class WFSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
      */
     public WFSCapabilities getCapabilities() {
         return capabilities;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private List<FeatureType> getFilteredNodes() {
+        final List<FeatureType> allValidNodes = new ArrayList<FeatureType>();
+
+        for (final FeatureType feature : nodes.keySet()) {
+            if (((feature.getTitle() != null)
+                            && (feature.getTitle().toLowerCase().indexOf(filterString.toLowerCase()) != -1))
+                        || ((feature.getName() != null)
+                            && (feature.getName().toString().toLowerCase().indexOf(filterString.toLowerCase()) != -1))
+                        || (containsFilterString(feature.getKeywords()))) {
+                allValidNodes.add(feature);
+            }
+        }
+
+        return allValidNodes;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   keywords  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean containsFilterString(final String[] keywords) {
+        if (keywords != null) {
+            for (final String tmp : keywords) {
+                if ((tmp != null) && (tmp.toLowerCase().indexOf(filterString.toLowerCase()) != -1)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

@@ -180,11 +180,19 @@ public class WMSCapabilitiesTreeModel extends AbstractCapabilitiesTreeModel {
      */
     @Override
     public Object getRoot() {
+        final Layer rootLayer;
+
         if (subparent != null) {
-            return getLayerByTitle(capabilities.getLayer(), subparent);
+            rootLayer = getLayerByTitle(capabilities.getLayer(), subparent);
         } else {
-            return capabilities.getLayer();
+            rootLayer = capabilities.getLayer();
         }
+
+        if (rootLayer != null) {
+            rootLayer.setFilterString(filterString);
+        }
+
+        return rootLayer;
     }
 
     /**

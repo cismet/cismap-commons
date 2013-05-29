@@ -538,11 +538,14 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             while (it.hasNext()) {
                 final Feature f = (Feature)it.next();
                 final PFeature p = new PFeature(f, wtst, clip_offset_x, clip_offset_y, MappingComponent.this);
-                if (p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
+                if (pfl.getPrintingRectangle().getBounds().isEmpty()
+                            || p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
                     list.add(p);
                 }
             }
-            pc.getCamera().animateViewToCenterBounds(pfl.getPrintingRectangle().getBounds(), true, 0);
+            if (!pfl.getPrintingRectangle().getBounds().isEmpty()) {
+                pc.getCamera().animateViewToCenterBounds(pfl.getPrintingRectangle().getBounds(), true, 0);
+            }
             final double scale = 1 / pc.getCamera().getViewScale();
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
@@ -641,7 +644,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         final Iterator it = featureLayer.getChildrenIterator();
         while (it.hasNext()) {
             final PNode p = (PNode)it.next();
-            if (p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
+            if (pfl.getPrintingRectangle().getBounds().isEmpty()
+                        || p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
                 list.add(p);
             }
         }
@@ -657,7 +661,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             if (layer.getVisible()) {
                 grpMembers = layer.getChildrenReference();
                 for (final PNode p : grpMembers) {
-                    if (p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
+                    if (pfl.getPrintingRectangle().getBounds().isEmpty()
+                                || p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
                         list.add(p);
                     }
                 }
@@ -669,11 +674,21 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 LOG.debug("intersecting feature count: " + list.size()); // NOI18N
             }
         }
-        pc.getCamera().animateViewToCenterBounds(pfl.getPrintingRectangle().getBounds(), true, 0);
+
+        if (!pfl.getPrintingRectangle().getBounds().isEmpty()) {
+            pc.getCamera().animateViewToCenterBounds(pfl.getPrintingRectangle().getBounds(), true, 0);
+        } else {
+            final double x1 = getWtst().getScreenX(getCurrentBoundingBox().getX1());
+            final double x2 = getWtst().getScreenX(getCurrentBoundingBox().getX2());
+            final double y1 = getWtst().getScreenY(getCurrentBoundingBox().getY1());
+            final double y2 = getWtst().getScreenY(getCurrentBoundingBox().getY2());
+            final PBounds bounds = new PBounds(x1, y2, x2 - x1, y1 - y2);
+            pc.getCamera().animateViewToCenterBounds(bounds, true, 0);
+        }
         final double scale = 1 / pc.getCamera().getViewScale();
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("subPCscale:" + scale);                        // NOI18N
+                LOG.debug("subPCscale:" + scale); // NOI18N
             }
         }
 
@@ -698,18 +713,24 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                             MappingComponent.this,
                                             true);
                                     pc.getLayer().addChild(copy);
+                                    
                                     for (final PNode tmp : (Collection<PNode>)copy.getAllNodes()) {
                                         tmp.setTransparency(1f);
                                     }
                                     copy.setStrokePaint(original.getStrokePaint());
 
-                                    copy.setStroke(
-                                        new CustomFixedWidthStroke(1));
+                                    Stroke stroke = original.getStroke();
+                                    if (stroke != null && (stroke instanceof CustomFixedWidthStroke)) {
+                                        copy.setStroke(stroke);
+                                    } else {
+                                        copy.setStroke(
+                                            new CustomFixedWidthStroke(1));
+                                    }
                                     copy.addInfoNode();
                                     copy.setInfoNodeExpanded(false);
 
                                     // Wenn mal irgendwas wegen Querformat kommt :
-                                    if (copy.getStickyChild() != null) {
+                                    if ((copy.getStickyChild() != null) && (getPrintingResolution() != 0.0)) {
                                         copy.getStickyChild().setScale(scale * getPrintingResolution());
                                     }
                                 } catch (final Exception t) {

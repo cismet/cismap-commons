@@ -23,6 +23,8 @@ public abstract class AbstractCapabilitiesTreeModel implements TreeModel {
 
     //~ Instance fields --------------------------------------------------------
 
+    protected String filterString;
+
     private String serviceName;
 
     //~ Methods ----------------------------------------------------------------
@@ -61,4 +63,22 @@ public abstract class AbstractCapabilitiesTreeModel implements TreeModel {
 //    public void setCapabilities(WFSCapabilities capabilities) {
 //        this.capabilities = capabilities;
 //    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the filterString
+     */
+    public String getFilterString() {
+        return filterString;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  filterString  the filterString to set
+     */
+    public void setFilterString(final String filterString) {
+        this.filterString = filterString;
+    }
 }

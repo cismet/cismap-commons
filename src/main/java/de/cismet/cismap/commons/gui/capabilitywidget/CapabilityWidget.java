@@ -79,6 +79,8 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
@@ -117,6 +119,7 @@ import de.cismet.tools.configuration.Configurable;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
+import org.jdom.Attribute;
 
 /**
  * DOCUMENT ME!
@@ -159,6 +162,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private CapabilityWidget thisWidget = null;
     private Element serverElement;
     private JPopupMenu treePopMenu = new JPopupMenu();
+    private String filterString = null;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdAddByUrl;
@@ -169,6 +173,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private javax.swing.JPanel jPanel1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JTabbedPane tbpCapabilities;
+    private javax.swing.JTextField txtSearch;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -204,9 +209,46 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 }
             });
         treePopMenu.add(pmenuItem);
+        txtSearch.getDocument().addDocumentListener(new DocumentListener() {
+
+                @Override
+                public void insertUpdate(final DocumentEvent e) {
+                    check(txtSearch.getText());
+                }
+
+                @Override
+                public void removeUpdate(final DocumentEvent e) {
+                    check(txtSearch.getText());
+                }
+
+                @Override
+                public void changedUpdate(final DocumentEvent e) {
+                    check(txtSearch.getText());
+                }
+
+                private void check(final String text) {
+                    filterString = text;
+                    addFilterToActiveTree();
+                }
+            });
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void addFilterToActiveTree() {
+        final JTree tree = getActiveTree();
+        if (tree != null) {
+            final Object model = tree.getModel();
+
+            if (model instanceof AbstractCapabilitiesTreeModel) {
+                ((AbstractCapabilitiesTreeModel)model).setFilterString(filterString);
+                tree.updateUI();
+            }
+        }
+    }
 
     /**
      * Erzeugt ein neues Tab in der TabbedPane und stoesst das parsen der Capabilities-XML an, die ueber den Link
@@ -452,6 +494,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         cmdAddByUrl = new javax.swing.JButton();
         cmdRemove = new javax.swing.JButton();
         cmdRefresh = new javax.swing.JButton();
+        txtSearch = new javax.swing.JTextField();
         tbpCapabilities = StaticSwingTools.jTabbedPaneWithVerticalTextCreator(
                 JTabbedPane.LEFT,
                 JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -541,6 +584,11 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             });
         jToolBar1.add(cmdRefresh);
 
+        txtSearch.setToolTipText(org.openide.util.NbBundle.getMessage(
+                CapabilityWidget.class,
+                "CapabilityWidget.txtSearch.tooltip")); // NOI18N
+        jToolBar1.add(txtSearch);
+
         jPanel1.add(jToolBar1, java.awt.BorderLayout.CENTER);
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
@@ -548,6 +596,13 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         tbpCapabilities.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
         tbpCapabilities.setTabLayoutPolicy(javax.swing.JTabbedPane.SCROLL_TAB_LAYOUT);
         tbpCapabilities.setPreferredSize(new java.awt.Dimension(180, 400));
+        tbpCapabilities.addChangeListener(new javax.swing.event.ChangeListener() {
+
+                @Override
+                public void stateChanged(final javax.swing.event.ChangeEvent evt) {
+                    tbpCapabilitiesStateChanged(evt);
+                }
+            });
         add(tbpCapabilities, java.awt.BorderLayout.CENTER);
     } // </editor-fold>//GEN-END:initComponents
     /**
@@ -555,30 +610,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
+    }//GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
+    }//GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
@@ -591,16 +646,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
+    }//GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
+    }//GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -655,7 +710,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -664,7 +719,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
+    }//GEN-LAST:event_cmdCollapseActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpCapabilitiesStateChanged
+        addFilterToActiveTree();
+    }//GEN-LAST:event_tbpCapabilitiesStateChanged
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
@@ -1466,6 +1530,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 ret.addContent(cl.getElement());
             }
         }
+        ret.setAttribute(new Attribute("searchPanelActivated", String.valueOf( isSearchEnabled() )));
         return ret;
     }
 
@@ -1524,6 +1589,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         for (final Component component : menu.getMenuComponents()) {
             capabilityList.add(component);
         }
+        
+        setSearchEnabled( cp.isSearchActivated() );
     }
     //J+
 
@@ -2248,5 +2315,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             final String t = link + subparent;
             return t.hashCode();
         }
+    }
+    
+    public void setSearchEnabled(boolean enabled) {
+        txtSearch.setVisible(enabled);
+        if (!enabled) {
+            txtSearch.setText("");
+        }
+    }
+
+    public boolean isSearchEnabled() {
+        return txtSearch.isVisible();
     }
 }
