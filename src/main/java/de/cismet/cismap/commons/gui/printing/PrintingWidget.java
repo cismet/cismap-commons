@@ -48,12 +48,16 @@ import javax.swing.text.StyledDocument;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Debug;
+import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
+import de.cismet.commons.concurrency.CismetConcurrency;
+import de.cismet.commons.concurrency.CismetExecutors;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -62,6 +66,8 @@ import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * DOCUMENT ME!
@@ -484,9 +490,9 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdBackActionPerformed
+    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBackActionPerformed
         dispose();
-    }                                                                           //GEN-LAST:event_cmdBackActionPerformed
+    }//GEN-LAST:event_cmdBackActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -542,37 +548,61 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
         services = new TreeMap<Integer, RetrievalService>();
         results = new TreeMap<Integer, Object>();
         erroneous = new TreeMap<Integer, Object>();
-        mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
+        
+        MappingModel model = mappingComponent.getMappingModel();
+        
+        if (model instanceof MappingModel) {
+            ActiveLayerModel alm = (ActiveLayerModel)model;
+            
+            if ( (alm.getMapServices().size() + alm.getRasterServices().size()) > 0) {
+                mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
+            } else {
+                ThreadFactory threadFactory =
+                    CismetConcurrency.getInstance("cismap-commons")                               // NOI18N
+                    .createThreadFactory("CreateImageFromFeatures-threadfactory"); // NOI18N
+                ExecutorService dispatcher = CismetExecutors.newSingleThreadExecutor(threadFactory);    
+                dispatcher.execute(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        createImageFromFeatures();
+                    }
+                });
+            }
+        } else {
+                mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
+        }
+
         prbLoading.setIndeterminate(true);
 
         super.pack();
     }
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void formComponentShown(final java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
+    }//GEN-LAST:event_formComponentShown
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formComponentShown(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentShown
-    }                                                                          //GEN-LAST:event_formComponentShown
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
         mappingComponent.setInteractionMode(interactionModeAfterPrinting);
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
         dispose();
-    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
+    }//GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
         final Runnable r = new Runnable() {
 
                 @Override
@@ -688,7 +718,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             };
         CismetThreadPool.execute(r);
         dispose();
-    } //GEN-LAST:event_cmdOkActionPerformed
+    }//GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -889,44 +919,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                 }
             }
 
-            // Add Existing Features as TopLevelLayer
-            if (mappingComponent.isFeatureCollectionVisible()) {
-                try {
-                    final Graphics2D g2d = (Graphics2D)map.getGraphics();
-                    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                            PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg3"),
-                        INFO); // NOI18N
-
-                    // Transparency
-                    float transparency = 0f;
-                    transparency = mappingComponent.getFeatureLayer().getTransparency();
-                    final Composite alphaComp = AlphaComposite.getInstance(
-                            AlphaComposite.SRC_OVER,
-                            transparency);
-                    g2d.setComposite(alphaComp);
-                    final Resolution r = mappingComponent.getPrintingSettingsDialog().getSelectedResolution();
-                    final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
-                    imageWidth = (int)((double)t.getMapWidth()
-                                    / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                                    * (double)r.getResolution());
-                    imageHeight = (int)((double)t.getMapHeight()
-                                    / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                                    * (double)r.getResolution());
-                    final Image image2add = mappingComponent.getFeatureImage(imageWidth, imageHeight);
-                    g2d.drawImage(image2add, 0, 0, null);
-                } catch (Throwable t) {
-                    log.error("Error while adding local features to the map", t); // NOI18N
-                }
-            } else {
-                final String localFeaturesNotAddedMessage = org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg9");
-                addMessageToProgressPane(localFeaturesNotAddedMessage, INFO);     // NOI18N
-                if (log.isDebugEnabled()) {
-                    log.debug(localFeaturesNotAddedMessage);
-                }
-            }
+            addFeaturesAsTopLevelLayer();
 
             if (erroneous.size() < results.size()) {
                 addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
@@ -948,9 +941,68 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                 }
             }
 
-            prbLoading.setIndeterminate(false);
-            prbLoading.setValue(100);
-            cmdOk.setEnabled(true);
+            activateButton();
+        }
+    }
+    
+    /**
+     * Creates an image of the features. This is required if the map does only contain features and no layer.
+     */
+    public void createImageFromFeatures() {
+        addFeaturesAsTopLevelLayer();
+        activateButton();
+    }
+        
+    /**
+     * set the progress bar to 100 percent and activates the ok button
+     */    
+    private void activateButton() {
+        prbLoading.setIndeterminate(false);
+        prbLoading.setValue(100);
+        cmdOk.setEnabled(true);    
+    }
+    
+    /**
+     * Adds the features to the map image.
+     */
+    private void addFeaturesAsTopLevelLayer() {
+        // Add Existing Features as TopLevelLayer
+        if (mappingComponent.isFeatureCollectionVisible()) {
+            try {
+                final Graphics2D g2d = (Graphics2D)map.getGraphics();
+                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
+                        PrintingWidget.class,
+                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg3"),
+                    INFO); // NOI18N
+
+                // Transparency
+                float transparency = 0f;
+                transparency = mappingComponent.getFeatureLayer().getTransparency();
+                final Composite alphaComp = AlphaComposite.getInstance(
+                        AlphaComposite.SRC_OVER,
+                        transparency);
+                g2d.setComposite(alphaComp);
+                final Resolution r = mappingComponent.getPrintingSettingsDialog().getSelectedResolution();
+                final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
+                imageWidth = (int)((double)t.getMapWidth()
+                                / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
+                                * (double)r.getResolution());
+                imageHeight = (int)((double)t.getMapHeight()
+                                / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
+                                * (double)r.getResolution());
+                final Image image2add = mappingComponent.getFeatureImage(imageWidth, imageHeight);
+                g2d.drawImage(image2add, 0, 0, null);
+            } catch (Throwable t) {
+                log.error("Error while adding local features to the map", t); // NOI18N
+            }
+        } else {
+            final String localFeaturesNotAddedMessage = org.openide.util.NbBundle.getMessage(
+                    PrintingWidget.class,
+                    "PrintingWidget.retrievalComplete(RetrievalEvent).msg9");
+            addMessageToProgressPane(localFeaturesNotAddedMessage, INFO);     // NOI18N
+            if (log.isDebugEnabled()) {
+                log.debug(localFeaturesNotAddedMessage);
+            }
         }
     }
 

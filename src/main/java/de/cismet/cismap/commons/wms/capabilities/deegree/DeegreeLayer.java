@@ -7,8 +7,10 @@
 ****************************************************/
 package de.cismet.cismap.commons.wms.capabilities.deegree;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
-import de.cismet.cismap.commons.wms.capabilities.Extent;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
 import de.cismet.cismap.commons.wms.capabilities.Style;
@@ -24,6 +26,7 @@ public class DeegreeLayer implements Layer {
     //~ Instance fields --------------------------------------------------------
 
     private org.deegree.ogcwebservices.wms.capabilities.Layer layer;
+    private String filterString;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -117,13 +120,60 @@ public class DeegreeLayer implements Layer {
             return null;
         }
         final org.deegree.ogcwebservices.wms.capabilities.Layer[] deegreeLayer = layer.getLayer();
-        final Layer[] result = new Layer[deegreeLayer.length];
+        final List<Layer> result = new ArrayList<Layer>();
 
         for (int i = 0; i < deegreeLayer.length; ++i) {
-            result[i] = new DeegreeLayer(deegreeLayer[i]);
+            if ((filterString == null) || fulfilFilterRequirements(deegreeLayer[i])) {
+                final Layer l = new DeegreeLayer(deegreeLayer[i]);
+                l.setFilterString(filterString);
+                result.add(l);
+            }
         }
 
-        return result;
+        return result.toArray(new Layer[result.size()]);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   l  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean fulfilFilterRequirements(final org.deegree.ogcwebservices.wms.capabilities.Layer l) {
+        if (((l.getTitle().toLowerCase().indexOf(filterString.toLowerCase()) != -1)
+                        || containsFilterString(l.getKeywordList()))
+                    && (l.getLayer().length == 0)) {
+            return true;
+        } else {
+            final org.deegree.ogcwebservices.wms.capabilities.Layer[] children = l.getLayer();
+            for (int i = 0; i < children.length; ++i) {
+                if (fulfilFilterRequirements(children[i])) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   keywords  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean containsFilterString(final String[] keywords) {
+        if (keywords != null) {
+            for (final String tmp : keywords) {
+                if ((tmp != null) && (tmp.toLowerCase().indexOf(filterString.toLowerCase()) != -1)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -148,5 +198,10 @@ public class DeegreeLayer implements Layer {
             return null;
         }
         return new DeegreeEnvelope(this.layer.getLatLonBoundingBox());
+    }
+
+    @Override
+    public void setFilterString(final String filterString) {
+        this.filterString = filterString;
     }
 }

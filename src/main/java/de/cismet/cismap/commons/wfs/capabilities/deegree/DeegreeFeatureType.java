@@ -100,9 +100,13 @@ public class DeegreeFeatureType implements FeatureType {
         final Keywords[] words = feature.getKeywords();
         final ArrayList<String> keywords = new ArrayList<String>();
 
-        for (final Keywords tmp : words) {
-            for (final String s : tmp.getKeywords()) {
-                keywords.add(s);
+        if (words != null) {
+            for (final Keywords tmp : words) {
+                if (tmp != null) {
+                    for (final String s : tmp.getKeywords()) {
+                        keywords.add(s);
+                    }
+                }
             }
         }
 
