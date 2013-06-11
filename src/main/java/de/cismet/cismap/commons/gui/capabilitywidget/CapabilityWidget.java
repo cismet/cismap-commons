@@ -17,6 +17,7 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
+import org.jdom.Attribute;
 import org.jdom.Element;
 
 import org.openide.util.NbBundle;
@@ -55,6 +56,8 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -119,9 +122,6 @@ import de.cismet.tools.configuration.Configurable;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
-import java.util.ArrayList;
-import java.util.Arrays;
-import org.jdom.Attribute;
 
 /**
  * DOCUMENT ME!
@@ -612,30 +612,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }//GEN-LAST:event_cmdAddFromListActionPerformed
+    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }//GEN-LAST:event_cmdRefreshActionPerformed
+    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
@@ -648,16 +648,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }//GEN-LAST:event_cmdAddByUrlActionPerformed
+    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }//GEN-LAST:event_cmdRemoveActionPerformed
+    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -712,7 +712,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -721,16 +721,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }//GEN-LAST:event_cmdCollapseActionPerformed
+    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpCapabilitiesStateChanged
+    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpCapabilitiesStateChanged
         addFilterToActiveTree();
-    }//GEN-LAST:event_tbpCapabilitiesStateChanged
+    }                                                                                   //GEN-LAST:event_tbpCapabilitiesStateChanged
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
@@ -1532,7 +1532,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 ret.addContent(cl.getElement());
             }
         }
-        ret.setAttribute(new Attribute("searchPanelActivated", String.valueOf( isSearchEnabled() )));
+        ret.setAttribute(new Attribute("searchPanelActivated", String.valueOf(isSearchEnabled())));
         return ret;
     }
 
@@ -1591,7 +1591,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         for (final Component component : menu.getMenuComponents()) {
             capabilityList.add(component);
         }
-        
+
         setSearchEnabled( cp.isSearchActivated() );
     }
     //J+
@@ -1908,6 +1908,27 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         return factory.toGeometry(envelope);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  enabled  DOCUMENT ME!
+     */
+    public void setSearchEnabled(final boolean enabled) {
+        txtSearch.setVisible(enabled);
+        if (!enabled) {
+            txtSearch.setText("");
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isSearchEnabled() {
+        return txtSearch.isVisible();
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -1965,8 +1986,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         //~ Instance fields ----------------------------------------------------
 
         DragSource dragSource = null;
-        TreePath[] cachedTreePaths; // DND Fehlverhalten Workaround
+        TreePath[] cachedTreePaths;             // DND Fehlverhalten Workaround
         private TreePath[] lastCachedTreePaths; // DND Fehlverhalten Workaround
+        private boolean autoSelection = false;
+        private boolean valueChanged = false;
         private WMSCapabilities wmsCapabilities;
         private WFSCapabilities wfsCapabilities;
 
@@ -1981,28 +2004,44 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 this,                             // component where drag originates
                 DnDConstants.ACTION_COPY_OR_MOVE, // actions
                 this);                            // drag gesture recognizer
+            addMouseListener(new MouseAdapter() {
 
-                getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
-                            //DND Fehlverhalten Workaround
-                            @Override
-                            public void valueChanged(TreeSelectionEvent e) {                
-                                java.util.List<TreePath> path = new ArrayList<TreePath>();;
+                    @Override
+                    public void mousePressed(final MouseEvent e) {
+                        if (!valueChanged) {
+                            lastCachedTreePaths = cachedTreePaths;
+                        }
+                        valueChanged = false;
+                    }
+                });
 
-                                if (cachedTreePaths != null) {
-                                    path.addAll( Arrays.asList(cachedTreePaths) );
-                                }
+            getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
 
-                                for (TreePath tmpPath : e.getPaths()) {
-                                    if (e.isAddedPath(tmpPath) ) {
-                                        path.add(tmpPath);
-                                    } else {
-                                        path.remove(tmpPath);
-                                    }
-                                }
-                                lastCachedTreePaths = cachedTreePaths;
-                                cachedTreePaths = path.toArray(new TreePath[path.size()]);
+                    // DND Fehlverhalten Workaround
+                    @Override
+                    public void valueChanged(final TreeSelectionEvent e) {
+                        if (autoSelection) {
+                            return;
+                        }
+                        final java.util.List<TreePath> path = new ArrayList<TreePath>();
+                        ;
+                        valueChanged = true;
+
+                        if (cachedTreePaths != null) {
+                            path.addAll(Arrays.asList(cachedTreePaths));
+                        }
+
+                        for (final TreePath tmpPath : e.getPaths()) {
+                            if (e.isAddedPath(tmpPath)) {
+                                path.add(tmpPath);
+                            } else {
+                                path.remove(tmpPath);
                             }
-                        });
+                        }
+                        lastCachedTreePaths = cachedTreePaths;
+                        cachedTreePaths = path.toArray(new TreePath[path.size()]);
+                    }
+                });
 
             getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
 
@@ -2040,19 +2079,22 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
             final TreePath selPath = getPathForLocation((int)e.getDragOrigin().getX(), (int)e.getDragOrigin().getY()); // DND Fehlverhalten Workaround
 
+            autoSelection = true;
             if ((e.getTriggerEvent().getModifiers()
-                            & (e.getTriggerEvent().CTRL_MASK)) != 0) {                                    // DND Fehlverhalten Workaround
-                getSelectionModel().setSelectionPaths(cachedTreePaths);                            // DND Fehlverhalten Workaround /
-                getSelectionModel().addSelectionPath(selPath);                                     // DND Fehlverhalten Workaround
-                cachedTreePaths = getSelectionModel().getSelectionPaths();                         // DND Fehlverhalten Workaround
+                            & (e.getTriggerEvent().CTRL_MASK)) != 0) {          // DND Fehlverhalten Workaround
+                getSelectionModel().setSelectionPaths(cachedTreePaths);         // DND Fehlverhalten Workaround /
+                getSelectionModel().addSelectionPath(selPath);                  // DND Fehlverhalten Workaround
+                cachedTreePaths = getSelectionModel().getSelectionPaths();      // DND Fehlverhalten Workaround
             } else if ((e.getTriggerEvent().getModifiers() & e.getTriggerEvent().SHIFT_MASK) != 0) {
-                getSelectionModel().addSelectionPaths(cachedTreePaths);                            // DND Fehlverhalten Workaround
-                cachedTreePaths = getSelectionModel().getSelectionPaths();                         // DND Fehlverhalten Workaround
+                getSelectionModel().addSelectionPaths(cachedTreePaths);         // DND Fehlverhalten Workaround
+                cachedTreePaths = getSelectionModel().getSelectionPaths();      // DND Fehlverhalten Workaround
             } else {
                 if (contains(lastCachedTreePaths, selPath)) {
-                    getSelectionModel().setSelectionPaths(lastCachedTreePaths);                    // DND Fehlverhalten Workaround
+                    getSelectionModel().setSelectionPaths(lastCachedTreePaths); // DND Fehlverhalten Workaround
+                    cachedTreePaths = lastCachedTreePaths;
                 }
-            }            
+            }
+            autoSelection = false;
 
             Transferable trans = null;
             if (this.getModel() instanceof WMSCapabilitiesTreeModel) {
@@ -2079,9 +2121,17 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
         }
-        
-        private boolean contains(TreePath[] list, TreePath path) {
-            for (TreePath tmpPath : list) {
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   list  DOCUMENT ME!
+         * @param   path  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private boolean contains(final TreePath[] list, final TreePath path) {
+            for (final TreePath tmpPath : list) {
                 if (tmpPath.equals(path)) {
                     return true;
                 }
@@ -2089,7 +2139,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
             return false;
         }
-    
+
         /**
          * unbenutzte DnD-Methoden.
          *
@@ -2344,16 +2394,5 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             final String t = link + subparent;
             return t.hashCode();
         }
-    }
-    
-    public void setSearchEnabled(boolean enabled) {
-        txtSearch.setVisible(enabled);
-        if (!enabled) {
-            txtSearch.setText("");
-        }
-    }
-
-    public boolean isSearchEnabled() {
-        return txtSearch.isVisible();
     }
 }
