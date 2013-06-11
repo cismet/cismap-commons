@@ -119,6 +119,8 @@ import de.cismet.tools.configuration.Configurable;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
+import java.util.ArrayList;
+import java.util.Arrays;
 import org.jdom.Attribute;
 
 /**
@@ -1964,6 +1966,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
         DragSource dragSource = null;
         TreePath[] cachedTreePaths; // DND Fehlverhalten Workaround
+        private TreePath[] lastCachedTreePaths; // DND Fehlverhalten Workaround
         private WMSCapabilities wmsCapabilities;
         private WFSCapabilities wfsCapabilities;
 
@@ -1979,14 +1982,27 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 DnDConstants.ACTION_COPY_OR_MOVE, // actions
                 this);                            // drag gesture recognizer
 
-            addMouseListener(new MouseAdapter() { // DND Fehlverhalten Workaround
+                getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+                            //DND Fehlverhalten Workaround
+                            @Override
+                            public void valueChanged(TreeSelectionEvent e) {                
+                                java.util.List<TreePath> path = new ArrayList<TreePath>();;
 
-                    @Override
-                    public void mouseReleased(final MouseEvent e) { // DND Fehlverhalten Workaround
+                                if (cachedTreePaths != null) {
+                                    path.addAll( Arrays.asList(cachedTreePaths) );
+                                }
 
-                        cachedTreePaths = getSelectionModel().getSelectionPaths(); // DND Fehlverhalten Workaround
-                    }
-                });
+                                for (TreePath tmpPath : e.getPaths()) {
+                                    if (e.isAddedPath(tmpPath) ) {
+                                        path.add(tmpPath);
+                                    } else {
+                                        path.remove(tmpPath);
+                                    }
+                                }
+                                lastCachedTreePaths = cachedTreePaths;
+                                cachedTreePaths = path.toArray(new TreePath[path.size()]);
+                            }
+                        });
 
             getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
 
@@ -2024,16 +2040,19 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
             final TreePath selPath = getPathForLocation((int)e.getDragOrigin().getX(), (int)e.getDragOrigin().getY()); // DND Fehlverhalten Workaround
 
-            if ((e.getTriggerEvent().getModifiers() & (InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK)) != 0) { // DND Fehlverhalten Workaround
-
-                getSelectionModel().setSelectionPaths(cachedTreePaths); // DND Fehlverhalten Workaround /
-
-                getSelectionModel().addSelectionPath(selPath); // DND Fehlverhalten Workaround
-
-                cachedTreePaths = getSelectionModel().getSelectionPaths(); // DND Fehlverhalten Workaround
+            if ((e.getTriggerEvent().getModifiers()
+                            & (e.getTriggerEvent().CTRL_MASK)) != 0) {                                    // DND Fehlverhalten Workaround
+                getSelectionModel().setSelectionPaths(cachedTreePaths);                            // DND Fehlverhalten Workaround /
+                getSelectionModel().addSelectionPath(selPath);                                     // DND Fehlverhalten Workaround
+                cachedTreePaths = getSelectionModel().getSelectionPaths();                         // DND Fehlverhalten Workaround
+            } else if ((e.getTriggerEvent().getModifiers() & e.getTriggerEvent().SHIFT_MASK) != 0) {
+                getSelectionModel().addSelectionPaths(cachedTreePaths);                            // DND Fehlverhalten Workaround
+                cachedTreePaths = getSelectionModel().getSelectionPaths();                         // DND Fehlverhalten Workaround
             } else {
-                getSelectionModel().setSelectionPath(selPath);             // DND Fehlverhalten Workaround
-            }
+                if (contains(lastCachedTreePaths, selPath)) {
+                    getSelectionModel().setSelectionPaths(lastCachedTreePaths);                    // DND Fehlverhalten Workaround
+                }
+            }            
 
             Transferable trans = null;
             if (this.getModel() instanceof WMSCapabilitiesTreeModel) {
@@ -2060,7 +2079,17 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
         }
+        
+        private boolean contains(TreePath[] list, TreePath path) {
+            for (TreePath tmpPath : list) {
+                if (tmpPath.equals(path)) {
+                    return true;
+                }
+            }
 
+            return false;
+        }
+    
         /**
          * unbenutzte DnD-Methoden.
          *
