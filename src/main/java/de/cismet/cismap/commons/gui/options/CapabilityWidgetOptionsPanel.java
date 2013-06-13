@@ -35,14 +35,13 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
     private static final String OPTION_NAME = NbBundle.getMessage(
             CapabilityWidgetOptionsPanel.class,
             "CapabilityWidgetOptionsPanel.OPTION_NAME");
+    private static CapabilityWidget capabilityWidget;
 
     //~ Instance fields --------------------------------------------------------
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
-
     private boolean searchActive;
-    private static CapabilityWidget capabilityWidget;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
@@ -68,8 +67,8 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
 
     @Override
     public void update() {
-        CapabilityWidget widget = getCapabilityWidget();
-        
+        final CapabilityWidget widget = getCapabilityWidget();
+
         if (widget != null) {
             searchActive = widget.isSearchEnabled();
             jcSearch.setSelected(searchActive);
@@ -78,8 +77,8 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
 
     @Override
     public void applyChanges() {
-        CapabilityWidget widget = getCapabilityWidget();
-        
+        final CapabilityWidget widget = getCapabilityWidget();
+
         if (widget != null) {
             searchActive = jcSearch.isSelected();
             widget.setSearchEnabled(searchActive);
@@ -88,17 +87,17 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
 
     @Override
     public boolean isChanged() {
-        boolean active = jcSearch.isSelected();
+        final boolean active = jcSearch.isSelected();
 
         return searchActive != active;
     }
 
     @Override
     public String getTooltip() {
-        return org.openide.util.NbBundle.getMessage(CapabilityWidgetOptionsPanel.class,
+        return org.openide.util.NbBundle.getMessage(
+                CapabilityWidgetOptionsPanel.class,
                 "CapabilityWidgetOptionsPanel.tooltip"); // NOI18N
     }
-
 
     @Override
     public void configure(final Element parent) {
@@ -110,11 +109,21 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
 
         return conf;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     private CapabilityWidget getCapabilityWidget() {
         return capabilityWidget;
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  globalCapabilityWidget  DOCUMENT ME!
+     */
     public static void setCapabilityWidget(final CapabilityWidget globalCapabilityWidget) {
         capabilityWidget = globalCapabilityWidget;
     }
@@ -126,33 +135,29 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-
         jLabel1 = new javax.swing.JLabel();
         jcSearch = new javax.swing.JCheckBox();
 
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(CapabilityWidgetOptionsPanel.class, "CapabilityWidgetOptionsPanel.jLabel1.text")); // NOI18N
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(
+                CapabilityWidgetOptionsPanel.class,
+                "CapabilityWidgetOptionsPanel.jLabel1.text")); // NOI18N
 
-        jcSearch.setText(org.openide.util.NbBundle.getMessage(CapabilityWidgetOptionsPanel.class, "CapabilityWidgetOptionsPanel.jcSearch.text")); // NOI18N
+        jcSearch.setText(org.openide.util.NbBundle.getMessage(
+                CapabilityWidgetOptionsPanel.class,
+                "CapabilityWidgetOptionsPanel.jcSearch.text")); // NOI18N
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        final javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jcSearch))
-                .addContainerGap(152, Short.MAX_VALUE))
-        );
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                layout.createSequentialGroup().addContainerGap().addGroup(
+                    layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addComponent(jLabel1)
+                                .addComponent(jcSearch)).addContainerGap(152, Short.MAX_VALUE)));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jcSearch)
-                .addContainerGap(39, Short.MAX_VALUE))
-        );
-    }// </editor-fold>//GEN-END:initComponents
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGroup(
+                layout.createSequentialGroup().addContainerGap().addComponent(jLabel1).addPreferredGap(
+                    javax.swing.LayoutStyle.ComponentPlacement.RELATED).addComponent(jcSearch).addContainerGap(
+                    39,
+                    Short.MAX_VALUE)));
+    } // </editor-fold>//GEN-END:initComponents
 }

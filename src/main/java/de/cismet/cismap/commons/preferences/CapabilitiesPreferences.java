@@ -7,13 +7,13 @@
 ****************************************************/
 package de.cismet.cismap.commons.preferences;
 
+import org.jdom.Attribute;
+import org.jdom.DataConversionException;
 import org.jdom.Element;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
-import org.jdom.Attribute;
-import org.jdom.DataConversionException;
 
 /**
  * DOCUMENT ME!
@@ -53,7 +53,7 @@ public class CapabilitiesPreferences {
         final Iterator<Element> it = caps.iterator();
         int counter = 0;
         Attribute searchActive = serverRoot.getAttribute("searchPanelActivated");
-        
+
         if (searchActive != null) {
             try {
                 searchActivated = searchActive.getBooleanValue();
@@ -63,7 +63,7 @@ public class CapabilitiesPreferences {
         }
 
         searchActive = clientRoot.getAttribute("searchPanelActivated");
-        
+
         if (searchActive != null) {
             try {
                 searchActivated = searchActive.getBooleanValue();
@@ -71,21 +71,21 @@ public class CapabilitiesPreferences {
                 log.warn("Invalid value for attribute searchPanelActivated found", e);
             }
         }
-        
+
         while (it.hasNext()) {
             try {
                 final Element elem = it.next();
-                final String type = elem.getAttribute("type").getValue();                  // NOI18N
+                final String type = elem.getAttribute("type").getValue();      // NOI18N
                 final String link = elem.getTextTrim();
-                final String subparent = elem.getAttributeValue("subparent");              // NOI18N
+                final String subparent = elem.getAttributeValue("subparent");  // NOI18N
                 boolean active = false;
                 try {
                     active = elem.getAttribute("active").getBooleanValue();
                 } catch (Exception unhandled) {
-                }                                                                          // NOI18N
+                }                                                              // NOI18N
                 capabilities.put(new Integer(counter++), new CapabilityLink(type, link, active, subparent));
             } catch (Throwable t) {
-                log.warn("Error while reading the CapabilityPreferences.", t);             // NOI18N
+                log.warn("Error while reading the CapabilityPreferences.", t); // NOI18N
             }
         }
 
@@ -165,16 +165,20 @@ public class CapabilitiesPreferences {
     }
 
     /**
-     * @return the searchActivated
+     * DOCUMENT ME!
+     *
+     * @return  the searchActivated
      */
     public boolean isSearchActivated() {
         return searchActivated;
     }
 
     /**
-     * @param searchActivated the searchActivated to set
+     * DOCUMENT ME!
+     *
+     * @param  searchActivated  the searchActivated to set
      */
-    public void setSearchActivated(boolean searchActivated) {
+    public void setSearchActivated(final boolean searchActivated) {
         this.searchActivated = searchActivated;
     }
 }
