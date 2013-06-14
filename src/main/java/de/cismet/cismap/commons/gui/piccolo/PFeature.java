@@ -297,7 +297,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
                 synchronized (this) {
                     if (rdfImage != null) {
-                        removeChild(rdfImage);
+                        if (indexOfChild(rdfImage) != -1) {
+                            // Remove the rdfImage only, if it is really contained in this object. Otherwise, the PNode
+                            // (this object) will throw a NullPointerException (if the children object of the PNode is
+                            // null) or an IndexOutOfBoundsException (if the children object of the PNode is not null,
+                            // but the object to delete does not exist)
+                            removeChild(rdfImage);
+                        }
                     }
                     rdfImage = pImage;
                 }
@@ -844,7 +850,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void refreshDesign() {
         if (primaryAnnotation != null) {
-            removeChild(primaryAnnotation);
+            if (indexOfChild(primaryAnnotation) != -1) {
+                // Remove the primaryAnnotation only, if it is really contained in this object.
+                // Otherwise, the PNode (this object) will throw a NullPointerException (if the children
+                // object of the PNode is null) or an IndexOutOfBoundsException (if the children object of the PNode
+                // is not null, but the object to delete does not exist)
+                removeChild(primaryAnnotation);
+            }
             viewer.removeStickyNode(primaryAnnotation);
         }
         if (viewer.isFeatureDebugging()) {
@@ -1835,9 +1847,21 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public void refreshInfoNode() {
         if ((stickyChild == infoNode) && (infoNode != null)) {
             stickyChild = null;
-            removeChild(infoNode);
+            if (indexOfChild(infoNode) != -1) {
+                // Remove the infoNode only, if it is really contained in the object.
+                // Otherwise, the PNode (this object) will throw a NullPointerException (if the children
+                // object of the PNode is null) or an IndexOutOfBoundsException (if the children object of the PNode
+                // is not null, but the object to delete does not exist)
+                removeChild(infoNode);
+            }
         } else if ((stickyChild != null) && (infoNode != null)) {
-            stickyChild.removeChild(infoNode);
+            if (stickyChild.indexOfChild(infoNode) != -1) {
+                // Remove the infoNode only, if it is really contained in the stickyChild object.
+                // Otherwise, the PNode (stickyChild) will throw a NullPointerException (if the children
+                // object of the PNode is null) or an IndexOutOfBoundsException (if the children object of the PNode
+                // is not null, but the object to delete does not exist)
+                stickyChild.removeChild(infoNode);
+            }
         }
         addInfoNode();
     }
@@ -2200,20 +2224,25 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     wasSelected = true;
 //                    addInfoNode();
                     if (infoNode != null) {
-                        try {
+                        if (pi.indexOfChild(infoNode) != -1) {
+                            // Remove the infoNode only, if the infoNode is really contained in the pi object.
+                            // Otherwise, the PNode (piSelection) will throw a NullPointerException (if the PNode
+                            // has no children) or an IndexOutOfBoundsException (if the children object of the PNode
+                            // is not null, but the object to delete does not exist)
                             pi.removeChild(infoNode);
-                        } catch (NullPointerException e) {
-                            if (log.isDebugEnabled()) {
-                                // This happens when you move a LinearReferencedLineFeature on the map
-                                log.debug("removeChild throws a NullPointerException", e);
-                            }
                         }
                         piSelected.addChild(infoNode);
                     }
                 } else if (wasSelected) {
                     wasSelected = false;
                     if (infoNode != null) {
-                        piSelected.removeChild(infoNode);
+                        if (piSelected.indexOfChild(infoNode) != -1) {
+                            // Remove the infoNode only, if the infoNode is really contained in the piSelected object.
+                            // Otherwise, the PNode (piSelection) will throw a NullPointerException (if the PNode
+                            // has no children) or an IndexOutOfBoundsException (if the children object of the PNode
+                            // is not null, but the object to delete does not exist)
+                            piSelected.removeChild(infoNode);
+                        }
                         pi.addChild(infoNode);
                     }
                 }
