@@ -2131,6 +2131,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
          * @return  DOCUMENT ME!
          */
         private boolean contains(final TreePath[] list, final TreePath path) {
+            if (list == null) {
+                return false;
+            }
+
             for (final TreePath tmpPath : list) {
                 if (tmpPath.equals(path)) {
                     return true;
