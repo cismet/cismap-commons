@@ -2939,6 +2939,22 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  DOCUMENT ME!
      */
+    public boolean hasHole() {
+        final int polygons = entityRingCoordArr.length;
+        for (int i = 0; i < polygons; i++) {
+            final int rings = entityRingCoordArr[i].length;
+            if (rings > 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public PNode getSecondStickyChild() {
         return secondStickyChild;
     }
