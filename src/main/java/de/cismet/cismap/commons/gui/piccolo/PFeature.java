@@ -2200,7 +2200,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     wasSelected = true;
 //                    addInfoNode();
                     if (infoNode != null) {
-                        pi.removeChild(infoNode);
+                        try {
+                            pi.removeChild(infoNode);
+                        } catch (NullPointerException e) {
+                            if (log.isDebugEnabled()) {
+                                // This happens when you move a LinearReferencedLineFeature on the map
+                                log.debug("removeChild throws a NullPointerException", e);
+                            }
+                        }
                         piSelected.addChild(infoNode);
                     }
                 } else if (wasSelected) {

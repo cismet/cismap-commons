@@ -713,14 +713,14 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                             MappingComponent.this,
                                             true);
                                     pc.getLayer().addChild(copy);
-                                    
+
                                     for (final PNode tmp : (Collection<PNode>)copy.getAllNodes()) {
                                         tmp.setTransparency(1f);
                                     }
                                     copy.setStrokePaint(original.getStrokePaint());
 
-                                    Stroke stroke = original.getStroke();
-                                    if (stroke != null && (stroke instanceof CustomFixedWidthStroke)) {
+                                    final Stroke stroke = original.getStroke();
+                                    if ((stroke != null) && (stroke instanceof CustomFixedWidthStroke)) {
                                         copy.setStroke(stroke);
                                     } else {
                                         copy.setStroke(
