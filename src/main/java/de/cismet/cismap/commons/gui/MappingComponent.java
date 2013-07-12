@@ -17,6 +17,7 @@ import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.event.PInputEventListener;
 import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.util.PAffineTransform;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPaintContext;
 
@@ -56,6 +57,8 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -167,6 +170,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
     //~ Instance fields --------------------------------------------------------
 
+    public ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
     private boolean featureServiceLayerVisible = true;
     private final List<LayerControl> layerControls = new ArrayList<LayerControl>();
     private boolean gridEnabled = true;
@@ -252,6 +257,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     private ButtonGroup interactionButtonGroup;
     private boolean mainMappingComponent = false;
+    private volatile boolean rescaleStickyNodesEnabled = true;
+    private volatile int retrievalCompleteInProgressCount = 0;
+
     /**
      * Creates new PFeatures for all features in the given array and adds them to the PFeatureHashmap. Then adds the
      * PFeature to the featurelayer.
@@ -423,12 +431,22 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         this.getCamera().addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener() {
 
+                private double lastScale = -1;
+
                 @Override
                 public void propertyChange(final PropertyChangeEvent evt) {
+                    final PAffineTransform transform = ((PAffineTransform)evt.getNewValue());
                     checkAndFixErroneousTransformation();
                     handleLayer.removeAllChildren();
                     showHandleDelay.restart();
-                    rescaleStickyNodes();
+
+                    if ((transform == null) || (lastScale != transform.getScale())) {
+                        rescaleStickyNodes();
+                    }
+
+                    if (transform != null) {
+                        lastScale = transform.getScale();
+                    }
                     CismapBroker.getInstance()
                             .fireStatusValueChanged(new StatusEvent(StatusEvent.SCALE, interactionMode));
                 }
@@ -804,6 +822,33 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * Calls private method rescaleStickyNodeWork(node) to rescale the sticky PNode. Forces the execution to the EDT.
+     *
+     * @param  nodes  n PNode to rescale
+     */
+    public void rescaleStickyNodes(final List<PNode> nodes) {
+        if ((nodes != null) && !nodes.isEmpty()) {
+            if (!EventQueue.isDispatchThread()) {
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            final List<PNode> nodesCopy = new ArrayList<PNode>(nodes);
+                            for (final PNode node : nodesCopy) {
+                                rescaleStickyNodeWork(node);
+                            }
+                        }
+                    });
+            } else {
+                final List<PNode> nodesCopy = new ArrayList<PNode>(nodes);
+                for (final PNode node : nodesCopy) {
+                    rescaleStickyNodeWork(node);
+                }
+            }
+        }
+    }
+
+    /**
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -835,15 +880,20 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * Rescales all nodes inside the StickyNode-vector.
      */
     public void rescaleStickyNodes() {
-        final List<PNode> stickyNodeCopy = new ArrayList<PNode>(getStickyNodes());
-        for (final PNode each : stickyNodeCopy) {
-            if ((each instanceof PSticky) && each.getVisible()) {
-                rescaleStickyNode(each);
-            } else {
-                if ((each instanceof PSticky) && (each.getParent() == null)) {
-                    removeStickyNode(each);
+        if (rescaleStickyNodesEnabled) {
+            final List<PNode> stickyNodeList = new ArrayList<PNode>();
+            final List<PNode> stickyNodeCopy = new ArrayList<PNode>(getStickyNodes());
+            for (final PNode each : stickyNodeCopy) {
+                if ((each instanceof PSticky) && each.getVisible()) {
+                    stickyNodeList.add(each);
+                } else {
+                    if ((each instanceof PSticky) && (each.getParent() == null)) {
+                        removeStickyNode(each);
+                    }
                 }
             }
+
+            rescaleStickyNodes(stickyPNodes);
         }
     }
 
@@ -1770,18 +1820,23 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * Refreshs all registered services.
      */
     public void queryServices() {
-        if (newViewBounds != null) {
-            addToHistory(new PBoundsWithCleverToString(
-                    new PBounds(newViewBounds),
-                    wtst,
-                    mappingModel.getSrs().getCode()));
-            queryServicesWithoutHistory();
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("queryServices()"); // NOI18N
+        lock.writeLock().lock();
+        try {
+            if (newViewBounds != null) {
+                addToHistory(new PBoundsWithCleverToString(
+                        new PBounds(newViewBounds),
+                        wtst,
+                        mappingModel.getSrs().getCode()));
+                queryServicesWithoutHistory();
+                if (DEBUG) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("queryServices()"); // NOI18N
+                    }
                 }
+                rescaleStickyNodes();
             }
-            rescaleStickyNodes();
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
@@ -5041,6 +5096,24 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     */
+    private synchronized void increaseRetrievalCompleteInProgressCount() {
+        retrievalCompleteInProgressCount++;
+        rescaleStickyNodesEnabled = false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private synchronized void decreaseRetrievalCompleteInProgressCount() {
+        retrievalCompleteInProgressCount--;
+        if (retrievalCompleteInProgressCount == 0) {
+            rescaleStickyNodesEnabled = true;
+        }
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -5400,7 +5473,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         private long requestIdentifier;
         private Thread completionThread;
         private final List deletionCandidates;
-        private final List twins;
 
         //~ Constructors -------------------------------------------------------
 
@@ -5414,7 +5486,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             this.featureService = featureService;
             this.parent = parent;
             this.deletionCandidates = new ArrayList();
-            this.twins = new ArrayList();
         }
 
         //~ Methods ------------------------------------------------------------
@@ -5518,7 +5589,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 return;
             }
 
-            final List newFeatures = new ArrayList();
+            int initialCapacity = parent.getChildrenReference().size();
+
+            if (initialCapacity < 100) {
+                initialCapacity = 100;
+            }
+
+            final List newFeatures = new ArrayList(initialCapacity);
             EventQueue.invokeLater(new Runnable() {
 
                     @Override
@@ -5529,7 +5606,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 });
             // clear all old data to delete twins
             deletionCandidates.clear();
-            twins.clear();
 
             // if it's a refresh, add all old features which should be deleted in the
             // newly acquired featurecollection
@@ -5550,10 +5626,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         @Override
                         public void run() {
                             // this is the collection with the retrieved features
+                            increaseRetrievalCompleteInProgressCount();
                             final List features = new ArrayList((Collection)e.getRetrievedObject());
                             final int size = features.size();
                             int counter = 0;
                             final Iterator it = features.iterator();
+
                             if (DEBUG) {
                                 if (log.isDebugEnabled()) {
                                     log.debug(featureService + "[" + e.getRequestIdentifier() + " ("
@@ -5561,51 +5639,34 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 }
                             }
 
+                            // Neue Suche
+                            final Feature[] deletionCandidatesFeature = new Feature[deletionCandidates.size()];
+                            final Map<Feature, PFeature> featureMap = new HashMap<Feature, PFeature>(
+                                    deletionCandidates.size()
+                                            * (101 / 75));
+                            for (int i = 0; i < deletionCandidates.size(); ++i) {
+                                final PFeature pf = (PFeature)deletionCandidates.get(i);
+                                deletionCandidatesFeature[i] = pf.getFeature();
+                                featureMap.put(pf.getFeature(), pf);
+                            }
+
+                            final PFeatureComparable comp = new PFeatureComparable();
+                            Arrays.sort(deletionCandidatesFeature, comp);
                             while ((requestIdentifier == e.getRequestIdentifier()) && !isInterrupted()
                                         && it.hasNext()) {
                                 counter++;
                                 final Object o = it.next();
                                 if (o instanceof Feature) {
-                                    final PFeature p = new PFeature(((Feature)o),
-                                            wtst,
-                                            clip_offset_x,
-                                            clip_offset_y,
-                                            MappingComponent.this);
-                                    PFeature twin = null;
-                                    for (final Object tester : deletionCandidates) {
-                                        // if tester and PFeature are FeatureWithId-objects
-                                        if ((((PFeature)tester).getFeature() instanceof FeatureWithId)
-                                                    && (p.getFeature() instanceof FeatureWithId)) {
-                                            final int id1 = ((FeatureWithId)((PFeature)tester).getFeature()).getId();
-                                            final int id2 = ((FeatureWithId)(p.getFeature())).getId();
-                                            if ((id1 != -1) && (id2 != -1)) { // check if they've got the same id
-                                                if (id1 == id2) {
-                                                    twin = ((PFeature)tester);
-                                                    break;
-                                                }
-                                            } else {                          // else test the geometry for equality
-                                                if (((PFeature)tester).getFeature().getGeometry().equals(
-                                                                p.getFeature().getGeometry())) {
-                                                    twin = ((PFeature)tester);
-                                                    break;
-                                                }
-                                            }
-                                        } else {                              // no FeatureWithId, test geometries for
-                                            // equality
-                                            if (((PFeature)tester).getFeature().getGeometry().equals(
-                                                            p.getFeature().getGeometry())) {
-                                                twin = ((PFeature)tester);
-                                                break;
-                                            }
-                                        }
-                                    }
+                                    final int index = Arrays.binarySearch(deletionCandidatesFeature, (Feature)o, comp);
 
-                                    // if a twin is found remove him from the deletion candidates
-                                    // and add him to the twins
-                                    if (twin != null) {
-                                        deletionCandidates.remove(twin);
-                                        twins.add(twin);
+                                    if (index >= 0) {
+                                        deletionCandidates.remove(featureMap.get(deletionCandidatesFeature[index]));
                                     } else { // else add the PFeature to the new features
+                                        final PFeature p = new PFeature((Feature)o,
+                                                wtst,
+                                                clip_offset_x,
+                                                clip_offset_y,
+                                                MappingComponent.this);
                                         newFeatures.add(p);
                                     }
 
@@ -5613,13 +5674,16 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     // fire event only wheen needed
                                     final int currentProgress = (int)((double)counter / (double)size * 100d);
 
-                                    if ((currentProgress >= 10) && ((currentProgress % 10) == 0)) {
+                                    if ((((RetrievalServiceLayer)featureService).getProgress() != currentProgress)
+                                                && (currentProgress >= 10)
+                                                && ((currentProgress % 10) == 0)) {
                                         ((RetrievalServiceLayer)featureService).setProgress(currentProgress);
                                         fireActivityChanged();
                                     }
                                 }
                             }
 
+                            decreaseRetrievalCompleteInProgressCount();
                             if ((requestIdentifier == e.getRequestIdentifier()) && !isInterrupted()) {
                                 // after all features are computed do stuff on the EDT
                                 EventQueue.invokeLater(new Runnable() {
@@ -5643,7 +5707,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                 if (e.isRefreshExisting()) {
                                                     parent.removeAllChildren();
                                                 }
-                                                final List deleteFeatures = new ArrayList();
                                                 for (final Object o : newFeatures) {
                                                     parent.addChild((PNode)o);
                                                 }
@@ -5674,7 +5737,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                         if (p != null) {
                                                             removeStickyNode(p);
                                                         }
-                                                        deleteFeatures.add(o);
+                                                        ((PFeature)o).releaseResources();
                                                     }
                                                 }
                                                 if (DEBUG) {
@@ -5698,11 +5761,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                                     + " ("
                                                                     + requestIdentifier
                                                                     + ")]: deleteFeatures="
-                                                                    + deleteFeatures.size());     // + " :" +
+                                                                    + deletionCandidates.size()); // + " :" +
                                                         // deleteFeatures);//NOI18N
                                                     }
                                                 }
-                                                parent.removeChildren(deleteFeatures);
+                                                parent.removeChildren(deletionCandidates);
+                                                deletionCandidates.clear();
 
                                                 if (DEBUG) {
                                                     if (log.isDebugEnabled()) {
