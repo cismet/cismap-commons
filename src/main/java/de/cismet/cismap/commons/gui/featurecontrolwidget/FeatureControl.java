@@ -685,8 +685,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         if (featureCollectionFilter.isArmed()) {
             ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
         }
-        final JXTable t = new JXTable();
-        t.getSortedColumn();
+//        final JXTable t = new JXTable();
+//        t.getSortedColumn();
     }
 
 //    private void refreshTableAndTryToKeepTheFuckingSelection() {

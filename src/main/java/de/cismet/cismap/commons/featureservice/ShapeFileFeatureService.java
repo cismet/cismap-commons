@@ -100,7 +100,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
             final long documentSize,
             final List<FeatureServiceAttribute> attributes) throws Exception {
         super(name, documentURI, documentSize, attributes);
-        this.maxFeatureCount = 5000;
+        this.maxFeatureCount = 15000000;
     }
 
     /**
