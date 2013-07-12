@@ -914,6 +914,28 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
         return tm;
     }
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public java.util.TreeMap<Integer, Object> getMapServicesAndCollections() {
+        final Iterator it = layers.iterator();
+        final TreeMap<Integer, Object> tm = new TreeMap();
+        int counter = 0;
+        while (it.hasNext()) {
+            final Object o = it.next();
+            if (o instanceof MapService) {
+                tm.put(new Integer(counter++), (MapService)o);
+            } else if (o instanceof LayerCollection) {
+                tm.put(new Integer(counter++), (LayerCollection)o);
+            } else {
+                log.warn("service is not of type MapService: " + o); // NOI18N
+            }
+        }
+        return tm;
+    }    
 
     public List<MapService> getMapServicesFromLayerCollection(LayerCollection col) {
         List<MapService> resultList = new ArrayList<MapService>();
@@ -1174,7 +1196,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     public Element getConfiguration() throws NoWriteError {
         final Element conf = new Element("cismapActiveLayerConfiguration"); // NOI18N
         // Zuerst alle RasterLayer
-        final Iterator<Integer> it = getMapServices().keySet().iterator();
+        final Iterator<Integer> it = getMapServicesAndCollections().keySet().iterator();
         final Element allLayerConf = new Element("Layers"); // Sollte irgendwann zu "Layers" umgewandelt werden
         // (TODO)//NOI18N
 
