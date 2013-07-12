@@ -102,6 +102,11 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 //        initialBoundingBox=new BoundingBox(2569442.79,5668858.33,2593744.91,5688416.22);
     }
 
+    public synchronized void addEmptyLayerCollection(final LayerCollection layer) {
+        layers.add(layer);
+    }
+    
+    
     /**
      * Fuegt dem Layer-Vektor einen neuen RetrievalServiceLayer hinzu.
      *
@@ -559,6 +564,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         if (parent == super.getRoot()) {
             return layers.size();
         }
+       
         if (parent instanceof WMSServiceLayer) {
             final WMSServiceLayer wmsServiceLayer = (WMSServiceLayer)parent;
             if (wmsServiceLayer.getWMSLayers().size() > 1) {
@@ -566,11 +572,64 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             } else {
                 return 0;
             }
+        } else if (parent instanceof LayerCollection) {
+            return ((LayerCollection)parent).size();
         } else {
             return 0;
         }
     }
-
+    
+    
+//    public int getChildCount(final Object parent, boolean layerCollectionsSupported) {
+//        if (parent == super.getRoot()) {
+//            if (layerCollectionsSupported) {
+//                return layers.size();
+//            } else {
+//                int count = 0;
+//                
+//                for (Object o : layers) {
+//                    if (o instanceof LayerCollection) {
+//                        count += getLayerCount((LayerCollection)o);
+//                    } else {
+//                        ++count;
+//                    }
+//                }
+//            }
+//        }
+//        
+//        if (parent instanceof WMSServiceLayer) {
+//            final WMSServiceLayer wmsServiceLayer = (WMSServiceLayer)parent;
+//            if (wmsServiceLayer.getWMSLayers().size() > 1) {
+//                return wmsServiceLayer.getWMSLayers().size();
+//            } else {
+//                return 0;
+//            }
+//        } else if (parent instanceof LayerCollection) {
+//            if (layerCollectionsSupported) {
+//                return ((LayerCollection)parent).size();
+//            } else {
+//                return getLayerCount((LayerCollection)parent);
+//            }
+//        } else {
+//            return 0;
+//        }
+//    }
+//
+//    private int getLayerCount(LayerCollection l) {
+//        int count = 0;
+//        
+//        for (Object o : l) {
+//            if (o instanceof LayerCollection) {
+//                count += getLayerCount((LayerCollection)o);
+//            } else {
+//                ++count;
+//            }
+//        }
+//        
+//        return count;
+//    }
+//    
+    
     /**
      * Returns the value to be displayed for node <code>node</code>, at column number <code>column</code>.
      *
@@ -651,9 +710,47 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         } else if (parent instanceof WMSServiceLayer) {
             return ((WMSServiceLayer)parent).getWMSLayers()
                         .get(((WMSServiceLayer)parent).getWMSLayers().size() - 1 - index);
+        } else if (parent instanceof LayerCollection) {
+            return ((LayerCollection)parent).get(((LayerCollection)parent).size() - 1 - index);
         } else {
             return null;
         }
+    }
+    
+    
+//    public Object getChild(final Object parent, final int index, boolean supportLayerCollection) {
+//        // Hier wird die Reihenfolge festgelegt
+//        if (parent == root) {
+//            return layers.get(layers.size() - 1 - index);
+//        } else if (parent instanceof WMSServiceLayer) {
+//            return ((WMSServiceLayer)parent).getWMSLayers()
+//                        .get(((WMSServiceLayer)parent).getWMSLayers().size() - 1 - index);
+//        } else if (parent instanceof LayerCollection) {
+//            return ((LayerCollection)parent).get(((LayerCollection)parent).size() - 1 - index);
+//        } else {
+//            return null;
+//        }
+//    }
+    
+    private int getLayerCollectionCount(Object parent) {
+        int count = 0;
+        Collection col;
+        
+        if (parent == root) {
+            col = layers;
+        } else if (parent instanceof LayerCollection) {
+            col = (LayerCollection)parent;
+        } else {
+            return 0;
+        }
+        
+        for (Object o : col) {
+            if (!(o instanceof LayerCollection)) {
+                ++count;
+            }
+        }
+        
+        return count;
     }
 
     /**
@@ -807,6 +904,10 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             final Object o = it.next();
             if (o instanceof MapService) {
                 tm.put(new Integer(counter++), (MapService)o);
+            } else if (o instanceof LayerCollection) {
+                for (MapService ms : getMapServicesFromLayerCollection((LayerCollection)o)) {
+                    tm.put(new Integer(counter++), ms);
+                }
             } else {
                 log.warn("service is not of type MapService: " + o); // NOI18N
             }
@@ -814,6 +915,21 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         return tm;
     }
 
+    public List<MapService> getMapServicesFromLayerCollection(LayerCollection col) {
+        List<MapService> resultList = new ArrayList<MapService>();
+        
+        for (Object o : col) {
+            if (o instanceof MapService) {
+                resultList.add((MapService)o);
+            } else if (o instanceof LayerCollection) {
+                resultList.addAll( getMapServicesFromLayerCollection((LayerCollection)o) );
+            }
+        }
+        
+        return resultList;
+    }    
+    
+    
     /**
      * DOCUMENT ME!
      *
