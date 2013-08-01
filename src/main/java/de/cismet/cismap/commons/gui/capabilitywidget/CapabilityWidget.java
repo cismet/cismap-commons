@@ -56,6 +56,8 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -1984,7 +1986,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         //~ Instance fields ----------------------------------------------------
 
         DragSource dragSource = null;
-        TreePath[] cachedTreePaths; // DND Fehlverhalten Workaround
+        TreePath[] cachedTreePaths;             // DND Fehlverhalten Workaround
+        private TreePath[] lastCachedTreePaths; // DND Fehlverhalten Workaround
+        private boolean autoSelection = false;
+        private boolean valueChanged = false;
         private WMSCapabilities wmsCapabilities;
         private WFSCapabilities wfsCapabilities;
 
@@ -1999,13 +2004,42 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 this,                             // component where drag originates
                 DnDConstants.ACTION_COPY_OR_MOVE, // actions
                 this);                            // drag gesture recognizer
-
-            addMouseListener(new MouseAdapter() { // DND Fehlverhalten Workaround
+            addMouseListener(new MouseAdapter() {
 
                     @Override
-                    public void mouseReleased(final MouseEvent e) { // DND Fehlverhalten Workaround
+                    public void mousePressed(final MouseEvent e) {
+                        if (!valueChanged) {
+                            lastCachedTreePaths = cachedTreePaths;
+                        }
+                        valueChanged = false;
+                    }
+                });
 
-                        cachedTreePaths = getSelectionModel().getSelectionPaths(); // DND Fehlverhalten Workaround
+            getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+
+                    // DND Fehlverhalten Workaround
+                    @Override
+                    public void valueChanged(final TreeSelectionEvent e) {
+                        if (autoSelection) {
+                            return;
+                        }
+                        final java.util.List<TreePath> path = new ArrayList<TreePath>();
+                        ;
+                        valueChanged = true;
+
+                        if (cachedTreePaths != null) {
+                            path.addAll(Arrays.asList(cachedTreePaths));
+                        }
+
+                        for (final TreePath tmpPath : e.getPaths()) {
+                            if (e.isAddedPath(tmpPath)) {
+                                path.add(tmpPath);
+                            } else {
+                                path.remove(tmpPath);
+                            }
+                        }
+                        lastCachedTreePaths = cachedTreePaths;
+                        cachedTreePaths = path.toArray(new TreePath[path.size()]);
                     }
                 });
 
@@ -2045,16 +2079,22 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
             final TreePath selPath = getPathForLocation((int)e.getDragOrigin().getX(), (int)e.getDragOrigin().getY()); // DND Fehlverhalten Workaround
 
-            if ((e.getTriggerEvent().getModifiers() & (InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK)) != 0) { // DND Fehlverhalten Workaround
-
-                getSelectionModel().setSelectionPaths(cachedTreePaths); // DND Fehlverhalten Workaround /
-
-                getSelectionModel().addSelectionPath(selPath); // DND Fehlverhalten Workaround
-
-                cachedTreePaths = getSelectionModel().getSelectionPaths(); // DND Fehlverhalten Workaround
+            autoSelection = true;
+            if ((e.getTriggerEvent().getModifiers()
+                            & (e.getTriggerEvent().CTRL_MASK)) != 0) {          // DND Fehlverhalten Workaround
+                getSelectionModel().setSelectionPaths(cachedTreePaths);         // DND Fehlverhalten Workaround /
+                getSelectionModel().addSelectionPath(selPath);                  // DND Fehlverhalten Workaround
+                cachedTreePaths = getSelectionModel().getSelectionPaths();      // DND Fehlverhalten Workaround
+            } else if ((e.getTriggerEvent().getModifiers() & e.getTriggerEvent().SHIFT_MASK) != 0) {
+                getSelectionModel().addSelectionPaths(cachedTreePaths);         // DND Fehlverhalten Workaround
+                cachedTreePaths = getSelectionModel().getSelectionPaths();      // DND Fehlverhalten Workaround
             } else {
-                getSelectionModel().setSelectionPath(selPath);             // DND Fehlverhalten Workaround
+                if (contains(lastCachedTreePaths, selPath)) {
+                    getSelectionModel().setSelectionPaths(lastCachedTreePaths); // DND Fehlverhalten Workaround
+                    cachedTreePaths = lastCachedTreePaths;
+                }
             }
+            autoSelection = false;
 
             Transferable trans = null;
             if (this.getModel() instanceof WMSCapabilitiesTreeModel) {
@@ -2080,6 +2120,28 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 }
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   list  DOCUMENT ME!
+         * @param   path  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private boolean contains(final TreePath[] list, final TreePath path) {
+            if (list == null) {
+                return false;
+            }
+
+            for (final TreePath tmpPath : list) {
+                if (tmpPath.equals(path)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /**

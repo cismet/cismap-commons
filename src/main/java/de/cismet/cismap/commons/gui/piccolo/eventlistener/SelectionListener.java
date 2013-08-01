@@ -254,6 +254,13 @@ public class SelectionListener extends RectangleRubberBandListener {
         return gf.createPoint(coord);
     }
 
+    @Override
+    public void mouseDragged(final PInputEvent e) {
+        super.mouseDragged(e); // To change body of generated methods, choose Tools | Templates.
+
+        clickCount = e.getClickCount();
+    }
+
     /**
      * Wird gefeuert, wenn die Maustaste nach dem Ziehen des Markiervierecks losgelassen wird.
      *
