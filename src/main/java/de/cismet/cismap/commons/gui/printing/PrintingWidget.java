@@ -35,6 +35,8 @@ import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
@@ -56,6 +58,7 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
+
 import de.cismet.commons.concurrency.CismetConcurrency;
 import de.cismet.commons.concurrency.CismetExecutors;
 
@@ -66,8 +69,6 @@ import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * DOCUMENT ME!
@@ -490,9 +491,9 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBackActionPerformed
+    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdBackActionPerformed
         dispose();
-    }//GEN-LAST:event_cmdBackActionPerformed
+    }                                                                           //GEN-LAST:event_cmdBackActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -548,61 +549,61 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
         services = new TreeMap<Integer, RetrievalService>();
         results = new TreeMap<Integer, Object>();
         erroneous = new TreeMap<Integer, Object>();
-        
-        MappingModel model = mappingComponent.getMappingModel();
-        
+
+        final MappingModel model = mappingComponent.getMappingModel();
+
         if (model instanceof MappingModel) {
-            ActiveLayerModel alm = (ActiveLayerModel)model;
-            
-            if ( (alm.getMapServices().size() + alm.getRasterServices().size()) > 0) {
+            final ActiveLayerModel alm = (ActiveLayerModel)model;
+
+            if ((alm.getMapServices().size() + alm.getRasterServices().size()) > 0) {
                 mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
             } else {
-                ThreadFactory threadFactory =
-                    CismetConcurrency.getInstance("cismap-commons")                               // NOI18N
+                final ThreadFactory threadFactory =
+                    CismetConcurrency.getInstance("cismap-commons")                // NOI18N
                     .createThreadFactory("CreateImageFromFeatures-threadfactory"); // NOI18N
-                ExecutorService dispatcher = CismetExecutors.newSingleThreadExecutor(threadFactory);    
+                final ExecutorService dispatcher = CismetExecutors.newSingleThreadExecutor(threadFactory);
                 dispatcher.execute(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        createImageFromFeatures();
-                    }
-                });
+                        @Override
+                        public void run() {
+                            createImageFromFeatures();
+                        }
+                    });
             }
         } else {
-                mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
+            mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
         }
 
         prbLoading.setIndeterminate(true);
 
         super.pack();
     }
-    
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void formComponentShown(final java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
-    }//GEN-LAST:event_formComponentShown
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
+    private void formComponentShown(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentShown
+    }                                                                          //GEN-LAST:event_formComponentShown
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
         mappingComponent.setInteractionMode(interactionModeAfterPrinting);
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
         dispose();
-    }//GEN-LAST:event_cmdCancelActionPerformed
+    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
         final Runnable r = new Runnable() {
 
                 @Override
@@ -718,7 +719,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             };
         CismetThreadPool.execute(r);
         dispose();
-    }//GEN-LAST:event_cmdOkActionPerformed
+    } //GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -944,7 +945,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             activateButton();
         }
     }
-    
+
     /**
      * Creates an image of the features. This is required if the map does only contain features and no layer.
      */
@@ -952,16 +953,16 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
         addFeaturesAsTopLevelLayer();
         activateButton();
     }
-        
+
     /**
-     * set the progress bar to 100 percent and activates the ok button
-     */    
+     * set the progress bar to 100 percent and activates the ok button.
+     */
     private void activateButton() {
         prbLoading.setIndeterminate(false);
         prbLoading.setValue(100);
-        cmdOk.setEnabled(true);    
+        cmdOk.setEnabled(true);
     }
-    
+
     /**
      * Adds the features to the map image.
      */

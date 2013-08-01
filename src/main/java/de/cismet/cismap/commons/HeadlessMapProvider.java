@@ -457,10 +457,10 @@ public class HeadlessMapProvider {
                     new Object[] { e.getRetrievalService() }),
                 NotificationLevel.INFO); // NOI18N
 
-                if ( e.getRetrievalService() == null) {
-                    System.out.println("service is null");
-                }
-            
+            if (e.getRetrievalService() == null) {
+                System.out.println("service is null");
+            }
+
             if (e.getRetrievalService() instanceof ServiceLayer) {
                 final int num = ((ServiceLayer)e.getRetrievalService()).getLayerPosition();
                 services.put(num, e.getRetrievalService());
@@ -720,7 +720,7 @@ public class HeadlessMapProvider {
             if (image != null) {
                 g.drawImage(image, 0, 0, null);
             }
-            
+
             if (composite != null) {
                 g.setComposite(composite);
             }
