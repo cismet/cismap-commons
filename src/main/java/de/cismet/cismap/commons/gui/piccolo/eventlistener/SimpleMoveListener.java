@@ -271,28 +271,30 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
             if (o instanceof Feature) {
                 final Feature feature = (Feature)o;
                 final PFeature pfeature = (PFeature)mappingComponent.getPFeatureHM().get(feature);
-                final Geometry geometry = pfeature.getFeature().getGeometry();
-                if ((geometry instanceof Polygon) || (geometry instanceof LineString)
-                            || (geometry instanceof MultiPolygon)) {
-                    for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
-                        for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
-                            final float[] xp = pfeature.getXp(entityIndex, ringIndex);
-                            final float[] yp = pfeature.getYp(entityIndex, ringIndex);
-                            for (int i = 0; i < (xp.length - 1); i++) {
-                                final Point2D tmpStart = new Point2D.Double(xp[i], yp[i]);
-                                final Point2D tmpEnd = new Point2D.Double(xp[i + 1], yp[i + 1]);
-                                final double tmpDist = StaticGeometryFunctions.distanceToLine(
-                                        tmpStart,
-                                        tmpEnd,
-                                        trigger);
-                                if (tmpDist < dist) {
-                                    dist = tmpDist;
-                                    start = tmpStart;
-                                    end = tmpEnd;
-                                    this.pFeature = pfeature;
-                                    this.entityPosition = entityIndex;
-                                    this.ringPosition = ringIndex;
-                                    this.coordPosition = i + 1;
+                if (pfeature != null) {
+                    final Geometry geometry = pfeature.getFeature().getGeometry();
+                    if ((geometry instanceof Polygon) || (geometry instanceof LineString)
+                                || (geometry instanceof MultiPolygon)) {
+                        for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
+                            for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
+                                final float[] xp = pfeature.getXp(entityIndex, ringIndex);
+                                final float[] yp = pfeature.getYp(entityIndex, ringIndex);
+                                for (int i = 0; i < (xp.length - 1); i++) {
+                                    final Point2D tmpStart = new Point2D.Double(xp[i], yp[i]);
+                                    final Point2D tmpEnd = new Point2D.Double(xp[i + 1], yp[i + 1]);
+                                    final double tmpDist = StaticGeometryFunctions.distanceToLine(
+                                            tmpStart,
+                                            tmpEnd,
+                                            trigger);
+                                    if (tmpDist < dist) {
+                                        dist = tmpDist;
+                                        start = tmpStart;
+                                        end = tmpEnd;
+                                        this.pFeature = pfeature;
+                                        this.entityPosition = entityIndex;
+                                        this.ringPosition = ringIndex;
+                                        this.coordPosition = i + 1;
+                                    }
                                 }
                             }
                         }
