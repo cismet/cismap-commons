@@ -17,7 +17,7 @@ import java.awt.image.BufferedImage;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.MetaSearchCreateSearchGeometryListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.AbstractCreateSearchGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
@@ -77,8 +77,8 @@ public class SearchFeature extends PureNewFeature {
 
     @Override
     public Paint getFillingPaint() {
-        final MetaSearchCreateSearchGeometryListener searchListener = ((MetaSearchCreateSearchGeometryListener)
-                CismapBroker.getInstance().getMappingComponent().getInputListener(
+        final AbstractCreateSearchGeometryListener searchListener = ((AbstractCreateSearchGeometryListener)CismapBroker
+                        .getInstance().getMappingComponent().getInputListener(
                     MappingComponent.CREATE_SEARCH_POLYGON));
         final Color color = searchListener.getSearchColor();
         return new Color(color.getRed(),
