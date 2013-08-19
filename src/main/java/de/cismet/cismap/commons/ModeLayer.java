@@ -342,8 +342,8 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
         element.setAttribute("mode", getCurrentMode());   // NOI18N
         element.setAttribute("key", layerKey);            // NOI18N
         for (final String m : getModes()) {
-            Element modeElement=new Element("Mode");
-            modeElement.setAttribute("key",m);
+            final Element modeElement = new Element("Mode");
+            modeElement.setAttribute("key", m);
             modeElement.addContent(CidsLayerFactory.getElement((MapService)getModeLayer(m)));
             element.addContent(modeElement);
         }
