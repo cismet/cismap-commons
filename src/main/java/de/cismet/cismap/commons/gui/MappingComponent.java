@@ -1311,8 +1311,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         (ServiceLayer)mapService));
             } else if (mapService instanceof ModeLayer) {
                 // skip
-
-                // a addMapService is called via a fireLAyerAdded when a Mode is selected
+                return;
+                    // a addMapService is called via a fireLAyerAdded when a Mode is selected
             } else {
                 LOG.info("adding FeatureMapService '" + mapService + "' (" + mapService.getClass().getSimpleName()
                             + ")"); // NOI18N
@@ -4919,8 +4919,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         MappingComponent.class,
                         "MappingComponent.crsChanged(CrsChangedEvent).wait"),
                     null);
-
-            EventQueue.invokeLater(new Runnable() {
+            final Runnable r = new Runnable() {
 
                     @Override
                     public void run() {
@@ -4992,7 +4991,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             }
                         }
                     }
-                });
+                };
+            if (EventQueue.isDispatchThread()) {
+                r.run();
+            } else {
+                EventQueue.invokeLater(r);
+            }
         } else {
             resetCrs = false;
         }
