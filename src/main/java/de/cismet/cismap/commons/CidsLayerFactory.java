@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
+import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.SimpleUpdateablePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
@@ -27,6 +28,7 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 /**
@@ -174,6 +176,9 @@ public class CidsLayerFactory {
                 }
             } else if (element.getName().equals("ModeLayer")) {
                 final ModeLayer modeLayer = new ModeLayer();
+                final String selectedMode = element.getAttributeValue("mode");
+                final String modeLayerKey = element.getAttributeValue("key");
+                modeLayer.setLayerKey(modeLayerKey);
                 final Iterator modeIt = element.getChildren("Mode").iterator();
                 String first = null;
                 while (modeIt.hasNext()) {
@@ -186,7 +191,12 @@ public class CidsLayerFactory {
                     final RetrievalServiceLayer layer = createLayer(layerDef, capabilities);
                     modeLayer.putModeLayer(key, layer);
                 }
-                modeLayer.setMode(first);
+                if (selectedMode == null) {
+                    modeLayer.setMode(first);
+                } else {
+                    modeLayer.setMode(selectedMode);
+                }
+                ModeLayerRegistry.getInstance().putModeLayer(modeLayerKey, modeLayer);
                 return modeLayer;
             } else {
                 try {
@@ -354,6 +364,60 @@ public class CidsLayerFactory {
                     preferredRasterFormat,
                     srs);
             }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crs    DOCUMENT ME!
+     * @param  layer  DOCUMENT ME!
+     */
+    public static void setLayerToCrs(final Crs crs, final Object layer) {
+        if (layer instanceof WMSServiceLayer) {
+            ((WMSServiceLayer)layer).setSrs(crs.getCode());
+        } else if (layer instanceof SlidableWMSServiceLayerGroup) {
+            ((SlidableWMSServiceLayerGroup)layer).setSrs(crs.getCode());
+        } else if (layer instanceof WebFeatureService) {
+            ((WebFeatureService)layer).setCrs(crs);
+        } else if (layer instanceof ShapeFileFeatureService) {
+            ((ShapeFileFeatureService)layer).setCrs(crs);
+        } else if (layer instanceof ModeLayer) {
+            ((ModeLayer)layer).setCrs(crs);
+        } else {
+            log.error("The SRS of a layer cannot be changed. Layer is of type  " + layer.getClass().getName());
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   layer  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Element getElement(final MapService layer) {
+        if (layer instanceof WMSServiceLayer) {
+            return ((WMSServiceLayer)layer).getElement();
+        } else if (layer instanceof SimpleWMS) {
+            return ((SimpleWMS)layer).getElement();
+        } else if (layer instanceof WebFeatureService) {
+            return ((WebFeatureService)layer).toElement();
+        } else if (layer instanceof DocumentFeatureService) {
+            return ((DocumentFeatureService)layer).toElement();
+        } else if (layer instanceof SimplePostgisFeatureService) {
+            return ((SimplePostgisFeatureService)layer).toElement();
+        } else if (layer instanceof SimpleUpdateablePostgisFeatureService) {
+            return ((SimpleUpdateablePostgisFeatureService)layer).toElement();
+        } else if (layer instanceof SlidableWMSServiceLayerGroup) {
+            return ((SlidableWMSServiceLayerGroup)layer).toElement();
+        } else if (layer instanceof ModeLayer) {
+            return ((ModeLayer)layer).toElement();
+        } else if (layer instanceof ConvertableToXML) {
+            return ((ConvertableToXML)layer).toElement();
+        } else {
+            log.warn("saving configuration not supported by service: " + layer); // NOI18N
+            return null;
         }
     }
 }
