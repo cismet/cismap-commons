@@ -13,6 +13,8 @@ package de.cismet.cismap.commons;
 
 import edu.umd.cs.piccolo.PNode;
 
+import org.jdom.Element;
+
 import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
@@ -21,6 +23,8 @@ import java.util.Set;
 
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModelStore;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
@@ -31,10 +35,6 @@ import de.cismet.cismap.commons.retrieval.RetrievalListener;
  * @version  $Revision$, $Date$
  */
 public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayerModelStore {
-
-    //~ Static fields/initializers ---------------------------------------------
-
-    public static ModeLayer ML;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -47,6 +47,7 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
     private ArrayList<RetrievalListener> retrievalListeners = new ArrayList<RetrievalListener>();
     private ArrayList<PropertyChangeListener> pcListeners = new ArrayList<PropertyChangeListener>();
     private ActiveLayerModel mappingModel;
+    private String layerKey = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -54,7 +55,6 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
      * Creates a new ModeLayer object.
      */
     public ModeLayer() {
-        ML = this;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -114,6 +114,7 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
                 for (final RetrievalListener rl : retrievalListeners) {
                     if (oldLayer != null) {
                         oldLayer.removeRetrievalListener(rl);
+                        setTranslucency(oldLayer.getTranslucency());
                     }
                     currentModeLayer.addRetrievalListener(rl);
                 }
@@ -124,8 +125,13 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
                     currentModeLayer.addPropertyChangeListener(pcl);
                 }
                 if (mappingModel != null) {
+                    final ActiveLayerEvent ale = new ActiveLayerEvent();
+                    ale.setLayer(oldLayer);
+                    CismapBroker.getInstance().fireLayerRemoved(ale);
                     mappingModel.fireMapServiceRemoved((MapService)oldLayer);
                     mappingModel.fireMapServiceAdded((MapService)currentModeLayer);
+                    ale.setLayer(currentModeLayer);
+                    CismapBroker.getInstance().fireLayerAdded(ale);
                 }
             } else {
                 currentModeLayer = oldLayer;
@@ -247,6 +253,17 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crs  DOCUMENT ME!
+     */
+    public void setCrs(final Crs crs) {
+        for (final RetrievalServiceLayer rsl : modeLayers.values()) {
+            CidsLayerFactory.setLayerToCrs(crs, rsl);
+        }
+    }
+
     @Override
     public boolean isRefreshNeeded() {
         return currentModeLayer.isRefreshNeeded();
@@ -313,5 +330,41 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
     @Override
     public boolean isVisible() {
         return ((MapService)currentModeLayer).isVisible();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Element toElement() {
+        final Element element = new Element("ModeLayer"); // NOI18N
+        element.setAttribute("mode", getCurrentMode());   // NOI18N
+        element.setAttribute("key", layerKey);            // NOI18N
+        for (final String m : getModes()) {
+            Element modeElement=new Element("Mode");
+            modeElement.setAttribute("key",m);
+            modeElement.addContent(CidsLayerFactory.getElement((MapService)getModeLayer(m)));
+            element.addContent(modeElement);
+        }
+        return element;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getLayerKey() {
+        return layerKey;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layerKey  DOCUMENT ME!
+     */
+    public void setLayerKey(final String layerKey) {
+        this.layerKey = layerKey;
     }
 }
