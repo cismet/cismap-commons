@@ -416,9 +416,9 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                             pi.setTransparency(f);
                             pi.repaint();
                         }
-                    }
-
-                    if (!slider.getValueIsAdjusting()) {
+                        if (!slider.getValueIsAdjusting()) {
+                            ((RetrievalServiceLayer)value).setTranslucency(f);
+                        }
                     }
                 }
             });
