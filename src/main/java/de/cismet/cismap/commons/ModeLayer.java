@@ -68,6 +68,7 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
     public ActiveLayerModel getActiveLayerModel() {
         return mappingModel;
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -77,6 +78,9 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
      * @return  DOCUMENT ME!
      */
     public RetrievalServiceLayer putModeLayer(final String mode, final RetrievalServiceLayer layer) {
+        if (layer.getPNode() == null) {
+            layer.setPNode(new PNode()); // add this PNode to avoid NPEs when the layer
+        }
         return modeLayers.put(mode, layer);
     }
 
@@ -105,8 +109,27 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
      *
      * @param  mode  DOCUMENT ME!
      */
+    public void forceMode(final String mode) {
+        setMode(mode, true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mode  DOCUMENT ME!
+     */
     public void setMode(final String mode) {
-        if ((this.mode == null) || !this.mode.equals(mode)) {
+        setMode(mode, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mode    DOCUMENT ME!
+     * @param  forced  DOCUMENT ME!
+     */
+    public void setMode(final String mode, final boolean forced) {
+        if ((this.mode == null) || !this.mode.equals(mode) || forced) {
             final RetrievalServiceLayer oldLayer = currentModeLayer;
             currentModeLayer = modeLayers.get(mode);
             if (currentModeLayer != null) {
@@ -124,15 +147,19 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
                     }
                     currentModeLayer.addPropertyChangeListener(pcl);
                 }
-                if (mappingModel != null) {
-                    final ActiveLayerEvent ale = new ActiveLayerEvent();
+                final ActiveLayerEvent ale = new ActiveLayerEvent();
+                if (oldLayer != null) {
                     ale.setLayer(oldLayer);
                     CismapBroker.getInstance().fireLayerRemoved(ale);
-                    mappingModel.fireMapServiceRemoved((MapService)oldLayer);
-                    mappingModel.fireMapServiceAdded((MapService)currentModeLayer);
-                    ale.setLayer(currentModeLayer);
-                    CismapBroker.getInstance().fireLayerAdded(ale);
                 }
+                if (mappingModel != null) {
+                    if (oldLayer != null) {
+                        mappingModel.fireMapServiceRemoved((MapService)oldLayer);
+                    }
+                    mappingModel.fireMapServiceAdded((MapService)currentModeLayer);
+                }
+                ale.setLayer(currentModeLayer);
+                CismapBroker.getInstance().fireLayerAdded(ale);
             } else {
                 currentModeLayer = oldLayer;
             }
