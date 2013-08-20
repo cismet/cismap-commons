@@ -32,15 +32,22 @@ public class SearchFeature extends PureNewFeature {
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(SearchFeature.class);
 
+    //~ Instance fields --------------------------------------------------------
+
+    private String inputListenerName;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new SearchFeature object.
      *
-     * @param  g  DOCUMENT ME!
+     * @param  g                  DOCUMENT ME!
+     * @param  inputListenerName  DOCUMENT ME!
      */
-    public SearchFeature(final Geometry g) {
+    public SearchFeature(final Geometry g, final String inputListenerName) {
         super(g);
+
+        this.inputListenerName = inputListenerName;
     }
 
     /**
@@ -59,7 +66,8 @@ public class SearchFeature extends PureNewFeature {
      * @param  canvasPoints  DOCUMENT ME!
      * @param  wtst          DOCUMENT ME!
      */
-    public SearchFeature(final Point2D[] canvasPoints, final WorldToScreenTransform wtst) {
+    public SearchFeature(final Point2D[] canvasPoints,
+            final WorldToScreenTransform wtst) {
         super(canvasPoints, wtst);
     }
 
@@ -74,6 +82,24 @@ public class SearchFeature extends PureNewFeature {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getInputListenerName() {
+        return inputListenerName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  inputListenerName  DOCUMENT ME!
+     */
+    public void setInputListenerName(final String inputListenerName) {
+        this.inputListenerName = inputListenerName;
+    }
 
     @Override
     public Paint getFillingPaint() {
@@ -166,5 +192,14 @@ public class SearchFeature extends PureNewFeature {
                     .newCustomSweetSpotFeatureAnnotationSymbol(bufferedImage, null, 0.5, 0.5);
 
         return pointAnnotationSymbol;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getInteractionMode() {
+        return inputListenerName;
     }
 }
