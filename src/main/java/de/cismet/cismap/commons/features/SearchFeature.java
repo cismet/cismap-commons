@@ -17,7 +17,7 @@ import java.awt.image.BufferedImage;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.MetaSearchCreateSearchGeometryListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.AbstractCreateSearchGeometryListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
@@ -32,15 +32,22 @@ public class SearchFeature extends PureNewFeature {
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(SearchFeature.class);
 
+    //~ Instance fields --------------------------------------------------------
+
+    private String inputListenerName;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new SearchFeature object.
      *
-     * @param  g  DOCUMENT ME!
+     * @param  g                  DOCUMENT ME!
+     * @param  inputListenerName  DOCUMENT ME!
      */
-    public SearchFeature(final Geometry g) {
+    public SearchFeature(final Geometry g, final String inputListenerName) {
         super(g);
+
+        this.inputListenerName = inputListenerName;
     }
 
     /**
@@ -59,7 +66,8 @@ public class SearchFeature extends PureNewFeature {
      * @param  canvasPoints  DOCUMENT ME!
      * @param  wtst          DOCUMENT ME!
      */
-    public SearchFeature(final Point2D[] canvasPoints, final WorldToScreenTransform wtst) {
+    public SearchFeature(final Point2D[] canvasPoints,
+            final WorldToScreenTransform wtst) {
         super(canvasPoints, wtst);
     }
 
@@ -75,10 +83,28 @@ public class SearchFeature extends PureNewFeature {
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getInputListenerName() {
+        return inputListenerName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  inputListenerName  DOCUMENT ME!
+     */
+    public void setInputListenerName(final String inputListenerName) {
+        this.inputListenerName = inputListenerName;
+    }
+
     @Override
     public Paint getFillingPaint() {
-        final MetaSearchCreateSearchGeometryListener searchListener = ((MetaSearchCreateSearchGeometryListener)
-                CismapBroker.getInstance().getMappingComponent().getInputListener(
+        final AbstractCreateSearchGeometryListener searchListener = ((AbstractCreateSearchGeometryListener)CismapBroker
+                        .getInstance().getMappingComponent().getInputListener(
                     MappingComponent.CREATE_SEARCH_POLYGON));
         final Color color = searchListener.getSearchColor();
         return new Color(color.getRed(),
@@ -166,5 +192,14 @@ public class SearchFeature extends PureNewFeature {
                     .newCustomSweetSpotFeatureAnnotationSymbol(bufferedImage, null, 0.5, 0.5);
 
         return pointAnnotationSymbol;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getInteractionMode() {
+        return inputListenerName;
     }
 }
