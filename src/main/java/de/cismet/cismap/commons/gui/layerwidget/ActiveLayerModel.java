@@ -24,11 +24,9 @@ import de.cismet.cismap.commons.*;
 import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
-import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupportingRasterLayer;
-import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
@@ -1182,14 +1180,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             final HashMap<String, WMSCapabilities> capabilities = new HashMap<String, WMSCapabilities>();
 
             if (links.size() > 0) {
-                final Runnable createLayerThread = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            createLayers(conf, capabilities);
-                        }
-                    };
-                CismetThreadPool.execute(createLayerThread);
+                createLayers(conf, capabilities);
             } else {
                 if (DEBUG) {
                     if (log.isDebugEnabled()) {
@@ -1307,7 +1298,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             final RetrievalServiceLayer layer = CidsLayerFactory.createLayer(element, capabilities);
 
             if (layer != null) {
-                // NOI18N
                 EventQueue.invokeLater(new Runnable() {
 
                         @Override
