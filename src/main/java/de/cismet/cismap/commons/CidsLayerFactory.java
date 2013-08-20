@@ -62,7 +62,6 @@ public class CidsLayerFactory {
                 LOG.debug("trying to create Layer '" + element.getName() + "'"); // NOI18N
             }
         }
-        final String currentKeyString = getKeyforLayerElement(element);
 
         try {
             if (element.getName().equals("WMSServiceLayer")) {          // NOI18N
@@ -275,13 +274,17 @@ public class CidsLayerFactory {
                     slidableWms.layerRemoved(event);
 
                     return getKeyForRetrievalService(slidableWms);
+                } else if (layerelement.getName().equals("ModeLayer")) {
+                    return "ModeLayer#" + layerelement.getAttributeValue("key");
                 } else {
                     final RetrievalServiceLayer layer = (RetrievalServiceLayer)XMLObjectFactory
                                 .restoreObjectfromElement(layerelement);
                     return getKeyForRetrievalService(layer);
                 }
             } catch (Exception ex) {
-                log.error("Konnte keinen Key für das layerelement erstellen", ex);
+                log.error((("Konnte keinen Key für das layerelement " + layerelement.getName()) != null)
+                        ? layerelement.getName() : ("null" + "erstellen"),
+                    ex);
             }
         }
         return null;
