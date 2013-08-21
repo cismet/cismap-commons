@@ -45,9 +45,9 @@ import javax.swing.Action;
 import javax.swing.JComponent;
 
 import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.features.AbstractNewFeature.geomTypes;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.PureNewFeature;
-import de.cismet.cismap.commons.features.PureNewFeature.geomTypes;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;

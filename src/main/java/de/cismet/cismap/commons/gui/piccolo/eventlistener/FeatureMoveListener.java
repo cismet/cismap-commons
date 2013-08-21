@@ -27,9 +27,9 @@ import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.Vector;
 
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureMoveAction;
@@ -223,7 +223,7 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
             final Object o = it.next();
             if (o instanceof PFeature) {
                 final PFeature f = (PFeature)o;
-                if (f.getFeature() instanceof PureNewFeature) {
+                if (f.getFeature() instanceof AbstractNewFeature) {
                     f.setStrokePaint(Color.black);
                 } else {
                     mc.reconsiderFeature(f.getFeature());
