@@ -26,7 +26,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class SearchFeature extends PureNewFeature {
+public class SearchFeature extends AbstractNewFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -126,32 +126,32 @@ public class SearchFeature extends PureNewFeature {
             switch (getGeometryType()) {
                 case RECTANGLE: {
                     return org.openide.util.NbBundle.getMessage(
-                            PureNewFeature.class,
+                            SearchFeature.class,
                             "SearchFeature.getName().searchRectangle");    // NOI18N
                 }
                 case LINESTRING: {
                     return org.openide.util.NbBundle.getMessage(
-                            PureNewFeature.class,
+                            SearchFeature.class,
                             "SearchFeature.getName().searchPolyline");     // NOI18N
                 }
                 case ELLIPSE: {
                     return org.openide.util.NbBundle.getMessage(
-                            PureNewFeature.class,
+                            SearchFeature.class,
                             "SearchFeature.getName().searchEllipse");      // NOI18N
                 }
                 case POINT: {
                     return org.openide.util.NbBundle.getMessage(
-                            PureNewFeature.class,
+                            SearchFeature.class,
                             "SearchFeature.getName().searchPoint");        // NOI18N
                 }
                 case POLYGON: {
                     return org.openide.util.NbBundle.getMessage(
-                            PureNewFeature.class,
+                            SearchFeature.class,
                             "SearchFeature.getName().searchPOLYGON");      // NOI18N
                 }
                 case MULTIPOLYGON: {
                     return org.openide.util.NbBundle.getMessage(
-                            PureNewFeature.class,
+                            SearchFeature.class,
                             "SearchFeature.getName().searchMULTIPOLYGON"); // NOI18N
                 }
                 default: {

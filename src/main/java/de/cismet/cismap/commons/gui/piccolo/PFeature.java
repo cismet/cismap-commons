@@ -1111,8 +1111,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public void addHandles(final PNode handleLayer) {
         if (getFeature() instanceof LinearReferencedPointFeature) {
             addLinearReferencedPointPHandle(handleLayer);
-        } else if ((getFeature() instanceof PureNewFeature)
-                    && (((PureNewFeature)getFeature()).getGeometryType() == PureNewFeature.geomTypes.ELLIPSE)) {
+        } else if ((getFeature() instanceof AbstractNewFeature)
+                    && (((AbstractNewFeature)getFeature()).getGeometryType() == AbstractNewFeature.geomTypes.ELLIPSE)) {
             addEllipseHandle(handleLayer);
         } else {
             for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {

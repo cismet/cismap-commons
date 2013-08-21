@@ -30,9 +30,9 @@ import java.util.Set;
 
 import javax.swing.SwingWorker;
 
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.InvalidPolygonTooltip;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
@@ -345,11 +345,11 @@ public class TransformationPHandle extends PHandle {
         leftNeighbourPoint = new Point2D.Double(xp[leftNeighbourIndex], yp[leftNeighbourIndex]);
         rightNeighbourPoint = new Point2D.Double(xp[rightNeighbourIndex], yp[rightNeighbourIndex]);
 
-        if ((pfeature.getFeature() instanceof PureNewFeature)
-                    && ((((PureNewFeature)pfeature.getFeature()).getGeometryType()
-                            == PureNewFeature.geomTypes.RECTANGLE)
-                        || (((PureNewFeature)pfeature.getFeature()).getGeometryType()
-                            == PureNewFeature.geomTypes.ELLIPSE))) {
+        if ((pfeature.getFeature() instanceof AbstractNewFeature)
+                    && ((((AbstractNewFeature)pfeature.getFeature()).getGeometryType()
+                            == AbstractNewFeature.geomTypes.RECTANGLE)
+                        || (((AbstractNewFeature)pfeature.getFeature()).getGeometryType()
+                            == AbstractNewFeature.geomTypes.ELLIPSE))) {
             final Collection selArr = pfeature.getViewer().getFeatureCollection().getSelectedFeatures();
             for (final Object o : selArr) {
                 final PFeature pf = (PFeature)(pfeature.getViewer().getPFeatureHM().get(o));
@@ -593,8 +593,8 @@ public class TransformationPHandle extends PHandle {
      * @param  newY  DOCUMENT ME!
      */
     private void updateGeometryPoints(final float newX, final float newY) {
-        if (pfeature.getFeature() instanceof PureNewFeature) {
-            final PureNewFeature.geomTypes geomType = ((PureNewFeature)pfeature.getFeature()).getGeometryType();
+        if (pfeature.getFeature() instanceof AbstractNewFeature) {
+            final AbstractNewFeature.geomTypes geomType = ((AbstractNewFeature)pfeature.getFeature()).getGeometryType();
 
             switch (geomType) {
                 case RECTANGLE: {
