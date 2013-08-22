@@ -40,8 +40,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
-import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
@@ -49,7 +49,6 @@ import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.features.FeatureGroup;
 import de.cismet.cismap.commons.features.FeatureGroups;
-import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.SubFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -963,8 +962,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         @Override
         public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
             if ((columnIndex == 1)
-                        && ((Feature)getFeatureCollection().getFeature(rowIndex) instanceof PureNewFeature)) {
-                ((PureNewFeature)(getFeatureCollection().getFeature(rowIndex))).setName(aValue.toString());
+                        && ((Feature)getFeatureCollection().getFeature(rowIndex) instanceof AbstractNewFeature)) {
+                ((AbstractNewFeature)(getFeatureCollection().getFeature(rowIndex))).setName(aValue.toString());
                 final Vector v = new Vector();
                 v.add(getFeatureCollection().getFeature(rowIndex));
                 ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).fireFeaturesChanged(v);
@@ -1050,7 +1049,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         @Override
         public boolean isCellEditable(final int rowIndex, final int columnIndex) {
             if ((columnIndex == 1)
-                        && ((Feature)getFeatureCollection().getFeature(rowIndex) instanceof PureNewFeature)) {
+                        && ((Feature)getFeatureCollection().getFeature(rowIndex) instanceof AbstractNewFeature)) {
                 return true;
             } else {
                 return false;

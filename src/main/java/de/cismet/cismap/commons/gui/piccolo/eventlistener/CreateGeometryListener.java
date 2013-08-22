@@ -70,8 +70,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     private Stack<Point2D> undoPoints;
     private SimpleMoveListener moveListener;
     private String mode = POLYGON;
-    private Class<? extends PureNewFeature> geometryFeatureClass = null;
-    private PureNewFeature currentFeature = null;
+    private Class<? extends AbstractNewFeature> geometryFeatureClass = null;
+    private AbstractNewFeature currentFeature = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -366,7 +366,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      */
     private void readyForFinishing() {
         try {
-            createCurrentPureNewFeature(null);
+            createCurrentNewFeature(null);
             finishGeometry(currentFeature);
         } catch (Throwable t) {
             LOG.error("Error during the creation of the geometry", t); // NOI18N
@@ -382,7 +382,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
 // return getCurrentPureNewFeature(null);
 // }
 
-    protected PureNewFeature getCurrentPureNewFeature() {
+    protected AbstractNewFeature getCurrentNewFeature() {
         return currentFeature;
     }
 
@@ -391,36 +391,36 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      *
      * @param  lastPoint  DOCUMENT ME!
      */
-    protected void createCurrentPureNewFeature(final Point2D lastPoint) {
+    protected void createCurrentNewFeature(final Point2D lastPoint) {
         try {
             final Point2D[] finalPoints = getPoints(lastPoint);
-            PureNewFeature.geomTypes geomType = PureNewFeature.geomTypes.UNKNOWN;
+            AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.UNKNOWN;
             if (isInMode(ELLIPSE)) {
-                geomType = PureNewFeature.geomTypes.ELLIPSE;
+                geomType = AbstractNewFeature.geomTypes.ELLIPSE;
             } else if (isInMode(LINESTRING)) {
-                geomType = PureNewFeature.geomTypes.LINESTRING;
+                geomType = AbstractNewFeature.geomTypes.LINESTRING;
             } else if (isInMode(POINT)) {
-                geomType = PureNewFeature.geomTypes.POINT;
+                geomType = AbstractNewFeature.geomTypes.POINT;
             } else if (isInMode(POLYGON)) {
-                geomType = PureNewFeature.geomTypes.POLYGON;
+                geomType = AbstractNewFeature.geomTypes.POLYGON;
             } else if (isInMode(RECTANGLE)) {
-                geomType = PureNewFeature.geomTypes.POLYGON;
+                geomType = AbstractNewFeature.geomTypes.POLYGON;
             } else if (isInMode(RECTANGLE_FROM_LINE)) {
-                geomType = PureNewFeature.geomTypes.POLYGON;
+                geomType = AbstractNewFeature.geomTypes.POLYGON;
             }
 
             final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
-            final Constructor<? extends PureNewFeature> constructor = geometryFeatureClass.getConstructor(
+            final Constructor<? extends AbstractNewFeature> constructor = geometryFeatureClass.getConstructor(
                     Point2D[].class,
                     WorldToScreenTransform.class);
-            final PureNewFeature pureNewFeature = constructor.newInstance(finalPoints, mappingComponent.getWtst());
-            pureNewFeature.setGeometryType(geomType);
-            pureNewFeature.getGeometry().setSRID(currentSrid);
-            final Geometry geom = CrsTransformer.transformToGivenCrs(pureNewFeature.getGeometry(),
+            final AbstractNewFeature newFeature = constructor.newInstance(finalPoints, mappingComponent.getWtst());
+            newFeature.setGeometryType(geomType);
+            newFeature.getGeometry().setSRID(currentSrid);
+            final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
                     mappingComponent.getMappingModel().getSrs().getCode());
-            pureNewFeature.setGeometry(geom);
+            newFeature.setGeometry(geom);
 
-            currentFeature = pureNewFeature;
+            currentFeature = newFeature;
         } catch (Throwable throwable) {
             LOG.error("Error during the creation of the geometry", throwable); // NOI18N
             currentFeature = null;
@@ -483,7 +483,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * @param  m  DOCUMENT ME!
      * @param  f  DOCUMENT ME!
      */
-    private void createAction(final MappingComponent m, final PureNewFeature f) {
+    private void createAction(final MappingComponent m, final AbstractNewFeature f) {
         mappingComponent.getMemUndo().addAction(new FeatureDeleteAction(m, f));
         mappingComponent.getMemRedo().clear();
     }
@@ -503,7 +503,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * @param  lastPoint  DOCUMENT ME!
      */
     protected void updatePolygon(final Point2D lastPoint) {
-        createCurrentPureNewFeature(lastPoint);
+        createCurrentNewFeature(lastPoint);
         final ArrayList<Feature> features = new ArrayList<Feature>();
         features.add(currentFeature);
         ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).fireFeaturesChanged(features);
@@ -602,7 +602,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * @param  geometryFeatureClass  DOCUMENT ME!
      */
     @Override
-    public final void setGeometryFeatureClass(final Class<? extends PureNewFeature> geometryFeatureClass) {
+    public final void setGeometryFeatureClass(final Class<? extends AbstractNewFeature> geometryFeatureClass) {
         this.geometryFeatureClass = geometryFeatureClass;
     }
 
@@ -611,7 +611,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      *
      * @param  newFeature  DOCUMENT ME!
      */
-    private void postGeometryCreatedNotificaton(final PureNewFeature newFeature) {
+    private void postGeometryCreatedNotificaton(final AbstractNewFeature newFeature) {
         final PNotificationCenter pn = PNotificationCenter.defaultCenter();
         pn.postNotification(GEOMETRY_CREATED_NOTIFICATION, newFeature);
     }
@@ -683,15 +683,15 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     @Override
     public void featuresAdded(final FeatureCollectionEvent fce) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Features added to map");                                                      // NOI18N
+            LOG.debug("Features added to map");                                                          // NOI18N
         }
         for (final Feature curFeature : fce.getEventFeatures()) {
-            if (curFeature instanceof PureNewFeature) {
+            if (curFeature instanceof AbstractNewFeature) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Added Feature is PureNewFeature. PostingGeometryCreateNotification"); // NOI18N
+                    LOG.debug("Added Feature is AbstractNewFeature. PostingGeometryCreateNotification"); // NOI18N
                 }
-                postGeometryCreatedNotificaton((PureNewFeature)curFeature);
-                createAction(mappingComponent, (PureNewFeature)curFeature);
+                postGeometryCreatedNotificaton((AbstractNewFeature)curFeature);
+                createAction(mappingComponent, (AbstractNewFeature)curFeature);
             }
         }
     }
@@ -709,7 +709,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      *
      * @param  newFeature  DOCUMENT ME!
      */
-    protected void finishGeometry(final PureNewFeature newFeature) {
+    protected void finishGeometry(final AbstractNewFeature newFeature) {
         mappingComponent.getTmpFeatureLayer().removeAllChildren();
     }
 

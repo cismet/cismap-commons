@@ -18,7 +18,7 @@ import java.awt.EventQueue;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -120,7 +120,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     }
 
     @Override
-    protected void finishGeometry(final PureNewFeature newFeature) {
+    protected void finishGeometry(final AbstractNewFeature newFeature) {
         super.finishGeometry(newFeature);
         final SearchFeature newSearchFeature = (SearchFeature)newFeature;
         newSearchFeature.setInputListenerName(inputListenerName);
@@ -132,7 +132,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
      *
      * @param  feature  DOCUMENT ME!
      */
-    protected void cleanup(final PureNewFeature feature) {
+    protected void cleanup(final SearchFeature feature) {
         final PFeature pFeature = (PFeature)getMappingComponent().getPFeatureHM().get(feature);
         if (isHoldingGeometries()) {
             pFeature.moveToFront(); // funktioniert nicht?!
@@ -197,7 +197,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     protected void showFeature(final SearchFeature feature) {
         if (feature != null) {
             feature.setInputListenerName(inputListenerName);
-            feature.setEditable(feature.getGeometryType() != PureNewFeature.geomTypes.MULTIPOLYGON);
+            feature.setEditable(feature.getGeometryType() != AbstractNewFeature.geomTypes.MULTIPOLYGON);
 
             getMappingComponent().getFeatureCollection().addFeature(feature);
             if (isHoldingGeometries()) {
