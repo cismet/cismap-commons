@@ -42,7 +42,7 @@ public final class ZoomAction implements ActionListener {
     //~ Instance fields --------------------------------------------------------
 
     private final PBounds bounds;
-    private final PInputEvent pInputEvent;
+    private final MappingComponent map;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -54,15 +54,24 @@ public final class ZoomAction implements ActionListener {
      */
     public ZoomAction(final PBounds bounds, final PInputEvent pInputEvent) {
         this.bounds = bounds;
-        this.pInputEvent = pInputEvent;
+        this.map = (MappingComponent)pInputEvent.getComponent();
+    }
+    /**
+     * Creates a new ZoomAction object.
+     *
+     * @param  bounds  DOCUMENT ME!
+     * @param  map     DOCUMENT ME!
+     */
+    public ZoomAction(final PBounds bounds, final MappingComponent map) {
+        this.bounds = bounds;
+        this.map = map;
     }
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-        if (pInputEvent.getComponent() instanceof MappingComponent) {
-            final MappingComponent map = (MappingComponent)pInputEvent.getComponent();
+        if (map != null) {
             map.setNewViewBounds(bounds);
             map.queryServices();
         }
