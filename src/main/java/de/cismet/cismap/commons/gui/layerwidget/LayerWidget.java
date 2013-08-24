@@ -8,8 +8,6 @@
 package de.cismet.cismap.commons.gui.layerwidget;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.PrecisionModel;
 
 import org.jdom.Element;
 
@@ -37,14 +35,11 @@ import java.io.File;
 import java.util.*;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.DefaultListSelectionModel;
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolTip;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -80,7 +75,6 @@ import de.cismet.tools.gui.imagetooltip.ImageToolTip;
 import de.cismet.tools.gui.treetable.JTreeTable;
 import de.cismet.tools.gui.treetable.TreeTableCellEditor;
 import de.cismet.tools.gui.treetable.TreeTableModel;
-import de.cismet.tools.gui.treetable.TreeTableModelAdapter;
 
 /**
  * DOCUMENT ME!
