@@ -158,7 +158,7 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
      * @return  DOCUMENT ME!
      */
     private boolean isTempFeatureValid() {
-        final PureNewFeature tempFeature = getCurrentPureNewFeature();
+        final AbstractNewFeature tempFeature = getCurrentNewFeature();
         final Coordinate[] tempFeatureCoordinates = tempFeature.getGeometry().getCoordinates();
 
         if (tempFeatureCoordinates.length == 3) {
@@ -227,7 +227,7 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     }
 
     @Override
-    protected void finishGeometry(final PureNewFeature newFeature) {
+    protected void finishGeometry(final AbstractNewFeature newFeature) {
         super.finishGeometry(newFeature);
 
         if (selectedPFeature == null) {

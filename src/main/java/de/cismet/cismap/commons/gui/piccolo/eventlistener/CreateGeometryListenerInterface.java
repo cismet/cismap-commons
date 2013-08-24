@@ -7,8 +7,7 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 
 /**
  * DOCUMENT ME!
@@ -73,7 +72,7 @@ public interface CreateGeometryListenerInterface {
      *
      * @param  geometryFeatureClass  DOCUMENT ME!
      */
-    void setGeometryFeatureClass(final Class<? extends PureNewFeature> geometryFeatureClass);
+    void setGeometryFeatureClass(final Class<? extends AbstractNewFeature> geometryFeatureClass);
 
     /**
      * DOCUMENT ME!
