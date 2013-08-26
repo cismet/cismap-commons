@@ -35,6 +35,7 @@ import javax.swing.table.TableCellRenderer;
 
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.LayerInfoProvider;
+import de.cismet.cismap.commons.ModeLayer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
@@ -188,6 +189,15 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
             if (log.isDebugEnabled()) {
                 log.debug(value + ": column=" + column);
             }
+        }
+        if (value instanceof ModeLayer) {
+            return getTableCellRendererComponent(
+                    table,
+                    ((ModeLayer)value).getCurrentLayer(),
+                    isSelected,
+                    hasFocus,
+                    row,
+                    column);
         }
 
         if (DEBUG) {
