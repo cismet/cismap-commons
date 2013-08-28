@@ -24,6 +24,8 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.*;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Abstract impelementation of a FeatureFactory. Supports re-evaluation of id and annotation expressions.
@@ -141,6 +143,32 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     @Override
     public void setMaxFeatureCount(final int maxFeatureCount) {
         this.maxFeatureCount = maxFeatureCount;
+    }
+    
+    protected void sortFeatureList(final List<? extends FeatureServiceFeature> featureList, final FeatureServiceAttribute[] attributes) {
+        Collections.sort(featureList, new Comparator<FeatureServiceFeature>() {
+
+            @Override
+            public int compare(FeatureServiceFeature o1, FeatureServiceFeature o2) {
+                for ( FeatureServiceAttribute attribute : attributes) {
+                    Object att1 = o1.getProperty(attribute.getName());
+                    Object att2 = o2.getProperty(attribute.getName());
+                    
+                    if (att1 instanceof Comparable && att2 instanceof Comparable) {
+                        Comparable c1 = (Comparable)att1;
+                        Comparable c2 = (Comparable)att2;
+                        
+                        int result = c1.compareTo(c2);
+                        
+                        if (result != 0) {
+                            return result;
+                        }
+                    }
+                }
+                
+                return 0;
+            }
+        });
     }
 
     /**

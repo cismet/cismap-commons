@@ -1118,6 +1118,34 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param   boundingBox  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List retrieveFeatures(final BoundingBox boundingBox, int offset, int limit, String orderBy) throws Exception {
+        return getFeatureFactory().createFeatures(getQuery(), boundingBox, layerInitWorker);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   boundingBox  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getFeatureCount(final BoundingBox boundingBox) {
+        if (boundingBox == null) {
+            return getFeatureFactory().getFeatureCount(this.bb);
+        } else {
+            return getFeatureFactory().getFeatureCount(boundingBox);
+        }
+    }
+
+    
+    
+    /**
      * This operation class the {@code createFeatures()} operation of the current FeatureFactory. Implementation classes
      * may override this method to pass additional parameters to the {@code createFeatures()} operation of the specific
      * FeatureFactory implementation.

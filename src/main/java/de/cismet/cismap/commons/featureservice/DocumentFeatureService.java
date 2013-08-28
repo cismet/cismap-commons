@@ -47,7 +47,7 @@ public abstract class DocumentFeatureService<FT extends FeatureServiceFeature, Q
      * Max number of featurews the underlying factory will parse. If the document contains more features they will be
      * ignored.
      */
-    protected int maxSupportedFeatureCount = 150000;
+    protected int maxSupportedFeatureCount = Integer.MAX_VALUE;
 
     /** Document Size in Kilobytes. */
     protected long documentSize = -1;

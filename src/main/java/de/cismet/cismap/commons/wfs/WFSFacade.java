@@ -96,6 +96,7 @@ public class WFSFacade {
     private static final String MAX_FEATURES_ATTR = "maxFeatures";                          // NOI18N
     private static final URL XML_FILE = WFSFacade.class.getResource("wfs.xml");             // TODO Auslagern//NOI18N
     public static final String CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER = "<cismapBoundingBoxAsGmlPlaceholder />";
+    public static final String CISMAP_RESULT_TYPE_PLACEHOLDER = "cismapResultTypePlaceholder";
     public static final String SRS_NAME_PLACEHOLDER = "SRSNAME_PLACEHOLDER";
 
     //~ Instance fields --------------------------------------------------------
@@ -212,11 +213,31 @@ public class WFSFacade {
             final XBoundingBox bbox,
             final FeatureType feature,
             final String mapCrs) {
+        return setGetFeatureBoundingBox(query, bbox, feature, mapCrs, false);
+    }
+
+    /**
+     * Set the bounding box and the srs of the given getFeature request and returns the resulting request as string.
+     *
+     * @param   query             the getFeature request template.
+     * @param   bbox              the bounding box that should be used in the getFeature request
+     * @param   feature           the type of the feature from the given query
+     * @param   mapCrs            the crs of the map, the features should be shown on
+     * @param   onlyFeatureCount  the resultType attribute will be set to hits, iif onlyFeatureCount is true
+     *
+     * @return  the new getFeature request
+     */
+    public String setGetFeatureBoundingBox(final String query,
+            final XBoundingBox bbox,
+            final FeatureType feature,
+            final String mapCrs,
+            final boolean onlyFeatureCount) {
         String request;
         String envelope;
         final String crs = getOptimalCrsForFeature(feature, mapCrs);
         final Geometry geom = CrsTransformer.transformToGivenCrs(bbox.getGeometry(), crs);
         final XBoundingBox tbbox = new XBoundingBox(geom);
+        final String resultType = (onlyFeatureCount ? "hits" : "results");
 
         if (logger.isDebugEnabled()) {
             logger.debug("optimal crs: " + crs);
@@ -240,6 +261,7 @@ public class WFSFacade {
 
         request = query.toString().replaceAll(CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER, envelope);
         request = request.replaceAll(SRS_NAME_PLACEHOLDER, crs);
+        request = request.replaceAll(CISMAP_RESULT_TYPE_PLACEHOLDER, resultType);
 
         return request;
     }
