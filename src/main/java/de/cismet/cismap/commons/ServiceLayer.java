@@ -7,8 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons;
 
-import java.util.HashMap;
-
 /**
  * DOCUMENT ME!
  *
@@ -56,18 +54,27 @@ public interface ServiceLayer {
      * @param  layerPosition  DOCUMENT ME!
      */
     void setLayerPosition(int layerPosition);
+
     /**
-     * DOCUMENT ME!
+     * Getter for the translucency of this layer. It returns a value between 0.0 and 1.0 (0.0 &lt;= translucency &lt;=
+     * 1.0) which represents the translucency percentage. However, this percentage effectively represents the <b>
+     * opacity</b> of the layer, e.g. if this operation returns <code>1.0</code> the layer is fully opaque and not
+     * transparent.
      *
-     * @return  DOCUMENT ME!
+     * @return  the opacity percentage (0.0 &lt;= translucency &lt;= 1.0)
      */
     float getTranslucency();
+
     /**
-     * DOCUMENT ME!
+     * Setter for the translucency of this layer. The value shall be between 0.0 and 1.0 (0.0 &lt;= translucency &lt;=
+     * 1.0) which represents the translucency percentage. However, this percentage effectively is interpreted as the <b>
+     * opacity</b> of the layer, e.g. if this operation receives <code>1.0</code> as a parameter the layer will become
+     * fully opaque and not transparent.
      *
-     * @param  t  DOCUMENT ME!
+     * @param  t  the opacity percentage (0.0 &lt;= translucency &lt;= 1.0)
      */
     void setTranslucency(float t);
+
     /**
      * DOCUMENT ME!
      *
