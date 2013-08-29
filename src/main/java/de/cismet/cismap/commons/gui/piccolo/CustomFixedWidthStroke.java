@@ -96,6 +96,25 @@ public class CustomFixedWidthStroke extends BasicStroke {
     }
 
     /**
+     * Creates a new CustomFixedWidthStroke object.
+     *
+     * @param  width       DOCUMENT ME!
+     * @param  lineCap     DOCUMENT ME!
+     * @param  lineJoin    DOCUMENT ME!
+     * @param  miterlimit  DOCUMENT ME!
+     * @param  dash        DOCUMENT ME!
+     * @param  dash_phase  DOCUMENT ME!
+     */
+    public CustomFixedWidthStroke(final float width,
+            final int lineCap,
+            final int lineJoin,
+            final float miterlimit,
+            final float[] dash,
+            final float dash_phase) {
+        super(width, lineCap, lineJoin, miterlimit, dash, dash_phase);
+    }
+
+    /**
      * Privater Defaultkonstruktor damit FixedWidthStroke in diesem Fall verwendet wird.
      */
     private CustomFixedWidthStroke() {
