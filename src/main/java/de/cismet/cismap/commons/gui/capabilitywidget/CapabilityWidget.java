@@ -20,6 +20,7 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
@@ -45,7 +46,6 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -86,13 +86,13 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
-import de.cismet.cismap.commons.exceptions.ConvertException;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
@@ -165,7 +165,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private Element serverElement;
     private JPopupMenu treePopMenu = new JPopupMenu();
     private String filterString = null;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdAddByUrl;
     private javax.swing.JButton cmdAddFromList;
@@ -342,6 +341,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         } catch (MalformedURLException ex) {
                             log.error("Url is not wellformed no wss authentication possible", ex); // NOI18N
                         }
+                    } else if (link.toLowerCase().contains("service=cids")) {
+                        addCidsCapabilitesTree(link, load, subparent);
                     } else {
                         // ToDo cleveres Probieren wenn z.B. nur die service URL angebenen wurde -->
                         // getCapabiltiesrequest aufbauen und probieren
@@ -447,6 +448,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             processUrl(link, null);
         }
     }
+
     /**
      * restliche unbenutzte DnD-Methoden.
      *
@@ -607,6 +609,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             });
         add(tbpCapabilities, java.awt.BorderLayout.CENTER);
     } // </editor-fold>//GEN-END:initComponents
+
     /**
      * DOCUMENT ME!
      *
@@ -901,6 +904,101 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         panLoad.add(panFillBottom, gridBagConstraints);
 
         return panLoad;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  link       DOCUMENT ME!
+     * @param  comp       DOCUMENT ME!
+     * @param  subparent  DOCUMENT ME!
+     */
+    private void addCidsCapabilitesTree(final String link, final JComponent comp, final String subparent) {
+        final Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final Class treeModelClass = ClassLoader.getSystemClassLoader()
+                                    .loadClass("de.cismet.cismap.cidslayer.CidsLayerTreeModel");
+                        final Class treeRendererClass = ClassLoader.getSystemClassLoader()
+                                    .loadClass("de.cismet.cismap.cidslayer.CidsCapabilitesTreeCellRenderer");
+                        final String[] args = link.split("[=&]");
+                        String domain = "";
+                        for (int i = 0; i < args.length; i++) {
+                            if (args[i].equalsIgnoreCase("domain") && ((i + 1) < args.length)) {
+                                domain = args[i + 1];
+                            }
+                        }
+                        if (domain.isEmpty()) {
+                            tbpCapabilities.remove(comp);
+                            return;
+                        }
+                        final String title = domain;
+                        final TreeModel tm = (TreeModel)treeModelClass.getConstructor(String.class).newInstance(domain);
+                        final TreeCellRenderer tcr = (TreeCellRenderer)treeRendererClass.newInstance();
+                        final DragTree tree = new DragTree();
+                        final DropTarget dt = new DropTarget(tree, acceptableActions, thisWidget);
+
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    addPopupMenu(tree);
+                                    tree.setModel(tm);
+                                    tree.setBorder(new EmptyBorder(1, 1, 1, 1));
+                                    tree.setCellRenderer(tcr);
+                                    final JScrollPane sPane = new JScrollPane();
+                                    sPane.setViewportView(tree);
+                                    sPane.setBorder(new EmptyBorder(1, 1, 1, 1));
+                                    StaticSwingTools.setNiftyScrollBars(sPane);
+                                    synchronized (this) {
+                                        tbpCapabilities.setComponentAt(tbpCapabilities.indexOfComponent(comp), sPane);
+                                    }
+                                    stateChanged(null);
+
+                                    capabilityUrls.put(new LinkWithSubparent(link, subparent), sPane);
+                                    capabilityUrlsReverse.put(sPane, new LinkWithSubparent(link, subparent));
+
+                                    sPane.putClientProperty("tabTitle", title);
+                                    synchronized (this) {
+                                        StaticSwingTools.jTabbedPaneWithVerticalTextSetNewText(
+                                            tbpCapabilities,
+                                            title,
+                                            icoConnect,
+                                            Color.black,
+                                            sPane);
+                                    }
+                                    /*synchronized(this) {
+                                     *  tbpCapabilities.setToolTipTextAt(tbpCapabilities.indexOfComponent(sPane), );}*/
+                                    stateChanged(null);
+                                }
+                            });
+                    } catch (Exception ex) {
+                        tbpCapabilities.remove(comp);
+                        final JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
+                        capabilityUrls.remove(new LinkWithSubparent(link, null));
+                        capabilityUrlsReverse.remove(jc);
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            };
+        CismetThreadPool.execute(r);
+        /*try {
+         *  treeModelClass =
+         * ClassLoader.getSystemClassLoader().loadClass("de.cismet.cismap.cidslayer.CidsLayerTreeModel"); final
+         * TreeModel tm = (TreeModel) treeModelClass.getConstructor(String.class).newInstance(cl.getLink()); final
+         * DragTree tree = new DragTree(); final DropTarget dt = new DropTarget(tree, acceptableActions, thisWidget);
+         * //final ListMenuItem lmi = new ListMenuItem("cidsLayer", cl); lmi.addActionListener(new ActionListener() {
+         * @Override     public void actionPerformed(ActionEvent e) {
+         *
+         *   } }); menu.add(lmi); } catch (ClassNotFoundException ex) { log.error("ClassNotFoundException", ex); } catch
+         * (NoSuchMethodException ex) { log.error("NoSuchMethodException", ex); } catch (SecurityException ex) {
+         * log.error("SecurityException", ex); } catch (InstantiationException ex) { log.error("InstantiationException",
+         * ex); } catch (IllegalAccessException ex) { log.error("IllegalAccessException", ex); } catch
+         * (IllegalArgumentException ex) { log.error("IllegalArgumentException", ex); } catch (InvocationTargetException
+         * ex) {
+         * log.error("InvocationTargetException", ex);}*/
     }
 
     /**
@@ -1592,7 +1690,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             capabilityList.add(component);
         }
 
-        setSearchEnabled( cp.isSearchActivated() );
+        setSearchEnabled(cp.isSearchActivated());
     }
     //J+
 
@@ -1613,7 +1711,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
         // CapabilityLink-Einträge erzeugen
         for (final CapabilityLink cl : node.getCapabilitiesList().values()) {
-            if (cl.getType().equals(CapabilityLink.OGC) || cl.getType().equals(CapabilityLink.OGC_DEPRECATED)) {
+            if (cl.getType().equals(CapabilityLink.OGC) || cl.getType().equals(CapabilityLink.OGC_DEPRECATED)
+                        || cl.getType().equals("cidsLayer")) {
                 final ListMenuItem lmi = new ListMenuItem("test", cl); // NOI18N
                 lmi.addActionListener(new ActionListener() {
 
@@ -2118,6 +2217,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
                     trans = new DefaultTransferable(new WFSSelectionAndCapabilities(features));
                 }
+            } else if (this.getModel().getClass().getName().equals("de.cismet.cismap.cidslayer.CidsLayerTreeModel")) {
+                trans = new DefaultTransferable(getSelectionModel().getSelectionPath().getLastPathComponent());
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
         }
