@@ -54,6 +54,7 @@ import de.cismet.cismap.commons.ModeLayer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.QueryEditorDialog;
+import de.cismet.cismap.commons.featureservice.SLDStyledLayer;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.featureservice.style.StyleDialog;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -297,7 +298,10 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                                     logger.debug("configure dialog"); // NOI18N
                                 }
                             }
+
                             styleDialog.configureDialog(
+                                (selectedService instanceof SLDStyledLayer)
+                                    ? ((SLDStyledLayer)selectedService).getSLDDefiniton() : null,
                                 selectedService.getLayerProperties(),
                                 selectedService.getFeatureServiceAttributes(),
                                 selectedService.getQuery());
@@ -380,6 +384,10 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                                                 selectedService.retrieve(forceUpdate);
                                             } else {
                                                 selectedService.setLayerProperties(styleDialog.getLayerProperties());
+                                                if (selectedService instanceof SLDStyledLayer) {
+                                                    ((SLDStyledLayer)selectedService).setSLDInputStream(
+                                                        styleDialog.getSLDStyle());
+                                                }
                                             }
                                         } catch (Throwable t) {
                                             logger.error(t.getMessage(), t);
