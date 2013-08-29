@@ -20,6 +20,7 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
@@ -177,7 +178,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private Element serverElement;
     private JPopupMenu treePopMenu = new JPopupMenu();
     private String filterString = null;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdAddByUrl;
     private javax.swing.JButton cmdAddFromList;
@@ -632,6 +632,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             });
         add(tbpCapabilities, java.awt.BorderLayout.CENTER);
     } // </editor-fold>//GEN-END:initComponents
+
     /**
      * DOCUMENT ME!
      *
