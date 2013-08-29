@@ -28,6 +28,8 @@ import org.jdom.output.Format;
 // import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
+import org.openide.util.Exceptions;
+
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -71,6 +73,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.text.AbstractDocument;
 import javax.swing.text.PlainDocument;
 
 import de.cismet.cismap.commons.RestrictedFileSystemView;
@@ -121,16 +124,16 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void closeDialog(final java.awt.event.WindowEvent evt) { //GEN-FIRST:event_closeDialog
+    private void closeDialog(final java.awt.event.WindowEvent evt) {//GEN-FIRST:event_closeDialog
         doClose(false);
-    }                                                                //GEN-LAST:event_closeDialog
+    }//GEN-LAST:event_closeDialog
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOKActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOKActionPerformed
+    private void cmdOKActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOKActionPerformed
 
         // setLabelAttribute((cbbAttribute.getSelectedItem() == null) ? null :
         // cbbAttribute.getSelectedItem().toString());
@@ -179,16 +182,16 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 //
 // if (isIdFeature) { ((FeatureWithId) feature).setIdExpression(getIdExpression()); }
         doClose(true);
-    } //GEN-LAST:event_cmdOKActionPerformed
+    }//GEN-LAST:event_cmdOKActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
         doClose(false);
-    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
+    }//GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -199,19 +202,19 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         // not supported or shown
 // cbbFillPattern.setEnabled((evt.getStateChange() == ItemEvent.SELECTED));
 // updatePreview();
-    } //GEN-LAST:event_chkFillPatternItemStateChanged
+    }//GEN-LAST:event_chkFillPatternItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkFillItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkFillItemStateChanged
+    private void chkFillItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkFillItemStateChanged
 
         cmdFill.setEnabled(chkFill.isSelected());
         getStyle().setDrawFill(chkFill.isSelected());
         updatePreview();
-    } //GEN-LAST:event_chkFillItemStateChanged
+    }//GEN-LAST:event_chkFillItemStateChanged
 
     /**
      * DOCUMENT ME!
@@ -251,7 +254,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void sldLineWidthStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_sldLineWidthStateChanged
+    private void sldLineWidthStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldLineWidthStateChanged
 
         // only permit linewidth > 0
         if (sldLineWidth.getValue() == 0) {
@@ -260,24 +263,24 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         setLineWidth(sldLineWidth.getValue());
         updatePreview();
-    } //GEN-LAST:event_sldLineWidthStateChanged
+    }//GEN-LAST:event_sldLineWidthStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void sldAlphaStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_sldAlphaStateChanged
+    private void sldAlphaStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldAlphaStateChanged
         setAlpha(sldAlpha.getValue() / 100.0f);
         updatePreview();
-    }                                                                            //GEN-LAST:event_sldAlphaStateChanged
+    }//GEN-LAST:event_sldAlphaStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdFillActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdFillActionPerformed
+    private void cmdFillActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdFillActionPerformed
 
         // set current color in the ColorChooser
         colorChooser.setColor(getStyle().getFillColor());
@@ -315,7 +318,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 });
 
         StaticSwingTools.showDialog(colorChooserDialog);
-    } //GEN-LAST:event_cmdFillActionPerformed
+    }//GEN-LAST:event_cmdFillActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -359,7 +362,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkActivateLabelsItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkActivateLabelsItemStateChanged
+    private void chkActivateLabelsItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkActivateLabelsItemStateChanged
 
         // enable/disable every labelling-oriented component
         final boolean flag = chkActivateLabels.isSelected();
@@ -382,38 +385,38 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cmdChangeTextColor.setEnabled(flag);
         cmdChangeFont.setEnabled(flag);
         updatePreview();
-    } //GEN-LAST:event_chkActivateLabelsItemStateChanged
+    }//GEN-LAST:event_chkActivateLabelsItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void sldPointSymbolSizeStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_sldPointSymbolSizeStateChanged
+    private void sldPointSymbolSizeStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_sldPointSymbolSizeStateChanged
         setPointSymbolSize(sldPointSymbolSize.getValue());
         updatePreview();
-    }                                                                                      //GEN-LAST:event_sldPointSymbolSizeStateChanged
+    }//GEN-LAST:event_sldPointSymbolSizeStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void sldPointSymbolSizeMouseWheelMoved(final java.awt.event.MouseWheelEvent evt) { //GEN-FIRST:event_sldPointSymbolSizeMouseWheelMoved
+    private void sldPointSymbolSizeMouseWheelMoved(final java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_sldPointSymbolSizeMouseWheelMoved
 
         if (sldPointSymbolSize.isEnabled() && sldPointSymbolSize.isFocusOwner()) {
             sldPointSymbolSize.setValue(sldPointSymbolSize.getValue() - evt.getWheelRotation());
         }
-    } //GEN-LAST:event_sldPointSymbolSizeMouseWheelMoved
+    }//GEN-LAST:event_sldPointSymbolSizeMouseWheelMoved
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void sldAlphaMouseWheelMoved(final java.awt.event.MouseWheelEvent evt) { //GEN-FIRST:event_sldAlphaMouseWheelMoved
+    private void sldAlphaMouseWheelMoved(final java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_sldAlphaMouseWheelMoved
         sldAlpha.setValue(sldAlpha.getValue() - (evt.getWheelRotation() * 5));
-    }                                                                                //GEN-LAST:event_sldAlphaMouseWheelMoved
+    }//GEN-LAST:event_sldAlphaMouseWheelMoved
 
     /**
      * DOCUMENT ME!
@@ -478,16 +481,16 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkAutoscaleItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkAutoscaleItemStateChanged
+    private void chkAutoscaleItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkAutoscaleItemStateChanged
         setAutoscale(chkAutoscale.isSelected());
-    }                                                                               //GEN-LAST:event_chkAutoscaleItemStateChanged
+    }//GEN-LAST:event_chkAutoscaleItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cbbPointSymbolItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_cbbPointSymbolItemStateChanged
+    private void cbbPointSymbolItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbbPointSymbolItemStateChanged
 
         // evaluate the selection of the pointsymbol-ComboBox
         if (evt.getStateChange() == ItemEvent.SELECTED) {
@@ -505,81 +508,81 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         }
 
         updatePreview();
-    } //GEN-LAST:event_cbbPointSymbolItemStateChanged
+    }//GEN-LAST:event_cbbPointSymbolItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkHighlightableItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkHighlightableItemStateChanged
+    private void chkHighlightableItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkHighlightableItemStateChanged
         setHighlighting(chkHighlightable.isSelected());
-    }                                                                                   //GEN-LAST:event_chkHighlightableItemStateChanged
+    }//GEN-LAST:event_chkHighlightableItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkSyncItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkSyncItemStateChanged
+    private void chkSyncItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkSyncItemStateChanged
 
         if (evt.getStateChange() == ItemEvent.SELECTED) {
             setLineColor(true, BasicStyle.darken(getStyle().getFillColor()));
             updatePreview();
         }
-    } //GEN-LAST:event_chkSyncItemStateChanged
+    }//GEN-LAST:event_chkSyncItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkLinewrapActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkLinewrapActionPerformed
+    private void chkLinewrapActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkLinewrapActionPerformed
 
         final XMLEditorKit kit = (XMLEditorKit)queryEditor.getEditorKit();
         kit.setLineWrappingEnabled(chkLinewrap.isSelected());
         queryEditor.updateUI();
-    } //GEN-LAST:event_chkLinewrapActionPerformed
+    }//GEN-LAST:event_chkLinewrapActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkFillActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_chkFillActionPerformed
-    {                                                                         //GEN-HEADEREND:event_chkFillActionPerformed
+    private void chkFillActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_chkFillActionPerformed
+    {//GEN-HEADEREND:event_chkFillActionPerformed
                                                                               // TODO add your handling code here:
-    }                                                                         //GEN-LAST:event_chkFillActionPerformed
+    }//GEN-LAST:event_chkFillActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void chkHighlightableActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_chkHighlightableActionPerformed
-    {                                                                                  //GEN-HEADEREND:event_chkHighlightableActionPerformed
+    private void chkHighlightableActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_chkHighlightableActionPerformed
+    {//GEN-HEADEREND:event_chkHighlightableActionPerformed
                                                                                        // TODO add your handling code
                                                                                        // here:
-    }                                                                                  //GEN-LAST:event_chkHighlightableActionPerformed
+    }//GEN-LAST:event_chkHighlightableActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cbbPointSymbolActionPerformed(final java.awt.event.ActionEvent evt) //GEN-FIRST:event_cbbPointSymbolActionPerformed
-    {                                                                                //GEN-HEADEREND:event_cbbPointSymbolActionPerformed
+    private void cbbPointSymbolActionPerformed(final java.awt.event.ActionEvent evt)//GEN-FIRST:event_cbbPointSymbolActionPerformed
+    {//GEN-HEADEREND:event_cbbPointSymbolActionPerformed
                                                                                      // TODO add your handling code
                                                                                      // here:
-    }                                                                                //GEN-LAST:event_cbbPointSymbolActionPerformed
+    }//GEN-LAST:event_cbbPointSymbolActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cbbAnnotationExpressionItemStateChanged(final java.awt.event.ItemEvent evt) //GEN-FIRST:event_cbbAnnotationExpressionItemStateChanged
-    {                                                                                        //GEN-HEADEREND:event_cbbAnnotationExpressionItemStateChanged
+    private void cbbAnnotationExpressionItemStateChanged(final java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbbAnnotationExpressionItemStateChanged
+    {//GEN-HEADEREND:event_cbbAnnotationExpressionItemStateChanged
 
         if (!this.ignoreSelectionEvent && (evt.getStateChange() == ItemEvent.SELECTED)) {
             final String annotationExpression = cbbAnnotationExpression.getSelectedItem().toString();
@@ -602,15 +605,15 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     LayerProperties.EXPRESSIONTYPE_GROOVY);
             }
         }
-    }                                                                 //GEN-LAST:event_cbbAnnotationExpressionItemStateChanged
+    }//GEN-LAST:event_cbbAnnotationExpressionItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cbbIdExpressionItemStateChanged(final java.awt.event.ItemEvent evt) //GEN-FIRST:event_cbbIdExpressionItemStateChanged
-    {                                                                                //GEN-HEADEREND:event_cbbIdExpressionItemStateChanged
+    private void cbbIdExpressionItemStateChanged(final java.awt.event.ItemEvent evt)//GEN-FIRST:event_cbbIdExpressionItemStateChanged
+    {//GEN-HEADEREND:event_cbbIdExpressionItemStateChanged
 
         if (!this.ignoreSelectionEvent && (evt.getStateChange() == ItemEvent.SELECTED)) {
             final String idExpression = cbbIdExpression.getSelectedItem().toString();
@@ -627,7 +630,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 this.layerProperties.setIdExpression(idExpression, LayerProperties.EXPRESSIONTYPE_GROOVY);
             }
         }
-    }                                                                                                            //GEN-LAST:event_cbbIdExpressionItemStateChanged
+    }//GEN-LAST:event_cbbIdExpressionItemStateChanged
 
     /**
      * DOCUMENT ME!
@@ -636,7 +639,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      */
     private void cmdAddActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddActionPerformed
         // TODO add your handling code here:
-    } //GEN-LAST:event_cmdAddActionPerformed
+    }//GEN-LAST:event_cmdAddActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -645,7 +648,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      */
     private void chkUseQueryStringActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkUseQueryStringActionPerformed
         // TODO add your handling code here:
-    } //GEN-LAST:event_chkUseQueryStringActionPerformed
+    }//GEN-LAST:event_chkUseQueryStringActionPerformed
 
     /**
      * Changes the style of the StyleDialog if the selection of the historylist has changed.
@@ -974,39 +977,39 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void sldLineWidthMouseWheelMoved(final java.awt.event.MouseWheelEvent evt) { //GEN-FIRST:event_sldLineWidthMouseWheelMoved
+    private void sldLineWidthMouseWheelMoved(final java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_sldLineWidthMouseWheelMoved
 
         if (sldLineWidth.isEnabled() && sldLineWidth.isFocusOwner()) {
             sldLineWidth.setValue(sldLineWidth.getValue() - evt.getWheelRotation());
         }
-    } //GEN-LAST:event_sldLineWidthMouseWheelMoved
+    }//GEN-LAST:event_sldLineWidthMouseWheelMoved
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void radRightActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_radRightActionPerformed
+    private void radRightActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radRightActionPerformed
         setAlignment(JLabel.RIGHT_ALIGNMENT);
-    }                                                                            //GEN-LAST:event_radRightActionPerformed
+    }//GEN-LAST:event_radRightActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void radLeftActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_radLeftActionPerformed
+    private void radLeftActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radLeftActionPerformed
         setAlignment(JLabel.LEFT_ALIGNMENT);
-    }                                                                           //GEN-LAST:event_radLeftActionPerformed
+    }//GEN-LAST:event_radLeftActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void radCenterActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_radCenterActionPerformed
+    private void radCenterActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_radCenterActionPerformed
         setAlignment(JLabel.CENTER_ALIGNMENT);
-    }                                                                             //GEN-LAST:event_radCenterActionPerformed
+    }//GEN-LAST:event_radCenterActionPerformed
 
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
@@ -1122,14 +1125,12 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panRulesButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
         panRulesButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        cmdAdd.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_add.png")));      // NOI18N
+        cmdAdd.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_add.png"))); // NOI18N
         cmdAdd.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdAdd.text")); // NOI18N
         cmdAdd.setMargin(new java.awt.Insets(2, 5, 2, 5));
         panRulesButtons.add(cmdAdd);
 
-        cmdRemove.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_remove.png")));         // NOI18N
+        cmdRemove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_remove.png"))); // NOI18N
         cmdRemove.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdRemove.text")); // NOI18N
         cmdRemove.setMargin(new java.awt.Insets(2, 5, 2, 5));
         panRulesButtons.add(cmdRemove);
@@ -1149,9 +1150,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         panTabRules.add(panRulesScroll, java.awt.BorderLayout.CENTER);
 
-        panTabQuery.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
-                javax.swing.BorderFactory.createTitledBorder("Query bearbeiten")));
+        panTabQuery.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10), javax.swing.BorderFactory.createTitledBorder("Query bearbeiten")));
         panTabQuery.setLayout(new java.awt.BorderLayout());
 
         panScrollpane.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 0, 5));
@@ -1165,24 +1164,18 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         chkLinewrap.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkLinewrap.text")); // NOI18N
         chkLinewrap.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    chkLinewrapActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkLinewrapActionPerformed(evt);
+            }
+        });
         panQueryCheckbox.add(chkLinewrap);
 
-        chkUseQueryString.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.chkUseQueryString.text")); // NOI18N
+        chkUseQueryString.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkUseQueryString.text")); // NOI18N
         chkUseQueryString.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    chkUseQueryStringActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkUseQueryStringActionPerformed(evt);
+            }
+        });
         panQueryCheckbox.add(chkUseQueryString);
 
         panTabQuery.add(panQueryCheckbox, java.awt.BorderLayout.SOUTH);
@@ -1192,29 +1185,22 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         setMinimumSize(new java.awt.Dimension(685, 461));
         setModal(true);
         addWindowListener(new java.awt.event.WindowAdapter() {
-
-                @Override
-                public void windowClosing(final java.awt.event.WindowEvent evt) {
-                    closeDialog(evt);
-                }
-            });
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                closeDialog(evt);
+            }
+        });
 
         panMain.setMinimumSize(new java.awt.Dimension(620, 433));
         panMain.setPreferredSize(new java.awt.Dimension(620, 433));
         panMain.setLayout(new java.awt.BorderLayout());
 
-        panInfo.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createCompoundBorder(
-                    javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5),
-                    javax.swing.BorderFactory.createEtchedBorder()),
-                javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+        panInfo.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5), javax.swing.BorderFactory.createEtchedBorder()), javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         panInfo.setLayout(new java.awt.BorderLayout());
 
         panInfoComp.setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         panInfoComp.add(jLabel1, gridBagConstraints);
@@ -1239,13 +1225,12 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         panPreview.setBackground(new java.awt.Color(255, 255, 255));
 
-        final javax.swing.GroupLayout panPreviewLayout = new javax.swing.GroupLayout(panPreview);
+        javax.swing.GroupLayout panPreviewLayout = new javax.swing.GroupLayout(panPreview);
         panPreview.setLayout(panPreviewLayout);
         panPreviewLayout.setHorizontalGroup(
-            panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                146,
-                Short.MAX_VALUE));
+            panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 146, Short.MAX_VALUE)
+        );
         panPreviewLayout.setVerticalGroup(
             panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
                 0,
@@ -1288,35 +1273,27 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         chkFill.setSelected(true);
         chkFill.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkFill.text")); // NOI18N
         chkFill.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    chkFillItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkFillItemStateChanged(evt);
+            }
+        });
         chkFill.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    chkFillActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkFillActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
         panFill.add(chkFill, gridBagConstraints);
 
-        chkFillPattern.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.chkFillPattern.text")); // NOI18N
+        chkFillPattern.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkFillPattern.text")); // NOI18N
         chkFillPattern.setEnabled(false);
         chkFillPattern.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    chkFillPatternItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkFillPatternItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -1324,8 +1301,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
         panFill.add(chkFillPattern, gridBagConstraints);
 
-        cbbFillPattern.setModel(new javax.swing.DefaultComboBoxModel(
-                new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbbFillPattern.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbbFillPattern.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1357,17 +1333,13 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 10);
         panFill.add(chkLine, gridBagConstraints);
 
-        chkLinePattern.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.chkLinePattern.text")); // NOI18N
+        chkLinePattern.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkLinePattern.text")); // NOI18N
         chkLinePattern.setEnabled(false);
         chkLinePattern.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    chkLinePatternItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkLinePatternItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -1375,8 +1347,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
         panFill.add(chkLinePattern, gridBagConstraints);
 
-        cbbLinePattern.setModel(new javax.swing.DefaultComboBoxModel(
-                new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbbLinePattern.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbbLinePattern.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1388,12 +1359,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         chkSync.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkLineSync.text")); // NOI18N
         chkSync.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    chkSyncItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkSyncItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
@@ -1402,23 +1371,17 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(10, 0, 5, 10);
         panFill.add(chkSync, gridBagConstraints);
 
-        chkHighlightable.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.chkHighlightable.text")); // NOI18N
+        chkHighlightable.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkHighlightable.text")); // NOI18N
         chkHighlightable.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    chkHighlightableItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkHighlightableItemStateChanged(evt);
+            }
+        });
         chkHighlightable.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    chkHighlightableActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkHighlightableActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
@@ -1446,19 +1409,15 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         sldLineWidth.setMinimumSize(new java.awt.Dimension(130, 37));
         sldLineWidth.setPreferredSize(new java.awt.Dimension(130, 37));
         sldLineWidth.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-
-                @Override
-                public void mouseWheelMoved(final java.awt.event.MouseWheelEvent evt) {
-                    sldLineWidthMouseWheelMoved(evt);
-                }
-            });
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                sldLineWidthMouseWheelMoved(evt);
+            }
+        });
         sldLineWidth.addChangeListener(new javax.swing.event.ChangeListener() {
-
-                @Override
-                public void stateChanged(final javax.swing.event.ChangeEvent evt) {
-                    sldLineWidthStateChanged(evt);
-                }
-            });
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sldLineWidthStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 6;
@@ -1515,18 +1474,16 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panTransWhite.setMinimumSize(new java.awt.Dimension(14, 14));
         panTransWhite.setPreferredSize(new java.awt.Dimension(14, 14));
 
-        final javax.swing.GroupLayout panTransWhiteLayout = new javax.swing.GroupLayout(panTransWhite);
+        javax.swing.GroupLayout panTransWhiteLayout = new javax.swing.GroupLayout(panTransWhite);
         panTransWhite.setLayout(panTransWhiteLayout);
         panTransWhiteLayout.setHorizontalGroup(
-            panTransWhiteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                12,
-                Short.MAX_VALUE));
+            panTransWhiteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 12, Short.MAX_VALUE)
+        );
         panTransWhiteLayout.setVerticalGroup(
-            panTransWhiteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                12,
-                Short.MAX_VALUE));
+            panTransWhiteLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 12, Short.MAX_VALUE)
+        );
 
         jPanel7.add(panTransWhite);
 
@@ -1537,19 +1494,15 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         sldAlpha.setMinimumSize(new java.awt.Dimension(100, 23));
         sldAlpha.setPreferredSize(new java.awt.Dimension(100, 23));
         sldAlpha.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-
-                @Override
-                public void mouseWheelMoved(final java.awt.event.MouseWheelEvent evt) {
-                    sldAlphaMouseWheelMoved(evt);
-                }
-            });
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                sldAlphaMouseWheelMoved(evt);
+            }
+        });
         sldAlpha.addChangeListener(new javax.swing.event.ChangeListener() {
-
-                @Override
-                public void stateChanged(final javax.swing.event.ChangeEvent evt) {
-                    sldAlphaStateChanged(evt);
-                }
-            });
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sldAlphaStateChanged(evt);
+            }
+        });
         jPanel7.add(sldAlpha);
 
         panTransColor.setBackground(new java.awt.Color(0, 180, 0));
@@ -1558,18 +1511,16 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panTransColor.setMinimumSize(new java.awt.Dimension(14, 14));
         panTransColor.setPreferredSize(new java.awt.Dimension(14, 14));
 
-        final javax.swing.GroupLayout panTransColorLayout = new javax.swing.GroupLayout(panTransColor);
+        javax.swing.GroupLayout panTransColorLayout = new javax.swing.GroupLayout(panTransColor);
         panTransColor.setLayout(panTransColorLayout);
         panTransColorLayout.setHorizontalGroup(
-            panTransColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                12,
-                Short.MAX_VALUE));
+            panTransColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 12, Short.MAX_VALUE)
+        );
         panTransColorLayout.setVerticalGroup(
-            panTransColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                12,
-                Short.MAX_VALUE));
+            panTransColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 12, Short.MAX_VALUE)
+        );
 
         jPanel7.add(panTransColor);
 
@@ -1589,18 +1540,16 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panFillColor.setMinimumSize(new java.awt.Dimension(35, 15));
         panFillColor.setPreferredSize(new java.awt.Dimension(35, 15));
 
-        final javax.swing.GroupLayout panFillColorLayout = new javax.swing.GroupLayout(panFillColor);
+        javax.swing.GroupLayout panFillColorLayout = new javax.swing.GroupLayout(panFillColor);
         panFillColor.setLayout(panFillColorLayout);
         panFillColorLayout.setHorizontalGroup(
-            panFillColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                33,
-                Short.MAX_VALUE));
+            panFillColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 33, Short.MAX_VALUE)
+        );
         panFillColorLayout.setVerticalGroup(
-            panFillColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                13,
-                Short.MAX_VALUE));
+            panFillColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 13, Short.MAX_VALUE)
+        );
 
         jPanel8.add(panFillColor);
 
@@ -1609,12 +1558,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cmdFill.setMinimumSize(new java.awt.Dimension(30, 18));
         cmdFill.setPreferredSize(new java.awt.Dimension(30, 18));
         cmdFill.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdFillActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdFillActionPerformed(evt);
+            }
+        });
         jPanel8.add(cmdFill);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1632,18 +1579,16 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panLineColor.setMinimumSize(new java.awt.Dimension(35, 15));
         panLineColor.setPreferredSize(new java.awt.Dimension(35, 15));
 
-        final javax.swing.GroupLayout panLineColorLayout = new javax.swing.GroupLayout(panLineColor);
+        javax.swing.GroupLayout panLineColorLayout = new javax.swing.GroupLayout(panLineColor);
         panLineColor.setLayout(panLineColorLayout);
         panLineColorLayout.setHorizontalGroup(
-            panLineColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                33,
-                Short.MAX_VALUE));
+            panLineColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 33, Short.MAX_VALUE)
+        );
         panLineColorLayout.setVerticalGroup(
-            panLineColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                13,
-                Short.MAX_VALUE));
+            panLineColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 13, Short.MAX_VALUE)
+        );
 
         jPanel9.add(panLineColor);
 
@@ -1653,12 +1598,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cmdLine.setMinimumSize(new java.awt.Dimension(30, 18));
         cmdLine.setPreferredSize(new java.awt.Dimension(30, 18));
         cmdLine.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdLineActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdLineActionPerformed(evt);
+            }
+        });
         jPanel9.add(cmdLine);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1694,9 +1637,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panFill.add(lblHistory, gridBagConstraints);
 
         lblPointSymbol.setLabelFor(cbbPointSymbol);
-        lblPointSymbol.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.lblPointSymbol.text")); // NOI18N
+        lblPointSymbol.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblPointSymbol.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 8;
@@ -1709,19 +1650,15 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cbbPointSymbol.setPreferredSize(new java.awt.Dimension(45, 25));
         cbbPointSymbol.setRenderer(new PointSymbolListRenderer());
         cbbPointSymbol.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    cbbPointSymbolItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbbPointSymbolItemStateChanged(evt);
+            }
+        });
         cbbPointSymbol.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cbbPointSymbolActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbbPointSymbolActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 8;
@@ -1730,9 +1667,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panFill.add(cbbPointSymbol, gridBagConstraints);
 
         lblPointSymbolSize.setLabelFor(sldPointSymbolSize);
-        lblPointSymbolSize.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.lblPointSymbolSize.text")); // NOI18N
+        lblPointSymbolSize.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblPointSymbolSize.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 9;
@@ -1750,19 +1685,15 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         sldPointSymbolSize.setMinimumSize(new java.awt.Dimension(130, 37));
         sldPointSymbolSize.setPreferredSize(new java.awt.Dimension(130, 37));
         sldPointSymbolSize.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
-
-                @Override
-                public void mouseWheelMoved(final java.awt.event.MouseWheelEvent evt) {
-                    sldPointSymbolSizeMouseWheelMoved(evt);
-                }
-            });
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                sldPointSymbolSizeMouseWheelMoved(evt);
+            }
+        });
         sldPointSymbolSize.addChangeListener(new javax.swing.event.ChangeListener() {
-
-                @Override
-                public void stateChanged(final javax.swing.event.ChangeEvent evt) {
-                    sldPointSymbolSizeStateChanged(evt);
-                }
-            });
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                sldPointSymbolSizeStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 9;
@@ -1788,10 +1719,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         panTabFill.add(panFill, java.awt.BorderLayout.WEST);
 
-        tbpTabs.addTab(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab1.title"),
-            new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style_color.png")),
-            panTabFill); // NOI18N
+        tbpTabs.addTab(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab1.title"), new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style_color.png")), panTabFill); // NOI18N
+
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, chkCustomSLD, org.jdesktop.beansbinding.ELProperty.create("${selected}"), panTabLabeling, org.jdesktop.beansbinding.BeanProperty.create("enabled"));
+        bindingGroup.addBinding(binding);
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
                 org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
@@ -1814,16 +1745,12 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panLabeling.setLayout(new java.awt.GridBagLayout());
 
         chkActivateLabels.setSelected(true);
-        chkActivateLabels.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.chkActivateLabels.text")); // NOI18N
+        chkActivateLabels.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkActivateLabels.text")); // NOI18N
         chkActivateLabels.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    chkActivateLabelsItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkActivateLabelsItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -1831,9 +1758,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panLabeling.add(chkActivateLabels, gridBagConstraints);
 
         lblAnnotationExpression.setLabelFor(cbbAnnotationExpression);
-        lblAnnotationExpression.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.lblAttrib.text")); // NOI18N
+        lblAnnotationExpression.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblAttrib.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -1843,12 +1768,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         cbbAnnotationExpression.setEditable(true);
         cbbAnnotationExpression.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    cbbAnnotationExpressionItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbbAnnotationExpressionItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -1857,20 +1780,15 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         panLabeling.add(cbbAnnotationExpression, gridBagConstraints);
 
-        panLabelButtons.setBorder(javax.swing.BorderFactory.createTitledBorder(
-                org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panLabelButtons.border.title"))); // NOI18N
+        panLabelButtons.setBorder(javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panLabelButtons.border.title"))); // NOI18N
         panLabelButtons.setLayout(new java.awt.GridBagLayout());
 
-        cmdChangeTextColor.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.cmdChangeColor.text")); // NOI18N
+        cmdChangeTextColor.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdChangeColor.text")); // NOI18N
         cmdChangeTextColor.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdChangeTextColorActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdChangeTextColorActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -1879,16 +1797,12 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(10, 5, 5, 5);
         panLabelButtons.add(cmdChangeTextColor, gridBagConstraints);
 
-        cmdChangeFont.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.cmdChangeFont.text")); // NOI18N
+        cmdChangeFont.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdChangeFont.text")); // NOI18N
         cmdChangeFont.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdChangeFontActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdChangeFontActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -1908,18 +1822,16 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panFontColor.setMinimumSize(new java.awt.Dimension(20, 20));
         panFontColor.setPreferredSize(new java.awt.Dimension(20, 20));
 
-        final javax.swing.GroupLayout panFontColorLayout = new javax.swing.GroupLayout(panFontColor);
+        javax.swing.GroupLayout panFontColorLayout = new javax.swing.GroupLayout(panFontColor);
         panFontColor.setLayout(panFontColorLayout);
         panFontColorLayout.setHorizontalGroup(
-            panFontColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                18,
-                Short.MAX_VALUE));
+            panFontColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 18, Short.MAX_VALUE)
+        );
         panFontColorLayout.setVerticalGroup(
-            panFontColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
-                0,
-                18,
-                Short.MAX_VALUE));
+            panFontColorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 18, Short.MAX_VALUE)
+        );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
@@ -1945,8 +1857,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         lblMin.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblMin.text")); // NOI18N
         panScale.add(lblMin);
 
-        txtMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(
-                new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtMin.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
         txtMin.setText("1");
         txtMin.setMinimumSize(new java.awt.Dimension(60, 20));
         txtMin.setPreferredSize(new java.awt.Dimension(60, 20));
@@ -1956,8 +1867,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         lblMax.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblMax.text")); // NOI18N
         panScale.add(lblMax);
 
-        txtMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(
-                new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
+        txtMax.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#0"))));
         txtMax.setText("2500");
         txtMax.setMinimumSize(new java.awt.Dimension(60, 20));
         txtMax.setPreferredSize(new java.awt.Dimension(60, 20));
@@ -1974,12 +1884,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         chkAutoscale.setSelected(true);
         chkAutoscale.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.chkAutoscale.text")); // NOI18N
         chkAutoscale.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    chkAutoscaleItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkAutoscaleItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
@@ -1994,34 +1902,28 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         radLeft.setSelected(true);
         radLeft.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.radleft.text")); // NOI18N
         radLeft.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    radLeftActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radLeftActionPerformed(evt);
+            }
+        });
         panAlignment.add(radLeft);
 
         btgAlignment.add(radCenter);
         radCenter.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.radCenter.text")); // NOI18N
         radCenter.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    radCenterActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radCenterActionPerformed(evt);
+            }
+        });
         panAlignment.add(radCenter);
 
         btgAlignment.add(radRight);
         radRight.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.radRight.text")); // NOI18N
         radRight.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    radRightActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                radRightActionPerformed(evt);
+            }
+        });
         panAlignment.add(radRight);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -2041,9 +1943,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panLabeling.add(lblAlignment, gridBagConstraints);
 
         lblMultiplier.setLabelFor(txtMultiplier);
-        lblMultiplier.setText(org.openide.util.NbBundle.getMessage(
-                StyleDialog.class,
-                "StyleDialog.lblMultiplier.text")); // NOI18N
+        lblMultiplier.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblMultiplier.text")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
@@ -2051,8 +1951,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 15);
         panLabeling.add(lblMultiplier, gridBagConstraints);
 
-        txtMultiplier.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(
-                new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
+        txtMultiplier.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter(new java.text.DecimalFormat("#,##0.00"))));
         txtMultiplier.setText("1,00");
         txtMultiplier.setMinimumSize(new java.awt.Dimension(40, 20));
         txtMultiplier.setPreferredSize(new java.awt.Dimension(40, 20));
@@ -2065,10 +1964,12 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         panTabLabeling.add(panLabeling);
 
-        tbpTabs.addTab(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab2.title"),
-            new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/featureservice/res/labelling.png")),
-            panTabLabeling); // NOI18N
+        tbpTabs.addTab(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab2.title"), new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/labelling.png")), panTabLabeling); // NOI18N
+
+        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10), javax.swing.BorderFactory.createTitledBorder(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panTabAttrib.border.title")))); // NOI18N
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, chkCustomSLD, org.jdesktop.beansbinding.ELProperty.create("${selected}"), panTabAttrib, org.jdesktop.beansbinding.BeanProperty.create("enabled"));
+        bindingGroup.addBinding(binding);
 
         panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(
                 javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
@@ -2141,12 +2042,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         jPanel2.add(lblIdExpression, gridBagConstraints);
 
         cbbIdExpression.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    cbbIdExpressionItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbbIdExpressionItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 20, 0);
@@ -2154,10 +2053,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         panTabAttrib.add(jPanel2);
 
-        tbpTabs.addTab(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab3.title"),
-            new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/featureservice/res/attributes.png")),
-            panTabAttrib); // NOI18N
+        tbpTabs.addTab(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab3.title"), new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/featureservice/res/attributes.png")), panTabAttrib); // NOI18N
         panTabAttrib.getAccessibleContext().setAccessibleName(null);
 
         panSLDDefinition.setBorder(javax.swing.BorderFactory.createCompoundBorder(
@@ -2214,10 +2110,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         tbpTabs.addTab("SLD Definition", panSLDDefinition);
 
         panTabs.add(tbpTabs, java.awt.BorderLayout.CENTER);
-        tbpTabs.getAccessibleContext()
-                .setAccessibleName(org.openide.util.NbBundle.getMessage(
-                        StyleDialog.class,
-                        "StyleDialog.tbpTabs.tab1.title")); // NOI18N
+        tbpTabs.getAccessibleContext().setAccessibleName(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.tbpTabs.tab1.title")); // NOI18N
 
         panMain.add(panTabs, java.awt.BorderLayout.CENTER);
 
@@ -2231,12 +2124,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cmdOK.setMinimumSize(new java.awt.Dimension(88, 23));
         cmdOK.setPreferredSize(new java.awt.Dimension(88, 23));
         cmdOK.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdOKActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdOKActionPerformed(evt);
+            }
+        });
         panDialogButtons.add(cmdOK);
 
         cmdCancel.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdCancel.text")); // NOI18N
@@ -2244,12 +2135,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cmdCancel.setMinimumSize(new java.awt.Dimension(88, 23));
         cmdCancel.setPreferredSize(new java.awt.Dimension(88, 23));
         cmdCancel.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    cmdCancelActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmdCancelActionPerformed(evt);
+            }
+        });
         panDialogButtons.add(cmdCancel);
 
         getContentPane().add(panDialogButtons, java.awt.BorderLayout.SOUTH);
@@ -2257,7 +2146,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         bindingGroup.bind();
 
         pack();
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 
     //~ Instance fields --------------------------------------------------------
 
