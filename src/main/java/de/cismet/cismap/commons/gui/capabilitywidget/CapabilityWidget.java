@@ -20,6 +20,7 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
@@ -45,7 +46,6 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -92,11 +92,9 @@ import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
-import de.cismet.cismap.commons.exceptions.ConvertException;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
@@ -173,7 +171,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private Element serverElement;
     private JPopupMenu treePopMenu = new JPopupMenu();
     private String filterString = null;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdAddByUrl;
     private javax.swing.JButton cmdAddFromList;
@@ -628,6 +625,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             });
         add(tbpCapabilities, java.awt.BorderLayout.CENTER);
     } // </editor-fold>//GEN-END:initComponents
+
     /**
      * DOCUMENT ME!
      *
