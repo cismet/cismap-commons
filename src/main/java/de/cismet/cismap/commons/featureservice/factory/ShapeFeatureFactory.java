@@ -1,10 +1,12 @@
-/***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+/**
+ * *************************************************
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ * 
+* ... and it just works.
+ * 
+***************************************************
+ */
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -55,8 +57,8 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 /**
  * DOCUMENT ME!
  *
- * @author   pascal
- * @version  $Revision$, $Date$
+ * @author pascal
+ * @version $Revision$, $Date$
  */
 public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, String>
         implements CachingFeatureFactory<ShapeFeature, String> {
@@ -81,7 +83,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     private String filename;
 
     //~ Constructors -----------------------------------------------------------
-
     /**
      * Creates a new ShapeFeatureFactory object.
      *
@@ -91,7 +92,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      * @param   workerThread           DOCUMENT ME!
      * @param   styles                 DOCUMENT ME!
      *
-     * @throws  Exception  DOCUMENT ME!
+     * @throws Exception DOCUMENT ME!
      */
     public ShapeFeatureFactory(final LayerProperties layerProperties,
             final URI documentURL,
@@ -120,7 +121,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * Creates a new ShapeFeatureFactory object.
      *
-     * @param  shpff  DOCUMENT ME!
+     * @param shpff DOCUMENT ME!
      */
     protected ShapeFeatureFactory(final ShapeFeatureFactory shpff) {
         super(shpff);
@@ -135,7 +136,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     }
 
     //~ Methods ----------------------------------------------------------------
-
     @Override
     protected ShapeFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
         // dummy method
@@ -197,7 +197,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     private Charset getCharsetDefinition() {
         Charset cs = null;
@@ -243,9 +243,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @param   workerThread  DOCUMENT ME!
+     * @param workerThread DOCUMENT ME!
      *
-     * @throws  Exception  DOCUMENT ME!
+     * @throws Exception DOCUMENT ME!
      */
     protected synchronized void parseShapeFile(final SwingWorker workerThread) throws Exception {
         if (shapeCrs == null) {
@@ -408,7 +408,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * Get the value of documentURL.
      *
-     * @return  the value of documentURL
+     * @return the value of documentURL
      */
     public URI getDocumentURI() {
         return documentURI;
@@ -417,7 +417,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * Set the value of documentURL.
      *
-     * @param  documentURI  new value of documentURL
+     * @param documentURI new value of documentURL
      */
     public synchronized void setDocumentURI(final URI documentURI) {
         this.documentURI = documentURI;
@@ -478,7 +478,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @return  the noGeometryRecognised
+     * @return the noGeometryRecognised
      */
     public boolean isNoGeometryRecognised() {
         return noGeometryRecognised;
@@ -487,7 +487,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @return  the errorInGeometryFound
+     * @return the errorInGeometryFound
      */
     public boolean isErrorInGeometryFound() {
         return errorInGeometryFound;
@@ -496,7 +496,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @param  crs  DOCUMENT ME!
+     * @param crs DOCUMENT ME!
      */
     public void setCrs(final Crs crs) {
         this.crs = crs;
@@ -505,7 +505,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @return  the envelope of the currently loaded shape file
+     * @return the envelope of the currently loaded shape file
      */
     public Geometry getEnvelope() {
         try {
