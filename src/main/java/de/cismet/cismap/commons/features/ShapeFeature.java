@@ -19,7 +19,12 @@ import org.deegree.model.spatialschema.JTSAdapter;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
+import org.deegree.feature.types.FeatureType;
+
+import javax.xml.namespace.QName;
+import org.deegree.style.se.unevaluated.Style;
 
 /**
  * Features read from a SHP File.
@@ -37,6 +42,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     //~ Instance fields --------------------------------------------------------
 
     private final ShapeInfo shapeInfo;
+    private String typename;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -45,8 +51,24 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      *
      * @param  shapeInfo  typename DOCUMENT ME!
      */
-
     public ShapeFeature(final ShapeInfo shapeInfo) {
+        this.shapeInfo = shapeInfo;
+    }
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  typename  DOCUMENT ME!
+     */
+    
+    public ShapeFeature(final ShapeInfo shapeInfo, final String typename) {
+        this.typename = typename;
+        this.shapeInfo = shapeInfo;
+    }
+    
+    public ShapeFeature(final ShapeInfo shapeInfo, final String typename, org.deegree.style.se.unevaluated.Style styles) {
+        super.style = styles;
+        this.typename = typename;
         this.shapeInfo = shapeInfo;
     }
 
@@ -231,5 +253,29 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public void setGeometry(final Geometry geom) {
         // do nothing
+    }
+
+    
+    //~ Inner Classes ----------------------------------------------------------
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected class ShapeFileLayerDeegreeFeature extends DeegreeFeature {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public FeatureType getType() {
+            return new DeegreeFeatureType() {
+
+                    @Override
+                    public QName getName() {
+                        return new QName(typename);
+                    }
+                };
+        }
     }
 }
