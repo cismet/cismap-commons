@@ -369,6 +369,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             } else if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
             } else if (geom instanceof MultiPolygon) {
+/*                final com.vividsolutions.jts.geom.Point intPoint = CrsTransformer.transformToGivenCrs(
+                            geom,
+                            viewer.getMappingModel().getSrs().getCode())
+                            .getInteriorPoint();
+                addAnnotation(intPoint.getX(), intPoint.getY());*/
 //                MultiPolygon mp = (MultiPolygon) geom;
             } else if ((geom instanceof Point) || (geom instanceof MultiPoint)) {
                 addAnnotation(entityRingCoordArr[0][0][0].x, entityRingCoordArr[0][0][0].y);
@@ -926,7 +931,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 // is not null, but the object to delete does not exist)
                 removeChild(primaryAnnotation);
             }
-            viewer.removeStickyNode(primaryAnnotation);
+            viewer.removeStickyNode((StickyPText)primaryAnnotation);
         }
         if (viewer.isFeatureDebugging()) {
             if (log.isDebugEnabled()) {
@@ -1066,8 +1071,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 addChild(primaryAnnotation);
 
                 if (!ignoreStickyFeature && af.isAutoscale()) {
-                    viewer.addStickyNode(primaryAnnotation);
-                    viewer.rescaleStickyNode(primaryAnnotation);
+                    viewer.addStickyNode((StickyPText)primaryAnnotation);
+                    viewer.rescaleStickyNode((StickyPText)primaryAnnotation);
                 }
                 setVisibility(primaryAnnotation, af);
             }
