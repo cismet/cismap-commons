@@ -210,8 +210,8 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public void addProperty(final String propertyName, final Object property) {
         // nothing to do
-    }
-
+    }    
+    
     /**
      * DOCUMENT ME!
      *
