@@ -936,7 +936,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 if ((each != null) && each.getVisible()) {
                     stickyNodeList.add(each);
                 } else {
-                    if ((each instanceof PSticky) && (each.getParent() == null)) {
+                    if ((each.getParent() == null)) {
                         removeStickyNode(each);
                     }
                 }
