@@ -32,6 +32,7 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.*;
+import java.util.LinkedList;
 
 /**
  * Abstract impelementation of a FeatureFactory. Supports re-evaluation of id and annotation expressions.
@@ -143,6 +144,14 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         this.styles = styles;
         for (final FT feature : lastCreatedfeatureVector) {
             feature.setSLDStyles(getStyle(layerName));
+        }
+    }
+
+    @Override
+    public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
+        this.styles = styles;
+        for(FT feature : lastCreatedfeatureVector) {
+            feature.setSLDStyle(getStyle());
         }
     }
 

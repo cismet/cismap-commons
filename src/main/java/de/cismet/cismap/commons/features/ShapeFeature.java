@@ -26,6 +26,10 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.deegree.feature.types.FeatureType;
+
+import javax.xml.namespace.QName;
+import org.deegree.style.se.unevaluated.Style;
 
 import javax.xml.namespace.QName;
 
@@ -74,6 +78,8 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         this.shapeInfo = shapeInfo;
     }
 
+    
+   
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -201,8 +207,8 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public void addProperty(final String propertyName, final Object property) {
         // nothing to do
-    }
-
+    }    
+    
     /**
      * DOCUMENT ME!
      *
