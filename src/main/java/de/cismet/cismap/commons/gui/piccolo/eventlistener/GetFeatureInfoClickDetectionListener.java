@@ -317,7 +317,7 @@ public class GetFeatureInfoClickDetectionListener extends PBasicInputEventHandle
                 dsf.setGeometry(f.getGeometry());
 
                 final PFeature pf = new PFeature(dsf, mc);
-                mc.addStickyNode(pf);
+                //mc.addStickyNode(pf);
                 mc.getTmpFeatureLayer().addChild(pf);
                 nr++;
             }
