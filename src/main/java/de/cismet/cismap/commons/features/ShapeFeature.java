@@ -15,16 +15,17 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.deegree.model.feature.FeatureProperty;
 import org.deegree.model.spatialschema.JTSAdapter;
+import org.deegree.feature.types.FeatureType;
+import org.deegree.style.se.unevaluated.Style;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+
 import java.util.LinkedList;
 import java.util.Map;
-import org.deegree.feature.types.FeatureType;
 
 import javax.xml.namespace.QName;
-import org.deegree.style.se.unevaluated.Style;
 
 /**
  * Features read from a SHP File.
@@ -60,7 +61,6 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      *
      * @param  typename  DOCUMENT ME!
      */
-    
     public ShapeFeature(final ShapeInfo shapeInfo, final String typename) {
         this.typename = typename;
         this.shapeInfo = shapeInfo;
