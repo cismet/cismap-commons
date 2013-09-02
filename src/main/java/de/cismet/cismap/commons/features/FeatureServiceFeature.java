@@ -27,5 +27,6 @@ public interface FeatureServiceFeature extends StyledFeature,
     PropertyContainer,
     AnnotatedByPropertyFeature,
     FeatureWithId,
-    InheritsLayerProperties /*,ConvertableToXML*/ {
+    InheritsLayerProperties,
+    SLDStyledFeature /*,ConvertableToXML*/ {
 }

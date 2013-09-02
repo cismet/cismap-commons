@@ -1,10 +1,12 @@
-/***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+/**
+ * *************************************************
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ * 
+* ... and it just works.
+ * 
+***************************************************
+ */
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -46,14 +48,13 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 /**
  * DOCUMENT ME!
  *
- * @author   pascal
- * @version  $Revision$, $Date$
+ * @author pascal
+ * @version $Revision$, $Date$
  */
 public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, String>
         implements CachingFeatureFactory<ShapeFeature, String> {
 
     //~ Instance fields --------------------------------------------------------
-
     protected int maxCachedFeatureCount = 150000;
     protected URI documentURI;
     protected ShapeFile shapeFile;
@@ -71,16 +72,15 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     private Geometry envelope;
 
     //~ Constructors -----------------------------------------------------------
-
     /**
      * Creates a new ShapeFeatureFactory object.
      *
-     * @param   layerProperties        DOCUMENT ME!
-     * @param   documentURL            DOCUMENT ME!
-     * @param   maxCachedFeatureCount  DOCUMENT ME!
-     * @param   workerThread           DOCUMENT ME!
+     * @param layerProperties DOCUMENT ME!
+     * @param documentURL DOCUMENT ME!
+     * @param maxCachedFeatureCount DOCUMENT ME!
+     * @param workerThread DOCUMENT ME!
      *
-     * @throws  Exception  DOCUMENT ME!
+     * @throws Exception DOCUMENT ME!
      */
     public ShapeFeatureFactory(final LayerProperties layerProperties,
             final URI documentURL,
@@ -107,7 +107,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * Creates a new ShapeFeatureFactory object.
      *
-     * @param  shpff  DOCUMENT ME!
+     * @param shpff DOCUMENT ME!
      */
     protected ShapeFeatureFactory(final ShapeFeatureFactory shpff) {
         super(shpff);
@@ -123,10 +123,16 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     }
 
     //~ Methods ----------------------------------------------------------------
-
     @Override
     protected ShapeFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
-        final ShapeFeature shapeFeature = new ShapeFeature();
+        String filename = new File(documentURI).getName();
+        if (filename.matches(".*\\..*")) {
+            filename = filename.substring(0, filename.lastIndexOf("."));
+        }
+        final ShapeFeature shapeFeature;
+        
+            shapeFeature = new ShapeFeature(filename, getStyle());
+
 
         // auto generate Ids!
         shapeFeature.setId(index);
@@ -181,7 +187,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     private Charset getCharsetDefinition() {
         Charset cs = null;
@@ -227,9 +233,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @param   workerThread  DOCUMENT ME!
+     * @param workerThread DOCUMENT ME!
      *
-     * @throws  Exception  DOCUMENT ME!
+     * @throws Exception DOCUMENT ME!
      */
     protected synchronized void parseShapeFile(final SwingWorker workerThread) throws Exception {
         logger.info("SW[" + workerThread + "]: initialising ShapeFeatureFactory with document: '" + documentURI + "'");
@@ -257,7 +263,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         }
         if (shapeFile.getRecordNum() > this.maxCachedFeatureCount) {
             logger.error("SW[" + workerThread + "]: number of features in shape file (" + shapeFile.getRecordNum()
-                        + ") exceeds maximum of supported features (" + this.maxCachedFeatureCount + ")");
+                    + ") exceeds maximum of supported features (" + this.maxCachedFeatureCount + ")");
             max = this.maxCachedFeatureCount;
         }
         if (max == 0) {
@@ -280,12 +286,12 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             if (i == 0) {
                 final FeatureType type = degreeFeature.getFeatureType();
                 logger.info("SW[" + workerThread + "]: creating " + type.getProperties().length
-                            + " featureServiceAttributes from first parsed degree feature");
+                        + " featureServiceAttributes from first parsed degree feature");
                 featureServiceAttributes = new Vector(type.getProperties().length);
                 for (final PropertyType pt : type.getProperties()) {
                     // ToDo was ist wenn zwei Geometrien dabei sind
                     featureServiceAttributes.add(
-                        new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true));
+                            new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true));
                 }
             }
 
@@ -294,9 +300,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             this.initialiseFeature(featureServiceFeature, degreeFeature, false, i);
             // this.tempFeatureCollection[i] = shapeFile.getFeatureByRecNo(i + 1);
 
-            newProgress = (int)((double)i / (double)max * 100d);
+            newProgress = (int) ((double) i / (double) max * 100d);
             if ((workerThread != null) && ((newProgress % 5) == 0) && (newProgress > currentProgress)
-                        && (newProgress >= 5)) {
+                    && (newProgress >= 5)) {
                 // set to progress to -1 (indeterminate progress bar)
                 currentProgress = (newProgress <= 100) ? newProgress : -1;
                 if (DEBUG) {
@@ -312,7 +318,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         this.cleanup();
         if (logger.isDebugEnabled()) {
             logger.debug("parsing, converting and initialising " + max + " shape features took "
-                        + (System.currentTimeMillis() - start) + " ms");
+                    + (System.currentTimeMillis() - start) + " ms");
         }
     }
 
@@ -336,7 +342,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * Get the value of documentURL.
      *
-     * @return  the value of documentURL
+     * @return the value of documentURL
      */
     public URI getDocumentURI() {
         return documentURI;
@@ -345,7 +351,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * Set the value of documentURL.
      *
-     * @param  documentURI  new value of documentURL
+     * @param documentURI new value of documentURL
      */
     public synchronized void setDocumentURI(final URI documentURI) {
         this.documentURI = documentURI;
@@ -381,13 +387,13 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                 CrsTransformer.extractSridFromCrs(crs.getCode()));
         Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
-        boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
+        boundingPolygon = (Polygon) CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
         final List<ShapeFeature> selectedFeatures = this.degreeFeaturesTree.query(boundingPolygon
-                        .getEnvelopeInternal());
+                .getEnvelopeInternal());
         if (logger.isDebugEnabled()) {
             logger.debug("feature crs: " + shapeCrs.getCode() + " features " + selectedFeatures.size()
-                        + " boundingbox: "
-                        + boundingPolygon.getEnvelopeInternal());
+                    + " boundingbox: "
+                    + boundingPolygon.getEnvelopeInternal());
         }
         // check if thread is canceled .........................................
         if (this.checkCancelled(workerThread, " quering spatial index structure")) {
@@ -396,18 +402,18 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         // check if thread is canceled .........................................
 
         logger.info("SW[" + workerThread + "]: " + selectedFeatures.size()
-                    + " features selected by bounding box out of " + this.degreeFeaturesTree.size()
-                    + " in spatial index");
+                + " features selected by bounding box out of " + this.degreeFeaturesTree.size()
+                + " in spatial index");
         if (DEBUG) {
             if (logger.isDebugEnabled()) {
                 logger.debug("SW[" + workerThread + "]: quering spatial index for bounding box took "
-                            + (System.currentTimeMillis() - start) + " ms");
+                        + (System.currentTimeMillis() - start) + " ms");
             }
         }
 
         if (selectedFeatures.size() > this.getMaxFeatureCount()) {
             throw new TooManyFeaturesException("features in selected area " + selectedFeatures.size()
-                        + " exceeds max feature count " + this.getMaxFeatureCount());
+                    + " exceeds max feature count " + this.getMaxFeatureCount());
         } else if (selectedFeatures.size() == 0) {
             logger.warn("SW[" + workerThread + "]: no features found in selected bounding box");
             return null;
@@ -468,7 +474,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @return  the noGeometryRecognised
+     * @return the noGeometryRecognised
      */
     public boolean isNoGeometryRecognised() {
         return noGeometryRecognised;
@@ -477,7 +483,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @return  the errorInGeometryFound
+     * @return the errorInGeometryFound
      */
     public boolean isErrorInGeometryFound() {
         return errorInGeometryFound;
@@ -486,7 +492,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @param  crs  DOCUMENT ME!
+     * @param crs DOCUMENT ME!
      */
     public void setCrs(final Crs crs) {
         this.crs = crs;
@@ -495,7 +501,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     /**
      * DOCUMENT ME!
      *
-     * @return  the envelope of the currently loaded shape file
+     * @return the envelope of the currently loaded shape file
      */
     public Geometry getEnvelope() {
         envelope.setSRID(shapeSrid);
