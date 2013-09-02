@@ -7,6 +7,8 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
+import edu.umd.cs.piccolo.PNode;
+
 /**
  * DOCUMENT ME!
  *
@@ -14,4 +16,7 @@ package de.cismet.cismap.commons.gui.piccolo;
  * @version  $Revision$, $Date$
  */
 public interface PSticky {
+    public boolean getVisible();
+    public PNode getParent();
+    public void setScale(final double scale);
 }
