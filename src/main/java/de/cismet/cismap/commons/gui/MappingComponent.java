@@ -826,22 +826,22 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  nodes  n PNode to rescale
      */
-    public void rescaleStickyNodes(final List<PNode> nodes) {
+    public void rescaleStickyNodes(final List<PSticky> nodes) {
         if ((nodes != null) && !nodes.isEmpty()) {
             if (!EventQueue.isDispatchThread()) {
                 EventQueue.invokeLater(new Runnable() {
 
                         @Override
                         public void run() {
-                            final List<PNode> nodesCopy = new ArrayList<PNode>(nodes);
-                            for (final PNode node : nodesCopy) {
+                            final List<PSticky> nodesCopy = new ArrayList<PSticky>(nodes);
+                            for (final PSticky node : nodesCopy) {
                                 rescaleStickyNodeWork(node);
                             }
                         }
                     });
             } else {
-                final List<PNode> nodesCopy = new ArrayList<PNode>(nodes);
-                for (final PNode node : nodesCopy) {
+                final List<PSticky> nodesCopy = new ArrayList<PSticky>(nodes);
+                for (final PSticky node : nodesCopy) {
                     rescaleStickyNodeWork(node);
                 }
             }
@@ -881,13 +881,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void rescaleStickyNodes() {
         if (rescaleStickyNodesEnabled) {
-            final List<PNode> stickyNodeList = new ArrayList<PNode>();
-            final List<PNode> stickyNodeCopy = new ArrayList<PNode>(getStickyNodes());
-            for (final PNode each : stickyNodeCopy) {
-                if ((each instanceof PSticky) && each.getVisible()) {
+            final List<PSticky> stickyNodeList = new ArrayList<PSticky>();
+            final List<PSticky> stickyNodeCopy = new ArrayList<PSticky>(getStickyNodes());
+            for (final PSticky each : stickyNodeCopy) {
+                if (each.getVisible()) {
                     stickyNodeList.add(each);
                 } else {
-                    if ((each instanceof PSticky) && (each.getParent() == null)) {
+                    if ((each.getParent() == null)) {
                         removeStickyNode(each);
                     }
                 }
