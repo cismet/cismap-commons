@@ -229,7 +229,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     // Scalebar
     private double screenResolution = 100.0;
     private volatile boolean locked = true;
-    private final List<PNode> stickyPNodes = new ArrayList<PNode>();
+    private final List<PSticky> stickyPNodes = new ArrayList<PSticky>();
     // Undo- & Redo-Stacks
     private final MementoInterface memUndo = new Memento();
     private final MementoInterface memRedo = new Memento();
@@ -593,7 +593,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                     original.refreshInfoNode();
 
-                    removeStickyNode(copy.getStickyChild());
+                    removeStickyNode((PSticky)copy.getStickyChild());
 
                     final PNode stickyChild = copy.getStickyChild();
                     if (stickyChild != null) {
@@ -761,7 +761,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  pn  PNode-object
      */
-    public void addStickyNode(final PNode pn) {
+    public void addStickyNode(final PSticky pn) {
         // if(DEBUG)log.debug("addStickyNode:" + pn);
         stickyPNodes.add(pn);
     }
@@ -771,7 +771,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  pn  PNode that should be removed
      */
-    public void removeStickyNode(final PNode pn) {
+    public void removeStickyNode(final PSticky pn) {
         stickyPNodes.remove(pn);
     }
 
@@ -780,7 +780,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @return  Vector<PNode> with all sticky PNodes
      */
-    public List<PNode> getStickyNodes() {
+    public List<PSticky> getStickyNodes() {
         return stickyPNodes;
     }
 
@@ -789,7 +789,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  n  PNode to rescale
      */
-    public void rescaleStickyNode(final PNode n) {
+    public void rescaleStickyNode(final PSticky n) {
         if (!EventQueue.isDispatchThread()) {
             EventQueue.invokeLater(new Runnable() {
 
@@ -826,7 +826,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  n  PNode to rescale
      */
-    private void rescaleStickyNodeWork(final PNode n) {
+    private void rescaleStickyNodeWork(final PSticky n) {
         final double s = MappingComponent.this.getCamera().getViewScale();
         n.setScale(1 / s);
     }
@@ -835,12 +835,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * Rescales all nodes inside the StickyNode-vector.
      */
     public void rescaleStickyNodes() {
-        final List<PNode> stickyNodeCopy = new ArrayList<PNode>(getStickyNodes());
-        for (final PNode each : stickyNodeCopy) {
-            if ((each instanceof PSticky) && each.getVisible()) {
+        final List<PSticky> stickyNodeCopy = new ArrayList<PSticky>(getStickyNodes());
+        for (final PSticky each : stickyNodeCopy) {
+            if (/*(each instanceof PSticky) &&*/ each.getVisible()) {
                 rescaleStickyNode(each);
             } else {
-                if ((each instanceof PSticky) && (each.getParent() == null)) {
+                if (/*(each instanceof PSticky) && */(each.getParent() == null)) {
                     removeStickyNode(each);
                 }
             }
@@ -4961,7 +4961,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     event.getCurrentCrs().getCode(),
                                     oldWtst,
                                     getWtst());
-                                rescaleStickyNode(node);
+                                if(node instanceof PSticky)
+                                        rescaleStickyNode((PSticky)node);
                             }
                         } catch (final Exception e) {
                             JOptionPane.showMessageDialog(
@@ -5656,7 +5657,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                     if (o instanceof PFeature) {
                                                         final PNode p = ((PFeature)o).getPrimaryAnnotationNode();
                                                         if (p != null) {
-                                                            removeStickyNode(p);
+                                                            if(p instanceof PSticky)
+                                                                removeStickyNode((PSticky)p);
                                                         }
                                                         deleteFeatures.add(o);
                                                     }
