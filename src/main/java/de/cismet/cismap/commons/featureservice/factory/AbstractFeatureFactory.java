@@ -20,8 +20,7 @@ import org.apache.log4j.Logger;
 import org.deegree.style.se.unevaluated.Style;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -127,6 +126,14 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         this.styles = styles;
         for (final FT feature : lastCreatedfeatureVector) {
             feature.setSLDStyles(getStyle(layerName));
+        }
+    }
+
+    @Override
+    public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
+        this.styles = styles;
+        for(FT feature : lastCreatedfeatureVector) {
+            feature.setSLDStyle(getStyle());
         }
     }
 
