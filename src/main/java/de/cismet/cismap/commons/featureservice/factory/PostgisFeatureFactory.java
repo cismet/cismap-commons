@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -142,9 +143,90 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
     }
 
     @Override
-    public synchronized Vector<PostgisFeature> createFeatures(final SimpleFeatureServiceSqlStatement sqlStatement,
+    public synchronized List<PostgisFeature> createFeatures(final SimpleFeatureServiceSqlStatement sqlStatement,
             final BoundingBox boundingBox,
             final SwingWorker workerThread) throws FeatureFactory.TooManyFeaturesException, Exception {
+        return createFeatures(sqlStatement, boundingBox, workerThread, 0, 0, null);
+    }
+
+    @Override
+    public Vector createAttributes(final SwingWorker workerThread) throws FeatureFactory.TooManyFeaturesException,
+        Exception {
+        final Vector featureServiceAttributes = new Vector(4);
+        featureServiceAttributes.add(new FeatureServiceAttribute(
+                PostgisFeature.GEO_PROPERTY,
+                "gml:GeometryPropertyType",
+                true));
+        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.ID_PROPERTY, "1", true));
+        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.FEATURE_TYPE_PROPERTY, "2", true));
+        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.GROUPING_KEY_PROPERTY, "2", true));
+        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.OBJECT_NAME_PROPERTY, "2", true));
+        return featureServiceAttributes;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  statement  DOCUMENT ME!
+     */
+    protected void cleanup(Statement statement) {
+        if (statement == null) {
+            return;
+        }
+        try {
+            statement.cancel();
+            statement.close();
+            statement = null;
+        } catch (Exception ex) {
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   id  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    protected void doAction(final int id) throws Exception {
+        if ((this.postgisAction.getAction() != null) && (this.postgisAction.getAction().length() > 0)) {
+            if ((this.connection == null) || this.connection.isClosed()) {
+                this.logger.error("Connection to database lost or not correctly initialised");
+                this.connection = createConnection(this.connectionInfo);
+            }
+
+            final java.sql.Statement statement = connection.createStatement();
+            final String sql = this.postgisAction.getAction().replaceAll(ID_TOKEN, String.valueOf(id));
+            if (DEBUG) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("performing action on feature #" + id + ": \n" + sql);
+                }
+            }
+            statement.execute(sql);
+            statement.close();
+        } else {
+            logger.warn("Feature Service not yet correclty initialised, ignoring action");
+            throw new Exception("Feature Service not yet correclty initialised, ignoring action");
+        }
+    }
+
+    @Override
+    public PostgisFeatureFactory clone() {
+        return new PostgisFeatureFactory(this);
+    }
+
+    @Override
+    public int getFeatureCount(final BoundingBox bb) {
+        return 0;
+    }
+
+    @Override
+    public synchronized List<PostgisFeature> createFeatures(final SimpleFeatureServiceSqlStatement sqlStatement,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
         if (checkCancelled(workerThread, "createFeatures()")) {
             return null;
         }
@@ -296,72 +378,6 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
                     + " ms");
         updateLastCreatedFeatures(postgisFeatures);
         return postgisFeatures;
-    }
-
-    @Override
-    public Vector createAttributes(final SwingWorker workerThread) throws FeatureFactory.TooManyFeaturesException,
-        Exception {
-        final Vector featureServiceAttributes = new Vector(4);
-        featureServiceAttributes.add(new FeatureServiceAttribute(
-                PostgisFeature.GEO_PROPERTY,
-                "gml:GeometryPropertyType",
-                true));
-        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.ID_PROPERTY, "1", true));
-        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.FEATURE_TYPE_PROPERTY, "2", true));
-        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.GROUPING_KEY_PROPERTY, "2", true));
-        featureServiceAttributes.add(new FeatureServiceAttribute(PostgisFeature.OBJECT_NAME_PROPERTY, "2", true));
-        return featureServiceAttributes;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  statement  DOCUMENT ME!
-     */
-    protected void cleanup(Statement statement) {
-        if (statement == null) {
-            return;
-        }
-        try {
-            statement.cancel();
-            statement.close();
-            statement = null;
-        } catch (Exception ex) {
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   id  DOCUMENT ME!
-     *
-     * @throws  Exception  DOCUMENT ME!
-     */
-    protected void doAction(final int id) throws Exception {
-        if ((this.postgisAction.getAction() != null) && (this.postgisAction.getAction().length() > 0)) {
-            if ((this.connection == null) || this.connection.isClosed()) {
-                this.logger.error("Connection to database lost or not correctly initialised");
-                this.connection = createConnection(this.connectionInfo);
-            }
-
-            final java.sql.Statement statement = connection.createStatement();
-            final String sql = this.postgisAction.getAction().replaceAll(ID_TOKEN, String.valueOf(id));
-            if (DEBUG) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("performing action on feature #" + id + ": \n" + sql);
-                }
-            }
-            statement.execute(sql);
-            statement.close();
-        } else {
-            logger.warn("Feature Service not yet correclty initialised, ignoring action");
-            throw new Exception("Feature Service not yet correclty initialised, ignoring action");
-        }
-    }
-
-    @Override
-    public PostgisFeatureFactory clone() {
-        return new PostgisFeatureFactory(this);
     }
 
     //~ Inner Classes ----------------------------------------------------------

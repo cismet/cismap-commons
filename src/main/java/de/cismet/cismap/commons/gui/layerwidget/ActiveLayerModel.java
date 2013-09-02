@@ -78,7 +78,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      * Erstellt eine neue ActiveLayerModel-Instanz.
      */
     public ActiveLayerModel() {
-        super("Root"); // NOI18N
+        super("Layer"); // NOI18N
         setDefaults();
         this.tableModel = new TreeTableModelAdapter(this, new JTree());
     }
@@ -103,14 +103,89 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     */
+    public synchronized void addEmptyLayerCollection(final LayerCollection layer) {
+        layers.add(layer);
+        layer.setModel(this);
+        fireTreeStructureChanged(
+            this,
+            new Object[] { root },
+            null,
+            new Object[] { layer });
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  path   DOCUMENT ME!
+     * @param  layer  DOCUMENT ME!
+     */
+    public synchronized void addEmptyLayerCollection(final TreePath path, final LayerCollection layer) {
+        final Object parentCollection = path.getLastPathComponent();
+
+        if (parentCollection instanceof LayerCollection) {
+            final LayerCollection collection = (LayerCollection)parentCollection;
+            collection.add(layer);
+            layer.setModel(this);
+            fireTreeStructureChanged(
+                this,
+                path.getPath(),
+                null,
+                new Object[] { layer });
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     * @param  index  DOCUMENT ME!
+     */
+    public synchronized void addLayerCollection(final LayerCollection layer, final int index) {
+        layers.add(index, layer);
+        fireTreeStructureChanged(
+            this,
+            new Object[] { root },
+            null,
+            null);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     * @param  index  DOCUMENT ME!
+     */
+    public synchronized void addLayer(final Object layer, final int index) {
+        if (layer instanceof LayerCollection) {
+            addLayerCollection((LayerCollection)layer, index);
+        } else if (layer instanceof RetrievalServiceLayer) {
+            addLayer((RetrievalServiceLayer)layer, index);
+        }
+    }
+
+    /**
      * Fuegt dem Layer-Vektor einen neuen RetrievalServiceLayer hinzu.
      *
-     * @param   layer  neuer RetrievalServiceLayer
-     *
-     * @throws  IllegalArgumentException  DOCUMENT ME!
+     * @param  layer  neuer RetrievalServiceLayer
      */
     @Override
     public synchronized void addLayer(final RetrievalServiceLayer layer) {
+        addLayer(layer, layers.size());
+    }
+
+    /**
+     * Fuegt dem Layer-Vektor einen neuen RetrievalServiceLayer hinzu.
+     *
+     * @param   layer  neuer RetrievalServiceLayer
+     * @param   index  the index of the layer in the layer list
+     *
+     * @throws  IllegalArgumentException  DOCUMENT ME!
+     */
+    public synchronized void addLayer(final RetrievalServiceLayer layer, final int index) {
         if (DEBUG) {
             if (log.isDebugEnabled()) {
                 log.debug("addLayer: " + layer.getName()); // NOI18N
@@ -126,6 +201,25 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 }
             }
         }
+
+        registerRetrievalServiceLayer(layer);
+        
+        // Das eigentliche Hinzufuegen des neuen Layers
+        layers.add(index, layer);
+        if (DEBUG) {
+            if (log.isDebugEnabled()) {
+                log.debug("layer '" + layer.getName() + "' added"); // NOI18N
+            }
+        }
+        fireTreeStructureChanged(
+            this,
+            new Object[] { root },
+            null,
+            null);
+    }
+
+    
+    public void registerRetrievalServiceLayer(RetrievalServiceLayer layer) {
         final RetrievalServiceLayer currentLayer = layer;
         final ActiveLayerEvent ale = new ActiveLayerEvent();
         ale.setLayer(currentLayer);
@@ -250,21 +344,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             if (log.isDebugEnabled()) {
                 log.debug("RetrievalListener added on layer '" + currentLayer.getName() + "'"); // NOI18N
             }
-        }
-        // Das eigentliche Hinzufuegen des neuen Layers
-        layers.add(layer);
-        if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("layer '" + currentLayer.getName() + "' added"); // NOI18N
-            }
-        }
-        fireTreeStructureChanged(
-            this,
-            new Object[] { root },
-            null,
-            null);
+        }    
     }
-
+    
     /**
      * DOCUMENT ME!
      */
@@ -324,22 +406,34 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      * @param  treePath  DOCUMENT ME!
      */
     public void removeLayer(final Object layer, final TreePath treePath) {
-        if (layer instanceof RetrievalServiceLayer) {
-            removeLayer((RetrievalServiceLayer)layer);
-        } else if ((treePath != null) && (layer instanceof WMSLayer)) { // Kinderlayer
+        if (!treePath.getParentPath().getLastPathComponent().equals(getRoot())) {
+            final Object parent = treePath.getParentPath().getLastPathComponent();
 
-            final TreePath parentPath = treePath.getParentPath();
-            if (parentPath.getLastPathComponent() instanceof WMSServiceLayer) {
-                ((WMSServiceLayer)parentPath.getLastPathComponent()).removeLayer((WMSLayer)layer);
+            if (parent instanceof LayerCollection) {
+                ((LayerCollection)parent).remove(layer);
+                fireTreeStructureChanged(this, new Object[] { layer }, null, null);
             }
-            fireTreeStructureChanged(
-                this,
-                new Object[] { root, (WMSServiceLayer)parentPath.getLastPathComponent() },
-                null,
-                null);
-            final ActiveLayerEvent ale = new ActiveLayerEvent();
-            ale.setLayer((WMSLayer)layer);
-            CismapBroker.getInstance().fireLayerRemoved(ale);
+        } else {
+            if (layer instanceof RetrievalServiceLayer) {
+                removeLayer((RetrievalServiceLayer)layer);
+            } else if (layer instanceof LayerCollection) {
+                layers.remove(layer);
+                fireTreeStructureChanged(this, new Object[] { layer }, null, null);
+            } else if ((treePath != null) && (layer instanceof WMSLayer)) { // Kinderlayer
+
+                final TreePath parentPath = treePath.getParentPath();
+                if (parentPath.getLastPathComponent() instanceof WMSServiceLayer) {
+                    ((WMSServiceLayer)parentPath.getLastPathComponent()).removeLayer((WMSLayer)layer);
+                }
+                fireTreeStructureChanged(
+                    this,
+                    new Object[] { root, (WMSServiceLayer)parentPath.getLastPathComponent() },
+                    null,
+                    null);
+                final ActiveLayerEvent ale = new ActiveLayerEvent();
+                ale.setLayer((WMSLayer)layer);
+                CismapBroker.getInstance().fireLayerRemoved(ale);
+            }
         }
     }
 
@@ -361,6 +455,36 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             null,
             null);
         fireMapServiceRemoved((MapService)wmsServiceLayer);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     */
+    public void removeLayer(final Object layer) {
+        if (layer instanceof LayerCollection) {
+            removeLayerCollection((LayerCollection)layer);
+        } else if (layer instanceof RetrievalServiceLayer) {
+            removeLayer((RetrievalServiceLayer)layer);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     */
+    public void removeLayerCollection(final LayerCollection layer) {
+        layers.remove(layer);
+        final ActiveLayerEvent ale = new ActiveLayerEvent();
+        ale.setLayer(layer);
+        CismapBroker.getInstance().fireLayerRemoved(ale);
+        fireTreeStructureChanged(
+            this,
+            new Object[] { root },
+            null,
+            null);
     }
 
     /**
@@ -429,6 +553,87 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     /**
      * DOCUMENT ME!
      *
+     * @param   treePath  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isVisible(final TreePath treePath) {
+        final Object layer = treePath.getLastPathComponent();
+
+        if (layer instanceof RetrievalServiceLayer) {
+            final RetrievalServiceLayer wmsServiceLayer = ((RetrievalServiceLayer)layer);
+            return wmsServiceLayer.getPNode().getVisible();
+        }
+
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  source       DOCUMENT ME!
+     * @param  destination  DOCUMENT ME!
+     * @param  index        DOCUMENT ME!
+     * @param  layer        DOCUMENT ME!
+     */
+    public void moveLayer(final TreePath source, final TreePath destination, final int index, final Object layer) {
+        int indexOfRemovedObject = 0;
+
+        if (source.getLastPathComponent().equals(getRoot())) {
+            indexOfRemovedObject = layers.indexOf(layer);
+            layers.remove(layer);
+        } else if (source.getLastPathComponent() instanceof LayerCollection) {
+            indexOfRemovedObject = ((LayerCollection)source.getLastPathComponent()).indexOf(layer);
+            ((LayerCollection)source.getLastPathComponent()).remove(layer);
+        }
+
+        if (destination.getLastPathComponent().equals(getRoot())) {
+            layers.add(layers.size() - index, layer);
+        } else if (destination.getLastPathComponent() instanceof LayerCollection) {
+            final LayerCollection collection = ((LayerCollection)destination.getLastPathComponent());
+            collection.add(collection.size() - index, layer);
+        }
+
+//        fireTreeStructureChanged(
+//            this,
+//            new Object[] { root },
+//            null,
+//            null);
+        fireTreeStructureChanged(
+            this,
+            source.getPath(),
+            new int[] { indexOfRemovedObject },
+            new Object[] { layer });
+        fireTreeStructureChanged(
+            this,
+            destination.getPath(),
+            null,
+            new Object[] { layer });
+        reorderLayer();
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void reorderLayer() {
+        final TreeMap<Integer, MapService> map = getMapServices();
+        MapService lastService = null;
+
+        for (final Integer key : map.keySet()) {
+            final MapService s = map.get(key);
+
+            if (lastService == null) {
+                lastService = s;
+            } else {
+                s.getPNode().moveInFrontOf(((MapService)lastService).getPNode());
+                lastService = s;
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  treePath  DOCUMENT ME!
      */
     public void moveLayerUp(final TreePath treePath) {
@@ -439,7 +644,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             if ((pos + 1) != layers.size()) {
                 layers.remove(l);
                 layers.add(pos + 1, l);
-                l.getPNode().moveInFrontOf(((MapService)layers.get(pos)).getPNode());
+                if (layers.get(pos) instanceof MapService) {
+                    l.getPNode().moveInFrontOf(((MapService)layers.get(pos)).getPNode());
+                }
                 fireTreeStructureChanged(
                     this,
                     new Object[] { root },
@@ -477,7 +684,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                 layers.remove(l);
                 layers.add(pos - 1, l);
 
-                l.getPNode().moveInBackOf(((MapService)layers.get(pos)).getPNode());
+                if (layers.get(pos) instanceof MapService) {
+                    l.getPNode().moveInBackOf(((MapService)layers.get(pos)).getPNode());
+                }
                 fireTreeStructureChanged(
                     this,
                     new Object[] { root },
@@ -559,6 +768,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         if (parent == super.getRoot()) {
             return layers.size();
         }
+
         if (parent instanceof WMSServiceLayer) {
             final WMSServiceLayer wmsServiceLayer = (WMSServiceLayer)parent;
             if (wmsServiceLayer.getWMSLayers().size() > 1) {
@@ -566,10 +776,67 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             } else {
                 return 0;
             }
+        } else if (parent instanceof LayerCollection) {
+            return ((LayerCollection)parent).size();
         } else {
             return 0;
         }
     }
+
+    @Override
+    public boolean isLeaf(final Object node) {
+        return getChildCount(node) == 0;
+    }
+
+//    public int getChildCount(final Object parent, boolean layerCollectionsSupported) {
+//        if (parent == super.getRoot()) {
+//            if (layerCollectionsSupported) {
+//                return layers.size();
+//            } else {
+//                int count = 0;
+//
+//                for (Object o : layers) {
+//                    if (o instanceof LayerCollection) {
+//                        count += getLayerCount((LayerCollection)o);
+//                    } else {
+//                        ++count;
+//                    }
+//                }
+//            }
+//        }
+//
+//        if (parent instanceof WMSServiceLayer) {
+//            final WMSServiceLayer wmsServiceLayer = (WMSServiceLayer)parent;
+//            if (wmsServiceLayer.getWMSLayers().size() > 1) {
+//                return wmsServiceLayer.getWMSLayers().size();
+//            } else {
+//                return 0;
+//            }
+//        } else if (parent instanceof LayerCollection) {
+//            if (layerCollectionsSupported) {
+//                return ((LayerCollection)parent).size();
+//            } else {
+//                return getLayerCount((LayerCollection)parent);
+//            }
+//        } else {
+//            return 0;
+//        }
+//    }
+//
+//    private int getLayerCount(LayerCollection l) {
+//        int count = 0;
+//
+//        for (Object o : l) {
+//            if (o instanceof LayerCollection) {
+//                count += getLayerCount((LayerCollection)o);
+//            } else {
+//                ++count;
+//            }
+//        }
+//
+//        return count;
+//    }
+//
 
     /**
      * Returns the value to be displayed for node <code>node</code>, at column number <code>column</code>.
@@ -651,9 +918,43 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         } else if (parent instanceof WMSServiceLayer) {
             return ((WMSServiceLayer)parent).getWMSLayers()
                         .get(((WMSServiceLayer)parent).getWMSLayers().size() - 1 - index);
+        } else if (parent instanceof LayerCollection) {
+            return ((LayerCollection)parent).get(((LayerCollection)parent).size() - 1 - index);
         } else {
             return null;
         }
+    }
+
+    /**
+     * public Object getChild(final Object parent, final int index, boolean supportLayerCollection) { // Hier wird die
+     * Reihenfolge festgelegt if (parent == root) { return layers.get(layers.size() - 1 - index); } else if (parent
+     * instanceof WMSServiceLayer) { return ((WMSServiceLayer)parent).getWMSLayers()
+     * .get(((WMSServiceLayer)parent).getWMSLayers().size() - 1 - index); } else if (parent instanceof LayerCollection)
+     * { return ((LayerCollection)parent).get(((LayerCollection)parent).size() - 1 - index); } else { return null; } }.
+     *
+     * @param   parent  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private int getLayerCollectionCount(final Object parent) {
+        int count = 0;
+        Collection col;
+
+        if (parent == root) {
+            col = layers;
+        } else if (parent instanceof LayerCollection) {
+            col = (LayerCollection)parent;
+        } else {
+            return 0;
+        }
+
+        for (final Object o : col) {
+            if (!(o instanceof LayerCollection)) {
+                ++count;
+            }
+        }
+
+        return count;
     }
 
     /**
@@ -807,11 +1108,58 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             final Object o = it.next();
             if (o instanceof MapService) {
                 tm.put(new Integer(counter++), (MapService)o);
+            } else if (o instanceof LayerCollection) {
+                for (final MapService ms : getMapServicesFromLayerCollection((LayerCollection)o)) {
+                    tm.put(new Integer(counter++), ms);
+                }
             } else {
                 log.warn("service is not of type MapService: " + o); // NOI18N
             }
         }
         return tm;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public java.util.TreeMap<Integer, Object> getMapServicesAndCollections() {
+        final Iterator it = layers.iterator();
+        final TreeMap<Integer, Object> tm = new TreeMap();
+        int counter = 0;
+        while (it.hasNext()) {
+            final Object o = it.next();
+            if (o instanceof MapService) {
+                tm.put(new Integer(counter++), (MapService)o);
+            } else if (o instanceof LayerCollection) {
+                tm.put(new Integer(counter++), (LayerCollection)o);
+            } else {
+                log.warn("service is not of type MapService: " + o); // NOI18N
+            }
+        }
+        return tm;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   col  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List<MapService> getMapServicesFromLayerCollection(final LayerCollection col) {
+        final List<MapService> resultList = new ArrayList<MapService>();
+
+        for (final Object o : col) {
+            if (o instanceof MapService) {
+                resultList.add((MapService)o);
+            } else if (o instanceof LayerCollection) {
+                resultList.addAll(getMapServicesFromLayerCollection((LayerCollection)o));
+            }
+        }
+
+        return resultList;
     }
 
     /**
@@ -992,7 +1340,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     public void fireProgressChanged(final ServiceLayer sl) {
         final int pos = layers.indexOf(sl);
         if (pos >= 0) {
-            this.fireTreeNodesChanged(this, new Object[] { root, sl }, null, null);
+//            this.fireTreeNodesChanged(this, new Object[] { root, sl }, null, null);
             fireTableChanged(null);
         }
     }
@@ -1058,13 +1406,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     public Element getConfiguration() throws NoWriteError {
         final Element conf = new Element("cismapActiveLayerConfiguration"); // NOI18N
         // Zuerst alle RasterLayer
-        final Iterator<Integer> it = getMapServices().keySet().iterator();
+        final Iterator<Integer> it = getMapServicesAndCollections().keySet().iterator();
         final Element allLayerConf = new Element("Layers"); // Sollte irgendwann zu "Layers" umgewandelt werden
         // (TODO)//NOI18N
 
         int counter = 0;
         while (it.hasNext()) {
-            final MapService service = getMapServices().get(it.next());
+            final Object service = layers.get(it.next());
             if (DEBUG) {
                 if (log.isDebugEnabled()) {
                     log.debug("saving configuration of service: '" + service + "'"); // NOI18N
@@ -1132,7 +1480,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                         return;
                     }
                 }
-                final Element[] orderedLayers = orderLayers(layersElement);
+                final Element[] orderedLayers = CidsLayerFactory.orderLayers(layersElement);
                 for (final Element curLayerElement : orderedLayers) {
                     final String curKeyString = CidsLayerFactory.getKeyforLayerElement(curLayerElement);
                     if (curKeyString != null) {
@@ -1194,57 +1542,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
     }
 
-    /**
-     * Layer neu anordnene entweder nach dem layerPosition Attribut (wenn vorhanden) oder nach der Tag-Reihenfolge in
-     * der XML Config.
-     *
-     * @param   layersElement  DOCUMENT ME!
-     *
-     * @return  sortierte Liste
-     */
-    private Element[] orderLayers(final Element layersElement) {
-        final List<Element> layerElements = layersElement.getChildren();
-        final Element[] orderedLayerElements = new Element[layerElements.size()];
-
-        int i = 0;
-        for (final Element layerElement : layerElements) {
-            int layerPosition = -1;
-            final Attribute layerPositionAttr = layerElement.getAttribute("layerPosition"); // NOI18N
-            if (layerPositionAttr != null) {
-                try {
-                    layerPosition = layerPositionAttr.getIntValue();
-                } catch (Exception e) {
-                }
-            }
-
-            if ((layerPosition < 0) || (layerPosition >= orderedLayerElements.length)) {
-                log.warn("layer position of layer #" + i + " (" + layerElement.getName()
-                            + ") not set or invalid, setting to " + i); // NOI18N
-                layerPosition = i;
-            }
-
-            if (orderedLayerElements[layerPosition] != null) {
-                log.warn("conflicting layer position " + layerPosition + ": '" + layerElement.getName() + "' vs '"
-                            + orderedLayerElements[layerPosition].getName() + "'");                            // NOI18N
-                for (int j = 0; j < orderedLayerElements.length; j++) {
-                    if (orderedLayerElements[j] == null) {
-                        orderedLayerElements[j] = layerElement;
-                        break;
-                    }
-                }
-            } else {
-                orderedLayerElements[layerPosition] = layerElement;
-            }
-            if (DEBUG) {
-                if (log.isDebugEnabled()) {
-                    log.debug(i + " layer '" + layerElement.getName() + "' set to position " + layerPosition); // NOI18N
-                }
-            }
-            i++;
-        }
-
-        return orderedLayerElements;
-    }
 
     /**
      * DOCUMENT ME!
@@ -1269,7 +1566,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             }
         }
         log.info("restoring " + layerElement.getChildren().size() + " layers from xml configuration"); // NOI18N
-        final Element[] orderedLayers = orderLayers(layerElement);
+        final Element[] orderedLayers = CidsLayerFactory.orderLayers(layerElement);
         for (final Element element : orderedLayers) {
             createLayer(element, capabilities);
         }
@@ -1295,7 +1592,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             return;
         }
         try {
-            final RetrievalServiceLayer layer = CidsLayerFactory.createLayer(element, capabilities);
+            final ServiceLayer layer = CidsLayerFactory.createLayer(element, capabilities, this);
 
             if (layer != null) {
                 EventQueue.invokeLater(new Runnable() {
@@ -1311,7 +1608,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                                     if (layer instanceof ActiveLayerModelStore) {
                                         ((ActiveLayerModelStore)layer).setActiveLayerModel(ActiveLayerModel.this);
                                     }
-                                    addLayer(layer);
+                                    addLayer(layer, 0);
                                 } catch (IllegalArgumentException schonVorhanden) {
                                     log.warn(
                                         "Layer '"
