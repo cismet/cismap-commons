@@ -77,6 +77,8 @@ import java.awt.image.RGBImageFilter;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import java.net.URL;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -84,9 +86,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.LinkedList;
 
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+
+import javax.swing.ImageIcon;
+
+import javax.xml.namespace.QName;
+
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.gui.MappingComponent;

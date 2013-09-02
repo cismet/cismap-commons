@@ -52,8 +52,24 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      *
      * @param  shapeInfo  typename DOCUMENT ME!
      */
-
     public ShapeFeature(final ShapeInfo shapeInfo) {
+        this.shapeInfo = shapeInfo;
+    }
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  typename  DOCUMENT ME!
+     */
+    
+    public ShapeFeature(final ShapeInfo shapeInfo, final String typename) {
+        this.typename = typename;
+        this.shapeInfo = shapeInfo;
+    }
+    
+    public ShapeFeature(final ShapeInfo shapeInfo, final String typename, org.deegree.style.se.unevaluated.Style styles) {
+        super.style = styles;
+        this.typename = typename;
         this.shapeInfo = shapeInfo;
     }
 

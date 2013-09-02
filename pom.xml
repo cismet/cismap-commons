@@ -81,6 +81,20 @@
                 <updatePolicy>interval:60</updatePolicy>
             </snapshots>
         </repository>
+        <repository>
+            <id>fdvsolution.public</id>
+            <url>http://archiva.fdvs.com.ar/repository/public1/</url>
+        </repository>
+        <repository>
+      <id>deegree-repo</id>
+      <url>http://repo.deegree.org/content/groups/public</url>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
     </repositories>
     
     <pluginRepositories>
