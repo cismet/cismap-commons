@@ -15,7 +15,14 @@ import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.style.persistence.sld.SLDParser;
+
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.Namespace;
+
+import org.openide.util.Exceptions;
 
 import java.awt.Color;
 import java.awt.EventQueue;
@@ -23,14 +30,22 @@ import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import javax.swing.Icon;
 import javax.swing.SwingWorker;
+
+import javax.xml.stream.XMLInputFactory;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.ConvertableToXML;
@@ -61,7 +76,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             RetrievalServiceLayer,
             FeatureMapService,
             ConvertableToXML,
-            Cloneable {
+            Cloneable,
+            SLDStyledLayer {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -73,7 +89,6 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     //~ Instance fields --------------------------------------------------------
 
     /* determines either the layer is enabled or not */
-
     // NOI18N
 
     /* determines either the layer is enabled or not */
@@ -104,6 +119,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected LayerInitWorker layerInitWorker = null;
     protected LayerProperties layerProperties = null;
     protected FeatureFactory featureFactory = null;
+    String sldDefinition;
+    final XMLInputFactory factory = XMLInputFactory.newInstance();
     private boolean initialisationError = false;
     private Element initElement = null;
 
@@ -966,7 +983,14 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         } else {
             LOG.warn("Layer Properties are null and will not be saved"); // NOI18N
         }
-
+        try {
+            final Document sldDoc = new org.jdom.input.SAXBuilder().build(getSLDDefiniton());
+            element.addContent(sldDoc.detachRootElement());
+        } catch (JDOMException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
         return element;
     }
 
@@ -1047,6 +1071,12 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             this.layerProperties = restoredLayerProperties;
         } else {
             LOG.warn("no layer properties ");                                                   // NOI18N
+        }
+        final Element sldStyle = element.getChild(
+                "StyledLayerDescriptor",
+                Namespace.getNamespace("http://www.opengis.net/sld"));
+        if (sldStyle != null) {
+            sldDefinition = new org.jdom.output.XMLOutputter().outputString(sldStyle);
         }
     }
 
@@ -1224,6 +1254,43 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      */
     public void setInitElement(final Element initElement) {
         this.initElement = initElement;
+    }
+
+    @Override
+    public Reader getSLDDefiniton() {
+        return (sldDefinition == null) ? new InputStreamReader(getClass().getResourceAsStream("/testSLD.xml"))
+                                       : new StringReader(sldDefinition);
+    }
+
+    @Override
+    public void setSLDInputStream(final String inputStream) {
+        sldDefinition = inputStream;
+        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = parseSLD(new StringReader(
+                    inputStream));
+        if (styles.isEmpty()) {
+            return;
+        }
+        featureFactory.setSLDStyle(styles);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   input  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> parseSLD(final Reader input) {
+        Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = null;
+        try {
+            styles = SLDParser.getStyles(factory.createXMLStreamReader(input));
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        if (styles == null) {
+            LOG.info("SLD Parser funtkioniert nicht");
+        }
+        return styles;
     }
 
     //~ Inner Classes ----------------------------------------------------------
