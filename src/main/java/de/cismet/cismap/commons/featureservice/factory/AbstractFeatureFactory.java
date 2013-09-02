@@ -134,6 +134,14 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     }
 
     @Override
+    public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
+        this.styles = styles;
+        for(FT feature : lastCreatedfeatureVector) {
+            feature.setSLDStyle(getStyle());
+        }
+    }
+
+    @Override
     public void setLayerProperties(final LayerProperties layerProperties) {
         final LayerProperties oldLayerProperties = this.layerProperties;
         this.layerProperties = layerProperties;
