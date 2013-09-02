@@ -42,16 +42,17 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.PropertyContainer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureWithId;
+import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
+import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
@@ -106,9 +107,9 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JButton butSelectAll;
     private javax.swing.JButton butShowCols;
     private javax.swing.JButton butZoomToSelection;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JPanel jpControl;
     private javax.swing.JLabel labWaitingImage;
     private javax.swing.JLabel lblTotalPages;
     private javax.swing.JMenuItem miFeldberechnung;
@@ -138,6 +139,11 @@ public class AttributeTable extends javax.swing.JPanel {
         miFeldberechnung.setEnabled(false);
         miSortieren.setEnabled(false);
         miStatistik.setEnabled(false);
+        
+        if (featureService instanceof ShapeFileFeatureService) {
+            pageSize = -1;
+            jpControl.setVisible(false);
+        }
 
         table.getTableHeader().addMouseListener(new MouseAdapter() {
 
@@ -322,7 +328,7 @@ public class AttributeTable extends javax.swing.JPanel {
         labWaitingImage = new javax.swing.JLabel();
         tableScrollPane = new javax.swing.JScrollPane();
         table = new org.jdesktop.swingx.JXTable();
-        jPanel1 = new javax.swing.JPanel();
+        jpControl = new javax.swing.JPanel();
         btnFirstPage = new javax.swing.JButton();
         btnPrevPage = new javax.swing.JButton();
         txtCurrentPage = new javax.swing.JTextField();
@@ -563,7 +569,7 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(tableScrollPane, gridBagConstraints);
 
-        jPanel1.setLayout(new java.awt.GridBagLayout());
+        jpControl.setLayout(new java.awt.GridBagLayout());
 
         btnFirstPage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnFirstPage.text")); // NOI18N
         btnFirstPage.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnFirstPage.toolTipText")); // NOI18N
@@ -574,7 +580,7 @@ public class AttributeTable extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(btnFirstPage, gridBagConstraints);
+        jpControl.add(btnFirstPage, gridBagConstraints);
 
         btnPrevPage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnPrevPage.text")); // NOI18N
         btnPrevPage.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnPrevPage.toolTipText")); // NOI18N
@@ -585,7 +591,7 @@ public class AttributeTable extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(btnPrevPage, gridBagConstraints);
+        jpControl.add(btnPrevPage, gridBagConstraints);
 
         txtCurrentPage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.txtCurrentPage.text")); // NOI18N
         txtCurrentPage.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.txtCurrentPage.toolTipText")); // NOI18N
@@ -593,13 +599,13 @@ public class AttributeTable extends javax.swing.JPanel {
         txtCurrentPage.setPreferredSize(new java.awt.Dimension(50, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(txtCurrentPage, gridBagConstraints);
+        jpControl.add(txtCurrentPage, gridBagConstraints);
 
         lblTotalPages.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblTotalPages.text")); // NOI18N
         lblTotalPages.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblTotalPages.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(lblTotalPages, gridBagConstraints);
+        jpControl.add(lblTotalPages, gridBagConstraints);
 
         btnNextPage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnNextPage.text")); // NOI18N
         btnNextPage.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnNextPage.toolTipText")); // NOI18N
@@ -610,7 +616,7 @@ public class AttributeTable extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(btnNextPage, gridBagConstraints);
+        jpControl.add(btnNextPage, gridBagConstraints);
 
         btnLastPage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnLastPage.text")); // NOI18N
         btnLastPage.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnLastPage.toolTipText")); // NOI18N
@@ -621,12 +627,12 @@ public class AttributeTable extends javax.swing.JPanel {
         });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel1.add(btnLastPage, gridBagConstraints);
+        jpControl.add(btnLastPage, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        add(jPanel1, gridBagConstraints);
+        add(jpControl, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     /**
