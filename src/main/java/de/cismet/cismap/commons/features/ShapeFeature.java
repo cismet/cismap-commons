@@ -61,7 +61,6 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      *
      * @param  typename  DOCUMENT ME!
      */
-    
     public ShapeFeature(final ShapeInfo shapeInfo, final String typename) {
         this.typename = typename;
         this.shapeInfo = shapeInfo;
