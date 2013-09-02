@@ -17,17 +17,26 @@ import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.GMLFeatureCollectionDocument;
 
+import org.jdom.Element;
+
+import org.w3c.dom.Document;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 
 import java.net.URL;
 
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
@@ -372,5 +381,75 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      */
     public void setCrs(final Crs crs) {
         this.crs = crs;
+    }
+
+    @Override
+    public int getFeatureCount(final BoundingBox bb) {
+        final XBoundingBox bbox = new XBoundingBox(bb.getX1(),
+                bb.getY1(),
+                bb.getX2(),
+                bb.getY2(),
+                getCrs().getCode(),
+                getCrs().isMetric());
+        final WFSFacade facade = featureType.getWFSCapabilities().getServiceFacade();
+        final Element queryElement = facade.getGetFeatureQuery(featureType);
+        final String query = FeatureServiceUtilities.elementToString(queryElement);
+        final String postString = facade.setGetFeatureBoundingBox(query, bbox, featureType, getCrs().getCode(), true);
+        featureSrid = CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(
+                    featureType,
+                    getCrs().getCode()));
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("Host name: " + hostname + "\nWFS Query: \n" + postString);
+        }
+        final long start = System.currentTimeMillis();
+
+        try {
+            final InputStream respIs = WebAccessManager.getInstance()
+                        .doRequest(new URL(hostname), postString, ACCESS_METHODS.POST_REQUEST);
+
+            logger.info("WFS request took " + (System.currentTimeMillis() - start) + " ms");
+
+            final InputStreamReader reader = new InputStreamReader(new BufferedInputStream(respIs));
+
+            final GMLFeatureCollectionDocument featureCollectionDocument = new GMLFeatureCollectionDocument();
+            final FeatureCollection featureCollection;
+
+            // debug
+            String res = "";
+            String tmp;
+            final BufferedReader br = new BufferedReader(reader);
+            while ((tmp = br.readLine()) != null) {
+                res += tmp;
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("wfs response: " + res);
+            }
+            final StringReader re = new StringReader(res);
+
+            final DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
+            final DocumentBuilder builder = fac.newDocumentBuilder();
+            final Document doc = builder.parse(new ByteArrayInputStream(res.getBytes("UTF-8")));
+            final String numberOfFeatures = doc.getDocumentElement().getAttribute("numberOfFeatures");
+
+            return Integer.parseInt(numberOfFeatures);
+//            featureCollectionDocument.load(re, "http://dummyID");
+//
+//            return featureCollectionDocument.getFeatureCount();
+        } catch (Exception t) {
+            logger.error("error parsing features: " + t.getMessage(), t);
+            return 0;
+        }
+    }
+
+    @Override
+    public List<WFSFeature> createFeatures(final String query,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+        return createFeatures(query, boundingBox, workerThread);
     }
 }

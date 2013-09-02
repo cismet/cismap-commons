@@ -26,6 +26,7 @@ import java.util.Vector;
 
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
+import org.deegree.datatypes.Types;
 
 /**
  * The FeatureServiceUtilities class provides various methods to make the FeatureService- funcionality possible.
@@ -55,7 +56,15 @@ public class FeatureServiceUtilities {
             "MultiSurfacePropertyType",
             "MultiSolidPropertyType",
             "MultiGeometryPropertyType",
-            "MultiLineStringPropertyType"
+            "MultiLineStringPropertyType",
+            String.valueOf( Types.GEOMETRY ),
+            String.valueOf( Types.MULTICURVE ),
+            String.valueOf( Types.MULTIGEOMETRY ),
+            String.valueOf( Types.MULTIPOINT ),
+            String.valueOf( Types.MULTISURFACE ),
+            String.valueOf( Types.POINT ),
+            String.valueOf( Types.CURVE ),
+            String.valueOf( Types.SURFACE ),
         };
     /** Log4J initialisation. */
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(

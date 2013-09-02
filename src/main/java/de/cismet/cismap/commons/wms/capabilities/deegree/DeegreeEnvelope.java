@@ -28,6 +28,7 @@ public class DeegreeEnvelope implements Envelope {
     //~ Instance fields --------------------------------------------------------
 
     private org.deegree.model.spatialschema.Envelope envelope;
+    private CoordinateSystem coordinateSystem = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -72,11 +73,22 @@ public class DeegreeEnvelope implements Envelope {
 
     @Override
     public CoordinateSystem getCoordinateSystem() {
-        if (envelope.getCoordinateSystem() == null) {
+        if (coordinateSystem != null) {
+            return coordinateSystem;
+        } else if (envelope.getCoordinateSystem() == null) {
             return null;
         } else {
             return new DeegreeCoordinateSystem(envelope.getCoordinateSystem());
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  coordinateSystem  DOCUMENT ME!
+     */
+    public void setCoordinateSystem(final CoordinateSystem coordinateSystem) {
+        this.coordinateSystem = coordinateSystem;
     }
 
     @Override
