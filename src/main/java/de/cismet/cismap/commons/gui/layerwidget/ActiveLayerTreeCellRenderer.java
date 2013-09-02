@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
+import de.cismet.cismap.commons.ModeLayer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.GMLFeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
@@ -247,6 +248,16 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
             final boolean leaf,
             final int row,
             final boolean hasFocus) {
+        if (value instanceof ModeLayer) {
+            return getTreeCellRendererComponent(
+                    tree,
+                    ((ModeLayer)value).getCurrentLayer(),
+                    isSelected,
+                    expanded,
+                    leaf,
+                    row,
+                    hasFocus);
+        }
         final JLabel ret = (JLabel)super.getTreeCellRendererComponent(
                 tree,
                 value,
@@ -259,6 +270,7 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
         ret.setMaximumSize(DIM);
         ret.setPreferredSize(DIM);
         ret.setText(value.toString());
+
         if (value instanceof RetrievalServiceLayer) {
             final RetrievalServiceLayer layer = (RetrievalServiceLayer)value;
             ret.setText(layer.toString());
@@ -406,6 +418,7 @@ class IconType {
         ret += type;
         return ret;
     }
+
     @Override
     public boolean equals(final Object o) {
         return ((o instanceof IconType) && (((IconType)o).type == type) && (((IconType)o).visible == visible)
