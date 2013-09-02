@@ -24,12 +24,16 @@ import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.SimpleUpdateablePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
+import de.cismet.cismap.commons.gui.layerwidget.LayerCollection;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+import java.util.List;
+import org.jdom.Attribute;
 
 /**
  * DOCUMENT ME!
@@ -55,8 +59,8 @@ public class CidsLayerFactory {
      *
      * @return  DOCUMENT ME!
      */
-    public static RetrievalServiceLayer createLayer(final Element element,
-            final HashMap<String, WMSCapabilities> capabilities) {
+    public static ServiceLayer createLayer(final Element element,
+            final HashMap<String, WMSCapabilities> capabilities, ActiveLayerModel model) {
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("trying to create Layer '" + element.getName() + "'"); // NOI18N
@@ -164,12 +168,29 @@ public class CidsLayerFactory {
                     LOG.info(
                         "addLayer SimplePostgisFeatureService ("
                                 + simplePostgisFeatureService.getName()
-                                + ")");                         // NOI18N
+                                + ")");                                              // NOI18N
                     return simplePostgisFeatureService;
                 } catch (IllegalArgumentException schonVorhanden) {
                     LOG.warn(
                         "Layer SimplePostgisFeatureService '"
                                 + simplePostgisFeatureService.getName()
+                                + "' already existed. Do not add the Layer. \n"
+                                + schonVorhanden.getMessage());                      // NOI18N
+                }
+            } else if (element.getName().equals(LayerCollection.XML_ELEMENT_NAME)) { // NOI18N
+                // todo
+                LayerCollection lc = new LayerCollection(element, capabilities, model);
+
+                try {
+                    LOG.info(
+                        "addLayer SimplePostgisFeatureService ("
+                                + lc.getName()
+                                + ")");                         // NOI18N
+                    return lc;
+                } catch (IllegalArgumentException schonVorhanden) {
+                    LOG.warn(
+                        "Layer LayerCollection '"
+                                + lc.getName()
                                 + "' already existed. Do not add the Layer. \n"
                                 + schonVorhanden.getMessage()); // NOI18N
                 }
@@ -187,8 +208,8 @@ public class CidsLayerFactory {
                         first = key;
                     }
                     final Element layerDef = (Element)mode.getChildren().get(0);
-                    final RetrievalServiceLayer layer = createLayer(layerDef, capabilities);
-                    modeLayer.putModeLayer(key, layer);
+                    final ServiceLayer layer = createLayer(layerDef, capabilities, model);
+                    modeLayer.putModeLayer(key, (RetrievalServiceLayer)layer);
                 }
                 if (selectedMode == null) {
                     modeLayer.setMode(first);
@@ -385,6 +406,8 @@ public class CidsLayerFactory {
             ((WebFeatureService)layer).setCrs(crs);
         } else if (layer instanceof ShapeFileFeatureService) {
             ((ShapeFileFeatureService)layer).setCrs(crs);
+        } else if (layer instanceof LayerCollection) {
+            ((LayerCollection)layer).setCrs(crs);
         } else if (layer instanceof ModeLayer) {
             ((ModeLayer)layer).setCrs(crs);
         } else {
@@ -399,7 +422,7 @@ public class CidsLayerFactory {
      *
      * @return  DOCUMENT ME!
      */
-    public static Element getElement(final MapService layer) {
+    public static Element getElement(final Object layer) {
         if (layer instanceof WMSServiceLayer) {
             return ((WMSServiceLayer)layer).getElement();
         } else if (layer instanceof SimpleWMS) {
@@ -410,6 +433,8 @@ public class CidsLayerFactory {
             return ((DocumentFeatureService)layer).toElement();
         } else if (layer instanceof SimplePostgisFeatureService) {
             return ((SimplePostgisFeatureService)layer).toElement();
+        } else if (layer instanceof LayerCollection) {
+            return ((LayerCollection)layer).toElement();
         } else if (layer instanceof SimpleUpdateablePostgisFeatureService) {
             return ((SimpleUpdateablePostgisFeatureService)layer).toElement();
         } else if (layer instanceof SlidableWMSServiceLayerGroup) {
@@ -422,5 +447,57 @@ public class CidsLayerFactory {
             log.warn("saving configuration not supported by service: " + layer); // NOI18N
             return null;
         }
+    }
+    
+    /**
+     * Layer neu anordnene entweder nach dem layerPosition Attribut (wenn vorhanden) oder nach der Tag-Reihenfolge in
+     * der XML Config.
+     *
+     * @param   layersElement  DOCUMENT ME!
+     *
+     * @return  sortierte Liste
+     */
+    public static Element[] orderLayers(final Element layersElement) {
+        final List<Element> layerElements = layersElement.getChildren();
+        final Element[] orderedLayerElements = new Element[layerElements.size()];
+
+        int i = 0;
+        for (final Element layerElement : layerElements) {
+            int layerPosition = -1;
+            final Attribute layerPositionAttr = layerElement.getAttribute("layerPosition"); // NOI18N
+            if (layerPositionAttr != null) {
+                try {
+                    layerPosition = layerPositionAttr.getIntValue();
+                } catch (Exception e) {
+                }
+            }
+
+            if ((layerPosition < 0) || (layerPosition >= orderedLayerElements.length)) {
+                log.warn("layer position of layer #" + i + " (" + layerElement.getName()
+                            + ") not set or invalid, setting to " + i); // NOI18N
+                layerPosition = i;
+            }
+
+            if (orderedLayerElements[layerPosition] != null) {
+                log.warn("conflicting layer position " + layerPosition + ": '" + layerElement.getName() + "' vs '"
+                            + orderedLayerElements[layerPosition].getName() + "'");                            // NOI18N
+                for (int j = 0; j < orderedLayerElements.length; j++) {
+                    if (orderedLayerElements[j] == null) {
+                        orderedLayerElements[j] = layerElement;
+                        break;
+                    }
+                }
+            } else {
+                orderedLayerElements[layerPosition] = layerElement;
+            }
+            if (DEBUG) {
+                if (log.isDebugEnabled()) {
+                    log.debug(i + " layer '" + layerElement.getName() + "' set to position " + layerPosition); // NOI18N
+                }
+            }
+            i++;
+        }
+
+        return orderedLayerElements;
     }
 }
