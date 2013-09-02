@@ -11,12 +11,13 @@
  */
 package de.cismet.cismap.commons.features;
 
+import org.deegree.feature.types.FeatureType;
+import org.deegree.style.se.unevaluated.Style;
+
 import java.util.LinkedList;
 import java.util.Map;
-import org.deegree.feature.types.FeatureType;
 
 import javax.xml.namespace.QName;
-import org.deegree.style.se.unevaluated.Style;
 
 /**
  * Features read from a SHP File. Currently identical to DefaultFeatureServiceFeature.
@@ -37,13 +38,19 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      *
      * @param  typename  DOCUMENT ME!
      */
-    
+
     public ShapeFeature(final String typename) {
         this.typename = typename;
     }
-    
-    public ShapeFeature(final String typename, org.deegree.style.se.unevaluated.Style styles) {
-        super.style = styles;
+
+    /**
+     * Creates a new ShapeFeature object.
+     *
+     * @param  typename  DOCUMENT ME!
+     * @param  styles    DOCUMENT ME!
+     */
+    public ShapeFeature(final String typename, final org.deegree.style.se.unevaluated.Style styles) {
+        setSLDStyle(styles); // super.style = styles;
         this.typename = typename;
     }
 
