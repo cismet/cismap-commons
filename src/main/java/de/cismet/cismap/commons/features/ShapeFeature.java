@@ -19,6 +19,10 @@ import org.deegree.model.feature.FeatureProperty;
 import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.style.se.unevaluated.Style;
 
+import org.deegree.feature.types.FeatureType;
+
+import org.deegree.style.se.unevaluated.Style;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
