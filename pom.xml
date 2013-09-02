@@ -36,6 +36,38 @@
 
     <repositories>
         <repository>
+            <!-- Releases for geopublishing.org and more by www.wikisquare.de -->
+            <snapshots>
+                    <enabled>false</enabled>
+            </snapshots>
+            <id>releases.artifactory.wikisquare.de</id>
+            <name>Releases for geopublishing.org - powered by wikisquare.de
+            </name>
+            <url>http://artifactory.wikisquare.de/artifactory/libs-releases</url>
+        </repository>
+        <repository>
+            <!-- Snapshot releases geopublishing.org and more by www.wikisquare.de -->
+            <snapshots>
+                    <enabled>true</enabled>
+                    <updatePolicy>daily</updatePolicy>
+            </snapshots>
+            <id>snapshots.artifactory.wikisquare.de</id>
+            <name>Snapshots for geopublishing.org - powered by wikisquare.de
+            </name>
+            <url>http://artifactory.wikisquare.de/artifactory/libs-snapshots
+            </url>
+        </repository>
+        <repository>
+            <id>deegree-repo</id>
+            <url>http://repo.deegree.org/content/groups/public</url>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
             <id>cismet-repo</id>
             <url>https://repo.cismet.de/repo</url>
             <releases>
@@ -56,16 +88,6 @@
             <groupId>de.cismet.commons</groupId>
             <artifactId>cismet-gui-commons</artifactId>
             <version>2.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.umd</groupId>
-            <artifactId>piccolo</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>edu.umd</groupId>
-            <artifactId>piccolox</artifactId>
-            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>xerces</groupId>
@@ -142,6 +164,42 @@
             <artifactId>jai_imageio</artifactId>
             <version>1.1</version>
         </dependency>      
+        <dependency>
+            <groupId>edu.umd</groupId>
+            <artifactId>piccolo</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>edu.umd</groupId>
+            <artifactId>piccolox</artifactId>
+            <version>1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree-core-style</artifactId>
+            <version>3.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree-core-commons</artifactId>
+            <version>3.2.3</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree-core-rendering-2d</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+<!--        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>        -->
+        <dependency>
+            <groupId>batik</groupId>
+            <artifactId>batik-awt-util</artifactId>
+            <version>1.6-1</version>
+        </dependency>
     </dependencies>
 
     <build>

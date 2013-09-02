@@ -17,10 +17,13 @@ import groovy.lang.GroovyShell;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.style.se.unevaluated.Style;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -58,6 +61,10 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     private volatile boolean isInterruptedAllowed = true;
     private Geometry lastGeom = null;
     private QT lastQuery;
+    // private BoundingBox lastBB = null;
+    // private BoundingBox diff = null;
+    // private final WKTReader reader;
+    protected Map<String, LinkedList<Style>> styles;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -108,6 +115,14 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      */
     protected synchronized void setInterruptedNotAllowed() {
         isInterruptedAllowed = false;
+    }
+
+    @Override
+    public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
+        this.styles = styles;
+        for(FT feature : lastCreatedfeatureVector) {
+            feature.setSLDStyle(getStyle());
+        }
     }
 
     @Override
@@ -606,4 +621,12 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
 
     @Override
     public abstract AbstractFeatureFactory clone();
+
+    protected Style getStyle() {
+        if (styles != null) {
+            return styles.get("StateBoundary").getFirst();
+        } else {
+            return null;
+        }
+    }
 }

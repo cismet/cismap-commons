@@ -37,6 +37,9 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     //~ Instance fields --------------------------------------------------------
 
     private final ShapeInfo shapeInfo;
+    //~ Instance fields --------------------------------------------------------
+
+    private String typename;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -231,5 +234,26 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public void setGeometry(final Geometry geom) {
         // do nothing
+    }
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected class ShapeFileLayerDeegreeFeature extends DeegreeFeature {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public FeatureType getType() {
+            return new DeegreeFeatureType() {
+
+                    @Override
+                    public QName getName() {
+                        return new QName(typename);
+                    }
+                };
+        }
     }
 }
