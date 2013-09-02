@@ -11,7 +11,6 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
-
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -74,6 +73,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     private List<ThemeLayerMenuItem> menuItems = new ArrayList<ThemeLayerMenuItem>();
     private ActiveLayerModel layerModel;
     private DefaultPopupMenuListener popupMenuListener = new DefaultPopupMenuListener(popupMenu);
+    private TreeTransferHandler transferHandler;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree tree;
@@ -92,7 +92,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         tree.setEditable(true);
         tree.setDragEnabled(true);
         tree.setDropMode(DropMode.ON_OR_INSERT);
-        tree.setTransferHandler(new TreeTransferHandler());
+        transferHandler = new TreeTransferHandler();
+        tree.setTransferHandler(transferHandler);
 //        tree.setCellRenderer(new DefaultTreeCellRenderer() {
 //
 //            @Override
@@ -251,14 +252,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             if (paths.length == 1) {
                 final Object selectedComponent = paths[0].getLastPathComponent();
                 if (selectedComponent instanceof LayerCollection) {
-                    final LayerCollection lc = (LayerCollection)selectedComponent;
+//                    final LayerCollection lc = (LayerCollection)selectedComponent;
                     final LayerCollection newLayer = new LayerCollection();
-                    lc.add(newLayer);
-                    layerModel.fireTreeStructureChanged(
-                        layerModel,
-                        paths[0].getPath(),
-                        null,
-                        new Object[] { newLayer });
+                    layerModel.addEmptyLayerCollection(paths[0], newLayer);
+//                    lc.add(newLayer);
+//                    layerModel.fireTreeStructureChanged(
+//                        layerModel,
+//                        paths[0].getPath(),
+//                        null,
+//                        new Object[] { newLayer });
                 } else if (selectedComponent.equals(layerModel.getRoot())) {
                     layerModel.addEmptyLayerCollection(new LayerCollection());
                 }
@@ -511,16 +513,19 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 final Object selectedComponent = paths[0].getLastPathComponent();
                 final Object parentComponent = paths[0].getParentPath().getLastPathComponent();
 
-                if (parentComponent instanceof LayerCollection) {
-                    final LayerCollection parent = (LayerCollection)parentComponent;
-                    tree.setSelectionPath(null);
-                    parent.remove(selectedComponent);
-                    layerModel.fireTreeStructureChanged(layerModel, new Object[] { selectedComponent }, null, null);
-                } else {
-                    tree.setSelectionPath(null);
-                    layerModel.removeLayerCollection((LayerCollection)selectedComponent);
-                    layerModel.fireTreeStructureChanged(layerModel, new Object[] { selectedComponent }, null, null);
-                }
+                tree.setSelectionPath(null);
+                layerModel.removeLayer(paths[0]);
+
+//                if (parentComponent instanceof LayerCollection) {
+//                    final LayerCollection parent = (LayerCollection)parentComponent;
+//                    tree.setSelectionPath(null);
+//                    parent.remove(selectedComponent);
+//                    layerModel.fireTreeStructureChanged(layerModel, new Object[] { selectedComponent }, null, null);
+//                } else {
+//                    tree.setSelectionPath(null);
+//                    layerModel.removeLayerCollection((LayerCollection)selectedComponent);
+//                    layerModel.fireTreeStructureChanged(layerModel, new Object[] { selectedComponent }, null, null);
+//                }
             }
         }
     }
@@ -547,6 +552,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         @Override
         public void actionPerformed(final ActionEvent e) {
             final TreePath[] paths = tree.getSelectionPaths();
+            tree.setSelectionPath(null);
 
             for (final TreePath tmpPath : paths) {
                 layerModel.removeLayer(tmpPath);

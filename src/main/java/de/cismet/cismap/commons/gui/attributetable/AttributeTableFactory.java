@@ -25,6 +25,7 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
+import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
@@ -40,6 +41,7 @@ public class AttributeTableFactory {
 
     private static AttributeTableFactory instance = null;
     private static final Logger LOG = Logger.getLogger(AttributeTableFactory.class);
+    private MappingComponent mappingComponent;
 
     static {
         instance = new AttributeTableFactory();
@@ -77,10 +79,9 @@ public class AttributeTableFactory {
         final FeatureFactory factory = featureService.getFeatureFactory();
 
         try {
-
-
             final AttributeTable table = new AttributeTable(featureService);
-
+            table.setMappingComponent(mappingComponent);
+                    
             listener.showPanel(
                 table,
                 featureService.getName(),
@@ -99,5 +100,19 @@ public class AttributeTableFactory {
      */
     public void setAttributeTableListener(final AttributeTableListener listener) {
         this.listener = listener;
+    }
+
+    /**
+     * @return the mappingComponent
+     */
+    public MappingComponent getMappingComponent() {
+        return mappingComponent;
+    }
+
+    /**
+     * @param mappingComponent the mappingComponent to set
+     */
+    public void setMappingComponent(MappingComponent mappingComponent) {
+        this.mappingComponent = mappingComponent;
     }
 }

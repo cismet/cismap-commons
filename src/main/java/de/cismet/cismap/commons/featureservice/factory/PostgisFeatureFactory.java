@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.List;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -45,7 +46,6 @@ import de.cismet.cismap.commons.jtsgeometryfactories.PostGisGeometryFactory;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
 
 import de.cismet.tools.ConnectionInfo;
-import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -221,7 +221,12 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
     }
 
     @Override
-    public synchronized  List<PostgisFeature> createFeatures(SimpleFeatureServiceSqlStatement sqlStatement, BoundingBox boundingBox, SwingWorker workerThread, int offset, int limit, FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+    public synchronized List<PostgisFeature> createFeatures(final SimpleFeatureServiceSqlStatement sqlStatement,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
         if (checkCancelled(workerThread, "createFeatures()")) {
             return null;
         }

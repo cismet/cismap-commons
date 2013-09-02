@@ -358,7 +358,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             final BoundingBox boundingBox,
             final SwingWorker workerThread) throws TooManyFeaturesException, Exception {
         return createFeatures(query, boundingBox, workerThread, 0, 0, null);
-   }
+    }
 
     @Override
     public synchronized Vector<FeatureServiceAttribute> createAttributes(final SwingWorker workerThread)
@@ -443,7 +443,12 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     }
 
     @Override
-    public synchronized List<ShapeFeature> createFeatures(String query, BoundingBox boundingBox, SwingWorker workerThread, int offset, int limit, FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+    public synchronized List<ShapeFeature> createFeatures(final String query,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
         if (!this.initialised) {
             logger.warn("SW[" + workerThread + "]: Factory not correclty initialised, parsing shape file");
             this.parseShapeFile(workerThread);
@@ -471,8 +476,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
         boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
-        List<ShapeFeature> selectedFeatures = this.degreeFeaturesTree.query(boundingPolygon
-                        .getEnvelopeInternal());
+        List<ShapeFeature> selectedFeatures = this.degreeFeaturesTree.query(boundingPolygon.getEnvelopeInternal());
         if (logger.isDebugEnabled()) {
             logger.debug("feature crs: " + shapeCrs.getCode() + " features " + selectedFeatures.size()
                         + " boundingbox: "
@@ -501,16 +505,16 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             logger.warn("SW[" + workerThread + "]: no features found in selected bounding box");
             return null;
         }
-        
-        if (orderBy != null && orderBy.length > 0) {
+
+        if ((orderBy != null) && (orderBy.length > 0)) {
             sortFeatureList(selectedFeatures, orderBy);
         }
-        
+
         if (offset > 0) {
             selectedFeatures = selectedFeatures.subList(offset, selectedFeatures.size());
         }
-        
-        if (limit > 0 && selectedFeatures.size() > limit) {
+
+        if ((limit > 0) && (selectedFeatures.size() > limit)) {
             selectedFeatures = selectedFeatures.subList(0, limit);
         }
 

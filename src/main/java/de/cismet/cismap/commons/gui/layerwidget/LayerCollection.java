@@ -11,32 +11,29 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import de.cismet.cismap.commons.CidsLayerFactory;
 import org.apache.log4j.Logger;
 
 import org.jdom.Element;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Random;
 
 import javax.swing.tree.TreePath;
 
-import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
-import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
-import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
-import de.cismet.cismap.commons.featureservice.SimpleUpdateablePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
-import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
-import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupportingRasterLayer;
-import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+import java.awt.EventQueue;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -44,17 +41,20 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class LayerCollection extends ArrayList<Object> {
+public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final Logger log = Logger.getLogger(LayerCollection.class);
+    private static final Logger LOG = Logger.getLogger(LayerCollection.class);
     public static final String XML_ELEMENT_NAME = "LayerCollection"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
     private String name = "unbenannt";
     private ActiveLayerModel model = null;
+    private int layerPosition;
+    private float translucency;
+    private Element initElement = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -64,6 +64,98 @@ public class LayerCollection extends ArrayList<Object> {
     public LayerCollection() {
     }
 
+    /**
+     * Creates a new LayerCollection object.
+     */
+    public LayerCollection(Element e, final HashMap<String, WMSCapabilities> capabilities, ActiveLayerModel model) {
+        this.model = model;
+
+        try {
+            LOG.info("creating new FeatureService instance from xml element '" + e.getName() + "'");                      // NOI18N
+
+            if (e.getName().equals(XML_ELEMENT_NAME)) {
+                this.initFromElement(e, capabilities);
+            } else {
+                LOG.error("LayerCollection could not be initailised from xml: unsupported element '" + e.getName() + "'"); // NOI18N
+                throw new ClassNotFoundException("LayerCollection could not be initailised from xml: unsupported element '"
+                            + e.getName() + "'");                                                                         // NOI18N
+            }
+        } catch (Exception ex) {
+            LOG.error("Exception while creating LayerCollection", ex);
+        }
+    }
+
+    private void initFromElement(Element element, final HashMap<String, WMSCapabilities> capabilities) throws Exception {
+        if (element == null) {
+            element = this.getInitElement();
+        } else {
+            this.setInitElement((Element)element.clone());
+        }
+
+        if (element.getAttributeValue("name") != null)                                                  // NOI18N
+        {
+            this.setName(element.getAttributeValue("name"));                                            // NOI18N
+        }
+        if (element.getAttributeValue("enabled") != null)                                               // NOI18N
+        {
+            this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));                     // NOI18N
+        }
+        if (element.getAttributeValue("translucency") != null)                                          // NOI18N
+        {
+            this.setTranslucency(element.getAttribute("translucency").getFloatValue());                 // NOI18N
+        }
+        if (element.getAttributeValue("layerPosition") != null)                                         // NOI18N
+        {
+            this.setLayerPosition(element.getAttribute("layerPosition").getIntValue());                 // NOI18N
+        }
+        
+        createLayers(element, capabilities);
+    }
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  conf          DOCUMENT ME!
+     * @param  capabilities  DOCUMENT ME!
+     */
+    private void createLayers(final Element conf, final HashMap<String, WMSCapabilities> capabilities) {
+        Element layerElement = conf.getChild("Layers");                                                // NOI18N
+        
+        if (layerElement == null) {
+            LOG.error("no valid layers element found");                                            // NOI18N
+            return;
+        }
+        
+        LOG.info("restoring " + layerElement.getChildren().size() + " layers from xml configuration"); // NOI18N
+        
+        final Element[] orderedLayers = CidsLayerFactory.orderLayers(layerElement);
+        for (final Element element : orderedLayers) {
+            createLayer(element, capabilities);
+        }
+    }
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  element       DOCUMENT ME!
+     * @param  capabilities  DOCUMENT ME!
+     */
+    private void createLayer(final Element element, final HashMap<String, WMSCapabilities> capabilities) {
+        try {
+            final ServiceLayer layer = CidsLayerFactory.createLayer(element, capabilities, model);
+
+            if (layer != null) {
+                add(layer);
+                
+                if (layer instanceof RetrievalServiceLayer) {
+                    model.registerRetrievalServiceLayer((RetrievalServiceLayer)layer);
+                }
+            }
+        } catch (Throwable t) {
+            LOG.error("Layer layer '" + element.getName() + "' could not be created: \n" + t.getMessage(), t); // NOI18N
+        }
+    }
+    
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -84,7 +176,7 @@ public class LayerCollection extends ArrayList<Object> {
             } else if (layer instanceof LayerCollection) {
                 ((LayerCollection)layer).setCrs(srs);
             } else {
-                log.error("The SRS of a layer cannot be changed. Layer is of type  " + layer.getClass().getName());
+                LOG.error("The SRS of a layer cannot be changed. Layer is of type  " + layer.getClass().getName());
             }
         }
     }
@@ -101,56 +193,44 @@ public class LayerCollection extends ArrayList<Object> {
      */
     public Element toElement() {
         final Element element = new Element(XML_ELEMENT_NAME);
-        element.setAttribute("name", name);
+        element.setAttribute("name", getName());                                                    // NOI18N
+        element.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString());                   // NOI18N
+        element.setAttribute("translucency", new Float(getTranslucency()).toString());              // NOI18N
+        element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString());     // NOI18N
+        
+        // Zuerst alle RasterLayer
+        final Iterator<Object> it = iterator();
+        final Element allLayerConf = new Element("Layers"); // Sollte irgendwann zu "Layers" umgewandelt werden
+        // (TODO)//NOI18N
 
-        final Element layerElement = new Element("layers"); // NOI18N
         int counter = 0;
+        while (it.hasNext()) {
+            final Object service = it.next();
 
-        for (final Object service : this) {
+            if (service instanceof ServiceLayer) {
+                // es reicht völlig aus, die Layer Position erst beim Speichern der
+                // Konfiugration zu setzten und nicht bei jedem Aufruf von moveLayerUp/Down.
+                ((ServiceLayer)service).setLayerPosition(counter);
+            }
+
             if (service instanceof SimpleFeatureSupportingRasterLayer) {
-            } else if (service instanceof WMSServiceLayer) {
-                final Element layerConf = ((WMSServiceLayer)service).getElement();
-                layerElement.addContent(layerConf);
-                counter++;
-            } else if (service instanceof SimpleWMS) {
-                final Element layerConf = ((SimpleWMS)service).getElement();
-                layerElement.addContent(layerConf);
-                counter++;
-            } else if (service instanceof WebFeatureService) {
-                final Element layerConf = ((WebFeatureService)service).toElement();
-                layerElement.addContent(layerConf);
-                counter++;
-            } else if (service instanceof DocumentFeatureService) {
-                final Element layerConf = ((DocumentFeatureService)service).toElement();
-                layerElement.addContent(layerConf);
-                counter++;
-            } else if (service instanceof SimplePostgisFeatureService) {
-                final Element layerConf = ((SimplePostgisFeatureService)service).toElement();
-                layerElement.addContent(layerConf);
-                counter++;
-            } else if (service instanceof SimpleUpdateablePostgisFeatureService) {
-                final Element layerConf = ((SimpleUpdateablePostgisFeatureService)service).toElement();
-                layerElement.addContent(layerConf);
-                counter++;
-            } else if (service instanceof SlidableWMSServiceLayerGroup) {
-                final Element layerConf = ((SlidableWMSServiceLayerGroup)service).toElement();
-                layerElement.addContent(layerConf);
-                counter++;
-            } else if (service instanceof LayerCollection) {
-                final Element layerConf = ((LayerCollection)service).toElement();
-                layerElement.addContent(layerConf);
-                counter++;
-            } else if (service instanceof ConvertableToXML) {
-                final Element layerConf = ((ConvertableToXML)service).toElement();
-                layerElement.addContent(layerConf);
-                counter++;
+                // wird nicht gespeichert
             } else {
-                log.warn("saving configuration not supported by service: " + service); // NOI18N
+                final Element layerConf = CidsLayerFactory.getElement(service);
+                allLayerConf.addContent(layerConf);
+                counter++;
             }
         }
+        if (counter == 0) {
+            // ToDo Why ?
+            // throw new NoWriteError();
+        }
+        element.addContent(allLayerConf);
+        // Alle FeatureService Layer
 
-        element.addContent(layerElement);
-        return element;
+        // AppFeatureLayer
+
+        return element;        
     }
 
     @Override
@@ -284,5 +364,49 @@ public class LayerCollection extends ArrayList<Object> {
                 ((LayerCollection)tmp).setModel(model);
             }
         }
+    }
+
+    @Override
+    public boolean canBeDisabled() {
+        return true;
+    }
+
+    @Override
+    public int getLayerPosition() {
+        return layerPosition;
+    }
+
+    @Override
+    public void setLayerPosition(int layerPosition) {
+        this.layerPosition = layerPosition;
+    }
+
+    @Override
+    public float getTranslucency() {
+        return translucency;
+    }
+
+    @Override
+    public void setTranslucency(float t) {
+        this.translucency = translucency;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @return the initElement
+     */
+    public Element getInitElement() {
+        return initElement;
+    }
+
+    /**
+     * @param initElement the initElement to set
+     */
+    public void setInitElement(Element initElement) {
+        this.initElement = initElement;
     }
 }

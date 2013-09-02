@@ -16,6 +16,8 @@ import groovy.lang.GroovyShell;
 import org.apache.log4j.Logger;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
@@ -24,8 +26,6 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.*;
-import java.util.Collections;
-import java.util.Comparator;
 
 /**
  * Abstract impelementation of a FeatureFactory. Supports re-evaluation of id and annotation expressions.
@@ -144,31 +144,38 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     public void setMaxFeatureCount(final int maxFeatureCount) {
         this.maxFeatureCount = maxFeatureCount;
     }
-    
-    protected void sortFeatureList(final List<? extends FeatureServiceFeature> featureList, final FeatureServiceAttribute[] attributes) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureList  DOCUMENT ME!
+     * @param  attributes   DOCUMENT ME!
+     */
+    protected void sortFeatureList(final List<? extends FeatureServiceFeature> featureList,
+            final FeatureServiceAttribute[] attributes) {
         Collections.sort(featureList, new Comparator<FeatureServiceFeature>() {
 
-            @Override
-            public int compare(FeatureServiceFeature o1, FeatureServiceFeature o2) {
-                for ( FeatureServiceAttribute attribute : attributes) {
-                    Object att1 = o1.getProperty(attribute.getName());
-                    Object att2 = o2.getProperty(attribute.getName());
-                    
-                    if (att1 instanceof Comparable && att2 instanceof Comparable) {
-                        Comparable c1 = (Comparable)att1;
-                        Comparable c2 = (Comparable)att2;
-                        
-                        int result = c1.compareTo(c2);
-                        
-                        if (result != 0) {
-                            return result;
+                @Override
+                public int compare(final FeatureServiceFeature o1, final FeatureServiceFeature o2) {
+                    for (final FeatureServiceAttribute attribute : attributes) {
+                        final Object att1 = o1.getProperty(attribute.getName());
+                        final Object att2 = o2.getProperty(attribute.getName());
+
+                        if ((att1 instanceof Comparable) && (att2 instanceof Comparable)) {
+                            final Comparable c1 = (Comparable)att1;
+                            final Comparable c2 = (Comparable)att2;
+
+                            final int result = c1.compareTo(c2);
+
+                            if (result != 0) {
+                                return result;
+                            }
                         }
                     }
+
+                    return 0;
                 }
-                
-                return 0;
-            }
-        });
+            });
     }
 
     /**

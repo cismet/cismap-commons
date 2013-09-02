@@ -396,9 +396,14 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
     public int getFeatureCount(final BoundingBox bb) {
         return this.degreeFeaturesTree.size();
     }
-    
+
     @Override
-    public synchronized List<DefaultFeatureServiceFeature> createFeatures(String query, BoundingBox boundingBox, SwingWorker workerThread, int offset, int limit, FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+    public synchronized List<DefaultFeatureServiceFeature> createFeatures(final String query,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
         if (!this.initialised) {
             logger.warn("SW[" + workerThread + "]: Factory not correclty initialised, parsing gml file");
             this.parseGMLFile(workerThread);
@@ -449,18 +454,18 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
             return null;
         }
 
-        if (orderBy != null && orderBy.length > 0) {
+        if ((orderBy != null) && (orderBy.length > 0)) {
             sortFeatureList(selectedFeatures, orderBy);
         }
-        
+
         if (offset > 0) {
             selectedFeatures = selectedFeatures.subList(offset, selectedFeatures.size());
         }
-        
-        if (limit > 0 && selectedFeatures.size() > limit) {
+
+        if ((limit > 0) && (selectedFeatures.size() > limit)) {
             selectedFeatures = selectedFeatures.subList(0, limit);
         }
-        
+
         this.reEvaluteExpressions(selectedFeatures, workerThread);
 
         // check if thread is canceled .........................................
@@ -471,5 +476,5 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
 
         this.updateLastCreatedFeatures(selectedFeatures);
         return new Vector<DefaultFeatureServiceFeature>(selectedFeatures);
-    }    
+    }
 }

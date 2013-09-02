@@ -30,6 +30,24 @@ import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
+import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
+import de.cismet.cismap.commons.featureservice.LayerProperties;
+import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
+import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
+import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
+import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
+import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.util.DnDUtils;
+import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+import de.cismet.tools.gui.StaticSwingTools;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTargetDropEvent;
+import java.io.File;
+import java.util.Collection;
+import javax.swing.JOptionPane;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -48,6 +66,8 @@ class TreeTransferHandler extends TransferHandler {
     private DataFlavor nodesFlavor;
     private DataFlavor[] flavors = new DataFlavor[1];
     private List<TreePath> nodesToRemove;
+    private DataFlavor fromCapabilityWidget = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SelectionAndCapabilities"); // NOI18N
+    
 
     //~ Constructors -----------------------------------------------------------
 
@@ -75,7 +95,7 @@ class TreeTransferHandler extends TransferHandler {
         }
         support.setShowDropLocation(true);
         if (!support.isDataFlavorSupported(nodesFlavor)) {
-            return false;
+            return true;
         }
         // Do not allow a drop on the drag source selections
         final JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
@@ -95,7 +115,7 @@ class TreeTransferHandler extends TransferHandler {
         // Do not allow a drop on a layer that is not a collection
         final Object targetNode = dl.getPath().getLastPathComponent();
 
-        if (!(targetNode instanceof LayerCollection) && !targetNode.equals("Root")) {
+        if (!(targetNode instanceof LayerCollection) && !targetNode.equals("Layer")) {
             return false;
         }
 
@@ -169,16 +189,7 @@ class TreeTransferHandler extends TransferHandler {
         if (!canImport(support)) {
             return false;
         }
-        // Extract transfer data.
-        TreePath[] nodes = null;
-        try {
-            final Transferable t = support.getTransferable();
-            nodes = (TreePath[])t.getTransferData(nodesFlavor);
-        } catch (UnsupportedFlavorException ufe) {
-            System.out.println("UnsupportedFlavor: " + ufe.getMessage());
-        } catch (java.io.IOException ioe) {
-            System.out.println("I/O error: " + ioe.getMessage());
-        }
+        
         // Get drop location info.
         final JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
         final int childIndex = dl.getChildIndex();
@@ -191,31 +202,136 @@ class TreeTransferHandler extends TransferHandler {
         if (childIndex == -1) { // DropMode.ON
             index = model.getChildCount(parent);
         }
-
-        for (int i = 0; i < nodes.length; i++) {
-            final TreePath parentPath = nodes[i].getParentPath();
-            final Object layer = nodes[i].getLastPathComponent();
-
-            // The index must be decreased, if the layer is moved to a higher row number in the same folder
-            if (parentPath.getLastPathComponent().equals(model.getRoot())) {
-                if (model.getIndexOfChild(model.getRoot(), layer) > -1) {
-                    if (model.getIndexOfChild(model.getRoot(), layer) < index) {
-                        --index;
-                    }
-                }
-            } else if (parentPath.getLastPathComponent() instanceof LayerCollection) {
-                final LayerCollection parentCollection = (LayerCollection)parentPath.getLastPathComponent();
-                if (parentCollection.indexOf(layer) > -1) {
-                    if (parentCollection.indexOf(layer) < index) {
-                        --index;
-                    }
-                }
+        
+        if (support.isDataFlavorSupported(nodesFlavor)) {
+            // Es handelt sich um eine MOVE Aktion --> Die Drag Operation wurde aus dem Themenbaum gestartet
+            TreePath[] nodes = null;
+            try {
+                final Transferable t = support.getTransferable();
+                nodes = (TreePath[])t.getTransferData(nodesFlavor);
+            } catch (UnsupportedFlavorException ufe) {
+                System.out.println("UnsupportedFlavor: " + ufe.getMessage());
+            } catch (java.io.IOException ioe) {
+                System.out.println("I/O error: " + ioe.getMessage());
             }
 
-            model.moveLayer(parentPath, dest, index, layer);
+            for (int i = 0; i < nodes.length; i++) {
+                final TreePath parentPath = nodes[i].getParentPath();
+                final Object layer = nodes[i].getLastPathComponent();
+
+                // The index must be decreased, if the layer is moved to a higher row number in the same folder
+                if (parentPath.getLastPathComponent().equals(model.getRoot())) {
+                    if (model.getIndexOfChild(model.getRoot(), layer) > -1) {
+                        if (model.getIndexOfChild(model.getRoot(), layer) < index) {
+                            --index;
+                        }
+                    }
+                } else if (parentPath.getLastPathComponent() instanceof LayerCollection) {
+                    final LayerCollection parentCollection = (LayerCollection)parentPath.getLastPathComponent();
+                    if (parentCollection.indexOf(layer) > -1) {
+                        if (parentCollection.indexOf(layer) < index) {
+                            --index;
+                        }
+                    }
+                }
+
+                model.moveLayer(parentPath, dest, index, layer);
+            }
+            return true;
+        } else {
+            return dropPerformed(support, model, index);
+        }
+    }
+    
+    private boolean dropPerformed(final TransferHandler.TransferSupport support, ActiveLayerModel activeLayerModel, int index) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Drop with this flavors:" + support.getDataFlavors()); // NOI18N
+        }
+        if (support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
+                    || support.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+            try {
+                List<File> data = null;
+                final Transferable transferable = support.getTransferable();
+                if (support.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Drop is unix drop");                                // NOI18N
+                    }
+
+                    try {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Drop is Mac drop xxx"
+                                        + transferable.getTransferData(DataFlavor.javaFileListFlavor)); // NOI18N
+                        }
+
+                        data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                    } catch (UnsupportedFlavorException e) {
+                        // transferable.getTransferData(DataFlavor.javaFileListFlavor) will throw an
+                        // UnsupportedFlavorException on Linux
+                        if (data == null) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Drop is Linux drop"); // NOI18N
+                            }
+                            data = DnDUtils.textURIListToFileList((String)transferable.getTransferData(
+                                        DnDUtils.URI_LIST_FLAVOR));
+                        }
+                    }
+                } else {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Drop is windows drop");       // NOI18N
+                    }
+                    data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
+                }
+
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Drag&Drop File List: " + data); // NOI18N
+                }
+                if (data != null) {
+                    for (final File currentFile : data) {
+                        // NO HARDCODING
+                        try {
+                            LOG.info("DocumentUri: " + currentFile.toURI()); // NOI18N
+
+                            final DocumentFeatureService dfs = DocumentFeatureServiceFactory
+                                        .createDocumentFeatureService(currentFile);
+                            activeLayerModel.addLayer(dfs, index);
+
+                            if (dfs instanceof ShapeFileFeatureService) {
+                                new Thread(new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            do {
+                                                try {
+                                                    Thread.sleep(500);
+                                                } catch (final InterruptedException e) {
+                                                    // nothing to do
+                                                }
+                                            } while (!dfs.isInitialized());
+
+                                            if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
+                                                LOG.error("Error in shape geometry found.");
+                                            } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
+                                                LOG.error("No geometry in shape recognised.");
+                                            }
+                                        }
+                                    }).start();
+                                
+                                return true;
+                            }
+                        } catch (final Exception ex) {
+                            LOG.error("Error during creation of a FeatureServices", ex); // NOI18N
+                        }
+                    }
+                } else {
+                    LOG.warn("No files available");                                      // NOI18N
+                }
+            } catch (final Exception ex) {
+                LOG.error("Failure during drag & drop opertation", ex);                  // NOI18N
+            }
         }
 
-        return true;
+        
+        return false; 
     }
 
     @Override
