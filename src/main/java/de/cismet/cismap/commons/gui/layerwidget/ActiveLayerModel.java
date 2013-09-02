@@ -406,7 +406,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      * @param  treePath  DOCUMENT ME!
      */
     public void removeLayer(final Object layer, final TreePath treePath) {
-        if (!treePath.getParentPath().getLastPathComponent().equals(getRoot())) {
+        if (treePath != null && !treePath.getParentPath().getLastPathComponent().equals(getRoot())) {
             final Object parent = treePath.getParentPath().getLastPathComponent();
 
             if (parent instanceof LayerCollection) {
