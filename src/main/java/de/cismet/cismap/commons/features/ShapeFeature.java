@@ -16,14 +16,16 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.deegree.model.feature.FeatureProperty;
 import org.deegree.model.spatialschema.JTSAdapter;
 
+import org.deegree.feature.types.FeatureType;
+
+import org.deegree.style.se.unevaluated.Style;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.deegree.feature.types.FeatureType;
 
 import javax.xml.namespace.QName;
-import org.deegree.style.se.unevaluated.Style;
 
 /**
  * Features read from a SHP File.
