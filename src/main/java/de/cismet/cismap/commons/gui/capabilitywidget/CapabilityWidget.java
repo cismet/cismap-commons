@@ -108,6 +108,7 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
 import de.cismet.cismap.commons.wms.capabilities.*;
+import de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeEnvelope;
 
 import de.cismet.security.AccessHandler;
 import de.cismet.security.WebAccessManager;

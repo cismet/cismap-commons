@@ -23,7 +23,6 @@ import java.util.*;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
@@ -220,12 +219,13 @@ public class SelectionListener extends RectangleRubberBandListener {
                 postSelectionChanged();
                 if (pInputEvent.getClickCount() == 2) {
                     if (sel.getFeature() instanceof SearchFeature) {
+                        final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
                         if (pInputEvent.isLeftMouseButton()) {
                             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                             mappingComponent.getHandleLayer().removeAllChildren();
                             // neue Suche mit Geometry auslösen
-                            ((MetaSearchCreateSearchGeometryListener)mappingComponent.getInputListener(
-                                    MappingComponent.CREATE_SEARCH_POLYGON)).search((SearchFeature)sel.getFeature());
+                            ((AbstractCreateSearchGeometryListener)mappingComponent.getInputListener(
+                                    searchFeature.getInteractionMode())).search(searchFeature);
                         }
                     }
                 }
@@ -252,6 +252,13 @@ public class SelectionListener extends RectangleRubberBandListener {
                 CrsTransformer.getCurrentSrid());
 
         return gf.createPoint(coord);
+    }
+
+    @Override
+    public void mouseDragged(final PInputEvent e) {
+        super.mouseDragged(e); // To change body of generated methods, choose Tools | Templates.
+
+        clickCount = e.getClickCount();
     }
 
     /**

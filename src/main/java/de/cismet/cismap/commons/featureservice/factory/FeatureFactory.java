@@ -61,6 +61,33 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
             throws TooManyFeaturesException, Exception;
 
     /**
+     * Returns instances of features {@code FT} that match the optional query and that fall into the optional
+     * BoundingBox.<br/>
+     * Applies layerProperties (if set) on all Features (if the type of the feature implements the interface
+     * {@code InheritsLayerProperties}). The SwingWorker instance can be used to set the progress of the operation and
+     * to check the worker thread was canceled. The state of the features list after a the operation was canceled is
+     * undefined.
+     *
+     * @param   query         optional query of type {@code QT} to select the features to be returned
+     * @param   boundingBox   optional BoundingBox to restrict the features to be returned
+     * @param   workerThread  an optional worker thread that is observed
+     * @param   offset        the start index
+     * @param   limit         a limit
+     * @param   orderBy       the attributes, the features should be ordered by
+     *
+     * @return  a list of matching features of type {@code FT}
+     *
+     * @throws  TooManyFeaturesException  if the maximum number of features is reached during processing
+     * @throws  Exception                 if something went wrong during parsing
+     */
+    List<FT> createFeatures(QT query,
+            BoundingBox boundingBox,
+            SwingWorker workerThread,
+            int offset,
+            int limit,
+            FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception;
+
+    /**
      * This operation can be used to retrieve the last created features without the need to invoke the
      * {@code createFeatures()} operation. It returns a <b>copy <b>of the internal features vector of the factory to
      * provent concurrent modification exceptions.</b></b>
@@ -135,6 +162,15 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      * @param  styles  DOCUMENT ME!
      */
     void setSLDStyle(Map<String, LinkedList<Style>> styles);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   bb  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    int getFeatureCount(BoundingBox bb);
 
     //~ Inner Classes ----------------------------------------------------------
 

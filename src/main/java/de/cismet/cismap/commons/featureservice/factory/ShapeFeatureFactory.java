@@ -39,6 +39,8 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
@@ -56,7 +58,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
     //~ Instance fields --------------------------------------------------------
 
-    protected int maxCachedFeatureCount = 150000;
+    protected int maxCachedFeatureCount = Integer.MAX_VALUE;
     protected URI documentURI;
     protected ShapeFile shapeFile;
     protected boolean initialised = false;
@@ -364,77 +366,10 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     }
 
     @Override
-    public synchronized Vector<ShapeFeature> createFeatures(final String query,
+    public synchronized List<ShapeFeature> createFeatures(final String query,
             final BoundingBox boundingBox,
             final SwingWorker workerThread) throws TooManyFeaturesException, Exception {
-        if (!this.initialised) {
-            logger.warn("SW[" + workerThread + "]: Factory not correclty initialised, parsing shape file");
-            this.parseShapeFile(workerThread);
-            this.initialised = true;
-
-            // check if thread is canceled .........................................
-            if (this.checkCancelled(workerThread, " initialisation")) {
-                return null;
-            }
-            // check if thread is canceled .........................................
-        }
-
-        // this.lastCreatedfeatureVector.clear();
-
-        final long start = System.currentTimeMillis();
-        final Coordinate[] polyCords = new Coordinate[5];
-        polyCords[0] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
-        polyCords[1] = new Coordinate(boundingBox.getX1(), boundingBox.getY2());
-        polyCords[2] = new Coordinate(boundingBox.getX2(), boundingBox.getY2());
-        polyCords[3] = new Coordinate(boundingBox.getX2(), boundingBox.getY1());
-        polyCords[4] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
-        // The GeometryFactory must use the same srid as the elements in the deegreeFeaturesTree
-        final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                CrsTransformer.extractSridFromCrs(crs.getCode()));
-        Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
-
-        boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
-        final List<ShapeFeature> selectedFeatures = this.degreeFeaturesTree.query(boundingPolygon
-                        .getEnvelopeInternal());
-        if (logger.isDebugEnabled()) {
-            logger.debug("feature crs: " + shapeCrs.getCode() + " features " + selectedFeatures.size()
-                        + " boundingbox: "
-                        + boundingPolygon.getEnvelopeInternal());
-        }
-        // check if thread is canceled .........................................
-        if (this.checkCancelled(workerThread, " quering spatial index structure")) {
-            return null;
-        }
-        // check if thread is canceled .........................................
-
-        logger.info("SW[" + workerThread + "]: " + selectedFeatures.size()
-                    + " features selected by bounding box out of " + this.degreeFeaturesTree.size()
-                    + " in spatial index");
-        if (DEBUG) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("SW[" + workerThread + "]: quering spatial index for bounding box took "
-                            + (System.currentTimeMillis() - start) + " ms");
-            }
-        }
-
-        if (selectedFeatures.size() > this.getMaxFeatureCount()) {
-            throw new TooManyFeaturesException("features in selected area " + selectedFeatures.size()
-                        + " exceeds max feature count " + this.getMaxFeatureCount());
-        } else if (selectedFeatures.size() == 0) {
-            logger.warn("SW[" + workerThread + "]: no features found in selected bounding box");
-            return null;
-        }
-
-        this.reEvaluteExpressions(selectedFeatures, workerThread);
-
-        // check if thread is canceled .........................................
-        if (this.checkCancelled(workerThread, " saving LastCreatedFeatures ")) {
-            return null;
-        }
-        // check if thread is canceled .........................................
-
-        this.updateLastCreatedFeatures(selectedFeatures);
-        return new Vector<ShapeFeature>(selectedFeatures);
+        return createFeatures(query, boundingBox, workerThread, 0, 0, null);
     }
 
     @Override
@@ -512,5 +447,98 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     public Geometry getEnvelope() {
         envelope.setSRID(shapeSrid);
         return envelope;
+    }
+
+    @Override
+    public int getFeatureCount(final BoundingBox bb) {
+        return this.degreeFeaturesTree.size();
+    }
+
+    @Override
+    public synchronized List<ShapeFeature> createFeatures(final String query,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+        if (!this.initialised) {
+            logger.warn("SW[" + workerThread + "]: Factory not correclty initialised, parsing shape file");
+            this.parseShapeFile(workerThread);
+            this.initialised = true;
+
+            // check if thread is canceled .........................................
+            if (this.checkCancelled(workerThread, " initialisation")) {
+                return null;
+            }
+            // check if thread is canceled .........................................
+        }
+
+        // this.lastCreatedfeatureVector.clear();
+
+        final long start = System.currentTimeMillis();
+        final Coordinate[] polyCords = new Coordinate[5];
+        polyCords[0] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
+        polyCords[1] = new Coordinate(boundingBox.getX1(), boundingBox.getY2());
+        polyCords[2] = new Coordinate(boundingBox.getX2(), boundingBox.getY2());
+        polyCords[3] = new Coordinate(boundingBox.getX2(), boundingBox.getY1());
+        polyCords[4] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
+        // The GeometryFactory must use the same srid as the elements in the deegreeFeaturesTree
+        final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                CrsTransformer.extractSridFromCrs(crs.getCode()));
+        Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
+
+        boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
+        List<ShapeFeature> selectedFeatures = this.degreeFeaturesTree.query(boundingPolygon.getEnvelopeInternal());
+        if (logger.isDebugEnabled()) {
+            logger.debug("feature crs: " + shapeCrs.getCode() + " features " + selectedFeatures.size()
+                        + " boundingbox: "
+                        + boundingPolygon.getEnvelopeInternal());
+        }
+        // check if thread is canceled .........................................
+        if (this.checkCancelled(workerThread, " quering spatial index structure")) {
+            return null;
+        }
+        // check if thread is canceled .........................................
+
+        logger.info("SW[" + workerThread + "]: " + selectedFeatures.size()
+                    + " features selected by bounding box out of " + this.degreeFeaturesTree.size()
+                    + " in spatial index");
+        if (DEBUG) {
+            if (logger.isDebugEnabled()) {
+                logger.debug("SW[" + workerThread + "]: quering spatial index for bounding box took "
+                            + (System.currentTimeMillis() - start) + " ms");
+            }
+        }
+
+        if (selectedFeatures.size() > this.getMaxFeatureCount()) {
+            throw new TooManyFeaturesException("features in selected area " + selectedFeatures.size()
+                        + " exceeds max feature count " + this.getMaxFeatureCount());
+        } else if (selectedFeatures.size() == 0) {
+            logger.warn("SW[" + workerThread + "]: no features found in selected bounding box");
+            return null;
+        }
+
+        if ((orderBy != null) && (orderBy.length > 0)) {
+            sortFeatureList(selectedFeatures, orderBy);
+        }
+
+        if (offset > 0) {
+            selectedFeatures = selectedFeatures.subList(offset, selectedFeatures.size());
+        }
+
+        if ((limit > 0) && (selectedFeatures.size() > limit)) {
+            selectedFeatures = selectedFeatures.subList(0, limit);
+        }
+
+        this.reEvaluteExpressions(selectedFeatures, workerThread);
+
+        // check if thread is canceled .........................................
+        if (this.checkCancelled(workerThread, " saving LastCreatedFeatures ")) {
+            return null;
+        }
+        // check if thread is canceled .........................................
+
+        this.updateLastCreatedFeatures(selectedFeatures);
+        return new Vector<ShapeFeature>(selectedFeatures);
     }
 }

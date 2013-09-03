@@ -146,7 +146,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public static final String CUSTOM_FEATUREINFO = "CUSTOM_FEATUREINFO";                   // NOI18N
     public static final String OVERVIEW = "OVERVIEW";                                       // NOI18N
     static final double OGC_DEGREE_TO_METERS = 6378137.0 * 2.0 * Math.PI / 360;
-
     private static MappingComponent THIS;
     /** Name of the internal Simple Layer Widget. */
     public static final String LAYERWIDGET = "SimpleInternalLayerWidget"; // NOI18N
@@ -1299,7 +1298,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         try {
             PNode p = new PNode();
             if (mapService instanceof RasterMapService) {
-                LOG.info("adding RasterMapService '" + mapService + "' " + mapService.getClass().getSimpleName() + ")"); // NOI18N
+                LOG.info("adding RasterMapService '" + mapService + "' " + mapService.getClass().getSimpleName()
+                            + ")"); // NOI18N
                 if (mapService.getPNode() instanceof XPImage) {
                     p = (XPImage)mapService.getPNode();
                 } else {
@@ -1310,9 +1310,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         position,
                         p,
                         (ServiceLayer)mapService));
+            } else if (mapService instanceof ModeLayer) {
+                // skip
+                return;
+                    // a addMapService is called via a fireLAyerAdded when a Mode is selected
             } else {
                 LOG.info("adding FeatureMapService '" + mapService + "' (" + mapService.getClass().getSimpleName()
-                            + ")");                                                                                      // NOI18N
+                            + ")"); // NOI18N
                 p = new PLayer();
                 mapService.setPNode(p);
 
@@ -1344,11 +1348,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             LOG.error("FeatureMapService(" + mapService
                                         + "): The documentProgressListener is already in use by request '"
                                         + this.documentProgressListener.getRequestId()
-                                        + ", document progress cannot be tracked");                                      // NOI18N
+                                        + ", document progress cannot be tracked");      // NOI18N
                         } else {
                             if (DEBUG) {
                                 if (LOG.isDebugEnabled()) {
-                                    LOG.debug("FeatureMapService(" + mapService + "): adding documentProgressListener"); // NOI18N
+                                    LOG.debug("FeatureMapService(" + mapService
+                                                + "): adding documentProgressListener"); // NOI18N
                                 }
                             }
                             documentFeatureService.addRetrievalListener(this.documentProgressListener);
@@ -4915,8 +4920,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         MappingComponent.class,
                         "MappingComponent.crsChanged(CrsChangedEvent).wait"),
                     null);
-
-            EventQueue.invokeLater(new Runnable() {
+            final Runnable r = new Runnable() {
 
                     @Override
                     public void run() {
@@ -4990,7 +4994,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             }
                         }
                     }
-                });
+                };
+            if (EventQueue.isDispatchThread()) {
+                r.run();
+            } else {
+                EventQueue.invokeLater(r);
+            }
         } else {
             resetCrs = false;
         }

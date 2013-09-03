@@ -12,41 +12,6 @@
  */
 package de.cismet.cismap.commons.gui;
 
-import com.vividsolutions.jts.geom.Envelope;
-
-import edu.umd.cs.piccolo.*;
-import edu.umd.cs.piccolo.event.PInputEventListener;
-import edu.umd.cs.piccolo.nodes.PImage;
-import edu.umd.cs.piccolo.util.*;
-
-import java.awt.Cursor;
-import java.awt.Image;
-import java.awt.MediaTracker;
-import java.awt.Paint;
-import java.awt.Toolkit;
-
-import java.net.URL;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Vector;
-
-import javax.swing.ImageIcon;
-import javax.swing.SwingUtilities;
-
-import de.cismet.cismap.commons.MappingModel;
-import de.cismet.cismap.commons.MappingModelEvent;
-import de.cismet.cismap.commons.MappingModelListener;
-import de.cismet.cismap.commons.WorldToScreenTransform;
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.PureNewFeature;
-import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import de.cismet.cismap.commons.gui.piccolo.PNodeFactory;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.BackgroundRefreshingPanEventListener;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.RubberBandZoomListener;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleSingleSelectionListener;
-import de.cismet.cismap.commons.raster.wms.simple.SimpleWmsGetMapUrl;
-
 /**
  * DOCUMENT ME!
  *

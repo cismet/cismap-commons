@@ -19,6 +19,8 @@ import org.deegree.style.se.unevaluated.Style;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -159,6 +161,39 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     @Override
     public void setMaxFeatureCount(final int maxFeatureCount) {
         this.maxFeatureCount = maxFeatureCount;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureList  DOCUMENT ME!
+     * @param  attributes   DOCUMENT ME!
+     */
+    protected void sortFeatureList(final List<? extends FeatureServiceFeature> featureList,
+            final FeatureServiceAttribute[] attributes) {
+        Collections.sort(featureList, new Comparator<FeatureServiceFeature>() {
+
+                @Override
+                public int compare(final FeatureServiceFeature o1, final FeatureServiceFeature o2) {
+                    for (final FeatureServiceAttribute attribute : attributes) {
+                        final Object att1 = o1.getProperty(attribute.getName());
+                        final Object att2 = o2.getProperty(attribute.getName());
+
+                        if ((att1 instanceof Comparable) && (att2 instanceof Comparable)) {
+                            final Comparable c1 = (Comparable)att1;
+                            final Comparable c2 = (Comparable)att2;
+
+                            final int result = c1.compareTo(c2);
+
+                            if (result != 0) {
+                                return result;
+                            }
+                        }
+                    }
+
+                    return 0;
+                }
+            });
     }
 
     /**

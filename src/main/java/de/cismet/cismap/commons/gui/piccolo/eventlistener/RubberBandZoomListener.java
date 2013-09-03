@@ -12,6 +12,7 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PBounds;
 
@@ -110,23 +111,35 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
      * @param  delayTime               DOCUMENT ME!
      */
     public void zoom(final float factor, final PInputEvent e, final int localAnimationDuration, final int delayTime) {
+        zoom(factor, e.getCamera(), localAnimationDuration, delayTime);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  factor                  DOCUMENT ME!
+     * @param  pc                      DOCUMENT ME!
+     * @param  localAnimationDuration  DOCUMENT ME!
+     * @param  delayTime               DOCUMENT ME!
+     */
+    public void zoom(final float factor, final PCamera pc, final int localAnimationDuration, final int delayTime) {
         final PBounds b = new PBounds();
         final double scale = factor;
-        final double oldWidth = e.getCamera().getViewBounds().getWidth();
+        final double oldWidth = pc.getViewBounds().getWidth();
         final double newWidth = oldWidth * (1 - scale + 1);
-        final double oldHeight = e.getCamera().getViewBounds().getHeight();
+        final double oldHeight = pc.getViewBounds().getHeight();
         final double newHeight = oldHeight * (1 - scale + 1);
 
         final double offsetX = (newWidth - oldWidth) / 2;
         final double offsetY = (newHeight - oldHeight) / 2;
 
-        final Point2D origin = e.getCamera().getViewBounds().getOrigin();
+        final Point2D origin = pc.getViewBounds().getOrigin();
         final double originX = origin.getX() - offsetX;
         final double originY = origin.getY() - offsetY;
 
         b.setOrigin(originX, originY);
         b.setSize(newWidth, newHeight);
-        e.getCamera().animateViewToCenterBounds(b, true, localAnimationDuration);
+        pc.animateViewToCenterBounds(b, true, localAnimationDuration);
 
         if (localAnimationDuration == 0) {
             CismapBroker.getInstance().fireMapBoundsChanged();
@@ -135,7 +148,7 @@ public class RubberBandZoomListener extends RectangleRubberBandListener {
         if (zoomListener != null) {
             timer.removeActionListener(zoomListener);
         }
-        zoomListener = new ZoomAction(b, e);
+        zoomListener = new ZoomAction(b, (MappingComponent)pc.getComponent());
         timer.addActionListener(zoomListener);
 
         timer.setInitialDelay(delayTime);

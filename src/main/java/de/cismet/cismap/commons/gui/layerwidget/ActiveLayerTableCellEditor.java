@@ -50,9 +50,9 @@ import javax.swing.tree.TreeCellEditor;
 
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.LayerInfoProvider;
+import de.cismet.cismap.commons.ModeLayer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 import de.cismet.cismap.commons.featureservice.QueryEditorDialog;
 import de.cismet.cismap.commons.featureservice.SLDStyledLayer;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
@@ -67,7 +67,6 @@ import de.cismet.cismap.commons.wms.capabilities.Style;
 import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.gui.StaticSwingTools;
-import de.cismet.tools.gui.treetable.JTreeTable;
 
 /**
  * DOCUMENT ME!
@@ -95,7 +94,6 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
     private JButton wfsStyleButton = new JButton() {
 
             // paints the rectangle inside the button that creates the StyleDialog
-
             @Override
             protected void paintComponent(final Graphics g) {
                 final de.cismet.cismap.commons.featureservice.style.Style style = ((AbstractFeatureService)value)
@@ -142,7 +140,6 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
 
                 // deactivate & hide layer on doubleclick or
                 // if already hidden activate, show and do a new retrieve
-
                 @Override
                 public void mouseClicked(final MouseEvent e) {
                     if (e.getClickCount() == 2) {
@@ -270,7 +267,6 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         wfsStyleButton.addMouseListener(new MouseAdapter() {
 
                 // creates and shows the StyleDialog on doubleclick
-
                 @Override
                 public void mouseClicked(final MouseEvent e) {
                     // Event Dispatch Thread TERROR:
@@ -428,9 +424,9 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                             pi.setTransparency(f);
                             pi.repaint();
                         }
-                    }
-
-                    if (!slider.getValueIsAdjusting()) {
+                        if (!slider.getValueIsAdjusting()) {
+                            ((RetrievalServiceLayer)value).setTranslucency(f);
+                        }
                     }
                 }
             });
@@ -533,7 +529,9 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
         this.table = table;
         WMSLayer wmsLayer = null;
         LayerInfoProvider layer = null;
-
+        if (value instanceof ModeLayer) {
+            return getTableCellEditorComponent(table, ((ModeLayer)value).getCurrentLayer(), isSelected, row, column);
+        }
         if (value instanceof WMSLayer) {
             wmsLayer = ((WMSLayer)value);
         } else if (value instanceof WMSServiceLayer) {

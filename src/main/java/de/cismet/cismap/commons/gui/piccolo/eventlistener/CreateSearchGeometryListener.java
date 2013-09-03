@@ -9,7 +9,7 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import java.awt.Color;
 
-import de.cismet.cismap.commons.features.PureNewFeature;
+import de.cismet.cismap.commons.features.SearchFeature;
 
 /**
  * DOCUMENT ME!
@@ -26,7 +26,7 @@ public interface CreateSearchGeometryListener extends CreateGeometryListenerInte
      *
      * @return  DOCUMENT ME!
      */
-    PureNewFeature getLastSearchFeature();
+    SearchFeature getLastSearchFeature();
 
     /**
      * DOCUMENT ME!
@@ -85,5 +85,5 @@ public interface CreateSearchGeometryListener extends CreateGeometryListenerInte
      *
      * @param  searchFeature  DOCUMENT ME!
      */
-    void search(final PureNewFeature searchFeature);
+    void search(final SearchFeature searchFeature);
 }
