@@ -11,6 +11,7 @@
  */
 package de.cismet.cismap.commons.features;
 
+import org.deegree.feature.Feature;
 import org.deegree.feature.types.FeatureType;
 import org.deegree.style.se.unevaluated.Style;
 
@@ -29,7 +30,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
 
     //~ Instance fields --------------------------------------------------------
 
-    private String typename;
+    private final String typename;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -54,6 +55,13 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         this.typename = typename;
     }
 
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
+    protected Feature getDeegreeFeature() {
+        return new ShapeFileLayerDeegreeFeature();
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -71,7 +79,9 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
 
                     @Override
                     public QName getName() {
-                        return new QName(typename);
+                        final String type = typename;
+                        final QName name = new QName("Feature");
+                        return name;
                     }
                 };
         }
