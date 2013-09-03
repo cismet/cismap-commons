@@ -99,10 +99,6 @@ import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PFixedTexturePaint;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
-import edu.umd.cs.piccolo.PNode;
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
-import java.util.ListIterator;
 
 /**
  * Default implementation of a FeatureServiceFeature.
@@ -848,10 +844,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      * @param  uom       DOCUMENT ME!
      * @param  fill      DOCUMENT ME!
      * @param  pfeature  DOCUMENT ME!
+     * @param  map       DOCUMENT ME!
      */
     protected void applyFill(final org.deegree.style.styling.components.UOM uom,
             final Fill fill,
-            final PPath pfeature, MappingComponent map) {
+            final PPath pfeature,
+            final MappingComponent map) {
         pfeature.setPaint(getPaintFromDeegree(fill.graphic, fill.color, uom, pfeature, map));
         // applyGraphic(fill.graphic, pfeature);
     }
@@ -876,7 +874,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         final BufferedImage buffImage = getImageFromDeegree(styling.graphic);
         image.setImage(buffImage);
         if (getUOMFromDeegree(styling.uom) == UOM.pixel) {
-            ((FixedPImage)image).setMultiplier(1/ (buffImage.getHeight() / styling.graphic.size));
+            ((FixedPImage)image).setMultiplier(1 / (buffImage.getHeight() / styling.graphic.size));
             image.setOffset(wtst.getScreenX(x), wtst.getScreenY(y));
             ((FixedPImage)image).setSweetSpotX(styling.graphic.anchorPointX);
             ((FixedPImage)image).setSweetSpotY(styling.graphic.anchorPointY);
@@ -895,7 +893,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                             + ((styling.graphic.displacementY
                                     + ((styling.graphic.anchorPointY) * styling.graphic.size)) * multiplier)));
         }
-        //image.setRotation(Math.toRadians(styling.graphic.rotation)); For Demo only
+        // image.setRotation(Math.toRadians(styling.graphic.rotation)); For Demo only
         image.setTransparency((float)styling.graphic.opacity);
     }
 
@@ -904,8 +902,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      *
      * @param  pfeature  DOCUMENT ME!
      * @param  styling   DOCUMENT ME!
+     * @param  map       DOCUMENT ME!
      */
-    protected void applyPolygonStyling(final PPath pfeature, final PolygonStyling styling, MappingComponent map) {
+    protected void applyPolygonStyling(final PPath pfeature, final PolygonStyling styling, final MappingComponent map) {
         if (styling.fill != null) {
             applyFill(styling.uom, styling.fill, pfeature, map);
         }
@@ -920,10 +919,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      * @param  uom       DOCUMENT ME!
      * @param  stroke    DOCUMENT ME!
      * @param  pfeature  DOCUMENT ME!
+     * @param  map       DOCUMENT ME!
      */
     protected void applyStroke(final org.deegree.style.styling.components.UOM uom,
             final Stroke stroke,
-            final PPath pfeature, MappingComponent map) {
+            final PPath pfeature,
+            final MappingComponent map) {
         /*double scale = 1.0d;
          * if(PDebug.getProcessingOutput()) { if(PPaintContext.CURRENT_PAINT_CONTEXT != null)     scale =
          * PPaintContext.CURRENT_PAINT_CONTEXT.getScale(); } else { if(PPickPath.CURRENT_PICK_PATH != null)     scale =
@@ -989,27 +990,32 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void applyStyle(final PFeature pfeature, final WorldToScreenTransform wtst) {
-        if (style != null) {
-            org.deegree.style.se.unevaluated.Style filteredStyle = style.filter(pfeature.getMappingComponent().getScaleDenominator());
-            stylings = filteredStyle.evaluate(getDeegreeFeature(), evaluator);
+        if (styles != null) {
+            for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
+                final org.deegree.style.se.unevaluated.Style filteredStyle = tempStyle.filter(
+                        pfeature.getMappingComponent().getScaleDenominator());
+                final LinkedList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> tempStylings =
+                    filteredStyle.evaluate(getDeegreeFeature(), evaluator);
+                if (stylings == null) {
+                    stylings = tempStylings;
+                } else {
+                    stylings.addAll(tempStylings);
+                }
+            }
         }
         /*
-        if (stylings == null) {
-            if (style == null) {
-                return;
-            }
-            this.stylings = style.evaluate(getDeegreeFeature(), evaluator);
-        }*/
-        if (stylings == null || stylings.size() == 0) {
+         * if (stylings == null) { if (style == null) {     return; } this.stylings =
+         * style.evaluate(getDeegreeFeature(), evaluator);}*/
+        if ((stylings == null) || (stylings.size() == 0)) {
             return;
         }
 
-        ListIterator it = pfeature.getChildrenIterator();
-        while (it.hasNext())
-        {
-            Object child = it.next();
-            if(child instanceof PSticky)
+        final ListIterator it = pfeature.getChildrenIterator();
+        while (it.hasNext()) {
+            final Object child = it.next();
+            if (child instanceof PSticky) {
                 pfeature.getMappingComponent().removeStickyNode((PSticky)child);
+            }
         }
         pfeature.removeAllChildren();
         pfeature.sldStyledImage.clear();
@@ -1139,11 +1145,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         ptext.setText(value);
         ptext.setOffset(wtst.getScreenX(x), wtst.getScreenY(y));
         /*ptext.setDisplacement(getUOMFromDeegree(textStyling.uom),
-            textStyling.displacementX,
-            textStyling.displacementY,
-            textStyling.anchorPointX,
-            textStyling.anchorPointY,
-            wtst);*/
+         *  textStyling.displacementX, textStyling.displacementY, textStyling.anchorPointX, textStyling.anchorPointY,
+         * wtst);*/
         /*double multiplier = getMultiplierFromDeegreeUOM(textStyling.uom);
          * ptext.setOffset(wtst.getScreenX(x + ((textStyling.displacementX)*multiplier)), wtst.getScreenY(y +
          * ((textStyling.displacementY)*multiplier)));*/
@@ -1198,13 +1201,25 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             return graphic.image;
         } else {
             BufferedImage temp = getImageFromWellKnownName(graphic.mark.wellKnown);
-            if(graphic.mark.fill != null && graphic.mark.fill.color != null) {
-                BufferedImage coloredVerion = new BufferedImage(temp.getWidth(), temp.getHeight(), BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g = (Graphics2D)coloredVerion.getGraphics();
+            if ((graphic.mark.fill != null) && (graphic.mark.fill.color != null)) {
+                final BufferedImage coloredVerion = new BufferedImage(temp.getWidth(),
+                        temp.getHeight(),
+                        BufferedImage.TYPE_INT_ARGB);
+                final Graphics2D g = (Graphics2D)coloredVerion.getGraphics();
                 g.setColor(graphic.mark.fill.color);
                 g.fillRect(0, 0, temp.getWidth(), temp.getHeight());
                 g.setComposite(AlphaComposite.DstIn);
-                g.drawImage(temp, 0, 0, temp.getWidth(), temp.getHeight(), 0, 0, temp.getWidth(), temp.getHeight(), null);
+                g.drawImage(
+                    temp,
+                    0,
+                    0,
+                    temp.getWidth(),
+                    temp.getHeight(),
+                    0,
+                    0,
+                    temp.getWidth(),
+                    temp.getHeight(),
+                    null);
                 temp = coloredVerion;
             }
             return temp;
@@ -1295,40 +1310,47 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      * @param   graphic  DOCUMENT ME!
      * @param   color    DOCUMENT ME!
      * @param   uom      DOCUMENT ME!
+     * @param   parent   DOCUMENT ME!
+     * @param   map      DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     protected Paint getPaintFromDeegree(final Graphic graphic,
             final Color color,
-            final org.deegree.style.styling.components.UOM uom, PNode parent, MappingComponent map) {
+            final org.deegree.style.styling.components.UOM uom,
+            final PNode parent,
+            final MappingComponent map) {
         if (graphic == null) {
             return color;
         } else {
             final double multiplier = getMultiplierFromDeegreeUOM(uom);
             final BufferedImage image = getImageFromDeegree(graphic);
             Paint texture;
-            if(uom != org.deegree.style.styling.components.UOM.Pixel) {
-            texture = new TexturePaint(
-                    image,
-                    new Rectangle2D.Double(
-                        0,
-                        0,
-                        multiplier
-                                * graphic.size
-                                * image.getWidth()
-                                / image.getHeight(),
-                        graphic.size
-                                * multiplier));
+            if (uom != org.deegree.style.styling.components.UOM.Pixel) {
+                texture = new TexturePaint(
+                        image,
+                        new Rectangle2D.Double(
+                            0,
+                            0,
+                            multiplier
+                                    * graphic.size
+                                    * image.getWidth()
+                                    / image.getHeight(),
+                            graphic.size
+                                    * multiplier));
             } else {
-                texture = new PFixedTexturePaint(image, new Rectangle2D.Double(
-                        0,
-                        0,
-                        multiplier
-                                * graphic.size
-                                * image.getWidth()
-                                / image.getHeight(),
-                        graphic.size
-                                * multiplier), parent);
+                texture = new PFixedTexturePaint(
+                        image,
+                        new Rectangle2D.Double(
+                            0,
+                            0,
+                            multiplier
+                                    * graphic.size
+                                    * image.getWidth()
+                                    / image.getHeight(),
+                            graphic.size
+                                    * multiplier),
+                        parent);
                 map.addStickyNode((PFixedTexturePaint)texture);
             }
             return texture;
@@ -1458,12 +1480,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param  featureStyle  DOCUMENT ME!
+     * @param  featureStyles  DOCUMENT ME!
      */
     @Override
-    public void setSLDStyle(final org.deegree.style.se.unevaluated.Style featureStyle) {
-        if ((style == null) || !style.equals(featureStyle)) {
-            this.style = featureStyle;
+    public void setSLDStyles(final List<org.deegree.style.se.unevaluated.Style> featureStyles) {
+        if ((styles == null) || !styles.equals(featureStyles)) {
+            this.styles = featureStyles;
             stylings = null;
         }
     }
@@ -1529,7 +1551,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                 } else {
                     deegreeProperties.add(new DeegreeProperty(qname, value));
                 }
-            } else if(DefaultFeatureServiceFeature.this.container.containsKey("app:" + qname.getLocalPart())) {
+            } else if (DefaultFeatureServiceFeature.this.container.containsKey("app:" + qname.getLocalPart())) {
                 value = DefaultFeatureServiceFeature.this.container.get("app:" + qname.getLocalPart());
                 if (value == null) {
                     deegreeProperties.add(null);
