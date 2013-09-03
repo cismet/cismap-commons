@@ -68,7 +68,7 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     protected Map<String, LinkedList<Style>> styles;
     protected String layerName = null;
 
-    protected String layerName = null;
+    public String layerName = null;
 
     //~ Constructors -----------------------------------------------------------
 
