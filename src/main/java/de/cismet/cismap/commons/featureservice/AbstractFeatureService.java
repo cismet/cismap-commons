@@ -1427,6 +1427,25 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         }
         return styles;
     }
+    
+    Legends legends = new Legends();
+    
+    @Override
+    public Pair<Integer, Integer> getLegendSize() {
+        if(featureFactory instanceof AbstractFeatureFactory){
+            AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+            return legends.getLegendSize((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0));
+        }
+        return null;
+    }
+
+    @Override
+    public void getLegend(int width, int height, Graphics2D g2d) {
+        if(featureFactory instanceof AbstractFeatureFactory){
+            AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+            legends.paintLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName), width, height, g2d);
+        }
+    }
 
     @Override
     public Pair<Integer, Integer> getLegendSize(final int nr) {
