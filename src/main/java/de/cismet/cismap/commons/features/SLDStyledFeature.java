@@ -17,7 +17,6 @@ import java.util.List;
 
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import org.deegree.style.se.unevaluated.Style;
 
 /**
  * DOCUMENT ME!
