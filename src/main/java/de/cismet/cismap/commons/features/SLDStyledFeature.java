@@ -11,9 +11,12 @@
  */
 package de.cismet.cismap.commons.features;
 
+import org.deegree.style.se.unevaluated.Style;
+
+import java.util.List;
+
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import org.deegree.style.se.unevaluated.Style;
 
 /**
  * DOCUMENT ME!
@@ -46,5 +49,10 @@ public interface SLDStyledFeature extends Feature {
      * @param  wtst      DOCUMENT ME!
      */
     void applyStyle(PFeature pFeature, WorldToScreenTransform wtst);
-    void setSLDStyle(Style style);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  style  DOCUMENT ME!
+     */
+    void setSLDStyles(List<Style> style);
 }
