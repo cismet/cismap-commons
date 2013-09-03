@@ -155,10 +155,11 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
         final ShapeFeatureFactory sff = new ShapeFeatureFactory(this.getLayerProperties(),
                 this.getDocumentURI(),
                 this.maxSupportedFeatureCount,
-                this.layerInitWorker);
+                this.layerInitWorker,
+                parseSLD(getSLDDefiniton()));
         noGeometryRecognised = sff.isNoGeometryRecognised();
         errorInGeometryFound = sff.isErrorInGeometryFound();
-
+        // sff.setSLDStyle();
         return sff;
     }
 
