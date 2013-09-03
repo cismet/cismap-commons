@@ -201,12 +201,12 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         super.getProperties().clear();
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  propertyName  DOCUMENT ME!
-     * @param  property      DOCUMENT ME!
-     */
+
+    @Override
+    protected Feature getDeegreeFeature() {
+        return new ShapeFileLayerDeegreeFeature();
+    }
+
     @Override
     public void addProperty(final String propertyName, final Object property) {
         // nothing to do
