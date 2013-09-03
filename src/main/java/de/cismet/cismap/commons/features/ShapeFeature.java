@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -275,7 +276,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
                     @Override
                     public QName getName() {
                         final String type = typename;
-                        final QName name = new QName("Feature");
+                        final QName name = new QName("Feature"); // for demo
                         return name;
                     }
                 };
