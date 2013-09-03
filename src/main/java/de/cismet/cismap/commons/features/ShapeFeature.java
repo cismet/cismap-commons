@@ -19,6 +19,7 @@ import org.deegree.feature.Feature;
 import org.deegree.feature.types.FeatureType;
 import org.deegree.style.se.unevaluated.Style;
 
+import org.deegree.feature.Feature;
 import org.deegree.feature.types.FeatureType;
 
 import org.deegree.style.se.unevaluated.Style;
@@ -266,6 +267,13 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     }
 
     
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
+    protected Feature getDeegreeFeature() {
+        return new ShapeFileLayerDeegreeFeature();
+    }
+
     //~ Inner Classes ----------------------------------------------------------
     
     /**
