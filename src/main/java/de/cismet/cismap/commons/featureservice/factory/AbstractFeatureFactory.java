@@ -117,7 +117,7 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
         this.styles = styles;
         for (final FT feature : lastCreatedfeatureVector) {
-            feature.setSLDStyle(getStyle(layerName));
+            feature.setSLDStyles(getStyle(layerName));
         }
     }
 
@@ -567,20 +567,28 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      *
      * @return  DOCUMENT ME!
      */
-    protected Style getStyle() {
+    protected List<Style> getStyle() {
         if (styles != null) {
-            return styles.get("default").getFirst();
+            return styles.get("default");
         } else {
             return null;
         }
     }
-    
-    protected Style getStyle(String layerName) {
-        if(layerName == null)
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   layerName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected List<Style> getStyle(final String layerName) {
+        if (layerName == null) {
             return getStyle();
-        else if(styles != null && styles.containsKey(layerName))
-            return styles.get(layerName).getFirst();
-        else
+        } else if ((styles != null) && styles.containsKey(layerName)) {
+            return styles.get(layerName);
+        } else {
             return null;
+        }
     }
 }
