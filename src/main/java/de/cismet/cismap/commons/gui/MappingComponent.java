@@ -763,7 +763,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void addStickyNode(final PSticky pn) {
         // if(DEBUG)log.debug("addStickyNode:" + pn);
-        stickyPNodes.add(pn);
+        if(pn != null)
+            stickyPNodes.add(pn);
     }
 
     /**
@@ -837,10 +838,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void rescaleStickyNodes() {
         final List<PSticky> stickyNodeCopy = new ArrayList<PSticky>(getStickyNodes());
         for (final PSticky each : stickyNodeCopy) {
-            if (/*(each instanceof PSticky) &&*/ each.getVisible()) {
+            if (each.getVisible()) {
                 rescaleStickyNode(each);
             } else {
-                if (/*(each instanceof PSticky) && */(each.getParent() == null)) {
+                if (each.getParent() == null) {
                     removeStickyNode(each);
                 }
             }
@@ -4961,8 +4962,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     event.getCurrentCrs().getCode(),
                                     oldWtst,
                                     getWtst());
-                                if(node instanceof PSticky)
-                                        rescaleStickyNode((PSticky)node);
+                                if (node instanceof PSticky) {
+                                    rescaleStickyNode((PSticky)node);
+                                }
                             }
                         } catch (final Exception e) {
                             JOptionPane.showMessageDialog(
@@ -5657,8 +5659,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                     if (o instanceof PFeature) {
                                                         final PNode p = ((PFeature)o).getPrimaryAnnotationNode();
                                                         if (p != null) {
-                                                            if(p instanceof PSticky)
+                                                            if (p instanceof PSticky) {
                                                                 removeStickyNode((PSticky)p);
+                                                            }
                                                         }
                                                         deleteFeatures.add(o);
                                                     }
