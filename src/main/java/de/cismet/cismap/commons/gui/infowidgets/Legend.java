@@ -1,10 +1,12 @@
-/***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+/**
+ * *************************************************
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ * 
+* ... and it just works.
+ * 
+***************************************************
+ */
 package de.cismet.cismap.commons.gui.infowidgets;
 
 import org.deegree.commons.utils.Pair;
@@ -49,17 +51,18 @@ import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 import de.cismet.tools.gui.StaticSwingTools;
+import java.awt.image.BufferedImage;
+import org.deegree.commons.utils.Pair;
 
 /**
  * DOCUMENT ME!
  *
- * @author   thorsten.hell@cismet.de
- * @version  $Revision$, $Date$
+ * @author thorsten.hell@cismet.de
+ * @version $Revision$, $Date$
  */
 public class Legend extends javax.swing.JPanel implements ActiveLayerListener, StatusListener {
 
     //~ Instance fields --------------------------------------------------------
-
     private int maxWidth = 0;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private HashMap<String, WMSCapabilities> wmsCapabilities = new HashMap<String, WMSCapabilities>();
@@ -70,7 +73,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
-
     /**
      * Creates new form Legend.
      */
@@ -94,15 +96,18 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     }
 
     //~ Methods ----------------------------------------------------------------
-
     /**
      * DOCUMENT ME!
      *
-     * @param  url        DOCUMENT ME!
-     * @param  layername  DOCUMENT ME!
+     * @param url DOCUMENT ME!
+     * @param layername DOCUMENT ME!
      */
     public void addLegend(final String url, final String layername) {
         tableModel.addLegend(url, layername);
+    }
+    
+    public void addLegend(final BufferedImage img, final String layername) {
+        tableModel.addLegend(img, layername);
     }
 
     /*public void addLegend(final BufferedImage img, final String layername) {
@@ -129,7 +134,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     /**
      * DOCUMENT ME!
      *
-     * @param  layername  DOCUMENT ME!
+     * @param layername DOCUMENT ME!
      */
     public void removeLegendByName(final String layername) {
         tableModel.removeLegendByName(layername);
@@ -138,7 +143,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     /**
      * DOCUMENT ME!
      *
-     * @param  url  DOCUMENT ME!
+     * @param url DOCUMENT ME!
      */
     public void scrollToLegend(final String url) {
         final int pos = tableModel.getPosition(url);
@@ -169,20 +174,20 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             log.debug("layerRemoved() fired");                                   // NOI18N
         }
         if (e.getLayer() instanceof WMSServiceLayer) {
-            removeWmsServiceLayer((WMSServiceLayer)e.getLayer());
+            removeWmsServiceLayer((WMSServiceLayer) e.getLayer());
         } else if (e.getLayer() instanceof WMSLayer) {
-            removeWMSLayer((WMSLayer)e.getLayer());
+            removeWMSLayer((WMSLayer) e.getLayer());
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
-            final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
+            final SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
             removeLegendByName(slp.getLegendIdentifier());
         } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
-            final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup)e.getLayer();
+            final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup) e.getLayer();
             final List v = wmsLayer.getLayers();
             final Iterator it = v.iterator();
             if (it.hasNext()) {
                 final Object elem = it.next();
                 if (elem instanceof WMSServiceLayer) {
-                    removeWmsServiceLayer((WMSServiceLayer)elem);
+                    removeWmsServiceLayer((WMSServiceLayer) elem);
                 }
             }
         }                                                                        /*else if(e.getLayer() instanceof
@@ -196,7 +201,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     /**
      * DOCUMENT ME!
      *
-     * @param  wmsLayer  DOCUMENT ME!
+     * @param wmsLayer DOCUMENT ME!
      */
     private void removeWmsServiceLayer(final WMSServiceLayer wmsLayer) {
         final List v = wmsLayer.getWMSLayers();
@@ -204,7 +209,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         while (it.hasNext()) {
             final Object elem = it.next();
             if (elem instanceof WMSLayer) {
-                final WMSLayer wl = (WMSLayer)elem;
+                final WMSLayer wl = (WMSLayer) elem;
                 removeWMSLayer(wl);
             }
         }
@@ -213,14 +218,14 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     /**
      * DOCUMENT ME!
      *
-     * @param  wl  DOCUMENT ME!
+     * @param wl DOCUMENT ME!
      */
     private void removeWMSLayer(final WMSLayer wl) {
         assert (wl != null);
         if (wl.getOgcCapabilitiesLayer() == null) {
             if (log.isDebugEnabled()) {
                 log.debug(
-                    "in removeWMSLayer waren die capabilities null. kann die Legende nicht entferenen. Wahrscheinlich war deshalb auch gar keine drin. ");
+                        "in removeWMSLayer waren die capabilities null. kann die Legende nicht entferenen. Wahrscheinlich war deshalb auch gar keine drin. ");
             }
         } else {
             final String title = wl.getOgcCapabilitiesLayer().getTitle();
@@ -246,18 +251,18 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             log.debug("layerSelectionChanged() fired");                          // NOI18N
         }
         if ((e.getLayer() instanceof WMSLayer) || (e.getLayer() instanceof WMSServiceLayer)
-                    || (e.getLayer() instanceof SlidableWMSServiceLayerGroup)) {
+                || (e.getLayer() instanceof SlidableWMSServiceLayerGroup)) {
             WMSLayer layer = null;
             if (e.getLayer() instanceof WMSLayer) {
-                layer = (WMSLayer)e.getLayer();
+                layer = (WMSLayer) e.getLayer();
             } else if ((e.getLayer() instanceof WMSServiceLayer)
-                        && (((WMSServiceLayer)e.getLayer()).getWMSLayers().size() == 1)) {
-                layer = (WMSLayer)((WMSServiceLayer)e.getLayer()).getWMSLayers().get(0);
+                    && (((WMSServiceLayer) e.getLayer()).getWMSLayers().size() == 1)) {
+                layer = (WMSLayer) ((WMSServiceLayer) e.getLayer()).getWMSLayers().get(0);
             } else if ((e.getLayer() instanceof SlidableWMSServiceLayerGroup)
-                        && (((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers().size() > 0)) {
-                final WMSServiceLayer sLayer = ((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers().get(0);
+                    && (((SlidableWMSServiceLayerGroup) e.getLayer()).getLayers().size() > 0)) {
+                final WMSServiceLayer sLayer = ((SlidableWMSServiceLayerGroup) e.getLayer()).getLayers().get(0);
                 if (sLayer.getWMSLayers().size() == 1) {
-                    layer = (WMSLayer)sLayer.getWMSLayers().get(0);
+                    layer = (WMSLayer) sLayer.getWMSLayers().get(0);
                 }
             }
             try {
@@ -270,7 +275,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 }
             }
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
-            final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
+            final SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
             scrollToLegend(slp.getLegendUrl());
         }
     }
@@ -289,18 +294,18 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         }
 
         if (e.getLayer() instanceof WMSServiceLayer) {
-            addWmsServiceLayer((WMSServiceLayer)e.getLayer());
+            addWmsServiceLayer((WMSServiceLayer) e.getLayer());
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
-            final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
+            final SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
             this.addLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
         } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
-            final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup)e.getLayer();
+            final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup) e.getLayer();
             final List v = wmsLayer.getLayers();
             final Iterator it = v.iterator();
             if (it.hasNext()) {
                 final Object elem = it.next();
                 if (elem instanceof WMSServiceLayer) {
-                    addWmsServiceLayer((WMSServiceLayer)elem);
+                    addWmsServiceLayer((WMSServiceLayer) elem);
                 }
             }
         }                                                                        /*else if (e.getLayer() instanceof
@@ -327,7 +332,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     /**
      * DOCUMENT ME!
      *
-     * @param  wmsLayer  DOCUMENT ME!
+     * @param wmsLayer DOCUMENT ME!
      */
     private void addWmsServiceLayer(final WMSServiceLayer wmsLayer) {
         if (!wmsLayer.isDummy()) {
@@ -336,7 +341,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             while (it.hasNext()) {
                 final Object elem = it.next();
                 if (elem instanceof WMSLayer) {
-                    final WMSLayer wl = (WMSLayer)elem;
+                    final WMSLayer wl = (WMSLayer) elem;
                     final String title = wl.getOgcCapabilitiesLayer().getTitle();
                     final String name = wl.getOgcCapabilitiesLayer().getName();
                     String url = null;
@@ -363,16 +368,16 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     @Override
     public void layerInformationStatusChanged(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof WMSServiceLayer) {
-            refreshWMSServiceLayerInformation((WMSServiceLayer)e.getLayer());
+            refreshWMSServiceLayerInformation((WMSServiceLayer) e.getLayer());
         } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
-            final List<WMSServiceLayer> layer = ((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers();
+            final List<WMSServiceLayer> layer = ((SlidableWMSServiceLayerGroup) e.getLayer()).getLayers();
             final Iterator<WMSServiceLayer> it = layer.iterator();
 
             if (it.hasNext()) {
                 refreshWMSServiceLayerInformation(it.next());
             }
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
-            final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
+            final SimpleLegendProvider slp = (SimpleLegendProvider) e.getLayer();
             tableModel.refreshLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
         } else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
@@ -382,7 +387,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     /**
      * DOCUMENT ME!
      *
-     * @param  wmsLayer  DOCUMENT ME!
+     * @param wmsLayer DOCUMENT ME!
      */
     private void refreshWMSServiceLayerInformation(final WMSServiceLayer wmsLayer) {
         final List v = wmsLayer.getWMSLayers();
@@ -390,7 +395,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         while (it.hasNext()) {
             final Object elem = it.next();
             if (elem instanceof WMSLayer) {
-                final WMSLayer wl = (WMSLayer)elem;
+                final WMSLayer wl = (WMSLayer) elem;
                 final String title = wl.getOgcCapabilitiesLayer().getTitle();
                 final String name = wl.getOgcCapabilitiesLayer().getName();
                 String url = null;
@@ -412,8 +417,9 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     }
 
     /**
-     * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
-     * content of this method is always regenerated by the Form Editor.
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
     // <editor-fold defaultstate="collapsed" desc=" Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -440,27 +446,24 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     public void statusValueChanged(final StatusEvent e) {
         if (e.getName().equals(StatusEvent.AWAKED_FROM_DUMMY)) {
             if (e.getValue() instanceof WMSServiceLayer) {
-                addWmsServiceLayer((WMSServiceLayer)e.getValue());
+                addWmsServiceLayer((WMSServiceLayer) e.getValue());
             }
         }
     }
 
     //~ Inner Classes ----------------------------------------------------------
-
     /**
      * DOCUMENT ME!
      *
-     * @version  $Revision$, $Date$
+     * @version $Revision$, $Date$
      */
     private class LegendPanel extends JPanel implements RetrievalListener {
 
         //~ Instance fields ----------------------------------------------------
-
         JLabel lblImage = new JLabel();
         private String url = ""; // NOI18N
 
         //~ Constructors -------------------------------------------------------
-
         /**
          * Creates a new LegendPanel object.
          */
@@ -478,7 +481,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         /**
          * Creates a new LegendPanel object.
          *
-         * @param  url  DOCUMENT ME!
+         * @param url DOCUMENT ME!
          */
         public LegendPanel(final String url) {
             this();
@@ -498,10 +501,11 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
         //~ Methods ------------------------------------------------------------
 
+        //~ Methods ------------------------------------------------------------
         /**
          * DOCUMENT ME!
          *
-         * @param  r  DOCUMENT ME!
+         * @param r DOCUMENT ME!
          */
         private void dispatch(final Runnable r) {
             if (EventQueue.isDispatchThread()) {
@@ -525,17 +529,16 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         @Override
         public void retrievalStarted(final RetrievalEvent e) {
             final Runnable r = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        lblImage.setIcon(null);
-                        lblImage.setText("..."); // NOI18N
-                        if (maxWidth > 0) {
-                            tblLegends.getColumnModel().getColumn(0).setPreferredWidth(maxWidth);
-                        }
-                        tableModel.fireTableDataChanged();
+                @Override
+                public void run() {
+                    lblImage.setIcon(null);
+                    lblImage.setText("..."); // NOI18N
+                    if (maxWidth > 0) {
+                        tblLegends.getColumnModel().getColumn(0).setPreferredWidth(maxWidth);
                     }
-                };
+                    tableModel.fireTableDataChanged();
+                }
+            };
 
             dispatch(r);
         }
@@ -547,14 +550,13 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         @Override
         public void retrievalError(final RetrievalEvent e) {
             final Runnable r = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        lblImage.setText("");                     // NOI18N
-                        log.error("Error while loading legend."); // NOI18N
-                        tableModel.fireTableDataChanged();
-                    }
-                };
+                @Override
+                public void run() {
+                    lblImage.setText("");                     // NOI18N
+                    log.error("Error while loading legend."); // NOI18N
+                    tableModel.fireTableDataChanged();
+                }
+            };
 
             dispatch(r);
         }
@@ -562,26 +564,25 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         @Override
         public void retrievalComplete(final RetrievalEvent e) {
             if (e.getRetrievedObject() instanceof Image) {
-                final Image image = (Image)e.getRetrievedObject();
+                final Image image = (Image) e.getRetrievedObject();
                 final ImageIcon ii = new ImageIcon(image);
 
                 final Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        lblImage.setText(""); // NOI18N
+                        lblImage.setIcon(ii);
 
-                        @Override
-                        public void run() {
-                            lblImage.setText(""); // NOI18N
-                            lblImage.setIcon(ii);
-
-                            tableModel.fireTableDataChanged();
-                            int newWidth = image.getWidth(null);
-                            if (newWidth < tblLegends.getPreferredSize().width) {
-                                newWidth = tblLegends.getPreferredSize().width;
-                            } else {
-                                maxWidth = newWidth;
-                            }
-                            tblLegends.getColumnModel().getColumn(0).setPreferredWidth(newWidth);
+                        tableModel.fireTableDataChanged();
+                        int newWidth = image.getWidth(null);
+                        if (newWidth < tblLegends.getPreferredSize().width) {
+                            newWidth = tblLegends.getPreferredSize().width;
+                        } else {
+                            maxWidth = newWidth;
                         }
-                    };
+                        tblLegends.getColumnModel().getColumn(0).setPreferredWidth(newWidth);
+                    }
+                };
 
                 dispatch(r);
             }
@@ -590,12 +591,11 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         @Override
         public void retrievalAborted(final RetrievalEvent e) {
             final Runnable r = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        lblImage.setText(""); // NOI18N
-                    }
-                };
+                @Override
+                public void run() {
+                    lblImage.setText(""); // NOI18N
+                }
+            };
 
             dispatch(r);
         }
@@ -603,7 +603,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         /**
          * DOCUMENT ME!
          *
-         * @return  DOCUMENT ME!
+         * @return DOCUMENT ME!
          */
         public String getUrl() {
             return url;
@@ -612,7 +612,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         /**
          * DOCUMENT ME!
          *
-         * @param  url  DOCUMENT ME!
+         * @param url DOCUMENT ME!
          */
         public void setUrl(final String url) {
             this.url = url;
@@ -621,7 +621,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         @Override
         public boolean equals(final Object tester) {
             if (tester instanceof LegendPanel) {
-                final LegendPanel t = (LegendPanel)tester;
+                final LegendPanel t = (LegendPanel) tester;
                 return t.url.equals(url);
             } else {
                 return false;
@@ -632,29 +632,33 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     /**
      * DOCUMENT ME!
      *
-     * @version  $Revision$, $Date$
+     * @version $Revision$, $Date$
      */
     private class CustomCellRenderer implements TableCellRenderer {
 
         //~ Methods ------------------------------------------------------------
-
         /**
-         * Returns the component used for drawing the cell. This method is used to configure the renderer appropriately
-         * before drawing.
+         * Returns the component used for drawing the cell. This method is used
+         * to configure the renderer appropriately before drawing.
          *
-         * @param   table       the <code>JTable</code> that is asking the renderer to draw; can be <code>null</code>
-         * @param   value       the value of the cell to be rendered. It is up to the specific renderer to interpret and
-         *                      draw the value. For example, if <code>value</code> is the string "true", it could be
-         *                      rendered as a string or it could be rendered as a check box that is checked. <code>
+         * @param table the <code>JTable</code> that is asking the renderer to
+         * draw; can be <code>null</code>
+         * @param value the value of the cell to be rendered. It is up to the
+         * specific renderer to interpret and draw the value. For example,
+         * if <code>value</code> is the string "true", it could be rendered as a
+         * string or it could be rendered as a check box that is checked. <code>
          *                      null</code> is a valid value
-         * @param   isSelected  true if the cell is to be rendered with the selection highlighted; otherwise false
-         * @param   hasFocus    if true, render cell appropriately. For example, put a special border on the cell, if
-         *                      the cell can be edited, render in the color used to indicate editing
-         * @param   row         the row index of the cell being drawn. When drawing the header, the value of <code>
+         * @param isSelected true if the cell is to be rendered with the
+         * selection highlighted; otherwise false
+         * @param hasFocus if true, render cell appropriately. For example, put
+         * a special border on the cell, if the cell can be edited, render in
+         * the color used to indicate editing
+         * @param row the row index of the cell being drawn. When drawing the
+         * header, the value of <code>
          *                      row</code> is -1
-         * @param   column      the column index of the cell being drawn
+         * @param column the column index of the cell being drawn
          *
-         * @return  DOCUMENT ME!
+         * @return DOCUMENT ME!
          */
         @Override
         public Component getTableCellRendererComponent(final JTable table,
@@ -663,7 +667,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 final boolean hasFocus,
                 final int row,
                 final int column) {
-            final Component component = (Component)value;
+            final Component component = (Component) value;
             if (isSelected) {
                 component.setBackground(Color.white); // javax.swing.UIManager.getDefaults().getColor("Table.highlight"));
                 component.setForeground(Legend.this.getForeground());
@@ -672,8 +676,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 component.setForeground(Legend.this.getForeground());
             }
 
-            if (table.getRowHeight(row) != (int)component.getPreferredSize().getHeight()) {
-                table.setRowHeight(row, (int)component.getPreferredSize().getHeight());
+            if (table.getRowHeight(row) != (int) component.getPreferredSize().getHeight()) {
+                table.setRowHeight(row, (int) component.getPreferredSize().getHeight());
             }
 
             return component;
@@ -683,19 +687,17 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     /**
      * DOCUMENT ME!
      *
-     * @version  $Revision$, $Date$
+     * @version $Revision$, $Date$
      */
     private class LegendModel extends AbstractTableModel {
 
         //~ Instance fields ----------------------------------------------------
-
         private List<LegendPanel> panels = new ArrayList<LegendPanel>();
         private HashMap<String, LegendPanel> panelsByName = new HashMap<String, LegendPanel>();
         private HashMap<String, LegendPanel> panelsByUrl = new HashMap<String, LegendPanel>();
         private HashMap<String, String> urlsByName = new HashMap<String, String>();
 
         //~ Methods ------------------------------------------------------------
-
         @Override
         public Class<?> getColumnClass(final int columnIndex) {
             return LegendPanel.class;
@@ -719,8 +721,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         /**
          * DOCUMENT ME!
          *
-         * @param  url   DOCUMENT ME!
-         * @param  name  DOCUMENT ME!
+         * @param url DOCUMENT ME!
+         * @param name DOCUMENT ME!
          */
         public void addLegend(final String url, final String name) {
             final LegendPanel lp = new LegendPanel(url);
@@ -740,8 +742,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         /**
          * DOCUMENT ME!
          *
-         * @param  url        DOCUMENT ME!
-         * @param  layername  DOCUMENT ME!
+         * @param url DOCUMENT ME!
+         * @param layername DOCUMENT ME!
          */
         public void refreshLegend(final String url, final String layername) {
             final String oldUrl = urlsByName.get(layername);
@@ -762,7 +764,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         /**
          * DOCUMENT ME!
          *
-         * @param  layername  DOCUMENT ME!
+         * @param layername DOCUMENT ME!
          */
         public void removeLegendByName(final String layername) {
             final String url = urlsByName.get(layername);
@@ -787,9 +789,9 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         /**
          * DOCUMENT ME!
          *
-         * @param   url  DOCUMENT ME!
+         * @param url DOCUMENT ME!
          *
-         * @return  DOCUMENT ME!
+         * @return DOCUMENT ME!
          */
         public int getPosition(final String url) {
             final LegendPanel lp = panelsByUrl.get(url);
