@@ -148,7 +148,13 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
                 add(layer);
                 
                 if (layer instanceof RetrievalServiceLayer) {
-                    model.registerRetrievalServiceLayer((RetrievalServiceLayer)layer);
+                    EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            model.registerRetrievalServiceLayer((RetrievalServiceLayer)layer);
+                        }
+                    });
                 }
             }
         } catch (Throwable t) {
@@ -256,6 +262,16 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
                 ((LayerCollection)tmp).setEnabled(enabled);
             } else if (tmp instanceof ServiceLayer) {
                 ((ServiceLayer)tmp).setEnabled(enabled);
+                
+                if (model != null) {
+                    // only the last component of the tree path will be considered within
+                    // the methods isVisible(TreePath) and handleVisibiliy(TreePath)
+                    final TreePath tp = new TreePath(new Object[] { this, tmp });
+
+                    if (model.isVisible(tp) != enabled) {
+                        model.handleVisibility(tp);
+                    }
+                }
             }
         }
     }
@@ -266,26 +282,16 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
      * @return  DOCUMENT ME!
      */
     public boolean isEnabled() {
-        boolean enabled = true;
+        boolean enabled = false;
 
         for (final Object tmp : this) {
             if (tmp instanceof LayerCollection) {
-                if (!((LayerCollection)tmp).isEnabled()) {
-                    enabled = false;
+                if (((LayerCollection)tmp).isEnabled()) {
+                    enabled = true;
                 }
             } else if (tmp instanceof ServiceLayer) {
-                if (!((ServiceLayer)tmp).isEnabled()) {
-                    enabled = false;
-                }
-
-                if (model != null) {
-                    // only the last component of the tree path will be considered within
-                    // the methods isVisible(TreePath) and handleVisibiliy(TreePath)
-                    final TreePath tp = new TreePath(new Object[] { this, tmp });
-
-                    if (model.isVisible(tp) != enabled) {
-                        model.handleVisibility(tp);
-                    }
+                if (((ServiceLayer)tmp).isEnabled()) {
+                    enabled = true;
                 }
             }
         }

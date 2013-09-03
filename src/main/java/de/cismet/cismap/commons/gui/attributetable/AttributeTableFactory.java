@@ -76,8 +76,6 @@ public class AttributeTableFactory {
      * @param  featureService  DOCUMENT ME!
      */
     public void showAttributeTable(final AbstractFeatureService featureService) {
-        final FeatureFactory factory = featureService.getFeatureFactory();
-
         try {
             final AttributeTable table = new AttributeTable(featureService);
             table.setMappingComponent(mappingComponent);

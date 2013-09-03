@@ -159,6 +159,20 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      * @param  layer  DOCUMENT ME!
      * @param  index  DOCUMENT ME!
      */
+    public void layerCollectionStructureChanged(final TreePath path, final LayerCollection layer) {
+        fireTreeStructureChanged(
+            this,
+            path.getPath(),
+            null,
+            new Object[] {layer});
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     * @param  index  DOCUMENT ME!
+     */
     public synchronized void addLayer(final Object layer, final int index) {
         if (layer instanceof LayerCollection) {
             addLayerCollection((LayerCollection)layer, index);
@@ -594,11 +608,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             collection.add(collection.size() - index, layer);
         }
 
-//        fireTreeStructureChanged(
-//            this,
-//            new Object[] { root },
-//            null,
-//            null);
         fireTreeStructureChanged(
             this,
             source.getPath(),

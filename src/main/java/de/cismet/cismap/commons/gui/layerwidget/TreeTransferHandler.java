@@ -35,6 +35,7 @@ import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
 import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
@@ -239,11 +240,11 @@ class TreeTransferHandler extends TransferHandler {
             }
             return true;
         } else {
-            return dropPerformed(support, model, index);
+            return dropPerformed(support, model, dest, index);
         }
     }
     
-    private boolean dropPerformed(final TransferHandler.TransferSupport support, ActiveLayerModel activeLayerModel, int index) {
+    private boolean dropPerformed(final TransferHandler.TransferSupport support, ActiveLayerModel activeLayerModel, TreePath parentPath, int index) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Drop with this flavors:" + support.getDataFlavors()); // NOI18N
         }
@@ -293,7 +294,15 @@ class TreeTransferHandler extends TransferHandler {
 
                             final DocumentFeatureService dfs = DocumentFeatureServiceFactory
                                         .createDocumentFeatureService(currentFile);
-                            activeLayerModel.addLayer(dfs, index);
+
+                            if (parentPath.getLastPathComponent() instanceof LayerCollection) {
+                                LayerCollection collection = (LayerCollection)parentPath.getLastPathComponent();
+                                collection.add(collection.size() - index, dfs);
+                                activeLayerModel.registerRetrievalServiceLayer(dfs);
+                                activeLayerModel.layerCollectionStructureChanged(parentPath, collection);
+                            } else {
+                                activeLayerModel.addLayer(dfs, activeLayerModel.getChildCount(activeLayerModel.getRoot()) - index);
+                            }
 
                             if (dfs instanceof ShapeFileFeatureService) {
                                 new Thread(new Runnable() {

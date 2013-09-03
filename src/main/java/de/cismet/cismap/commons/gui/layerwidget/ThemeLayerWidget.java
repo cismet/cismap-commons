@@ -49,9 +49,17 @@ import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.featureservice.style.StyleDialog;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
+import de.cismet.cismap.commons.wfs.WFSFacade;
+import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
+import de.cismet.tools.gui.StaticSwingTools;
+import java.awt.Frame;
+import javax.swing.JOptionPane;
+import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -74,6 +82,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     private ActiveLayerModel layerModel;
     private DefaultPopupMenuListener popupMenuListener = new DefaultPopupMenuListener(popupMenu);
     private TreeTransferHandler transferHandler;
+    private StyleDialog styleDialog;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree tree;
@@ -838,14 +847,128 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             super(NbBundle.getMessage(
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.OptionsMenuItem.pmenuItem.text"),
-                NODE,
-                0);
+                NODE);
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         public void actionPerformed(final ActionEvent e) {
+            final TreePath[] paths = tree.getSelectionPaths();
+
+            for (final TreePath path : paths) {
+                if (path.getLastPathComponent() instanceof AbstractFeatureService) {
+                    final AbstractFeatureService selectedService = (AbstractFeatureService)path.getLastPathComponent();
+
+                    try {
+                        if (log.isDebugEnabled()) {
+                            log.debug("invoke FeatureService-StyleDialog");                             // NOI18N
+                        }
+                        
+                        if (styleDialog == null) {
+                            final Frame parentFrame = StaticSwingTools.getParentFrame(ThemeLayerWidget.this);
+                            if (log.isDebugEnabled()) {
+                                log.debug("creating new StyleDialog '" + parentFrame.getTitle() + "'"); // NOI18N
+                            }
+                            styleDialog = new StyleDialog(parentFrame, true);
+                        }
+
+                        // configure dialog, adding attributes to the tab and
+                        // set style from the layer properties
+                        if (log.isDebugEnabled()) {
+                            log.debug("configure dialog"); // NOI18N
+                        }
+                        styleDialog.configureDialog(
+                            selectedService.getLayerProperties(),
+                            selectedService.getFeatureServiceAttributes(),
+                            selectedService.getQuery());
+
+                        if (log.isDebugEnabled()) {
+                            log.debug("set dialog visible"); // NOI18N
+                        }
+                        StaticSwingTools.showDialog(styleDialog);
+                    } catch (Throwable t) {
+                        log.error("could not configure StyleDialog: " + t.getMessage(), t); // NOI18N
+                    }
+                    // check returnstatus
+                    if ((styleDialog != null) && styleDialog.isAccepted()) {
+                        final Runnable r = new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    try {
+                                        boolean forceUpdate = false;
+                                        if (selectedService instanceof WebFeatureService) {
+                                            if (styleDialog.isGeoAttributeChanged()
+                                                        || styleDialog.isAttributeSelectionChanged()) {
+                                                if (log.isDebugEnabled()) {
+                                                    log.debug(
+                                                        "Attributes changed, updating the QUERY Element"); // NOI18N
+                                                }
+                                                final Element query = ((WebFeatureService)selectedService)
+                                                            .getQueryElement();
+                                                final WebFeatureService service = ((WebFeatureService)
+                                                        selectedService);
+                                                WFSFacade.setGeometry(
+                                                    query,
+                                                    styleDialog.getSelectedGeoAttribute(),
+                                                    service.getVersion());
+                                                WFSFacade.changePropertyNames(
+                                                    query,
+                                                    styleDialog.getSelectedAttributes(),
+                                                    service.getVersion());
+
+                                                service.setQueryElement(query);
+                                                forceUpdate = true;
+                                            }
+
+//                                            if (styleDialog.isQueryStringChanged()) {
+//                                                final int i = JOptionPane.showConfirmDialog(
+//                                                        StaticSwingTools.getParentFrame(this),
+//                                                        org.openide.util.NbBundle.getMessage(
+//                                                            ActiveLayerTableCellEditor.class,
+//                                                            "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.message"), // NOI18N
+//                                                        org.openide.util.NbBundle.getMessage(
+//                                                            ActiveLayerTableCellEditor.class,
+//                                                            "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.title"), // NOI18N
+//                                                        JOptionPane.YES_NO_OPTION,
+//                                                        JOptionPane.WARNING_MESSAGE);
+//                                                if (i == JOptionPane.YES_OPTION) {
+//                                                    if (log.isDebugEnabled()) {
+//                                                        log.debug(
+//                                                            "Query String changed, updating the QUERY String");                         // NOI18N
+//                                                    }
+//                                                    selectedService.setQuery(styleDialog.getQueryString());
+//                                                    forceUpdate = true;
+//                                                }
+//                                            }
+                                        }
+
+                                        // this causes a refresh of the last created features and fires a
+                                        // retrieval event
+                                        selectedService.setFeatureServiceAttributes(
+                                            styleDialog.getFeatureServiceAttributes());
+
+                                        if (forceUpdate) {
+                                            ((WebFeatureService)selectedService).setLayerPropertiesWithoutUpdate(
+                                                styleDialog.getLayerProperties());
+                                            selectedService.retrieve(forceUpdate);
+                                        } else {
+                                            selectedService.setLayerProperties(styleDialog.getLayerProperties());
+                                        }
+                                    } catch (Throwable t) {
+                                        log.error(t.getMessage(), t);
+                                    }
+                                }
+                            };
+                        CismetThreadPool.execute(r);
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Style Dialog canceled"); // NOI18N
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1110,7 +1233,13 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     private void changeVisibility(final Object objectToChange) {
                         if (objectToChange instanceof ServiceLayer) {
                             ((ServiceLayer)objectToChange).setEnabled(!((ServiceLayer)objectToChange).isEnabled());
-                            layerModel.handleVisibility(tree.getSelectionPath());
+                            // only the last component of the tree path will be considered within
+                            // the methods isVisible(TreePath) and handleVisibiliy(TreePath)
+                            final TreePath tp = new TreePath(new Object[] { layerModel.getRoot(), objectToChange });
+                            
+                            if (layerModel.isVisible(tp) != ((ServiceLayer)objectToChange).isEnabled()) {
+                                layerModel.handleVisibility(tp);
+                            }
                         } else if (objectToChange instanceof LayerCollection) {
                             ((LayerCollection)objectToChange).setEnabled(
                                 !((LayerCollection)objectToChange).isEnabled());
@@ -1144,7 +1273,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         if (ret instanceof JLabel) {
                             final String text = ((JLabel)ret).getText();
                             ((JLabel)ret).setText("");
-                            log.error("setText " + text);
                             treeEditorTextField = new JTextField(text);
                             treeEditorTextField.addKeyListener(new KeyAdapter() {
 
