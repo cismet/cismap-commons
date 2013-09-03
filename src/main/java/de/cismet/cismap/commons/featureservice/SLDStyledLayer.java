@@ -17,6 +17,7 @@ import java.awt.Graphics2D;
 
 import java.io.InputStream;
 import java.io.Reader;
+import org.deegree.commons.utils.Pair;
 
 import java.util.List;
 
