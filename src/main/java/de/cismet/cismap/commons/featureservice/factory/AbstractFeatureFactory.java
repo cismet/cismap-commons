@@ -60,7 +60,8 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // private BoundingBox diff = null;
     // private final WKTReader reader;
     protected Map<String, LinkedList<Style>> styles;
-
+    protected String layerName = null;
+    
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -115,8 +116,8 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     @Override
     public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
         this.styles = styles;
-        for(FT feature : lastCreatedfeatureVector) {
-            feature.setSLDStyle(getStyle());
+        for (final FT feature : lastCreatedfeatureVector) {
+            feature.setSLDStyle(getStyle(layerName));
         }
     }
 
@@ -561,11 +562,25 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     @Override
     public abstract AbstractFeatureFactory clone();
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     protected Style getStyle() {
         if (styles != null) {
-            return styles.get("StateBoundary").getFirst();
+            return styles.get("default").getFirst();
         } else {
             return null;
         }
+    }
+    
+    protected Style getStyle(String layerName) {
+        if(layerName == null)
+            return getStyle();
+        else if(styles != null && styles.containsKey(layerName))
+            return styles.get(layerName).getFirst();
+        else
+            return null;
     }
 }
