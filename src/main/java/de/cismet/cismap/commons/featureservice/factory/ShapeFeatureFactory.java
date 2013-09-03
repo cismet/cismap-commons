@@ -29,7 +29,9 @@ import java.net.URI;
 
 import java.nio.charset.Charset;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -81,16 +83,19 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      * @param   documentURL            DOCUMENT ME!
      * @param   maxCachedFeatureCount  DOCUMENT ME!
      * @param   workerThread           DOCUMENT ME!
+     * @param   styles                 DOCUMENT ME!
      *
      * @throws  Exception  DOCUMENT ME!
      */
     public ShapeFeatureFactory(final LayerProperties layerProperties,
             final URI documentURL,
             final int maxCachedFeatureCount,
-            final SwingWorker workerThread) throws Exception {
+            final SwingWorker workerThread,
+            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) throws Exception {
         this.layerProperties = layerProperties;
         this.documentURI = documentURL;
         this.maxCachedFeatureCount = maxCachedFeatureCount;
+        this.styles = styles;
 
         try {
             this.parseShapeFile(workerThread);
@@ -128,7 +133,14 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
     @Override
     protected ShapeFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
-        final ShapeFeature shapeFeature = new ShapeFeature();
+        String filename = new File(documentURI).getName();
+        if (filename.matches(".*\\..*")) {
+            filename = filename.substring(0, filename.lastIndexOf("."));
+        }
+        layerName = filename;
+        final ShapeFeature shapeFeature;
+
+        shapeFeature = new ShapeFeature(filename, getStyle(filename));
 
         // auto generate Ids!
         shapeFeature.setId(index);

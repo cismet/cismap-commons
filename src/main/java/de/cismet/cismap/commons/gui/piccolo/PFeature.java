@@ -74,6 +74,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
     //~ Instance fields --------------------------------------------------------
 
+    public ArrayList<PPath> sldStyledPolygon = new ArrayList();
+    public ArrayList<PTextWithDisplacement> sldStyledText = new ArrayList();
+    public ArrayList<PImage> sldStyledImage = new ArrayList();
     ArrayList splitHandlesBetween = new ArrayList();
     PHandle splitPolygonFromHandle = null;
     PHandle splitPolygonToHandle = null;
@@ -347,6 +350,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             } else if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
             } else if (geom instanceof MultiPolygon) {
+/*                final com.vividsolutions.jts.geom.Point intPoint = CrsTransformer.transformToGivenCrs(
+                            geom,
+                            viewer.getMappingModel().getSrs().getCode())
+                            .getInteriorPoint();
+                addAnnotation(intPoint.getX(), intPoint.getY());*/
 //                MultiPolygon mp = (MultiPolygon) geom;
             } else if ((geom instanceof Point) || (geom instanceof MultiPoint)) {
                 addAnnotation(entityRingCoordArr[0][0][0].x, entityRingCoordArr[0][0][0].y);
@@ -859,7 +867,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 // is not null, but the object to delete does not exist)
                 removeChild(primaryAnnotation);
             }
-            viewer.removeStickyNode(primaryAnnotation);
+            viewer.removeStickyNode((StickyPText)primaryAnnotation);
         }
         if (viewer.isFeatureDebugging()) {
             if (log.isDebugEnabled()) {
@@ -919,6 +927,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     }
                 }
             }
+
+            if (feature instanceof SLDStyledFeature) {
+                ((SLDStyledFeature)feature).applyStyle(this, wtst);
+                nonHighlightingPaint = getPaint();
+            }
+
             stroke = getStroke();
             strokePaint = getStrokePaint();
             setSelected(this.isSelected());
@@ -965,8 +979,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 addChild(primaryAnnotation);
 
                 if (!ignoreStickyFeature && af.isAutoscale()) {
-                    viewer.addStickyNode(primaryAnnotation);
-                    viewer.rescaleStickyNode(primaryAnnotation);
+                    viewer.addStickyNode((StickyPText)primaryAnnotation);
+                    viewer.rescaleStickyNode((StickyPText)primaryAnnotation);
                 }
                 setVisibility(primaryAnnotation, af);
                 // }
@@ -3106,7 +3120,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @version  $Revision$, $Date$
      */
-    class StickyPText extends PText implements ParentNodeIsAPFeature, PSticky {
+    public class StickyPText extends PText implements ParentNodeIsAPFeature, PSticky {
 
         //~ Constructors -------------------------------------------------------
 
@@ -3124,6 +3138,61 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
          */
         public StickyPText(final String text) {
             super(text);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public class PTextWithDisplacement extends PText implements PSticky {
+
+        //~ Instance fields ----------------------------------------------------
+
+        double displacementX;
+        double displacementY;
+        private SLDStyledFeature.UOM uom;
+        private double anchorPointX;
+        private double anchorPointY;
+        private WorldToScreenTransform wtst;
+
+        private double scaledDisplacementX;
+        private double scaledDisplacementY;
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void setScale(final double scale) {
+            offset(-scaledDisplacementX, -scaledDisplacementY);
+            super.setScale(scale);
+            scaledDisplacementX = (displacementX + ((-anchorPointX) * (double)this.getWidth())) / scale;
+            scaledDisplacementY = (displacementY + ((anchorPointY) * (double)this.getHeight())) / scale;
+            offset(scaledDisplacementX, scaledDisplacementY);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  uomFromDeegree  DOCUMENT ME!
+         * @param  displacementX   DOCUMENT ME!
+         * @param  displacementY   DOCUMENT ME!
+         * @param  anchorPointX    DOCUMENT ME!
+         * @param  anchorPointY    DOCUMENT ME!
+         * @param  wtst            DOCUMENT ME!
+         */
+        public void setDisplacement(final SLDStyledFeature.UOM uomFromDeegree,
+                final double displacementX,
+                final double displacementY,
+                final double anchorPointX,
+                final double anchorPointY,
+                final WorldToScreenTransform wtst) {
+            this.uom = uomFromDeegree;
+            this.displacementX = displacementX;
+            this.displacementY = displacementY;
+            this.anchorPointX = anchorPointX;
+            this.anchorPointY = anchorPointY;
+            this.wtst = wtst;
         }
     }
 }
