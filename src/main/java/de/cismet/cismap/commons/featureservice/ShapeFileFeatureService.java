@@ -161,7 +161,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
                 parseSLD(getSLDDefiniton()));
         noGeometryRecognised = sff.isNoGeometryRecognised();
         errorInGeometryFound = sff.isErrorInGeometryFound();
-
+        // sff.setSLDStyle();
         return sff;
     }
 
