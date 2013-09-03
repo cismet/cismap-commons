@@ -41,13 +41,14 @@ public class AttributeTableFactory {
 
     private static AttributeTableFactory instance = null;
     private static final Logger LOG = Logger.getLogger(AttributeTableFactory.class);
-    private MappingComponent mappingComponent;
 
     static {
         instance = new AttributeTableFactory();
     }
 
     //~ Instance fields --------------------------------------------------------
+
+    private MappingComponent mappingComponent;
 
     private AttributeTableListener listener = null;
 
@@ -79,7 +80,7 @@ public class AttributeTableFactory {
         try {
             final AttributeTable table = new AttributeTable(featureService);
             table.setMappingComponent(mappingComponent);
-                    
+
             listener.showPanel(
                 table,
                 featureService.getName(),
@@ -101,16 +102,20 @@ public class AttributeTableFactory {
     }
 
     /**
-     * @return the mappingComponent
+     * DOCUMENT ME!
+     *
+     * @return  the mappingComponent
      */
     public MappingComponent getMappingComponent() {
         return mappingComponent;
     }
 
     /**
-     * @param mappingComponent the mappingComponent to set
+     * DOCUMENT ME!
+     *
+     * @param  mappingComponent  the mappingComponent to set
      */
-    public void setMappingComponent(MappingComponent mappingComponent) {
+    public void setMappingComponent(final MappingComponent mappingComponent) {
         this.mappingComponent = mappingComponent;
     }
 }

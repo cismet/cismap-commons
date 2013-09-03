@@ -13,6 +13,7 @@ package de.cismet.cismap.commons.featureservice.factory;
 
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.index.strtree.STRtree;
+import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 
 import org.deegree.io.shpapi.ShapeFile;
 import org.deegree.model.feature.Feature;
@@ -39,8 +40,6 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
@@ -147,6 +146,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
         try {
             shapeFeature.setGeometry(JTSAdapter.export(degreeFeature.getGeometryPropertyValues()[geometryIndex]));
+            shapeFeature.setGeometry(TopologyPreservingSimplifier.simplify(shapeFeature.getGeometry(), 30));            
         } catch (Exception e) {
             logger.error("Error while parsing the geometry of a feature from a shape file.", e);
             if (degreeFeature.getGeometryPropertyValues().length == 0) {

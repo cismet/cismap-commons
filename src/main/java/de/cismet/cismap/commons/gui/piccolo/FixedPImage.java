@@ -69,10 +69,15 @@ public class FixedPImage extends PImage implements PSticky {
 
     //~ Methods ----------------------------------------------------------------
 
-    public void setMultiplier(double multiplier) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  multiplier  DOCUMENT ME!
+     */
+    public void setMultiplier(final double multiplier) {
         this.multiplier = multiplier;
     }
-    
+
     @Override
     public void setOffset(final double x, final double y) {
         originalOffsetX = x;

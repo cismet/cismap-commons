@@ -156,15 +156,15 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     /**
      * DOCUMENT ME!
      *
+     * @param  path   index DOCUMENT ME!
      * @param  layer  DOCUMENT ME!
-     * @param  index  DOCUMENT ME!
      */
     public void layerCollectionStructureChanged(final TreePath path, final LayerCollection layer) {
         fireTreeStructureChanged(
             this,
             path.getPath(),
             null,
-            new Object[] {layer});
+            new Object[] { layer });
     }
 
     /**
@@ -217,7 +217,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
 
         registerRetrievalServiceLayer(layer);
-        
+
         // Das eigentliche Hinzufuegen des neuen Layers
         layers.add(index, layer);
         if (DEBUG) {
@@ -232,8 +232,12 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             null);
     }
 
-    
-    public void registerRetrievalServiceLayer(RetrievalServiceLayer layer) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     */
+    public void registerRetrievalServiceLayer(final RetrievalServiceLayer layer) {
         final RetrievalServiceLayer currentLayer = layer;
         final ActiveLayerEvent ale = new ActiveLayerEvent();
         ale.setLayer(currentLayer);
@@ -358,9 +362,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             if (log.isDebugEnabled()) {
                 log.debug("RetrievalListener added on layer '" + currentLayer.getName() + "'"); // NOI18N
             }
-        }    
+        }
     }
-    
+
     /**
      * DOCUMENT ME!
      */
@@ -420,7 +424,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      * @param  treePath  DOCUMENT ME!
      */
     public void removeLayer(final Object layer, final TreePath treePath) {
-        if (treePath != null && !treePath.getParentPath().getLastPathComponent().equals(getRoot())) {
+        if ((treePath != null) && !treePath.getParentPath().getLastPathComponent().equals(getRoot())) {
             final Object parent = treePath.getParentPath().getLastPathComponent();
 
             if (parent instanceof LayerCollection) {
@@ -1550,7 +1554,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             log.error("Error during the configuration of the ActiveLayerModell", ex); // NOI18N
         }
     }
-
 
     /**
      * DOCUMENT ME!

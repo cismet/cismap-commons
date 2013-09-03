@@ -929,7 +929,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
 
             if (feature instanceof SLDStyledFeature) {
-                ((SLDStyledFeature)feature).applyStyle(this, wtst);
+//                ((SLDStyledFeature)feature).applyStyle(this, wtst);
                 nonHighlightingPaint = getPaint();
             }
 
@@ -3081,11 +3081,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
 
         if (stickyChild != null) {
-            viewer.removeStickyNode(stickyChild);
+            viewer.removeStickyNode((PSticky)stickyChild);
         }
 
         if (secondStickyChild != null) {
-            viewer.removeStickyNode(secondStickyChild);
+            viewer.removeStickyNode((PSticky)secondStickyChild);
         }
     }
 

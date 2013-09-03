@@ -993,7 +993,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
          * //final ListMenuItem lmi = new ListMenuItem("cidsLayer", cl); lmi.addActionListener(new ActionListener() {
          * @Override     public void actionPerformed(ActionEvent e) {
          *
-         *   } }); menu.add(lmi); } catch (ClassNotFoundException ex) { log.error("ClassNotFoundException", ex); } catch
+         * } }); menu.add(lmi); } catch (ClassNotFoundException ex) { log.error("ClassNotFoundException", ex); } catch
          * (NoSuchMethodException ex) { log.error("NoSuchMethodException", ex); } catch (SecurityException ex) {
          * log.error("SecurityException", ex); } catch (InstantiationException ex) { log.error("InstantiationException",
          * ex); } catch (IllegalAccessException ex) { log.error("IllegalAccessException", ex); } catch

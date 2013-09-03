@@ -780,8 +780,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void addStickyNode(final PSticky pn) {
         // if(DEBUG)log.debug("addStickyNode:" + pn);
-        if(pn != null)
+        if (pn != null) {
             stickyPNodes.add(pn);
+        }
     }
 
     /**
@@ -826,22 +827,22 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @param  nodes  n PNode to rescale
      */
-    public void rescaleStickyNodes(final List<PNode> nodes) {
+    public void rescaleStickyNodes(final List<PSticky> nodes) {
         if ((nodes != null) && !nodes.isEmpty()) {
             if (!EventQueue.isDispatchThread()) {
                 EventQueue.invokeLater(new Runnable() {
 
                         @Override
                         public void run() {
-                            final List<PNode> nodesCopy = new ArrayList<PNode>(nodes);
-                            for (final PNode node : nodesCopy) {
+                            final List<PSticky> nodesCopy = new ArrayList<PSticky>(nodes);
+                            for (final PSticky node : nodesCopy) {
                                 rescaleStickyNodeWork(node);
                             }
                         }
                     });
             } else {
-                final List<PNode> nodesCopy = new ArrayList<PNode>(nodes);
-                for (final PNode node : nodesCopy) {
+                final List<PSticky> nodesCopy = new ArrayList<PSticky>(nodes);
+                for (final PSticky node : nodesCopy) {
                     rescaleStickyNodeWork(node);
                 }
             }

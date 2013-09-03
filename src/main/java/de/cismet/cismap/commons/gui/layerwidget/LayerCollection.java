@@ -11,16 +11,21 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
-import de.cismet.cismap.commons.CidsLayerFactory;
 import org.apache.log4j.Logger;
 
 import org.jdom.Element;
 
+import java.awt.EventQueue;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.tree.TreePath;
 
+import de.cismet.cismap.commons.CidsLayerFactory;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
@@ -30,10 +35,6 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupportingRasterLayer;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
-import java.awt.EventQueue;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -66,52 +67,72 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
 
     /**
      * Creates a new LayerCollection object.
+     *
+     * @param  e             DOCUMENT ME!
+     * @param  capabilities  DOCUMENT ME!
+     * @param  model         DOCUMENT ME!
      */
-    public LayerCollection(Element e, final HashMap<String, WMSCapabilities> capabilities, ActiveLayerModel model) {
+    public LayerCollection(final Element e,
+            final HashMap<String, WMSCapabilities> capabilities,
+            final ActiveLayerModel model) {
         this.model = model;
 
         try {
-            LOG.info("creating new FeatureService instance from xml element '" + e.getName() + "'");                      // NOI18N
+            LOG.info("creating new FeatureService instance from xml element '" + e.getName() + "'"); // NOI18N
 
             if (e.getName().equals(XML_ELEMENT_NAME)) {
                 this.initFromElement(e, capabilities);
             } else {
-                LOG.error("LayerCollection could not be initailised from xml: unsupported element '" + e.getName() + "'"); // NOI18N
-                throw new ClassNotFoundException("LayerCollection could not be initailised from xml: unsupported element '"
-                            + e.getName() + "'");                                                                         // NOI18N
+                LOG.error("LayerCollection could not be initailised from xml: unsupported element '" + e.getName()
+                            + "'"); // NOI18N
+                throw new ClassNotFoundException(
+                    "LayerCollection could not be initailised from xml: unsupported element '"
+                            + e.getName()
+                            + "'"); // NOI18N
             }
         } catch (Exception ex) {
             LOG.error("Exception while creating LayerCollection", ex);
         }
     }
 
-    private void initFromElement(Element element, final HashMap<String, WMSCapabilities> capabilities) throws Exception {
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   element       DOCUMENT ME!
+     * @param   capabilities  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private void initFromElement(Element element, final HashMap<String, WMSCapabilities> capabilities)
+            throws Exception {
         if (element == null) {
             element = this.getInitElement();
         } else {
             this.setInitElement((Element)element.clone());
         }
 
-        if (element.getAttributeValue("name") != null)                                                  // NOI18N
+        if (element.getAttributeValue("name") != null)                                  // NOI18N
         {
-            this.setName(element.getAttributeValue("name"));                                            // NOI18N
+            this.setName(element.getAttributeValue("name"));                            // NOI18N
         }
-        if (element.getAttributeValue("enabled") != null)                                               // NOI18N
+        if (element.getAttributeValue("enabled") != null)                               // NOI18N
         {
-            this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));                     // NOI18N
+            this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));     // NOI18N
         }
-        if (element.getAttributeValue("translucency") != null)                                          // NOI18N
+        if (element.getAttributeValue("translucency") != null)                          // NOI18N
         {
-            this.setTranslucency(element.getAttribute("translucency").getFloatValue());                 // NOI18N
+            this.setTranslucency(element.getAttribute("translucency").getFloatValue()); // NOI18N
         }
-        if (element.getAttributeValue("layerPosition") != null)                                         // NOI18N
+        if (element.getAttributeValue("layerPosition") != null)                         // NOI18N
         {
-            this.setLayerPosition(element.getAttribute("layerPosition").getIntValue());                 // NOI18N
+            this.setLayerPosition(element.getAttribute("layerPosition").getIntValue()); // NOI18N
         }
-        
+
         createLayers(element, capabilities);
     }
-    
+
     /**
      * DOCUMENT ME!
      *
@@ -119,21 +140,21 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
      * @param  capabilities  DOCUMENT ME!
      */
     private void createLayers(final Element conf, final HashMap<String, WMSCapabilities> capabilities) {
-        Element layerElement = conf.getChild("Layers");                                                // NOI18N
-        
+        final Element layerElement = conf.getChild("Layers"); // NOI18N
+
         if (layerElement == null) {
-            LOG.error("no valid layers element found");                                            // NOI18N
+            LOG.error("no valid layers element found"); // NOI18N
             return;
         }
-        
+
         LOG.info("restoring " + layerElement.getChildren().size() + " layers from xml configuration"); // NOI18N
-        
+
         final Element[] orderedLayers = CidsLayerFactory.orderLayers(layerElement);
         for (final Element element : orderedLayers) {
             createLayer(element, capabilities);
         }
     }
-    
+
     /**
      * DOCUMENT ME!
      *
@@ -146,23 +167,21 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
 
             if (layer != null) {
                 add(layer);
-                
+
                 if (layer instanceof RetrievalServiceLayer) {
                     EventQueue.invokeLater(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            model.registerRetrievalServiceLayer((RetrievalServiceLayer)layer);
-                        }
-                    });
+                            @Override
+                            public void run() {
+                                model.registerRetrievalServiceLayer((RetrievalServiceLayer)layer);
+                            }
+                        });
                 }
             }
         } catch (Throwable t) {
             LOG.error("Layer layer '" + element.getName() + "' could not be created: \n" + t.getMessage(), t); // NOI18N
         }
     }
-    
-    //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
@@ -199,11 +218,11 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
      */
     public Element toElement() {
         final Element element = new Element(XML_ELEMENT_NAME);
-        element.setAttribute("name", getName());                                                    // NOI18N
-        element.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString());                   // NOI18N
-        element.setAttribute("translucency", new Float(getTranslucency()).toString());              // NOI18N
-        element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString());     // NOI18N
-        
+        element.setAttribute("name", getName());                                                // NOI18N
+        element.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString());               // NOI18N
+        element.setAttribute("translucency", new Float(getTranslucency()).toString());          // NOI18N
+        element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString()); // NOI18N
+
         // Zuerst alle RasterLayer
         final Iterator<Object> it = iterator();
         final Element allLayerConf = new Element("Layers"); // Sollte irgendwann zu "Layers" umgewandelt werden
@@ -236,7 +255,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
 
         // AppFeatureLayer
 
-        return element;        
+        return element;
     }
 
     @Override
@@ -256,13 +275,14 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
      *
      * @param  enabled  DOCUMENT ME!
      */
+    @Override
     public void setEnabled(final boolean enabled) {
         for (final Object tmp : this) {
             if (tmp instanceof LayerCollection) {
                 ((LayerCollection)tmp).setEnabled(enabled);
             } else if (tmp instanceof ServiceLayer) {
                 ((ServiceLayer)tmp).setEnabled(enabled);
-                
+
                 if (model != null) {
                     // only the last component of the tree path will be considered within
                     // the methods isVisible(TreePath) and handleVisibiliy(TreePath)
@@ -281,6 +301,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public boolean isEnabled() {
         boolean enabled = false;
 
@@ -344,6 +365,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
      *
      * @param  name  DOCUMENT ME!
      */
+    @Override
     public void setName(final String name) {
         this.name = name;
     }
@@ -383,7 +405,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
     }
 
     @Override
-    public void setLayerPosition(int layerPosition) {
+    public void setLayerPosition(final int layerPosition) {
         this.layerPosition = layerPosition;
     }
 
@@ -393,7 +415,7 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
     }
 
     @Override
-    public void setTranslucency(float t) {
+    public void setTranslucency(final float t) {
         this.translucency = translucency;
     }
 
@@ -403,16 +425,20 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
     }
 
     /**
-     * @return the initElement
+     * DOCUMENT ME!
+     *
+     * @return  the initElement
      */
     public Element getInitElement() {
         return initElement;
     }
 
     /**
-     * @param initElement the initElement to set
+     * DOCUMENT ME!
+     *
+     * @param  initElement  the initElement to set
      */
-    public void setInitElement(Element initElement) {
+    public void setInitElement(final Element initElement) {
         this.initElement = initElement;
     }
 }

@@ -13,11 +13,14 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import org.apache.log4j.Logger;
 
+import org.jdom.Element;
+
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -36,6 +39,7 @@ import javax.swing.DropMode;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
@@ -49,17 +53,16 @@ import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.SLDStyledLayer;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.featureservice.style.StyleDialog;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
 import de.cismet.cismap.commons.wfs.WFSFacade;
+
 import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
-import java.awt.Frame;
-import javax.swing.JOptionPane;
-import org.jdom.Element;
 
 /**
  * DOCUMENT ME!
@@ -862,9 +865,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
                     try {
                         if (log.isDebugEnabled()) {
-                            log.debug("invoke FeatureService-StyleDialog");                             // NOI18N
+                            log.debug("invoke FeatureService-StyleDialog"); // NOI18N
                         }
-                        
+
                         if (styleDialog == null) {
                             final Frame parentFrame = StaticSwingTools.getParentFrame(ThemeLayerWidget.this);
                             if (log.isDebugEnabled()) {
@@ -878,13 +881,13 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         if (log.isDebugEnabled()) {
                             log.debug("configure dialog"); // NOI18N
                         }
-                        styleDialog.configureDialog(
+                        styleDialog.configureDialog(selectedService.getSLDDefiniton(),
                             selectedService.getLayerProperties(),
                             selectedService.getFeatureServiceAttributes(),
                             selectedService.getQuery());
 
                         if (log.isDebugEnabled()) {
-                            log.debug("set dialog visible"); // NOI18N
+                            log.debug("set dialog visible");                                // NOI18N
                         }
                         StaticSwingTools.showDialog(styleDialog);
                     } catch (Throwable t) {
@@ -907,8 +910,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                                                 }
                                                 final Element query = ((WebFeatureService)selectedService)
                                                             .getQueryElement();
-                                                final WebFeatureService service = ((WebFeatureService)
-                                                        selectedService);
+                                                final WebFeatureService service = ((WebFeatureService)selectedService);
                                                 WFSFacade.setGeometry(
                                                     query,
                                                     styleDialog.getSelectedGeoAttribute(),
@@ -955,6 +957,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                                             selectedService.retrieve(forceUpdate);
                                         } else {
                                             selectedService.setLayerProperties(styleDialog.getLayerProperties());
+                                            if (selectedService instanceof SLDStyledLayer) {
+                                                ((SLDStyledLayer)selectedService).setSLDInputStream(
+                                                    styleDialog.getSLDStyle());
+                                            }
                                         }
                                     } catch (Throwable t) {
                                         log.error(t.getMessage(), t);
@@ -1236,7 +1242,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                             // only the last component of the tree path will be considered within
                             // the methods isVisible(TreePath) and handleVisibiliy(TreePath)
                             final TreePath tp = new TreePath(new Object[] { layerModel.getRoot(), objectToChange });
-                            
+
                             if (layerModel.isVisible(tp) != ((ServiceLayer)objectToChange).isEnabled()) {
                                 layerModel.handleVisibility(tp);
                             }
