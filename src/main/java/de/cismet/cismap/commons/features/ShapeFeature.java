@@ -16,6 +16,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.deegree.model.feature.FeatureProperty;
 import org.deegree.model.spatialschema.JTSAdapter;
 
+import org.deegree.feature.Feature;
 import org.deegree.feature.types.FeatureType;
 
 import org.deegree.style.se.unevaluated.Style;
@@ -212,6 +213,13 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         // do nothing
     }
     
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
+    protected Feature getDeegreeFeature() {
+        return new ShapeFileLayerDeegreeFeature();
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -229,7 +237,8 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
 
                     @Override
                     public QName getName() {
-                        return new QName(typename);
+                        final QName name = new QName("Feature");
+                        return name;
                     }
                 };
         }
