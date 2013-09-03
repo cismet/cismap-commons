@@ -16,6 +16,7 @@ import org.deegree.feature.types.FeatureType;
 import org.deegree.style.se.unevaluated.Style;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -50,8 +51,8 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      * @param  typename  DOCUMENT ME!
      * @param  styles    DOCUMENT ME!
      */
-    public ShapeFeature(final String typename, final org.deegree.style.se.unevaluated.Style styles) {
-        setSLDStyle(styles); // super.style = styles;
+    public ShapeFeature(final String typename, final List<org.deegree.style.se.unevaluated.Style> styles) {
+        setSLDStyles(styles); // super.style = styles;
         this.typename = typename;
     }
 
@@ -80,7 +81,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
                     @Override
                     public QName getName() {
                         final String type = typename;
-                        final QName name = new QName("Feature");
+                        final QName name = new QName("Feature"); // for demo
                         return name;
                     }
                 };
