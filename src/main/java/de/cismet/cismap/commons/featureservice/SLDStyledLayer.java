@@ -11,8 +11,10 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
+import java.awt.Graphics2D;
 import java.io.InputStream;
 import java.io.Reader;
+import org.deegree.commons.utils.Pair;
 
 /**
  * DOCUMENT ME!
@@ -36,4 +38,7 @@ public interface SLDStyledLayer {
      * @return  DOCUMENT ME!
      */
     Reader getSLDDefiniton();
+    
+    Pair<Integer, Integer> getLegendSize();
+    void getLegend(int width, int height, Graphics2D g2d);
 }
