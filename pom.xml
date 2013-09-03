@@ -35,6 +35,16 @@
     </scm>
 
     <repositories>
+      <repository>
+      <id>deegree-repo</id>
+      <url>http://repo.deegree.org/content/groups/public</url>
+      <releases>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>        
         <repository>
             <id>cismet-repo</id>
             <url>https://repo.cismet.de/repo</url>
@@ -49,16 +59,6 @@
                 <updatePolicy>interval:60</updatePolicy>
             </snapshots>
         </repository>
-        <repository>
-      <id>deegree-repo</id>
-      <url>http://repo.deegree.org/content/groups/public</url>
-      <releases>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
     </repositories>
 
     <dependencies>
