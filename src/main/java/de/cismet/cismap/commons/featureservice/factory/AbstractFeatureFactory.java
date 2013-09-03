@@ -67,7 +67,8 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // private BoundingBox diff = null;
     // private final WKTReader reader;
     protected Map<String, LinkedList<Style>> styles;
-
+    protected String layerName = null;
+    
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -687,5 +688,14 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         } else {
             return null;
         }
+    }
+    
+    protected Style getStyle(String layerName) {
+        if(layerName == null)
+            return getStyle();
+        else if(styles != null && styles.containsKey(layerName))
+            return styles.get(layerName).getFirst();
+        else
+            return null;
     }
 }
