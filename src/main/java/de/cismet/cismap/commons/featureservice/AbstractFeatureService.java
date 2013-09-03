@@ -67,6 +67,9 @@ import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 
 import de.cismet.tools.StaticXMLTools;
+import java.awt.Graphics2D;
+import org.deegree.commons.utils.Pair;
+import org.deegree.rendering.r2d.legends.Legends;
 
 /**
  * DOCUMENT ME!
