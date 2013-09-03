@@ -65,7 +65,7 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // private final WKTReader reader;
     protected Map<String, LinkedList<Style>> styles;
 
-    protected String layerName = null;
+    public String layerName = null;
 
     //~ Constructors -----------------------------------------------------------
 
