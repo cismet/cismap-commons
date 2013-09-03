@@ -68,6 +68,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
     //~ Static fields/initializers ---------------------------------------------
 
+    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(PFeature.class);
     private static final Color TRANSPARENT = new Color(255, 255, 255, 0);
     private static final Stroke FIXED_WIDTH_STROKE = new FixedWidthStroke();
 
@@ -81,7 +82,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     PPath splitPolygonLine;
     List<Point2D> splitPoints = new ArrayList<Point2D>();
     Image origin = null;
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private ImageIcon pushpinIco = new javax.swing.ImageIcon(PFeature.class.getResource(
+                "/de/cismet/cismap/commons/gui/res/pushpin.png"));         // NOI18N
+    private ImageIcon pushpinSelectedIco = new javax.swing.ImageIcon(PFeature.class.getResource(
+                "/de/cismet/cismap/commons/gui/res/pushpinSelected.png")); // NOI18N
     private Feature feature;
     private WorldToScreenTransform wtst;
     private double x_offset = 0.0d;
@@ -103,10 +107,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private Stroke stroke = null;
     private Paint strokePaint = null;
 //    private ColorTintFilter tinter;
-    private ImageIcon pushpinIco = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/pushpin.png"));         // NOI18N
-    private ImageIcon pushpinSelectedIco = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/pushpinSelected.png")); // NOI18N
     private boolean ignoreStickyFeature = false;
     private InfoPanel infoPanel;
     private JComponent infoComponent;
@@ -364,7 +364,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // no FeatureAnnotationSymbol is set, use PushPin Icons as  fallback case
             pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
             piSelected = new FeatureAnnotationSymbol(pushpinSelectedIco.getImage());
-            log.warn("No PointAnnotationSymbol found use PushPinIcons"); // NOI18N
+            if (log.isDebugEnabled()) {
+                log.debug("No PointAnnotationSymbol found use PushPinIcons"); // NOI18N
+            }
             pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
             pi.setSweetSpotX(0.46d);
             pi.setSweetSpotY(0.9d);
@@ -3050,6 +3052,27 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public int getNumOfRings(final int entityIndex) {
         return entityRingCoordArr[entityIndex].length;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void releaseResources() {
+        if (pi != null) {
+            viewer.removeStickyNode(pi);
+        }
+
+        if (piSelected != null) {
+            viewer.removeStickyNode(piSelected);
+        }
+
+        if (stickyChild != null) {
+            viewer.removeStickyNode(stickyChild);
+        }
+
+        if (secondStickyChild != null) {
+            viewer.removeStickyNode(secondStickyChild);
+        }
     }
 
     //~ Inner Classes ----------------------------------------------------------
