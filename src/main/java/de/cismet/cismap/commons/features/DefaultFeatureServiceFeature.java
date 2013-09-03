@@ -99,10 +99,6 @@ import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PFixedTexturePaint;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
-import edu.umd.cs.piccolo.PNode;
-import java.awt.AlphaComposite;
-import java.awt.Graphics2D;
-import java.util.ListIterator;
 
 /**
  * Default implementation of a FeatureServiceFeature.
