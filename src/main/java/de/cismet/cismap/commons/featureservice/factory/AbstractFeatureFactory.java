@@ -66,7 +66,7 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // private final WKTReader reader;
     protected Map<String, LinkedList<Style>> styles;
 
-    protected String layerName = null;
+    public String layerName = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -644,7 +644,7 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      *
      * @return  DOCUMENT ME!
      */
-    protected List<Style> getStyle(final String layerName) {
+    public List<Style> getStyle(final String layerName) {
         if (layerName == null) {
             return getStyle();
         } else if ((styles != null) && styles.containsKey(layerName)) {
