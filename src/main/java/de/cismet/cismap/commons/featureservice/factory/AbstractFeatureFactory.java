@@ -68,6 +68,8 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     protected Map<String, LinkedList<Style>> styles;
     private volatile boolean isInterruptedAllowed = true;
 
+    protected String layerName = null;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -150,7 +152,7 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
         this.styles = styles;
         for (final FT feature : lastCreatedfeatureVector) {
-            feature.setSLDStyle(getStyle(layerName));
+            feature.setSLDStyles(getStyle(layerName));
         }
     }
 
@@ -735,9 +737,10 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     protected Style getStyle(String layerName) {
         if(layerName == null)
             return getStyle();
-        else if(styles != null && styles.containsKey(layerName))
-            return styles.get(layerName).getFirst();
-        else
+        } else if ((styles != null) && styles.containsKey(layerName)) {
+            return styles.get(layerName);
+        } else {
             return null;
+        }
     }
 }
