@@ -149,8 +149,8 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     @Override
     public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
         this.styles = styles;
-        for(FT feature : lastCreatedfeatureVector) {
-            feature.setSLDStyle(getStyle());
+        for (final FT feature : lastCreatedfeatureVector) {
+            feature.setSLDStyle(getStyle(layerName));
         }
     }
 
@@ -730,5 +730,14 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         } else {
             return null;
         }
+    }
+    
+    protected Style getStyle(String layerName) {
+        if(layerName == null)
+            return getStyle();
+        else if(styles != null && styles.containsKey(layerName))
+            return styles.get(layerName).getFirst();
+        else
+            return null;
     }
 }
