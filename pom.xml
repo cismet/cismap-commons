@@ -129,6 +129,11 @@
             <version>3.2.3-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>org.deegree</groupId>
+            <artifactId>deegree-core-rendering-2d</artifactId>
+            <version>3.2-pre8.3-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
