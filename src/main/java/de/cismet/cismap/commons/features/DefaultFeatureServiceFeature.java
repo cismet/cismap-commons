@@ -953,6 +953,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         container.put(propertyName, propertyValue);
 
         propertyChangeSupport.firePropertyChange(propertyName, oldValue, propertyValue);
+    }
+    
     protected org.deegree.feature.Feature getDeegreeFeature() {
         return new DeegreeFeature();
     }

@@ -18,8 +18,9 @@ import org.deegree.model.spatialschema.JTSAdapter;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import javax.xml.namespace.QName;
+import org.deegree.feature.types.FeatureType;
 
 /**
  * Features read from a SHP File.
@@ -39,7 +40,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     private final ShapeInfo shapeInfo;
     //~ Instance fields --------------------------------------------------------
 
-    private String typename;
+    private final String typename;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -236,6 +237,12 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         // do nothing
     }
     
+
+    @Override
+    protected org.deegree.feature.Feature getDeegreeFeature() {
+        return new ShapeFileLayerDeegreeFeature();
+    }
+
     /**
      * DOCUMENT ME!
      *
@@ -251,7 +258,9 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
 
                     @Override
                     public QName getName() {
-                        return new QName(typename);
+                        final String type = typename;
+                        final QName name = new QName("Feature");
+                        return name;
                     }
                 };
         }
