@@ -119,6 +119,7 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         isInterruptedAllowed = false;
     }
 
+    
     @Override
     public void setLayerName(final String layerName) {
         this.layerName = layerName;
@@ -704,5 +705,14 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         } else {
             return null;
         }
+    }
+    
+    protected Style getStyle(String layerName) {
+        if(layerName == null)
+            return getStyle();
+        else if(styles != null && styles.containsKey(layerName))
+            return styles.get(layerName).getFirst();
+        else
+            return null;
     }
 }
