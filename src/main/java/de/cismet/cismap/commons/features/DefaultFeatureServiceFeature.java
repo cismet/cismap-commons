@@ -106,6 +106,10 @@ import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PFixedTexturePaint;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
+import edu.umd.cs.piccolo.PNode;
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.util.ListIterator;
 
 /**
  * Default implementation of a FeatureServiceFeature.
@@ -863,8 +867,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     protected void applyFill(final org.deegree.style.styling.components.UOM uom,
             final Fill fill,
-            final PPath pfeature) {
-        pfeature.setPaint(getPaintFromDeegree(fill.graphic, fill.color, uom));
+            final PPath pfeature, MappingComponent map) {
+        pfeature.setPaint(getPaintFromDeegree(fill.graphic, fill.color, uom, pfeature, map));
         // applyGraphic(fill.graphic, pfeature);
     }
 
@@ -888,6 +892,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         final BufferedImage buffImage = getImageFromDeegree(styling.graphic);
         image.setImage(buffImage);
         if (getUOMFromDeegree(styling.uom) == UOM.pixel) {
+            ((FixedPImage)image).setMultiplier(1/ (buffImage.getHeight() / styling.graphic.size));
             image.setOffset(wtst.getScreenX(x), wtst.getScreenY(y));
             ((FixedPImage)image).setSweetSpotX(styling.graphic.anchorPointX);
             ((FixedPImage)image).setSweetSpotY(styling.graphic.anchorPointY);
@@ -906,7 +911,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                             + ((styling.graphic.displacementY
                                     + ((styling.graphic.anchorPointY) * styling.graphic.size)) * multiplier)));
         }
-        image.setRotation(Math.toRadians(styling.graphic.rotation));
+        //image.setRotation(Math.toRadians(styling.graphic.rotation)); For Demo only
         image.setTransparency((float)styling.graphic.opacity);
     }
 
@@ -916,12 +921,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      * @param  pfeature  DOCUMENT ME!
      * @param  styling   DOCUMENT ME!
      */
-    protected void applyPolygonStyling(final PPath pfeature, final PolygonStyling styling) {
+    protected void applyPolygonStyling(final PPath pfeature, final PolygonStyling styling, MappingComponent map) {
         if (styling.fill != null) {
-            applyFill(styling.uom, styling.fill, pfeature);
+            applyFill(styling.uom, styling.fill, pfeature, map);
         }
         if (styling.stroke != null) {
-            applyStroke(styling.uom, styling.stroke, pfeature);
+            applyStroke(styling.uom, styling.stroke, pfeature, map);
         }
     }
 
@@ -934,7 +939,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     protected void applyStroke(final org.deegree.style.styling.components.UOM uom,
             final Stroke stroke,
-            final PPath pfeature) {
+            final PPath pfeature, MappingComponent map) {
         /*double scale = 1.0d;
          * if(PDebug.getProcessingOutput()) { if(PPaintContext.CURRENT_PAINT_CONTEXT != null)     scale =
          * PPaintContext.CURRENT_PAINT_CONTEXT.getScale(); } else { if(PPickPath.CURRENT_PICK_PATH != null)     scale =
@@ -980,7 +985,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     (float)(stroke.dashoffset * multiplier));
         }
         pfeature.setStroke(newStroke);
-        pfeature.setStrokePaint(getPaintFromDeegree(stroke.fill, stroke.color, uom));
+        pfeature.setStrokePaint(getPaintFromDeegree(stroke.fill, stroke.color, uom, pfeature, map));
     }
 
     /**
@@ -1000,13 +1005,27 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void applyStyle(final PFeature pfeature, final WorldToScreenTransform wtst) {
-        if (stylings == null) {
-            if(style == null)
-                return;
-            this.stylings = style.evaluate(getDeegreeFeature(), evaluator);
+        if (style != null) {
+            org.deegree.style.se.unevaluated.Style filteredStyle = style.filter(pfeature.getMappingComponent().getScaleDenominator());
+            stylings = filteredStyle.evaluate(getDeegreeFeature(), evaluator);
         }
-        if (stylings.size() == 0) {
+        /*
+        if (stylings == null) {
+            if (style == null) {
+                return;
+            }
+            this.stylings = style.evaluate(getDeegreeFeature(), evaluator);
+        }*/
+        if (stylings == null || stylings.size() == 0) {
             return;
+        }
+
+        ListIterator it = pfeature.getChildrenIterator();
+        while (it.hasNext())
+        {
+            Object child = it.next();
+            if(child instanceof PSticky)
+                pfeature.getMappingComponent().removeStickyNode((PSticky)child);
         }
         pfeature.removeAllChildren();
         pfeature.sldStyledImage.clear();
@@ -1030,7 +1049,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     }
                     path.setPathTo(pfeature.getPathReference());
                 }
-                applyPolygonStyling(path, (PolygonStyling)styling.first);
+                applyPolygonStyling(path, (PolygonStyling)styling.first, pfeature.getMappingComponent());
                 polygonNr++;
             } else if (styling.first instanceof TextStyling) {
                 PFeature.PTextWithDisplacement text;
@@ -1061,6 +1080,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                 } catch (IndexOutOfBoundsException ex) {
                     if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
                         image = new FixedPImage();
+                        pfeature.getMappingComponent().addStickyNode((PSticky)image);
                     } else {
                         image = new PImage();
                     }
@@ -1134,12 +1154,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             final double y) {
         ptext.setText(value);
         ptext.setOffset(wtst.getScreenX(x), wtst.getScreenY(y));
-        ptext.setDisplacement(getUOMFromDeegree(textStyling.uom),
+        /*ptext.setDisplacement(getUOMFromDeegree(textStyling.uom),
             textStyling.displacementX,
             textStyling.displacementY,
             textStyling.anchorPointX,
             textStyling.anchorPointY,
-            wtst);
+            wtst);*/
         /*double multiplier = getMultiplierFromDeegreeUOM(textStyling.uom);
          * ptext.setOffset(wtst.getScreenX(x + ((textStyling.displacementX)*multiplier)), wtst.getScreenY(y +
          * ((textStyling.displacementY)*multiplier)));*/
@@ -1193,7 +1213,16 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         if (graphic.image != null) {
             return graphic.image;
         } else {
-            final BufferedImage temp = getImageFromWellKnownName(graphic.mark.wellKnown);
+            BufferedImage temp = getImageFromWellKnownName(graphic.mark.wellKnown);
+            if(graphic.mark.fill != null && graphic.mark.fill.color != null) {
+                BufferedImage coloredVerion = new BufferedImage(temp.getWidth(), temp.getHeight(), BufferedImage.TYPE_INT_ARGB);
+                Graphics2D g = (Graphics2D)coloredVerion.getGraphics();
+                g.setColor(graphic.mark.fill.color);
+                g.fillRect(0, 0, temp.getWidth(), temp.getHeight());
+                g.setComposite(AlphaComposite.DstIn);
+                g.drawImage(temp, 0, 0, temp.getWidth(), temp.getHeight(), 0, 0, temp.getWidth(), temp.getHeight(), null);
+                temp = coloredVerion;
+            }
             return temp;
         }
     }
@@ -1287,13 +1316,15 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     protected Paint getPaintFromDeegree(final Graphic graphic,
             final Color color,
-            final org.deegree.style.styling.components.UOM uom) {
+            final org.deegree.style.styling.components.UOM uom, PNode parent, MappingComponent map) {
         if (graphic == null) {
             return color;
         } else {
             final double multiplier = getMultiplierFromDeegreeUOM(uom);
             final BufferedImage image = getImageFromDeegree(graphic);
-            final TexturePaint texture = new TexturePaint(
+            Paint texture;
+            if(uom != org.deegree.style.styling.components.UOM.Pixel) {
+            texture = new TexturePaint(
                     image,
                     new Rectangle2D.Double(
                         0,
@@ -1304,6 +1335,18 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                                 / image.getHeight(),
                         graphic.size
                                 * multiplier));
+            } else {
+                texture = new PFixedTexturePaint(image, new Rectangle2D.Double(
+                        0,
+                        0,
+                        multiplier
+                                * graphic.size
+                                * image.getWidth()
+                                / image.getHeight(),
+                        graphic.size
+                                * multiplier), parent);
+                map.addStickyNode((PFixedTexturePaint)texture);
+            }
             return texture;
         }
     }
@@ -1435,7 +1478,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setSLDStyle(final org.deegree.style.se.unevaluated.Style featureStyle) {
-        if (style == null || !style.equals(featureStyle)) {
+        if ((style == null) || !style.equals(featureStyle)) {
             this.style = featureStyle;
             stylings = null;
         }
@@ -1489,8 +1532,21 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         public List<org.deegree.commons.tom.gml.property.Property> getProperties(final QName qname) {
             final List<Property> deegreeProperties = new LinkedList();
             final Object value;
-            if (DefaultFeatureServiceFeature.this.container.containsKey(qname.getLocalPart())) {
-                value = DefaultFeatureServiceFeature.this.container.get(qname.getLocalPart());
+            String key;
+            if ((qname.getPrefix() != null) && !qname.getPrefix().isEmpty()) {
+                key = qname.getPrefix() + ":" + qname.getLocalPart();
+            } else {
+                key = qname.getLocalPart();
+            }
+            if (DefaultFeatureServiceFeature.this.container.containsKey(key)) {
+                value = DefaultFeatureServiceFeature.this.container.get(key);
+                if (value == null) {
+                    deegreeProperties.add(null);
+                } else {
+                    deegreeProperties.add(new DeegreeProperty(qname, value));
+                }
+            } else if(DefaultFeatureServiceFeature.this.container.containsKey("app:" + qname.getLocalPart())) {
+                value = DefaultFeatureServiceFeature.this.container.get("app:" + qname.getLocalPart());
                 if (value == null) {
                     deegreeProperties.add(null);
                 } else {
@@ -1686,6 +1742,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                             org.deegree.commons.tom.primitive.BaseType.DOUBLE));
             } else if (value instanceof Integer) {
                 return new org.deegree.commons.tom.primitive.PrimitiveValue((Integer)value,
+                        new org.deegree.commons.tom.primitive.PrimitiveType(
+                            org.deegree.commons.tom.primitive.BaseType.INTEGER));
+            } else if (value instanceof Long) {
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((Long)value,
                         new org.deegree.commons.tom.primitive.PrimitiveType(
                             org.deegree.commons.tom.primitive.BaseType.INTEGER));
             } else if (value instanceof Geometry) {
