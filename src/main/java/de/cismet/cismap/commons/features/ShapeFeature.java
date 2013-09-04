@@ -237,8 +237,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
 
                     @Override
                     public QName getName() {
-                        final QName name = new QName("Feature");
-                        return name;
+                        return new QName("Feature");// for demo only
                     }
                 };
         }
