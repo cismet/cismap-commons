@@ -106,9 +106,9 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         tableModel.addLegend(url, layername);
     }
     
-    public void addLegend(final BufferedImage img, final String layername) {
+    /*public void addLegend(final BufferedImage img, final String layername) {
         tableModel.addLegend(img, layername);
-    }
+    }*/
 
     /*public void addLegend(final BufferedImage img, final String layername) {
      *  tableModel.addLegend(img, layername);}*/
