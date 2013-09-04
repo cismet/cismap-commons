@@ -1289,7 +1289,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         try {
             styles = SLDParser.getStyles(factory.createXMLStreamReader(input));
         } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.error("Fehler in der SLD", ex);
         }
         if (styles == null) {
             LOG.info("SLD Parser funtkioniert nicht");

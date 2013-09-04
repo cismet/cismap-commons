@@ -80,9 +80,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
 
                     @Override
                     public QName getName() {
-                        final String type = typename;
-                        final QName name = new QName("Feature"); // for demo
-                        return name;
+                        return new QName("Feature");// for demo only
                     }
                 };
         }
