@@ -929,7 +929,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
 
             if (feature instanceof SLDStyledFeature) {
-//                ((SLDStyledFeature)feature).applyStyle(this, wtst);
+                ((SLDStyledFeature)feature).applyStyle(this, wtst);
                 nonHighlightingPaint = getPaint();
             }
 

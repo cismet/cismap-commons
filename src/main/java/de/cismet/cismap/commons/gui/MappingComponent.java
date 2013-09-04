@@ -881,17 +881,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * Rescales all nodes inside the StickyNode-vector.
      */
     public void rescaleStickyNodes() {
-        final List<PSticky> stickyNodeCopy = new ArrayList<PSticky>(getStickyNodes());
-        for (final PSticky each : stickyNodeCopy) {
-            if (each.getVisible()) {
-                rescaleStickyNode(each);
-            } else {
-                if (each.getParent() == null) {
-                    removeStickyNode(each);
+        if (rescaleStickyNodesEnabled) {
+            final List<PSticky> stickyNodeCopy = new ArrayList<PSticky>(getStickyNodes());
+            for (final PSticky each : stickyNodeCopy) {
+                if (each.getVisible()) {
+                    rescaleStickyNode(each);
+                } else {
+                    if (each.getParent() == null) {
+                        removeStickyNode(each);
+                    }
                 }
-            }
 
-            rescaleStickyNodes(stickyPNodes);
+                rescaleStickyNodes(stickyPNodes);
+            }
         }
     }
 

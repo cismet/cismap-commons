@@ -1136,7 +1136,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             leafRenderer.setSelected(isValueSelected(value));
 
-            pan.add(leafRenderer);
+            if (!value.equals(layerModel.getRoot())) {
+                pan.add(leafRenderer);
+            }
             pan.add(ret);
             return pan;
         }
