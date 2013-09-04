@@ -103,9 +103,9 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         tableModel.addLegend(url, layername);
     }
     
-    public void addLegend(final BufferedImage img, final String layername) {
+    /*public void addLegend(final BufferedImage img, final String layername) {
         tableModel.addLegend(img, layername);
-    }
+    }*/
 
     /**
      * DOCUMENT ME!
@@ -166,9 +166,9 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                     removeWmsServiceLayer((WMSServiceLayer) elem);
                 }
             }
-        } else if(e.getLayer() instanceof ServiceLayer) {
+        } /*else if(e.getLayer() instanceof ServiceLayer) {
             removeLegendByName(((ServiceLayer)e.getLayer()).getName());
-        } else {
+        }*/ else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
         }
     }
@@ -283,13 +283,13 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                     addWmsServiceLayer((WMSServiceLayer) elem);
                 }
             }
-        } else if (e.getLayer() instanceof SLDStyledLayer) {
+        } /*else if (e.getLayer() instanceof SLDStyledLayer) {
             final SLDStyledLayer sldLayer = (SLDStyledLayer) e.getLayer();
             Pair<Integer, Integer> size = sldLayer.getLegendSize();
             BufferedImage legendImage = new BufferedImage(size.first, size.second, BufferedImage.TYPE_4BYTE_ABGR);
             sldLayer.getLegend(legendImage.getWidth(), legendImage.getHeight(), legendImage.createGraphics());
             addLegend(legendImage, ((ServiceLayer)e.getLayer()).getName());
-        } else {
+        } */else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
         }
     }
@@ -454,7 +454,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             refresh();
         }
 
-        public LegendPanel(final BufferedImage img) {
+        /*public LegendPanel(final BufferedImage img) {
             this();
             lblImage.setText(""); // NOI18N
             lblImage.setIcon(new ImageIcon(img));
@@ -466,7 +466,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 maxWidth = newWidth;
             }
             tblLegends.getColumnModel().getColumn(0).setPreferredWidth(newWidth);
-        }
+        }*/
 
         //~ Methods ------------------------------------------------------------
         /**
@@ -701,7 +701,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             }
             super.fireTableStructureChanged();
         }
-        
+        /*
         public void addLegend(final BufferedImage img, final String name) {
             final LegendPanel lp = new LegendPanel(img);
             if(!panels.contains(lp)){
@@ -709,7 +709,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 panelsByName.put(name, lp);
             }
             super.fireTableStructureChanged();
-        }
+        }*/
 
         /**
          * DOCUMENT ME!
