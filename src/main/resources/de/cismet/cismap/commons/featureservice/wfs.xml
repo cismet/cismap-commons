@@ -13,6 +13,7 @@
   <!-- The following Query is a getFeature version 1.1.0 Request -->
   <CismapQuery>
     <wfs:GetFeature version="1.1.0" service="WFS"
+    resultType="cismapResultTypePlaceholder"
     outputFormat="text/xml; subtype=gml/3.1.1"
     xmlns:wfs="http://www.opengis.net/wfs"
     xmlns:gml="http://www.opengis.net/gml"
