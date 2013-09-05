@@ -17,8 +17,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.cismet.cismap.commons.Debug;
+import de.cismet.cismap.commons.rasterservice.Testframe.ImageCallback;
 
 import de.cismet.tools.CurrentStackTrace;
+import java.awt.Image;
 
 /**
  * DOCUMENT ME!
@@ -124,11 +126,20 @@ public abstract class AbstractRetrievalService implements RetrievalService {
             while (it.hasNext()) {
                 final Object l = it.next();
                 if (l instanceof RetrievalListener) {
+                    LOG.fatal("informing listener: " + l);
+                    if(callback != null)
+                        callback.call((Image)e.getRetrievedObject());
                     ((RetrievalListener)l).retrievalComplete(e);
                 }
             }
         }
     }
+    
+    public void setCallback(ImageCallback b){
+        this.callback = b;
+    }
+    
+    private transient ImageCallback callback = null;
 
     /**
      * DOCUMENT ME!
