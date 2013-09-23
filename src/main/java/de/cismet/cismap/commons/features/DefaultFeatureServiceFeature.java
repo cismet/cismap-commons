@@ -1,10 +1,12 @@
-/***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+/**
+ * *************************************************
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ * 
+* ... and it just works.
+ * 
+***************************************************
+ */
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -97,19 +99,16 @@ import de.cismet.cismap.commons.gui.piccolo.PSticky;
 /**
  * Default implementation of a FeatureServiceFeature.
  *
- * @author   Pascal Dihé
- * @version  $Revision$, $Date$
+ * @author Pascal Dihé
+ * @version $Revision$, $Date$
  */
 public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
 
     //~ Static fields/initializers ---------------------------------------------
-
     protected static final String CLASS_ID = "class_id";
     protected static final String GEOMETRIE = "geo_field";
     protected static final String OBJECT_ID = "object_id";
-
     //~ Instance fields --------------------------------------------------------
-
     protected Logger logger = Logger.getLogger(this.getClass());
     protected XPathEvaluator<Feature> evaluator = new DeegreeEvaluator();
     protected List<org.deegree.style.se.unevaluated.Style> styles;
@@ -128,21 +127,23 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     //~ Constructors -----------------------------------------------------------
-
     /**
-     * Creates a new uninitialised instance of DefaultFeatureServiceFeature. The id is set to -1, editable is set to
-     * false, canBeSelected is set to true, hiding is set to false, any other properties set to null.
+     * Creates a new uninitialised instance of DefaultFeatureServiceFeature. The
+     * id is set to -1, editable is set to false, canBeSelected is set to true,
+     * hiding is set to false, any other properties set to null.
      */
     public DefaultFeatureServiceFeature() {
     }
 
     /**
-     * Initialises a new DefaultFeatureServiceFeature instance from an existing FeatureServiceFeature object. The
-     * properties of the FeatureServiceFeature will be cloned.
+     * Initialises a new DefaultFeatureServiceFeature instance from an existing
+     * FeatureServiceFeature object. The properties of the FeatureServiceFeature
+     * will be cloned.
      *
-     * @param  feature  layerProperties LayerProperties to be used for initialisation
+     * @param feature layerProperties LayerProperties to be used for
+     * initialisation
      *
-     * @see    FeatureServiceFeature#clone(Object)
+     * @see FeatureServiceFeature#clone(Object)
      */
     public DefaultFeatureServiceFeature(final FeatureServiceFeature feature) {
         this.setId(id);
@@ -152,7 +153,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         this.setEditable(feature.isEditable());
         this.setCanBeSelected(feature.canBeSelected());
         if (feature instanceof DefaultFeatureServiceFeature) {
-            styles = ((DefaultFeatureServiceFeature)feature).styles;
+            styles = ((DefaultFeatureServiceFeature) feature).styles;
         }
 
         if ((feature.getProperties() != null) && (feature.getProperties().size() > 0)) {
@@ -161,21 +162,23 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         }
 
         if (feature.getGeometry() != null) {
-            this.setGeometry((Geometry)feature.getGeometry().clone());
+            this.setGeometry((Geometry) feature.getGeometry().clone());
         }
 
         if (feature.getLayerProperties() != null) {
-            this.setLayerProperties((LayerProperties)feature.getLayerProperties().clone());
+            this.setLayerProperties((LayerProperties) feature.getLayerProperties().clone());
         }
     }
 
     /**
-     * Creates a new initialised instance of DefaultFeatureServiceFeature. Editable is set to false, canBeSelected is
-     * set to true, hiding is set to false.
+     * Creates a new initialised instance of DefaultFeatureServiceFeature.
+     * Editable is set to false, canBeSelected is set to true, hiding is set to
+     * false.
      *
-     * @param  id               the unique (within the layer or the feature collection) id of the feature
-     * @param  geometry         the geometry of the feature
-     * @param  layerProperties  (shared) layer properties object
+     * @param id the unique (within the layer or the feature collection) id of
+     * the feature
+     * @param geometry the geometry of the feature
+     * @param layerProperties (shared) layer properties object
      */
     public DefaultFeatureServiceFeature(final int id, final Geometry geometry, final LayerProperties layerProperties) {
         this.setId(id);
@@ -186,10 +189,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Creates a new DefaultFeatureServiceFeature object.
      *
-     * @param  id               DOCUMENT ME!
-     * @param  geometry         DOCUMENT ME!
-     * @param  layerProperties  DOCUMENT ME!
-     * @param  styles           DOCUMENT ME!
+     * @param id DOCUMENT ME!
+     * @param geometry DOCUMENT ME!
+     * @param layerProperties DOCUMENT ME!
+     * @param styles DOCUMENT ME!
      */
     public DefaultFeatureServiceFeature(final int id,
             final Geometry geometry,
@@ -212,10 +215,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     }
 
     /**
-     * Fügt das übergebene Objekt dem PropertyContainer unter gegebenem Namen ein.
+     * Fügt das übergebene Objekt dem PropertyContainer unter gegebenem Namen
+     * ein.
      *
-     * @param  propertyName  Name und gleichzeitig Schlüssel
-     * @param  property      einzufügendes Objekt
+     * @param propertyName Name und gleichzeitig Schlüssel
+     * @param property einzufügendes Objekt
      */
     @Override
     public void addProperty(final String propertyName, final Object property) {
@@ -225,7 +229,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param  map  DOCUMENT ME!
+     * @param map DOCUMENT ME!
      */
     public void addProperties(final Map<String, Object> map) {
         container.putAll(map);
@@ -234,7 +238,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @return  HashMap mit Properties
+     * @return HashMap mit Properties
      */
     @Override
     public HashMap getProperties() {
@@ -244,7 +248,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Ersetzt den alten PropertieContainer mit einer neuen HashMap.
      *
-     * @param  properties  neue Hashmap
+     * @param properties neue Hashmap
      */
     @Override
     public void setProperties(final HashMap properties) {
@@ -254,9 +258,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Liefert die dem Namen zugeordnete Property.
      *
-     * @param   propertyName  Name des gesuchten Objekts
+     * @param propertyName Name des gesuchten Objekts
      *
-     * @return  Objekt aus der Hashmap
+     * @return Objekt aus der Hashmap
      */
     @Override
     public Object getProperty(final String propertyName) {
@@ -266,7 +270,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Entfernt die dem Namen zugeordnete Property aus der Hashmap.
      *
-     * @param  propertyName  Name des zu löschenden Objekts
+     * @param propertyName Name des zu löschenden Objekts
      */
     @Override
     public void removeProperty(final String propertyName) {
@@ -276,7 +280,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Liefert die ID des DefaultWFSFeatures.
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     @Override
     public int getId() {
@@ -286,7 +290,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Setzt die ID des DefaultWFSFeatures neu.
      *
-     * @param  id  neue ID
+     * @param id neue ID
      */
     @Override
     public void setId(final int id) {
@@ -296,7 +300,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Liefert den ID-Ausdruck des DefaultWFSFeatures.
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     @Override
     public String getIdExpression() {
@@ -306,7 +310,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Setzt den ID-Ausdruck des DefaultWFSFeatures neu.
      *
-     * @param  idExpression  neuer ID-Ausdruck
+     * @param idExpression neuer ID-Ausdruck
      */
     @Override
     public void setIdExpression(final String idExpression) {
@@ -340,7 +344,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public Paint getLinePaint() {
-        if (styles != null) {
+        if ((styles == null) || styles.isEmpty()) {
             return this.getStyle().isDrawLine() ? this.getStyle().getLineColor() : null;
         } else {
             return null;
@@ -354,7 +358,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setLinePaint(final Paint linePaint) {
-        this.getStyle().setLineColor((Color)linePaint);
+        this.getStyle().setLineColor((Color) linePaint);
         this.getStyle().setDrawLine(true);
     }
 
@@ -365,7 +369,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public int getLineWidth() {
-        if (styles != null) {
+        if ((styles == null) || styles.isEmpty()) {
             return this.getStyle().getLineWidth();
         } else {
             return 0;
@@ -389,7 +393,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public Paint getFillingPaint() {
-        if (styles != null) {
+        if ((styles == null) || styles.isEmpty()) {
             return this.getStyle().isDrawFill() ? this.getStyle().getFillColor() : null;
         } else {
             return null;
@@ -403,7 +407,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setFillingPaint(final Paint fillingStyle) {
-        this.getStyle().setFillColor((Color)fillingStyle);
+        this.getStyle().setFillColor((Color) fillingStyle);
         this.getStyle().setDrawFill(true);
     }
 
@@ -414,7 +418,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public float getTransparency() {
-        if (styles != null) {
+        if ((styles == null) || styles.isEmpty()) {
             return this.getStyle().getAlpha();
         } else {
             return 0;
@@ -438,7 +442,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
-        if (styles != null) {
+        if ((styles == null) || styles.isEmpty()) {
             return this.getStyle().getPointSymbol();
         } else {
             return null;
@@ -560,7 +564,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public String getPrimaryAnnotation() {
-        if (styles != null) {
+        if ((styles == null) || styles.isEmpty()) {
             return this.primaryAnnotation;
         } else {
             return null;
@@ -574,7 +578,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public boolean isPrimaryAnnotationVisible() {
-        if (styles != null) {
+        if ((styles == null) || styles.isEmpty()) {
             return this.getStyle().isDrawLabel();
         } else {
             return false;
@@ -678,7 +682,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setPrimaryAnnotationPaint(final Paint primaryAnnotationPaint) {
-        this.getStyle().setFontColor((Color)primaryAnnotationPaint);
+        this.getStyle().setFontColor((Color) primaryAnnotationPaint);
     }
 
     /**
@@ -784,7 +788,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     protected Style getStyle() {
         return this.layerProperties.getStyle();
@@ -850,10 +854,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param  uom       DOCUMENT ME!
-     * @param  fill      DOCUMENT ME!
-     * @param  pfeature  DOCUMENT ME!
-     * @param  map       DOCUMENT ME!
+     * @param uom DOCUMENT ME!
+     * @param fill DOCUMENT ME!
+     * @param pfeature DOCUMENT ME!
+     * @param map DOCUMENT ME!
      */
     protected void applyFill(final org.deegree.style.styling.components.UOM uom,
             final Fill fill,
@@ -866,12 +870,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param  image    DOCUMENT ME!
-     * @param  styling  DOCUMENT ME!
-     * @param  wtst     DOCUMENT ME!
-     * @param  x        DOCUMENT ME!
-     * @param  y        DOCUMENT ME!
-     * @param  camera   DOCUMENT ME!
+     * @param image DOCUMENT ME!
+     * @param styling DOCUMENT ME!
+     * @param wtst DOCUMENT ME!
+     * @param x DOCUMENT ME!
+     * @param y DOCUMENT ME!
+     * @param camera DOCUMENT ME!
      */
     protected void applyPointStyling(final PImage image,
             final PointStyling styling,
@@ -883,35 +887,35 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         final BufferedImage buffImage = getImageFromDeegree(styling.graphic);
         image.setImage(buffImage);
         if (getUOMFromDeegree(styling.uom) == UOM.pixel) {
-            ((FixedPImage)image).setMultiplier(1 / (buffImage.getHeight() / styling.graphic.size));
+            ((FixedPImage) image).setMultiplier(1 / (buffImage.getHeight() / styling.graphic.size));
             image.setOffset(wtst.getScreenX(x), wtst.getScreenY(y));
-            ((FixedPImage)image).setSweetSpotX(styling.graphic.anchorPointX);
-            ((FixedPImage)image).setSweetSpotY(styling.graphic.anchorPointY);
+            ((FixedPImage) image).setSweetSpotX(styling.graphic.anchorPointX);
+            ((FixedPImage) image).setSweetSpotY(styling.graphic.anchorPointY);
         } else {
             // ((PImageWithDisplacement)image).setUOM(getUOMFromDeegree(styling.uom));
             final double multiplier = getMultiplierFromDeegreeUOM(styling.uom);
-            final double sizeMulti = styling.graphic.size / (double)(buffImage.getHeight());
+            final double sizeMulti = styling.graphic.size / (double) (buffImage.getHeight());
             image.setScale(multiplier * sizeMulti);
             image.setOffset(wtst.getScreenX(
                     x
-                            + ((styling.graphic.displacementX
-                                    + ((-styling.graphic.anchorPointX) * buffImage.getWidth() * sizeMulti))
-                                * multiplier)),
-                wtst.getScreenY(
+                    + ((styling.graphic.displacementX
+                    + ((-styling.graphic.anchorPointX) * buffImage.getWidth() * sizeMulti))
+                    * multiplier)),
+                    wtst.getScreenY(
                     y
-                            + ((styling.graphic.displacementY
-                                    + ((styling.graphic.anchorPointY) * styling.graphic.size)) * multiplier)));
+                    + ((styling.graphic.displacementY
+                    + ((styling.graphic.anchorPointY) * styling.graphic.size)) * multiplier)));
         }
         // image.setRotation(Math.toRadians(styling.graphic.rotation)); For Demo only
-        image.setTransparency((float)styling.graphic.opacity);
+        image.setTransparency((float) styling.graphic.opacity);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  pfeature  DOCUMENT ME!
-     * @param  styling   DOCUMENT ME!
-     * @param  map       DOCUMENT ME!
+     * @param pfeature DOCUMENT ME!
+     * @param styling DOCUMENT ME!
+     * @param map DOCUMENT ME!
      */
     protected void applyPolygonStyling(final PPath pfeature, final PolygonStyling styling, final MappingComponent map) {
         if (styling.fill != null) {
@@ -925,10 +929,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param  uom       DOCUMENT ME!
-     * @param  stroke    DOCUMENT ME!
-     * @param  pfeature  DOCUMENT ME!
-     * @param  map       DOCUMENT ME!
+     * @param uom DOCUMENT ME!
+     * @param stroke DOCUMENT ME!
+     * @param pfeature DOCUMENT ME!
+     * @param map DOCUMENT ME!
      */
     protected void applyStroke(final org.deegree.style.styling.components.UOM uom,
             final Stroke stroke,
@@ -959,24 +963,24 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         if ((stroke.dasharray != null) && (stroke.dasharray.length != 0)) {
             dash_array = new float[stroke.dasharray.length];
             for (int i = 0; i < stroke.dasharray.length; i++) {
-                dash_array[i] = (float)(stroke.dasharray[i] * multiplier);
+                dash_array[i] = (float) (stroke.dasharray[i] * multiplier);
             }
         }
         java.awt.Stroke newStroke;
         if (uom == org.deegree.style.styling.components.UOM.Pixel) {
-            newStroke = new CustomFixedWidthStroke((float)(stroke.width),
+            newStroke = new CustomFixedWidthStroke((float) (stroke.width),
                     linecap,
                     lineJoin,
                     1.0F,
                     dash_array,
-                    (float)(stroke.dashoffset));
+                    (float) (stroke.dashoffset));
         } else {
-            newStroke = new BasicStroke((float)(stroke.width * multiplier),
+            newStroke = new BasicStroke((float) (stroke.width * multiplier),
                     linecap,
                     lineJoin,
                     1.0F,
                     dash_array,
-                    (float)(stroke.dashoffset * multiplier));
+                    (float) (stroke.dashoffset * multiplier));
         }
         pfeature.setStroke(newStroke);
         pfeature.setStrokePaint(getPaintFromDeegree(stroke.fill, stroke.color, uom, pfeature, map));
@@ -985,7 +989,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     protected org.deegree.feature.Feature getDeegreeFeature() {
         return new DeegreeFeature();
@@ -994,24 +998,28 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param  pfeature  DOCUMENT ME!
-     * @param  wtst      DOCUMENT ME!
+     * @param pfeature DOCUMENT ME!
+     * @param wtst DOCUMENT ME!
      */
     @Override
     public void applyStyle(final PFeature pfeature, final WorldToScreenTransform wtst) {
-        if (styles != null) {
-            for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
-                final org.deegree.style.se.unevaluated.Style filteredStyle = tempStyle.filter(
-                        pfeature.getMappingComponent().getScaleDenominator());
-                final LinkedList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> tempStylings =
+        if (styles == null) {
+            return;
+        }
+        pfeature.setStrokePaint(null);
+        pfeature.setStroke(null);
+        for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
+            final org.deegree.style.se.unevaluated.Style filteredStyle = tempStyle.filter(
+                    pfeature.getMappingComponent().getScaleDenominator());
+            final LinkedList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> tempStylings =
                     filteredStyle.evaluate(getDeegreeFeature(), evaluator);
-                if (stylings == null) {
-                    stylings = tempStylings;
-                } else {
-                    stylings.addAll(tempStylings);
-                }
+            if (stylings == null) {
+                stylings = tempStylings;
+            } else {
+                stylings.addAll(tempStylings);
             }
         }
+
         /*
          * if (stylings == null) { if (style == null) {     return; } this.stylings =
          * style.evaluate(getDeegreeFeature(), evaluator);}*/
@@ -1023,7 +1031,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         while (it.hasNext()) {
             final Object child = it.next();
             if (child instanceof PSticky) {
-                pfeature.getMappingComponent().removeStickyNode((PSticky)child);
+                pfeature.getMappingComponent().removeStickyNode((PSticky) child);
             }
         }
         pfeature.removeAllChildren();
@@ -1048,7 +1056,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     }
                     path.setPathTo(pfeature.getPathReference());
                 }
-                applyPolygonStyling(path, (PolygonStyling)styling.first, pfeature.getMappingComponent());
+                applyPolygonStyling(path, (PolygonStyling) styling.first, pfeature.getMappingComponent());
                 polygonNr++;
             } else if (styling.first instanceof TextStyling) {
                 PFeature.PTextWithDisplacement text;
@@ -1061,25 +1069,25 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     pfeature.getMappingComponent().addStickyNode(text);
                 }
                 final Point intPoint = CrsTransformer.transformToGivenCrs(
-                            getGeometry(),
-                            pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
-                            .getInteriorPoint();
+                        getGeometry(),
+                        pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
+                        .getInteriorPoint();
                 applyTextStyling(
-                    text,
-                    styling.third,
-                    (TextStyling)styling.first,
-                    wtst,
-                    intPoint.getX(),
-                    intPoint.getY());
+                        text,
+                        styling.third,
+                        (TextStyling) styling.first,
+                        wtst,
+                        intPoint.getX(),
+                        intPoint.getY());
                 pfeature.getMappingComponent().rescaleStickyNode(text);
             } else if (styling.first instanceof PointStyling) {
                 PImage image;
                 try {
                     image = pfeature.sldStyledImage.get(imageNr++);
                 } catch (IndexOutOfBoundsException ex) {
-                    if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                    if (((PointStyling) styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
                         image = new FixedPImage();
-                        pfeature.getMappingComponent().addStickyNode((PSticky)image);
+                        pfeature.getMappingComponent().addStickyNode((PSticky) image);
                     } else {
                         image = new PImage();
                     }
@@ -1087,18 +1095,18 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     pfeature.sldStyledImage.add(image);
                     pfeature.addChild(image);
                 }
-                if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                if (((PointStyling) styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
                     if (!(image instanceof FixedPImage)) {
                         pfeature.removeChild(image);
                         pfeature.sldStyledImage.remove(image);
                         image = new FixedPImage();
                         pfeature.sldStyledImage.add(image);
                         pfeature.addChild(image);
-                        pfeature.getMappingComponent().addStickyNode((PSticky)image);
+                        pfeature.getMappingComponent().addStickyNode((PSticky) image);
                     }
                 } else {
                     if (image instanceof FixedPImage) {
-                        pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+                        pfeature.getMappingComponent().removeStickyNode((PSticky) image);
                         pfeature.sldStyledImage.remove(image);
                         pfeature.removeChild(image);
                         image = new PImage();
@@ -1107,18 +1115,18 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     }
                 }
                 final Point intPoint = CrsTransformer.transformToGivenCrs(
-                            getGeometry(),
-                            pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
-                            .getInteriorPoint();
+                        getGeometry(),
+                        pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
+                        .getInteriorPoint();
                 applyPointStyling(
-                    image,
-                    (PointStyling)styling.first,
-                    wtst,
-                    intPoint.getX(),
-                    intPoint.getY(),
-                    pfeature.getMappingComponent().getCamera());
-                if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
-                    pfeature.getMappingComponent().rescaleStickyNode((PSticky)image);
+                        image,
+                        (PointStyling) styling.first,
+                        wtst,
+                        intPoint.getX(),
+                        intPoint.getY(),
+                        pfeature.getMappingComponent().getCamera());
+                if (((PointStyling) styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                    pfeature.getMappingComponent().rescaleStickyNode((PSticky) image);
                 }
             }
         }
@@ -1138,12 +1146,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param  ptext        DOCUMENT ME!
-     * @param  value        DOCUMENT ME!
-     * @param  textStyling  DOCUMENT ME!
-     * @param  wtst         DOCUMENT ME!
-     * @param  x            DOCUMENT ME!
-     * @param  y            DOCUMENT ME!
+     * @param ptext DOCUMENT ME!
+     * @param value DOCUMENT ME!
+     * @param textStyling DOCUMENT ME!
+     * @param wtst DOCUMENT ME!
+     * @param x DOCUMENT ME!
+     * @param y DOCUMENT ME!
      */
     protected void applyTextStyling(final PFeature.PTextWithDisplacement ptext,
             final String value,
@@ -1168,7 +1176,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         Font font = null;
         try {
             for (final String fontName : textStyling.font.fontFamily) {
-                font = new Font(fontName, getFontStyling(textStyling.font), (int)textStyling.font.fontSize);
+                font = new Font(fontName, getFontStyling(textStyling.font), (int) textStyling.font.fontSize);
             }
         } catch (Exception ex) {
         }
@@ -1180,9 +1188,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param   font  DOCUMENT ME!
+     * @param font DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     protected int getFontStyling(final org.deegree.style.styling.components.Font font) {
         final int bolt = font.bold ? 1 : 0;
@@ -1201,9 +1209,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param   graphic  DOCUMENT ME!
+     * @param graphic DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     protected BufferedImage getImageFromDeegree(final Graphic graphic) {
         if (graphic.image != null) {
@@ -1214,21 +1222,21 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                 final BufferedImage coloredVerion = new BufferedImage(temp.getWidth(),
                         temp.getHeight(),
                         BufferedImage.TYPE_INT_ARGB);
-                final Graphics2D g = (Graphics2D)coloredVerion.getGraphics();
+                final Graphics2D g = (Graphics2D) coloredVerion.getGraphics();
                 g.setColor(graphic.mark.fill.color);
                 g.fillRect(0, 0, temp.getWidth(), temp.getHeight());
                 g.setComposite(AlphaComposite.DstIn);
                 g.drawImage(
-                    temp,
-                    0,
-                    0,
-                    temp.getWidth(),
-                    temp.getHeight(),
-                    0,
-                    0,
-                    temp.getWidth(),
-                    temp.getHeight(),
-                    null);
+                        temp,
+                        0,
+                        0,
+                        temp.getWidth(),
+                        temp.getHeight(),
+                        0,
+                        0,
+                        temp.getWidth(),
+                        temp.getHeight(),
+                        null);
                 temp = coloredVerion;
             }
             return temp;
@@ -1238,11 +1246,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param   mark  DOCUMENT ME!
+     * @param mark DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      *
-     * @throws  RuntimeException  DOCUMENT ME!
+     * @throws RuntimeException DOCUMENT ME!
      */
     protected BufferedImage getImageFromWellKnownName(final Mark.SimpleMark mark) {
         URL url = null;
@@ -1278,9 +1286,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         final ImageIcon icon = new ImageIcon(url);
         final Image image = icon.getImage();
         if (image instanceof BufferedImage) {
-            return (BufferedImage)image;
+            return (BufferedImage) image;
         } else if (image instanceof ToolkitImage) {
-            return ((ToolkitImage)image).getBufferedImage();
+            return ((ToolkitImage) image).getBufferedImage();
         } else {
             throw new RuntimeException("No BufferedImage" + mark);
         }
@@ -1289,11 +1297,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param   uom  DOCUMENT ME!
+     * @param uom DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      *
-     * @throws  RuntimeException  DOCUMENT ME!
+     * @throws RuntimeException DOCUMENT ME!
      */
     protected double getMultiplierFromDeegreeUOM(final org.deegree.style.styling.components.UOM uom) {
         switch (uom) {
@@ -1333,7 +1341,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      * @param   parent   DOCUMENT ME!
      * @param   map      DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     protected Paint getPaintFromDeegree(final Graphic graphic,
             final Color color,
@@ -1350,28 +1358,28 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                 texture = new TexturePaint(
                         image,
                         new Rectangle2D.Double(
-                            0,
-                            0,
-                            multiplier
-                                    * graphic.size
-                                    * image.getWidth()
-                                    / image.getHeight(),
-                            graphic.size
-                                    * multiplier));
+                        0,
+                        0,
+                        multiplier
+                        * graphic.size
+                        * image.getWidth()
+                        / image.getHeight(),
+                        graphic.size
+                        * multiplier));
             } else {
                 texture = new PFixedTexturePaint(
                         image,
                         new Rectangle2D.Double(
-                            0,
-                            0,
-                            multiplier
-                                    * graphic.size
-                                    * image.getWidth()
-                                    / image.getHeight(),
-                            graphic.size
-                                    * multiplier),
+                        0,
+                        0,
+                        multiplier
+                        * graphic.size
+                        * image.getWidth()
+                        / image.getHeight(),
+                        graphic.size
+                        * multiplier),
                         parent);
-                map.addStickyNode((PFixedTexturePaint)texture);
+                map.addStickyNode((PFixedTexturePaint) texture);
             }
             return texture;
         }
@@ -1475,9 +1483,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      *
      * @param   uom  DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      *
-     * @throws  RuntimeException  DOCUMENT ME!
+     * @throws RuntimeException DOCUMENT ME!
      */
     protected UOM getUOMFromDeegree(final org.deegree.style.styling.components.UOM uom) {
         switch (uom) {
@@ -1500,7 +1508,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param  featureStyles  DOCUMENT ME!
+     * @param featureStyles DOCUMENT ME!
      */
     @Override
     public void setSLDStyles(final List<org.deegree.style.se.unevaluated.Style> featureStyles) {
@@ -1511,16 +1519,14 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     }
 
     //~ Inner Classes ----------------------------------------------------------
-
     /**
      * DOCUMENT ME!
      *
-     * @version  $Revision$, $Date$
+     * @version $Revision$, $Date$
      */
     protected class DeegreeEvaluator implements org.deegree.filter.XPathEvaluator<org.deegree.feature.Feature> {
 
         //~ Methods ------------------------------------------------------------
-
         @Override
         public TypedObjectNode[] eval(final Feature t, final ValueReference vr) throws FilterEvaluationException {
             final List<org.deegree.commons.tom.gml.property.Property> properties = t.getProperties(vr.getAsQName());
@@ -1531,19 +1537,18 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         @Override
         public String getId(final Feature t) {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @version  $Revision$, $Date$
+     * @version $Revision$, $Date$
      */
     protected class DeegreeFeature implements Feature {
 
         //~ Methods ------------------------------------------------------------
-
         @Override
         public List<org.deegree.commons.tom.gml.property.Property> getGeometryProperties() {
             return new ArrayList<org.deegree.commons.tom.gml.property.Property>();
@@ -1557,6 +1562,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         @Override
         public List<org.deegree.commons.tom.gml.property.Property> getProperties(final QName qname) {
             final List<Property> deegreeProperties = new LinkedList();
+            if (qname == null) {
+                return deegreeProperties;
+            }
             final Object value;
             String key;
             if ((qname.getPrefix() != null) && !qname.getPrefix().isEmpty()) {
@@ -1585,79 +1593,78 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         @Override
         public void setId(final String string) {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public QName getName() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public Envelope getEnvelope() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public void setEnvelope(final Envelope envlp) {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public Envelope calcEnvelope() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public void setPropertyValue(final QName qname, final int i, final TypedObjectNode ton) {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public void setProperties(final List<Property> list) throws IllegalArgumentException {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public ExtraProps getExtraProperties() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public void setExtraProperties(final ExtraProps ep) {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public String getId() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public List<Property> getProperties() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @version  $Revision$, $Date$
+     * @version $Revision$, $Date$
      */
     protected class DeegreeFeatureType implements FeatureType {
 
         //~ Constructors -------------------------------------------------------
-
         /**
          * Creates a new DeegreeFeatureType object.
          */
@@ -1665,29 +1672,28 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         }
 
         //~ Methods ------------------------------------------------------------
-
         @Override
         public GeometryPropertyType getDefaultGeometryPropertyDeclaration() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public Feature newFeature(final String string, final List<Property> list, final ExtraProps ep) {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public AppSchema getSchema() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public GMLObjectCategory getCategory() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
@@ -1698,41 +1704,39 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         @Override
         public boolean isAbstract() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public PropertyType getPropertyDeclaration(final QName qname) {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public List<PropertyType> getPropertyDeclarations() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @version  $Revision$, $Date$
+     * @version $Revision$, $Date$
      */
     protected class DeegreeProperty implements Property {
 
         //~ Instance fields ----------------------------------------------------
-
         private QName name;
         private Object value;
 
         //~ Constructors -------------------------------------------------------
-
         /**
          * Creates a new DeegreeProperty object.
          *
-         * @param  name   DOCUMENT ME!
-         * @param  value  DOCUMENT ME!
+         * @param name DOCUMENT ME!
+         * @param value DOCUMENT ME!
          */
         public DeegreeProperty(final QName name, final Object value) {
             this.name = name;
@@ -1740,7 +1744,6 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         }
 
         //~ Methods ------------------------------------------------------------
-
         @Override
         public QName getName() {
             return name;
@@ -1751,293 +1754,292 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             if (value == null) {
                 return new org.deegree.commons.tom.primitive.PrimitiveValue("null");
             } else if (value instanceof String) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue((String)value,
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((String) value,
                         new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.STRING));
+                        org.deegree.commons.tom.primitive.BaseType.STRING));
             } else if (value instanceof Float) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue(new Double((Float)value),
+                return new org.deegree.commons.tom.primitive.PrimitiveValue(new Double((Float) value),
                         new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.DOUBLE));
+                        org.deegree.commons.tom.primitive.BaseType.DOUBLE));
             } else if (value instanceof Boolean) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue((Boolean)value,
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((Boolean) value,
                         new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.BOOLEAN));
+                        org.deegree.commons.tom.primitive.BaseType.BOOLEAN));
             } else if (value instanceof Double) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue((Double)value,
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((Double) value,
                         new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.DOUBLE));
+                        org.deegree.commons.tom.primitive.BaseType.DOUBLE));
             } else if (value instanceof Integer) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue((Integer)value,
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((Integer) value,
                         new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.INTEGER));
+                        org.deegree.commons.tom.primitive.BaseType.INTEGER));
             } else if (value instanceof Long) {
-                return new org.deegree.commons.tom.primitive.PrimitiveValue((Long)value,
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((Long) value,
                         new org.deegree.commons.tom.primitive.PrimitiveType(
-                            org.deegree.commons.tom.primitive.BaseType.INTEGER));
+                        org.deegree.commons.tom.primitive.BaseType.INTEGER));
             } else if (value instanceof Geometry) {
                 return new org.deegree.geometry.Geometry() {
+                    @Override
+                    public org.deegree.geometry.Geometry.GeometryType getGeometryType() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.geometry.Geometry.GeometryType getGeometryType() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public void setId(final String string) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public void setId(final String string) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public void setType(final org.deegree.commons.tom.gml.GMLObjectType gmlot) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public void setType(final org.deegree.commons.tom.gml.GMLObjectType gmlot) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public org.deegree.geometry.precision.PrecisionModel getPrecision() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.geometry.precision.PrecisionModel getPrecision() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public void setPrecision(final org.deegree.geometry.precision.PrecisionModel pm) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public void setPrecision(final org.deegree.geometry.precision.PrecisionModel pm) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public org.deegree.cs.coordinatesystems.ICRS getCoordinateSystem() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.cs.coordinatesystems.ICRS getCoordinateSystem() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public void setCoordinateSystem(final org.deegree.cs.coordinatesystems.ICRS icrs) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public void setCoordinateSystem(final org.deegree.cs.coordinatesystems.ICRS icrs) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public void setProperties(final List<Property> list) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public void setProperties(final List<Property> list) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean isSFSCompliant() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean isSFSCompliant() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public int getCoordinateDimension() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public int getCoordinateDimension() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean contains(final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean contains(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean crosses(final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean crosses(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean equals(final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean equals(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean intersects(final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean intersects(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean isBeyond(final org.deegree.geometry.Geometry gmtr,
+                            final org.deegree.commons.uom.Measure msr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean isBeyond(final org.deegree.geometry.Geometry gmtr,
-                                final org.deegree.commons.uom.Measure msr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean isDisjoint(final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean isDisjoint(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean isWithin(final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean isWithin(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean isWithinDistance(final org.deegree.geometry.Geometry gmtr,
+                            final org.deegree.commons.uom.Measure msr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean isWithinDistance(final org.deegree.geometry.Geometry gmtr,
-                                final org.deegree.commons.uom.Measure msr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean overlaps(final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean overlaps(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public boolean touches(final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public boolean touches(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public org.deegree.geometry.Geometry getBuffer(final org.deegree.commons.uom.Measure msr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.geometry.Geometry getBuffer(final org.deegree.commons.uom.Measure msr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public org.deegree.geometry.primitive.Point getCentroid() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.geometry.primitive.Point getCentroid() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public Envelope getEnvelope() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public Envelope getEnvelope() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public org.deegree.geometry.Geometry getDifference(
+                            final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.geometry.Geometry getDifference(
-                                final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public org.deegree.geometry.Geometry getIntersection(
+                            final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.geometry.Geometry getIntersection(
-                                final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public org.deegree.geometry.Geometry getUnion(final org.deegree.geometry.Geometry gmtr) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.geometry.Geometry getUnion(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public org.deegree.geometry.Geometry getConvexHull() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.geometry.Geometry getConvexHull() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public org.deegree.commons.uom.Measure getDistance(final org.deegree.geometry.Geometry gmtr,
+                            final org.deegree.commons.uom.Unit unit) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.commons.uom.Measure getDistance(final org.deegree.geometry.Geometry gmtr,
-                                final org.deegree.commons.uom.Unit unit) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public String getId() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public String getId() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public org.deegree.commons.tom.gml.GMLObjectType getType() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public org.deegree.commons.tom.gml.GMLObjectType getType() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
+                    @Override
+                    public List<Property> getProperties() {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
 
-                        @Override
-                        public List<Property> getProperties() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public List<Property> getProperties(final QName qname) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-                    };
+                    @Override
+                    public List<Property> getProperties(final QName qname) {
+                        throw new UnsupportedOperationException("Not supported yet."); // To change body of
+                        // generated methods,
+                        // choose Tools |
+                        // Templates.
+                    }
+                };
             } else {
                 return new org.deegree.commons.tom.primitive.PrimitiveValue("null");
             }
@@ -2051,37 +2053,37 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         @Override
         public PropertyType getType() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public void setValue(final TypedObjectNode ton) {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public void setChildren(final List<TypedObjectNode> list) {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public Map<QName, PrimitiveValue> getAttributes() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public List<TypedObjectNode> getChildren() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
 
         @Override
         public XSElementDeclaration getXSType() {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
-                                                                           // choose Tools | Templates.
+            // choose Tools | Templates.
         }
     }
 }
