@@ -28,8 +28,6 @@ import org.jdom.output.Format;
 // import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
-import org.openide.util.Exceptions;
-
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -73,7 +71,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.PlainDocument;
 
 import de.cismet.cismap.commons.RestrictedFileSystemView;
