@@ -28,10 +28,7 @@ import org.jdom.output.Format;
 // import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
-import org.openide.util.Exceptions;
-
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
@@ -45,20 +42,16 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
-import java.io.StringReader;
 
 import java.text.ParseException;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
@@ -78,12 +71,13 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.text.AbstractDocument;
 import javax.swing.text.PlainDocument;
 
 import de.cismet.cismap.commons.RestrictedFileSystemView;
 import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+
+import de.cismet.lookupoptions.gui.OptionsDialog;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -2240,6 +2234,10 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         pack();
     } // </editor-fold>//GEN-END:initComponents
 
+    //~ Instance fields --------------------------------------------------------
+
+    private String layerName;
+
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -2257,13 +2255,25 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      * @param  evt  DOCUMENT ME!
      */
     private void chkCustomSLDActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkCustomSLDActionPerformed
+        if (!chkCustomSLD.isSelected()) {
+            final int i = JOptionPane.showConfirmDialog(
+                    this,
+                    "Das Verlassen des einfachen Modus übernimmt die Füllfarbe,\nLinienfarbe und Linienstaerke aus dem einfachen Stil",
+                    "Sind Sie sicher?",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+            if (i == JOptionPane.YES_OPTION) {
+                jEditorPane1.setText(getSLDStyle(true));
+            } else {
+                chkCustomSLD.setSelected(true);
+                return;
+            }
+        }
         tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabFill), chkCustomSLD.isSelected());
         tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabLabeling), chkCustomSLD.isSelected());
         tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabAttrib), chkCustomSLD.isSelected());
-        if (!chkCustomSLD.isSelected()) {
-            jEditorPane1.setText(getSLDStyle(true));
-        }
     }                                                                                //GEN-LAST:event_chkCustomSLDActionPerformed
+
     /**
      * Returns a modified CloneableFeature.
      *
@@ -2275,7 +2285,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 // }
 
     public String getSLDStyle() {
-        return getSLDStyle(chkCustomSLD.isSelected());
+        return chkCustomSLD.isSelected() ? "" : getSLDStyle(false);
     }
 
     /**
@@ -2294,63 +2304,64 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                         + "  xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd\">\n"
                         + "  <sld:NamedLayer>\n"
                         + "    <!--  This styling file shows the use of SLD styling -->\n"
-                        + "    <se:Name>StateBoundary</se:Name>\n" // todo correct layer name
+                        + "    <sld:Name>"
+                        + layerName
+                        + "</sld:Name>\n" // todo correct layer name
                         + "        <sld:UserStyle>\n"
-                        + "            <se:Name>default:SGID024_StateBoundary</se:Name>\n"
-                        + "            <se:Description>\n"
-                        + "                <se:Title>State of Utah</se:Title>\n"
-                        + "            </se:Description>\n"
-                        + "            <se:FeatureTypeStyle>\n"
-                        + "                <se:Name>SGID024_StateBoundary</se:Name>\n"
-                        + "                <se:Description>\n"
-                        + "                    <se:Title>State of Utah</se:Title>\n"
-                        + "                </se:Description>\n"
-                        + "                <se:Rule>\n"
-                        + "                    <se:Name>SGID024_StateBoundary</se:Name>\n"
-                        + "                    <se:Description>\n"
-                        + "                        <se:Title>State of Utah</se:Title>\n"
-                        + "                    </se:Description>\n";
-
-            sld += "                    <se:PolygonSymbolizer uom=\"http://www.opengeospatial/se/units/metre\">\n";
+                        + "            <sld:Name>"
+                        + layerName
+                        + "</sld:Name>\n"
+                        + "    <sld:Title>"
+                        + layerName
+                        + "</sld:Title>\n"
+                        + "            <sld:FeatureTypeStyle>\n"
+                        + "                <sld:Name>"
+                        + layerName
+                        + "</sld:Name>\n"
+                        + "                <sld:Rule>\n"
+                        + "                    <sld:Name>"
+                        + layerName
+                        + "</sld:Name>\n";
+            sld += "                    <sld:PolygonSymbolizer uom=\"http://www.opengeospatial/se/units/metre\">\n";
 
             if (chkFill.isSelected()) {
-                sld += "                        <se:Fill>\n";
-                sld += "                            <se:SvgParameter name=\"fill\">";
+                sld += "                        <sld:Fill>\n";
+                sld += "                            <sld:CssParameter name=\"fill\">";
                 sld += "#"
                             + Integer.toHexString(panFillColor.getBackground().getRGB()).substring(2).toUpperCase();
-                sld += "</se:SvgParameter>\n";
+                sld += "</sld:CssParameter>\n";
 
                 if (panFillColor.getBackground().getAlpha() != 255) {
-                    sld += "                            <se:SvgParameter name=\"fill-opacity\">";
+                    sld += "                            <sld:CssParameter name=\"fill-opacity\">";
                     sld += (float)((panFillColor.getBackground().getAlpha() * 100) / 255)
                                 * 0.01f;
-                    sld += "</se:SvgParameter>\n";
+                    sld += "</sld:CssParameter>\n";
                 }
-                sld += "                        </se:Fill>\n";
+                sld += "                        </sld:Fill>\n";
             }
             if (chkLine.isSelected()) {
-                sld += "                        <se:Stroke>\n";
-                sld += "                            <se:SvgParameter name=\"stroke\">";
+                sld += "                        <sld:Stroke>\n";
+                sld += "                            <sld:CssParameter name=\"stroke\">";
                 sld += "#"
                             + Integer.toHexString(panLineColor.getBackground().getRGB()).substring(2).toUpperCase();
-                sld += "</se:SvgParameter>\n";
+                sld += "</sld:CssParameter>\n";
                 if (panLineColor.getBackground().getAlpha() != 255) {
-                    sld += "                            <se:SvgParameter name=\"stroke-opacity\">";
+                    sld += "                            <sld:CssParameter name=\"stroke-opacity\">";
                     sld += (float)((panLineColor.getBackground().getAlpha() * 100) / 255)
                                 * 0.01f;
-                    sld += "</se:SvgParameter>\n";
+                    sld += "</sld:CssParameter>\n";
                 }
-                sld += "                            <se:SvgParameter name=\"stroke-width\">";
+                sld += "                            <sld:CssParameter name=\"stroke-width\">";
                 sld += sldLineWidth.getValue();
-                sld += "</se:SvgParameter>\n";
+                sld += "</sld:CssParameter>\n";
 //"                            <!--<se:SvgParameter name=\"stroke-dasharray\">5,7.5,10,2.5</se:SvgParameter>-->\n" +
 //"                            <se:SvgParameter name=\"stroke-linecap\">butt</se:SvgParameter>\n" +
-                sld += "                        </se:Stroke>\n";
+                sld += "                        </sld:Stroke>\n";
             }
 
-            sld += "                    </se:PolygonSymbolizer>\n";
-            sld += ("                </se:Rule>\n"
-                            + "            </se:FeatureTypeStyle>\n"
+            sld += "                    </sld:PolygonSymbolizer>\n";
+            sld += ("                </sld:Rule>\n"
+                            + "            </sld:FeatureTypeStyle>\n"
                             + "        </sld:UserStyle>\n"
                             + "    </sld:NamedLayer>\n"
                             + "</sld:StyledLayerDescriptor>");
@@ -2871,22 +2882,40 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
     public void configureDialog(final LayerProperties layerProperties,
             final Map<String, FeatureServiceAttribute> featureServiceAttributes,
             final Object query) {
-        configureDialog(null, layerProperties, featureServiceAttributes, query);
+        configureDialog(null, "default", layerProperties, featureServiceAttributes, query);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  sldDefinition   DOCUMENT ME!
+     * @param  featureService  DOCUMENT ME!
+     */
+    public void configureDialog(final Reader sldDefinition, final AbstractFeatureService featureService) {
+        configureDialog(
+            sldDefinition,
+            featureService.getName(),
+            featureService.getLayerProperties(),
+            featureService.getFeatureServiceAttributes(),
+            featureService.getQuery());
     }
 
     /**
      * Configures the dialog based on the delivered AbstractfeatureService.
      *
      * @param  sldDefinition             DOCUMENT ME!
+     * @param  layerName                 DOCUMENT ME!
      * @param  layerProperties           DOCUMENT ME!
      * @param  featureServiceAttributes  featureservice to get attributes from
      * @param  query                     DOCUMENT ME!
      */
     public void configureDialog(final Reader sldDefinition,
+            final String layerName,
             final LayerProperties layerProperties,
             final Map<String, FeatureServiceAttribute> featureServiceAttributes,
             final Object query) {
         try {
+            this.layerName = layerName;
             chkCustomSLD.setSelected(sldDefinition == null);
             tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabFill), chkCustomSLD.isSelected());
             tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabLabeling), chkCustomSLD.isSelected());
