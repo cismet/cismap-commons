@@ -131,10 +131,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
     @Override
     protected ShapeFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
-        String filename = new File(documentURI).getName();
-        if (filename.matches(".*\\..*")) {
-            filename = filename.substring(0, filename.lastIndexOf("."));
-        }
+        final String filename = new File(documentURI).getName();
         layerName = filename;
         final ShapeFeature shapeFeature;
 
