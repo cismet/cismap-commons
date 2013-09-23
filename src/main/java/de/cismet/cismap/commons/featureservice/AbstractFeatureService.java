@@ -67,9 +67,6 @@ import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 
 import de.cismet.tools.StaticXMLTools;
-import java.awt.Graphics2D;
-import org.deegree.commons.utils.Pair;
-import org.deegree.rendering.r2d.legends.Legends;
 
 /**
  * DOCUMENT ME!
@@ -1422,23 +1419,55 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         }
         return styles;
     }
-    
-    Legends legends = new Legends();
-    
+
     @Override
     public Pair<Integer, Integer> getLegendSize() {
-        if(featureFactory instanceof AbstractFeatureFactory){
-            AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+        if (featureFactory instanceof AbstractFeatureFactory) {
+            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
             return legends.getLegendSize((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0));
         }
         return null;
     }
 
     @Override
-    public void getLegend(int width, int height, Graphics2D g2d) {
-        if(featureFactory instanceof AbstractFeatureFactory){
-            AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            legends.paintLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName), width, height, g2d);
+    public void getLegend(final int width, final int height, final Graphics2D g2d) {
+        if (featureFactory instanceof AbstractFeatureFactory) {
+            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+            legends.paintLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName),
+                width,
+                height,
+                g2d);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void refreshFeatures() {
+        final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
+        if (lastCreatedFeatures.size() > 0) {
+            if (DEBUG) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(lastCreatedFeatures.size()
+                                + " last created features refreshed, fiering retrival event"); // NOI18N
+                }
+            }
+            EventQueue.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        final RetrievalEvent re = new RetrievalEvent();
+                        re.setIsComplete(true);
+                        re.setHasErrors(false);
+                        re.setRefreshExisting(true);
+                        re.setRetrievedObject(lastCreatedFeatures);
+                        re.setRequestIdentifier(System.currentTimeMillis());
+                        fireRetrievalStarted(re);
+                        fireRetrievalComplete(re);
+                    }
+                });
+        } else {
+            LOG.warn("no last created features that could be refreshed found"); // NOI18N
         }
     }
 
