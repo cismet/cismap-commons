@@ -156,8 +156,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     protected ShapeFeature createFeatureInstance(final Feature degreeFeature,
             final ShapeInfo shapeInfo,
             final int index) throws Exception {
-        final String filename = new File(documentURI).getName();
-//        layerName = filename;
+        layerName = filename;
         final ShapeFeature shapeFeature = new ShapeFeature(shapeInfo, getStyle(filename));
 
         // auto generate Ids!
