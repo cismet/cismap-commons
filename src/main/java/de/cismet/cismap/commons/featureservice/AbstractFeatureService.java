@@ -15,6 +15,8 @@ import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.commons.utils.Pair;
+import org.deegree.rendering.r2d.legends.Legends;
 import org.deegree.style.persistence.sld.SLDParser;
 
 import org.jdom.Document;
@@ -66,9 +68,6 @@ import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 
 import de.cismet.tools.StaticXMLTools;
-import java.awt.Graphics2D;
-import org.deegree.commons.utils.Pair;
-import org.deegree.rendering.r2d.legends.Legends;
 
 /**
  * DOCUMENT ME!
@@ -171,6 +170,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
     String sldDefinition;
     final XMLInputFactory factory = XMLInputFactory.newInstance();
+
+    Legends legends = new Legends();
     private boolean initialisationError = false;
     private Element initElement = null;
     private boolean selectable = true;
@@ -778,11 +779,21 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
-     * Sets the new layer properties of the service and.
+     * DOCUMENT ME!
      *
      * @param  layerProperties  DOCUMENT ME!
      */
     public void setLayerProperties(final LayerProperties layerProperties) {
+        setLayerProperties(layerProperties, true);
+    }
+
+    /**
+     * Sets the new layer properties of the service and.
+     *
+     * @param  layerProperties  DOCUMENT ME!
+     * @param  refreshFeatures  DOCUMENT ME!
+     */
+    public void setLayerProperties(final LayerProperties layerProperties, final boolean refreshFeatures) {
         this.layerProperties = layerProperties;
 
         if (this.featureFactory != null) {
@@ -807,30 +818,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
 
             this.featureFactory.setLayerProperties(layerProperties);
-            final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
-            if (lastCreatedFeatures.size() > 0) {
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(lastCreatedFeatures.size()
-                                    + " last created features refreshed, fiering retrival event"); // NOI18N
-                    }
-                }
-                EventQueue.invokeLater(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            final RetrievalEvent re = new RetrievalEvent();
-                            re.setIsComplete(true);
-                            re.setHasErrors(false);
-                            re.setRefreshExisting(true);
-                            re.setRetrievedObject(lastCreatedFeatures);
-                            re.setRequestIdentifier(System.currentTimeMillis());
-                            fireRetrievalStarted(re);
-                            fireRetrievalComplete(re);
-                        }
-                    });
-            } else {
-                LOG.warn("no last created features that could be refreshed found"); // NOI18N
+            if (refreshFeatures) {
+                refreshFeatures();
             }
         }
     }
@@ -861,31 +850,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
 
             this.featureFactory.setLayerProperties(layerProperties);
-            final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
-            if (lastCreatedFeatures.size() > 0) {
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(lastCreatedFeatures.size()
-                                    + " last created features refreshed, fiering retrival event"); // NOI18N
-                    }
-                }
-                EventQueue.invokeLater(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            final RetrievalEvent re = new RetrievalEvent();
-                            re.setIsComplete(true);
-                            re.setHasErrors(false);
-                            re.setRefreshExisting(true);
-                            re.setRetrievedObject(lastCreatedFeatures);
-                            re.setRequestIdentifier(System.currentTimeMillis());
-                            fireRetrievalStarted(re);
-                            fireRetrievalComplete(re);
-                        }
-                    });
-            } else {
-                LOG.warn("no last created features that could be refreshed found"); // NOI18N
-            }
+            refreshFeatures();
         }
     }
 
@@ -1420,7 +1385,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     
     @Override
     public Reader getSLDDefiniton() {
-        return (sldDefinition == null) ? new InputStreamReader(getClass().getResourceAsStream("/testSLD.xml"))
+        return (sldDefinition == null) ? null // new InputStreamReader(getClass().getResourceAsStream("/testSLD.xml"))
                                        : new StringReader(sldDefinition);
     }
 
@@ -1453,372 +1418,3 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             LOG.info("SLD Parser funtkioniert nicht");
         }
         return styles;
->>>>>>> #67 Moved SLDStyling to AbstractFeatureFactoryFeature
-    }
-    
-    Legends legends = new Legends();
-    
-    @Override
-    public Pair<Integer, Integer> getLegendSize() {
-        if(featureFactory instanceof AbstractFeatureFactory){
-            AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            return legends.getLegendSize((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0));
-        }
-        return null;
-    }
-
-    @Override
-    public void getLegend(int width, int height, Graphics2D g2d) {
-        if(featureFactory instanceof AbstractFeatureFactory){
-            AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            legends.paintLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName), width, height, g2d);
-        }
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * Feature Retrieval Thread started by the {@code retrieve()} operation.
-     *
-     * @version  $Revision$, $Date$
-     */
-    protected class FeatureRetrievalWorker extends SwingWorker<List<FT>, FT> implements PropertyChangeListener {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private final long id = System.nanoTime();
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new FeatureRetrievalWorker object.
-         */
-        public FeatureRetrievalWorker() {
-            this.addPropertyChangeListener(this);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public long getId() {
-            return this.id;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         *
-         * @throws  Exception  DOCUMENT ME!
-         */
-        @Override
-        protected List<FT> doInBackground() throws Exception {
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("FRW[" + this.getId() + "]: doInBackground() started"); // NOI18N
-                }
-            }
-            EventQueue.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        final RetrievalEvent r = new RetrievalEvent();
-                        r.setRequestIdentifier(getId());
-                        r.setPercentageDone(-1);
-                        fireRetrievalStarted(r);
-                    }
-                });
-
-            // check if canceled .......................................................
-            if (this.isCancelled()) {
-                LOG.warn("FRW[" + this.getId() + "]: doInBackground() canceled"); // NOI18N
-                return null;
-            }
-            // check if canceled .......................................................
-
-            final List<FT> features = retrieveFeatures(this);
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("FRW[" + this.getId() + "]: doInBackground() completed"); // NOI18N
-                }
-            }
-            return features;
-        }
-
-        /**
-         * DOCUMENT ME!
-         */
-        @Override
-        protected void done() {
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("FRW[" + this.getId() + "]: done()"); // NOI18N
-                }
-            }
-            // check if canceled .......................................................
-            if (this.isCancelled()) {
-                LOG.warn("FRW[" + this.getId() + "]:  canceled (done)"); // NOI18N
-                final RetrievalEvent re = new RetrievalEvent();
-                re.setRequestIdentifier(this.getId());
-                re.setPercentageDone(0);
-                re.setHasErrors(false);
-                fireRetrievalAborted(re);
-                return;
-            }
-            // check if canceled .......................................................
-
-            try {
-                List<FT> results = null;
-                if (!this.isCancelled()) {
-                    results = this.get();
-                }
-
-                if (results != null) {
-                    if (DEBUG) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("FRW[" + this.getId() + "]: " + results.size() + " features created"); // NOI18N
-                        }
-                    }
-                    AbstractFeatureService.this.setRefreshNeeded(false);
-                    final RetrievalEvent re = new RetrievalEvent();
-                    re.setRequestIdentifier(getId());
-                    re.setIsComplete(true);
-                    re.setHasErrors(false);
-                    re.setRetrievedObject(results);
-                    fireRetrievalComplete(re);
-                } else {
-                    LOG.warn("FRW[" + this.getId() + "]: FeatureRetrieverWorker brachte keine Ergebnisse (canceled="
-                                + this.isCancelled() + ")");                                                 // NOI18N
-                    // setErrorMessage("Feature Request brachte keine Ergebnisse");
-                    final RetrievalEvent re = new RetrievalEvent();
-                    re.setHasErrors(false);
-
-                    re.setRequestIdentifier(getId());
-                    if (this.isCancelled()) {
-                        fireRetrievalAborted(re);
-                    } else {
-                        re.setRetrievedObject(new ArrayList<FT>());
-                        fireRetrievalComplete(re);
-                    }
-                }
-            } catch (final Exception e) {
-                LOG.error("FRW[" + this.getId() + "]: Fehler im FeatureRetrieverWorker (done): \n" + e.getMessage(),
-                    e); // NOI18N
-
-                final RetrievalEvent re = new RetrievalEvent();
-                re.setRequestIdentifier(this.getId());
-                re.setPercentageDone(0);
-                re.setHasErrors(true);
-                re.setRetrievedObject(e.getMessage());
-                fireRetrievalError(re);
-            }
-        }
-
-        /**
-         * Fires a RetrievalEvent on progress update.
-         *
-         * @param  evt  DOCUMENT ME!
-         */
-        @Override
-        public void propertyChange(final PropertyChangeEvent evt) {
-            if (evt.getPropertyName().equals("progress")) // NOI18N
-            {
-                final int progress = (Integer)evt.getNewValue();
-                // AbstractFeatureService.this.setProgress(progress);
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("FRW[" + this.getId() + "]: FeatureRetrieverWorker progress: " + progress); // NOI18N
-                    }
-                }
-
-                final RetrievalEvent re = new RetrievalEvent();
-                re.setRequestIdentifier(this.getId());
-                re.setIsComplete(progress != 100);
-                re.setPercentageDone(progress);
-                AbstractFeatureService.this.fireRetrievalProgress(re);
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        @Override
-        public String toString() {
-            return String.valueOf(this.getId());
-        }
-    }
-
-    /**
-     * Initialisiert den Layer.
-     *
-     * @version  $Revision$, $Date$
-     */
-    protected class LayerInitWorker extends SwingWorker<Void, Void> implements PropertyChangeListener {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private final long id = System.nanoTime();
-        // private final long id = System.currentTimeMillis();
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new LayerInitWorker object.
-         */
-        public LayerInitWorker() {
-            this.addPropertyChangeListener(this);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public long getId() {
-            return this.id;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         *
-         * @throws  Exception  DOCUMENT ME!
-         */
-        @Override
-        protected Void doInBackground() throws Exception {
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("LIW[" + this.getId() + "]: doInBackground() started"); // NOI18N
-                }
-            }
-            EventQueue.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        final RetrievalEvent r = new RetrievalEvent();
-                        r.setPercentageDone(-1);
-                        r.setRequestIdentifier(getId());
-                        r.setInitialisationEvent(true);
-                        fireRetrievalStarted(r);
-                    }
-                });
-
-            init();
-            return null;
-        }
-
-        /**
-         * DOCUMENT ME!
-         */
-        @Override
-        protected void done() {
-            AbstractFeatureService.this.setRefreshNeeded(false);
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("LIW[" + this.getId() + "]: done()"); // NOI18N
-                }
-            }
-            // check if canceled .......................................................
-            if (isCancelled()) {
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("LIW[" + this.getId() + "]: canceled (done)"); // NOI18N
-                    }
-                }
-                setInitialized(false);
-
-                final RetrievalEvent re = new RetrievalEvent();
-                re.setInitialisationEvent(true);
-                re.setPercentageDone(0);
-                re.setRequestIdentifier(this.getId());
-                re.setHasErrors(false);
-                fireRetrievalAborted(re);
-                return;
-            }
-            // check if canceled .......................................................
-
-            try {
-                get();
-
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("LIW[" + this.getId() + "]: finished"); // NOI18N
-                    }
-                }
-                AbstractFeatureService.this.setRefreshNeeded(false);
-                final RetrievalEvent re = new RetrievalEvent();
-                re.setInitialisationEvent(true);
-                re.setPercentageDone(100);
-                re.setRequestIdentifier(getId());
-                re.setIsComplete(true);
-                re.setHasErrors(false);
-                re.setRetrievedObject(null);
-                fireRetrievalComplete(re);
-            } catch (final Exception e) {
-                LOG.error("LIW[" + this.getId() + "]: Fehler beim initalisieren des Layers: " + e.getMessage(), e); // NOI18N
-                setInitialized(false);
-
-                final RetrievalEvent re = new RetrievalEvent();
-                re.setInitialisationEvent(true);
-                re.setPercentageDone(0);
-                re.setRequestIdentifier(this.getId());
-                fireRetrievalStarted(re);
-                re.setHasErrors(true);
-                re.setRetrievedObject(e.getMessage());
-                fireRetrievalError(re);
-                return;
-            }
-
-            setInitialized(true);
-            layerInitWorker = null;
-
-            // start initial retrieval
-            retrieve(false);
-        }
-
-        /**
-         * Fires a RetrievalEvent on progress update.
-         *
-         * @param  evt  DOCUMENT ME!
-         */
-        @Override
-        public void propertyChange(final PropertyChangeEvent evt) {
-            if (evt.getPropertyName().equals("progress")) // NOI18N
-            {
-                final int progress = (Integer)evt.getNewValue();
-                // AbstractFeatureService.this.setProgress(progress);
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("LIW[" + this.getId() + "]: LayerInitWorker progress: " + progress); // NOI18N
-                    }
-                }
-
-                final RetrievalEvent re = new RetrievalEvent();
-                re.setInitialisationEvent(true);
-                re.setRequestIdentifier(this.getId());
-                re.setIsComplete(progress != 100);
-                re.setPercentageDone(progress);
-                AbstractFeatureService.this.fireRetrievalProgress(re);
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        @Override
-        public String toString() {
-            return String.valueOf(this.getId());
-        }
-    }
-}
