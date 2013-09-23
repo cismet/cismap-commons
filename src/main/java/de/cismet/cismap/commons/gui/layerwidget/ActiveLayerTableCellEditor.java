@@ -58,7 +58,6 @@ import de.cismet.cismap.commons.ModeLayer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.QueryEditorDialog;
-import de.cismet.cismap.commons.featureservice.SLDStyledLayer;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
