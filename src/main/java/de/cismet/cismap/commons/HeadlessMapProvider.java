@@ -471,6 +471,15 @@ public class HeadlessMapProvider {
         return imgScaleDenominator;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public BoundingBox getCurrentBoundingBoxFromMap() {
+        return map.getCurrentBoundingBoxFromCamera();
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
