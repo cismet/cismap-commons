@@ -1611,7 +1611,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                                     if (layer instanceof ActiveLayerModelStore) {
                                         ((ActiveLayerModelStore)layer).setActiveLayerModel(ActiveLayerModel.this);
                                     }
-                                    addLayer(layer, 0);
+                                    addLayer(layer, layers.size());
                                 } catch (IllegalArgumentException schonVorhanden) {
                                     log.warn(
                                         "Layer '"
