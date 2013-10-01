@@ -184,7 +184,10 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         this.setLayerPosition(afs.getLayerPosition());
         this.setName(afs.getName());
         this.setEncoding(afs.getEncoding());
-        this.setPNode(afs.getPNode());
+        // The cloned featureService and the origin featureService should not use the same pnode,
+        // because this would lead to problems, if the cloned layer and the origin layer are
+        // used in 2 different MappingComponents
+// this.setPNode(afs.getPNode());
         this.setTranslucency(afs.getTranslucency());
         this.setEncoding(afs.getEncoding());
         this.setEnabled(afs.isEnabled());
