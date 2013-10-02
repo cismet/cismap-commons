@@ -214,7 +214,7 @@ public class HeadlessMapProvider {
     public void addLayer(final RetrievalServiceLayer layer) {
         if (layer instanceof AbstractRetrievalService) {
             final AbstractRetrievalService l = ((AbstractRetrievalService)layer).cloneWithoutRetrievalListeners();
-            mappingModel.addLayer(layer);
+            mappingModel.addLayer((RetrievalServiceLayer)l);
         } else {
             mappingModel.addLayer(layer);
         }
