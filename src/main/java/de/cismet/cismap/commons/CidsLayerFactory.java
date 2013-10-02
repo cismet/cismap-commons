@@ -11,12 +11,14 @@
  */
 package de.cismet.cismap.commons;
 
+import org.jdom.Attribute;
 import org.jdom.Element;
 
 import java.awt.EventQueue;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
@@ -32,8 +34,6 @@ import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
-import java.util.List;
-import org.jdom.Attribute;
 
 /**
  * DOCUMENT ME!
@@ -56,11 +56,13 @@ public class CidsLayerFactory {
      *
      * @param   element       DOCUMENT ME!
      * @param   capabilities  DOCUMENT ME!
+     * @param   model         DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     public static ServiceLayer createLayer(final Element element,
-            final HashMap<String, WMSCapabilities> capabilities, ActiveLayerModel model) {
+            final HashMap<String, WMSCapabilities> capabilities,
+            final ActiveLayerModel model) {
         if (DEBUG) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("trying to create Layer '" + element.getName() + "'"); // NOI18N
@@ -179,7 +181,7 @@ public class CidsLayerFactory {
                 }
             } else if (element.getName().equals(LayerCollection.XML_ELEMENT_NAME)) { // NOI18N
                 // todo
-                LayerCollection lc = new LayerCollection(element, capabilities, model);
+                final LayerCollection lc = new LayerCollection(element, capabilities, model);
 
                 try {
                     LOG.info(
@@ -448,7 +450,7 @@ public class CidsLayerFactory {
             return null;
         }
     }
-    
+
     /**
      * Layer neu anordnene entweder nach dem layerPosition Attribut (wenn vorhanden) oder nach der Tag-Reihenfolge in
      * der XML Config.
