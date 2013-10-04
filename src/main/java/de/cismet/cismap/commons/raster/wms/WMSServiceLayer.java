@@ -1102,7 +1102,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         w.exceptionsFormat = exceptionsFormat;
         w.height = height;
         w.imageFormat = imageFormat;
-        // The cloned featureService and the origin featureService should not use the same pnode,
+        // The cloned service layer and the origin service layer should not use the same pnode,
         // because this would lead to problems, if the cloned layer and the origin layer are
         // used in 2 different MappingComponents
         w.imageObject = null;
