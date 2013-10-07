@@ -100,6 +100,7 @@ public class OverviewComponent extends javax.swing.JPanel implements Configurabl
         model.setDefaultHomeSrs(srs);
         model.addHome(home);
         overviewMap.setMappingModel(model);
+        overviewMap.resetWtst();
         model.removeAllLayers();
         model.addLayer((RetrievalServiceLayer)backgroundService);
         backgroundService.addRetrievalListener(new RetrievalListener() {

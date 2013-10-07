@@ -15,6 +15,8 @@ import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
+import java.beans.PropertyChangeSupport;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -1100,14 +1102,17 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         w.exceptionsFormat = exceptionsFormat;
         w.height = height;
         w.imageFormat = imageFormat;
-        w.imageObject = imageObject;
+        // The cloned service layer and the origin service layer should not use the same pnode,
+        // because this would lead to problems, if the cloned layer and the origin layer are
+        // used in 2 different MappingComponents
+        w.imageObject = null;
         w.ir = new ImageRetrieval(w);
+        w.propertyChangeSupport = new PropertyChangeSupport(this);
         w.layerPosition = layerPosition;
         w.listeners = new ArrayList(listeners);
         w.name = name;
         w.ogcLayers = ogcLayers;
         w.progress = progress;
-        w.propertyChangeSupport = propertyChangeSupport;
         w.refreshNeeded = refreshNeeded;
         w.srs = srs;
         w.translucency = translucency;
@@ -1115,10 +1120,19 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         w.treePaths = treePaths;
         w.width = width;
         w.wmsCapabilities = wmsCapabilities;
-        w.wmsLayers = wmsLayers;
         w.wmsServiceLayerElement = wmsServiceLayerElement;
         w.capabilities = capabilities;
         w.dummyLayer = dummyLayer;
+        final List<WMSLayer> layers = new ArrayList<WMSLayer>(wmsLayers.size());
+
+        for (final Object layerObject : wmsLayers) {
+            final WMSLayer layer = (WMSLayer)layerObject;
+            final WMSLayer newLayer = new WMSLayer(layer.getOgcCapabilitiesLayer(), layer.getSelectedStyle());
+            newLayer.setParentServiceLayer(w);
+            layers.add(newLayer);
+        }
+
+        w.wmsLayers = layers;
         return w;
     }
 
