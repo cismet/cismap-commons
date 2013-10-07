@@ -34,6 +34,7 @@ import java.util.List;
 
 import javax.swing.DropMode;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -50,8 +51,12 @@ import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
+import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
+import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -74,6 +79,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     private ActiveLayerModel layerModel;
     private DefaultPopupMenuListener popupMenuListener = new DefaultPopupMenuListener(popupMenu);
     private TreeTransferHandler transferHandler;
+
+    private AddThemeMenuItem addThemeMenuItem;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree tree;
@@ -120,7 +127,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
         menuItems.add(new AddFolderMenuItem());
         menuItems.add(new RemoveGroupMenuItem());
-        menuItems.add(new AddThemeMenuItem());
+        addThemeMenuItem = new AddThemeMenuItem();
+        menuItems.add(addThemeMenuItem);
         menuItems.add(new VisibilityMenuItem());
         menuItems.add(new InvisibilityMenuItem());
         menuItems.add(new ExpandMenuItem());
@@ -140,6 +148,14 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         tree.getSelectionModel().addTreeSelectionListener(this);
         createPopupMenu();
         tree.addMouseListener(popupMenuListener);
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void addAddThemeMenuItemListener(final ActionListener l) {
+        addThemeMenuItem.addActionListener(l);
     }
 
     /**
@@ -429,30 +445,14 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.AddThemeMenuItem.pmenuItem.text"),
                 ROOT
                         | FOLDER,
-                0);
+                1);
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         public void actionPerformed(final ActionEvent e) {
-            expandAll(new TreePath(layerModel.getRoot()));
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  parent  DOCUMENT ME!
-         */
-        private void expandAll(final TreePath parent) {
-            final Object lastComponent = parent.getLastPathComponent();
-
-            tree.expandPath(parent);
-
-            for (int i = 0; i < layerModel.getChildCount(lastComponent); ++i) {
-                final TreePath newPath = parent.pathByAddingChild(layerModel.getChild(lastComponent, i));
-                expandAll(newPath);
-            }
+            // do nothing
         }
     }
 
