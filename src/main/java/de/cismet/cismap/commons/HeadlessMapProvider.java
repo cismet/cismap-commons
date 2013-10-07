@@ -32,10 +32,12 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
@@ -205,12 +207,17 @@ public class HeadlessMapProvider {
     }
 
     /**
-     * add a layer to the HeadlessMapProvider.
+     * Add a layer to the HeadlessMapProvider. A clone of the given layer is added to the model.
      *
      * @param  layer  the layer to add
      */
     public void addLayer(final RetrievalServiceLayer layer) {
-        mappingModel.addLayer(layer);
+        if (layer instanceof AbstractRetrievalService) {
+            final AbstractRetrievalService l = ((AbstractRetrievalService)layer).cloneWithoutRetrievalListeners();
+            mappingModel.addLayer((RetrievalServiceLayer)l);
+        } else {
+            mappingModel.addLayer(layer);
+        }
     }
 
     /**
