@@ -32,7 +32,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
@@ -857,7 +856,7 @@ public class HeadlessMapProvider {
             }
 
             try {
-                return image;
+                return map.getImage();
             } finally {
                 lock.unlock();
             }
@@ -875,7 +874,7 @@ public class HeadlessMapProvider {
                     }
                 }
 
-                return image;
+                return map.getImage();
             } finally {
                 lock.unlock();
             }
