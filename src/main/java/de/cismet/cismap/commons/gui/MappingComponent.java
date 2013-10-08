@@ -266,7 +266,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private final HashMap<String, PLayer> featureGrpLayerMap = new HashMap<String, PLayer>();
     private BoundingBox initialBoundingBox;
 
-    private ArrayList<RepaintListener> repaintListeners = new ArrayList<RepaintListener>();
+    private final ArrayList<RepaintListener> repaintListeners = new ArrayList<RepaintListener>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -5043,7 +5043,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  repaintListener  DOCUMENT ME!
      */
     public void addRepaintListener(final RepaintListener repaintListener) {
-        repaintListeners.add(repaintListener);
+        synchronized (repaintListeners) {
+            repaintListeners.add(repaintListener);
+            LOG.error(repaintListeners.size());
+        }
     }
 
     /**
@@ -5052,7 +5055,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  repaintListener  DOCUMENT ME!
      */
     public void removeRepaintListener(final RepaintListener repaintListener) {
-        repaintListeners.remove(repaintListener);
+        synchronized (repaintListeners) {
+            repaintListeners.remove(repaintListener);
+        }
     }
 
     /**
@@ -5061,8 +5066,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  e  DOCUMENT ME!
      */
     public void fireRepaintComplete(final RepaintEvent e) {
-        for (final RepaintListener repaintListener : repaintListeners) {
-            repaintListener.repaintComplete(e);
+        synchronized (repaintListeners) {
+            for (final RepaintListener repaintListener : (ArrayList<RepaintListener>)repaintListeners.clone()) {
+                repaintListener.repaintComplete(e);
+            }
         }
     }
 
@@ -5072,8 +5079,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  e  DOCUMENT ME!
      */
     public void fireRepaintError(final RepaintEvent e) {
-        for (final RepaintListener repaintListener : repaintListeners) {
-            repaintListener.repaintError(e);
+        synchronized (repaintListeners) {
+            for (final RepaintListener repaintListener : (ArrayList<RepaintListener>)repaintListeners.clone()) {
+                repaintListener.repaintError(e);
+            }
         }
     }
 
