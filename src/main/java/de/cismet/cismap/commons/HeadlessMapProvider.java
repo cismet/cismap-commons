@@ -37,6 +37,8 @@ import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
+import de.cismet.cismap.commons.retrieval.RepaintEvent;
+import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
@@ -494,7 +496,7 @@ public class HeadlessMapProvider {
      *
      * @version  $Revision$, $Date$
      */
-    class HeadlessMapProviderRetrievalListener implements Future<Image>, RetrievalListener {
+    class HeadlessMapProviderRetrievalListener implements Future<Image>, RetrievalListener, RepaintListener {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -532,6 +534,7 @@ public class HeadlessMapProvider {
             erroneous = new TreeMap<Integer, Object>();
             this.listener = listener;
             this.serviceCount = serviceCount;
+            map.addRepaintListener(this);
         }
 
         //~ Methods ------------------------------------------------------------
@@ -580,6 +583,17 @@ public class HeadlessMapProvider {
 
         @Override
         public void retrievalError(final RetrievalEvent e) {
+            // do nothing
+        }
+
+        @Override
+        public synchronized void retrievalComplete(final RetrievalEvent e) {
+            // do nothing
+        }
+
+        @Override
+        public void repaintError(final RepaintEvent repaintEvent) {
+            final RetrievalEvent e = repaintEvent.getRetrievalEvent();
             LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalError"); // NOI18N
 
             if (e.isInitialisationEvent()) {
@@ -597,11 +611,13 @@ public class HeadlessMapProvider {
                     PrintingWidget.class,
                     "PrintingWidget.retrievalError(RetrievalEvent).msg2"),
                 HeadlessMapProvider.NotificationLevel.ERROR_REASON); // NOI18N
-            retrievalComplete(e);
+            repaintComplete(repaintEvent);
         }
 
         @Override
-        public synchronized void retrievalComplete(final RetrievalEvent e) {
+        public synchronized void repaintComplete(final RepaintEvent repaintEvent) {
+            final RetrievalEvent e = repaintEvent.getRetrievalEvent();
+
             if (LOG.isInfoEnabled()) {
                 LOG.info(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalComplete"); // NOI18N
             }
@@ -709,6 +725,7 @@ public class HeadlessMapProvider {
                     LOG.debug("services:" + services); // NOI18N
                 }
 
+                map.removeRepaintListener(this);
                 unlock();
             }
         }
