@@ -502,9 +502,9 @@ public class HeadlessMapProvider {
 
         int imageWidth;
         int imageHeight;
-        private TreeMap<Integer, RetrievalService> services;
-        private TreeMap<Integer, Object> results;
-        private TreeMap<Integer, Object> erroneous;
+        private ArrayList<RetrievalService> services;
+        private ArrayList<Object> results;
+        private ArrayList<Object> erroneous;
         private boolean cancel = false;
         private volatile boolean done = false;
         private final ReentrantLock lock = new ReentrantLock();
@@ -528,9 +528,9 @@ public class HeadlessMapProvider {
                 final int serviceCount) {
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
-            services = new TreeMap<Integer, RetrievalService>();
-            results = new TreeMap<Integer, Object>();
-            erroneous = new TreeMap<Integer, Object>();
+            services = new ArrayList<RetrievalService>();
+            results = new ArrayList<Object>();
+            erroneous = new ArrayList<Object>();
             this.listener = listener;
             this.serviceCount = serviceCount;
             map.addRepaintListener(this);
@@ -561,8 +561,7 @@ public class HeadlessMapProvider {
             }
 
             if (e.getRetrievalService() instanceof ServiceLayer) {
-                final int num = ((ServiceLayer)e.getRetrievalService()).getLayerPosition();
-                services.put(num, e.getRetrievalService());
+                services.add(e.getRetrievalService());
             }
         }
 
@@ -627,16 +626,15 @@ public class HeadlessMapProvider {
             }
 
             if (e.getRetrievalService() instanceof ServiceLayer) {
-                final int num = ((ServiceLayer)e.getRetrievalService()).getLayerPosition();
                 if (!e.isHasErrors()) {
-                    results.put(num, e.getRetrievedObject());
+                    results.add(e.getRetrievalService());
                     sendNotification(org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
                             "PrintingWidget.retrievalComplete(RetrievalEvent).msg",
                             new Object[] { e.getRetrievalService() }),
                         HeadlessMapProvider.NotificationLevel.SUCCESS);          // NOI18N
                 } else {
-                    erroneous.put(num, e);
+                    erroneous.add(e.getRetrievalService());
                     if (e.getRetrievedObject() instanceof Image) {
                         sendNotification(org.openide.util.NbBundle.getMessage(
                                 PrintingWidget.class,
