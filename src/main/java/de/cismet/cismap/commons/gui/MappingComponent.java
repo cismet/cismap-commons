@@ -87,6 +87,8 @@ import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
+import de.cismet.cismap.commons.retrieval.RepaintEvent;
+import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
@@ -263,6 +265,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     private final HashMap<String, PLayer> featureGrpLayerMap = new HashMap<String, PLayer>();
     private BoundingBox initialBoundingBox;
+
+    private ArrayList<RepaintListener> repaintListeners = new ArrayList<RepaintListener>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -5032,6 +5036,45 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         } else {
             LOG.warn("unknown position for '" + name + "'"); // NOI18N
             return -1;
+        }
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  repaintListener  DOCUMENT ME!
+     */
+    public void addRepaintListener(final RepaintListener repaintListener) {
+        repaintListeners.add(repaintListener);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  repaintListener  DOCUMENT ME!
+     */
+    public void removeRepaintListener(final RepaintListener repaintListener) {
+        repaintListeners.remove(repaintListener);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    public void fireRepaintComplete(final RepaintEvent e) {
+        for (final RepaintListener repaintListener : repaintListeners) {
+            repaintListener.repaintComplete(e);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    public void fireRepaintError(final RepaintEvent e) {
+        for (final RepaintListener repaintListener : repaintListeners) {
+            repaintListener.repaintError(e);
         }
     }
 
