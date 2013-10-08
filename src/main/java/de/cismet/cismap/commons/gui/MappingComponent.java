@@ -5057,7 +5057,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void addRepaintListener(final RepaintListener repaintListener) {
         synchronized (repaintListeners) {
             repaintListeners.add(repaintListener);
-            LOG.error(repaintListeners.size());
         }
     }
 
