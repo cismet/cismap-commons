@@ -4851,6 +4851,18 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * Unlocks the MappingComponent.
+     */
+    public void unlockWithoutReload() {
+        if (DEBUG) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("unlock"); // NOI18N
+            }
+        }
+        locked = false;
+    }
+
+    /**
      * Returns whether the MappingComponent is locked or not.
      *
      * @return  DOCUMENT ME!
