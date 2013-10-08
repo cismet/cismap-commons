@@ -11,19 +11,15 @@
  */
 package de.cismet.cismap.commons;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -502,15 +498,17 @@ public class HeadlessMapProvider {
 
         int imageWidth;
         int imageHeight;
-        private ArrayList<RetrievalService> services;
-        private ArrayList<Object> results;
-        private ArrayList<Object> erroneous;
+        private HashSet<RetrievalService> services;
+        private HashSet<Object> results;
+        private HashSet<Object> erroneous;
         private boolean cancel = false;
         private volatile boolean done = false;
         private final ReentrantLock lock = new ReentrantLock();
         private Condition condition = lock.newCondition();
         private List<PropertyChangeListener> listener = new ArrayList<PropertyChangeListener>();
         private int serviceCount = 0;
+
+        private long requestIdentifier = -1;
 
         //~ Constructors -------------------------------------------------------
 
@@ -528,9 +526,9 @@ public class HeadlessMapProvider {
                 final int serviceCount) {
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
-            services = new ArrayList<RetrievalService>();
-            results = new ArrayList<Object>();
-            erroneous = new ArrayList<Object>();
+            services = new HashSet<RetrievalService>();
+            results = new HashSet<Object>();
+            erroneous = new HashSet<Object>();
             this.listener = listener;
             this.serviceCount = serviceCount;
             map.addRepaintListener(this);
@@ -677,10 +675,9 @@ public class HeadlessMapProvider {
                         HeadlessMapProvider.NotificationLevel.INFO);    // NOI18N
                 }
 
+                LOG.info("Following layers were painted: " + results); // NOI18N
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("ALLE FERTIG");          // NOI18N
-                    LOG.debug("results:" + results);   // NOI18N
-                    LOG.debug("services:" + services); // NOI18N
+                    LOG.debug("services:" + services);                 // NOI18N
                 }
 
                 map.removeRepaintListener(this);
