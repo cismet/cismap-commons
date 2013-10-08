@@ -5179,6 +5179,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         + " Errors: "      // NOI18N
                         + e.getErrors() + " Cause: " + e.getRetrievedObject()); // NOI18N
             fireActivityChanged();
+            fireRepaintError(new RepaintEvent(e));
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(rasterService + ": TaskCounter:" + taskCounter); // NOI18N
@@ -5229,6 +5230,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     MappingComponent.this.repaint();
                                 }
                             }
+                            fireRepaintComplete(new RepaintEvent(e));
+                        } else {
+                            fireRepaintError(new RepaintEvent(e));
                         }
                     }
                 };
@@ -5532,6 +5536,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             this.log.error(featureService + "[" + e.getRequestIdentifier() + " (" + this.requestIdentifier + ")]: "
                         + (e.isInitialisationEvent() ? "initialisation" : "retrieval") + " error"); // NOI18N
             fireActivityChanged();
+            fireRepaintError(new RepaintEvent(e));
 
             if (mainMappingComponent) {
                 CismapBroker.getInstance()
@@ -5557,6 +5562,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 this.log.info(featureService + "[" + e.getRequestIdentifier() + " (" + this.requestIdentifier
                             + ")]: initialisation complete"); // NOI18N
                 fireActivityChanged();
+                fireRepaintError(new RepaintEvent(e));
                 return;
             }
 
@@ -5573,6 +5579,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 }
                 ((RetrievalServiceLayer)featureService).setProgress(-1);
                 fireActivityChanged();
+                fireRepaintError(new RepaintEvent(e));
                 return;
             }
 
@@ -5786,6 +5793,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                                 + " features retrieved or updated"); // NOI18N
                                                 }
                                                 rescaleStickyNodes();
+                                                fireRepaintComplete(new RepaintEvent(e));
                                             } catch (final Exception exception) {
                                                 log.warn(
                                                     featureService
@@ -5795,6 +5803,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                             + requestIdentifier
                                                             + ")]: Fehler beim Aufr\u00E4umen",
                                                     exception);                                      // NOI18N
+                                                fireRepaintError(new RepaintEvent(e));
                                             }
                                         }
                                     });
@@ -5805,6 +5814,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                     + requestIdentifier
                                                     + ")]: completion thread Interrupted or synchronisation lost"); // NOI18N
                                     }
+                                }
+                                if (requestIdentifier == e.getRequestIdentifier()) {
+                                    fireRepaintError(new RepaintEvent(e));
                                 }
                             }
                         }
@@ -5819,6 +5831,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         + ")]: completion thread Interrupted or synchronisation lost"); // NOI18N
                         }
                     }
+                    fireRepaintError(new RepaintEvent(e));
                 }
             }
 
