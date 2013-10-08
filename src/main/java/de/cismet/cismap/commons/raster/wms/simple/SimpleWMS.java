@@ -56,12 +56,17 @@ public class SimpleWMS extends AbstractWMS implements MapService,
      */
     public SimpleWMS(final SimpleWMS s) {
         this(s.gmUrl);
-        bb = (BoundingBox)s.bb.clone();
+        if ((BoundingBox)s.bb != null) {
+            bb = (BoundingBox)s.bb.clone();
+        }
         enabled = s.enabled;
         height = s.height;
         layerPosition = s.layerPosition;
         name = s.name;
-        pNode = s.pNode;
+        // The cloned wms and the origin wms should not use the same pnode,
+        // because this would lead to problems, if the cloned layer and the origin layer are
+        // used in 2 different MappingComponents
+// pNode = s.pNode;
         translucency = s.translucency;
         width = s.width;
         ir = new ImageRetrieval(s);
