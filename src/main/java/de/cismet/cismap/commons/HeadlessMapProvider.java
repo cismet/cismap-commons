@@ -164,7 +164,6 @@ public class HeadlessMapProvider {
         // initial positioning of the map
         map.setAnimationDuration(0);
         map.gotoInitialBoundingBox();
-        map.unlock();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -372,6 +371,7 @@ public class HeadlessMapProvider {
                 mappingModel.getFeatureServices().size()
                         + mappingModel.getMapServices().size());
 
+        map.unlockWithoutReload();
         if (mappingModel.getMapServices().size() > 0) {
             map.queryServicesIndependentFromMap(
                 correctedWidthPixels,
