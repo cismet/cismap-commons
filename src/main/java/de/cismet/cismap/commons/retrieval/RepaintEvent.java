@@ -21,17 +21,17 @@ public class RepaintEvent {
 
     //~ Instance fields --------------------------------------------------------
 
-    private Object source;
+    RetrievalEvent retrievalEvent = null;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new RepaintEvent object.
      *
-     * @param  source  DOCUMENT ME!
+     * @param  retrievalEvent  DOCUMENT ME!
      */
-    public RepaintEvent(final Object source) {
-        this.source = source;
+    public RepaintEvent(final RetrievalEvent retrievalEvent) {
+        this.retrievalEvent = retrievalEvent;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -41,7 +41,7 @@ public class RepaintEvent {
      *
      * @return  DOCUMENT ME!
      */
-    public Object getSource() {
-        return source;
+    public RetrievalEvent getRetrievalEvent() {
+        return retrievalEvent;
     }
 }
