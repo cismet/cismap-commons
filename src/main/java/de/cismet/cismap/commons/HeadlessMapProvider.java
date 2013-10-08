@@ -507,7 +507,6 @@ public class HeadlessMapProvider {
         private TreeMap<Integer, Object> erroneous;
         private boolean cancel = false;
         private volatile boolean done = false;
-        private Image image;
         private final ReentrantLock lock = new ReentrantLock();
         private Condition condition = lock.newCondition();
         private List<PropertyChangeListener> listener = new ArrayList<PropertyChangeListener>();
@@ -666,45 +665,6 @@ public class HeadlessMapProvider {
                         HeadlessMapProvider.NotificationLevel.WARN);    // NOI18N
                 }
 
-                for (final Integer i : results.keySet()) {
-                    // Transparency
-                    final RetrievalService rs = services.get(i);
-
-                    float transparency = 0f;
-                    if (rs instanceof ServiceLayer) {
-                        transparency = ((ServiceLayer)rs).getTranslucency();
-                    }
-                    final Composite alphaComp = AlphaComposite.getInstance(
-                            AlphaComposite.SRC_OVER,
-                            transparency);
-                    final Object o = results.get(i);
-
-                    LOG.info("processing results of type '" + ((o != null) ? o.getClass().getSimpleName() : " null ")
-                                + "' from service #" + i
-                                + " '"
-                                + rs + "' (" + ((rs != null) ? rs.getClass().getSimpleName() : null) + ")"); // NOI18N
-                    if (o instanceof Image) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("service '" + rs + "' returned an image, must be a raster service");   // NOI18N
-                        }
-                        final Image image2add = (Image)o;
-                        addImage(image2add, alphaComp);
-                    } else if (Collection.class.isAssignableFrom(o.getClass())) {
-                        final Collection featureCollection = (Collection)o;
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("service '" + rs + "' returned a collection, must be a feature service ("
-                                        + featureCollection.size() + " features retrieved)");                // NOI18N
-                        }
-                        final Image image2add = map.getImageOfFeatures(
-                                featureCollection,
-                                imageWidth,
-                                imageHeight);
-                        addImage(image2add, null);
-                    } else {
-                        LOG.error("unknown results retrieved: " + o.getClass().getSimpleName());             // NOI18N
-                    }
-                }
-
                 addFeaturesToTopLevelLayer();
 
                 if (erroneous.size() < results.size()) {
@@ -748,18 +708,9 @@ public class HeadlessMapProvider {
                     sendNotification(org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
                             "PrintingWidget.retrievalComplete(RetrievalEvent).msg3"),
-                        HeadlessMapProvider.NotificationLevel.INFO); // NOI18N
-
-                    // Transparency
-                    float transparency = 0f;
-                    transparency = map.getFeatureLayer().getTransparency();
-                    final Composite alphaComp = AlphaComposite.getInstance(
-                            AlphaComposite.SRC_OVER,
-                            transparency);
-                    final Image image2add = map.getFeatureImage(imageWidth, imageHeight);
-                    addImage(image2add, alphaComp);
+                        HeadlessMapProvider.NotificationLevel.INFO);                                        // NOI18N
                 } catch (Throwable t) {
-                    LOG.error("Error while adding local features to the map", t); // NOI18N
+                    LOG.error("Error while adding local features to the map", t);                           // NOI18N
                 }
             } else {
                 final String localFeaturesNotAddedMessage = org.openide.util.NbBundle.getMessage(
@@ -802,45 +753,6 @@ public class HeadlessMapProvider {
             for (final PropertyChangeListener tmpListener : listener) {
                 tmpListener.propertyChange(evt);
             }
-
-//            System.out.println(msg);
-        }
-
-        /**
-         * Adds an image (map component) to the map image.
-         *
-         * @param  img        the overlay image to add
-         * @param  composite  the composite object to be used for rendering
-         */
-        private synchronized void addImage(final Image img, final Composite composite) {
-            image = mergeImages(image, img, composite);
-        }
-
-        /**
-         * adds an image to an other image.
-         *
-         * @param   image      the base image
-         * @param   overlay    the overlay image to add
-         * @param   composite  the composite object to be used for rendering
-         *
-         * @return  DOCUMENT ME!
-         */
-        private BufferedImage mergeImages(final Image image, final Image overlay, final Composite composite) {
-            final int w = Math.max(((image == null) ? 0 : image.getWidth(null)), overlay.getWidth(null));
-            final int h = Math.max(((image == null) ? 0 : image.getHeight(null)), overlay.getHeight(null));
-            final BufferedImage combined = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-            final Graphics2D g = (Graphics2D)combined.getGraphics();
-
-            if (image != null) {
-                g.drawImage(image, 0, 0, null);
-            }
-
-            if (composite != null) {
-                g.setComposite(composite);
-            }
-            g.drawImage(overlay, 0, 0, null);
-
-            return combined;
         }
 
         @Override
