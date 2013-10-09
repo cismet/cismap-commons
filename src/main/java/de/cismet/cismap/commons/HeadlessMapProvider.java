@@ -371,11 +371,7 @@ public class HeadlessMapProvider {
 
         map.unlockWithoutReload();
         if (mappingModel.getMapServices().size() > 0) {
-            map.queryServicesIndependentFromMap(
-                correctedWidthPixels,
-                correctedHeightPixels,
-                correctedBoundingBox,
-                listener); // evtl angepasst
+            map.queryServices();
         } else {
             listener.createImageFromFeatures();
         }
