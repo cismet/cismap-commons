@@ -1095,7 +1095,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     featureCollection.unselectAll();
                 }
                 if ((interactionMode.equals(SELECT) || interactionMode.equals(LINEAR_REFERENCING)
-                                || interactionMode.equals(SPLIT_POLYGON))
+                                || interactionMode.equals(SPLIT_POLYGON) || interactionMode.equals(MOVE_POLYGON))
                             && (this.readOnly == false)) {
                     featureSelectionChanged(null);
                 }
@@ -2962,6 +2962,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         }
                         if (featureCollection.areFeaturesEditable()
                                     && (getInteractionMode().equals(SELECT)
+                                        || getInteractionMode().equals(MOVE_POLYGON)
                                         || getInteractionMode().equals(LINEAR_REFERENCING)
                                         || getInteractionMode().equals(PAN)
                                         || getInteractionMode().equals(ZOOM)
