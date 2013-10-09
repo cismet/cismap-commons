@@ -488,7 +488,7 @@ public class HeadlessMapProvider {
      *
      * @version  $Revision$, $Date$
      */
-    class HeadlessMapProviderRetrievalListener implements Future<Image>, RetrievalListener, RepaintListener {
+    class HeadlessMapProviderRetrievalListener implements Future<Image>, RepaintListener {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -503,8 +503,6 @@ public class HeadlessMapProvider {
         private Condition condition = lock.newCondition();
         private List<PropertyChangeListener> listener = new ArrayList<PropertyChangeListener>();
         private int serviceCount = 0;
-
-        private long requestIdentifier = -1;
 
         //~ Constructors -------------------------------------------------------
 
@@ -531,9 +529,10 @@ public class HeadlessMapProvider {
         }
 
         //~ Methods ------------------------------------------------------------
-
+        
         @Override
-        public synchronized void retrievalStarted(final RetrievalEvent e) {
+        public synchronized void repaintStart(RepaintEvent repaintEvent) {
+            RetrievalEvent e = repaintEvent.getRetrievalEvent();
             if (LOG.isDebugEnabled()) {
                 LOG.debug("retrievalStarted" + e.getRetrievalService()); // NOI18N
             }
@@ -557,30 +556,6 @@ public class HeadlessMapProvider {
             if (e.getRetrievalService() instanceof ServiceLayer) {
                 services.add(e.getRetrievalService());
             }
-        }
-
-        @Override
-        public void retrievalProgress(final RetrievalEvent e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrieval progress: "
-                            + e.getPercentageDone()); // NOI18N
-            }
-
-            if (e.isInitialisationEvent()) {
-                LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                            + "]: retrievalProgress ignored, initialisation event"); // NOI18N
-                return;
-            }
-        }
-
-        @Override
-        public void retrievalError(final RetrievalEvent e) {
-            // do nothing
-        }
-
-        @Override
-        public synchronized void retrievalComplete(final RetrievalEvent e) {
-            // do nothing
         }
 
         @Override
@@ -676,7 +651,6 @@ public class HeadlessMapProvider {
                     LOG.debug("services:" + services);                 // NOI18N
                 }
 
-                map.removeRepaintListener(this);
                 unlock();
             }
         }
@@ -744,11 +718,6 @@ public class HeadlessMapProvider {
             for (final PropertyChangeListener tmpListener : listener) {
                 tmpListener.propertyChange(evt);
             }
-        }
-
-        @Override
-        public void retrievalAborted(final RetrievalEvent e) {
-            LOG.warn(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalAborted"); // NOI18N
         }
 
         @Override
