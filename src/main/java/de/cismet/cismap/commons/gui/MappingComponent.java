@@ -3702,7 +3702,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         if (mapService instanceof FeatureAwareRasterService) {
             ((FeatureAwareRasterService)mapService).setFeatureCollection(getFeatureCollection());
         }
-        if ((mapService instanceof ServiceLayer) && ((ServiceLayer)mapService).isEnabled()) {
+        if ((mapService instanceof ServiceLayer) && ((ServiceLayer)mapService).isEnabled() && !locked) {
             handleMapService(0, mapService, false);
         }
     }
