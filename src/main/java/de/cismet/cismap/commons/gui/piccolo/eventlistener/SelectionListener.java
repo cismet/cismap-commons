@@ -8,6 +8,7 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -51,9 +52,11 @@ public class SelectionListener extends RectangleRubberBandListener {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String SELECTION_CHANGED_NOTIFICATION = "SELECTION_CHANGED_NOTIFICATION"; // NOI18N
+    public static final String DOUBLECLICK_POINT_NOTIFICATION = "DOUBLECLICK_POINT_NOTIFICATION"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
+    Point doubleclickPoint = null;
     PFeature sel = null;
     Vector<PFeature> pfVector = new Vector<PFeature>();
     MappingComponent mappingComponent = null;
@@ -90,12 +93,19 @@ public class SelectionListener extends RectangleRubberBandListener {
         if (log.isDebugEnabled()) {
             log.debug("mouseClicked():" + pInputEvent.getPickedNode()); // NOI18N
         }
-        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
         clickCount = pInputEvent.getClickCount();
         if (pInputEvent.getComponent() instanceof MappingComponent) {
             mappingComponent = (MappingComponent)pInputEvent.getComponent();
         }
 
+        if ((clickCount == 2) && pInputEvent.isLeftMouseButton()) {
+            doubleclickPoint = createPointFromInput(pInputEvent);
+
+            final PNotificationCenter pn = PNotificationCenter.defaultCenter();
+            pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
+        }
+
+        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
         if (pInputEvent.isRightMouseButton()) {
             if (log.isDebugEnabled()) {
                 log.debug("right mouseclick"); // NOI18N
@@ -380,5 +390,14 @@ public class SelectionListener extends RectangleRubberBandListener {
      */
     public int getClickCount() {
         return clickCount;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Point getDoubleclickPoint() {
+        return doubleclickPoint;
     }
 }

@@ -19,6 +19,7 @@ import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.util.PLocator;
 
@@ -31,6 +32,7 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.Highlightable;
@@ -80,6 +82,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     private PNode pointerAnnotation = new PNode();
     private PPath snapRect = PPath.createRectangle(0.0f, 0.0f, 20.0f, 20.0f);
     private boolean annotationNodeVisible = false;
+    private double underlyingObjectHalo = 0.0d;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -167,9 +170,17 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                         refreshPointerAnnotation(event);
 
                         underlyingObject = null;
-                        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
-                                event,
-                                new Class[] { PFeature.class });
+                        final Object o;
+                        if (underlyingObjectHalo > 0.0d) {
+                            o = PFeatureTools.getFirstValidObjectUnderPointer2(
+                                    event,
+                                    new Class[] { PFeature.class },
+                                    underlyingObjectHalo);
+                        } else {
+                            o = PFeatureTools.getFirstValidObjectUnderPointer(
+                                    event,
+                                    new Class[] { PFeature.class });
+                        }
                         if (o instanceof PFeature) {
                             underlyingObject = (PFeature)o;
                         }
@@ -697,5 +708,23 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
     public void setPointerAnnotation(final PNode pointerAnnotation) {
         setAnnotationNodeVisible(false);
         this.pointerAnnotation = pointerAnnotation;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  underlyingObjectHalo  DOCUMENT ME!
+     */
+    public void setUnderlyingObjectHalo(final double underlyingObjectHalo) {
+        this.underlyingObjectHalo = underlyingObjectHalo;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getUnderlyingObjectHalo() {
+        return underlyingObjectHalo;
     }
 }
