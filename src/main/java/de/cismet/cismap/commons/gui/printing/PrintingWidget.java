@@ -22,21 +22,18 @@ import net.sf.jasperreports.view.JRViewer;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
-import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import java.lang.reflect.Constructor;
 
-import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
@@ -49,18 +46,14 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.Debug;
-import de.cismet.cismap.commons.MappingModel;
-import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.HeadlessMapProvider;
+import de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
-import de.cismet.cismap.commons.retrieval.RetrievalService;
-
-import de.cismet.commons.concurrency.CismetConcurrency;
-import de.cismet.commons.concurrency.CismetExecutors;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -69,6 +62,8 @@ import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
+
+import static de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel.*;
 
 /**
  * DOCUMENT ME!
@@ -80,6 +75,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
 
     //~ Static fields/initializers ---------------------------------------------
 
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(PrintingWidget.class);
     private static final boolean DEBUG = Debug.DEBUG;
     public static final String TIP = "TIP";                   // NOI18N
     public static final String INFO = "INFO";                 // NOI18N
@@ -114,9 +110,9 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     private Style styleWarn;
     private Style styleError;
     private Style styleErrorReason;
-    private HashMap<String, Style> styles = new HashMap<String, Style>();
-    private int imageWidth;
-    private int imageHeight;
+    private EnumMap<NotificationLevel, Style> styles = new EnumMap<NotificationLevel, Style>(NotificationLevel.class);
+    private HeadlessMapProvider headlessMapProvider;
+    private Future<Image> futureMapImage;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdBack;
     private javax.swing.JButton cmdCancel;
@@ -201,6 +197,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
 
         StaticSwingTools.setNiftyScrollBars(scpLoadingStatus);
         // txpLoadingStatus.setContentType("text/html");
+
+        headlessMapProvider = HeadlessMapProvider.createHeadlessMapProviderAndAddLayers(mappingComponent);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -491,17 +489,17 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdBackActionPerformed
+    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBackActionPerformed
         dispose();
-    }                                                                           //GEN-LAST:event_cmdBackActionPerformed
+    }//GEN-LAST:event_cmdBackActionPerformed
 
     /**
      * DOCUMENT ME!
      */
     public void startLoading() {
         if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("startLoading()");                        // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("startLoading()");                        // NOI18N
             }
         }
         txpLoadingStatus.setText("");                               // NOI18N
@@ -511,7 +509,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             final Constructor constructor = c.getConstructor();
             inscriber = (AbstractPrintingInscriber)constructor.newInstance();
         } catch (Exception e) {
-            log.error("Error while loading the print template", e); // NOI18N
+            LOG.error("Error while loading the print template", e); // NOI18N
         }
         panInscribe.removeAll();
         panInscribe.add(inscriber, BorderLayout.CENTER);
@@ -524,54 +522,33 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                 PrintingWidget.class,
                 "PrintingWidget.startLoading().msg",
                 new Object[] { r.getResolution() }),
-            EXPERT);                                                        // NOI18N
+            EXPERT); // NOI18N
+
+        headlessMapProvider.addPropertyChangeListener(this);
+
         final BoundingBox bb =
             ((PrintingFrameListener)mappingComponent.getInputListener(MappingComponent.PRINTING_AREA_SELECTION))
                     .getPrintingBoundingBox();
-        imageWidth = (int)((double)t.getMapWidth() / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                        * (double)r.getResolution());
-        imageHeight = (int)((double)t.getMapHeight() / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                        * (double)r.getResolution());
+        // transform BoundingBox to XBoundingBox
+        final Crs crs = mappingComponent.getMappingModel().getSrs();
+        final boolean isMetric = crs.isMetric();
+        final XBoundingBox xbb = new XBoundingBox(bb.getX1(),
+                bb.getY1(),
+                bb.getX2(),
+                bb.getY2(),
+                crs.getName(),
+                isMetric);
+        headlessMapProvider.setBoundingBox(xbb);
+
+        futureMapImage = headlessMapProvider.getImage((int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                r.getResolution(),
+                t.getMapWidth(),
+                t.getMapHeight());
+
         if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("image size: " + imageWidth + "x" + imageHeight); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("BoundingBox:" + bb); // NOI18N
             }
-        }
-        if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("BoundingBox:" + bb);                             // NOI18N
-            }
-        }
-        map = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
-        map.getGraphics().setColor(Color.white);
-        map.getGraphics().fillRect(0, 0, imageWidth, imageHeight);
-        // map=Static2DTools.toCompatibleImage(map);
-        services = new TreeMap<Integer, RetrievalService>();
-        results = new TreeMap<Integer, Object>();
-        erroneous = new TreeMap<Integer, Object>();
-
-        final MappingModel model = mappingComponent.getMappingModel();
-
-        if (model instanceof MappingModel) {
-            final ActiveLayerModel alm = (ActiveLayerModel)model;
-
-            if ((alm.getMapServices().size() + alm.getRasterServices().size()) > 0) {
-                mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
-            } else {
-                final ThreadFactory threadFactory =
-                    CismetConcurrency.getInstance("cismap-commons")                // NOI18N
-                    .createThreadFactory("CreateImageFromFeatures-threadfactory"); // NOI18N
-                final ExecutorService dispatcher = CismetExecutors.newSingleThreadExecutor(threadFactory);
-                dispatcher.execute(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            createImageFromFeatures();
-                        }
-                    });
-            }
-        } else {
-            mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
         }
 
         prbLoading.setIndeterminate(true);
@@ -584,26 +561,26 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formComponentShown(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentShown
-    }                                                                          //GEN-LAST:event_formComponentShown
+    private void formComponentShown(final java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
+    }//GEN-LAST:event_formComponentShown
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
         mappingComponent.setInteractionMode(interactionModeAfterPrinting);
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
         dispose();
-    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
+    }//GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
         final Runnable r = new Runnable() {
 
                 @Override
@@ -623,14 +600,14 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                     mappingComponent.getPrintingFrameLayer().removeAllChildren();
                     mappingComponent.setInteractionMode(interactionModeAfterPrinting);
                     if (DEBUG) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("interactionModeAfterPrinting:" + interactionModeAfterPrinting); // NOI18N
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("interactionModeAfterPrinting:" + interactionModeAfterPrinting); // NOI18N
                         }
                     }
 
                     try {
                         final HashMap param = new HashMap();
-                        param.put(t.getMapPlaceholder(), map);
+                        param.put(t.getMapPlaceholder(), futureMapImage.get());
                         String scaleDenomString = "" + s.getDenominator();                                            // NOI18N
                         if (scaleDenomString.equals("0") || scaleDenomString.equals("-1"))                            // NOI18N
                         {
@@ -651,8 +628,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                         param.put(BB_MAX_Y, bbox.getY2());
 
                         if (DEBUG) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Parameter:" + param); // NOI18N
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Parameter:" + param); // NOI18N
                             }
                         }
 
@@ -696,7 +673,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                             JasperPrintManager.printReport(jasperPrint, true);
                         }
                     } catch (Throwable tt) {
-                        log.error("Error during Jaspern", tt); // NOI18N
+                        LOG.error("Error during Jaspern", tt); // NOI18N
 
                         final ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(
                                     PrintingWidget.class,
@@ -719,7 +696,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             };
         CismetThreadPool.execute(r);
         dispose();
-    } //GEN-LAST:event_cmdOkActionPerformed
+    }//GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!
