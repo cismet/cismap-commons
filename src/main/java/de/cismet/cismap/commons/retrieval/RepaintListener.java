@@ -27,7 +27,7 @@ public interface RepaintListener {
      * @param  e  DOCUMENT ME!
      */
     void repaintStart(RepaintEvent e);
-    
+
     /**
      * DOCUMENT ME!
      *

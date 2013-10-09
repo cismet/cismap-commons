@@ -5095,8 +5095,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             repaintListeners.remove(repaintListener);
         }
     }
-    
-     /**
+
+    /**
      * DOCUMENT ME!
      *
      * @param  e  DOCUMENT ME!
