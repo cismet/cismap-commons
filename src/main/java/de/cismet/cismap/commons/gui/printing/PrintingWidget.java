@@ -77,14 +77,6 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(PrintingWidget.class);
     private static final boolean DEBUG = Debug.DEBUG;
-    public static final String TIP = "TIP";                   // NOI18N
-    public static final String INFO = "INFO";                 // NOI18N
-    public static final String SUCCESS = "SUCCESS";           // NOI18N
-    public static final String EXPERT = "EXPERT";             // NOI18N
-    public static final String WARN = "WARN";                 // NOI18N
-    public static final String ERROR = "ERROR";               // NOI18N
-    public static final String ERROR_REASON = "ERROR_REASON"; // NOI18N
-
     public static final String BB_MIN_X = "minX";
     public static final String BB_MIN_Y = "minY";
     public static final String BB_MAX_X = "maxX";
@@ -164,33 +156,33 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
         getRootPane().setDefaultButton(cmdOk);
         txpLoadingStatus.setBackground(this.getBackground());
         prbLoading.setForeground(panDesc.getBackground());
-        styleTip = txpLoadingStatus.addStyle(TIP, null);
+        styleTip = txpLoadingStatus.addStyle(TIP.name(), null);
         StyleConstants.setForeground(styleTip, Color.blue);
         StyleConstants.setFontSize(styleTip, 10);
         styles.put(TIP, styleTip);
-        styleSuccess = txpLoadingStatus.addStyle(SUCCESS, null);
+        styleSuccess = txpLoadingStatus.addStyle(SUCCESS.name(), null);
         StyleConstants.setForeground(styleSuccess, Color.green.darker());
         StyleConstants.setFontSize(styleSuccess, 10);
 
         styles.put(SUCCESS, styleSuccess);
-        styleInfo = txpLoadingStatus.addStyle(INFO, null);
+        styleInfo = txpLoadingStatus.addStyle(INFO.name(), null);
         StyleConstants.setForeground(styleInfo, Color.DARK_GRAY);
         StyleConstants.setFontSize(styleInfo, 10);
         styles.put(INFO, styleInfo);
-        styleExpert = txpLoadingStatus.addStyle(EXPERT, null);
+        styleExpert = txpLoadingStatus.addStyle(EXPERT.name(), null);
         StyleConstants.setForeground(styleExpert, Color.gray);
         StyleConstants.setFontSize(styleExpert, 10);
         styles.put(EXPERT, styleExpert);
-        styleWarn = txpLoadingStatus.addStyle(WARN, null);
+        styleWarn = txpLoadingStatus.addStyle(WARN.name(), null);
         StyleConstants.setForeground(styleWarn, Color.orange.darker());
         StyleConstants.setFontSize(styleWarn, 10);
         styles.put(WARN, styleWarn);
-        styleError = txpLoadingStatus.addStyle(ERROR, null);
+        styleError = txpLoadingStatus.addStyle(NotificationLevel.ERROR.name(), null);
         StyleConstants.setForeground(styleError, Color.red);
         StyleConstants.setFontSize(styleError, 10);
         StyleConstants.setBold(styleError, true);
-        styles.put(ERROR, styleError);
-        styleErrorReason = txpLoadingStatus.addStyle(ERROR_REASON, null);
+        styles.put(NotificationLevel.ERROR, styleError);
+        styleErrorReason = txpLoadingStatus.addStyle(ERROR_REASON.name(), null);
         StyleConstants.setForeground(styleErrorReason, Color.red);
         StyleConstants.setFontSize(styleErrorReason, 10);
         styles.put(ERROR_REASON, styleErrorReason);
@@ -1026,7 +1018,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                         try {
                             doc.insertString(doc.getLength(), "ico", style);                                    // NOI18N
                         } catch (BadLocationException ble) {
-                            log.error("Error in addIconToProgressPane", ble);                                   // NOI18N
+                            LOG.error("Error in addIconToProgressPane", ble);                                   // NOI18N
                         }
                     }
                 });
@@ -1039,7 +1031,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      * @param  msg     DOCUMENT ME!
      * @param  reason  DOCUMENT ME!
      */
-    private void addMessageToProgressPane(final String msg, final String reason) {
+    private void addMessageToProgressPane(final String msg, final NotificationLevel reason) {
         synchronized (this) {
             java.awt.EventQueue.invokeLater(new Runnable() {
 
@@ -1053,11 +1045,10 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                         + "\n",
                                         styles.get(reason));       // NOI18N
                         } catch (BadLocationException ble) {
-                            log.error("error during Insert", ble); // NOI18N
+                            LOG.error("error during Insert", ble); // NOI18N
                         }
                     }
                 });
         }
-//        // txpLoadingStatus.setCaretPosition(txpLoadingStatus.getText().length());
     }
 }
