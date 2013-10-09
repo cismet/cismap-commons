@@ -28,8 +28,6 @@ import java.util.*;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.StyledFeatureGroupMember;
-import de.cismet.cismap.commons.gui.StyledFeatureGroupWrapper;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.ParentNodeIsAPFeature;
 
@@ -47,6 +45,71 @@ public class PFeatureTools {
             "de.cismet.cismap.commons.tools.PFeatureTools"); // NOI18N
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pInputEvent   DOCUMENT ME!
+     * @param   validClasses  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Object getFirstValidObjectUnderPointer2(final PInputEvent pInputEvent,
+            final Class[] validClasses) {
+        return getFirstValidObjectUnderPointer2(pInputEvent, validClasses, 0);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pInputEvent   mc DOCUMENT ME!
+     * @param   validClasses  DOCUMENT ME!
+     * @param   halo          DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Object getFirstValidObjectUnderPointer2(final PInputEvent pInputEvent,
+            final Class[] validClasses,
+            final double halo) {
+        final ArrayList al = new ArrayList();
+        final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
+        final WorldToScreenTransform wtst = mc.getWtst();
+
+        final int srs = CrsTransformer.extractSridFromCrs(mc.getMappingModel().getSrs().getCode());
+        final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srs);
+        final double x1 = wtst.getWorldX(pInputEvent.getPosition().getX());
+        final double y1 = wtst.getWorldY(pInputEvent.getPosition().getY());
+        final Geometry point;
+        if (halo > 0) {
+            point = gf.createPoint(new Coordinate(x1, y1)).buffer(halo * mc.getScaleDenominator());
+        } else {
+            point = gf.createPoint(new Coordinate(x1, y1));
+        }
+
+        findIntersectingPFeatures(mc.getFeatureLayer(), point, al);
+
+        for (int i = 0; i < mc.getMapServiceLayer().getChildrenCount(); ++i) {
+            final PNode p = mc.getMapServiceLayer().getChild(i);
+            if (p instanceof PLayer) {
+                findIntersectingPFeatures(mc.getMapServiceLayer().getChild(i), point, al);
+            }
+        }
+        final Iterator it = al.iterator();
+        Object o = null;
+        boolean rightType = false;
+        do {
+            if (!it.hasNext()) {
+                return null;
+            }
+            o = it.next();
+            for (int i = 0; i < validClasses.length; ++i) {
+                if ((o != null) && validClasses[i].isAssignableFrom(o.getClass())) {
+                    rightType = true;
+                }
+            }
+        } while ((o != null) && !rightType);
+        return o;
+    }
 
     /**
      * DOCUMENT ME!
