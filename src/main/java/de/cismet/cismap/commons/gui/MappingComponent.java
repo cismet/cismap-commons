@@ -5095,6 +5095,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             repaintListeners.remove(repaintListener);
         }
     }
+    
+     /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    public void fireRepaintStart(final RepaintEvent e) {
+        synchronized (repaintListeners) {
+            for (final RepaintListener repaintListener : (ArrayList<RepaintListener>)repaintListeners.clone()) {
+                repaintListener.repaintStart(e);
+            }
+        }
+    }
 
     /**
      * DOCUMENT ME!
@@ -5170,6 +5183,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         @Override
         public void retrievalStarted(final RetrievalEvent e) {
             fireActivityChanged();
+            fireRepaintStart(new RepaintEvent(e));
             if (DEBUG) {
                 if (this.log.isDebugEnabled()) {
                     this.log.debug(rasterService + ": TaskCounter:" + taskCounter); // NOI18N
@@ -5522,6 +5536,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 }
             }
             fireActivityChanged();
+            fireRepaintStart(new RepaintEvent(e));
 
             if (mainMappingComponent) {
                 CismapBroker.getInstance()
