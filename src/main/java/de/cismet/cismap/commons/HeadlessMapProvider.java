@@ -107,6 +107,7 @@ public class HeadlessMapProvider {
      * Creates a new HeadlessMapProvider object.
      */
     public HeadlessMapProvider() {
+        map.setResizeEventActivated(false);
         map.setInternalLayerWidgetAvailable(false);
 
         if (CismapBroker.getInstance().getMappingComponent() != null) {
