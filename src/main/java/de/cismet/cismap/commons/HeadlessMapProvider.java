@@ -633,11 +633,12 @@ public class HeadlessMapProvider {
                     PrintingWidget.class,
                     "PrintingWidget.retrievalError(RetrievalEvent).msg1",
                     new Object[] { e.getRetrievalService() }),
-                HeadlessMapProvider.NotificationLevel.ERROR);        // NOI18N
+                HeadlessMapProvider.NotificationLevel.ERROR); // NOI18N
             sendNotification(org.openide.util.NbBundle.getMessage(
                     PrintingWidget.class,
                     "PrintingWidget.retrievalError(RetrievalEvent).msg2"),
-                HeadlessMapProvider.NotificationLevel.ERROR_REASON); // NOI18N
+                HeadlessMapProvider.NotificationLevel.ERROR_REASON,
+                e);                                           // NOI18N
             repaintComplete(repaintEvent);
         }
 
@@ -669,7 +670,8 @@ public class HeadlessMapProvider {
                                 PrintingWidget.class,
                                 "PrintingWidget.retrievalComplete(RetrievalEvent).msg2",
                                 new Object[] { e.getRetrievalService() }),
-                            HeadlessMapProvider.NotificationLevel.ERROR_REASON); // NOI18N
+                            HeadlessMapProvider.NotificationLevel.ERROR_REASON,
+                            e);                                         // NOI18N
                     }
                 }
             }
@@ -770,10 +772,23 @@ public class HeadlessMapProvider {
          * @param  level  the notification level
          */
         private void sendNotification(final String msg, final HeadlessMapProvider.NotificationLevel level) {
+            sendNotification(msg, level, null);
+        }
+
+        /**
+         * Send a notification to all registered listeners.
+         *
+         * @param  msg    the message to send
+         * @param  level  the notification level
+         * @param  e      a RetrievalEvent
+         */
+        private void sendNotification(final String msg,
+                final HeadlessMapProvider.NotificationLevel level,
+                final RetrievalEvent e) {
             final PropertyChangeEvent evt = new PropertyChangeEvent(
                     this,
                     "notification",
-                    null,
+                    e,
                     new HeadlessMapProvider.NotificationMessage(msg, level));
 
             for (final PropertyChangeListener tmpListener : listener) {
