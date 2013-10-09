@@ -18,8 +18,10 @@ import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -39,10 +41,7 @@ import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
-import java.util.Collections;
-import java.util.TreeMap;
 
 /**
  * DOCUMENT ME!
@@ -79,7 +78,7 @@ public class HeadlessMapProvider {
 
         //~ Enum constants -----------------------------------------------------
 
-        TIP, INFO, SUCCESS, EXPERT, WARN, ERROR, ERROR_REASON
+        TIP, INFO, SUCCESS, EXPERT, WARN, ERROR, ERROR_REASON, UNLOCKED
     }
 
     /**
@@ -168,15 +167,18 @@ public class HeadlessMapProvider {
         // initial positioning of the map
         map.setAnimationDuration(0);
     }
-    
-     /**
-     * Creates a HeadlessMapProvider and adds the raster layers and feature layers from the mapping
-     * component to it.
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * Creates a HeadlessMapProvider and adds the raster layers and feature layers from the mapping component to it.
+     *
+     * @param   mappingComponent  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    public static HeadlessMapProvider createHeadlessMapProviderAndAddLayers(MappingComponent mappingComponent) {
-        HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
+    public static HeadlessMapProvider createHeadlessMapProviderAndAddLayers(final MappingComponent mappingComponent) {
+        final HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
 
         // Raster Services
         final TreeMap rasterServices = mappingComponent.getMappingModel().getRasterServices();
@@ -223,8 +225,6 @@ public class HeadlessMapProvider {
 
         return headlessMapProvider;
     }
-
-    //~ Methods ----------------------------------------------------------------
 
     /**
      * Adds a PropertyChangeListener that will notify about the progress of the map building.
@@ -661,7 +661,7 @@ public class HeadlessMapProvider {
                             PrintingWidget.class,
                             "PrintingWidget.retrievalComplete(RetrievalEvent).msg",
                             new Object[] { e.getRetrievalService() }),
-                        HeadlessMapProvider.NotificationLevel.SUCCESS);          // NOI18N
+                        HeadlessMapProvider.NotificationLevel.SUCCESS); // NOI18N
                 } else {
                     erroneous.add(e.getRetrievalService());
                     if (e.getRetrievedObject() instanceof Image) {
@@ -759,6 +759,7 @@ public class HeadlessMapProvider {
                 condition.signalAll();
             } finally {
                 lock.unlock();
+                sendNotification("", NotificationLevel.UNLOCKED);
             }
         }
 
