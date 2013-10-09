@@ -71,7 +71,7 @@ import static de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel.*;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class PrintingWidget extends javax.swing.JDialog implements RetrievalListener {
+public class PrintingWidget extends javax.swing.JDialog implements PropertyChangeListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -1022,6 +1022,30 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                         }
                     }
                 });
+        }
+    }
+
+    @Override
+    public void propertyChange(final PropertyChangeEvent evt) {
+        if (evt.getNewValue() instanceof HeadlessMapProvider.NotificationMessage) {
+            final HeadlessMapProvider.NotificationMessage message = (HeadlessMapProvider.NotificationMessage)
+                evt.getNewValue();
+            addMessageToProgressPane(message.getMsg(), message.getLevel());
+
+            if (message.getLevel().equals(UNLOCKED)) {
+                activateButton();
+            } else if (message.getLevel().equals(ERROR_REASON) && (evt.getOldValue() instanceof RetrievalEvent)) {
+                final RetrievalEvent e = (RetrievalEvent)evt.getOldValue();
+                if (e.getRetrievedObject() instanceof Image) {
+                    final Image i = Static2DTools.removeUnusedBorder((Image)e.getRetrievedObject(), 5, 0.7);
+                    addIconToProgressPane(errorImage, i);
+                    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
+                            PrintingWidget.class,
+                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg2",
+                            new Object[] { e.getRetrievalService() }),
+                        ERROR_REASON); // NOI18N
+                }
+            }
         }
     }
 
