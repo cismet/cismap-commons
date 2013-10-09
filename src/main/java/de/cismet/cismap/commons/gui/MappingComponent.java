@@ -267,6 +267,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private BoundingBox initialBoundingBox;
 
     private final ArrayList<RepaintListener> repaintListeners = new ArrayList<RepaintListener>();
+    private boolean resizeEventActivated = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -318,25 +319,27 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                 @Override
                 public void componentResized(final ComponentEvent evt) {
-                    if (MappingComponent.this.delayedResizeEventTimer == null) {
-                        delayedResizeEventTimer = new Timer(RESIZE_DELAY, new ActionListener() {
+                    if (resizeEventActivated) {
+                        if (MappingComponent.this.delayedResizeEventTimer == null) {
+                            delayedResizeEventTimer = new Timer(RESIZE_DELAY, new ActionListener() {
 
-                                    @Override
-                                    public void actionPerformed(final ActionEvent e) {
-                                        delayedResizeEventTimer.stop();
-                                        delayedResizeEventTimer = null;
+                                        @Override
+                                        public void actionPerformed(final ActionEvent e) {
+                                            delayedResizeEventTimer.stop();
+                                            delayedResizeEventTimer = null;
 
-                                        // perform delayed resize:
-                                        // rescape map + move widgets + reload services
-                                        componentResizedDelayed();
-                                    }
-                                });
-                        delayedResizeEventTimer.start();
-                    } else {
-                        // perform intermediate resize:
-                        // rescape map + move widgets
-                        componentResizedIntermediate();
-                        delayedResizeEventTimer.restart();
+                                            // perform delayed resize:
+                                            // rescape map + move widgets + reload services
+                                            componentResizedDelayed();
+                                        }
+                                    });
+                            delayedResizeEventTimer.start();
+                        } else {
+                            // perform intermediate resize:
+                            // rescape map + move widgets
+                            componentResizedIntermediate();
+                            delayedResizeEventTimer.restart();
+                        }
                     }
                 }
             });
@@ -439,6 +442,28 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * If <code>resizeEventActivated</code> is true, then the mapping component makes a new query for its services, when
+     * it is resized. This happens for example if the window of the mapping component is resized. The default value for
+     * <code>resizeEventActivated</code> is true.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isResizeEventActivated() {
+        return resizeEventActivated;
+    }
+
+    /**
+     * Set <code>resizeEventActivated</code> to true so that the mapping component makes a query for its services on a
+     * resize event (Such an event is for example fired when the window of the mapping component is resized). The
+     * default value for <code>resizeEventActivated</code> is true.
+     *
+     * @param  resizeEventActivated  DOCUMENT ME!
+     */
+    public void setResizeEventActivated(final boolean resizeEventActivated) {
+        this.resizeEventActivated = resizeEventActivated;
+    }
 
     /**
      * DOCUMENT ME!
@@ -5882,7 +5907,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
     }
 }
-
 /**
  * DOCUMENT ME!
  *
