@@ -161,7 +161,6 @@ public class HeadlessMapProvider {
 
         // initial positioning of the map
         map.setAnimationDuration(0);
-        map.gotoInitialBoundingBox();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -321,7 +320,7 @@ public class HeadlessMapProvider {
         }
 
         map.setSize(correctedWidthPixels, correctedHeightPixels);
-        map.gotoBoundingBox(correctedBoundingBox, true, true, 0, true);
+        map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
         // check the minimum map scale condition
         if ((minimumScaleDenominator > 0) && (map.getScaleDenominator() < minimumScaleDenominator)) {
             if (LOG.isDebugEnabled()) {
@@ -335,7 +334,7 @@ public class HeadlessMapProvider {
                     bb.getY2(),
                     boundingBox.getSrs(),
                     boundingBox.isMetric());
-            map.gotoBoundingBox(correctedBoundingBox, true, true, 0, true);
+            map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
         }
 
         // check if we have to round up the scale to a certain precision
@@ -355,7 +354,7 @@ public class HeadlessMapProvider {
                     bb.getY2(),
                     boundingBox.getSrs(),
                     boundingBox.isMetric());
-            map.gotoBoundingBox(correctedBoundingBox, true, true, 0, true);
+            map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
         }
 
         imgScaleDenominator = map.getScaleDenominator();
