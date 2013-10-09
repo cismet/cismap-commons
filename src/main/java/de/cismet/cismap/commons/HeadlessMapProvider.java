@@ -28,16 +28,21 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.raster.wms.AbstractWMS;
+import de.cismet.cismap.commons.raster.wms.AbstractWMSServiceLayer;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
+import java.util.Collections;
+import java.util.TreeMap;
 
 /**
  * DOCUMENT ME!
@@ -162,6 +167,61 @@ public class HeadlessMapProvider {
 
         // initial positioning of the map
         map.setAnimationDuration(0);
+    }
+    
+     /**
+     * Creates a HeadlessMapProvider and adds the raster layers and feature layers from the mapping
+     * component to it.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static HeadlessMapProvider createHeadlessMapProviderAndAddLayers(MappingComponent mappingComponent) {
+        HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
+
+        // Raster Services
+        final TreeMap rasterServices = mappingComponent.getMappingModel().getRasterServices();
+        final List positionsRaster = new ArrayList(rasterServices.keySet());
+        Collections.sort(positionsRaster);
+
+        for (final Object position : positionsRaster) {
+            boolean addable = false;
+            final Object rasterService = rasterServices.get(position);
+            if ((rasterService instanceof RetrievalServiceLayer)
+                        && ((RetrievalServiceLayer)rasterService).isEnabled()) {
+                if ((rasterService instanceof AbstractWMSServiceLayer)
+                            && ((AbstractWMSServiceLayer)rasterService).isVisible()) {
+                    addable = true;
+                } else if ((rasterService instanceof AbstractWMS) && ((AbstractWMS)rasterService).isVisible()) {
+                    addable = true;
+                } else if ((rasterService instanceof AbstractFeatureService)
+                            && ((AbstractFeatureService)rasterService).isVisible()) {
+                    addable = true;
+                }
+            }
+            if (addable) {
+                headlessMapProvider.addLayer((RetrievalServiceLayer)rasterService);
+            } else {
+                LOG.warn(
+                    "Layer can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
+            }
+        }
+
+        // Feature Services
+        final TreeMap featureServices = mappingComponent.getMappingModel().getFeatureServices();
+        final List positionsFeatures = new ArrayList(featureServices.keySet());
+        Collections.sort(positionsFeatures);
+
+        for (final Object position : positionsFeatures) {
+            final Object featureService = featureServices.get(position);
+            if (featureService instanceof RetrievalServiceLayer) {
+                headlessMapProvider.addLayer((RetrievalServiceLayer)featureService);
+            } else {
+                LOG.warn(
+                    "Feature can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
+            }
+        }
+
+        return headlessMapProvider;
     }
 
     //~ Methods ----------------------------------------------------------------
