@@ -66,8 +66,6 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // private final WKTReader reader;
     protected Map<String, LinkedList<Style>> styles;
 
-    public String layerName = null;
-
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -117,6 +115,11 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      */
     protected synchronized void setInterruptedNotAllowed() {
         isInterruptedAllowed = false;
+    }
+
+    @Override
+    public void setLayerName(final String layerName) {
+        this.layerName = layerName;
     }
 
     @Override
