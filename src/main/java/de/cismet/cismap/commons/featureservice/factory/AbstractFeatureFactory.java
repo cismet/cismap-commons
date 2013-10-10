@@ -68,8 +68,6 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     protected Map<String, LinkedList<Style>> styles;
     private volatile boolean isInterruptedAllowed = true;
 
-    public String layerName = null;
-
     //~ Constructors -----------------------------------------------------------
 
     /**
