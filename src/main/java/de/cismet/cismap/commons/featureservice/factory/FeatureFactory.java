@@ -164,6 +164,7 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      */
     FeatureFactory clone();
     //J+
+
     /**
      * DOCUMENT ME!
      *
