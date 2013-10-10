@@ -156,6 +156,7 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      */
     FeatureFactory clone();
     //J+
+
     /**
      * DOCUMENT ME!
      *
@@ -178,7 +179,7 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      * @return  DOCUMENT ME!
      */
     int getFeatureCount(BoundingBox bb);
-
+    
     //~ Inner Classes ----------------------------------------------------------
 
     /**
