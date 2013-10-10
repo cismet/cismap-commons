@@ -80,7 +80,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
 
                     @Override
                     public QName getName() {
-                        return new QName("Feature");// for demo only
+                        return new QName("Feature"); // for demo only
                     }
                 };
         }

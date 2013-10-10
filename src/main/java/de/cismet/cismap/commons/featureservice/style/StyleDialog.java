@@ -2168,7 +2168,11 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         jPanel4.add(jScrollPane2, gridBagConstraints);
 
         chkCustomSLD.setSelected(true);
-        chkCustomSLD.setText("Einfacher Style");
+        chkCustomSLD.setText("Expertenmodus");
+        chkCustomSLD.setToolTipText("");
+        chkCustomSLD.setDisabledSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/icon-unlock.png"))); // NOI18N
+        chkCustomSLD.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon-unlock.png")));                 // NOI18N
+        chkCustomSLD.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/icon-lock.png")));           // NOI18N
         chkCustomSLD.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
@@ -2258,7 +2262,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         if (!chkCustomSLD.isSelected()) {
             final int i = JOptionPane.showConfirmDialog(
                     this,
-                    "Das Verlassen des einfachen Modus übernimmt die Füllfarbe,\nLinienfarbe und Linienstaerke aus dem einfachen Stil",
+                    "Das aktivieren des Expertenmodus übernimmt die Füllfarbe,\nLinienfarbe und Linienstaerke aus dem einfachen Stil",
                     "Sind Sie sicher?",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.WARNING_MESSAGE);
