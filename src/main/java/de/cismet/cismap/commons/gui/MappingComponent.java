@@ -763,8 +763,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void addStickyNode(final PSticky pn) {
         // if(DEBUG)log.debug("addStickyNode:" + pn);
-        if(pn != null)
+        if (pn != null) {
             stickyPNodes.add(pn);
+        }
     }
 
     /**
