@@ -1,12 +1,10 @@
-/**
- * *************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- * 
-* ... and it just works.
- * 
-***************************************************
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -112,12 +110,13 @@ import de.cismet.cismap.commons.gui.piccolo.PSticky;
 /**
  * Default implementation of a FeatureServiceFeature.
  *
- * @author Pascal Dihé
- * @version $Revision$, $Date$
+ * @author   Pascal Dihé
+ * @version  $Revision$, $Date$
  */
 public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
 
     //~ Static fields/initializers ---------------------------------------------
+
     protected static final String CLASS_ID = "class_id";
     protected static final String GEOMETRIE = "geo_field";
     protected static final String OBJECT_ID = "object_id";
@@ -125,6 +124,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     private static AbstractDefaultGeometry defaultGeom = new DefaultPoint(null, null, null, new double[] { 0.0, 0.0 });
 
     //~ Instance fields --------------------------------------------------------
+
     protected Logger logger = Logger.getLogger(this.getClass());
     protected XPathEvaluator<Feature> evaluator = new DeegreeEvaluator();
     protected List<org.deegree.style.se.unevaluated.Style> styles;
@@ -143,23 +143,21 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     //~ Constructors -----------------------------------------------------------
+
     /**
-     * Creates a new uninitialised instance of DefaultFeatureServiceFeature. The
-     * id is set to -1, editable is set to false, canBeSelected is set to true,
-     * hiding is set to false, any other properties set to null.
+     * Creates a new uninitialised instance of DefaultFeatureServiceFeature. The id is set to -1, editable is set to
+     * false, canBeSelected is set to true, hiding is set to false, any other properties set to null.
      */
     public DefaultFeatureServiceFeature() {
     }
 
     /**
-     * Initialises a new DefaultFeatureServiceFeature instance from an existing
-     * FeatureServiceFeature object. The properties of the FeatureServiceFeature
-     * will be cloned.
+     * Initialises a new DefaultFeatureServiceFeature instance from an existing FeatureServiceFeature object. The
+     * properties of the FeatureServiceFeature will be cloned.
      *
-     * @param feature layerProperties LayerProperties to be used for
-     * initialisation
+     * @param  feature  layerProperties LayerProperties to be used for initialisation
      *
-     * @see FeatureServiceFeature#clone(Object)
+     * @see    FeatureServiceFeature#clone(Object)
      */
     public DefaultFeatureServiceFeature(final FeatureServiceFeature feature) {
         this.setId(id);
@@ -169,7 +167,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         this.setEditable(feature.isEditable());
         this.setCanBeSelected(feature.canBeSelected());
         if (feature instanceof DefaultFeatureServiceFeature) {
-            styles = ((DefaultFeatureServiceFeature) feature).styles;
+            styles = ((DefaultFeatureServiceFeature)feature).styles;
         }
 
         if ((feature.getProperties() != null) && (feature.getProperties().size() > 0)) {
@@ -178,23 +176,21 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         }
 
         if (feature.getGeometry() != null) {
-            this.setGeometry((Geometry) feature.getGeometry().clone());
+            this.setGeometry((Geometry)feature.getGeometry().clone());
         }
 
         if (feature.getLayerProperties() != null) {
-            this.setLayerProperties((LayerProperties) feature.getLayerProperties().clone());
+            this.setLayerProperties((LayerProperties)feature.getLayerProperties().clone());
         }
     }
 
     /**
-     * Creates a new initialised instance of DefaultFeatureServiceFeature.
-     * Editable is set to false, canBeSelected is set to true, hiding is set to
-     * false.
+     * Creates a new initialised instance of DefaultFeatureServiceFeature. Editable is set to false, canBeSelected is
+     * set to true, hiding is set to false.
      *
-     * @param id the unique (within the layer or the feature collection) id of
-     * the feature
-     * @param geometry the geometry of the feature
-     * @param layerProperties (shared) layer properties object
+     * @param  id               the unique (within the layer or the feature collection) id of the feature
+     * @param  geometry         the geometry of the feature
+     * @param  layerProperties  (shared) layer properties object
      */
     public DefaultFeatureServiceFeature(final int id, final Geometry geometry, final LayerProperties layerProperties) {
         this.setId(id);
@@ -205,10 +201,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Creates a new DefaultFeatureServiceFeature object.
      *
-     * @param id DOCUMENT ME!
-     * @param geometry DOCUMENT ME!
-     * @param layerProperties DOCUMENT ME!
-     * @param styles DOCUMENT ME!
+     * @param  id               DOCUMENT ME!
+     * @param  geometry         DOCUMENT ME!
+     * @param  layerProperties  DOCUMENT ME!
+     * @param  styles           DOCUMENT ME!
      */
     public DefaultFeatureServiceFeature(final int id,
             final Geometry geometry,
@@ -231,11 +227,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     }
 
     /**
-     * Fügt das übergebene Objekt dem PropertyContainer unter gegebenem Namen
-     * ein.
+     * Fügt das übergebene Objekt dem PropertyContainer unter gegebenem Namen ein.
      *
-     * @param propertyName Name und gleichzeitig Schlüssel
-     * @param property einzufügendes Objekt
+     * @param  propertyName  Name und gleichzeitig Schlüssel
+     * @param  property      einzufügendes Objekt
      */
     @Override
     public void addProperty(final String propertyName, final Object property) {
@@ -245,7 +240,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param map DOCUMENT ME!
+     * @param  map  DOCUMENT ME!
      */
     public void addProperties(final Map<String, Object> map) {
         container.putAll(map);
@@ -254,7 +249,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @return HashMap mit Properties
+     * @return  HashMap mit Properties
      */
     @Override
     public HashMap getProperties() {
@@ -264,7 +259,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Ersetzt den alten PropertieContainer mit einer neuen HashMap.
      *
-     * @param properties neue Hashmap
+     * @param  properties  neue Hashmap
      */
     @Override
     public void setProperties(final HashMap properties) {
@@ -274,9 +269,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Liefert die dem Namen zugeordnete Property.
      *
-     * @param propertyName Name des gesuchten Objekts
+     * @param   propertyName  Name des gesuchten Objekts
      *
-     * @return Objekt aus der Hashmap
+     * @return  Objekt aus der Hashmap
      */
     @Override
     public Object getProperty(final String propertyName) {
@@ -286,7 +281,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Entfernt die dem Namen zugeordnete Property aus der Hashmap.
      *
-     * @param propertyName Name des zu löschenden Objekts
+     * @param  propertyName  Name des zu löschenden Objekts
      */
     @Override
     public void removeProperty(final String propertyName) {
@@ -296,7 +291,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Liefert die ID des DefaultWFSFeatures.
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     @Override
     public int getId() {
@@ -306,7 +301,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Setzt die ID des DefaultWFSFeatures neu.
      *
-     * @param id neue ID
+     * @param  id  neue ID
      */
     @Override
     public void setId(final int id) {
@@ -316,7 +311,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Liefert den ID-Ausdruck des DefaultWFSFeatures.
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     @Override
     public String getIdExpression() {
@@ -326,7 +321,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * Setzt den ID-Ausdruck des DefaultWFSFeatures neu.
      *
-     * @param idExpression neuer ID-Ausdruck
+     * @param  idExpression  neuer ID-Ausdruck
      */
     @Override
     public void setIdExpression(final String idExpression) {
@@ -374,7 +369,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setLinePaint(final Paint linePaint) {
-        this.getStyle().setLineColor((Color) linePaint);
+        this.getStyle().setLineColor((Color)linePaint);
         this.getStyle().setDrawLine(true);
     }
 
@@ -423,7 +418,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setFillingPaint(final Paint fillingStyle) {
-        this.getStyle().setFillColor((Color) fillingStyle);
+        this.getStyle().setFillColor((Color)fillingStyle);
         this.getStyle().setDrawFill(true);
     }
 
@@ -713,7 +708,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setPrimaryAnnotationPaint(final Paint primaryAnnotationPaint) {
-        this.getStyle().setFontColor((Color) primaryAnnotationPaint);
+        this.getStyle().setFontColor((Color)primaryAnnotationPaint);
     }
 
     /**
@@ -819,7 +814,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     protected Style getStyle() {
         return this.layerProperties.getStyle();
