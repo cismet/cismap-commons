@@ -68,8 +68,6 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     protected Map<String, LinkedList<Style>> styles;
     protected String layerName = null;
 
-    public String layerName = null;
-
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -122,6 +120,11 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     }
 
     
+    @Override
+    public void setLayerName(final String layerName) {
+        this.layerName = layerName;
+    }
+
     @Override
     public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
         this.styles = styles;
