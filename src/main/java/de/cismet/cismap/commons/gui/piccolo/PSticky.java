@@ -16,7 +16,25 @@ import edu.umd.cs.piccolo.PNode;
  * @version  $Revision$, $Date$
  */
 public interface PSticky {
-    public boolean getVisible();
-    public PNode getParent();
-    public void setScale(final double scale);
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean getVisible();
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    PNode getParent();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  scale  DOCUMENT ME!
+     */
+    void setScale(final double scale);
 }
