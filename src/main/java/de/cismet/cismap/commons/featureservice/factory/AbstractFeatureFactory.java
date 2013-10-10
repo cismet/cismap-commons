@@ -43,6 +43,8 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
 
     //~ Instance fields --------------------------------------------------------
 
+    public String layerName = null;
+
     // -1 = not id available
     protected int ID = -1;
     protected Logger logger = Logger.getLogger(this.getClass());
@@ -57,8 +59,6 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // private BoundingBox diff = null;
     // private final WKTReader reader;
     protected Map<String, LinkedList<Style>> styles;
-
-    public String layerName = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -82,6 +82,11 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public void setLayerName(final String layerName) {
+        this.layerName = layerName;
+    }
 
     @Override
     public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
