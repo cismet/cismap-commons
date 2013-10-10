@@ -83,6 +83,29 @@
         </repository>
     </repositories>
     
+    <pluginRepositories>
+        <pluginRepository>
+                <!-- Plugins needed to create exe files -->
+                <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                </snapshots>
+                <id>plugins-snapshots.artifactory.wikisquare.de</id>
+                <url>http://artifactory.wikisquare.de/artifactory/plugins-snapshots
+                </url>
+        </pluginRepository>
+
+        <pluginRepository>
+                <!-- Plugins needed to create exe files -->
+                <snapshots>
+                        <enabled>false</enabled>
+                </snapshots>
+                <id>plugins-releases.artifactory.wikisquare.de</id>
+                <url>http://artifactory.wikisquare.de/artifactory/plugins-releases
+                </url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <dependencies>
         <dependency>
             <groupId>de.cismet.commons</groupId>
