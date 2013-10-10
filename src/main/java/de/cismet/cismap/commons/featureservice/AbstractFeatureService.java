@@ -34,7 +34,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 
@@ -125,7 +124,6 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected FeatureFactory featureFactory = null;
     String sldDefinition;
     final XMLInputFactory factory = XMLInputFactory.newInstance();
-
     Legends legends = new Legends();
     private boolean initialisationError = false;
     private Element initElement = null;
@@ -790,6 +788,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     @Override
     public void setName(final String name) {
         this.name = name;
+        if (featureFactory != null) {
+            featureFactory.setLayerName(name);
+        }
     }
 
     /**
@@ -1264,22 +1265,81 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     @Override
-    public Pair<Integer, Integer> getLegendSize() {
+    public Pair<Integer, Integer> getLegendSize(final int nr) {
         if (featureFactory instanceof AbstractFeatureFactory) {
             final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            return legends.getLegendSize((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0));
+            return getLegendSize((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0));
         }
         return null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   style  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Pair<Integer, Integer> getLegendSize(final org.deegree.style.se.unevaluated.Style style) {
+        return legends.getLegendSize(style);
+    }
+
+    @Override
+    public Pair<Integer, Integer> getLegendSize() {
+        return getLegendSize(0);
+    }
+
+    @Override
+    public List<Pair<Integer, Integer>> getLegendSizes() {
+        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
+        final List<Pair<Integer, Integer>> sizes = new LinkedList<Pair<Integer, Integer>>();
+        for (final org.deegree.style.se.unevaluated.Style style : styles) {
+            sizes.add(getLegendSize(style));
+        }
+        return sizes;
+    }
+
     @Override
     public void getLegend(final int width, final int height, final Graphics2D g2d) {
+        getLegend(0, width, height, g2d);
+    }
+
+    @Override
+    public void getLegend(final int nr, final int width, final int height, final Graphics2D g2d) {
         if (featureFactory instanceof AbstractFeatureFactory) {
             final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            legends.paintLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName),
+            getLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0),
                 width,
                 height,
                 g2d);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  style   DOCUMENT ME!
+     * @param  width   DOCUMENT ME!
+     * @param  height  DOCUMENT ME!
+     * @param  g2d     DOCUMENT ME!
+     */
+    private void getLegend(final org.deegree.style.se.unevaluated.Style style,
+            final int width,
+            final int height,
+            final Graphics2D g2d) {
+        legends.paintLegend(style,
+            width,
+            height,
+            g2d);
+    }
+
+    @Override
+    public void getLegends(final List<Pair<Integer, Integer>> sizes, final Graphics2D[] g2d) {
+        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
+        for (int i = 0; i < styles.size(); i++) {
+            legends.paintLegend(styles.get(i), sizes.get(i).first, sizes.get(i).second, g2d[i]);
         }
     }
 
