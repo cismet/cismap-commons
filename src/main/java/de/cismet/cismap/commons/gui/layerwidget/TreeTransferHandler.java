@@ -301,7 +301,7 @@ class TreeTransferHandler extends TransferHandler {
 
                             final DocumentFeatureService dfs = DocumentFeatureServiceFactory
                                         .createDocumentFeatureService(currentFile);
-                            activeLayerModel.addLayer(dfs, index);
+                            activeLayerModel.addLayer(dfs, activeLayerModel.layers.size() - index);
 
                             if (dfs instanceof ShapeFileFeatureService) {
                                 new Thread(new Runnable() {
@@ -359,12 +359,12 @@ class TreeTransferHandler extends TransferHandler {
                         final SlidableWMSServiceLayerGroup l = new SlidableWMSServiceLayerGroup(v);
                         l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
                         l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
-                        activeLayerModel.addLayer(l, index);
+                        activeLayerModel.addLayer(l, activeLayerModel.layers.size() - index);
                     } else {
                         final WMSServiceLayer l = new WMSServiceLayer(v);
                         if (l.getWMSLayers().size() > 0) {
                             l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
-                            activeLayerModel.addLayer(l, index);
+                            activeLayerModel.addLayer(l, activeLayerModel.layers.size() - index);
                         }
                         l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
                         l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
