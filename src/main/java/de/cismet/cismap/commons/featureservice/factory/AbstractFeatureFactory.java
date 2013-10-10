@@ -65,8 +65,6 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // private final WKTReader reader;
     protected Map<String, LinkedList<Style>> styles;
 
-    public String layerName = null;
-
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -129,6 +127,11 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         for (final FT feature : lastCreatedfeatureVector) {
             feature.setSLDStyles(getStyle(layerName));
         }
+    }
+
+    @Override
+    public void setLayerName(final String layerName) {
+        this.layerName = layerName;
     }
 
     @Override
