@@ -45,6 +45,8 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
 
     //~ Instance fields --------------------------------------------------------
 
+    public String layerName = null;
+
     // -1 = not id available
     protected int ID = -1;
     protected Logger logger = Logger.getLogger(this.getClass());
@@ -111,6 +113,11 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      */
     protected synchronized void setInterruptedNotAllowed() {
         isInterruptedAllowed = false;
+    }
+
+    @Override
+    public void setLayerName(final String layerName) {
+        this.layerName = layerName;
     }
 
     @Override
