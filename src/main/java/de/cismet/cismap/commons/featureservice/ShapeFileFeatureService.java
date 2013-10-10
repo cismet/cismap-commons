@@ -13,6 +13,9 @@ package de.cismet.cismap.commons.featureservice;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.commons.utils.Pair;
+import org.deegree.rendering.r2d.legends.Legends;
+
 import org.jdom.Element;
 
 import java.awt.Graphics2D;
@@ -32,9 +35,6 @@ import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
-import java.awt.Graphics2D;
-import org.deegree.commons.utils.Pair;
-import org.deegree.rendering.r2d.legends.Legends;
 
 /**
  * DOCUMENT ME!
