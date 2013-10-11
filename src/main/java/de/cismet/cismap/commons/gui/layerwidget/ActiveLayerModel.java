@@ -294,7 +294,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                                     + currentLayer.hasErrors()
                                     + ")"); // NOI18N
                     }
-                    // currentLayer.setProgress(0);
+                    currentLayer.setProgress(0);
 
                     fireProgressChanged(currentLayer);
 
@@ -410,7 +410,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      * @param  treePath  DOCUMENT ME!
      */
     public void removeLayer(final Object layer, final TreePath treePath) {
-        if (!treePath.getParentPath().getLastPathComponent().equals(getRoot())) {
+        if ((treePath != null) && !treePath.getParentPath().getLastPathComponent().equals(getRoot())) {
             final Object parent = treePath.getParentPath().getLastPathComponent();
 
             if (parent instanceof LayerCollection) {
@@ -1344,7 +1344,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     public void fireProgressChanged(final ServiceLayer sl) {
         final int pos = layers.indexOf(sl);
         if (pos >= 0) {
-//            this.fireTreeNodesChanged(this, new Object[] { root, sl }, null, null);
+            this.fireTreeNodesChanged(this, new Object[] { root, sl }, null, null);
             fireTableChanged(null);
         }
     }
@@ -1611,7 +1611,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                                     if (layer instanceof ActiveLayerModelStore) {
                                         ((ActiveLayerModelStore)layer).setActiveLayerModel(ActiveLayerModel.this);
                                     }
-                                    addLayer(layer, 0);
+                                    addLayer(layer, layers.size());
                                 } catch (IllegalArgumentException schonVorhanden) {
                                     log.warn(
                                         "Layer '"

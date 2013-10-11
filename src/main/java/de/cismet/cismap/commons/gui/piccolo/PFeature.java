@@ -1011,7 +1011,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         && ((originalXArr.length - 1) >= coordPosition))
                     || ((getFeature().getGeometry() instanceof LineString) && (originalXArr != null)
                         && (originalXArr.length > coordPosition)
-                        && (originalXArr.length > 2))) {
+                        && (originalXArr.length >= 2))) {
             final Coordinate[] newCoordArr = new Coordinate[originalCoordArr.length + 1];
             final float[] newXArr = new float[originalXArr.length + 1];
             final float[] newYArr = new float[originalYArr.length + 1];

@@ -18,7 +18,6 @@ import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.SystemFlavorMap;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DragSource;
@@ -848,7 +847,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         }
 
                         data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                    } catch (UnsupportedFlavorException e) {
+                    } catch (Exception e) {
                         // transferable.getTransferData(DataFlavor.javaFileListFlavor) will throw an
                         // UnsupportedFlavorException on Linux
                         if (data == null) {
