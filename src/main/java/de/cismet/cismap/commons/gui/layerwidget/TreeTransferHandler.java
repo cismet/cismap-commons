@@ -13,14 +13,22 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTargetDropEvent;
+
+import java.io.File;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -41,13 +49,8 @@ import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
+
 import de.cismet.tools.gui.StaticSwingTools;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTargetDropEvent;
-import java.io.File;
-import java.util.Collection;
-import javax.swing.JOptionPane;
-import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -66,8 +69,9 @@ class TreeTransferHandler extends TransferHandler {
     private DataFlavor nodesFlavor;
     private DataFlavor[] flavors = new DataFlavor[1];
     private List<TreePath> nodesToRemove;
-    private DataFlavor fromCapabilityWidget = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType, "SelectionAndCapabilities"); // NOI18N
-    
+    private DataFlavor fromCapabilityWidget = new DataFlavor(
+            DataFlavor.javaJVMLocalObjectMimeType,
+            "SelectionAndCapabilities"); // NOI18N
 
     //~ Constructors -----------------------------------------------------------
 
@@ -189,7 +193,7 @@ class TreeTransferHandler extends TransferHandler {
         if (!canImport(support)) {
             return false;
         }
-        
+
         // Get drop location info.
         final JTree.DropLocation dl = (JTree.DropLocation)support.getDropLocation();
         final int childIndex = dl.getChildIndex();
@@ -202,7 +206,7 @@ class TreeTransferHandler extends TransferHandler {
         if (childIndex == -1) { // DropMode.ON
             index = model.getChildCount(parent);
         }
-        
+
         if (support.isDataFlavorSupported(nodesFlavor)) {
             // Es handelt sich um eine MOVE Aktion --> Die Drag Operation wurde aus dem Themenbaum gestartet
             TreePath[] nodes = null;
@@ -242,8 +246,19 @@ class TreeTransferHandler extends TransferHandler {
             return dropPerformed(support, model, index);
         }
     }
-    
-    private boolean dropPerformed(final TransferHandler.TransferSupport support, ActiveLayerModel activeLayerModel, int index) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   support           DOCUMENT ME!
+     * @param   activeLayerModel  DOCUMENT ME!
+     * @param   index             DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean dropPerformed(final TransferHandler.TransferSupport support,
+            final ActiveLayerModel activeLayerModel,
+            final int index) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Drop with this flavors:" + support.getDataFlavors()); // NOI18N
         }
@@ -254,7 +269,7 @@ class TreeTransferHandler extends TransferHandler {
                 final Transferable transferable = support.getTransferable();
                 if (support.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Drop is unix drop");                                // NOI18N
+                        LOG.debug("Drop is unix drop");                      // NOI18N
                     }
 
                     try {
@@ -315,7 +330,7 @@ class TreeTransferHandler extends TransferHandler {
                                             }
                                         }
                                     }).start();
-                                
+
                                 return true;
                             }
                         } catch (final Exception ex) {
@@ -330,8 +345,7 @@ class TreeTransferHandler extends TransferHandler {
             }
         }
 
-        
-        return false; 
+        return false;
     }
 
     @Override

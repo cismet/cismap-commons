@@ -203,7 +203,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
 
         registerRetrievalServiceLayer(layer);
-        
+
         // Das eigentliche Hinzufuegen des neuen Layers
         layers.add(index, layer);
         if (DEBUG) {
@@ -218,8 +218,12 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             null);
     }
 
-    
-    public void registerRetrievalServiceLayer(RetrievalServiceLayer layer) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layer  DOCUMENT ME!
+     */
+    public void registerRetrievalServiceLayer(final RetrievalServiceLayer layer) {
         final RetrievalServiceLayer currentLayer = layer;
         final ActiveLayerEvent ale = new ActiveLayerEvent();
         ale.setLayer(currentLayer);
@@ -344,9 +348,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             if (log.isDebugEnabled()) {
                 log.debug("RetrievalListener added on layer '" + currentLayer.getName() + "'"); // NOI18N
             }
-        }    
+        }
     }
-    
+
     /**
      * DOCUMENT ME!
      */
@@ -1541,7 +1545,6 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             log.error("Error during the configuration of the ActiveLayerModell", ex); // NOI18N
         }
     }
-
 
     /**
      * DOCUMENT ME!
