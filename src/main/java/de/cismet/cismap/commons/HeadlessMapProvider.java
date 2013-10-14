@@ -235,6 +235,8 @@ public class HeadlessMapProvider {
      */
     public static HeadlessMapProvider createHeadlessMapProviderAndAddLayers(final MappingComponent mappingComponent) {
         final HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
+        ((ActiveLayerModel)headlessMapProvider.getMappingComponent().getMappingModel()).setSrs(
+            mappingComponent.getMappingModel().getSrs());
 
         // Raster Services
         final TreeMap rasterServices = mappingComponent.getMappingModel().getRasterServices();
@@ -279,8 +281,6 @@ public class HeadlessMapProvider {
             }
         }
 
-        ((ActiveLayerModel)headlessMapProvider.getMappingComponent().getMappingModel()).setSrs(
-            mappingComponent.getMappingModel().getSrs());
         return headlessMapProvider;
     }
 
