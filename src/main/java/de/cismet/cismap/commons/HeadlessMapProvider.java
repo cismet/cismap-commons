@@ -249,6 +249,8 @@ public class HeadlessMapProvider {
             }
         }
 
+        ((ActiveLayerModel)headlessMapProvider.getMappingComponent().getMappingModel()).setSrs(
+            mappingComponent.getMappingModel().getSrs());
         return headlessMapProvider;
     }
     
@@ -314,6 +316,15 @@ public class HeadlessMapProvider {
             headlessMapProvider.addFeature(f);
         }
         return headlessMapProvider;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public MappingComponent getMappingComponent() {
+        return map;
     }
 
     /**
