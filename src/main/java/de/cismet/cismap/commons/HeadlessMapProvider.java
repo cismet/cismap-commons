@@ -11,15 +11,17 @@
  */
 package de.cismet.cismap.commons;
 
+import java.awt.AlphaComposite;
+import java.awt.Composite;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
@@ -30,17 +32,14 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.raster.wms.AbstractWMS;
-import de.cismet.cismap.commons.raster.wms.AbstractWMSServiceLayer;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
-import de.cismet.cismap.commons.retrieval.RepaintEvent;
-import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
+import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
 
 /**
@@ -78,7 +77,7 @@ public class HeadlessMapProvider {
 
         //~ Enum constants -----------------------------------------------------
 
-        TIP, INFO, SUCCESS, EXPERT, WARN, ERROR, ERROR_REASON, UNLOCKED
+        TIP, INFO, SUCCESS, EXPERT, WARN, ERROR, ERROR_REASON
     }
 
     /**
@@ -111,7 +110,6 @@ public class HeadlessMapProvider {
      * Creates a new HeadlessMapProvider object.
      */
     public HeadlessMapProvider() {
-        map.setResizeEventActivated(false);
         map.setInternalLayerWidgetAvailable(false);
 
         if (CismapBroker.getInstance().getMappingComponent() != null) {
@@ -166,65 +164,11 @@ public class HeadlessMapProvider {
 
         // initial positioning of the map
         map.setAnimationDuration(0);
+        map.gotoInitialBoundingBox();
+        map.unlock();
     }
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * Creates a HeadlessMapProvider and adds the raster layers and feature layers from the mapping component to it.
-     *
-     * @param   mappingComponent  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static HeadlessMapProvider createHeadlessMapProviderAndAddLayers(final MappingComponent mappingComponent) {
-        final HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
-
-        // Raster Services
-        final TreeMap rasterServices = mappingComponent.getMappingModel().getRasterServices();
-        final List positionsRaster = new ArrayList(rasterServices.keySet());
-        Collections.sort(positionsRaster);
-
-        for (final Object position : positionsRaster) {
-            boolean addable = false;
-            final Object rasterService = rasterServices.get(position);
-            if ((rasterService instanceof RetrievalServiceLayer)
-                        && ((RetrievalServiceLayer)rasterService).isEnabled()) {
-                if ((rasterService instanceof AbstractWMSServiceLayer)
-                            && ((AbstractWMSServiceLayer)rasterService).isVisible()) {
-                    addable = true;
-                } else if ((rasterService instanceof AbstractWMS) && ((AbstractWMS)rasterService).isVisible()) {
-                    addable = true;
-                } else if ((rasterService instanceof AbstractFeatureService)
-                            && ((AbstractFeatureService)rasterService).isVisible()) {
-                    addable = true;
-                }
-            }
-            if (addable) {
-                headlessMapProvider.addLayer((RetrievalServiceLayer)rasterService);
-            } else {
-                LOG.warn(
-                    "Layer can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
-            }
-        }
-
-        // Feature Services
-        final TreeMap featureServices = mappingComponent.getMappingModel().getFeatureServices();
-        final List positionsFeatures = new ArrayList(featureServices.keySet());
-        Collections.sort(positionsFeatures);
-
-        for (final Object position : positionsFeatures) {
-            final Object featureService = featureServices.get(position);
-            if (featureService instanceof RetrievalServiceLayer) {
-                headlessMapProvider.addLayer((RetrievalServiceLayer)featureService);
-            } else {
-                LOG.warn(
-                    "Feature can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
-            }
-        }
-
-        return headlessMapProvider;
-    }
 
     /**
      * Adds a PropertyChangeListener that will notify about the progress of the map building.
@@ -381,7 +325,7 @@ public class HeadlessMapProvider {
         }
 
         map.setSize(correctedWidthPixels, correctedHeightPixels);
-        map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
+        map.gotoBoundingBox(correctedBoundingBox, true, true, 0, true);
         // check the minimum map scale condition
         if ((minimumScaleDenominator > 0) && (map.getScaleDenominator() < minimumScaleDenominator)) {
             if (LOG.isDebugEnabled()) {
@@ -395,7 +339,7 @@ public class HeadlessMapProvider {
                     bb.getY2(),
                     boundingBox.getSrs(),
                     boundingBox.isMetric());
-            map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
+            map.gotoBoundingBox(correctedBoundingBox, true, true, 0, true);
         }
 
         // check if we have to round up the scale to a certain precision
@@ -415,7 +359,7 @@ public class HeadlessMapProvider {
                     bb.getY2(),
                     boundingBox.getSrs(),
                     boundingBox.isMetric());
-            map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
+            map.gotoBoundingBox(correctedBoundingBox, true, true, 0, true);
         }
 
         imgScaleDenominator = map.getScaleDenominator();
@@ -429,9 +373,12 @@ public class HeadlessMapProvider {
                 mappingModel.getFeatureServices().size()
                         + mappingModel.getMapServices().size());
 
-        map.unlockWithoutReload();
         if (mappingModel.getMapServices().size() > 0) {
-            map.queryServices();
+            map.queryServicesIndependentFromMap(
+                correctedWidthPixels,
+                correctedHeightPixels,
+                correctedBoundingBox,
+                listener); // evtl angepasst
         } else {
             listener.createImageFromFeatures();
         }
@@ -548,17 +495,18 @@ public class HeadlessMapProvider {
      *
      * @version  $Revision$, $Date$
      */
-    class HeadlessMapProviderRetrievalListener implements Future<Image>, RepaintListener {
+    class HeadlessMapProviderRetrievalListener implements Future<Image>, RetrievalListener {
 
         //~ Instance fields ----------------------------------------------------
 
         int imageWidth;
         int imageHeight;
-        private HashSet<RetrievalService> services;
-        private HashSet<Object> results;
-        private HashSet<Object> erroneous;
+        private TreeMap<Integer, RetrievalService> services;
+        private TreeMap<Integer, Object> results;
+        private TreeMap<Integer, Object> erroneous;
         private boolean cancel = false;
         private volatile boolean done = false;
+        private Image image;
         private final ReentrantLock lock = new ReentrantLock();
         private Condition condition = lock.newCondition();
         private List<PropertyChangeListener> listener = new ArrayList<PropertyChangeListener>();
@@ -580,19 +528,17 @@ public class HeadlessMapProvider {
                 final int serviceCount) {
             this.imageWidth = imageWidth;
             this.imageHeight = imageHeight;
-            services = new HashSet<RetrievalService>();
-            results = new HashSet<Object>();
-            erroneous = new HashSet<Object>();
+            services = new TreeMap<Integer, RetrievalService>();
+            results = new TreeMap<Integer, Object>();
+            erroneous = new TreeMap<Integer, Object>();
             this.listener = listener;
             this.serviceCount = serviceCount;
-            map.addRepaintListener(this);
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        public synchronized void repaintStart(final RepaintEvent repaintEvent) {
-            final RetrievalEvent e = repaintEvent.getRetrievalEvent();
+        public synchronized void retrievalStarted(final RetrievalEvent e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("retrievalStarted" + e.getRetrievalService()); // NOI18N
             }
@@ -614,13 +560,27 @@ public class HeadlessMapProvider {
             }
 
             if (e.getRetrievalService() instanceof ServiceLayer) {
-                services.add(e.getRetrievalService());
+                final int num = ((ServiceLayer)e.getRetrievalService()).getLayerPosition();
+                services.put(num, e.getRetrievalService());
             }
         }
 
         @Override
-        public void repaintError(final RepaintEvent repaintEvent) {
-            final RetrievalEvent e = repaintEvent.getRetrievalEvent();
+        public void retrievalProgress(final RetrievalEvent e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrieval progress: "
+                            + e.getPercentageDone()); // NOI18N
+            }
+
+            if (e.isInitialisationEvent()) {
+                LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
+                            + "]: retrievalProgress ignored, initialisation event"); // NOI18N
+                return;
+            }
+        }
+
+        @Override
+        public void retrievalError(final RetrievalEvent e) {
             LOG.error(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalError"); // NOI18N
 
             if (e.isInitialisationEvent()) {
@@ -633,19 +593,16 @@ public class HeadlessMapProvider {
                     PrintingWidget.class,
                     "PrintingWidget.retrievalError(RetrievalEvent).msg1",
                     new Object[] { e.getRetrievalService() }),
-                HeadlessMapProvider.NotificationLevel.ERROR); // NOI18N
+                HeadlessMapProvider.NotificationLevel.ERROR);        // NOI18N
             sendNotification(org.openide.util.NbBundle.getMessage(
                     PrintingWidget.class,
                     "PrintingWidget.retrievalError(RetrievalEvent).msg2"),
-                HeadlessMapProvider.NotificationLevel.ERROR_REASON,
-                e);                                           // NOI18N
-            repaintComplete(repaintEvent);
+                HeadlessMapProvider.NotificationLevel.ERROR_REASON); // NOI18N
+            retrievalComplete(e);
         }
 
         @Override
-        public synchronized void repaintComplete(final RepaintEvent repaintEvent) {
-            final RetrievalEvent e = repaintEvent.getRetrievalEvent();
-
+        public synchronized void retrievalComplete(final RetrievalEvent e) {
             if (LOG.isInfoEnabled()) {
                 LOG.info(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalComplete"); // NOI18N
             }
@@ -656,22 +613,22 @@ public class HeadlessMapProvider {
             }
 
             if (e.getRetrievalService() instanceof ServiceLayer) {
+                final int num = ((ServiceLayer)e.getRetrievalService()).getLayerPosition();
                 if (!e.isHasErrors()) {
-                    results.add(e.getRetrievalService());
+                    results.put(num, e.getRetrievedObject());
                     sendNotification(org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
                             "PrintingWidget.retrievalComplete(RetrievalEvent).msg",
                             new Object[] { e.getRetrievalService() }),
-                        HeadlessMapProvider.NotificationLevel.SUCCESS); // NOI18N
+                        HeadlessMapProvider.NotificationLevel.SUCCESS);          // NOI18N
                 } else {
-                    erroneous.add(e.getRetrievalService());
+                    erroneous.put(num, e);
                     if (e.getRetrievedObject() instanceof Image) {
                         sendNotification(org.openide.util.NbBundle.getMessage(
                                 PrintingWidget.class,
                                 "PrintingWidget.retrievalComplete(RetrievalEvent).msg2",
                                 new Object[] { e.getRetrievalService() }),
-                            HeadlessMapProvider.NotificationLevel.ERROR_REASON,
-                            e);                                         // NOI18N
+                            HeadlessMapProvider.NotificationLevel.ERROR_REASON); // NOI18N
                     }
                 }
             }
@@ -694,6 +651,45 @@ public class HeadlessMapProvider {
                         HeadlessMapProvider.NotificationLevel.WARN);    // NOI18N
                 }
 
+                for (final Integer i : results.keySet()) {
+                    // Transparency
+                    final RetrievalService rs = services.get(i);
+
+                    float transparency = 0f;
+                    if (rs instanceof ServiceLayer) {
+                        transparency = ((ServiceLayer)rs).getTranslucency();
+                    }
+                    final Composite alphaComp = AlphaComposite.getInstance(
+                            AlphaComposite.SRC_OVER,
+                            transparency);
+                    final Object o = results.get(i);
+
+                    LOG.info("processing results of type '" + ((o != null) ? o.getClass().getSimpleName() : " null ")
+                                + "' from service #" + i
+                                + " '"
+                                + rs + "' (" + ((rs != null) ? rs.getClass().getSimpleName() : null) + ")"); // NOI18N
+                    if (o instanceof Image) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("service '" + rs + "' returned an image, must be a raster service");   // NOI18N
+                        }
+                        final Image image2add = (Image)o;
+                        addImage(image2add, alphaComp);
+                    } else if (Collection.class.isAssignableFrom(o.getClass())) {
+                        final Collection featureCollection = (Collection)o;
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("service '" + rs + "' returned a collection, must be a feature service ("
+                                        + featureCollection.size() + " features retrieved)");                // NOI18N
+                        }
+                        final Image image2add = map.getImageOfFeatures(
+                                featureCollection,
+                                imageWidth,
+                                imageHeight);
+                        addImage(image2add, null);
+                    } else {
+                        LOG.error("unknown results retrieved: " + o.getClass().getSimpleName());             // NOI18N
+                    }
+                }
+
                 addFeaturesToTopLevelLayer();
 
                 if (erroneous.size() < results.size()) {
@@ -708,9 +704,10 @@ public class HeadlessMapProvider {
                         HeadlessMapProvider.NotificationLevel.INFO);    // NOI18N
                 }
 
-                LOG.info("Following layers were painted: " + results); // NOI18N
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("services:" + services);                 // NOI18N
+                    LOG.debug("ALLE FERTIG");          // NOI18N
+                    LOG.debug("results:" + results);   // NOI18N
+                    LOG.debug("services:" + services); // NOI18N
                 }
 
                 unlock();
@@ -735,9 +732,18 @@ public class HeadlessMapProvider {
                     sendNotification(org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
                             "PrintingWidget.retrievalComplete(RetrievalEvent).msg3"),
-                        HeadlessMapProvider.NotificationLevel.INFO);                                        // NOI18N
+                        HeadlessMapProvider.NotificationLevel.INFO); // NOI18N
+
+                    // Transparency
+                    float transparency = 0f;
+                    transparency = map.getFeatureLayer().getTransparency();
+                    final Composite alphaComp = AlphaComposite.getInstance(
+                            AlphaComposite.SRC_OVER,
+                            transparency);
+                    final Image image2add = map.getFeatureImage(imageWidth, imageHeight);
+                    addImage(image2add, alphaComp);
                 } catch (Throwable t) {
-                    LOG.error("Error while adding local features to the map", t);                           // NOI18N
+                    LOG.error("Error while adding local features to the map", t); // NOI18N
                 }
             } else {
                 final String localFeaturesNotAddedMessage = org.openide.util.NbBundle.getMessage(
@@ -761,7 +767,6 @@ public class HeadlessMapProvider {
                 condition.signalAll();
             } finally {
                 lock.unlock();
-                sendNotification("", NotificationLevel.UNLOCKED);
             }
         }
 
@@ -772,28 +777,59 @@ public class HeadlessMapProvider {
          * @param  level  the notification level
          */
         private void sendNotification(final String msg, final HeadlessMapProvider.NotificationLevel level) {
-            sendNotification(msg, level, null);
-        }
-
-        /**
-         * Send a notification to all registered listeners.
-         *
-         * @param  msg    the message to send
-         * @param  level  the notification level
-         * @param  e      a RetrievalEvent
-         */
-        private void sendNotification(final String msg,
-                final HeadlessMapProvider.NotificationLevel level,
-                final RetrievalEvent e) {
             final PropertyChangeEvent evt = new PropertyChangeEvent(
                     this,
                     "notification",
-                    e,
+                    null,
                     new HeadlessMapProvider.NotificationMessage(msg, level));
 
             for (final PropertyChangeListener tmpListener : listener) {
                 tmpListener.propertyChange(evt);
             }
+
+//            System.out.println(msg);
+        }
+
+        /**
+         * Adds an image (map component) to the map image.
+         *
+         * @param  img        the overlay image to add
+         * @param  composite  the composite object to be used for rendering
+         */
+        private synchronized void addImage(final Image img, final Composite composite) {
+            image = mergeImages(image, img, composite);
+        }
+
+        /**
+         * adds an image to an other image.
+         *
+         * @param   image      the base image
+         * @param   overlay    the overlay image to add
+         * @param   composite  the composite object to be used for rendering
+         *
+         * @return  DOCUMENT ME!
+         */
+        private BufferedImage mergeImages(final Image image, final Image overlay, final Composite composite) {
+            final int w = Math.max(((image == null) ? 0 : image.getWidth(null)), overlay.getWidth(null));
+            final int h = Math.max(((image == null) ? 0 : image.getHeight(null)), overlay.getHeight(null));
+            final BufferedImage combined = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            final Graphics2D g = (Graphics2D)combined.getGraphics();
+
+            if (image != null) {
+                g.drawImage(image, 0, 0, null);
+            }
+
+            if (composite != null) {
+                g.setComposite(composite);
+            }
+            g.drawImage(overlay, 0, 0, null);
+
+            return combined;
+        }
+
+        @Override
+        public void retrievalAborted(final RetrievalEvent e) {
+            LOG.warn(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalAborted"); // NOI18N
         }
 
         @Override
@@ -821,7 +857,7 @@ public class HeadlessMapProvider {
             }
 
             try {
-                return map.getImage();
+                return image;
             } finally {
                 lock.unlock();
             }
@@ -839,7 +875,7 @@ public class HeadlessMapProvider {
                     }
                 }
 
-                return map.getImage();
+                return image;
             } finally {
                 lock.unlock();
             }
