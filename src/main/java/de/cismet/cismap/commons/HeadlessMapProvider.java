@@ -223,18 +223,7 @@ public class HeadlessMapProvider {
             }
         }
 
-        ((ActiveLayerModel)headlessMapProvider.getMappingComponent().getMappingModel()).setSrs(
-            mappingComponent.getMappingModel().getSrs());
         return headlessMapProvider;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public MappingComponent getMappingComponent() {
-        return map;
     }
 
     /**
@@ -524,7 +513,6 @@ public class HeadlessMapProvider {
     public void setCenterMapOnResize(final boolean b) {
         centerMapOnResize = b;
     }
-
     /**
      * DOCUMENT ME!
      *
