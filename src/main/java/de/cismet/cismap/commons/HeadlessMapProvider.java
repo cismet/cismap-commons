@@ -211,6 +211,7 @@ public class HeadlessMapProvider {
         }
 
         // Feature Services
+        // featureServices should always be empty
         final TreeMap featureServices = mappingComponent.getMappingModel().getFeatureServices();
         final List positionsFeatures = new ArrayList(featureServices.keySet());
         Collections.sort(positionsFeatures);
@@ -225,6 +226,10 @@ public class HeadlessMapProvider {
             }
         }
 
+        // Features
+        for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
+            headlessMapProvider.addFeature(f);
+        }
         return headlessMapProvider;
     }
 
