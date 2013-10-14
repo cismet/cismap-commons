@@ -197,39 +197,59 @@ public class HeadlessMapProvider {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Creates a HeadlessMapProvider and adds the raster layers and feature layers from the mapping component to it.
      *
-     * @return  the printingResolution
+     * @param   mappingComponent  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    public double getPrintingResolution() {
-        return printingResolution;
-    }
+    public static HeadlessMapProvider createHeadlessMapProviderAndAddLayers(final MappingComponent mappingComponent) {
+        final HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  printingResolution  the printingResolution to set
-     */
-    public void setPrintingResolution(final double printingResolution) {
-        this.printingResolution = printingResolution;
-    }
+        // Raster Services
+        final TreeMap rasterServices = mappingComponent.getMappingModel().getRasterServices();
+        final List positionsRaster = new ArrayList(rasterServices.keySet());
+        Collections.sort(positionsRaster);
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the featureResolutionFactor
-     */
-    public double getFeatureResolutionFactor() {
-        return featureResolutionFactor;
-    }
+        for (final Object position : positionsRaster) {
+            boolean addable = false;
+            final Object rasterService = rasterServices.get(position);
+            if ((rasterService instanceof RetrievalServiceLayer)
+                        && ((RetrievalServiceLayer)rasterService).isEnabled()) {
+                if ((rasterService instanceof AbstractWMSServiceLayer)
+                            && ((AbstractWMSServiceLayer)rasterService).isVisible()) {
+                    addable = true;
+                } else if ((rasterService instanceof AbstractWMS) && ((AbstractWMS)rasterService).isVisible()) {
+                    addable = true;
+                } else if ((rasterService instanceof AbstractFeatureService)
+                            && ((AbstractFeatureService)rasterService).isVisible()) {
+                    addable = true;
+                }
+            }
+            if (addable) {
+                headlessMapProvider.addLayer((RetrievalServiceLayer)rasterService);
+            } else {
+                LOG.warn(
+                    "Layer can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
+            }
+        }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  featureResolutionFactor  the featureResolutionFactor to set
-     */
-    public void setFeatureResolutionFactor(final double featureResolutionFactor) {
-        this.featureResolutionFactor = featureResolutionFactor;
+        // Feature Services
+        final TreeMap featureServices = mappingComponent.getMappingModel().getFeatureServices();
+        final List positionsFeatures = new ArrayList(featureServices.keySet());
+        Collections.sort(positionsFeatures);
+
+        for (final Object position : positionsFeatures) {
+            final Object featureService = featureServices.get(position);
+            if (featureService instanceof RetrievalServiceLayer) {
+                headlessMapProvider.addLayer((RetrievalServiceLayer)featureService);
+            } else {
+                LOG.warn(
+                    "Feature can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
+            }
+        }
+
+        return headlessMapProvider;
     }
     
     /**
@@ -756,6 +776,7 @@ public class HeadlessMapProvider {
             erroneous = new HashSet<Object>();
             this.listener = listener;
             this.serviceCount = serviceCount;
+            map.addRepaintListener(this);
         }
 
         //~ Methods ------------------------------------------------------------
