@@ -87,6 +87,8 @@ import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.rasterservice.RasterMapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
+import de.cismet.cismap.commons.retrieval.RepaintEvent;
+import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 
@@ -265,6 +267,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private BoundingBox initialBoundingBox;
     private WaitDialog crsChangedWaitingDialog = null;
 
+    private final ArrayList<RepaintListener> repaintListeners = new ArrayList<RepaintListener>();
+    private boolean resizeEventActivated = true;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -315,25 +320,27 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                 @Override
                 public void componentResized(final ComponentEvent evt) {
-                    if (MappingComponent.this.delayedResizeEventTimer == null) {
-                        delayedResizeEventTimer = new Timer(RESIZE_DELAY, new ActionListener() {
+                    if (resizeEventActivated) {
+                        if (MappingComponent.this.delayedResizeEventTimer == null) {
+                            delayedResizeEventTimer = new Timer(RESIZE_DELAY, new ActionListener() {
 
-                                    @Override
-                                    public void actionPerformed(final ActionEvent e) {
-                                        delayedResizeEventTimer.stop();
-                                        delayedResizeEventTimer = null;
+                                        @Override
+                                        public void actionPerformed(final ActionEvent e) {
+                                            delayedResizeEventTimer.stop();
+                                            delayedResizeEventTimer = null;
 
-                                        // perform delayed resize:
-                                        // rescape map + move widgets + reload services
-                                        componentResizedDelayed();
-                                    }
-                                });
-                        delayedResizeEventTimer.start();
-                    } else {
-                        // perform intermediate resize:
-                        // rescape map + move widgets
-                        componentResizedIntermediate();
-                        delayedResizeEventTimer.restart();
+                                            // perform delayed resize:
+                                            // rescape map + move widgets + reload services
+                                            componentResizedDelayed();
+                                        }
+                                    });
+                            delayedResizeEventTimer.start();
+                        } else {
+                            // perform intermediate resize:
+                            // rescape map + move widgets
+                            componentResizedIntermediate();
+                            delayedResizeEventTimer.restart();
+                        }
                     }
                 }
             });
@@ -436,6 +443,28 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * If <code>resizeEventActivated</code> is true, then the mapping component makes a new query for its services, when
+     * it is resized. This happens for example if the window of the mapping component is resized. The default value for
+     * <code>resizeEventActivated</code> is true.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isResizeEventActivated() {
+        return resizeEventActivated;
+    }
+
+    /**
+     * Set <code>resizeEventActivated</code> to true so that the mapping component makes a query for its services on a
+     * resize event (Such an event is for example fired when the window of the mapping component is resized). The
+     * default value for <code>resizeEventActivated</code> is true.
+     *
+     * @param  resizeEventActivated  DOCUMENT ME!
+     */
+    public void setResizeEventActivated(final boolean resizeEventActivated) {
+        this.resizeEventActivated = resizeEventActivated;
+    }
 
     /**
      * DOCUMENT ME!
@@ -3675,7 +3704,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         if (mapService instanceof FeatureAwareRasterService) {
             ((FeatureAwareRasterService)mapService).setFeatureCollection(getFeatureCollection());
         }
-        if ((mapService instanceof ServiceLayer) && ((ServiceLayer)mapService).isEnabled()) {
+        if ((mapService instanceof ServiceLayer) && ((ServiceLayer)mapService).isEnabled() && !locked) {
             handleMapService(0, mapService, false);
         }
     }
@@ -4849,6 +4878,18 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * Unlocks the MappingComponent.
+     */
+    public void unlockWithoutReload() {
+        if (DEBUG) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("unlock"); // NOI18N
+            }
+        }
+        locked = false;
+    }
+
+    /**
      * Returns whether the MappingComponent is locked or not.
      *
      * @return  DOCUMENT ME!
@@ -5040,6 +5081,66 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             return -1;
         }
     }
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  repaintListener  DOCUMENT ME!
+     */
+    public void addRepaintListener(final RepaintListener repaintListener) {
+        synchronized (repaintListeners) {
+            repaintListeners.add(repaintListener);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  repaintListener  DOCUMENT ME!
+     */
+    public void removeRepaintListener(final RepaintListener repaintListener) {
+        synchronized (repaintListeners) {
+            repaintListeners.remove(repaintListener);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    public void fireRepaintStart(final RepaintEvent e) {
+        synchronized (repaintListeners) {
+            for (final RepaintListener repaintListener : (ArrayList<RepaintListener>)repaintListeners.clone()) {
+                repaintListener.repaintStart(e);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    public void fireRepaintComplete(final RepaintEvent e) {
+        synchronized (repaintListeners) {
+            for (final RepaintListener repaintListener : (ArrayList<RepaintListener>)repaintListeners.clone()) {
+                repaintListener.repaintComplete(e);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    public void fireRepaintError(final RepaintEvent e) {
+        synchronized (repaintListeners) {
+            for (final RepaintListener repaintListener : (ArrayList<RepaintListener>)repaintListeners.clone()) {
+                repaintListener.repaintError(e);
+            }
+        }
+    }
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -5089,6 +5190,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         @Override
         public void retrievalStarted(final RetrievalEvent e) {
             fireActivityChanged();
+            fireRepaintStart(new RepaintEvent(e));
             if (DEBUG) {
                 if (this.log.isDebugEnabled()) {
                     this.log.debug(rasterService + ": TaskCounter:" + taskCounter); // NOI18N
@@ -5121,6 +5223,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         + " Errors: "      // NOI18N
                         + e.getErrors() + " Cause: " + e.getRetrievedObject()); // NOI18N
             fireActivityChanged();
+            fireRepaintError(new RepaintEvent(e));
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(rasterService + ": TaskCounter:" + taskCounter); // NOI18N
@@ -5171,6 +5274,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     MappingComponent.this.repaint();
                                 }
                             }
+                            fireRepaintComplete(new RepaintEvent(e));
+                        } else {
+                            fireRepaintError(new RepaintEvent(e));
                         }
                     }
                 };
@@ -5437,6 +5543,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 }
             }
             fireActivityChanged();
+            fireRepaintStart(new RepaintEvent(e));
 
             if (mainMappingComponent) {
                 CismapBroker.getInstance()
@@ -5474,6 +5581,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             this.log.error(featureService + "[" + e.getRequestIdentifier() + " (" + this.requestIdentifier + ")]: "
                         + (e.isInitialisationEvent() ? "initialisation" : "retrieval") + " error"); // NOI18N
             fireActivityChanged();
+            fireRepaintError(new RepaintEvent(e));
 
             if (mainMappingComponent) {
                 CismapBroker.getInstance()
@@ -5499,6 +5607,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 this.log.info(featureService + "[" + e.getRequestIdentifier() + " (" + this.requestIdentifier
                             + ")]: initialisation complete"); // NOI18N
                 fireActivityChanged();
+                fireRepaintError(new RepaintEvent(e));
                 return;
             }
 
@@ -5515,6 +5624,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 }
                 ((RetrievalServiceLayer)featureService).setProgress(-1);
                 fireActivityChanged();
+                fireRepaintError(new RepaintEvent(e));
                 return;
             }
 
@@ -5728,6 +5838,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                                 + " features retrieved or updated"); // NOI18N
                                                 }
                                                 rescaleStickyNodes();
+                                                fireRepaintComplete(new RepaintEvent(e));
                                             } catch (final Exception exception) {
                                                 log.warn(
                                                     featureService
@@ -5737,6 +5848,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                             + requestIdentifier
                                                             + ")]: Fehler beim Aufr\u00E4umen",
                                                     exception);                                      // NOI18N
+                                                fireRepaintError(new RepaintEvent(e));
                                             }
                                         }
                                     });
@@ -5747,6 +5859,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                     + requestIdentifier
                                                     + ")]: completion thread Interrupted or synchronisation lost"); // NOI18N
                                     }
+                                }
+                                if (requestIdentifier == e.getRequestIdentifier()) {
+                                    fireRepaintError(new RepaintEvent(e));
                                 }
                             }
                         }
@@ -5761,6 +5876,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         + ")]: completion thread Interrupted or synchronisation lost"); // NOI18N
                         }
                     }
+                    fireRepaintError(new RepaintEvent(e));
                 }
             }
 
@@ -5812,7 +5928,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
     }
 }
-
 /**
  * DOCUMENT ME!
  *
