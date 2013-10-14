@@ -736,6 +736,7 @@ public class HeadlessMapProvider {
             erroneous = new HashSet<Object>();
             this.listener = listener;
             this.serviceCount = serviceCount;
+            map.addRepaintListener(this);
         }
 
         //~ Methods ------------------------------------------------------------
