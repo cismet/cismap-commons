@@ -444,6 +444,7 @@ public class HeadlessMapProvider {
                 propertyChangeListener,
                 mappingModel.getFeatureServices().size()
                         + mappingModel.getMapServices().size());
+        map.addRepaintListener(listener);
 
         map.unlockWithoutReload();
         if (mappingModel.getMapServices().size() > 0) {
@@ -602,7 +603,6 @@ public class HeadlessMapProvider {
             erroneous = new HashSet<Object>();
             this.listener = listener;
             this.serviceCount = serviceCount;
-            map.addRepaintListener(this);
         }
 
         //~ Methods ------------------------------------------------------------
