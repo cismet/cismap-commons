@@ -263,6 +263,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     private final HashMap<String, PLayer> featureGrpLayerMap = new HashMap<String, PLayer>();
     private BoundingBox initialBoundingBox;
+    private WaitDialog crsChangedWaitingDialog = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -4914,18 +4915,20 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 return;
             }
 
-            final WaitDialog dialog = new WaitDialog(StaticSwingTools.getParentFrame(MappingComponent.this),
-                    false,
-                    NbBundle.getMessage(
-                        MappingComponent.class,
-                        "MappingComponent.crsChanged(CrsChangedEvent).wait"),
-                    null);
+            if (crsChangedWaitingDialog == null) {
+                crsChangedWaitingDialog = new WaitDialog(StaticSwingTools.getParentFrame(MappingComponent.this),
+                        false,
+                        NbBundle.getMessage(
+                            MappingComponent.class,
+                            "MappingComponent.crsChanged(CrsChangedEvent).wait"),
+                        null);
+            }
             final Runnable r = new Runnable() {
 
                     @Override
                     public void run() {
                         try {
-                            StaticSwingTools.showDialog(dialog);
+                            StaticSwingTools.showDialog(crsChangedWaitingDialog);
 
                             // the wtst object should not be null, so the getWtst method will be invoked
                             final WorldToScreenTransform oldWtst = getWtst();
@@ -4987,8 +4990,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             alm.setSrs(event.getCurrentCrs());
                             CismapBroker.getInstance().setSrs(event.getFormerCrs());
                         } finally {
-                            if (dialog != null) {
-                                dialog.setVisible(false);
+                            if (crsChangedWaitingDialog != null) {
+                                crsChangedWaitingDialog.setVisible(false);
+                                crsChangedWaitingDialog.dispose();
+                            } else {
+                                LOG.error("crsChangedWaitingDialog == null");
                             }
                         }
                     }
