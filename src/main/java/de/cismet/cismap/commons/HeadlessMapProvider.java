@@ -181,6 +181,7 @@ public class HeadlessMapProvider {
         final HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
         ((ActiveLayerModel)headlessMapProvider.getMappingComponent().getMappingModel()).setSrs(
             mappingComponent.getMappingModel().getSrs());
+        headlessMapProvider.getMappingComponent().setInfoNodesVisible(mappingComponent.isInfoNodesVisible());
 
         // Raster Services
         final TreeMap rasterServices = mappingComponent.getMappingModel().getRasterServices();
