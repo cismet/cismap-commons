@@ -482,7 +482,7 @@ public class HeadlessMapProvider {
             listener.createImageFromFeatures();
         }
 
-        //@Thorsten: siehe Kommentar zu prepareFeaturesBeforePaint()
+        // @Thorsten: siehe Kommentar zu prepareFeaturesBeforePaint()
         if (false) {
             map.setPrintingResolution(printingResolution);
             prepareFeaturesBeforePaint();
@@ -529,8 +529,12 @@ public class HeadlessMapProvider {
     }
 
     /**
-     * @Thorsten: Die Idee von dieser Methode ist es dass die Features von der MappingComponent entfernt und nochmals draufgezeichnet werden, damit sie somit ihre Transparenz verlieren.
-     * Die Methode basiert auf MappingComponent.getImageOfFeatures(). Im Augenblick kann man sie in getImage() aktivieren oder deaktivieren.
+     * DOCUMENT ME!
+     *
+     * @Thorsten:  Die Idee von dieser Methode ist es dass die Features von der MappingComponent entfernt und nochmals
+     *             draufgezeichnet werden, damit sie somit ihre Transparenz verlieren. Die Methode basiert auf
+     *             MappingComponent.getImageOfFeatures(). Im Augenblick kann man sie in getImage() aktivieren oder
+     *             deaktivieren.
      */
     private void prepareFeaturesBeforePaint() {
         final Collection<Feature> fc = map.getFeatureCollection().getAllFeatures();
