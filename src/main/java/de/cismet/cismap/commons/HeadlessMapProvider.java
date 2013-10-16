@@ -11,6 +11,9 @@
  */
 package de.cismet.cismap.commons;
 
+import edu.umd.cs.piccolo.PNode;
+
+import java.awt.EventQueue;
 import java.awt.Image;
 
 import java.beans.PropertyChangeEvent;
@@ -30,10 +33,11 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
-import de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.AbstractWMS;
@@ -55,6 +59,7 @@ public class HeadlessMapProvider {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(HeadlessMapProvider.class);
+    private static final double FEATURE_RESOLUTION_FACTOR = 125.0d;
 
     //~ Enums ------------------------------------------------------------------
 
@@ -105,9 +110,7 @@ public class HeadlessMapProvider {
     private HeadlessMapProvider.DominatingDimension dominatingDimension = HeadlessMapProvider.DominatingDimension.SIZE;
     private HeadlessMapProvider.RoundingPrecision roundScaleTo = HeadlessMapProvider.RoundingPrecision.NO_ROUNDING;
     private boolean centerMapOnResize = false;
-    private double printingResolution = 0;
-    private double resolution = 72.0;
-    private double featureResolutionFactor = PrintingSettingsWidget.FEATURE_RESOLUTION_FACTOR;
+    private double printingResolution = 72d / FEATURE_RESOLUTION_FACTOR;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -333,7 +336,6 @@ public class HeadlessMapProvider {
     public Image getImage(final int dpi, final double widthInMillimeters, final double heightInMilimeters) {
         return null;
     }
-
     /**
      * This is the method called when you need to fill in a report: for jasper with (72 as basedpi and widzth and height
      * with the dimension of the image in the report
@@ -349,6 +351,7 @@ public class HeadlessMapProvider {
             final int targetDpi,
             final double widthInPixels,
             final double heightInPixels) {
+        printingResolution = targetDpi / FEATURE_RESOLUTION_FACTOR;
         final int imageWidth = (int)((double)widthInPixels / (double)basedpi
                         * (double)targetDpi);
         final int imageHeight = (int)((double)heightInPixels / (double)basedpi
@@ -479,6 +482,12 @@ public class HeadlessMapProvider {
             listener.createImageFromFeatures();
         }
 
+        //@Thorsten: siehe Kommentar zu prepareFeaturesBeforePaint()
+        if (false) {
+            map.setPrintingResolution(printingResolution);
+            prepareFeaturesBeforePaint();
+        }
+
         return listener;
     }
 
@@ -517,6 +526,69 @@ public class HeadlessMapProvider {
             final double widthInPixels,
             final double heightInPixels) throws ExecutionException, InterruptedException {
         return getImage(basedpi, targetDpi, widthInPixels, heightInPixels).get();
+    }
+
+    /**
+     * @Thorsten: Die Idee von dieser Methode ist es dass die Features von der MappingComponent entfernt und nochmals draufgezeichnet werden, damit sie somit ihre Transparenz verlieren.
+     * Die Methode basiert auf MappingComponent.getImageOfFeatures(). Im Augenblick kann man sie in getImage() aktivieren oder deaktivieren.
+     */
+    private void prepareFeaturesBeforePaint() {
+        final Collection<Feature> fc = map.getFeatureCollection().getAllFeatures();
+        final List<PFeature> list = new ArrayList<PFeature>();
+
+        try {
+            for (final Feature f : fc) {
+                final PFeature p = new PFeature(f, map);
+                list.add(p);
+            }
+            final double scale = 1 / map.getCamera().getViewScale();
+
+            map.getFeatureCollection().removeAllFeatures();
+
+            // TODO Sorge dafür dass die PSwingKomponente richtig gedruckt wird und dass die Karte nicht mehr "zittert"
+
+            int printingLineWidth = 10;
+            for (final PFeature original : list) {
+                original.setInfoNodeExpanded(false);
+
+                if (printingLineWidth > 0) {
+                    ((StyledFeature)original.getFeature()).setLineWidth(printingLineWidth);
+                } else if (StyledFeature.class.isAssignableFrom(original.getFeature().getClass())) {
+                    final int orginalLineWidth = ((StyledFeature)original.getFeature()).getLineWidth();
+                    printingLineWidth = (int)Math.round(orginalLineWidth * (printingResolution * 2));
+                    ((StyledFeature)original.getFeature()).setLineWidth(printingLineWidth);
+                }
+
+                final PFeature copy = new PFeature(original.getFeature(),
+                        map.getWtst(),
+                        0,
+                        0,
+                        map,
+                        true);
+                map.getLayer().addChild(copy);
+
+                copy.setTransparency(original.getTransparency());
+                copy.setStrokePaint(original.getStrokePaint());
+                final boolean expanded = original.isInfoNodeExpanded();
+                copy.addInfoNode();
+                copy.setInfoNodeExpanded(false);
+                copy.refreshInfoNode();
+
+                original.refreshInfoNode();
+
+                map.removeStickyNode(copy.getStickyChild());
+
+                final PNode stickyChild = copy.getStickyChild();
+                if (stickyChild != null) {
+                    stickyChild.setScale(scale * printingResolution);
+                    if (copy.hasSecondStickyChild()) {
+                        copy.getSecondStickyChild().setScale(scale * printingResolution);
+                    }
+                }
+            }
+        } catch (final Exception exception) {
+            LOG.error("Error during the creation of an image from features", exception); // NOI18N
+        }
     }
 
     /**
