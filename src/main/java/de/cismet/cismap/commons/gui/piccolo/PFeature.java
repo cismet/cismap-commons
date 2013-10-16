@@ -2281,12 +2281,24 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if (nonSelectedPaint instanceof Color) {
                     final Color c = (Color)nonHighlightingPaint;
                     if (c != null) {
-                        final int red = (int)(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground")
-                                        .getRed());                           // NOI18N
-                        final int green = (int)(javax.swing.UIManager.getDefaults().getColor(
-                                    "Table.selectionBackground").getGreen()); // NOI18N
-                        final int blue = (int)(javax.swing.UIManager.getDefaults().getColor(
-                                    "Table.selectionBackground").getBlue());  // NOI18N
+                        Color selectionColor = null;
+                        try {
+                            selectionColor = javax.swing.UIManager.getDefaults()
+                                        .getColor("Cismap.featureSelectionForeground");
+                        } catch (Exception e) {
+                            if (log.isDebugEnabled()) {
+                                log.debug(
+                                    "Error when getting javax.swing.UIManager.getDefaults().getColor(\"Cismap.featureSelectionForeground\")",
+                                    e);
+                            }
+                        }
+                        if (selectionColor == null) {
+                            selectionColor = javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground");
+                        }
+
+                        final int red = (int)(selectionColor.getRed());     // NOI18N
+                        final int green = (int)(selectionColor.getGreen()); // NOI18N
+                        final int blue = (int)(selectionColor.getBlue());   // NOI18N
                         setPaint(new Color(red, green, blue, c.getAlpha() / 2));
                     }
                 } else {
