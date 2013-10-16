@@ -64,6 +64,20 @@ public class HeadlessMapProvider {
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(HeadlessMapProvider.class);
     private static final double FEATURE_RESOLUTION_FACTOR = 125.0d;
 
+    /**
+     * @return the featureResolutionFactor
+     */
+    public double getFeatureResolutionFactor() {
+        return featureResolutionFactor;
+    }
+
+    /**
+     * @param featureResolutionFactor the featureResolutionFactor to set
+     */
+    public void setFeatureResolutionFactor(double featureResolutionFactor) {
+        this.featureResolutionFactor = featureResolutionFactor;
+    }
+
     //~ Enums ------------------------------------------------------------------
 
     /**
@@ -260,69 +274,6 @@ public class HeadlessMapProvider {
         return headlessMapProvider;
     }
     
-    /**
-     * Creates a HeadlessMapProvider and adds the raster layers and feature layers from the mapping component to it.
-     *
-     * @param   mappingComponent  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static HeadlessMapProvider createHeadlessMapProviderAndAddLayers(final MappingComponent mappingComponent) {
-        final HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
-        ((ActiveLayerModel)headlessMapProvider.getMappingComponent().getMappingModel()).setSrs(
-            mappingComponent.getMappingModel().getSrs());
-        headlessMapProvider.getMappingComponent().setInfoNodesVisible(mappingComponent.isInfoNodesVisible());
-
-        // Raster Services
-        final TreeMap rasterServices = mappingComponent.getMappingModel().getRasterServices();
-        final List positionsRaster = new ArrayList(rasterServices.keySet());
-        Collections.sort(positionsRaster);
-
-        for (final Object position : positionsRaster) {
-            boolean addable = false;
-            final Object rasterService = rasterServices.get(position);
-            if ((rasterService instanceof RetrievalServiceLayer)
-                        && ((RetrievalServiceLayer)rasterService).isEnabled()) {
-                if ((rasterService instanceof AbstractWMSServiceLayer)
-                            && ((AbstractWMSServiceLayer)rasterService).isVisible()) {
-                    addable = true;
-                } else if ((rasterService instanceof AbstractWMS) && ((AbstractWMS)rasterService).isVisible()) {
-                    addable = true;
-                } else if ((rasterService instanceof AbstractFeatureService)
-                            && ((AbstractFeatureService)rasterService).isVisible()) {
-                    addable = true;
-                }
-            }
-            if (addable) {
-                headlessMapProvider.addLayer((RetrievalServiceLayer)rasterService);
-            } else {
-                LOG.warn(
-                    "Layer can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
-            }
-        }
-
-        // Feature Services
-        // featureServices should always be empty
-        final TreeMap featureServices = mappingComponent.getMappingModel().getFeatureServices();
-        final List positionsFeatures = new ArrayList(featureServices.keySet());
-        Collections.sort(positionsFeatures);
-
-        for (final Object position : positionsFeatures) {
-            final Object featureService = featureServices.get(position);
-            if (featureService instanceof RetrievalServiceLayer) {
-                headlessMapProvider.addLayer((RetrievalServiceLayer)featureService);
-            } else {
-                LOG.warn(
-                    "Feature can not be added to the headlessMapProvider as it is not an instance of RetrievalServiceLayer");
-            }
-        }
-
-        // Features
-        for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
-            headlessMapProvider.addFeature(f);
-        }
-        return headlessMapProvider;
-    }
 
     /**
      * DOCUMENT ME!
@@ -333,14 +284,6 @@ public class HeadlessMapProvider {
         return map;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public MappingComponent getMappingComponent() {
-        return map;
-    }
 
     /**
      * Adds a PropertyChangeListener that will notify about the progress of the map building.
