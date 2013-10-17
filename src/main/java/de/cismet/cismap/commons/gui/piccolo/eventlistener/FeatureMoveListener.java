@@ -15,6 +15,7 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 import com.vividsolutions.jts.geom.Coordinate;
 
 import edu.umd.cs.piccolo.PLayer;
+import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PDimension;
@@ -32,6 +33,8 @@ import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.PHandle;
+import de.cismet.cismap.commons.gui.piccolo.TransformationPHandle;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureMoveAction;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
@@ -82,12 +85,11 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
         if (!ctrlPressed(e)) {
             unmarkFeatures();
         }
-        if (e.getButton() == 1) { // Linke Maustaste: TODO: konnte die piccolo Konstanten nicht inden
+        if (e.isLeftMouseButton()) {
             // Initialize the locations.
             pressPoint = e.getPosition();
             dragDim = e.getCanvasDelta();
             dragPoint = pressPoint;
-            handleLayer.removeAllChildren();
             final Object o = PFeatureTools.getFirstValidObjectUnderPointer(e, new Class[] { PFeature.class });
 
             if ((o instanceof PFeature) && ((PFeature)o).getFeature().isEditable()
@@ -101,6 +103,8 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                     features.add(feature);
                     feature.moveToFront();
                 }
+                mc.getFeatureCollection().unselectAll();
+                mc.getFeatureCollection().select(feature.getFeature());
                 postSelectionChanged();
             } else {
                 feature = null;
@@ -141,10 +145,13 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                         f.moveFeature(delta);
                     }
                 }
-            }
-            if (handleLayer.getChildrenCount() > 0) {
-                // to avoid problem if featur is dragged, released and dragged again very fast.
-                handleLayer.removeAllChildren();
+                for (int i = 0; i < handleLayer.getChildrenCount(); i++) {
+                    final PNode child = handleLayer.getChild(i);
+                    if (child instanceof PHandle) {
+                        final PHandle pHandle = (PHandle)child;
+                        pHandle.relocateHandle();
+                    }
+                }
             }
             mc.syncSelectedObjectPresenter(0);
         }
