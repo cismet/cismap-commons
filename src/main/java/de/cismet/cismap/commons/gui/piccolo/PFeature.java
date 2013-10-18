@@ -401,11 +401,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             } else {
                 piSelected = piOrig.getSelectedFeatureAnnotationSymbol();
             }
-            if (pi == null) {
-                /*
-                 * draw an invisble frame around the icon, this places the info node at the same position as for the
-                 * selected FeatureAnnotationSymbol
-                 */
+            if ((pi == null)) {
                 pi = new FeatureAnnotationSymbol();
                 final Image iconImage = piOrig.getImage();
                 final BufferedImage img = new BufferedImage(iconImage.getWidth(null),
@@ -413,13 +409,23 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         BufferedImage.TYPE_INT_ARGB);
                 final Graphics g = img.getGraphics();
                 g.drawImage(iconImage, 0, 0, null);
-                pi.setImage(highlightImageAsSelected(img, TRANSPARENT, TRANSPARENT, 10));
-                final double sweetX = ((10 + (piOrig.getImage().getWidth(null) * sweetSpotX))
-                                / piSelected.getImage().getWidth(null));
-                final double sweetY = ((10 + (piOrig.getImage().getHeight(null) * sweetSpotY))
-                                / piSelected.getImage().getHeight(null));
-                pi.setSweetSpotX(sweetX);
-                pi.setSweetSpotY(sweetY);
+                if (piOrig.getSelectedFeatureAnnotationSymbol() == null) {
+                    /*
+                     * draw an invisble frame around the icon, this places the info node at the same position as for the
+                     * selected FeatureAnnotationSymbol
+                     */
+                    pi.setImage(highlightImageAsSelected(img, TRANSPARENT, TRANSPARENT, 10));
+                    final double sweetX = ((10 + (piOrig.getImage().getWidth(null) * sweetSpotX))
+                                    / piSelected.getImage().getWidth(null));
+                    final double sweetY = ((10 + (piOrig.getImage().getHeight(null) * sweetSpotY))
+                                    / piSelected.getImage().getHeight(null));
+                    pi.setSweetSpotX(sweetX);
+                    pi.setSweetSpotY(sweetY);
+                } else {
+                    pi.setImage(img);
+                    pi.setSweetSpotX(piOrig.getSweetSpotX());
+                    pi.setSweetSpotY(piOrig.getSweetSpotY());
+                }
             }
             pi.setSelectedFeatureAnnotationSymbol(piSelected);
         }
