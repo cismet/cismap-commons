@@ -7,6 +7,11 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
+
 import edu.umd.cs.piccolo.PLayer;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
@@ -23,10 +28,12 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.JOptionPane;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.printing.PrintingToolTip;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -206,6 +213,31 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
                         / MILLIMETER_OF_A_METER * this.scaleDenominator;
             realWorldHeight = placeholderHeight / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
                         / MILLIMETER_OF_A_METER * this.scaleDenominator;
+
+            if (!mappingComponent.getMappingModel().getSrs().isMetric()) {
+                try {
+                    final String srs = mappingComponent.getMappingModel().getSrs().getCode();
+                    final BoundingBox currentBox = mappingComponent.getCurrentBoundingBox();
+                    final GeometryFactory factory = new GeometryFactory(new PrecisionModel(),
+                            CrsTransformer.extractSridFromCrs(srs));
+                    Point point = factory.createPoint(new Coordinate(currentBox.getX1(), currentBox.getY1()));
+                    point = CrsTransformer.transformToMetricCrs(point);
+                    final XBoundingBox metricBbox = new XBoundingBox(point.getX(),
+                            point.getY(),
+                            point.getX()
+                                    + 1,
+                            point.getY()
+                                    + 1,
+                            CrsTransformer.createCrsFromSrid(point.getSRID()),
+                            true);
+                    final CrsTransformer geoTransformer = new CrsTransformer(srs);
+                    final XBoundingBox geoBbox = geoTransformer.transformBoundingBox(metricBbox);
+                    realWorldWidth = realWorldWidth * (geoBbox.getX2() - geoBbox.getX1());
+                    realWorldHeight = realWorldHeight * (geoBbox.getX2() - geoBbox.getX1());
+                } catch (Exception e) {
+                    log.error("Error while trying to convert the boundingbox to a metric one.", e);
+                }
+            }
         }
         final Point2D center = mappingComponent.getCamera().getViewBounds().getCenter2D();
         final PBounds pb = new PBounds(0, 0, realWorldWidth, realWorldHeight);
