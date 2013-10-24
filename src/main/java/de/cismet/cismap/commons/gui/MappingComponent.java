@@ -170,8 +170,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
     //~ Instance fields --------------------------------------------------------
 
-    public ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
     private boolean featureServiceLayerVisible = true;
     private final List<LayerControl> layerControls = new ArrayList<LayerControl>();
     private boolean gridEnabled = true;
@@ -1820,23 +1818,18 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * Refreshs all registered services.
      */
     public void queryServices() {
-        lock.writeLock().lock();
-        try {
-            if (newViewBounds != null) {
-                addToHistory(new PBoundsWithCleverToString(
-                        new PBounds(newViewBounds),
-                        wtst,
-                        mappingModel.getSrs().getCode()));
-                queryServicesWithoutHistory();
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("queryServices()"); // NOI18N
-                    }
+        if (newViewBounds != null) {
+            addToHistory(new PBoundsWithCleverToString(
+                    new PBounds(newViewBounds),
+                    wtst,
+                    mappingModel.getSrs().getCode()));
+            queryServicesWithoutHistory();
+            if (DEBUG) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("queryServices()"); // NOI18N
                 }
-                rescaleStickyNodes();
             }
-        } finally {
-            lock.writeLock().unlock();
+            rescaleStickyNodes();
         }
     }
 

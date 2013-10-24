@@ -48,6 +48,10 @@ import de.cismet.tools.CurrentStackTrace;
  */
 public class BackgroundRefreshingPanEventListener extends PPanEventHandler implements PropertyChangeListener {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final boolean IMAGE_BOOSTER_ACTIVE = false;
+
     //~ Instance fields --------------------------------------------------------
 
     PImage pi;
@@ -82,12 +86,13 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
 //        }
         if (pInputEvent.getComponent() instanceof MappingComponent) {
             final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
-//            if (mappingComponent == null) {
-//                mappingComponent = mc;
-//                mc.getCamera().addPropertyChangeListener(this);
-//            }
+
             // mc.showHandles(false);
-            if (false) {
+            if (IMAGE_BOOSTER_ACTIVE) {
+//                if (mappingComponent == null) {
+//                    mappingComponent = mc;
+//                    mc.getCamera().addPropertyChangeListener(this);
+//                }
                 mc.getRasterServiceLayer().setVisible(rasterServiceLayerVisible);
                 mc.getDragPerformanceImproverLayer().setVisible(false);
                 mc.getDragPerformanceImproverLayer().removeAllChildren();
@@ -116,13 +121,11 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
         if (aEvent.getComponent() instanceof MappingComponent) {
             final MappingComponent mc = (MappingComponent)aEvent.getComponent();
 //            mc.getHandleLayer().removeAllChildren();
-            if (false) {
+            if (IMAGE_BOOSTER_ACTIVE) {
                 if (log.isDebugEnabled()) {
                     log.debug("isPanPerformanceBoosterEnabled"); // NOI18N
                 }
-                final long startTime = System.currentTimeMillis();
                 refreshImage(mc);
-                log.error("time to copy: " + (System.currentTimeMillis() - startTime));
                 mc.getDragPerformanceImproverLayer().setVisible(true);
                 mc.getRasterServiceLayer().setVisible(false);
                 for (int i = 0; i < mc.getMapServiceLayer().getChildrenCount(); ++i) {
@@ -149,11 +152,10 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
         // hier nur noch \u00FCberpr\u00FCft ob es aktualisiert werden muss.
         // evtl auch nur einen einfachen Layer nehmen. Vielleicht bringts das auch schon
         rasterServiceLayerVisible = mc.getRasterServiceLayer().getVisible();
-//        final Image i = mc.getCamera().toImage();
 //        lock.readLock().lock();
 //        try {
 //            if (image == null) {
-        image = componentToImage(mc);
+        image = mc.getCamera().toImage();
 //            }
         pi = new PImage(image);
 //        } finally {
@@ -196,18 +198,17 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
         if (!panStarted) {
+            image = null;
             new Thread(new Runnable() {
 
                     @Override
                     public void run() {
                         lock.writeLock().lock();
-                        mappingComponent.lock.readLock().lock();
 
                         try {
-//                        image = mappingComponent.getCamera().toImage();
-                            image = componentToImage(mappingComponent);
+                            image = mappingComponent.getCamera().toImage();
+//                            image = componentToImage(mappingComponent);
                         } finally {
-                            mappingComponent.lock.readLock().unlock();
                             lock.writeLock().unlock();
                         }
                     }
