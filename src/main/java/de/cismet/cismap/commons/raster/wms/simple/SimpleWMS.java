@@ -115,6 +115,14 @@ public class SimpleWMS extends AbstractWMS implements MapService,
             } catch (Exception e) {
             }
         }
+        final Attribute visAttr = object.getAttribute("visible");                 // NOI18N
+        if (visAttr != null) {
+            try {
+                visible = visAttr.getBooleanValue();
+                pNode.setVisible(visible);
+            } catch (Exception e) {
+            }
+        }
         final Attribute translucencyAttr = object.getAttribute("translucency");   // NOI18N
         if (translucencyAttr != null) {
             try {
@@ -152,7 +160,8 @@ public class SimpleWMS extends AbstractWMS implements MapService,
         final Element element = new Element("simpleWms");                             // NOI18N
         element.setAttribute("layerPosition", new Integer(layerPosition).toString()); // NOI18N
         element.setAttribute("skip", "false");                                        // NOI18N
-        element.setAttribute("enabled", new Boolean(enabled).toString());             // NOI18N
+        element.setAttribute("enabled", Boolean.toString(enabled));
+        element.setAttribute("visible", Boolean.toString(pNode.getVisible()));        // NOI18N
         element.setAttribute("name", name);                                           // NOI18N
         element.setAttribute("translucency", new Float(translucency).toString());     // NOI18N
         final CDATA data = new CDATA(gmUrl.getUrlTemplate());
