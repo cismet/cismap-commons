@@ -39,6 +39,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CurrentStackTrace;
+import de.cismet.tools.StaticDebuggingTools;
 
 /**
  * DOCUMENT ME!
@@ -48,14 +49,12 @@ import de.cismet.tools.CurrentStackTrace;
  */
 public class BackgroundRefreshingPanEventListener extends PPanEventHandler implements PropertyChangeListener {
 
-    //~ Static fields/initializers ---------------------------------------------
-
-    private static final boolean IMAGE_BOOSTER_ACTIVE = false;
-
     //~ Instance fields --------------------------------------------------------
 
     PImage pi;
     boolean rasterServiceLayerVisible = true;
+
+    private boolean imageBoosterActive = false;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private List<PNode> nodesToEnable = new ArrayList<PNode>();
     private MappingComponent mappingComponent;
@@ -88,7 +87,7 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
             final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
 
             // mc.showHandles(false);
-            if (IMAGE_BOOSTER_ACTIVE) {
+            if (imageBoosterActive) {
 //                if (mappingComponent == null) {
 //                    mappingComponent = mc;
 //                    mc.getCamera().addPropertyChangeListener(this);
@@ -121,7 +120,9 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler imple
         if (aEvent.getComponent() instanceof MappingComponent) {
             final MappingComponent mc = (MappingComponent)aEvent.getComponent();
 //            mc.getHandleLayer().removeAllChildren();
-            if (IMAGE_BOOSTER_ACTIVE) {
+            imageBoosterActive = StaticDebuggingTools.checkHomeForFile("panPerformanceBooster");
+
+            if (imageBoosterActive) {
                 if (log.isDebugEnabled()) {
                     log.debug("isPanPerformanceBoosterEnabled"); // NOI18N
                 }
