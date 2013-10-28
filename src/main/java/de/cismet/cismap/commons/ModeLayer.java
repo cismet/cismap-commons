@@ -125,6 +125,17 @@ public class ModeLayer implements RetrievalServiceLayer, MapService, ActiveLayer
     /**
      * DOCUMENT ME!
      *
+     * @param  b  DOCUMENT ME!
+     */
+    public void setVisible(final boolean b) {
+        for (final RetrievalServiceLayer rsl : modeLayers.values()) {
+            rsl.getPNode().setVisible(b);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  mode    DOCUMENT ME!
      * @param  forced  DOCUMENT ME!
      */
