@@ -3177,12 +3177,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             viewer.removeStickyNode(piSelected);
         }
 
-        if (stickyChild != null) {
-            viewer.removeStickyNode(stickyChild);
+        if ((stickyChild != null) && (stickyChild instanceof PSticky)) {
+            viewer.removeStickyNode((PSticky)stickyChild);
         }
 
-        if (secondStickyChild != null) {
-            viewer.removeStickyNode(secondStickyChild);
+        if ((secondStickyChild != null) && (stickyChild instanceof PSticky)) {
+            viewer.removeStickyNode((PSticky)secondStickyChild);
         }
 
 //        if (primaryAnnotation != null) {

@@ -179,7 +179,7 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      * @return  DOCUMENT ME!
      */
     int getFeatureCount(BoundingBox bb);
-    
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
