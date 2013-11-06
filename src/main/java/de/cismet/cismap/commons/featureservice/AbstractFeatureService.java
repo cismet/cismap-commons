@@ -1238,7 +1238,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         sldDefinition = inputStream;
         final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = parseSLD(new StringReader(
                     inputStream));
-        if (styles.isEmpty()) {
+        if (styles == null || styles.isEmpty()) {
             return;
         }
         featureFactory.setSLDStyle(styles);
