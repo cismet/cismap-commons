@@ -887,6 +887,19 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
+     * @param  pfeature  DOCUMENT ME!
+     * @param  styling   DOCUMENT ME!
+     * @param  map       DOCUMENT ME!
+     */
+    protected void applyLineStyling(final PPath pfeature, final LineStyling styling, final MappingComponent map) {
+        if (styling.stroke != null) {
+            applyStroke(styling.uom, styling.stroke, pfeature, map);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  image    DOCUMENT ME!
      * @param  styling  DOCUMENT ME!
      * @param  wtst     DOCUMENT ME!
@@ -1055,11 +1068,13 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         pfeature.sldStyledImage.clear();
         pfeature.sldStyledPolygon.clear();
         pfeature.sldStyledText.clear();
+        final Geometry geom = pfeature.getFeature().getGeometry();
         int polygonNr = -1;
         int textNr = 0;
         int imageNr = 0;
         for (final Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String> styling : stylings) {
-            if (styling.first instanceof PolygonStyling) {
+            if ((styling.first instanceof PolygonStyling)
+                        && ((geom instanceof Polygon) || (geom instanceof MultiPolygon))) {
                 PPath path;
                 if (polygonNr < 0) {
                     path = pfeature;
@@ -1074,6 +1089,23 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     path.setPathTo(pfeature.getPathReference());
                 }
                 applyPolygonStyling(path, (PolygonStyling)styling.first, pfeature.getMappingComponent());
+                polygonNr++;
+            } else if ((styling.first instanceof LineStyling)
+                        && ((geom instanceof LineString) || (geom instanceof MultiLineString))) {
+                PPath path;
+                if (polygonNr < 0) {
+                    path = pfeature;
+                } else {
+                    try {
+                        path = pfeature.sldStyledPolygon.get(polygonNr);
+                    } catch (IndexOutOfBoundsException ex) {
+                        path = new PPath();
+                        pfeature.sldStyledPolygon.add(path);
+                        pfeature.addChild(path);
+                    }
+                    path.setPathTo(pfeature.getPathReference());
+                }
+                applyLineStyling(path, (LineStyling)styling.first, pfeature.getMappingComponent());
                 polygonNr++;
             } else if (styling.first instanceof TextStyling) {
                 PFeature.PTextWithDisplacement text;
@@ -1097,7 +1129,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     intPoint.getX(),
                     intPoint.getY());
                 pfeature.getMappingComponent().rescaleStickyNode(text);
-            } else if (styling.first instanceof PointStyling) {
+            } else if ((styling.first instanceof PointStyling)
+                        && ((geom instanceof Point) || (geom instanceof MultiPoint))) {
                 PImage image;
                 try {
                     image = pfeature.sldStyledImage.get(imageNr++);
@@ -1146,6 +1179,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     pfeature.getMappingComponent().rescaleStickyNode((PSticky)image);
                 }
             }
+        }
+        if ((polygonNr == -1) && (imageNr == 0) && (textNr == 0)) {
+            Log.warn("Es wurde kein passender Sybolizer für das Feature gefunden, Darstellung unmöglich.");
         }
         /*
          * //if (stylings.getFirst().first instanceof PolygonStyling) { applyStyling(pfeature,
