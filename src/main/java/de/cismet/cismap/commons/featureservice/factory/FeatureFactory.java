@@ -172,12 +172,14 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
     void setLayerName(String name);
 
     /**
+     * DOCUMENT ME!
+     *
      * @param   bb  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     int getFeatureCount(BoundingBox bb);
-    
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
