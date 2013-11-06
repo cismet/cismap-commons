@@ -1382,10 +1382,15 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
 
     @Override
     public void setSLDInputStream(final String inputStream) {
+        if ((inputStream == null) || inputStream.isEmpty()) {
+            sldDefinition = null;
+            featureFactory.setSLDStyle(null);
+            return;
+        }
         sldDefinition = inputStream;
         final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = parseSLD(new StringReader(
                     inputStream));
-        if (styles == null || styles.isEmpty()) {
+        if ((styles == null) || styles.isEmpty()) {
             return;
         }
         featureFactory.setSLDStyle(styles);
