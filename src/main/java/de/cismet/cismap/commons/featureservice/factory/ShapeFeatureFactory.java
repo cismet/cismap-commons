@@ -251,17 +251,17 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             shapeFile = new ShapeFile(this.documentURI.getPath(), cs);
         }
 
-        int max = shapeFile.getRecordNum();
+        final int max = shapeFile.getRecordNum();
         if (DEBUG) {
             if (logger.isDebugEnabled()) {
                 logger.debug("SW[" + workerThread + "]: " + max + " features found in shape file");
             }
         }
-        if (shapeFile.getRecordNum() > this.maxCachedFeatureCount) {
-            logger.error("SW[" + workerThread + "]: number of features in shape file (" + shapeFile.getRecordNum()
-                        + ") exceeds maximum of supported features (" + this.maxCachedFeatureCount + ")");
-            max = this.maxCachedFeatureCount;
-        }
+//        if (shapeFile.getRecordNum() > this.maxCachedFeatureCount) {
+//            logger.error("SW[" + workerThread + "]: number of features in shape file (" + shapeFile.getRecordNum()
+//                        + ") exceeds maximum of supported features (" + this.maxCachedFeatureCount + ")");
+//            max = this.maxCachedFeatureCount;
+//        }
         if (max == 0) {
             logger.error("SW[" + workerThread + "]: no features found in shape file");
             throw new Exception("no features found in shape file '" + this.documentURI + "'");
@@ -327,12 +327,16 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
     @Override
     public int getMaxCachedFeatureCount() {
-        return this.maxCachedFeatureCount;
+        if (this.degreeFeaturesTree != null) {
+            return this.degreeFeaturesTree.getNodeCapacity();
+        } else {
+            return this.maxCachedFeatureCount;
+        }
     }
 
     @Override
     public void setMaxCachedFeatureCount(final int maxCachedFeatureCount) {
-        this.maxCachedFeatureCount = maxCachedFeatureCount;
+//        this.maxCachedFeatureCount = maxCachedFeatureCount;
     }
 
     /**
