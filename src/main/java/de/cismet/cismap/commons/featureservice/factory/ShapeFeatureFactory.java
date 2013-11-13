@@ -24,6 +24,7 @@ import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.schema.FeatureType;
 import org.deegree.model.feature.schema.PropertyType;
 import org.deegree.model.spatialschema.JTSAdapter;
+import org.deegree.style.se.unevaluated.Style;
 
 import java.io.BufferedReader;
 import java.io.File;
