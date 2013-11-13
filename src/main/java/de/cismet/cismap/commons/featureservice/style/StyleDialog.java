@@ -2347,7 +2347,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                         + "                    <sld:Name>"
                         + layerName
                         + "</sld:Name>\n";
-            sld += "                    <sld:PolygonSymbolizer uom=\"http://www.opengeospatial/se/units/metre\">\n";
+            sld += "                    <sld:PolygonSymbolizer uom=\"http://www.opengeospatial/se/units/pixel\">\n";
 
             if (chkFill.isSelected()) {
                 sld += "                        <sld:Fill>\n";
