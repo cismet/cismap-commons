@@ -706,6 +706,14 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             if (saveAsLastCreated) {
                 this.updateLastCreatedFeatures(selectedFeatures, boundingPolygon, query);
             }
+            // set the SLDs for features
+            final List<Style> style = getStyle(layerName);
+
+            if ((style != null) && (selectedFeatures != null)) {
+                for (final ShapeFeature f : selectedFeatures) {
+                    f.setSLDStyles(style);
+                }
+            }
             return new Vector<ShapeFeature>(selectedFeatures);
         } finally {
             cleanup();
