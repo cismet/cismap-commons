@@ -19,6 +19,7 @@ import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.schema.FeatureType;
 import org.deegree.model.feature.schema.PropertyType;
 import org.deegree.model.spatialschema.JTSAdapter;
+import org.deegree.style.se.unevaluated.Style;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -540,6 +541,14 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         // check if thread is canceled .........................................
 
         this.updateLastCreatedFeatures(selectedFeatures);
+        // set the SLDs for features
+        final List<Style> style = getStyle(layerName);
+
+        if ((style != null) && (selectedFeatures != null)) {
+            for (final ShapeFeature f : selectedFeatures) {
+                f.setSLDStyles(style);
+            }
+        }
         return new Vector<ShapeFeature>(selectedFeatures);
     }
 }
