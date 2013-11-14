@@ -106,7 +106,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     private DefaultPopupMenuListener popupMenuListener = new DefaultPopupMenuListener(popupMenu);
     private TreeTransferHandler transferHandler;
     private StyleDialogInterface styleDialog;
-    
+
     private AddThemeMenuItem addThemeMenuItem;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
@@ -1161,14 +1161,14 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         @Override
         public void actionPerformed(final ActionEvent e) {
             final TreePath path = tree.getSelectionPath();
-            
+
             final AbstractFeatureService selectedService = (AbstractFeatureService)path.getLastPathComponent();
             /*
-                * final JumpSLDEditor editor = new JumpSLDEditor();
-                *
-                * editor.ConfigureEditor( selectedService, StaticSwingTools.getParentFrame(wfsStyleButton),
-                * CismapBroker.getInstance().getMappingComponent());
-                */
+             * final JumpSLDEditor editor = new JumpSLDEditor();
+             *
+             * editor.ConfigureEditor( selectedService, StaticSwingTools.getParentFrame(wfsStyleButton),
+             * CismapBroker.getInstance().getMappingComponent());
+             */
             try {
                 if (log.isDebugEnabled()) {
                     log.debug(
@@ -1218,7 +1218,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         args);
 
                 if (log.isDebugEnabled()) {
-                    log.debug("set dialog visible"); // NOI18N
+                    log.debug("set dialog visible");                                // NOI18N
                 }
                 StaticSwingTools.showDialog(dialog);
             } catch (Throwable t) {
@@ -1226,12 +1226,12 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             }
             // check returnstatus
             if ((styleDialog != null) && styleDialog.isAccepted()) {
-                final Runnable r = styleDialog.createResultTask(); 
+                final Runnable r = styleDialog.createResultTask();
 
                 CismetThreadPool.execute(r);
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Style Dialog canceled");     // NOI18N
+                    log.debug("Style Dialog canceled"); // NOI18N
                 }
             }
         }
