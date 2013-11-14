@@ -105,7 +105,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     private ActiveLayerModel layerModel;
     private DefaultPopupMenuListener popupMenuListener = new DefaultPopupMenuListener(popupMenu);
     private TreeTransferHandler transferHandler;
-
+    private StyleDialogInterface styleDialog;
+    
     private AddThemeMenuItem addThemeMenuItem;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
@@ -1159,6 +1160,80 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
         @Override
         public void actionPerformed(final ActionEvent e) {
+            final TreePath path = tree.getSelectionPath();
+            
+            final AbstractFeatureService selectedService = (AbstractFeatureService)path.getLastPathComponent();
+            /*
+                * final JumpSLDEditor editor = new JumpSLDEditor();
+                *
+                * editor.ConfigureEditor( selectedService, StaticSwingTools.getParentFrame(wfsStyleButton),
+                * CismapBroker.getInstance().getMappingComponent());
+                */
+            try {
+                if (log.isDebugEnabled()) {
+                    log.debug(
+                        "invoke FeatureService - StyleDialog"); // NOI18N
+                }
+                // only create one instance of the styledialog
+                final Frame parentFrame = StaticSwingTools.getParentFrame(ThemeLayerWidget.this);
+                if (styleDialog == null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("creating new StyleDialog '"
+                                    + parentFrame.getTitle() + "'"); // NOI18N
+                    }
+
+                    final String lookupkey = "Jump";
+
+                    if ((lookupkey != null) && !lookupkey.isEmpty()) {
+                        final Lookup.Result<StyleDialogInterface> result = Lookup.getDefault()
+                                    .lookupResult(StyleDialogInterface.class);
+
+                        for (final StyleDialogInterface dialog : result.allInstances()) {
+                            if (lookupkey.equals(dialog.getKey())) {
+                                styleDialog = dialog;
+                            }
+                        }
+                    }
+                    if (styleDialog == null) {
+                        styleDialog = Lookup.getDefault().lookup(StyleDialogInterface.class);
+                    }
+                }
+
+                // configure dialog, adding attributes to the tab and
+                // set style from the layer properties
+
+                final ArrayList<String> args = new ArrayList<String>();
+                args.add("Allgemein");
+                args.add("Darstellung");
+                args.add("Massstab");
+                args.add("Thematische Farbgebung");
+                args.add("Beschriftung");
+                args.add("TextEditor");
+                // args.add("Begleitsymbole");
+
+                final JDialog dialog = styleDialog.configureDialog(
+                        selectedService,
+                        parentFrame,
+                        CismapBroker.getInstance().getMappingComponent(),
+                        args);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("set dialog visible"); // NOI18N
+                }
+                StaticSwingTools.showDialog(dialog);
+            } catch (Throwable t) {
+                log.error("could not configure StyleDialog: " + t.getMessage(), t); // NOI18N
+            }
+            // check returnstatus
+            if ((styleDialog != null) && styleDialog.isAccepted()) {
+                final Runnable r = styleDialog.createResultTask(); 
+
+                CismetThreadPool.execute(r);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Style Dialog canceled");     // NOI18N
+                }
+            }
         }
     }
 
