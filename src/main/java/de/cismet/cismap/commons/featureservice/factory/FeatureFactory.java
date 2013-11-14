@@ -175,9 +175,11 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
     /**
      * DOCUMENT ME!
      *
-     * @param  styles  DOCUMENT ME!
+     * @param   bb  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    void setSLDStyle(Map<String, LinkedList<Style>> styles);
+    int getFeatureCount(BoundingBox bb);
 
     /**
      * DOCUMENT ME!
@@ -200,7 +202,7 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      *
      * @return  DOCUMENT ME!
      */
-    int getFeatureCount(BoundingBox bb);
+    void setLayerName(final String layerName);
 
     //~ Inner Classes ----------------------------------------------------------
 
