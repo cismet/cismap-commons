@@ -479,8 +479,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
         //~ Methods ------------------------------------------------------------
 
-        //~ Methods ------------------------------------------------------------
-
         /**
          * DOCUMENT ME!
          *
