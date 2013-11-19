@@ -13,7 +13,6 @@ package de.cismet.cismap.commons;
 
 import edu.umd.cs.piccolo.PNode;
 
-import java.awt.EventQueue;
 import java.awt.Image;
 
 import java.beans.PropertyChangeEvent;
@@ -21,7 +20,9 @@ import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
@@ -321,6 +322,15 @@ public class HeadlessMapProvider {
      */
     public void setBoundingBox(final XBoundingBox boundingBox) {
         this.boundingBox = boundingBox;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crs  DOCUMENT ME!
+     */
+    public void setCrs(final Crs crs) {
+        mappingModel.setSrs(crs);
     }
 
     /**
