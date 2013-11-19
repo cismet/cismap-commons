@@ -13,7 +13,6 @@ package de.cismet.cismap.commons;
 
 import edu.umd.cs.piccolo.PNode;
 
-import java.awt.EventQueue;
 import java.awt.Image;
 
 import java.beans.PropertyChangeEvent;
@@ -22,8 +21,10 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -126,6 +127,7 @@ public class HeadlessMapProvider {
             // Set the default Crs
             final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
             final String defaultCrs = CismapBroker.getInstance().getDefaultCrs();
+            XBoundingBox homeBoundingBox = null;
             boolean defaultCrsFound = false;
 
             for (final Crs crs : crsList) {
@@ -147,17 +149,30 @@ public class HeadlessMapProvider {
                             .getInitialBoundingBox();
             }
 
-            mappingModel.addHome(boundingBox);
+            final HashMap homeMap =
+                ((ActiveLayerModel)CismapBroker.getInstance().getMappingComponent().getMappingModel())
+                        .getHomeBoundingBoxes();
+            final Set keys = homeMap.keySet();
 
-            if (boundingBox == null) {
-                LOG.error("Home boundingBox not found");
-                mappingModel.addHome(new XBoundingBox(
-                        374271.251964098,
-                        5681514.032498134,
-                        374682.9413952776,
-                        5681773.852810634,
-                        "EPSG:25832",
-                        true));
+            for (final Object key : keys) {
+                homeBoundingBox = (XBoundingBox)homeMap.get(key);
+                mappingModel.addHome(homeBoundingBox);
+            }
+
+            if (mappingModel.getInitialBoundingBox() == null) {
+                LOG.error("Default home boundingBox not found");
+
+                if (homeBoundingBox != null) {
+                    LOG.warn("Calculate home bounding box from " + homeBoundingBox);
+                    try {
+                        final CrsTransformer transformer = new CrsTransformer(defaultCrs);
+
+                        homeBoundingBox = transformer.transformBoundingBox(homeBoundingBox);
+                        mappingModel.addHome(homeBoundingBox);
+                    } catch (Exception e) {
+                        LOG.error("Cannot calculate home bounding box", e);
+                    }
+                }
             }
         } else {
             // set default values for test purposes
@@ -307,6 +322,15 @@ public class HeadlessMapProvider {
      */
     public void setBoundingBox(final XBoundingBox boundingBox) {
         this.boundingBox = boundingBox;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  crs  DOCUMENT ME!
+     */
+    public void setCrs(final Crs crs) {
+        mappingModel.setSrs(crs);
     }
 
     /**
