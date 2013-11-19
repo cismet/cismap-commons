@@ -20,7 +20,6 @@ import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
