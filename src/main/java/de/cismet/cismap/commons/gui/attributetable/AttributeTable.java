@@ -61,6 +61,7 @@ import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
@@ -88,6 +89,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private CustomTableModel model;
     private int popupColumn;
     private MappingComponent mappingComponent;
+    private boolean selectionChangeFromMap = false;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFirstPage;
@@ -192,8 +194,20 @@ public class AttributeTable extends javax.swing.JPanel {
                                 final boolean selected = Arrays.binarySearch(
                                         selectedFeatureIds,
                                         ((FeatureWithId)feature).getId()) >= 0;
-                                if (selected != pfeature.isSelected()) {
-                                    pfeature.setSelected(selected);
+
+                                if (!selectionChangeFromMap) {
+                                    if (selected != pfeature.isSelected()) {
+                                        pfeature.setSelected(selected);
+                                    }
+                                    if (selected) {
+                                        final SelectionListener sl = (SelectionListener)
+                                            mappingComponent.getInputEventListener().get(MappingComponent.SELECT);
+                                        sl.addSelectedFeature(pfeature);
+                                    } else {
+                                        final SelectionListener sl = (SelectionListener)
+                                            mappingComponent.getInputEventListener().get(MappingComponent.SELECT);
+                                        sl.removeSelectedFeature(pfeature);
+                                    }
                                 }
                             }
                         }
@@ -1056,7 +1070,9 @@ public class AttributeTable extends javax.swing.JPanel {
                         }
                     }
 
+                    selectionChangeFromMap = true;
                     table.getSelectionModel().setValueIsAdjusting(false);
+                    selectionChangeFromMap = false;
                 }
 
                 @Override
