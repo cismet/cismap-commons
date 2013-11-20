@@ -599,21 +599,4 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
             return null;
         }
     }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   layerName  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    protected List<Style> getStyle(final String layerName) {
-        if (layerName == null) {
-            return getStyle();
-        } else if ((styles != null) && styles.containsKey(layerName)) {
-            return styles.get(layerName);
-        } else {
-            return null;
-        }
-    }
 }

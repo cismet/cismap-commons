@@ -1120,7 +1120,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panTabRules.setLayout(new java.awt.BorderLayout());
 
         panRulesButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
-        panRulesButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+        panRulesButtons.setLayout(new java.awt.FlowLayout(0));
 
         cmdAdd.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_add.png")));      // NOI18N
@@ -1139,7 +1139,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panRulesScroll.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 0, 10));
         panRulesScroll.setLayout(new java.awt.BorderLayout());
 
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(1));
 
         panRules.setBackground(new java.awt.Color(255, 255, 255));
         panRules.setLayout(new java.awt.GridLayout(1, 0));
@@ -1232,7 +1232,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         jPanel3.setPreferredSize(new java.awt.Dimension(150, 220));
         jPanel3.setLayout(new java.awt.GridBagLayout());
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(1));
         jPanel1.setMinimumSize(new java.awt.Dimension(150, 200));
         jPanel1.setPreferredSize(new java.awt.Dimension(150, 150));
         jPanel1.setLayout(new java.awt.BorderLayout());
@@ -1249,7 +1249,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panPreviewLayout.setVerticalGroup(
             panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
                 0,
-                187,
+                184,
                 Short.MAX_VALUE));
 
         jPanel1.add(panPreview, java.awt.BorderLayout.CENTER);
@@ -1507,7 +1507,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         panFill.add(txtTransparency, gridBagConstraints);
 
-        jPanel7.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 0));
+        jPanel7.setLayout(new java.awt.FlowLayout(1, 2, 0));
 
         panTransWhite.setBackground(new java.awt.Color(255, 255, 255));
         panTransWhite.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
@@ -1581,7 +1581,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         panFill.add(jPanel7, gridBagConstraints);
 
-        jPanel8.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+        jPanel8.setLayout(new java.awt.FlowLayout(0, 5, 0));
 
         panFillColor.setBackground(new java.awt.Color(0, 180, 0));
         panFillColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
@@ -1624,7 +1624,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
         panFill.add(jPanel8, gridBagConstraints);
 
-        jPanel9.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+        jPanel9.setLayout(new java.awt.FlowLayout(0, 5, 0));
 
         panLineColor.setBackground(new java.awt.Color(0, 125, 0));
         panLineColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
@@ -1801,15 +1801,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 org.jdesktop.beansbinding.BeanProperty.create("enabled"));
         bindingGroup.addBinding(binding);
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabLabeling,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        panTabLabeling.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 20, 20));
+        panTabLabeling.setLayout(new java.awt.FlowLayout(0, 20, 20));
 
         panLabeling.setLayout(new java.awt.GridBagLayout());
 
@@ -1939,7 +1931,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 0, 0);
         panLabeling.add(panLabelButtons, gridBagConstraints);
 
-        panScale.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
+        panScale.setLayout(new java.awt.FlowLayout(1, 5, 0));
 
         lblMin.setLabelFor(txtMin);
         lblMin.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblMin.text")); // NOI18N
@@ -1988,7 +1980,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 0);
         panLabeling.add(chkAutoscale, gridBagConstraints);
 
-        panAlignment.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+        panAlignment.setLayout(new java.awt.FlowLayout(0, 5, 0));
 
         btgAlignment.add(radLeft);
         radLeft.setSelected(true);
@@ -2083,20 +2075,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 org.jdesktop.beansbinding.BeanProperty.create("enabled"));
         bindingGroup.addBinding(binding);
 
-        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
-                javax.swing.BorderFactory.createTitledBorder(
-                    org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panTabAttrib.border.title")))); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabAttrib,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        panTabAttrib.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
+        panTabAttrib.setLayout(new java.awt.FlowLayout(1, 5, 0));
 
         jPanel2.setLayout(new java.awt.GridBagLayout());
 
@@ -2224,7 +2203,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         getContentPane().add(panMain, java.awt.BorderLayout.CENTER);
 
         panDialogButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, -5));
-        panDialogButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 0));
+        panDialogButtons.setLayout(new java.awt.FlowLayout(2, 10, 0));
 
         cmdOK.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdIOK.text")); // NOI18N
         cmdOK.setMaximumSize(new java.awt.Dimension(88, 23));
