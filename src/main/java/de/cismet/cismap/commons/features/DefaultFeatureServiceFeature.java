@@ -1022,8 +1022,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         if (styles == null) {
             return;
         }
+        stylings = null;
         pfeature.setStrokePaint(null);
         pfeature.setStroke(null);
+        pfeature.setPaintOnAllFeatures(null);
+        pfeature.setPaint(null);
         for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
             final org.deegree.style.se.unevaluated.Style filteredStyle = tempStyle.filter(
                     pfeature.getMappingComponent().getScaleDenominator());
