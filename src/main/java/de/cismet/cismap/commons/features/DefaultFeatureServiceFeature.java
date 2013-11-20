@@ -458,7 +458,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public boolean isHighlightingEnabled() {
-        return this.getStyle().isHighlightFeature();
+        if ((styles == null) || styles.isEmpty()) {
+            return this.getStyle().isHighlightFeature();
+        } else {
+            return true;
+        }
     }
 
     /**
