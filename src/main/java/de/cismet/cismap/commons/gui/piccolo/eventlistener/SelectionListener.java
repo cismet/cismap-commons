@@ -63,6 +63,8 @@ public class SelectionListener extends RectangleRubberBandListener {
     ArrayList<? extends CommonFeatureAction> commonFeatureActions = null;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private int clickCount = 0;
+    private Map<Feature, PFeature> selectedFeatures = new HashMap<Feature, PFeature>();
+    private boolean featuresFromServicesSelectable = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -196,8 +198,12 @@ public class SelectionListener extends RectangleRubberBandListener {
                         } else {
                             log.warn("mc.getFeatureCollection() instanceof DefaultFeatureCollection == false !!!!!!!"); // NOI18N
                         }
+
+                        changeSelection(sel);
                     } else {
                         mappingComponent.getFeatureCollection().select(sel.getFeature());
+                        unselectAll();
+                        changeSelection(sel);
                         if (pInputEvent.isAltDown()) {
                             final Coordinate mouseCoord = new Coordinate(
                                     mappingComponent.getWtst().getSourceX(
@@ -225,6 +231,7 @@ public class SelectionListener extends RectangleRubberBandListener {
                     if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
                         ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                     }
+                    unselectAll();
                 }
                 postSelectionChanged();
                 if (pInputEvent.getClickCount() == 2) {
@@ -243,8 +250,83 @@ public class SelectionListener extends RectangleRubberBandListener {
                 if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
                     ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                 }
+                unselectAll();
             }
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void unselectAll() {
+        if (featuresFromServicesSelectable) {
+            final List<Feature> allKeys = new ArrayList(selectedFeatures.keySet());
+            for (final Feature f : allKeys) {
+                final PFeature pf = selectedFeatures.remove(f);
+                if (pf != null) {
+                    pf.setSelected(false);
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    private void changeSelection(final PFeature f) {
+        if (featuresFromServicesSelectable) {
+            f.setSelected(!isSelected(f));
+
+            if (f.isSelected()) {
+                selectedFeatures.put(f.getFeature(), f);
+            } else {
+                selectedFeatures.remove(f.getFeature());
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   f  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean isSelected(final PFeature f) {
+        return selectedFeatures.get(f.getFeature()) != null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pf  DOCUMENT ME!
+     */
+    public void addSelectedFeature(final PFeature pf) {
+        if (featuresFromServicesSelectable) {
+            selectedFeatures.put(pf.getFeature(), pf);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pf  DOCUMENT ME!
+     */
+    public void removeSelectedFeature(final PFeature pf) {
+        if (featuresFromServicesSelectable) {
+            selectedFeatures.remove(pf.getFeature());
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featuresFromServicesSelectable  DOCUMENT ME!
+     */
+    public void setFeaturesFromServicesSelectable(final boolean featuresFromServicesSelectable) {
+        this.featuresFromServicesSelectable = featuresFromServicesSelectable;
     }
 
     /**
@@ -298,6 +380,7 @@ public class SelectionListener extends RectangleRubberBandListener {
 
                     if (!event.isControlDown()) {
                         ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                        unselectAll();
                     }
                     final PFeature[] pfArr = PFeatureTools.getPFeaturesInArea(mappingComponent, rectangle.getBounds());
                     final Vector<Feature> toBeSelected = new Vector<Feature>();
@@ -318,6 +401,7 @@ public class SelectionListener extends RectangleRubberBandListener {
                                     // mappingComponent.getFeatureCollection().unselect(pf.getFeature()); //war vorher
                                     // unselectAll()
                                 }
+                                changeSelection(pf);
                             }
                         } else {
                             if (log.isDebugEnabled()) {
