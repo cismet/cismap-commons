@@ -57,6 +57,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.tools.CurrentStackTrace;
 
 import de.cismet.tools.collections.MultiMap;
+import edu.umd.cs.piccolo.util.PPaintContext;
 
 /**
  * DOCUMENT ME!
@@ -2253,17 +2254,29 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     if (blue > 255) {
                         blue = 255;
                     }
-                    setPaint(new Color(red, green, blue, c.getAlpha()));
+                    setPaintOnAllFeatures(new Color(red, green, blue, c.getAlpha()));
                 } else {
-                    setPaint(new Color(1f, 1f, 1f, 0.6f));
+                    setPaintOnAllFeatures(new Color(1f, 1f, 1f, 0.6f));
                 }
             } else {
-                setPaint(nonHighlightingPaint);
+                setPaintOnAllFeatures(nonHighlightingPaint);
             }
             repaint();
         }
     }
 
+    public void setPaintOnAllFeatures(Paint newPaint) {
+        if (feature instanceof SLDStyledFeature) {
+            for (int i = 0; i < sldStyledPolygon.size(); ++i) {
+                sldStyledPolygon.get(i).setPaint(newPaint);
+            }
+        } else {
+            super.setPaint(newPaint);
+        }
+    }
+
+    
+    
     /**
      * Liefert ein boolean, ob das Pfeature gerade hervorgehoben wird.
      *
@@ -2355,7 +2368,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 final CustomFixedWidthStroke fws = new CustomFixedWidthStroke(5f);
                 setStroke(fws);
                 setStrokePaint(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground")); // NOI18N
-                setPaint(null);
+                setPaintOnAllFeatures(null);
             } else {
                 // setStroke(new FixedWidthStroke());
                 if (stroke != null) {
@@ -2400,13 +2413,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         final int red = (int)(selectionColor.getRed());     // NOI18N
                         final int green = (int)(selectionColor.getGreen()); // NOI18N
                         final int blue = (int)(selectionColor.getBlue());   // NOI18N
-                        setPaint(new Color(red, green, blue, c.getAlpha() / 2));
+                        setPaintOnAllFeatures(new Color(red, green, blue, c.getAlpha() / 2));
                     }
                 } else {
-                    setPaint(new Color(172, 210, 248, 178));
+                    setPaintOnAllFeatures(new Color(172, 210, 248, 178));
                 }
             } else {
-                setPaint(nonHighlightingPaint);
+                setPaintOnAllFeatures(nonHighlightingPaint);
             }
         }
         repaint();
