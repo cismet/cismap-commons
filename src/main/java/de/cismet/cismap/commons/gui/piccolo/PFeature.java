@@ -58,6 +58,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.tools.CurrentStackTrace;
 
 import de.cismet.tools.collections.MultiMap;
+import edu.umd.cs.piccolo.util.PPaintContext;
 
 /**
  * DOCUMENT ME!
@@ -2282,6 +2283,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
     }
 
+    public void setPaintOnAllFeatures(Paint newPaint) {
+        if (feature instanceof SLDStyledFeature) {
+            for (int i = 0; i < sldStyledPolygon.size(); ++i) {
+                sldStyledPolygon.get(i).setPaint(newPaint);
+            }
+        } else {
+            super.setPaint(newPaint);
+        }
+    }
+
+    
+    
     /**
      * DOCUMENT ME!
      *
