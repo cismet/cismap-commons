@@ -17,9 +17,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PDimension;
 
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.decorator.Filter;
-import org.jdesktop.swingx.decorator.FilterPipeline;
 import org.jdesktop.swingx.table.TableColumnExt;
 
 import org.jdom.Element;
@@ -36,9 +33,12 @@ import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.RowFilter;
+import javax.swing.SortOrder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableRowSorter;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.AbstractNewFeature;
@@ -123,7 +123,8 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     public FeatureControl(final de.cismet.cismap.commons.gui.MappingComponent mappingComponent) {
         initComponents();
         this.mappingComponent = mappingComponent;
-        jxtFeatures.setModel(new FeatureCollectionTableModel());
+        final FeatureCollectionTableModel model = new FeatureCollectionTableModel();
+        jxtFeatures.setModel(model);
 //        Enumeration en = jxtFeatures.getColumnModel().getColumns();
 //        while ( en.hasMoreElements() ) {
 //            TableColumn tc = (TableColumn)en.nextElement();
@@ -140,16 +141,22 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         jxtFeatures.getColumnModel().getColumn(7).setCellRenderer(jxtFeatures.getDefaultRenderer(Icon.class));
         // jxtFeatures.getColumnModel().getColumn(7).setCellEditor(new JXTable.BooleanEditor());
 
-        featureCollectionFilter = new FeatureCollectionFilter(false);
-        final Filter[] filterArray;
+        featureCollectionFilter = new FeatureCollectionFilter(false, model);
+        final ArrayList<RowFilter<AbstractTableModel, Integer>> usedFilters =
+            new ArrayList<RowFilter<AbstractTableModel, Integer>>();
         if (FeatureGroups.SHOW_GROUPING_ENABLED) {
-            filterArray = new Filter[] { featureCollectionFilter };
+            usedFilters.add(featureCollectionFilter);
         } else {
             final SubFeatureFilter subFeatureFilter = new SubFeatureFilter();
-            filterArray = new Filter[] { subFeatureFilter, featureCollectionFilter };
+            usedFilters.add(featureCollectionFilter);
+            usedFilters.add(subFeatureFilter);
         }
-        final FilterPipeline filters = new FilterPipeline(filterArray);
-        jxtFeatures.setFilters(filters);
+
+        final TableRowSorter<FeatureCollectionTableModel> sorter = new TableRowSorter<FeatureCollectionTableModel>(
+                model);
+        sorter.setRowFilter(RowFilter.andFilter(usedFilters));
+        jxtFeatures.setRowSorter(sorter);
+
         // jxtFeatures.setHighlighters(new HighlighterPipeline(new Highlighter[]{
         // AlternateRowHighlighter.classicLinePrinter }));
         jxtFeatures.getSelectionModel().addListSelectionListener(theListSelectionListener);
@@ -548,7 +555,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      * @return  DOCUMENT ME!
      */
     private int mapRowToModel(final int displayedRow) {
-        return jxtFeatures.getFilters().convertRowIndexToModel(displayedRow);
+        return jxtFeatures.convertRowIndexToModel(displayedRow);
             // return jxtFeatures.getFilters().convertRowIndexToView(displayedRow);
     }
 
@@ -789,7 +796,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                                 .getModelIndex());
                 ret.setAttribute(
                     "ascendingSortOrder",
-                    new Boolean(jxtFeatures.getSortOrder(viewIndex).isAscending()).toString());                // NOI18N
+                    new Boolean(jxtFeatures.getSortOrder(viewIndex).equals(SortOrder.ASCENDING)).toString());  // NOI18N
             }
             final Element columnSequence = new Element("columnSequence");                                      // NOI18N
             for (final Object tce : jxtFeatures.getColumns()) {
@@ -1185,48 +1192,15 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      *
      * @version  $Revision$, $Date$
      */
-    final class SubFeatureFilter extends Filter {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private final List<Integer> toPrevious = TypeSafeCollections.newArrayList();
+    final class SubFeatureFilter extends RowFilter<AbstractTableModel, Integer> {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        protected void reset() {
-            toPrevious.clear();
-            final int inputSize = getInputSize();
-            fromPrevious = new int[inputSize]; // fromPrevious is inherited protected
-            for (int i = 0; i < inputSize; i++) {
-                fromPrevious[i] = -1;
-            }
-        }
-
-        @Override
-        protected void init() {
-        }
-
-        @Override
-        public int getSize() {
-            return toPrevious.size();
-        }
-
-        @Override
-        protected int mapTowardModel(final int row) {
-            return toPrevious.get(row);
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   row  DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public boolean test(final int row) {
+        public boolean include(final RowFilter.Entry entry) {
+            final int modelRow = (Integer)entry.getIdentifier();
             try {
-                final Feature currentTestFeature = getFeatureCollection().getFeature(row);
+                final Feature currentTestFeature = getFeatureCollection().getFeature(modelRow);
                 if (currentTestFeature instanceof SubFeature) {
                     return ((SubFeature)currentTestFeature).getParentFeature() == null;
                 }
@@ -1236,19 +1210,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                 return true;
             }
         }
-
-        @Override
-        protected void filter() {
-            final int inputSize = getInputSize();
-            int current = 0;
-            for (int i = 0; i < inputSize; i++) {
-                if (test(i)) {
-                    toPrevious.add(i);
-                    // generate inverse map entry while we are here
-                    fromPrevious[i] = current++;
-                }
-            }
-        }
     }
 
     /**
@@ -1256,11 +1217,11 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      *
      * @version  $Revision$, $Date$
      */
-    class FeatureCollectionFilter extends Filter {
+    class FeatureCollectionFilter extends RowFilter<AbstractTableModel, Integer> {
 
         //~ Instance fields ----------------------------------------------------
 
-        private ArrayList<Integer> toPrevious;
+        private FeatureCollectionTableModel model;
         private boolean armed = false;
 
         //~ Constructors -------------------------------------------------------
@@ -1269,57 +1230,24 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
          * Creates a new FeatureCollectionFilter object.
          *
          * @param  armed  DOCUMENT ME!
+         * @param  model  DOCUMENT ME!
          */
-        public FeatureCollectionFilter(final boolean armed) {
-            super(0);
-            init();
-            reset();
+        public FeatureCollectionFilter(final boolean armed, final FeatureCollectionTableModel model) {
             this.armed = armed;
-            if (log.isDebugEnabled()) {
-                log.debug("Filter initialised."); // NOI18N
-            }
+            this.model = model;
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
-        protected void reset() {
-            toPrevious.clear();
-            final int inputSize = getInputSize();
-            fromPrevious = new int[inputSize]; // fromPrevious is inherited protected
-            for (int i = 0; i < inputSize; i++) {
-                fromPrevious[i] = -1;
-            }
-        }
-
-        @Override
-        protected void init() {
-            toPrevious = new ArrayList<Integer>();
-        }
-
-        @Override
-        public int getSize() {
-            return toPrevious.size();
-        }
-
-        @Override
-        protected int mapTowardModel(final int row) {
-            return toPrevious.get(row);
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   row  DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public boolean test(final int row) {
+        public boolean include(final RowFilter.Entry entry) {
             if (!armed) {
                 return true;
             } else {
+                final int modelRow = (Integer)entry.getIdentifier();
+
                 try {
-                    final Object value = getFeatureCollection().getFeature(row);
+                    final Object value = getFeatureCollection().getFeature(modelRow);
                     final PFeature pf = (PFeature)(mappingComponent.getPFeatureHM().get(value));
                     if (pf != null) {
                         final PBounds all = mappingComponent.getCamera().getViewBounds();
@@ -1344,19 +1272,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
             }
         }
 
-        @Override
-        protected void filter() {
-            final int inputSize = getInputSize();
-            int current = 0;
-            for (int i = 0; i < inputSize; i++) {
-                if (test(i)) {
-                    toPrevious.add(i);
-                    // generate inverse map entry while we are here
-                    fromPrevious[i] = current++;
-                }
-            }
-        }
-
         /**
          * DOCUMENT ME!
          *
@@ -1373,7 +1288,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
          */
         public void setArmed(final boolean armed) {
             this.armed = armed;
-            refresh();
+            model.fireTableDataChanged();
         }
     }
 }
