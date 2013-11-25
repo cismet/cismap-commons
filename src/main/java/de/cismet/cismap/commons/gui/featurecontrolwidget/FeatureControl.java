@@ -126,21 +126,11 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         this.mappingComponent = mappingComponent;
         final FeatureCollectionTableModel model = new FeatureCollectionTableModel();
         jxtFeatures.setModel(model);
-//        Enumeration en = jxtFeatures.getColumnModel().getColumns();
-//        while ( en.hasMoreElements() ) {
-//            TableColumn tc = (TableColumn)en.nextElement();
-//            tc.setIdentifier(tc.getIdentifier());
-//        }
-
-        // Vorerst: SingleSelection
-        // jxtFeatures.setSelectionMode(jxtFeatures.getSelectionModel().SINGLE_SELECTION);
-        // jxtFeatures.setAutoCreateColumnsFromModel(true);
 
         jxtFeatures.getColumnModel().getColumn(0).setCellRenderer(jxtFeatures.getDefaultRenderer(Icon.class));
         jxtFeatures.getColumnModel().getColumn(4).setCellRenderer(jxtFeatures.getDefaultRenderer(Number.class));
         jxtFeatures.getColumnModel().getColumn(5).setCellRenderer(jxtFeatures.getDefaultRenderer(Number.class));
         jxtFeatures.getColumnModel().getColumn(7).setCellRenderer(jxtFeatures.getDefaultRenderer(Icon.class));
-        // jxtFeatures.getColumnModel().getColumn(7).setCellEditor(new JXTable.BooleanEditor());
 
         featureCollectionFilter = new FeatureCollectionFilter(false, model);
         final ArrayList<RowFilter<AbstractTableModel, Integer>> usedFilters =
@@ -158,8 +148,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         sorter.setRowFilter(RowFilter.andFilter(usedFilters));
         jxtFeatures.setRowSorter(sorter);
 
-        // jxtFeatures.setHighlighters(new HighlighterPipeline(new Highlighter[]{
-        // AlternateRowHighlighter.classicLinePrinter }));
         jxtFeatures.getSelectionModel().addListSelectionListener(theListSelectionListener);
         jxtFeatures.addMouseListener(new MouseAdapter() {
 
@@ -179,24 +167,16 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      */
     private void updateSelection() {
         final int[] rows = jxtFeatures.getSelectedRows();
-//            mappingComponent.getFeatureCollection().unselectAll(false);
+        
         final List<Feature> tableSelection = TypeSafeCollections.newArrayList();
         for (int i = 0; i < rows.length; i++) {
             final int mappedRow = mapRowToModel(rows[i]);
             tableSelection.add(getFeatureCollection().getFeature(mappedRow));
         }
-//        final Set<Feature> selectionResult = TypeSafeCollections.newHashSet();
-//        for (Feature current : tableSelection) {
-//            if (current instanceof FeatureGroup) {
-//                selectionResult.addAll(FeatureGroups.expandAll((FeatureGroup) current, true));
-//            } else {
-//                selectionResult.add(current);
-//            }
-//        }
+
         // Hinter die Schleife gestellt, damit nicht f\u00FCr alle selektierten Features ein Event gefeuert wird
         mappingComponent.getFeatureCollection().removeFeatureCollectionListener(FeatureControl.this);
         mappingComponent.getFeatureCollection().select(tableSelection);
-//        mappingComponent.getFeatureCollection().select(selectionResult);
         mappingComponent.getFeatureCollection().addFeatureCollectionListener(FeatureControl.this);
     }
 
@@ -557,7 +537,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      */
     private int mapRowToModel(final int displayedRow) {
         return jxtFeatures.convertRowIndexToModel(displayedRow);
-            // return jxtFeatures.getFilters().convertRowIndexToView(displayedRow);
     }
 
     /**
@@ -688,22 +667,11 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 
     @Override
     public void shownMapBoundsChanged() {
-        // refreshTableAndTryToKeepTheFuckingSelection();
         if (featureCollectionFilter.isArmed()) {
             ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
         }
-//        final JXTable t = new JXTable();
-//        t.getSortedColumn();
     }
-
-//    private void refreshTableAndTryToKeepTheFuckingSelection() {
-//        int[] i=jxtFeatures.getSelectedRows();
-//        ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
-//        for (int j = 0; j < i.length; j++) {
-//            jxtFeatures.getSelectionModel().setSelectionInterval(i[j],i[j]);
-//        }
-//
-//    }
+    
     @Override
     public void featuresRemoved(final FeatureCollectionEvent fce) {
         ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
@@ -897,7 +865,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                         }
                         try {
                             jxtFeatures.getColumnExt(id).setPreferredWidth(col.getAttribute("width").getIntValue()); // NOI18N
-                            // jxtFeatures.getColumnExt(id).setWidth();
                         } catch (Exception ex) {
                             LOG.warn("Error while reading configs", ex); // NOI18N
                         }
@@ -1256,10 +1223,6 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                         mappingComponent.getCamera().viewToLocal(delta);
                         final PDimension size = new PDimension(pf.getFullBounds().getSize());
                         mappingComponent.getCamera().viewToLocal(size);
-                        // boolean test=(Math.abs(delta.width)<pf.getFullBounds().getWidth()*0.75 &&
-                        // Math.abs(delta.height)<pf.getFullBounds().getHeight()*0.75); boolean
-                        // test=(Math.abs(delta.width)<=pf.getFullBounds().getWidth()-10 &&
-                        // Math.abs(delta.height)<=pf.getFullBounds().getHeight()-10);
                         final boolean test = ((Math.abs(delta.width) <= size.width)
                                         && (Math.abs(delta.height) <= size.height));
                         return test;
