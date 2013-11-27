@@ -14,6 +14,7 @@ package de.cismet.cismap.commons;
 import edu.umd.cs.piccolo.PNode;
 
 import java.awt.Image;
+import java.awt.geom.Rectangle2D;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -450,7 +451,9 @@ public class HeadlessMapProvider {
         }
 
         map.setSize(correctedWidthPixels, correctedHeightPixels);
+        map.setNewViewBounds(null);
         map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
+        waitUntilGotoBoundingBoxIsComplete();
         // check the minimum map scale condition
         if ((minimumScaleDenominator > 0) && (map.getScaleDenominator() < minimumScaleDenominator)) {
             if (LOG.isDebugEnabled()) {
@@ -464,7 +467,9 @@ public class HeadlessMapProvider {
                     bb.getY2(),
                     boundingBox.getSrs(),
                     boundingBox.isMetric());
+            map.setNewViewBounds(null);
             map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
+            waitUntilGotoBoundingBoxIsComplete();
         }
 
         // check if we have to round up the scale to a certain precision
@@ -484,7 +489,9 @@ public class HeadlessMapProvider {
                     bb.getY2(),
                     boundingBox.getSrs(),
                     boundingBox.isMetric());
+            map.setNewViewBounds(null);
             map.gotoBoundingBox(correctedBoundingBox, true, true, 0, false);
+            waitUntilGotoBoundingBoxIsComplete();
         }
 
         imgScaleDenominator = map.getScaleDenominator();
@@ -512,13 +519,21 @@ public class HeadlessMapProvider {
             listener.createImageFromFeatures();
         }
 
-        // @Thorsten: siehe Kommentar zu prepareFeaturesBeforePaint()
-        if (false) {
-            map.setPrintingResolution(printingResolution);
-            prepareFeaturesBeforePaint();
-        }
-
         return listener;
+    }
+
+    /**
+     * Waits until the last gotoBoundingBox method of the MappingComponent is completed. This does only work, if
+     * setNewViewBounds(null) was invoked, before the gotoBoundingBox invocation and the history flag mus be true
+     */
+    private void waitUntilGotoBoundingBoxIsComplete() {
+        while (map.getViewBounds() == null) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                // nothing to do
+            }
+        }
     }
 
     /**
@@ -556,73 +571,6 @@ public class HeadlessMapProvider {
             final double widthInPixels,
             final double heightInPixels) throws ExecutionException, InterruptedException {
         return getImage(basedpi, targetDpi, widthInPixels, heightInPixels).get();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @Thorsten:  Die Idee von dieser Methode ist es dass die Features von der MappingComponent entfernt und nochmals
-     *             draufgezeichnet werden, damit sie somit ihre Transparenz verlieren. Die Methode basiert auf
-     *             MappingComponent.getImageOfFeatures(). Im Augenblick kann man sie in getImage() aktivieren oder
-     *             deaktivieren.
-     */
-    private void prepareFeaturesBeforePaint() {
-        final Collection<Feature> fc = map.getFeatureCollection().getAllFeatures();
-        final List<PFeature> list = new ArrayList<PFeature>();
-
-        try {
-            for (final Feature f : fc) {
-                final PFeature p = new PFeature(f, map);
-                list.add(p);
-            }
-            final double scale = 1 / map.getCamera().getViewScale();
-
-            map.getFeatureCollection().removeAllFeatures();
-
-            // TODO Sorge dafür dass die PSwingKomponente richtig gedruckt wird und dass die Karte nicht mehr "zittert"
-
-            int printingLineWidth = 10;
-            for (final PFeature original : list) {
-                original.setInfoNodeExpanded(false);
-
-                if (printingLineWidth > 0) {
-                    ((StyledFeature)original.getFeature()).setLineWidth(printingLineWidth);
-                } else if (StyledFeature.class.isAssignableFrom(original.getFeature().getClass())) {
-                    final int orginalLineWidth = ((StyledFeature)original.getFeature()).getLineWidth();
-                    printingLineWidth = (int)Math.round(orginalLineWidth * (printingResolution * 2));
-                    ((StyledFeature)original.getFeature()).setLineWidth(printingLineWidth);
-                }
-
-                final PFeature copy = new PFeature(original.getFeature(),
-                        map.getWtst(),
-                        0,
-                        0,
-                        map,
-                        true);
-                map.getLayer().addChild(copy);
-
-                copy.setTransparency(original.getTransparency());
-                copy.setStrokePaint(original.getStrokePaint());
-                final boolean expanded = original.isInfoNodeExpanded();
-                copy.addInfoNode();
-                copy.setInfoNodeExpanded(false);
-                copy.refreshInfoNode();
-
-                original.refreshInfoNode();
-
-                map.removeStickyNode(copy.getStickyChild());
-
-                final PNode stickyChild = copy.getStickyChild();
-                if (stickyChild != null) {
-                    stickyChild.setScale(scale * printingResolution);
-                    if (copy.hasSecondStickyChild()) {
-                        copy.getSecondStickyChild().setScale(scale * printingResolution);
-                    }
-                }
-            }
-        } catch (final Exception exception) {
-            LOG.error("Error during the creation of an image from features", exception); // NOI18N
-        }
     }
 
     /**
@@ -742,6 +690,7 @@ public class HeadlessMapProvider {
         @Override
         public synchronized void repaintStart(final RepaintEvent repaintEvent) {
             final RetrievalEvent e = repaintEvent.getRetrievalEvent();
+            LOG.error("start");
             if (LOG.isDebugEnabled()) {
                 LOG.debug("retrievalStarted" + e.getRetrievalService()); // NOI18N
             }
