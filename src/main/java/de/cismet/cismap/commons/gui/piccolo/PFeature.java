@@ -2289,7 +2289,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void setPaintOnAllFeatures(final Paint newPaint) {
         if (feature instanceof SLDStyledFeature) {
-            if (sldStyledPolygon == null || sldStyledPolygon.size() == 0) {
+            if ((sldStyledPolygon == null) || (sldStyledPolygon.size() == 0)) {
                 super.setPaint(newPaint);
             } else {
                 for (int i = 0; i < sldStyledPolygon.size(); ++i) {
