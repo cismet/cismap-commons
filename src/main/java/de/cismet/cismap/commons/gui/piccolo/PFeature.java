@@ -2299,7 +2299,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void setPaintOnAllFeatures(final Paint newPaint) {
         if (feature instanceof SLDStyledFeature) {
-            if (sldStyledPolygon == null || sldStyledPolygon.size() == 0) {
+            if ((sldStyledPolygon == null) || (sldStyledPolygon.size() == 0)) {
                 super.setPaint(newPaint);
             } else {
                 for (int i = 0; i < sldStyledPolygon.size(); ++i) {
@@ -2404,14 +2404,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 setStrokePaint(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground")); // NOI18N
                 setPaintOnAllFeatures(null);
             } else {
-                // setStroke(new FixedWidthStroke());
+//                setStroke(new FixedWidthStroke());
 //                if (stroke != null) {
-                    setStroke(stroke);
+                setStroke(stroke);
 //                } else {
 //                    setStroke(FIXED_WIDTH_STROKE);
 //                }
 //                if (strokePaint != null) {
-                    setStrokePaint(strokePaint);
+                setStrokePaint(strokePaint);
 //                } else {
 //                    setStrokePaint(Color.black);
 //                }
