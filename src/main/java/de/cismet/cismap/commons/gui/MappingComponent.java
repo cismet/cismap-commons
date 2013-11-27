@@ -2270,6 +2270,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  the current view bounds
+     */
+    public Rectangle2D getViewBounds() {
+        return newViewBounds;
+    }
+
+    /**
      * Will be called if the selection of features changes. It selects the PFeatures connected to the selected features
      * of the featurecollectionevent and moves them to the front. Also repaints handles at the end.
      *
