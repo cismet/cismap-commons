@@ -1128,6 +1128,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         //~ Methods ------------------------------------------------------------
 
         @Override
+        public boolean isVisible(final int mask) {
+            return ((visibility & mask) == mask) && ((mask & FEATURE_SERVICE) != 0);
+        }
+
+        @Override
         public void actionPerformed(final ActionEvent e) {
             final TreePath path = tree.getSelectionPath();
 
