@@ -2250,6 +2250,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void featureSelectionChanged(final FeatureCollectionEvent fce) {
         final Collection allChildren = featureLayer.getChildrenReference();
         final ArrayList<PFeature> all = new ArrayList<PFeature>();
+        final SelectionListener sl = (SelectionListener)getInputEventListener().get(MappingComponent.SELECT);
+        boolean selectionChangedBySelectionListener = false;
+
+        if (sl != null) {
+            selectionChangedBySelectionListener = sl.isSelectionInProgress();
+        }
 
         for (final Object o : allChildren) {
             if (o instanceof PFeature) {
@@ -2264,6 +2270,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         for (final PFeature f : all) {
             f.setSelected(false);
+            if ((sl != null) && !selectionChangedBySelectionListener) {
+                sl.removeSelectedFeature(f);
+            }
         }
         Collection<Feature> c;
         if (fce != null) {
@@ -2292,7 +2301,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     }
                     feature.setSelected(true);
                     feature.moveToFront();
-
+                    if ((sl != null) && !selectionChangedBySelectionListener) {
+                        sl.addSelectedFeature(feature);
+                    }
                     // Fuer den selectedObjectPresenter (Eigener PCanvas)
                     syncSelectedObjectPresenter(1000);
                 } else {
