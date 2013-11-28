@@ -47,6 +47,7 @@ import javax.swing.table.TableModel;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
@@ -90,6 +91,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private int popupColumn;
     private MappingComponent mappingComponent;
     private boolean selectionChangeFromMap = false;
+    private FeatureCollectionListener featureCollectionListener;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFirstPage;
@@ -233,6 +235,64 @@ public class AttributeTable extends javax.swing.JPanel {
                 new Color(255, 255, 255),
                 new Color(235, 235, 235));
         ((JXTable)table).setHighlighters(alternateRowHighlighter);
+
+        featureCollectionListener = new FeatureCollectionListener() {
+
+                @Override
+                public void featuresAdded(final FeatureCollectionEvent fce) {
+                }
+
+                @Override
+                public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
+                }
+
+                @Override
+                public void featuresRemoved(final FeatureCollectionEvent fce) {
+                }
+
+                @Override
+                public void featuresChanged(final FeatureCollectionEvent fce) {
+                }
+
+                @Override
+                public void featureSelectionChanged(final FeatureCollectionEvent fce) {
+                    final Collection<Feature> features = fce.getFeatureCollection().getSelectedFeatures();
+                    final List<FeatureServiceFeature> selectedFeatures = new ArrayList<FeatureServiceFeature>();
+                    final List<FeatureServiceFeature> tableFeatures = model.getFeatureServiceFeatures();
+                    final LayerProperties layerProperties = featureService.getLayerProperties();
+
+                    for (final Feature feature : features) {
+                        if (feature instanceof FeatureServiceFeature) {
+                            if (((FeatureServiceFeature)feature).getLayerProperties() == layerProperties) {
+                                selectedFeatures.add((FeatureServiceFeature)feature);
+                            }
+                        }
+                    }
+
+                    table.getSelectionModel().setValueIsAdjusting(true);
+                    for (int index = 0; index < tableFeatures.size(); ++index) {
+                        final FeatureServiceFeature feature = tableFeatures.get(index);
+
+                        if (selectedFeatures.contains(feature)) {
+                            table.addRowSelectionInterval(index, index);
+                        } else {
+                            table.removeRowSelectionInterval(index, index);
+                        }
+                    }
+
+                    selectionChangeFromMap = true;
+                    table.getSelectionModel().setValueIsAdjusting(false);
+                    selectionChangeFromMap = false;
+                }
+
+                @Override
+                public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
+                }
+
+                @Override
+                public void featureCollectionChanged() {
+                }
+            };
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -295,6 +355,7 @@ public class AttributeTable extends javax.swing.JPanel {
                             model.setNewFeatureList(featureList);
                         }
 
+                        applySelection();
                         setTableSize();
                         txtCurrentPage.setText(String.valueOf(page));
                     } catch (Exception e) {
@@ -1025,64 +1086,30 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     public void setMappingComponent(final MappingComponent mappingComponent) {
         this.mappingComponent = mappingComponent;
+        mappingComponent.getFeatureCollection().addFeatureCollectionListener(featureCollectionListener);
 
-        mappingComponent.getFeatureCollection().addFeatureCollectionListener(new FeatureCollectionListener() {
+        if (model != null) {
+            applySelection();
+        }
+    }
 
-                @Override
-                public void featuresAdded(final FeatureCollectionEvent fce) {
-                }
+    /**
+     * DOCUMENT ME!
+     */
+    private void applySelection() {
+        final SelectionListener sl = (SelectionListener)mappingComponent.getInputEventListener()
+                    .get(MappingComponent.SELECT);
+        final Collection<PFeature> selectedPFeatures = sl.getAllSelectedPFeatures();
+        final Collection<Feature> selectedFeatures = new ArrayList<Feature>();
 
-                @Override
-                public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-                }
+        for (final PFeature f : selectedPFeatures) {
+            selectedFeatures.add(f.getFeature());
+        }
 
-                @Override
-                public void featuresRemoved(final FeatureCollectionEvent fce) {
-                }
-
-                @Override
-                public void featuresChanged(final FeatureCollectionEvent fce) {
-                }
-
-                @Override
-                public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-                    final Collection<Feature> features = fce.getFeatureCollection().getSelectedFeatures();
-                    final List<FeatureServiceFeature> selectedFeatures = new ArrayList<FeatureServiceFeature>();
-                    final List<FeatureServiceFeature> tableFeatures = model.getFeatureServiceFeatures();
-                    final LayerProperties layerProperties = featureService.getLayerProperties();
-
-                    for (final Feature feature : features) {
-                        if (feature instanceof FeatureServiceFeature) {
-                            if (((FeatureServiceFeature)feature).getLayerProperties() == layerProperties) {
-                                selectedFeatures.add((FeatureServiceFeature)feature);
-                            }
-                        }
-                    }
-
-                    table.getSelectionModel().setValueIsAdjusting(true);
-                    for (int index = 0; index < tableFeatures.size(); ++index) {
-                        final FeatureServiceFeature feature = tableFeatures.get(index);
-
-                        if (selectedFeatures.contains(feature)) {
-                            table.addRowSelectionInterval(index, index);
-                        } else {
-                            table.removeRowSelectionInterval(index, index);
-                        }
-                    }
-
-                    selectionChangeFromMap = true;
-                    table.getSelectionModel().setValueIsAdjusting(false);
-                    selectionChangeFromMap = false;
-                }
-
-                @Override
-                public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
-                }
-
-                @Override
-                public void featureCollectionChanged() {
-                }
-            });
+        final DefaultFeatureCollection dfc = new DefaultFeatureCollection();
+        dfc.addToSelection(selectedFeatures);
+        final FeatureCollectionEvent e = new FeatureCollectionEvent(dfc, selectedFeatures);
+        featureCollectionListener.featureSelectionChanged(e);
     }
 
     //~ Inner Classes ----------------------------------------------------------
