@@ -17,6 +17,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PDimension;
 
+import org.apache.log4j.Logger;
+
 import org.jdesktop.swingx.table.TableColumnExt;
 
 import org.jdom.Element;
@@ -61,7 +63,6 @@ import de.cismet.tools.StaticDecimalTools;
 import de.cismet.tools.collections.TypeSafeCollections;
 
 import de.cismet.tools.configuration.Configurable;
-import org.apache.log4j.Logger;
 
 /**
  * DOCUMENT ME!
@@ -73,9 +74,12 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
     MapBoundsListener,
     Configurable {
 
-    //~ Instance fields --------------------------------------------------------
+    //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(FeatureControl.class);
+
+    //~ Instance fields --------------------------------------------------------
+
     boolean wizardMode = false;
     private FeatureCollectionFilter featureCollectionFilter;
     private ImageIcon icoGreenled = new ImageIcon(getClass().getResource(
@@ -167,7 +171,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      */
     private void updateSelection() {
         final int[] rows = jxtFeatures.getSelectedRows();
-        
+
         final List<Feature> tableSelection = TypeSafeCollections.newArrayList();
         for (int i = 0; i < rows.length; i++) {
             final int mappedRow = mapRowToModel(rows[i]);
@@ -436,72 +440,72 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void togHoldAllActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togHoldAllActionPerformed
+    private void togHoldAllActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togHoldAllActionPerformed
         mappingComponent.getFeatureCollection().setHoldAll(togHoldAll.isSelected());
-    }//GEN-LAST:event_togHoldAllActionPerformed
+    }                                                                              //GEN-LAST:event_togHoldAllActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton3ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    private void jButton3ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton3ActionPerformed
         tester();
-    }//GEN-LAST:event_jButton3ActionPerformed
+    }                                                                            //GEN-LAST:event_jButton3ActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveAllActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveAllActionPerformed
+    private void cmdRemoveAllActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveAllActionPerformed
         mappingComponent.getFeatureCollection().removeAllFeatures();
         mappingComponent.getMemUndo().clear();
         mappingComponent.getMemRedo().clear();
-    }//GEN-LAST:event_cmdRemoveAllActionPerformed
+    }                                                                                //GEN-LAST:event_cmdRemoveAllActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void togSelectionWizardActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togSelectionWizardActionPerformed
+    private void togSelectionWizardActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togSelectionWizardActionPerformed
         wizardMode = togSelectionWizard.isSelected();
-    }//GEN-LAST:event_togSelectionWizardActionPerformed
+    }                                                                                      //GEN-LAST:event_togSelectionWizardActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void togFixMapScaleActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togFixMapScaleActionPerformed
+    private void togFixMapScaleActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togFixMapScaleActionPerformed
         mappingComponent.setFixedMapScale(togFixMapScale.isSelected());
-    }//GEN-LAST:event_togFixMapScaleActionPerformed
+    }                                                                                  //GEN-LAST:event_togFixMapScaleActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void togFixMapExtentActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togFixMapExtentActionPerformed
+    private void togFixMapExtentActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togFixMapExtentActionPerformed
         mappingComponent.setFixedMapExtent(togFixMapExtent.isSelected());
-    }//GEN-LAST:event_togFixMapExtentActionPerformed
+    }                                                                                   //GEN-LAST:event_togFixMapExtentActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void togDisplayObjectInfoActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togDisplayObjectInfoActionPerformed
+    private void togDisplayObjectInfoActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togDisplayObjectInfoActionPerformed
         mappingComponent.setInfoNodesVisible(togDisplayObjectInfo.isSelected());
-    }//GEN-LAST:event_togDisplayObjectInfoActionPerformed
+    }                                                                                        //GEN-LAST:event_togDisplayObjectInfoActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdHoldActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdHoldActionPerformed
+    private void cmdHoldActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdHoldActionPerformed
         final int[] rows = jxtFeatures.getSelectedRows();
         for (int i = 0; i < rows.length; i++) {
             final int mappedRow = mapRowToModel(rows[i]);
@@ -512,7 +516,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                 getFeatureCollection().holdFeature(f);
             }
         }
-    }//GEN-LAST:event_cmdHoldActionPerformed
+    }                                                                           //GEN-LAST:event_cmdHoldActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -566,7 +570,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveFeaturesActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveFeaturesActionPerformed
+    private void cmdRemoveFeaturesActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveFeaturesActionPerformed
         mappingComponent.getMemUndo().clear();
         mappingComponent.getMemRedo().clear();
         final int[] rows = jxtFeatures.getSelectedRows();
@@ -603,41 +607,41 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
         if (firstSelectedRow >= 0) {
             jxtFeatures.getSelectionModel().setSelectionInterval(firstSelectedRow, firstSelectedRow);
         }
-    }//GEN-LAST:event_cmdRemoveFeaturesActionPerformed
+    } //GEN-LAST:event_cmdRemoveFeaturesActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdZoomToFeaturesMouseExited(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cmdZoomToFeaturesMouseExited
+    private void cmdZoomToFeaturesMouseExited(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_cmdZoomToFeaturesMouseExited
 //        mappingComponent.outlineArea((BoundingBox)null);
-    }//GEN-LAST:event_cmdZoomToFeaturesMouseExited
+    } //GEN-LAST:event_cmdZoomToFeaturesMouseExited
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdZoomToFeaturesActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdZoomToFeaturesActionPerformed
+    private void cmdZoomToFeaturesActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdZoomToFeaturesActionPerformed
         mappingComponent.zoomToSelection();
-    }//GEN-LAST:event_cmdZoomToFeaturesActionPerformed
+    }                                                                                     //GEN-LAST:event_cmdZoomToFeaturesActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdZoomToAllFeaturesActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdZoomToAllFeaturesActionPerformed
+    private void cmdZoomToAllFeaturesActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdZoomToAllFeaturesActionPerformed
         mappingComponent.zoomToFeatureCollection();
-    }//GEN-LAST:event_cmdZoomToAllFeaturesActionPerformed
+    }                                                                                        //GEN-LAST:event_cmdZoomToAllFeaturesActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdZoomToFeaturesMouseEntered(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cmdZoomToFeaturesMouseEntered
+    private void cmdZoomToFeaturesMouseEntered(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_cmdZoomToFeaturesMouseEntered
 //        int[] rows=jxtFeatures.getSelectedRows();
 //        Geometry g=null;
 //        for (int i = 0; i < rows.length; i++) {
@@ -653,17 +657,17 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 //            BoundingBox bb=new BoundingBox(g);
 //            mappingComponent.outlineArea(bb);
 //        }
-    }//GEN-LAST:event_cmdZoomToFeaturesMouseEntered
+    } //GEN-LAST:event_cmdZoomToFeaturesMouseEntered
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void togShowOnlyVisibleActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togShowOnlyVisibleActionPerformed
+    private void togShowOnlyVisibleActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togShowOnlyVisibleActionPerformed
         featureCollectionFilter.setArmed(togShowOnlyVisible.isSelected());
         ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
-    }//GEN-LAST:event_togShowOnlyVisibleActionPerformed
+    }                                                                                      //GEN-LAST:event_togShowOnlyVisibleActionPerformed
 
     @Override
     public void shownMapBoundsChanged() {
@@ -671,7 +675,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
             ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
         }
     }
-    
+
     @Override
     public void featuresRemoved(final FeatureCollectionEvent fce) {
         ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
@@ -727,8 +731,10 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     current = FeatureGroups.getRootFeature(sf);
                 }
                 final int collectionIndex = fc.getAllFeatures().indexOf(current);
-                final int viewIndex = jxtFeatures.convertRowIndexToView(collectionIndex);
-                jxtFeatures.getSelectionModel().addSelectionInterval(viewIndex, viewIndex);
+                if (collectionIndex != -1) {
+                    final int viewIndex = jxtFeatures.convertRowIndexToView(collectionIndex);
+                    jxtFeatures.getSelectionModel().addSelectionInterval(viewIndex, viewIndex);
+                }
             }
         } else {
             jxtFeatures.scrollRowToVisible(0);
@@ -866,11 +872,11 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                         try {
                             jxtFeatures.getColumnExt(id).setPreferredWidth(col.getAttribute("width").getIntValue()); // NOI18N
                         } catch (Exception ex) {
-                            LOG.warn("Error while reading configs", ex); // NOI18N
+                            LOG.warn("Error while reading configs", ex);                                             // NOI18N
                         }
                     }
                 } catch (Throwable t) {
-                    LOG.warn("Error while configuring featureControlComponent:", t); // NOI18N
+                    LOG.warn("Error while configuring featureControlComponent:", t);                                 // NOI18N
                 }
                 featureCollectionFilter.setArmed(togShowOnlyVisible.isSelected());
                 mappingComponent.setInfoNodesVisible(togDisplayObjectInfo.isSelected());
@@ -878,10 +884,10 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                 mappingComponent.setFixedMapScale(togFixMapScale.isSelected());
                 mappingComponent.getFeatureCollection().setHoldAll(togHoldAll.isSelected());
             } else {
-                LOG.warn("No configurarion data for FeatureControl available."); // NOI18N
+                LOG.warn("No configurarion data for FeatureControl available.");                                     // NOI18N
             }
         } catch (Throwable t) {
-            LOG.error("Error while loading configuration (application start)", t); // NOI18N
+            LOG.error("Error while loading configuration (application start)", t);                                   // NOI18N
         }
     }
 
