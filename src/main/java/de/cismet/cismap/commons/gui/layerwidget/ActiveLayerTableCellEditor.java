@@ -28,7 +28,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
@@ -59,12 +59,16 @@ import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.QueryEditorDialog;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
+import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
+import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.featureservice.style.StyleDialogInterface;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.AbstractWMS;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.util.SLDStyleUtil;
 import de.cismet.cismap.commons.wms.capabilities.Style;
 
 import de.cismet.tools.CismetThreadPool;
@@ -99,8 +103,26 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
             // paints the rectangle inside the button that creates the StyleDialog
             @Override
             protected void paintComponent(final Graphics g) {
-                final de.cismet.cismap.commons.featureservice.style.Style style = ((AbstractFeatureService)value)
-                            .getLayerProperties().getStyle();
+                de.cismet.cismap.commons.featureservice.style.Style style = null;
+
+                final FeatureFactory ff = ((AbstractFeatureService)value).getFeatureFactory();
+                BasicStyle basicStyle = null;
+
+                if (ff instanceof AbstractFeatureFactory) {
+                    final AbstractFeatureFactory aff = (AbstractFeatureFactory)ff;
+                    final List<org.deegree.style.se.unevaluated.Style> styleList = aff.getStyle(aff.layerName);
+
+                    basicStyle = SLDStyleUtil.getBasicStyleFromSLDStyle(styleList);
+                }
+
+                if (basicStyle != null) {
+                    style = basicStyle;
+                } else {
+                    if (((AbstractFeatureService)value).getLayerProperties() != null) {
+                        style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
+                    }
+                }
+
                 try {
                     final Graphics2D g2d = (Graphics2D)g;
                     if (style.isDrawFill() && (style.getFillColor() != null)) {

@@ -39,11 +39,15 @@ import de.cismet.cismap.commons.ModeLayer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
+import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
+import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.util.SLDStyleUtil;
 import de.cismet.cismap.commons.wms.capabilities.Style;
 
 import de.cismet.tools.CurrentStackTrace;
@@ -345,8 +349,22 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     log.debug("is it null? " + ((AbstractFeatureService)value).getLayerProperties());
                 }
 
-                if (((AbstractFeatureService)value).getLayerProperties() != null) {
-                    styleLabel.style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
+                final FeatureFactory ff = ((AbstractFeatureService)value).getFeatureFactory();
+                BasicStyle basicStyle = null;
+
+                if (ff instanceof AbstractFeatureFactory) {
+                    final AbstractFeatureFactory aff = (AbstractFeatureFactory)ff;
+                    final List<org.deegree.style.se.unevaluated.Style> styleList = aff.getStyle(aff.layerName);
+
+                    basicStyle = SLDStyleUtil.getBasicStyleFromSLDStyle(styleList);
+                }
+
+                if (basicStyle != null) {
+                    styleLabel.style = basicStyle;
+                } else {
+                    if (((AbstractFeatureService)value).getLayerProperties() != null) {
+                        styleLabel.style = ((AbstractFeatureService)value).getLayerProperties().getStyle();
+                    }
                 }
 
                 styleLabel.repaint();
