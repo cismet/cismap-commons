@@ -731,8 +731,10 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     current = FeatureGroups.getRootFeature(sf);
                 }
                 final int collectionIndex = fc.getAllFeatures().indexOf(current);
-                final int viewIndex = jxtFeatures.convertRowIndexToView(collectionIndex);
-                jxtFeatures.getSelectionModel().addSelectionInterval(viewIndex, viewIndex);
+                if (collectionIndex != -1) {
+                    final int viewIndex = jxtFeatures.convertRowIndexToView(collectionIndex);
+                    jxtFeatures.getSelectionModel().addSelectionInterval(viewIndex, viewIndex);
+                }
             }
         } else {
             jxtFeatures.scrollRowToVisible(0);
