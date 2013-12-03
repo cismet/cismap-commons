@@ -12,17 +12,34 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
+import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.event.PPanEventHandler;
 import edu.umd.cs.piccolo.nodes.PImage;
 
+import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import java.io.IOException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.swing.JComponent;
+
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CurrentStackTrace;
+import de.cismet.tools.StaticDebuggingTools;
 
 /**
  * DOCUMENT ME!
@@ -30,13 +47,20 @@ import de.cismet.tools.CurrentStackTrace;
  * @author   hell
  * @version  $Revision$, $Date$
  */
-public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
+public class BackgroundRefreshingPanEventListener extends PPanEventHandler implements PropertyChangeListener {
 
     //~ Instance fields --------------------------------------------------------
 
     PImage pi;
     boolean rasterServiceLayerVisible = true;
+
+    private boolean imageBoosterActive = false;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private List<PNode> nodesToEnable = new ArrayList<PNode>();
+    private MappingComponent mappingComponent;
+    private volatile Image image = null;
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private boolean panStarted = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -55,33 +79,31 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
         // 1. DragBild unsichtbar machen
         // 2. Alle FeatureLayer die sichtbar sein sollen wieder sichtbar machen
         super.dragActivityFinalStep(pInputEvent);
+        panStarted = false;
 //        if (pInputEvent.getComponent() instanceof SimpleFeatureViewer) {
 //            ((SimpleFeatureViewer)pInputEvent.getComponent()).refreshBackground();
 //        }
         if (pInputEvent.getComponent() instanceof MappingComponent) {
             final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
+
             // mc.showHandles(false);
-            if ((mc.getCismapPrefs() != null) && (mc.getCismapPrefs().getGlobalPrefs() != null)
-                        && mc.getCismapPrefs().getGlobalPrefs().isPanPerformanceBoosterEnabled()
-                        && (mc.getMappingModel().getFeatureServices().size() > 0)) {
+            if (imageBoosterActive) {
+//                if (mappingComponent == null) {
+//                    mappingComponent = mc;
+//                    mc.getCamera().addPropertyChangeListener(this);
+//                }
                 mc.getRasterServiceLayer().setVisible(rasterServiceLayerVisible);
                 mc.getDragPerformanceImproverLayer().setVisible(false);
                 mc.getDragPerformanceImproverLayer().removeAllChildren();
-                for (int i = 0; i < mc.getFeatureServiceLayer().getChildrenCount(); ++i) {
-                    final Object o = mc.getFeatureServiceLayer().getChild(i).getClientProperty("serviceLayer");      // NOI18N
-                    boolean enabled = true;
-                    if ((o != null) && (o instanceof ServiceLayer)) {
-                        enabled = ((ServiceLayer)o).isEnabled() && mc.isBackgroundEnabled();
-                    } else {
-                        log.warn("konnte nicht feststellen ob ServiceLayer enabled war, deswegen auf true gesetzt"); // NOI18N
-                    }
-                    mc.getFeatureServiceLayer().getChild(i).setVisible(enabled);
+                for (final PNode node : nodesToEnable) {
+                    node.setVisible(true);
                 }
                 mc.getFeatureLayer().setVisible(true);
             }
             mc.setNewViewBounds(mc.getCamera().getViewBounds());
             mc.queryServices();
         }
+//        propertyChange(null);
     }
 
     /**
@@ -94,20 +116,25 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
         // 1. Schritt ein Bild des aktuellen PCanvas schiessen
         // 2. Dieses Bild als obersten Layer einblenden und richtig positionieren
         // 3. Alle FeatureLayer unsichtbar machen
+        panStarted = true;
         if (aEvent.getComponent() instanceof MappingComponent) {
             final MappingComponent mc = (MappingComponent)aEvent.getComponent();
 //            mc.getHandleLayer().removeAllChildren();
-            if ((mc.getCismapPrefs() != null) && (mc.getCismapPrefs().getGlobalPrefs() != null)
-                        && mc.getCismapPrefs().getGlobalPrefs().isPanPerformanceBoosterEnabled()
-                        && (mc.getMappingModel().getFeatureServices().size() > 0)) {
+            imageBoosterActive = StaticDebuggingTools.checkHomeForFile("panPerformanceBooster");
+
+            if (imageBoosterActive) {
                 if (log.isDebugEnabled()) {
                     log.debug("isPanPerformanceBoosterEnabled"); // NOI18N
                 }
                 refreshImage(mc);
                 mc.getDragPerformanceImproverLayer().setVisible(true);
                 mc.getRasterServiceLayer().setVisible(false);
-                for (int i = 0; i < mc.getFeatureServiceLayer().getChildrenCount(); ++i) {
-                    mc.getFeatureServiceLayer().getChild(i).setVisible(false);
+                for (int i = 0; i < mc.getMapServiceLayer().getChildrenCount(); ++i) {
+                    final PNode tmp = mc.getMapServiceLayer().getChild(i);
+                    if (tmp.getVisible()) {
+                        tmp.setVisible(false);
+                        nodesToEnable.add(tmp);
+                    }
                 }
                 mc.getFeatureLayer().setVisible(false);
             }
@@ -126,8 +153,15 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
         // hier nur noch \u00FCberpr\u00FCft ob es aktualisiert werden muss.
         // evtl auch nur einen einfachen Layer nehmen. Vielleicht bringts das auch schon
         rasterServiceLayerVisible = mc.getRasterServiceLayer().getVisible();
-        final Image i = mc.getCamera().toImage();
-        pi = new PImage(i);
+//        lock.readLock().lock();
+//        try {
+//            if (image == null) {
+        image = mc.getCamera().toImage();
+//            }
+        pi = new PImage(image);
+//        } finally {
+//            lock.readLock().unlock();
+//        }
         mc.getDragPerformanceImproverLayer().removeAllChildren();
         mc.getDragPerformanceImproverLayer().addChild(pi);
 //        Point2D p2d=
@@ -137,15 +171,49 @@ public class BackgroundRefreshingPanEventListener extends PPanEventHandler {
         pi.setTransparency(0.5f);
     }
 
+    /**
+     * Draws an image from a component.
+     *
+     * @param   component  DOCUMENT ME!
+     *
+     * @return  the given component as image
+     */
+    private BufferedImage componentToImage(final JComponent component) {
+        final BufferedImage img = new BufferedImage(component.getWidth(),
+                component.getHeight(),
+                BufferedImage.TYPE_INT_ARGB_PRE);
+        final Graphics g = img.getGraphics();
+        g.setColor(component.getForeground());
+        g.setFont(component.getFont());
+        component.paintAll(g);
+
+        return img.getSubimage(0, 0, img.getWidth(), img.getHeight());
+    }
+
     @Override
     public void mouseDragged(final PInputEvent e) {
         super.mouseDragged(e);
         CismapBroker.getInstance().fireMapBoundsChanged();
-//        if (e.getCanvasDelta().getHeight() > 100 || e.getCanvasDelta().getWidth() > 100) {
-//            log.fatal(e.getCanvasDelta()+""+e.getSourceSwingEvent().getSource(), new CurrentStackTrace());
-//        } else {
-//            log.error(e.getCanvasDelta()+""+e.getSourceSwingEvent().getSource(), new CurrentStackTrace());
-//
-//        }
+    }
+
+    @Override
+    public void propertyChange(final PropertyChangeEvent evt) {
+        if (!panStarted) {
+            image = null;
+            new Thread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        lock.writeLock().lock();
+
+                        try {
+                            image = mappingComponent.getCamera().toImage();
+//                            image = componentToImage(mappingComponent);
+                        } finally {
+                            lock.writeLock().unlock();
+                        }
+                    }
+                }).start();
+        }
     }
 }

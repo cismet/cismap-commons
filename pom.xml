@@ -52,17 +52,6 @@
     </repositories>
 
     <dependencies>
-        <!-- 
-             swingx in this rather early version is required for this project. Consider refactoring of relevant code.
-             
-             WARN: due to version downgrade of transitively incoming version 1.6.1 there may be class loading issues or
-                   related errors
-        -->
-        <dependency>
-            <groupId>org.swinglabs</groupId>
-            <artifactId>swingx</artifactId>
-            <version>0.9.7</version>
-        </dependency>
         <dependency>
             <groupId>de.cismet.commons</groupId>
             <artifactId>cismet-gui-commons</artifactId>
