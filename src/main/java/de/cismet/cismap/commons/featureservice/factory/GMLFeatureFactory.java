@@ -12,6 +12,7 @@
 package de.cismet.cismap.commons.featureservice.factory;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -65,6 +66,7 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
     protected STRtree degreeFeaturesTree = null;
     protected Vector<FeatureServiceAttribute> featureServiceAttributes;
     protected BufferedReader documentReader;
+    protected Geometry envelope;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -131,12 +133,15 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
     protected DefaultFeatureServiceFeature createFeatureInstance(final Feature degreeFeature, final int index)
             throws Exception {
         final DefaultFeatureServiceFeature gmlFeature = new DefaultFeatureServiceFeature();
-
+        int currentSrid = -1;
         // auto generate Ids!
         gmlFeature.setId(index);
 
         try {
             gmlFeature.setGeometry(JTSAdapter.export(degreeFeature.getGeometryPropertyValues()[geometryIndex]));
+            currentSrid = CrsTransformer.extractSridFromCrs(degreeFeature.getGeometryPropertyValues()[geometryIndex]
+                            .getCoordinateSystem().getPrefixedName());
+            gmlFeature.getGeometry().setSRID(currentSrid);
         } catch (Exception e) {
             gmlFeature.setGeometry(JTSAdapter.export(degreeFeature.getDefaultGeometryPropertyValue()));
         }
@@ -144,6 +149,13 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         // store the feature in the spatial index structure
         gmlFeature.setGeometry(CrsTransformer.transformToDefaultCrs(gmlFeature.getGeometry()));
         this.degreeFeaturesTree.insert(gmlFeature.getGeometry().getEnvelopeInternal(), gmlFeature);
+
+        if (envelope == null) {
+            envelope = gmlFeature.getGeometry().getEnvelope();
+        } else {
+            envelope = envelope.getEnvelope().union(gmlFeature.getGeometry().getEnvelope());
+        }
+
         return gmlFeature;
     }
 
@@ -184,6 +196,7 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         logger.info("SW[" + workerThread + "]: initialising GMLFeatureFactory with document: '" + documentURI + "'");
         final long start = System.currentTimeMillis();
 
+        envelope = null;
         this.documentReader = new BufferedReader(new InputStreamReader(
                     new FileInputStream(new File(this.documentURI))));
         this.gmlDocument = new GMLFeatureCollectionDocument();
@@ -476,5 +489,23 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
 
         this.updateLastCreatedFeatures(selectedFeatures);
         return new Vector<DefaultFeatureServiceFeature>(selectedFeatures);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the envelope
+     */
+    public Geometry getEnvelope() {
+        return envelope;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  envelope  the envelope to set
+     */
+    public void setEnvelope(final Geometry envelope) {
+        this.envelope = envelope;
     }
 }
