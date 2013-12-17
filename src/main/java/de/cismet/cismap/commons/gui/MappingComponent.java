@@ -840,16 +840,18 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  n  PNode to rescale
      */
     public void rescaleStickyNode(final PSticky n) {
-        if (!EventQueue.isDispatchThread()) {
-            EventQueue.invokeLater(new Runnable() {
+        if (rescaleStickyNodesEnabled && (n != null)) {
+            if (!EventQueue.isDispatchThread()) {
+                EventQueue.invokeLater(new Runnable() {
 
-                    @Override
-                    public void run() {
-                        rescaleStickyNodeWork(n);
-                    }
-                });
-        } else {
-            rescaleStickyNodeWork(n);
+                        @Override
+                        public void run() {
+                            rescaleStickyNodeWork(n);
+                        }
+                    });
+            } else {
+                rescaleStickyNodeWork(n);
+            }
         }
     }
 

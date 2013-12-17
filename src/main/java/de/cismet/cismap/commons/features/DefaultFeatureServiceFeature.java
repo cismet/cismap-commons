@@ -60,12 +60,16 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Paint;
 import java.awt.TexturePaint;
+import java.awt.Toolkit;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.RGBImageFilter;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -103,6 +107,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     protected static final String CLASS_ID = "class_id";
     protected static final String GEOMETRIE = "geo_field";
     protected static final String OBJECT_ID = "object_id";
+    protected static Map<BufferedImage, BufferedImage> selectedImage = new HashMap<BufferedImage, BufferedImage>();
 
     //~ Instance fields --------------------------------------------------------
 
