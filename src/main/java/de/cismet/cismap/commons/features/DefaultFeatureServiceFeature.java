@@ -60,12 +60,16 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Paint;
 import java.awt.TexturePaint;
+import java.awt.Toolkit;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.RGBImageFilter;
 
 import java.net.URL;
 
@@ -106,6 +110,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     protected static final String CLASS_ID = "class_id";
     protected static final String GEOMETRIE = "geo_field";
     protected static final String OBJECT_ID = "object_id";
+    protected static Map<BufferedImage, BufferedImage> selectedImage = new HashMap<BufferedImage, BufferedImage>();
 
     //~ Instance fields --------------------------------------------------------
 
@@ -626,7 +631,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         hash = (79 * hash) + this.id;
         hash = (79 * hash) + ((this.getClass().getName() != null) ? this.getClass().getName().hashCode() : 0);
         return hash;
-
+    }
+    
     /**
      * DOCUMENT ME!
      *
@@ -659,21 +665,23 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param  image    DOCUMENT ME!
-     * @param  styling  DOCUMENT ME!
-     * @param  wtst     DOCUMENT ME!
-     * @param  x        DOCUMENT ME!
-     * @param  y        DOCUMENT ME!
-     * @param  camera   DOCUMENT ME!
+     * @param  image     DOCUMENT ME!
+     * @param  styling   DOCUMENT ME!
+     * @param  wtst      DOCUMENT ME!
+     * @param  x         DOCUMENT ME!
+     * @param  y         DOCUMENT ME!
+     * @param  camera    DOCUMENT ME!
+     * @param  selected  DOCUMENT ME!
      */
     protected void applyPointStyling(final PImage image,
             final PointStyling styling,
             final WorldToScreenTransform wtst,
             final double x,
             final double y,
-            final PCamera camera) {
-        Log.info("Test");
-        final BufferedImage buffImage = getImageFromDeegree(styling.graphic);
+            final PCamera camera,
+            final boolean selected) {
+        final BufferedImage buffImage = getImageFromDeegree(styling.graphic, selected);
+
         image.setImage(buffImage);
         if (getUOMFromDeegree(styling.uom) == UOM.pixel) {
             ((FixedPImage)image).setMultiplier(1 / (buffImage.getHeight() / styling.graphic.size));
@@ -894,35 +902,47 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             } else if ((styling.first instanceof PointStyling)
                         && ((geom instanceof Point) || (geom instanceof MultiPoint))) {
                 PImage image;
+                PImage selectedImage;
                 try {
-                    image = pfeature.sldStyledImage.get(imageNr++);
+                    image = pfeature.sldStyledImage.get(imageNr);
+                    selectedImage = pfeature.sldStyledSelectedImage.get(imageNr++);
                 } catch (IndexOutOfBoundsException ex) {
                     if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
                         image = new FixedPImage();
                         pfeature.getMappingComponent().addStickyNode((PSticky)image);
+                        selectedImage = new FixedPImage();
+                        pfeature.getMappingComponent().addStickyNode((PSticky)selectedImage);
                     } else {
                         image = new PImage();
+                        selectedImage = new PImage();
                     }
                     // image = new PImageWithDisplacement();
                     pfeature.sldStyledImage.add(image);
+                    pfeature.sldStyledSelectedImage.add(selectedImage);
                     pfeature.addChild(image);
                 }
                 if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
                     if (!(image instanceof FixedPImage)) {
                         pfeature.removeChild(image);
                         pfeature.sldStyledImage.remove(image);
+                        pfeature.sldStyledSelectedImage.remove(selectedImage);
                         image = new FixedPImage();
                         pfeature.sldStyledImage.add(image);
+                        pfeature.sldStyledSelectedImage.add(selectedImage);
                         pfeature.addChild(image);
+                        pfeature.addChild(selectedImage);
                         pfeature.getMappingComponent().addStickyNode((PSticky)image);
+                        pfeature.getMappingComponent().addStickyNode((PSticky)selectedImage);
                     }
                 } else {
                     if (image instanceof FixedPImage) {
                         pfeature.getMappingComponent().removeStickyNode((PSticky)image);
                         pfeature.sldStyledImage.remove(image);
+                        pfeature.sldStyledSelectedImage.remove(selectedImage);
                         pfeature.removeChild(image);
                         image = new PImage();
                         pfeature.sldStyledImage.add(image);
+                        pfeature.sldStyledSelectedImage.add(selectedImage);
                         pfeature.addChild(image);
                     }
                 }
@@ -936,14 +956,24 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     wtst,
                     intPoint.getX(),
                     intPoint.getY(),
-                    pfeature.getMappingComponent().getCamera());
+                    pfeature.getMappingComponent().getCamera(),
+                    false);
+                applyPointStyling(
+                    selectedImage,
+                    (PointStyling)styling.first,
+                    wtst,
+                    intPoint.getX(),
+                    intPoint.getY(),
+                    pfeature.getMappingComponent().getCamera(),
+                    true);
                 if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
                     pfeature.getMappingComponent().rescaleStickyNode((PSticky)image);
+                    pfeature.getMappingComponent().rescaleStickyNode((PSticky)selectedImage);
                 }
             }
         }
         if ((polygonNr == -1) && (imageNr == 0) && (textNr == 0)) {
-            Log.warn("Es wurde kein passender Sybolizer für das Feature gefunden, Darstellung unmöglich.");
+            Log.warn("Es wurde kein passender Symbolizer für das Feature gefunden, Darstellung unmöglich.");
         }
         /*
          * //if (stylings.getFirst().first instanceof PolygonStyling) { applyStyling(pfeature,
@@ -1024,13 +1054,18 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @param   graphic  DOCUMENT ME!
+     * @param   graphic   DOCUMENT ME!
+     * @param   selected  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    protected BufferedImage getImageFromDeegree(final Graphic graphic) {
+    protected BufferedImage getImageFromDeegree(final Graphic graphic, final boolean selected) {
         if (graphic.image != null) {
-            return graphic.image;
+            if (selected) {
+                return getSelectedImageFromImage(graphic.image);
+            } else {
+                return graphic.image;
+            }
         } else {
             BufferedImage temp = getImageFromWellKnownName(graphic.mark.wellKnown);
             if ((graphic.mark.fill != null) && (graphic.mark.fill.color != null)) {
@@ -1038,7 +1073,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                         temp.getHeight(),
                         BufferedImage.TYPE_INT_ARGB);
                 final Graphics2D g = (Graphics2D)coloredVerion.getGraphics();
-                g.setColor(graphic.mark.fill.color);
+                if (selected) {
+                    g.setColor(PFeature.getHighlightingColorFromColor(graphic.mark.fill.color));
+                } else {
+                    g.setColor(graphic.mark.fill.color);
+                }
                 g.fillRect(0, 0, temp.getWidth(), temp.getHeight());
                 g.setComposite(AlphaComposite.DstIn);
                 g.drawImage(
@@ -1156,7 +1195,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             return color;
         } else {
             final double multiplier = getMultiplierFromDeegreeUOM(uom);
-            final BufferedImage image = getImageFromDeegree(graphic);
+            final BufferedImage image = getImageFromDeegree(graphic, false);
             Paint texture;
             if (uom != org.deegree.style.styling.components.UOM.Pixel) {
                 texture = new TexturePaint(
@@ -1228,6 +1267,76 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             stylings = null;
         }
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   unselectedImage  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private BufferedImage getSelectedImageFromImage(final BufferedImage unselectedImage) {
+        BufferedImage bImage = selectedImage.get(unselectedImage);
+
+        if (bImage == null) {
+            Image image = ensureRGBAImage(unselectedImage);
+            image = Toolkit.getDefaultToolkit()
+                        .createImage(new FilteredImageSource(image.getSource(),
+                                    new SelectedFilter()));
+            final int width = image.getWidth(null);
+            final int height = image.getHeight(null);
+            bImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+            bImage.getGraphics().drawImage(image, 0, 0, null);
+
+            selectedImage.put(unselectedImage, bImage);
+        }
+
+        return bImage;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   image  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private BufferedImage ensureRGBAImage(BufferedImage image) {
+        if ((image != null) && (image.getType() != BufferedImage.TYPE_INT_ARGB)) {
+            final BufferedImage tmpImg = new BufferedImage(image.getWidth(),
+                    image.getHeight(),
+                    BufferedImage.TYPE_INT_ARGB);
+            final Graphics g = tmpImg.getGraphics();
+            g.drawImage(image, 0, 0, null);
+            g.dispose();
+            image = tmpImg;
+        }
+
+        return image;
+    }
+    
+    /**
+     * Ändert das dem Namen zugeordnete Property.
+     *
+     * @param  propertyName   Name des gesuchten Objekts
+     * @param  propertyValue  neuer Wert des Properties
+     */
+    @Override
+    public void setProperty(final String propertyName, final Object propertyValue) {
+        container.put(propertyName, propertyValue);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  Exception                      DOCUMENT ME!
+     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     */
+    public void saveChanges() throws Exception {
+        throw new UnsupportedOperationException();
+    }
+    
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -1805,27 +1914,29 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
             // choose Tools | Templates.
         }
->>>>>>> #67 Moved SLDStyling to AbstractFeatureFactoryFeature
-    }
-
-    /**
-     * Ändert das dem Namen zugeordnete Property.
-     *
-     * @param  propertyName   Name des gesuchten Objekts
-     * @param  propertyValue  neuer Wert des Properties
-     */
-    @Override
-    public void setProperty(final String propertyName, final Object propertyValue) {
-        container.put(propertyName, propertyValue);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @throws  Exception                      DOCUMENT ME!
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     * @version  $Revision$, $Date$
      */
-    public void saveChanges() throws Exception {
-        throw new UnsupportedOperationException();
+    private class SelectedFilter extends RGBImageFilter {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public int filterRGB(final int x, final int y, final int argb) {
+            final int r = (argb & 0x00ff0000) >> 0x10;
+            final int g = (argb & 0x0000ff00) >> 0x08;
+            final int b = (argb & 0x000000ff);
+
+            final Color c = new Color(r, g, b);
+
+            final Color newColor = PFeature.getHighlightingColorFromColor(c);
+
+            return (argb & 0xff000000) | (newColor.getRed() << 0x10) | (newColor.getGreen() << 0x08)
+                        | (newColor.getBlue());
+        }
     }
 }

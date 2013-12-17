@@ -78,6 +78,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public ArrayList<PPath> sldStyledPolygon = new ArrayList();
     public ArrayList<PTextWithDisplacement> sldStyledText = new ArrayList();
     public ArrayList<PImage> sldStyledImage = new ArrayList();
+    public ArrayList<PImage> sldStyledSelectedImage = new ArrayList();
     ArrayList splitHandlesBetween = new ArrayList();
     PHandle splitPolygonFromHandle = null;
     PHandle splitPolygonToHandle = null;
@@ -2242,19 +2243,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 nonHighlightingPaint = getPaint();
                 if (nonHighlightingPaint instanceof Color) {
                     final Color c = (Color)nonHighlightingPaint;
-                    int red = (int)(c.getRed() + 70);
-                    int green = (int)(c.getGreen() + 70);
-                    int blue = (int)(c.getBlue() + 70);
-                    if (red > 255) {
-                        red = 255;
-                    }
-                    if (green > 255) {
-                        green = 255;
-                    }
-                    if (blue > 255) {
-                        blue = 255;
-                    }
-                    setPaintOnAllFeatures(new Color(red, green, blue, c.getAlpha()));
+
+                    setPaintOnAllFeatures(getHighlightingColorFromColor(c));
                 } else {
                     setPaintOnAllFeatures(new Color(1f, 1f, 1f, 0.6f));
                 }
@@ -2263,6 +2253,30 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             repaint();
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   c  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Color getHighlightingColorFromColor(final Color c) {
+        int red = (int)(c.getRed() + 70);
+        int green = (int)(c.getGreen() + 70);
+        int blue = (int)(c.getBlue() + 70);
+        if (red > 255) {
+            red = 255;
+        }
+        if (green > 255) {
+            green = 255;
+        }
+        if (blue > 255) {
+            blue = 255;
+        }
+
+        return new Color(red, green, blue, c.getAlpha());
     }
 
     /**
@@ -2337,13 +2351,36 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if ((pi != null) && (piSelected != null)) {
                 piSelected.setVisible(selected);
                 pi.setVisible(!selected);
+
+                if ((sldStyledImage != null) && (sldStyledImage.size() > 0)) {
+                    if (selected) {
+                        for (final PNode n : sldStyledImage) {
+                            if (this.indexOfChild(n) > -1) {
+                                this.removeChild(n);
+                            }
+                        }
+                        for (final PNode n : sldStyledSelectedImage) {
+                            this.addChild(n);
+                        }
+                    } else {
+                        for (final PNode n : sldStyledSelectedImage) {
+                            if (this.indexOfChild(n) > -1) {
+                                this.removeChild(n);
+                            }
+                        }
+                        for (final PNode n : sldStyledImage) {
+                            this.addChild(n);
+                        }
+                    }
+                }
+//                else {
                 /*
                  * since we have two different FeatureAnnotationSymbols for selection and normal we have to switch the
                  * infoNode to them depending on selection state
                  */
                 if (selected) {
                     wasSelected = true;
-//                    addInfoNode();
+                    // addInfoNode();
                     if (infoNode != null) {
                         if (pi.indexOfChild(infoNode) != -1) {
                             // Remove the infoNode only, if the infoNode is really contained in the pi object.
@@ -2367,8 +2404,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         pi.addChild(infoNode);
                     }
                 }
+//                }
+                viewer.rescaleStickyNode(pi);
+                viewer.rescaleStickyNode(piSelected);
             }
-            viewer.rescaleStickyNodes();
         }                                                                                                  // LINESTRING
         else if ((feature.getGeometry() instanceof LineString) || (feature.getGeometry() instanceof MultiLineString)) {
             if (selected) {
@@ -3205,9 +3244,29 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             viewer.removeStickyNode((PSticky)secondStickyChild);
         }
 
-//        if (primaryAnnotation != null) {
-//            viewer.removeStickyNode(primaryAnnotation);
-//        }
+        if (sldStyledImage != null) {
+            for (final PImage i : sldStyledImage) {
+                if (i instanceof PSticky) {
+                    viewer.removeStickyNode((PSticky)i);
+                }
+            }
+        }
+
+        if (sldStyledSelectedImage != null) {
+            for (final PImage i : sldStyledSelectedImage) {
+                if (i instanceof PSticky) {
+                    viewer.removeStickyNode((PSticky)i);
+                }
+            }
+        }
+
+        if (sldStyledText != null) {
+            for (final PTextWithDisplacement text : sldStyledText) {
+                if (text instanceof PSticky) {
+                    viewer.removeStickyNode((PSticky)text);
+                }
+            }
+        }
     }
 
     //~ Inner Classes ----------------------------------------------------------
