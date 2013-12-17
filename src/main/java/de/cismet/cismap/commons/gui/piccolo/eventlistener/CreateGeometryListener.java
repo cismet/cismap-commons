@@ -60,20 +60,29 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
 
     //~ Instance fields --------------------------------------------------------
 
+    protected MappingComponent mappingComponent;
+    protected PInputEvent finishingEvent = null;
+    protected String mode = POLYGON;
+
     private Point2D startPoint;
     private PPath tempFeature;
-    private MappingComponent mappingComponent;
     private boolean inProgress;
     private int numOfEllipseEdges = DEFAULT_NUMOF_ELLIPSE_EDGES;
 
     private ArrayList<Point2D> points;
     private Stack<Point2D> undoPoints;
     private SimpleMoveListener moveListener;
-    private String mode = POLYGON;
     private Class<? extends AbstractNewFeature> geometryFeatureClass = null;
     private AbstractNewFeature currentFeature = null;
 
     //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new CreateGeometryListener object.
+     */
+    public CreateGeometryListener() {
+        this(null, Feature.class);
+    }
 
     /**
      * Creates a new CreateGeometryListener object.
@@ -93,11 +102,14 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     protected CreateGeometryListener(final MappingComponent mc, final Class geometryFeatureClass) {
         setGeometryFeatureClass(geometryFeatureClass);
         this.mappingComponent = mc;
-        moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
         undoPoints = new Stack<Point2D>();
-        // srichter: fehlerpotential! this referenz eines nicht fertig initialisieren Objekts wieder nach aussen
-        // geliefert! loesungsvorschlag: createInstance-methode, welche den aufruf nach dem erzeugen ausfuehrt.
-        mc.getFeatureCollection().addFeatureCollectionListener(this);
+
+        if (mc != null) {
+            moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
+            // srichter: fehlerpotential! this referenz eines nicht fertig initialisieren Objekts wieder nach aussen
+            // geliefert! loesungsvorschlag: createInstance-methode, welche den aufruf nach dem erzeugen ausfuehrt.
+            mc.getFeatureCollection().addFeatureCollectionListener(this);
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -156,7 +168,9 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * DOCUMENT ME!
      */
     protected void reset() {
-        mappingComponent.getTmpFeatureLayer().removeAllChildren();
+        if (mappingComponent != null) {
+            mappingComponent.getTmpFeatureLayer().removeAllChildren();
+        }
         inProgress = false;
     }
 
@@ -198,7 +212,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                 }
                 points = new ArrayList<Point2D>();
                 points.add(point);
-                readyForFinishing();
+                readyForFinishing(pInputEvent);
             }
         } else if (isInMode(RECTANGLE)) {
             if (!inProgress) {
@@ -273,7 +287,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                     // Ergebnis des Dialogs auswerten
                     if (dialog.getReturnStatus() == RectangleFromLineDialog.STATUS_OK) {
                         // fertig
-                        readyForFinishing();
+                        readyForFinishing(pInputEvent);
                         inProgress = false;
                     } else {
                         // abbrechen
@@ -355,7 +369,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
                         return; // ignorieren, da weniger als 2 Punkte nicht ausreichen
                     }
                 }
-                readyForFinishing();
+                readyForFinishing(pInputEvent);
                 inProgress = false;
             }
         }
@@ -363,9 +377,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  event  DOCUMENT ME!
      */
-    private void readyForFinishing() {
+    private void readyForFinishing(final PInputEvent event) {
         try {
+            finishingEvent = event;
             createCurrentNewFeature(null);
             finishGeometry(currentFeature);
         } catch (Throwable t) {
@@ -432,7 +449,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
         super.mouseReleased(arg0);
         if (inProgress) {
             if (isInMode(RECTANGLE) || isInMode(ELLIPSE)) {
-                readyForFinishing();
+                readyForFinishing(arg0);
                 inProgress = false;
             }
         }
@@ -758,5 +775,20 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
     private void initTempFeature() {
         tempFeature = createNewTempFeature();
         mappingComponent.getTmpFeatureLayer().addChild(tempFeature);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  mappingComponent  the mappingComponent to set
+     */
+    public void setMappingComponent(final MappingComponent mappingComponent) {
+        if (this.mappingComponent != null) {
+            mappingComponent.getFeatureCollection().removeFeatureCollectionListener(this);
+        }
+        this.mappingComponent = mappingComponent;
+        this.mappingComponent = mappingComponent;
+        moveListener = (SimpleMoveListener)mappingComponent.getInputListener(MappingComponent.MOTION);
+        mappingComponent.getFeatureCollection().addFeatureCollectionListener(this);
     }
 }

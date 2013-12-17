@@ -18,6 +18,7 @@ import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 import org.openide.util.Lookup;
 
+import java.awt.Color;
 import java.awt.geom.Point2D;
 
 import java.util.*;
@@ -29,9 +30,11 @@ import javax.swing.JSeparator;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MapPopupAction;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -47,7 +50,7 @@ import de.cismet.tools.gui.ActionsProvider;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class SelectionListener extends RectangleRubberBandListener {
+public class SelectionListener extends CreateGeometryListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -59,7 +62,6 @@ public class SelectionListener extends RectangleRubberBandListener {
     Point doubleclickPoint = null;
     PFeature sel = null;
     Vector<PFeature> pfVector = new Vector<PFeature>();
-    MappingComponent mappingComponent = null;
     ArrayList<? extends CommonFeatureAction> commonFeatureActions = null;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private int clickCount = 0;
@@ -82,9 +84,23 @@ public class SelectionListener extends RectangleRubberBandListener {
                     return Integer.valueOf(o1.getSorter()).compareTo(Integer.valueOf(o2.getSorter()));
                 }
             });
+        setGeometryFeatureClass(PureNewFeature.class);
+        setMode(RECTANGLE);
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    @Override
+    public void mouseMoved(final PInputEvent pInputEvent) {
+        setMappingComponent(pInputEvent);
+        super.mouseMoved(pInputEvent);
+    }
+
+    @Override
+    public void mousePressed(final PInputEvent pInputEvent) {
+        setMappingComponent(pInputEvent);
+        super.mousePressed(pInputEvent);
+    }
 
     /**
      * Selektiere einen PNode.
@@ -93,174 +109,183 @@ public class SelectionListener extends RectangleRubberBandListener {
      */
     @Override
     public void mouseClicked(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
-        selectionInProgress = true;
+        setMappingComponent(pInputEvent);
+        super.mouseClicked(pInputEvent);
 
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("mouseClicked():" + pInputEvent.getPickedNode()); // NOI18N
-            }
-            clickCount = pInputEvent.getClickCount();
-            if (pInputEvent.getComponent() instanceof MappingComponent) {
-                mappingComponent = (MappingComponent)pInputEvent.getComponent();
-            }
+        if (mode.equals(RECTANGLE) || mode.equals(ELLIPSE)) {
+            selectionInProgress = true;
 
-            if ((clickCount == 2) && pInputEvent.isLeftMouseButton()) {
-                doubleclickPoint = createPointFromInput(pInputEvent);
-
-                final PNotificationCenter pn = PNotificationCenter.defaultCenter();
-                pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
-            }
-
-            final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
-            if (pInputEvent.isRightMouseButton()) {
+            try {
                 if (log.isDebugEnabled()) {
-                    log.debug("right mouseclick"); // NOI18N
+                    log.debug("mouseClicked():" + pInputEvent.getPickedNode()); // NOI18N
                 }
-                final JPopupMenu popup = new JPopupMenu("MapPopup");
+                clickCount = pInputEvent.getClickCount();
+                if (pInputEvent.getComponent() instanceof MappingComponent) {
+                    mappingComponent = (MappingComponent)pInputEvent.getComponent();
+                }
 
-                if (o instanceof PFeature) {
-                    final PFeature pf = (PFeature)o;
-                    if (pf.getFeature() instanceof ActionsProvider) {
-                        final ActionsProvider ap = (ActionsProvider)((PFeature)o).getFeature();
-                        final Collection<? extends Action> ac = ap.getActions();
-                        for (final Action a : ac) {
-                            popup.add(a);
+                if ((clickCount == 2) && pInputEvent.isLeftMouseButton()) {
+                    doubleclickPoint = createPointFromInput(pInputEvent);
+
+                    final PNotificationCenter pn = PNotificationCenter.defaultCenter();
+                    pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
+                }
+
+                final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
+                        pInputEvent,
+                        new Class[] { PFeature.class });
+                if (pInputEvent.isRightMouseButton()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("right mouseclick"); // NOI18N
+                    }
+                    final JPopupMenu popup = new JPopupMenu("MapPopup");
+
+                    if (o instanceof PFeature) {
+                        final PFeature pf = (PFeature)o;
+                        if (pf.getFeature() instanceof ActionsProvider) {
+                            final ActionsProvider ap = (ActionsProvider)((PFeature)o).getFeature();
+                            final Collection<? extends Action> ac = ap.getActions();
+                            for (final Action a : ac) {
+                                popup.add(a);
+                            }
+                        }
+
+                        final JSeparator sep = new JSeparator();
+
+                        if (popup.getComponentCount() > 0) {
+                            popup.add(sep);
+                        }
+
+                        int commonActionCounter = 0;
+                        if (commonFeatureActions != null) {
+                            for (final CommonFeatureAction cfa : commonFeatureActions) {
+                                cfa.setSourceFeature(pf.getFeature());
+                                if (cfa.isActive()) {
+                                    popup.add(cfa);
+                                    commonActionCounter++;
+                                }
+                            }
+                        }
+                        if (commonActionCounter == 0) {
+                            popup.remove(sep);
                         }
                     }
 
-                    final JSeparator sep = new JSeparator();
+                    // we build a popup menu from all the registered generic point actions
+                    final Point point = createPointFromInput(pInputEvent);
+
+                    final Collection<? extends MapPopupAction> lookupResult = Lookup.getDefault()
+                                .lookupAll(MapPopupAction.class);
+                    final ArrayList<MapPopupAction> popupActions = new ArrayList<MapPopupAction>(lookupResult);
+                    Collections.sort(popupActions);
+
+                    boolean first = true;
+                    for (final MapPopupAction action : popupActions) {
+                        action.setPoint(point);
+
+                        if (action.isActive(o instanceof PFeature)) {
+                            if (first && (popup.getComponentCount() > 0)) {
+                                popup.add(new JSeparator());
+                                first = false;
+                            }
+
+                            final JMenu submenu = action.getSubmenu();
+
+                            if (submenu != null) {
+                                popup.add(submenu);
+                            } else {
+                                popup.add(action);
+                            }
+                        }
+                    }
 
                     if (popup.getComponentCount() > 0) {
-                        popup.add(sep);
+                        popup.show(
+                            mappingComponent,
+                            (int)pInputEvent.getCanvasPosition().getX(),
+                            (int)pInputEvent.getCanvasPosition().getY());
                     }
-
-                    int commonActionCounter = 0;
-                    if (commonFeatureActions != null) {
-                        for (final CommonFeatureAction cfa : commonFeatureActions) {
-                            cfa.setSourceFeature(pf.getFeature());
-                            if (cfa.isActive()) {
-                                popup.add(cfa);
-                                commonActionCounter++;
-                            }
-                        }
-                    }
-                    if (commonActionCounter == 0) {
-                        popup.remove(sep);
-                    }
-                }
-
-                // we build a popup menu from all the registered generic point actions
-                final Point point = createPointFromInput(pInputEvent);
-
-                final Collection<? extends MapPopupAction> lookupResult = Lookup.getDefault()
-                            .lookupAll(MapPopupAction.class);
-                final ArrayList<MapPopupAction> popupActions = new ArrayList<MapPopupAction>(lookupResult);
-                Collections.sort(popupActions);
-
-                boolean first = true;
-                for (final MapPopupAction action : popupActions) {
-                    action.setPoint(point);
-
-                    if (action.isActive(o instanceof PFeature)) {
-                        if (first && (popup.getComponentCount() > 0)) {
-                            popup.add(new JSeparator());
-                            first = false;
-                        }
-
-                        final JMenu submenu = action.getSubmenu();
-
-                        if (submenu != null) {
-                            popup.add(submenu);
-                        } else {
-                            popup.add(action);
-                        }
-                    }
-                }
-
-                if (popup.getComponentCount() > 0) {
-                    popup.show(
-                        mappingComponent,
-                        (int)pInputEvent.getCanvasPosition().getX(),
-                        (int)pInputEvent.getCanvasPosition().getY());
-                }
-            } else {
-                if (o instanceof PFeature) {
-                    super.mouseClicked(pInputEvent);
-                    sel = (PFeature)o;
-                    if (sel.getFeature().canBeSelected()) {
-                        if ((mappingComponent != null) && pInputEvent.isLeftMouseButton()
-                                    && pInputEvent.isControlDown()) {
-                            if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                                if (
-                                    !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
-                                                sel.getFeature())) {
-                                    ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(
-                                        sel.getFeature());
+                } else {
+                    if (o instanceof PFeature) {
+                        super.mouseClicked(pInputEvent);
+                        sel = (PFeature)o;
+                        if (sel.getFeature().canBeSelected()) {
+                            if ((mappingComponent != null) && pInputEvent.isLeftMouseButton()
+                                        && pInputEvent.isControlDown()) {
+                                if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                                    if (
+                                        !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
+                                                    sel.getFeature())) {
+                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                                                .addToSelection(
+                                                    sel.getFeature());
+                                    } else {
+                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(
+                                            sel.getFeature());
+                                    }
                                 } else {
-                                    ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(
-                                        sel.getFeature());
+                                    log.warn(
+                                        "mc.getFeatureCollection() instanceof DefaultFeatureCollection == false !!!!!!!"); // NOI18N
                                 }
+
+                                changeSelection(sel);
                             } else {
-                                log.warn(
-                                    "mc.getFeatureCollection() instanceof DefaultFeatureCollection == false !!!!!!!"); // NOI18N
+                                mappingComponent.getFeatureCollection().select(sel.getFeature());
+                                unselectAll();
+                                changeSelection(sel);
+                                if (pInputEvent.isAltDown()) {
+                                    final Coordinate mouseCoord = new Coordinate(
+                                            mappingComponent.getWtst().getSourceX(
+                                                pInputEvent.getPosition().getX()
+                                                        - mappingComponent.getClip_offset_x()),
+                                            mappingComponent.getWtst().getSourceY(
+                                                pInputEvent.getPosition().getY()
+                                                        - mappingComponent.getClip_offset_y()));
+
+                                    final GeometryFactory geometryFactory = new GeometryFactory(
+                                            new PrecisionModel(PrecisionModel.FLOATING),
+                                            CrsTransformer.extractSridFromCrs(
+                                                mappingComponent.getMappingModel().getSrs().getCode()));
+                                    final Point mousePoint = CrsTransformer.transformToGivenCrs(
+                                            geometryFactory.createPoint(
+                                                mouseCoord),
+                                            CismapBroker.getInstance().getDefaultCrs());
+
+                                    sel.setSelectedEntity(sel.getEntityPositionUnderPoint(mousePoint));
+                                }
                             }
-
-                            changeSelection(sel);
                         } else {
-                            mappingComponent.getFeatureCollection().select(sel.getFeature());
+                            if (log.isDebugEnabled()) {
+                                log.debug("Feature cannot be selected"); // NOI18N
+                            }
+                            if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                            }
                             unselectAll();
-                            changeSelection(sel);
-                            if (pInputEvent.isAltDown()) {
-                                final Coordinate mouseCoord = new Coordinate(
-                                        mappingComponent.getWtst().getSourceX(
-                                            pInputEvent.getPosition().getX()
-                                                    - mappingComponent.getClip_offset_x()),
-                                        mappingComponent.getWtst().getSourceY(
-                                            pInputEvent.getPosition().getY()
-                                                    - mappingComponent.getClip_offset_y()));
-
-                                final GeometryFactory geometryFactory = new GeometryFactory(
-                                        new PrecisionModel(PrecisionModel.FLOATING),
-                                        CrsTransformer.extractSridFromCrs(
-                                            mappingComponent.getMappingModel().getSrs().getCode()));
-                                final Point mousePoint = CrsTransformer.transformToGivenCrs(geometryFactory.createPoint(
-                                            mouseCoord),
-                                        CismapBroker.getInstance().getDefaultCrs());
-
-                                sel.setSelectedEntity(sel.getEntityPositionUnderPoint(mousePoint));
+                        }
+                        postSelectionChanged();
+                        if (pInputEvent.getClickCount() == 2) {
+                            if (sel.getFeature() instanceof SearchFeature) {
+                                final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
+                                if (pInputEvent.isLeftMouseButton()) {
+                                    ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                                    mappingComponent.getHandleLayer().removeAllChildren();
+                                    // neue Suche mit Geometry auslösen
+                                    ((AbstractCreateSearchGeometryListener)mappingComponent.getInputListener(
+                                            searchFeature.getInteractionMode())).search(searchFeature);
+                                }
                             }
                         }
                     } else {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Feature cannot be selected"); // NOI18N
-                        }
                         if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
                             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                         }
                         unselectAll();
                     }
-                    postSelectionChanged();
-                    if (pInputEvent.getClickCount() == 2) {
-                        if (sel.getFeature() instanceof SearchFeature) {
-                            final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
-                            if (pInputEvent.isLeftMouseButton()) {
-                                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                                mappingComponent.getHandleLayer().removeAllChildren();
-                                // neue Suche mit Geometry auslösen
-                                ((AbstractCreateSearchGeometryListener)mappingComponent.getInputListener(
-                                        searchFeature.getInteractionMode())).search(searchFeature);
-                            }
-                        }
-                    }
-                } else {
-                    if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                    }
-                    unselectAll();
                 }
+            } finally {
+                selectionInProgress = false;
             }
-        } finally {
-            selectionInProgress = false;
         }
     }
 
@@ -349,7 +374,7 @@ public class SelectionListener extends RectangleRubberBandListener {
      */
     private Point createPointFromInput(final PInputEvent event) {
         final Point2D pos = event.getPosition();
-        final WorldToScreenTransform wtst = mappingComponent.getWtst();
+        final WorldToScreenTransform wtst = getMappingComponent().getWtst();
         final Coordinate coord = new Coordinate(wtst.getSourceX(pos.getX()), wtst.getSourceY(pos.getY()));
         final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
                 CrsTransformer.getCurrentSrid());
@@ -359,6 +384,7 @@ public class SelectionListener extends RectangleRubberBandListener {
 
     @Override
     public void mouseDragged(final PInputEvent e) {
+        setMappingComponent(e);
         super.mouseDragged(e); // To change body of generated methods, choose Tools | Templates.
 
         clickCount = e.getClickCount();
@@ -371,80 +397,92 @@ public class SelectionListener extends RectangleRubberBandListener {
      */
     @Override
     public void mouseReleased(final PInputEvent event) {
+        setMappingComponent(event);
         super.mouseReleased(event);
+    }
+
+    @Override
+    protected Color getFillingColor() {
+        return new Color(20, 20, 20, 20);
+    }
+
+    @Override
+    protected void finishGeometry(final AbstractNewFeature feature) {
+        super.finishGeometry(feature);
         selectionInProgress = true;
-
+        final Geometry geom = feature.getGeometry();
         try {
-            if (event.getButton() == 1) { // linke Maustaste
-                // Mouseevent muss von einer MappingComponent gefeuert werden
-                if (event.getComponent() instanceof MappingComponent) {
-                    mappingComponent = (MappingComponent)event.getComponent();
-                    mappingComponent.getHandleLayer().removeAllChildren();
-                    // einfacher Klick ohne ziehen des Markiervierecks
-                    // rectangle ist bei einem Linksklick nie null. Siehe mousePressed in RectangleRubberBandListener
-                    if ((rectangle != null) && !rectangleEmpty) {
-                        if (log.isDebugEnabled()) {
-                            // Hole alle PFeatures die das Markierviereck schneiden
-                            // und Hinzuf\u00FCgen dieser PFeatures zur Selektion
-                            log.debug("Markierviereck = (X=" + rectangle.getBounds().getX() + ",Y="
-                                        + rectangle.getBounds().getY() // NOI18N
-                                        + ",W=" + rectangle.getBounds().getWidth() + ",H="
-                                        + rectangle.getBounds().getHeight() + ")"); // NOI18N
-                        }
+            mappingComponent.getHandleLayer().removeAllChildren();
+            if ((geom != null)) {
+                if (log.isDebugEnabled()) {
+                    // Hole alle PFeatures die das Markierviereck schneiden
+                    // und Hinzuf\u00FCgen dieser PFeatures zur Selektion
+                    log.debug("Markiergeometrie = " + geom.toText()); // NOI18N
+                }
 
-                        if (!event.isControlDown()) {
-                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                            unselectAll();
-                        }
-                        final PFeature[] pfArr = PFeatureTools.getPFeaturesInArea(
-                                mappingComponent,
-                                rectangle.getBounds());
-                        final Vector<Feature> toBeSelected = new Vector<Feature>();
-                        final Vector<Feature> toBeUnselected = new Vector<Feature>();
+                if (!finishingEvent.isControlDown()) {
+                    ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                    unselectAll();
+                }
+                final PFeature[] pfArr = PFeatureTools.getPFeaturesInArea(
+                        mappingComponent,
+                        geom);
+                final Vector<Feature> toBeSelected = new Vector<Feature>();
+                final Vector<Feature> toBeUnselected = new Vector<Feature>();
 
-                        for (final PFeature pf : pfArr) {
-                            if (pf.getFeature().canBeSelected()) {
-                                if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                                    if (
-                                        !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
-                                                    pf.getFeature())) {
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("Feature markiert: " + pf); // NOI18N
-                                        }
-                                        toBeSelected.add(pf.getFeature());
-                                    } else {
-                                        toBeUnselected.add(pf.getFeature());
-                                        // mappingComponent.getFeatureCollection().unselect(pf.getFeature()); //war
-                                        // vorher unselectAll()
-                                    }
-                                    changeSelection(pf);
-                                }
-                            } else {
+                for (final PFeature pf : pfArr) {
+                    if (pf.getFeature().canBeSelected()) {
+                        if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                            if (
+                                !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
+                                            pf.getFeature())) {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Feature cannot be selected");      // NOI18N
+                                    log.debug("Feature markiert: " + pf); // NOI18N
                                 }
-                                if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                                    toBeUnselected.add(pf.getFeature());
-                                    // ((DefaultFeatureCollection)
-                                    // mappingComponent.getFeatureCollection()).unselect(pf.getFeature());//war vorher
-                                    // unselectAll()
-                                }
+                                toBeSelected.add(pf.getFeature());
+                            } else {
+                                toBeUnselected.add(pf.getFeature());
+                                // mappingComponent.getFeatureCollection().unselect(pf.getFeature()); //war vorher
+                                // unselectAll()
                             }
+                            changeSelection(pf);
                         }
-
-                        // Hier passierts
-                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(
-                            toBeSelected);
-                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(toBeUnselected);
-
-                        pfVector = new Vector(((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                        .getSelectedFeatures());
-                        postSelectionChanged();
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Feature cannot be selected");      // NOI18N
+                        }
+                        if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                            toBeUnselected.add(pf.getFeature());
+                            // ((DefaultFeatureCollection)
+                            // mappingComponent.getFeatureCollection()).unselect(pf.getFeature());//war vorher
+                            // unselectAll()
+                        }
                     }
                 }
+
+                // Hier passierts
+                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(
+                    toBeSelected);
+                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(toBeUnselected);
+
+                pfVector = new Vector(((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                                .getSelectedFeatures());
+                postSelectionChanged();
             }
         } finally {
             selectionInProgress = false;
+            mappingComponent.getFeatureCollection().removeFeature(feature);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pInputEvent  DOCUMENT ME!
+     */
+    private void setMappingComponent(final edu.umd.cs.piccolo.event.PInputEvent pInputEvent) {
+        if (getMappingComponent() == null) {
+            super.setMappingComponent((MappingComponent)pInputEvent.getComponent());
         }
     }
 
