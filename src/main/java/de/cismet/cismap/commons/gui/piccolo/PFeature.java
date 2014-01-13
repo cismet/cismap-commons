@@ -333,10 +333,20 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         log.debug("newSweetSpotx: "
                                     + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX()); // NOI18N
                     }
-                    pi.setSweetSpotX(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());
-                    pi.setSweetSpotY(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY());
-                    piSelected.setSweetSpotX(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX());
-                    piSelected.setSweetSpotY(((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY());
+                    final double sweetSpotX = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX();
+                    final double sweetSpotY = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY();
+                    final double sweetX = (10
+                                        + (((StyledFeature)feature).getPointAnnotationSymbol().getImage().getWidth(null)
+                                            * sweetSpotX))
+                                    / piSelected.getImage().getWidth(null);
+                    final double sweetY = (10
+                                        + (((StyledFeature)feature).getPointAnnotationSymbol().getImage().getHeight(
+                                                null) * sweetSpotY))
+                                    / piSelected.getImage().getHeight(null);
+                    pi.setSweetSpotX(sweetX);
+                    pi.setSweetSpotY(sweetY);
+                    piSelected.setSweetSpotX(sweetX);
+                    piSelected.setSweetSpotY(sweetY);
                 }
             }
 
