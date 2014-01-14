@@ -12,6 +12,9 @@
 package de.cismet.cismap.commons.gui.layerwidget;
 
 import com.vividsolutions.jts.geom.Geometry;
+
+import edu.umd.cs.piccolo.PNode;
+
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -37,6 +40,7 @@ import javax.swing.DropMode;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
@@ -62,8 +66,6 @@ import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
-import edu.umd.cs.piccolo.PNode;
-import javax.swing.JOptionPane;
 
 /**
  * DOCUMENT ME!
@@ -893,7 +895,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             }
         }
     }
-
 
     /**
      * DOCUMENT ME!

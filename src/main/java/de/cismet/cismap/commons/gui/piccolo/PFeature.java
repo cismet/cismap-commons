@@ -336,13 +336,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     final double sweetSpotX = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX();
                     final double sweetSpotY = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY();
                     final double sweetX = (10
-                                        + (((StyledFeature)feature).getPointAnnotationSymbol().getImage().getWidth(null)
-                                            * sweetSpotX))
-                                    / piSelected.getImage().getWidth(null);
+                                    + (((StyledFeature)feature).getPointAnnotationSymbol().getImage().getWidth(null)
+                                        * sweetSpotX))
+                                / piSelected.getImage().getWidth(null);
                     final double sweetY = (10
-                                        + (((StyledFeature)feature).getPointAnnotationSymbol().getImage().getHeight(
-                                                null) * sweetSpotY))
-                                    / piSelected.getImage().getHeight(null);
+                                    + (((StyledFeature)feature).getPointAnnotationSymbol().getImage().getHeight(
+                                            null) * sweetSpotY))
+                                / piSelected.getImage().getHeight(null);
                     pi.setSweetSpotX(sweetX);
                     pi.setSweetSpotY(sweetY);
                     piSelected.setSweetSpotX(sweetX);
