@@ -12,8 +12,10 @@
 package de.cismet.cismap.commons.featureservice.factory;
 
 import com.vividsolutions.jts.geom.*;
-import com.vividsolutions.jts.index.strtree.STRtree;
 
+import org.deegree.io.rtree.HyperBoundingBox;
+import org.deegree.io.rtree.HyperPoint;
+import org.deegree.io.rtree.RTree;
 import org.deegree.io.shpapi.ShapeFile;
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.schema.FeatureType;
@@ -29,6 +31,7 @@ import java.net.URI;
 
 import java.nio.charset.Charset;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -37,13 +40,13 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import org.deegree.io.rtree.RTreeException;
+import org.openide.util.Exceptions;
 
 /**
  * DOCUMENT ME!
@@ -60,7 +63,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     protected URI documentURI;
     protected ShapeFile shapeFile;
     protected boolean initialised = false;
-    protected STRtree degreeFeaturesTree = null;
     // private Feature[] tempFeatureCollection;
     // private int currentProgress = 0;
     protected Vector<FeatureServiceAttribute> featureServiceAttributes;
@@ -70,7 +72,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     private Crs shapeCrs = null;
     private int shapeSrid = 0;
     private Crs crs = CismapBroker.getInstance().getSrs();
-    private Geometry envelope;
+    private org.deegree.model.spatialschema.Envelope envelope;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -116,7 +118,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         this.maxCachedFeatureCount = shpff.maxCachedFeatureCount;
         this.documentURI = shpff.documentURI;
         this.shapeFile = shpff.shapeFile;
-        this.degreeFeaturesTree = shpff.degreeFeaturesTree;
         this.featureServiceAttributes = new Vector(shpff.featureServiceAttributes);
         this.initialised = shpff.initialised;
         this.crs = shpff.crs;
@@ -128,7 +129,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
     @Override
     protected ShapeFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
-        final ShapeFeature shapeFeature = new ShapeFeature();
+        final ShapeFeature shapeFeature;
+
+        shapeFeature = new ShapeFeature();
 
         // auto generate Ids!
         shapeFeature.setId(index);
@@ -150,15 +153,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 //                logger.debug("srid of feature = " + shapeFeature.getGeometry().getSRID());
 //            }
             shapeFeature.getGeometry().setSRID(shapeSrid);
-            // store the feature in the spatial index structure
-            final Geometry geom = shapeFeature.getGeometry();
-            this.degreeFeaturesTree.insert(geom.getEnvelopeInternal(), shapeFeature);
-
-            if (envelope == null) {
-                envelope = geom.getEnvelope();
-            } else {
-                envelope = envelope.getEnvelope().union(geom.getEnvelope());
-            }
         }
 
         return shapeFeature;
@@ -234,90 +228,110 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      * @throws  Exception  DOCUMENT ME!
      */
     protected synchronized void parseShapeFile(final SwingWorker workerThread) throws Exception {
-        logger.info("SW[" + workerThread + "]: initialising ShapeFeatureFactory with document: '" + documentURI + "'");
-        final long start = System.currentTimeMillis();
-        envelope = null;
         if (shapeCrs == null) {
             shapeCrs = CismapBroker.getInstance().getSrs();
             shapeSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
         }
 
-        final Charset cs = getCharsetDefinition();
+        shapeFile = getShapeFile();
+
+        final Feature degreeFeature = shapeFile.getFeatureByRecNo(1);
+        final FeatureType type = degreeFeature.getFeatureType();
+        logger.info("SW[" + workerThread + "]: creating " + type.getProperties().length
+                    + " featureServiceAttributes from first parsed degree feature");
+        featureServiceAttributes = new Vector(type.getProperties().length);
+        for (final PropertyType pt : type.getProperties()) {
+            // ToDo was ist wenn zwei Geometrien dabei sind
+            featureServiceAttributes.add(
+                new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true));
+        }
+
+        envelope = shapeFile.getFileMBR();
+        // create an index file, if it does not alreay exists
+        int currentProgress = 0;
+        int newProgress = 0;
+        String filename = null;
 
         if (this.documentURI.getPath().endsWith(".shp")) {
-            shapeFile = new ShapeFile(this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4),
-                    cs);
+            filename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
         } else {
-            shapeFile = new ShapeFile(this.documentURI.getPath(), cs);
+            filename = this.documentURI.getPath();
         }
 
-        final int max = shapeFile.getRecordNum();
-        if (DEBUG) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("SW[" + workerThread + "]: " + max + " features found in shape file");
-            }
-        }
-//        if (shapeFile.getRecordNum() > this.maxCachedFeatureCount) {
-//            logger.error("SW[" + workerThread + "]: number of features in shape file (" + shapeFile.getRecordNum()
-//                        + ") exceeds maximum of supported features (" + this.maxCachedFeatureCount + ")");
-//            max = this.maxCachedFeatureCount;
-//        }
-        if (max == 0) {
-            logger.error("SW[" + workerThread + "]: no features found in shape file");
-            throw new Exception("no features found in shape file '" + this.documentURI + "'");
-        }
+        try {
+            if (!shapeFile.hasRTreeIndex()) {
+                final int features = shapeFile.getRecordNum();
+                final RTree rtree = new RTree(2, 11, filename + ".rti");
+                for (int i = 1; i < (features + 1); i++) {
+                    final Feature feature = shapeFile.getFeatureByRecNo(i);
 
-        // this.tempFeatureCollection = new Feature[max];
-        if (max >= 4) {
-            this.degreeFeaturesTree = new STRtree(max);
-        } else {
-            this.degreeFeaturesTree = new STRtree();
-        }
+                    final org.deegree.model.spatialschema.Geometry[] geometries = feature.getGeometryPropertyValues();
 
-        // parse features ........................................................
-        int currentProgress = 0;
-        int newProgress;
-        for (int i = 0; i < max; i++) {
-            final Feature degreeFeature = shapeFile.getFeatureByRecNo(i + 1);
-            if (i == 0) {
-                final FeatureType type = degreeFeature.getFeatureType();
-                logger.info("SW[" + workerThread + "]: creating " + type.getProperties().length
-                            + " featureServiceAttributes from first parsed degree feature");
-                featureServiceAttributes = new Vector(type.getProperties().length);
-                for (final PropertyType pt : type.getProperties()) {
-                    // ToDo was ist wenn zwei Geometrien dabei sind
-                    featureServiceAttributes.add(
-                        new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true));
-                }
-            }
+                    if (geometries.length == 0) {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("no geometries at recno" + i);
+                        }
+                        continue;
+                    }
 
-            // create Feature instance fuegt die features dem strtree hinzu
-            final ShapeFeature featureServiceFeature = this.createFeatureInstance(degreeFeature, i);
-            this.initialiseFeature(featureServiceFeature, degreeFeature, false, i);
-            // this.tempFeatureCollection[i] = shapeFile.getFeatureByRecNo(i + 1);
+                    org.deegree.model.spatialschema.Envelope envelope = null;
+                    // TODO: deal with more than one geometry; handle geometry=null (allowed
+                    // in shapefile)
+                    envelope = (feature.getDefaultGeometryPropertyValue()).getEnvelope();
+                    if (envelope == null) { // assume a Point-geometry
+                        if (geometries[0] instanceof org.deegree.model.spatialschema.Point) {
+                            final org.deegree.model.spatialschema.Point pnt = (org.deegree.model.spatialschema.Point)geometries[0];
+                            envelope = org.deegree.model.spatialschema.GeometryFactory.createEnvelope(pnt.getX(),
+                                    pnt.getY(),
+                                    pnt.getX(),
+                                    pnt.getY(),
+                                    null);
+                        }
+                    }
+                    final HyperBoundingBox box = new HyperBoundingBox(
+                            new HyperPoint(envelope.getMin().getAsArray()),
+                            new HyperPoint(envelope.getMax().getAsArray()));
+                    rtree.insert(new Integer(i), box);
 
-            newProgress = (int)((double)i / (double)max * 100d);
-            if ((workerThread != null) && ((newProgress % 5) == 0) && (newProgress > currentProgress)
-                        && (newProgress >= 5)) {
-                // set to progress to -1 (indeterminate progress bar)
-                currentProgress = (newProgress <= 100) ? newProgress : -1;
-                if (DEBUG) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("SW[" + workerThread + "]: parsing progress: " + currentProgress + "%");
+                    // refresh progress bar
+                    newProgress = (int)((double)i / (double)features * 100d);
+                    if ((workerThread != null) && ((newProgress % 5) == 0) && (newProgress > currentProgress)
+                                && (newProgress >= 5)) {
+                        // set to progress to -1 (indeterminate progress bar)
+                        currentProgress = (newProgress <= 100) ? newProgress : -1;
+
+                        workerThread.firePropertyChange("progress", currentProgress - 5, currentProgress);
                     }
                 }
-                workerThread.firePropertyChange("progress", currentProgress - 5, currentProgress);
-            }
-        }
 
-//        CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(new XBoundingBox(extend));
-        this.cleanup();
-        if (logger.isDebugEnabled()) {
-            logger.debug("parsing, converting and initialising " + max + " shape features took "
-                        + (System.currentTimeMillis() - start) + " ms");
+                rtree.close();
+            }
+        } catch (final RTreeException e) {
+            logger.error("The index file cannot be created. The corresponding folder is possibly write protected.", e);
         }
+        initialised = true;
+
+        this.cleanup();
     }
 
+    
+    private ShapeFile getShapeFile() throws IOException {
+        cleanup();
+        final Charset cs = getCharsetDefinition();
+        String filename = null;
+
+        if (this.documentURI.getPath().endsWith(".shp")) {
+            filename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
+        } else {
+            filename = this.documentURI.getPath();
+        }
+
+        shapeFile = new ShapeFile(filename, cs);
+        
+        return shapeFile;
+    }
+    
+    
     @Override
     public synchronized void flush() {
         logger.warn("flushing cached features");
@@ -325,12 +339,20 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         System.gc();
     }
 
+    /**
+     * is not used and not usable.
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public int getMaxCachedFeatureCount() {
-        if (this.degreeFeaturesTree != null) {
-            return this.degreeFeaturesTree.getNodeCapacity();
-        } else {
-            return this.maxCachedFeatureCount;
+        try {
+            return getShapeFile().getRecordNum();
+        } catch (IOException ex) {
+            logger.error("Cannot open the shape file", ex);
+            return 0;
+        } finally {
+            cleanup();
         }
     }
 
@@ -437,13 +459,56 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      * @return  the envelope of the currently loaded shape file
      */
     public Geometry getEnvelope() {
-        envelope.setSRID(shapeSrid);
-        return envelope;
+        try {
+            if (envelope == null) {
+                envelope = getShapeFile().getFileMBR();
+                cleanup();
+            }
+            final Coordinate[] polyCords = new Coordinate[5];
+            polyCords[0] = new Coordinate(envelope.getMin().getX(), envelope.getMin().getY());
+            polyCords[1] = new Coordinate(envelope.getMin().getX(), envelope.getMax().getY());
+            polyCords[2] = new Coordinate(envelope.getMax().getX(), envelope.getMax().getY());
+            polyCords[3] = new Coordinate(envelope.getMax().getX(), envelope.getMin().getY());
+            polyCords[4] = new Coordinate(envelope.getMin().getX(), envelope.getMin().getY());
+            // The GeometryFactory must use the same srid as the elements in the deegreeFeaturesTree
+            final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                    shapeSrid);
+            final Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
+
+            return boundingPolygon.getEnvelope();
+        } catch (Exception e) {
+            logger.error("Error whie reading Shape file", e);
+        }
+
+        return null;
     }
 
     @Override
     public int getFeatureCount(final BoundingBox bb) {
-        return this.degreeFeaturesTree.size();
+        try {
+            final Coordinate[] polyCords = new Coordinate[5];
+            polyCords[0] = new Coordinate(bb.getX1(), bb.getY1());
+            polyCords[1] = new Coordinate(bb.getX1(), bb.getY2());
+            polyCords[2] = new Coordinate(bb.getX2(), bb.getY2());
+            polyCords[3] = new Coordinate(bb.getX2(), bb.getY1());
+            polyCords[4] = new Coordinate(bb.getX1(), bb.getY1());
+            // The GeometryFactory must use the same srid as the elements in the deegreeFeaturesTree
+            final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                    CrsTransformer.extractSridFromCrs(crs.getCode()));
+            Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
+
+            boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
+            // List<ShapeFeature> selectedFeatures =
+            // this.degreeFeaturesTree.query(boundingPolygon.getEnvelopeInternal());
+
+            return getShapeFile().getGeoNumbersByRect(JTSAdapter.wrap(boundingPolygon).getEnvelope()).length;
+        } catch (final Exception e) {
+            logger.error("Error while determining the feature count", e);
+        } finally {
+            cleanup();
+        }
+
+        return 0;
     }
 
     @Override
@@ -453,84 +518,100 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             final int offset,
             final int limit,
             final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
-        if (!this.initialised) {
-            logger.warn("SW[" + workerThread + "]: Factory not correclty initialised, parsing shape file");
-            this.parseShapeFile(workerThread);
-            this.initialised = true;
+        try {
+            if (!this.initialised) {
+                logger.warn("SW[" + workerThread + "]: Factory not correclty initialised, parsing shape file");
+                this.parseShapeFile(workerThread);
+                this.initialised = true;
 
+                // check if thread is canceled .........................................
+                if (this.checkCancelled(workerThread, " initialisation")) {
+                    return null;
+                }
+                // check if thread is canceled .........................................
+            }
+
+            // this.lastCreatedfeatureVector.clear();
+
+            final long start = System.currentTimeMillis();
+            final Coordinate[] polyCords = new Coordinate[5];
+            polyCords[0] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
+            polyCords[1] = new Coordinate(boundingBox.getX1(), boundingBox.getY2());
+            polyCords[2] = new Coordinate(boundingBox.getX2(), boundingBox.getY2());
+            polyCords[3] = new Coordinate(boundingBox.getX2(), boundingBox.getY1());
+            polyCords[4] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
+            // The GeometryFactory must use the same srid as the elements in the deegreeFeaturesTree
+            final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                    CrsTransformer.extractSridFromCrs(crs.getCode()));
+            Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
+
+            boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
+
+            shapeFile = getShapeFile();
+            final int[] recordNumbers = shapeFile.getGeoNumbersByRect(JTSAdapter.wrap(boundingPolygon).getEnvelope());
+
+            List<ShapeFeature> selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
+
+            if (recordNumbers.length < 15000) {
+                for (final int record : recordNumbers) {
+                    final Feature f = shapeFile.getFeatureByRecNo(record);
+                    final ShapeFeature featureServiceFeature = createFeatureInstance(f, record);
+                    this.initialiseFeature(featureServiceFeature, f, false, record);
+                    selectedFeatures.add(featureServiceFeature);
+                }
+            }
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("feature crs: " + shapeCrs.getCode() + " features " + selectedFeatures.size()
+                            + " boundingbox: "
+                            + boundingPolygon.getEnvelopeInternal());
+            }
             // check if thread is canceled .........................................
-            if (this.checkCancelled(workerThread, " initialisation")) {
+            if (this.checkCancelled(workerThread, " quering spatial index structure")) {
                 return null;
             }
             // check if thread is canceled .........................................
-        }
 
-        // this.lastCreatedfeatureVector.clear();
-
-        final long start = System.currentTimeMillis();
-        final Coordinate[] polyCords = new Coordinate[5];
-        polyCords[0] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
-        polyCords[1] = new Coordinate(boundingBox.getX1(), boundingBox.getY2());
-        polyCords[2] = new Coordinate(boundingBox.getX2(), boundingBox.getY2());
-        polyCords[3] = new Coordinate(boundingBox.getX2(), boundingBox.getY1());
-        polyCords[4] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
-        // The GeometryFactory must use the same srid as the elements in the deegreeFeaturesTree
-        final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                CrsTransformer.extractSridFromCrs(crs.getCode()));
-        Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
-
-        boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
-        List<ShapeFeature> selectedFeatures = this.degreeFeaturesTree.query(boundingPolygon.getEnvelopeInternal());
-        if (logger.isDebugEnabled()) {
-            logger.debug("feature crs: " + shapeCrs.getCode() + " features " + selectedFeatures.size()
-                        + " boundingbox: "
-                        + boundingPolygon.getEnvelopeInternal());
-        }
-        // check if thread is canceled .........................................
-        if (this.checkCancelled(workerThread, " quering spatial index structure")) {
-            return null;
-        }
-        // check if thread is canceled .........................................
-
-        logger.info("SW[" + workerThread + "]: " + selectedFeatures.size()
-                    + " features selected by bounding box out of " + this.degreeFeaturesTree.size()
-                    + " in spatial index");
-        if (DEBUG) {
+            logger.info("SW[" + workerThread + "]: " + selectedFeatures.size()
+                        + " features selected by bounding box out of " + this.shapeFile.getRecordNum()
+                        + " in spatial index");
             if (logger.isDebugEnabled()) {
                 logger.debug("SW[" + workerThread + "]: quering spatial index for bounding box took "
                             + (System.currentTimeMillis() - start) + " ms");
             }
+
+            if (selectedFeatures.size() > this.getMaxFeatureCount()) {
+                throw new TooManyFeaturesException("features in selected area " + selectedFeatures.size()
+                            + " exceeds max feature count " + this.getMaxFeatureCount());
+            } else if (selectedFeatures.size() == 0) {
+                logger.warn("SW[" + workerThread + "]: no features found in selected bounding box");
+                return null;
+            }
+
+            if ((orderBy != null) && (orderBy.length > 0)) {
+                sortFeatureList(selectedFeatures, orderBy);
+            }
+
+            if (offset > 0) {
+                selectedFeatures = selectedFeatures.subList(offset, selectedFeatures.size());
+            }
+
+            if ((limit > 0) && (selectedFeatures.size() > limit)) {
+                selectedFeatures = selectedFeatures.subList(0, limit);
+            }
+
+            this.reEvaluteExpressions(selectedFeatures, workerThread);
+
+            // check if thread is canceled .........................................
+            if (this.checkCancelled(workerThread, " saving LastCreatedFeatures ")) {
+                return null;
+            }
+            // check if thread is canceled .........................................
+
+            this.updateLastCreatedFeatures(selectedFeatures);
+            return new Vector<ShapeFeature>(selectedFeatures);
+        } finally {
+            cleanup();
         }
-
-        if (selectedFeatures.size() > this.getMaxFeatureCount()) {
-            throw new TooManyFeaturesException("features in selected area " + selectedFeatures.size()
-                        + " exceeds max feature count " + this.getMaxFeatureCount());
-        } else if (selectedFeatures.size() == 0) {
-            logger.warn("SW[" + workerThread + "]: no features found in selected bounding box");
-            return null;
-        }
-
-        if ((orderBy != null) && (orderBy.length > 0)) {
-            sortFeatureList(selectedFeatures, orderBy);
-        }
-
-        if (offset > 0) {
-            selectedFeatures = selectedFeatures.subList(offset, selectedFeatures.size());
-        }
-
-        if ((limit > 0) && (selectedFeatures.size() > limit)) {
-            selectedFeatures = selectedFeatures.subList(0, limit);
-        }
-
-        this.reEvaluteExpressions(selectedFeatures, workerThread);
-
-        // check if thread is canceled .........................................
-        if (this.checkCancelled(workerThread, " saving LastCreatedFeatures ")) {
-            return null;
-        }
-        // check if thread is canceled .........................................
-
-        this.updateLastCreatedFeatures(selectedFeatures);
-        return new Vector<ShapeFeature>(selectedFeatures);
     }
 }
