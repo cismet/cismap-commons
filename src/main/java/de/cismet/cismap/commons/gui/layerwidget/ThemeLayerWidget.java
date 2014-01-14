@@ -11,6 +11,7 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -34,7 +35,6 @@ import java.util.List;
 
 import javax.swing.DropMode;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -49,14 +49,21 @@ import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
-import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
-import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.tools.ExportShapeDownload;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
-import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.downloadmanager.DownloadManager;
+import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
+import edu.umd.cs.piccolo.PNode;
+import javax.swing.JOptionPane;
 
 /**
  * DOCUMENT ME!
@@ -811,16 +818,82 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.ExportMenuItem.pmenuItem.text"),
                 NODE
-                        | MULTI,
-                0);
+                        | FEATURE_SERVICE);
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         public void actionPerformed(final ActionEvent e) {
+            String name = null;
+            final List<DefaultFeatureServiceFeature> features = new ArrayList<DefaultFeatureServiceFeature>();
+            final TreePath[] paths = tree.getSelectionPaths();
+            final List<AbstractFeatureService> services = new ArrayList<AbstractFeatureService>(paths.length);
+
+            for (final TreePath o : paths) {
+                final AbstractFeatureService afs = (AbstractFeatureService)o.getLastPathComponent();
+
+                if (name == null) {
+                    name = afs.getName();
+                    if (name.indexOf(".") != -1) {
+                        name = name.substring(0, name.lastIndexOf("."));
+                    }
+                }
+                services.add(afs);
+            }
+
+            final int option = JOptionPane.showOptionDialog(
+                    this,
+                    "Alle Features exportieren oder nur die ausgewählten?",
+                    "Features exportieren",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new Object[] { "alle Features", "selektierte Features" },
+                    "alle Features");
+
+            if (option == 1) {
+                // export all selected features
+                final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
+                final SelectionListener sl = (SelectionListener)map.getInputEventListener()
+                            .get(MappingComponent.SELECT);
+                final List<PFeature> sel = sl.getAllSelectedPFeatures();
+                final List<PNode> nodesOfTheSelectedServices = new ArrayList<PNode>(paths.length);
+
+                for (final AbstractFeatureService afs : services) {
+                    nodesOfTheSelectedServices.add(afs.getPNode());
+                }
+
+                for (int i = 0; i < sel.size(); ++i) {
+                    final PFeature feature = sel.get(i);
+                    if (nodesOfTheSelectedServices.contains(feature.getParent())) {
+                        features.add((DefaultFeatureServiceFeature)feature.getFeature());
+                    }
+                }
+            } else if (option == 0) {
+                // export all features
+                for (final AbstractFeatureService afs : services) {
+                    final Geometry g = ZoomToLayerWorker.getServiceBounds(afs);
+                    final XBoundingBox bb = new XBoundingBox(g);
+
+                    try {
+                        features.addAll(afs.getFeatureFactory().createFeatures(afs.getQuery(), bb, null));
+                    } catch (Exception ex) {
+                        log.error("Error while retrieving features", ex);
+                    }
+                }
+            }
+
+            if (DownloadManagerDialog.showAskingForUserTitle(this)) {
+                DownloadManager.instance()
+                        .add(new ExportShapeDownload(
+                                name,
+                                ".shp",
+                                features.toArray(new DefaultFeatureServiceFeature[features.size()])));
+            }
         }
     }
+
 
     /**
      * DOCUMENT ME!
@@ -862,6 +935,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         public static final int NODE = 2;
         public static final int FOLDER = 4;
         public static final int MULTI = 8;
+        public static final int FEATURE_SERVICE = 16;
         public static final int EVER = 255;
 
         //~ Instance fields ----------------------------------------------------
@@ -869,7 +943,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         protected int selectable = 0;
         protected boolean newSection = false;
 
-        private int visibility = 0;
+        protected int visibility = 0;
 
         //~ Constructors -------------------------------------------------------
 
