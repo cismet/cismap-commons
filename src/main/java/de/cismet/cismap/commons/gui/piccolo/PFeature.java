@@ -329,24 +329,28 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 } else if ((pi != null) && (getFeature() != null) && (getFeature() instanceof StyledFeature)
                             && (((StyledFeature)getFeature()).getPointAnnotationSymbol() != null)) {
 //                        log.fatal("Sweetspot updated");                                                                  // NOI18N
+                    final FeatureAnnotationSymbol piOrig = ((StyledFeature)getFeature()).getPointAnnotationSymbol();
                     if (log.isDebugEnabled()) {
                         log.debug("newSweetSpotx: "
-                                    + ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX()); // NOI18N
+                                    + piOrig.getSweetSpotX()); // NOI18N
                     }
-                    final double sweetSpotX = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotX();
-                    final double sweetSpotY = ((StyledFeature)getFeature()).getPointAnnotationSymbol().getSweetSpotY();
-                    final double sweetX = (10
-                                    + (((StyledFeature)feature).getPointAnnotationSymbol().getImage().getWidth(null)
-                                        * sweetSpotX))
-                                / piSelected.getImage().getWidth(null);
-                    final double sweetY = (10
-                                    + (((StyledFeature)feature).getPointAnnotationSymbol().getImage().getHeight(
-                                            null) * sweetSpotY))
-                                / piSelected.getImage().getHeight(null);
-                    pi.setSweetSpotX(sweetX);
-                    pi.setSweetSpotY(sweetY);
-                    piSelected.setSweetSpotX(sweetX);
-                    piSelected.setSweetSpotY(sweetY);
+                    final double sweetSpotX = piOrig.getSweetSpotX();
+                    final double sweetSpotY = piOrig.getSweetSpotY();
+                    if (piOrig.getSelectedFeatureAnnotationSymbol() == null) {
+                        final double sweetX = (10 + (piOrig.getImage().getWidth(null) * sweetSpotX))
+                                    / piSelected.getImage().getWidth(null);
+                        final double sweetY = (10 + (piOrig.getImage().getHeight(null) * sweetSpotY))
+                                    / piSelected.getImage().getHeight(null);
+                        pi.setSweetSpotX(sweetX);
+                        pi.setSweetSpotY(sweetY);
+                        piSelected.setSweetSpotX(sweetX);
+                        piSelected.setSweetSpotY(sweetY);
+                    } else {
+                        pi.setSweetSpotX(piOrig.getSweetSpotX());
+                        pi.setSweetSpotY(piOrig.getSweetSpotY());
+                        piSelected.setSweetSpotX(piOrig.getSweetSpotX());
+                        piSelected.setSweetSpotY(piOrig.getSweetSpotY());
+                    }
                 }
             }
 
