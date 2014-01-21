@@ -570,7 +570,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
 
             // TODO Sorge dafür dass die PSwingKomponente richtig gedruckt wird und dass die Karte nicht mehr "zittert"
-
             int printingLineWidth = -1;
             for (final PNode p : list) {
                 if (p instanceof PFeature) {
@@ -709,7 +708,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
 
         // TODO Sorge dafür dass die PSwingKomponente richtig gedruckt wird und dass die Karte nicht mehr "zittert"
-
         for (final PNode p : list) {
             if (p instanceof PFeature) {
                 final PFeature original = ((PFeature)p);
@@ -2267,7 +2265,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
 
 //        final Collection<PFeature> all = featureLayer.getChildrenReference();
-
         for (final PFeature f : all) {
             f.setSelected(false);
             if ((sl != null) && !selectionChangedBySelectionListener) {
@@ -3034,19 +3031,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         featureCollection.getSelectedFeatures());
                                 for (final Feature selectedFeature : copy) {
                                     if ((selectedFeature instanceof Feature) && selectedFeature.isEditable()) {
-                                        if ((pFeatureHM.get(selectedFeature) != null)
-                                                    && pFeatureHM.get(selectedFeature).getVisible()) {
-                                            // manipulates gui -> edt
-                                            EventQueue.invokeLater(new Runnable() {
+                                        // manipulates gui -> edt
+                                        EventQueue.invokeLater(new Runnable() {
 
-                                                    @Override
-                                                    public void run() {
+                                                @Override
+                                                public void run() {
+                                                    if ((pFeatureHM.get(selectedFeature) != null)
+                                                                && pFeatureHM.get(selectedFeature).getVisible()) {
                                                         pFeatureHM.get(selectedFeature).addRotationHandles(handleLayer);
+                                                    } else {
+                                                        LOG.warn("pFeatureHM.get(" + selectedFeature + ")==null"); // NOI18N
                                                     }
-                                                });
-                                        } else {
-                                            LOG.warn("pFeatureHM.get(" + selectedFeature + ")==null"); // NOI18N
-                                        }
+                                                }
+                                            });
                                     }
                                 }
                             } else {
