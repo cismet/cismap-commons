@@ -15,6 +15,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.datatypes.Types;
 import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 
@@ -29,9 +30,14 @@ import java.awt.FontMetrics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -66,10 +72,8 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
+
 import de.cismet.tools.gui.StaticSwingTools;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.math.RoundingMode;
 
 /**
  * DOCUMENT ME!
@@ -108,6 +112,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JButton butExport;
     private javax.swing.JButton butInvertSelection;
     private javax.swing.JButton butMoveSelectedRows;
+    private javax.swing.JButton butOk;
     private javax.swing.JButton butPrint;
     private javax.swing.JButton butPrintPreview;
     private javax.swing.JButton butSearch;
@@ -117,9 +122,12 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JDialog diaStatistic;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JPanel jpControl;
+    private javax.swing.JLabel labStat;
+    private javax.swing.JLabel labStatCol;
     private javax.swing.JLabel labWaitingImage;
     private javax.swing.JLabel lblCountLab;
     private javax.swing.JLabel lblCountVal;
@@ -189,6 +197,9 @@ public class AttributeTable extends javax.swing.JPanel {
                     if (e.isPopupTrigger()) {
                         popupColumn = table.getTableHeader().getColumnModel().getColumnIndexAtX(e.getX());
                         popupColumn = table.convertColumnIndexToModel(popupColumn);
+
+                        miStatistik.setEnabled(model.isNumeric(popupColumn));
+
                         jPopupMenu1.show((Component)e.getSource(), e.getX(), e.getY());
                     }
                 }
@@ -421,6 +432,10 @@ public class AttributeTable extends javax.swing.JPanel {
         lblMeanVal = new javax.swing.JLabel();
         lblStdDeviationVal = new javax.swing.JLabel();
         lblNullVal = new javax.swing.JLabel();
+        butOk = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        labStat = new javax.swing.JLabel();
+        labStatCol = new javax.swing.JLabel();
         jToolBar1 = new javax.swing.JToolBar();
         butPrintPreview = new javax.swing.JButton();
         butPrint = new javax.swing.JButton();
@@ -449,41 +464,64 @@ public class AttributeTable extends javax.swing.JPanel {
         btnNextPage = new javax.swing.JButton();
         btnLastPage = new javax.swing.JButton();
 
-        miSortieren.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.miSortieren.text")); // NOI18N
+        miSortieren.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.miSortieren.text")); // NOI18N
         jPopupMenu1.add(miSortieren);
 
-        miStatistik.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.miStatistik.text")); // NOI18N
+        miStatistik.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.miStatistik.text")); // NOI18N
         miStatistik.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                miStatistikActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    miStatistikActionPerformed(evt);
+                }
+            });
         jPopupMenu1.add(miStatistik);
 
-        miSpalteAusblenden.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.miSpalteAusblenden.text")); // NOI18N
+        miSpalteAusblenden.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.miSpalteAusblenden.text")); // NOI18N
         miSpalteAusblenden.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                miSpalteAusblendenActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    miSpalteAusblendenActionPerformed(evt);
+                }
+            });
         jPopupMenu1.add(miSpalteAusblenden);
 
-        miSpaltenUmbenennen.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.miSpaltenUmbenennen.text")); // NOI18N
+        miSpaltenUmbenennen.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.miSpaltenUmbenennen.text")); // NOI18N
         miSpaltenUmbenennen.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                miSpaltenUmbenennenActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    miSpaltenUmbenennenActionPerformed(evt);
+                }
+            });
         jPopupMenu1.add(miSpaltenUmbenennen);
 
-        miFeldberechnung.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.miFeldberechnung.text")); // NOI18N
+        miFeldberechnung.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.miFeldberechnung.text")); // NOI18N
         jPopupMenu1.add(miFeldberechnung);
 
-        diaStatistic.setTitle(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.diaStatistic.title")); // NOI18N
+        diaStatistic.setTitle(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.diaStatistic.title")); // NOI18N
 
+        jPanel1.setLayout(new java.awt.GridBagLayout());
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         jPanel2.setLayout(new java.awt.GridBagLayout());
 
-        lblCountLab.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblCountLab.text")); // NOI18N
+        lblCountLab.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblCountLab.text")); // NOI18N
         lblCountLab.setMaximumSize(new java.awt.Dimension(150, 20));
         lblCountLab.setMinimumSize(new java.awt.Dimension(150, 20));
         lblCountLab.setPreferredSize(new java.awt.Dimension(150, 20));
@@ -527,7 +565,9 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel2.add(lblSumLab, gridBagConstraints);
 
-        lblMeanLab.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblMeanLab.text")); // NOI18N
+        lblMeanLab.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblMeanLab.text")); // NOI18N
         lblMeanLab.setMaximumSize(new java.awt.Dimension(150, 20));
         lblMeanLab.setMinimumSize(new java.awt.Dimension(150, 20));
         lblMeanLab.setPreferredSize(new java.awt.Dimension(150, 20));
@@ -538,7 +578,9 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel2.add(lblMeanLab, gridBagConstraints);
 
-        lblStdDeviationLab.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblStdDeviationLab.text")); // NOI18N
+        lblStdDeviationLab.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblStdDeviationLab.text")); // NOI18N
         lblStdDeviationLab.setMaximumSize(new java.awt.Dimension(150, 20));
         lblStdDeviationLab.setMinimumSize(new java.awt.Dimension(150, 20));
         lblStdDeviationLab.setPreferredSize(new java.awt.Dimension(150, 20));
@@ -549,7 +591,9 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel2.add(lblStdDeviationLab, gridBagConstraints);
 
-        lblNullLab.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblNullLab.text")); // NOI18N
+        lblNullLab.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblNullLab.text")); // NOI18N
         lblNullLab.setMaximumSize(new java.awt.Dimension(150, 20));
         lblNullLab.setMinimumSize(new java.awt.Dimension(150, 20));
         lblNullLab.setPreferredSize(new java.awt.Dimension(150, 20));
@@ -637,7 +681,37 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel2.add(lblNullVal, gridBagConstraints);
 
-        jPanel1.add(jPanel2);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        jPanel1.add(jPanel2, gridBagConstraints);
+
+        butOk.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butOk.text")); // NOI18N
+        butOk.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butOkActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(20, 0, 10, 0);
+        jPanel1.add(butOk, gridBagConstraints);
+
+        labStat.setFont(new java.awt.Font("Ubuntu", 1, 15));                                                        // NOI18N
+        labStat.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.labStat.text")); // NOI18N
+        jPanel3.add(labStat);
+
+        labStatCol.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
+        jPanel3.add(labStatCol);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        jPanel1.add(jPanel3, gridBagConstraints);
 
         diaStatistic.getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
 
@@ -645,162 +719,240 @@ public class AttributeTable extends javax.swing.JPanel {
 
         jToolBar1.setRollover(true);
 
-        butPrintPreview.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-preview.png"))); // NOI18N
-        butPrintPreview.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butPrintPreview.text")); // NOI18N
-        butPrintPreview.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butPrintPreview.toolTipText")); // NOI18N
+        butPrintPreview.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-preview.png"))); // NOI18N
+        butPrintPreview.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butPrintPreview.text"));                                                       // NOI18N
+        butPrintPreview.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butPrintPreview.toolTipText"));                                                // NOI18N
         butPrintPreview.setFocusable(false);
         butPrintPreview.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butPrintPreview.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         butPrintPreview.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                butPrintPreviewActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butPrintPreviewActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butPrintPreview);
 
-        butPrint.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-print.png"))); // NOI18N
+        butPrint.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-print.png")));          // NOI18N
         butPrint.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butPrint.text")); // NOI18N
-        butPrint.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butPrint.toolTipText")); // NOI18N
+        butPrint.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butPrint.toolTipText"));                                                              // NOI18N
         butPrint.setFocusable(false);
         butPrint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butPrint.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(butPrint);
 
-        butExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-export.png"))); // NOI18N
+        butExport.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-export.png")));           // NOI18N
         butExport.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExport.text")); // NOI18N
-        butExport.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExport.toolTipText")); // NOI18N
+        butExport.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butExport.toolTipText"));                                                               // NOI18N
         butExport.setFocusable(false);
         butExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(butExport);
 
         butAttrib.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butAttrib.text")); // NOI18N
-        butAttrib.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butAttrib.toolTipText")); // NOI18N
+        butAttrib.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butAttrib.toolTipText"));                                                               // NOI18N
         butAttrib.setFocusable(false);
         butAttrib.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butAttrib.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(butAttrib);
 
-        butSearch.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-searchdocument.png"))); // NOI18N
+        butSearch.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-searchdocument.png")));   // NOI18N
         butSearch.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butSearch.text")); // NOI18N
-        butSearch.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butSearch.toolTipText")); // NOI18N
+        butSearch.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butSearch.toolTipText"));                                                               // NOI18N
         butSearch.setFocusable(false);
         butSearch.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butSearch.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(butSearch);
 
-        tbLookup.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-brokenlink.png"))); // NOI18N
+        tbLookup.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-brokenlink.png")));     // NOI18N
         tbLookup.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.tbLookup.text")); // NOI18N
-        tbLookup.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.tbLookup.toolTipText")); // NOI18N
+        tbLookup.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.tbLookup.toolTipText"));                                                              // NOI18N
         tbLookup.setFocusable(false);
         tbLookup.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        tbLookup.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-link.png"))); // NOI18N
+        tbLookup.setSelectedIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-link.png")));           // NOI18N
         tbLookup.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(tbLookup);
 
         tbAlias.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.tbAlias.text")); // NOI18N
-        tbAlias.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.tbAlias.toolTipText")); // NOI18N
+        tbAlias.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.tbAlias.toolTipText"));                                                             // NOI18N
         tbAlias.setFocusable(false);
         tbAlias.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         tbAlias.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(tbAlias);
 
-        tbProcessing.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.tbProcessing.text")); // NOI18N
-        tbProcessing.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.tbProcessing.toolTipText")); // NOI18N
+        tbProcessing.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.tbProcessing.text"));        // NOI18N
+        tbProcessing.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.tbProcessing.toolTipText")); // NOI18N
         tbProcessing.setFocusable(false);
         tbProcessing.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         tbProcessing.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(tbProcessing);
 
-        butMoveSelectedRows.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-thissideup.png"))); // NOI18N
-        butMoveSelectedRows.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butMoveSelectedRows.text")); // NOI18N
-        butMoveSelectedRows.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butMoveSelectedRows.toolTipText")); // NOI18N
+        butMoveSelectedRows.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-thissideup.png"))); // NOI18N
+        butMoveSelectedRows.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butMoveSelectedRows.text"));                                                      // NOI18N
+        butMoveSelectedRows.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butMoveSelectedRows.toolTipText"));                                               // NOI18N
         butMoveSelectedRows.setFocusable(false);
         butMoveSelectedRows.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butMoveSelectedRows.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         butMoveSelectedRows.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                butMoveSelectedRowsActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butMoveSelectedRowsActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butMoveSelectedRows);
 
-        butSelectAll.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-selectionadd.png"))); // NOI18N
-        butSelectAll.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butSelectAll.text")); // NOI18N
-        butSelectAll.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butSelectAll.toolTipText")); // NOI18N
+        butSelectAll.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-selectionadd.png"))); // NOI18N
+        butSelectAll.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butSelectAll.text"));                                                               // NOI18N
+        butSelectAll.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butSelectAll.toolTipText"));                                                        // NOI18N
         butSelectAll.setFocusable(false);
         butSelectAll.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butSelectAll.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         butSelectAll.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                butSelectAllActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butSelectAllActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butSelectAll);
 
-        butInvertSelection.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-selectionintersect.png"))); // NOI18N
-        butInvertSelection.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butInvertSelection.text")); // NOI18N
-        butInvertSelection.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butInvertSelection.toolTipText")); // NOI18N
+        butInvertSelection.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource(
+                    "/de/cismet/cismap/commons/gui/attributetable/res/icon-selectionintersect.png"))); // NOI18N
+        butInvertSelection.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butInvertSelection.text"));                                            // NOI18N
+        butInvertSelection.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butInvertSelection.toolTipText"));                                     // NOI18N
         butInvertSelection.setFocusable(false);
         butInvertSelection.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butInvertSelection.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         butInvertSelection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                butInvertSelectionActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butInvertSelectionActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butInvertSelection);
 
-        butClearSelection.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-selectionremove.png"))); // NOI18N
-        butClearSelection.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butClearSelection.text")); // NOI18N
-        butClearSelection.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butClearSelection.toolTipText")); // NOI18N
+        butClearSelection.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-selectionremove.png"))); // NOI18N
+        butClearSelection.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butClearSelection.text"));                                                             // NOI18N
+        butClearSelection.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butClearSelection.toolTipText"));                                                      // NOI18N
         butClearSelection.setFocusable(false);
         butClearSelection.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butClearSelection.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         butClearSelection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                butClearSelectionActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butClearSelectionActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butClearSelection);
 
-        butZoomToSelection.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-resize.png"))); // NOI18N
-        butZoomToSelection.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butZoomToSelection.text")); // NOI18N
-        butZoomToSelection.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butZoomToSelection.toolTipText")); // NOI18N
+        butZoomToSelection.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-resize.png"))); // NOI18N
+        butZoomToSelection.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butZoomToSelection.text"));                                                   // NOI18N
+        butZoomToSelection.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butZoomToSelection.toolTipText"));                                            // NOI18N
         butZoomToSelection.setFocusable(false);
         butZoomToSelection.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butZoomToSelection.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         butZoomToSelection.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                butZoomToSelectionActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butZoomToSelectionActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butZoomToSelection);
 
-        butColWidth.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-text-width.png"))); // NOI18N
-        butColWidth.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butColWidth.text")); // NOI18N
-        butColWidth.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butColWidth.toolTipText")); // NOI18N
+        butColWidth.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-text-width.png"))); // NOI18N
+        butColWidth.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butColWidth.text"));                                                              // NOI18N
+        butColWidth.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butColWidth.toolTipText"));                                                       // NOI18N
         butColWidth.setFocusable(false);
         butColWidth.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butColWidth.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         butColWidth.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                butColWidthActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butColWidthActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butColWidth);
 
-        butShowCols.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-threecolumns.png"))); // NOI18N
-        butShowCols.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butShowCols.text")); // NOI18N
-        butShowCols.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butShowCols.toolTipText")); // NOI18N
+        butShowCols.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-threecolumns.png"))); // NOI18N
+        butShowCols.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butShowCols.text"));                                                                // NOI18N
+        butShowCols.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butShowCols.toolTipText"));                                                         // NOI18N
         butShowCols.setFocusable(false);
         butShowCols.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butShowCols.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         butShowCols.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                butShowColsActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butShowColsActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butShowCols);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -810,11 +962,14 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.weightx = 1.0;
         add(jToolBar1, gridBagConstraints);
 
-        panWaiting.setBackground(new Color(255,255,255, 150));
+        panWaiting.setBackground(new Color(255, 255, 255, 150));
         panWaiting.setLayout(new java.awt.GridBagLayout());
 
-        labWaitingImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/ajax-loader.gif"))); // NOI18N
-        labWaitingImage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.labWaitingImage.text")); // NOI18N
+        labWaitingImage.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/ajax-loader.gif"))); // NOI18N
+        labWaitingImage.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.labWaitingImage.text"));                                                  // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -831,13 +986,8 @@ public class AttributeTable extends javax.swing.JPanel {
         add(panWaiting, gridBagConstraints);
 
         table.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-
-            }
-        ));
+                new Object[][] {},
+                new String[] {}));
         table.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tableScrollPane.setViewportView(table);
 
@@ -851,60 +1001,92 @@ public class AttributeTable extends javax.swing.JPanel {
 
         jpControl.setLayout(new java.awt.GridBagLayout());
 
-        btnFirstPage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnFirstPage.text")); // NOI18N
-        btnFirstPage.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnFirstPage.toolTipText")); // NOI18N
+        btnFirstPage.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.btnFirstPage.text"));        // NOI18N
+        btnFirstPage.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.btnFirstPage.toolTipText")); // NOI18N
         btnFirstPage.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnFirstPageActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnFirstPageActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(btnFirstPage, gridBagConstraints);
 
-        btnPrevPage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnPrevPage.text")); // NOI18N
-        btnPrevPage.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnPrevPage.toolTipText")); // NOI18N
+        btnPrevPage.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.btnPrevPage.text"));        // NOI18N
+        btnPrevPage.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.btnPrevPage.toolTipText")); // NOI18N
         btnPrevPage.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnPrevPageActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnPrevPageActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(btnPrevPage, gridBagConstraints);
 
-        txtCurrentPage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.txtCurrentPage.text")); // NOI18N
-        txtCurrentPage.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.txtCurrentPage.toolTipText")); // NOI18N
+        txtCurrentPage.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.txtCurrentPage.text"));        // NOI18N
+        txtCurrentPage.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.txtCurrentPage.toolTipText")); // NOI18N
         txtCurrentPage.setMinimumSize(new java.awt.Dimension(50, 27));
         txtCurrentPage.setPreferredSize(new java.awt.Dimension(50, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(txtCurrentPage, gridBagConstraints);
 
-        lblTotalPages.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblTotalPages.text")); // NOI18N
-        lblTotalPages.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblTotalPages.toolTipText")); // NOI18N
+        lblTotalPages.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblTotalPages.text"));        // NOI18N
+        lblTotalPages.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblTotalPages.toolTipText")); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(lblTotalPages, gridBagConstraints);
 
-        btnNextPage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnNextPage.text")); // NOI18N
-        btnNextPage.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnNextPage.toolTipText")); // NOI18N
+        btnNextPage.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.btnNextPage.text"));        // NOI18N
+        btnNextPage.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.btnNextPage.toolTipText")); // NOI18N
         btnNextPage.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnNextPageActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnNextPageActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(btnNextPage, gridBagConstraints);
 
-        btnLastPage.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnLastPage.text")); // NOI18N
-        btnLastPage.setToolTipText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.btnLastPage.toolTipText")); // NOI18N
+        btnLastPage.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.btnLastPage.text"));        // NOI18N
+        btnLastPage.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.btnLastPage.toolTipText")); // NOI18N
         btnLastPage.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnLastPageActionPerformed(evt);
-            }
-        });
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnLastPageActionPerformed(evt);
+                }
+            });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(btnLastPage, gridBagConstraints);
@@ -913,78 +1095,78 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
         add(jpControl, gridBagConstraints);
-    }// </editor-fold>//GEN-END:initComponents
+    } // </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butPrintPreviewActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butPrintPreviewActionPerformed
+    private void butPrintPreviewActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintPreviewActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_butPrintPreviewActionPerformed
+    } //GEN-LAST:event_butPrintPreviewActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrevPageActionPerformed
+    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnPrevPageActionPerformed
         if (currentPage > 1) {
             loadModel(--currentPage);
         }
-    }//GEN-LAST:event_btnPrevPageActionPerformed
+    }                                                                               //GEN-LAST:event_btnPrevPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnFirstPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFirstPageActionPerformed
+    private void btnFirstPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnFirstPageActionPerformed
         currentPage = 1;
         loadModel(currentPage);
-    }//GEN-LAST:event_btnFirstPageActionPerformed
+    }                                                                                //GEN-LAST:event_btnFirstPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextPageActionPerformed
+    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnNextPageActionPerformed
         if ((pageSize != -1) && ((currentPage * pageSize) < itemCount)) {
             loadModel(++currentPage);
         }
-    }//GEN-LAST:event_btnNextPageActionPerformed
+    }                                                                               //GEN-LAST:event_btnNextPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnLastPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLastPageActionPerformed
+    private void btnLastPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnLastPageActionPerformed
         currentPage = itemCount / pageSize;
 
         if ((pageSize != -1) && ((currentPage * pageSize) < itemCount)) {
             ++currentPage;
             loadModel(currentPage);
         }
-    }//GEN-LAST:event_btnLastPageActionPerformed
+    } //GEN-LAST:event_btnLastPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miSpalteAusblendenActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miSpalteAusblendenActionPerformed
+    private void miSpalteAusblendenActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miSpalteAusblendenActionPerformed
         model.hideColumn(popupColumn);
-    }//GEN-LAST:event_miSpalteAusblendenActionPerformed
+    }                                                                                      //GEN-LAST:event_miSpalteAusblendenActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miSpaltenUmbenennenActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miSpaltenUmbenennenActionPerformed
+    private void miSpaltenUmbenennenActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miSpaltenUmbenennenActionPerformed
         final String newName = (String)JOptionPane.showInputDialog(
                 this,
                 "Geben Sie den neuen Namen der Spalte ein.",
@@ -996,50 +1178,50 @@ public class AttributeTable extends javax.swing.JPanel {
         if (newName != null) {
             model.setColumnName(popupColumn, newName);
         }
-    }//GEN-LAST:event_miSpaltenUmbenennenActionPerformed
+    }                                                                                       //GEN-LAST:event_miSpaltenUmbenennenActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butShowColsActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butShowColsActionPerformed
+    private void butShowColsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butShowColsActionPerformed
         model.showColumns();
-    }//GEN-LAST:event_butShowColsActionPerformed
+    }                                                                               //GEN-LAST:event_butShowColsActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butColWidthActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butColWidthActionPerformed
+    private void butColWidthActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butColWidthActionPerformed
         setTableSize();
-    }//GEN-LAST:event_butColWidthActionPerformed
+    }                                                                               //GEN-LAST:event_butColWidthActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butSelectAllActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butSelectAllActionPerformed
+    private void butSelectAllActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butSelectAllActionPerformed
         table.getSelectionModel().setSelectionInterval(0, model.getRowCount() - 1);
-    }//GEN-LAST:event_butSelectAllActionPerformed
+    }                                                                                //GEN-LAST:event_butSelectAllActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butClearSelectionActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butClearSelectionActionPerformed
+    private void butClearSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butClearSelectionActionPerformed
         table.getSelectionModel().clearSelection();
-    }//GEN-LAST:event_butClearSelectionActionPerformed
+    }                                                                                     //GEN-LAST:event_butClearSelectionActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butInvertSelectionActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butInvertSelectionActionPerformed
+    private void butInvertSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butInvertSelectionActionPerformed
         final int[] selectedIndices = table.getSelectedRows();
         table.selectAll();
         table.getSelectionModel().setValueIsAdjusting(true);
@@ -1048,14 +1230,14 @@ public class AttributeTable extends javax.swing.JPanel {
             table.removeRowSelectionInterval(selectedIndex, selectedIndex);
         }
         table.getSelectionModel().setValueIsAdjusting(false);
-    }//GEN-LAST:event_butInvertSelectionActionPerformed
+    } //GEN-LAST:event_butInvertSelectionActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butMoveSelectedRowsActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butMoveSelectedRowsActionPerformed
+    private void butMoveSelectedRowsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butMoveSelectedRowsActionPerformed
         final int[] selectedRows = table.getSelectedRows();
         final int selectedRowCount = table.getSelectedRowCount();
         int count = 0;
@@ -1067,14 +1249,14 @@ public class AttributeTable extends javax.swing.JPanel {
         }
 
         table.getSelectionModel().setSelectionInterval(0, selectedRowCount - 1);
-    }//GEN-LAST:event_butMoveSelectedRowsActionPerformed
+    } //GEN-LAST:event_butMoveSelectedRowsActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butZoomToSelectionActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butZoomToSelectionActionPerformed
+    private void butZoomToSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butZoomToSelectionActionPerformed
         final int[] selectedRows = table.getSelectedRows();
         Geometry geo = null;
 
@@ -1095,53 +1277,72 @@ public class AttributeTable extends javax.swing.JPanel {
         } else {
             LOG.error("MappingComponent is not set");
         }
-    }//GEN-LAST:event_butZoomToSelectionActionPerformed
+    } //GEN-LAST:event_butZoomToSelectionActionPerformed
 
-    private void miStatistikActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miStatistikActionPerformed
-        int count = model.getRowCount();
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void miStatistikActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miStatistikActionPerformed
+        final int count = model.getRowCount();
         double min = Double.MAX_VALUE;
         double max = Double.MIN_VALUE;
         double sum = 0;
         double mean = 0;
         double stdDeviation = 0;
         int nullCount = 0;
-        
+
         for (int i = 0; i < model.getRowCount(); ++i) {
             Object val = model.getValueAt(i, popupColumn);
-            
+
+            if (val instanceof String) {
+                try {
+                    val = Double.parseDouble((String)val);
+                } catch (NumberFormatException e) {
+                    // nothing to do
+                }
+            }
+
             if (val instanceof Number) {
-                double doubleVal = ((Number)val).doubleValue();
-                
+                final double doubleVal = ((Number)val).doubleValue();
+
                 if (doubleVal < min) {
                     min = doubleVal;
                 }
-                
+
                 if (doubleVal > max) {
                     max = doubleVal;
                 }
-                
+
                 sum += doubleVal;
-                
-                
             } else if (val == null) {
                 ++nullCount;
             }
         }
-        
+
         for (int i = 0; i < model.getRowCount(); ++i) {
             Object val = model.getValueAt(i, popupColumn);
-            
+
+            if (val instanceof String) {
+                try {
+                    val = Double.parseDouble((String)val);
+                } catch (NumberFormatException e) {
+                    // nothing to do
+                }
+            }
+
             if (val instanceof Number) {
-                double doubleVal = ((Number)val).doubleValue();
+                final double doubleVal = ((Number)val).doubleValue();
                 stdDeviation += Math.pow(doubleVal - mean, 2);
             }
         }
-        
+
         mean = sum / (count - nullCount);
         // formula: sqrt(1/(n-1) * sum((Xi - Y)^2)), n: value count, Xi: ith values, Y: mean
         // see: http://en.wikipedia.org/wiki/Standard_deviation#Corrected_sample_standard_deviation
-        stdDeviation = Math.sqrt( 1.0 / (count - nullCount - 1) * stdDeviation );
-        
+        stdDeviation = Math.sqrt(1.0 / (count - nullCount - 1) * stdDeviation);
+
         lblCountVal.setText(toString(count));
         lblMinVal.setText(toString(round(min, 6)));
         lblMaxVal.setText(toString(round(max, 6)));
@@ -1149,31 +1350,57 @@ public class AttributeTable extends javax.swing.JPanel {
         lblNullVal.setText(toString(nullCount));
         lblStdDeviationVal.setText(toString(round(stdDeviation, 6)));
         lblSumVal.setText(toString(round(sum, 6)));
-        
-        diaStatistic.setSize(400, 300);
-        StaticSwingTools.showDialog(diaStatistic);
-    }//GEN-LAST:event_miStatistikActionPerformed
 
-    private String toString(double val) {
+        diaStatistic.setSize(400, 320);
+        diaStatistic.setResizable(false);
+        labStatCol.setText(model.getColumnName(popupColumn));
+        StaticSwingTools.showDialog(diaStatistic);
+    } //GEN-LAST:event_miStatistikActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butOkActionPerformed
+        diaStatistic.setVisible(false);
+    }                                                                         //GEN-LAST:event_butOkActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   val  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String toString(final double val) {
         String res = String.valueOf(val);
-        
+
         // remove all leading points and zeros
         for (int i = res.length() - 1; i > 0; --i) {
-            if (res.charAt(i) == '0' || res.charAt(i) == '.') {
+            if ((res.charAt(i) == '0') || (res.charAt(i) == '.')) {
                 res = res.substring(0, i);
             } else {
                 break;
             }
         }
-        
+
         return res;
     }
-    
-    private double round(double value, int digits) {
-        BigDecimal tmpValue = new BigDecimal(value);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   value   DOCUMENT ME!
+     * @param   digits  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private double round(final double value, final int digits) {
+        final BigDecimal tmpValue = new BigDecimal(value);
         return tmpValue.setScale(digits, RoundingMode.HALF_UP).doubleValue();
     }
-    
+
     /**
      * DOCUMENT ME!
      */
@@ -1416,6 +1643,35 @@ public class AttributeTable extends javax.swing.JPanel {
         /**
          * DOCUMENT ME!
          *
+         * @param   col  row DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public boolean isNumeric(final int col) {
+            final String key = attributeNames[col];
+            final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
+
+            if ((attr != null)
+                        && (attr.getType().equals(String.valueOf(Types.INTEGER))
+                            || attr.getType().equals(String.valueOf(Types.BIGINT))
+                            || attr.getType().equals(String.valueOf(Types.SMALLINT))
+                            || attr.getType().equals(String.valueOf(Types.TINYINT))
+                            || attr.getType().equals(String.valueOf(Types.DOUBLE))
+                            || attr.getType().equals(String.valueOf(Types.FLOAT))
+                            || attr.getType().equals(String.valueOf(Types.DECIMAL))
+                            || attr.getType().equals("xsd:float")
+                            || attr.getType().equals("xsd:decimal")
+                            || attr.getType().equals("xsd:double")
+                            || attr.getType().equals("xsd:integer"))) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
          * @param   row  DOCUMENT ME!
          *
          * @return  DOCUMENT ME!
@@ -1440,7 +1696,38 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public Class<?> getColumnClass(final int columnIndex) {
-            return String.class;
+            final String key = attributeNames[columnIndex];
+            final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
+
+            if (attr.isGeometry()) {
+                return String.class;
+            } else if (attr.getType().equals(String.valueOf(Types.CHAR))
+                        || attr.getType().equals(String.valueOf(Types.VARCHAR))
+                        || attr.getType().equals(String.valueOf(Types.LONGVARCHAR))) {
+                return String.class;
+            } else if (attr.getType().equals(String.valueOf(Types.INTEGER))
+                        || attr.getType().equals(String.valueOf(Types.BIGINT))
+                        || attr.getType().equals(String.valueOf(Types.SMALLINT))
+                        || attr.getType().equals(String.valueOf(Types.TINYINT))
+                        || attr.getType().equals("xsd:integer")) {
+                return Integer.class;
+            } else if (attr.getType().equals(String.valueOf(Types.DOUBLE))
+                        || attr.getType().equals(String.valueOf(Types.FLOAT))
+                        || attr.getType().equals(String.valueOf(Types.DECIMAL))
+                        || attr.getType().equals("xsd:float")
+                        || attr.getType().equals("xsd:decimal")
+                        || attr.getType().equals("xsd:double")) {
+                return Double.class;
+            } else if (attr.getType().equals(String.valueOf(Types.DATE))
+                        || attr.getType().equals(String.valueOf(Types.TIME))
+                        || attr.getType().equals(String.valueOf(Types.TIMESTAMP))) {
+                return Date.class;
+            } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN))
+                        || attr.getType().equals("xsd:boolean")) {
+                return Boolean.class;
+            } else {
+                return String.class;
+            }
         }
 
         @Override
