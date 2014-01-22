@@ -54,7 +54,9 @@ import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
@@ -586,16 +588,35 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.ZoomToSelectedItemsMenuItem.pmenuItem.text"),
                 NODE
-                        | MULTI);
+                        | MULTI
+                        | FEATURE_SERVICE);
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         public void actionPerformed(final ActionEvent e) {
-            // TODO: Uses the same logic as the ZoomToThemeMenuItem, at the moment.
-            final TreePath[] tps = tree.getSelectionPaths();
-            final ZoomToLayerWorker worker = new ZoomToLayerWorker(tps);
+            final TreePath[] paths = tree.getSelectionPaths();
+            final List<PNode> nodesOfTheSelectedServices = new ArrayList<PNode>(paths.length);
+
+            for (final TreePath o : paths) {
+                final AbstractFeatureService afs = (AbstractFeatureService)o.getLastPathComponent();
+                nodesOfTheSelectedServices.add(afs.getPNode());
+            }
+
+            final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
+            final SelectionListener sl = (SelectionListener)map.getInputEventListener().get(MappingComponent.SELECT);
+            final List<PFeature> sel = sl.getAllSelectedPFeatures();
+            final Feature[] features = new Feature[sel.size()];
+
+            for (int i = 0; i < sel.size(); ++i) {
+                final PFeature feature = sel.get(i);
+                if (nodesOfTheSelectedServices.contains(feature.getParent())) {
+                    features[i] = feature.getFeature();
+                }
+            }
+
+            final ZoomToFeaturesWorker worker = new ZoomToFeaturesWorker(features);
             worker.execute();
         }
     }
@@ -615,7 +636,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         public ZoomToThemeMenuItem() {
             super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.ZoomToThemeMenuItem.pmenuItem.text"),
                 NODE
-                        | MULTI);
+                        | MULTI
+                        | FEATURE_SERVICE);
             newSection = true;
         }
 
@@ -646,10 +668,16 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.OpenAttributeTableMenuItem.pmenuItem.text"),
                 NODE
-                        | MULTI);
+                        | MULTI
+                        | FEATURE_SERVICE);
         }
 
         //~ Methods ------------------------------------------------------------
+
+        @Override
+        public boolean isVisible(final int mask) {
+            return ((visibility & mask) == mask) && ((mask & FEATURE_SERVICE) != 0);
+        }
 
         @Override
         public void actionPerformed(final ActionEvent e) {
@@ -681,14 +709,44 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.SelectAllMenuItem.pmenuItem.text"),
                 NODE
-                        | MULTI);
+                        | MULTI
+                        | FEATURE_SERVICE);
             newSection = true;
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
+        public boolean isVisible(final int mask) {
+            return ((visibility & mask) == mask) && ((mask & FEATURE_SERVICE) != 0);
+        }
+
+        @Override
         public void actionPerformed(final ActionEvent e) {
+            final TreePath[] paths = tree.getSelectionPaths();
+
+            for (final TreePath path : paths) {
+                if (path.getLastPathComponent() instanceof AbstractFeatureService) {
+                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
+                    final List<Feature> toBeSelected = new ArrayList<Feature>();
+                    for (final Object featureObject : service.getPNode().getChildrenReference()) {
+                        final PFeature feature = (PFeature)featureObject;
+
+                        if (!feature.isSelected()) {
+                            feature.setSelected(true);
+                            final SelectionListener sl = (SelectionListener)CismapBroker.getInstance()
+                                        .getMappingComponent()
+                                        .getInputEventListener()
+                                        .get(MappingComponent.SELECT);
+                            sl.addSelectedFeature(feature);
+                            toBeSelected.add(feature.getFeature());
+                        }
+                    }
+
+                    ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection())
+                            .addToSelection(toBeSelected);
+                }
+            }
         }
     }
 
@@ -709,13 +767,48 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.InvertSelectionTableMenuItem.pmenuItem.text"),
                 NODE
-                        | MULTI);
+                        | MULTI
+                        | FEATURE_SERVICE);
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
+        public boolean isVisible(final int mask) {
+            return ((visibility & mask) == mask) && ((mask & FEATURE_SERVICE) != 0);
+        }
+
+        @Override
         public void actionPerformed(final ActionEvent e) {
+            final TreePath[] paths = tree.getSelectionPaths();
+
+            for (final TreePath path : paths) {
+                if (path.getLastPathComponent() instanceof AbstractFeatureService) {
+                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
+                    final List<Feature> toBeSelected = new ArrayList<Feature>();
+                    final List<Feature> toBeUnselected = new ArrayList<Feature>();
+                    for (final Object featureObject : service.getPNode().getChildrenReference()) {
+                        final PFeature feature = (PFeature)featureObject;
+
+                        feature.setSelected(!feature.isSelected());
+                        final SelectionListener sl = (SelectionListener)CismapBroker.getInstance().getMappingComponent()
+                                    .getInputEventListener()
+                                    .get(MappingComponent.SELECT);
+
+                        if (feature.isSelected()) {
+                            sl.addSelectedFeature(feature);
+                            toBeSelected.add(feature.getFeature());
+                        } else {
+                            sl.removeSelectedFeature(feature);
+                            toBeUnselected.add(feature.getFeature());
+                        }
+                    }
+                    ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection())
+                            .addToSelection(toBeSelected);
+                    ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection())
+                            .unselect(toBeUnselected);
+                }
+            }
         }
     }
 
@@ -736,13 +829,42 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.ClearSelectionMenuItem.pmenuItem.text"),
                 NODE
-                        | MULTI);
+                        | MULTI
+                        | FEATURE_SERVICE);
         }
 
         //~ Methods ------------------------------------------------------------
 
         @Override
+        public boolean isVisible(final int mask) {
+            return ((visibility & mask) == mask) && ((mask & FEATURE_SERVICE) != 0);
+        }
+
+        @Override
         public void actionPerformed(final ActionEvent e) {
+            final TreePath[] paths = tree.getSelectionPaths();
+
+            for (final TreePath path : paths) {
+                if (path.getLastPathComponent() instanceof AbstractFeatureService) {
+                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
+                    final List<Feature> toBeUnselected = new ArrayList<Feature>();
+                    for (final Object featureObject : service.getPNode().getChildrenReference()) {
+                        final PFeature feature = (PFeature)featureObject;
+
+                        if (feature.isSelected()) {
+                            feature.setSelected(false);
+                            final SelectionListener sl = (SelectionListener)CismapBroker.getInstance()
+                                        .getMappingComponent()
+                                        .getInputEventListener()
+                                        .get(MappingComponent.SELECT);
+                            sl.removeSelectedFeature(feature);
+                            toBeUnselected.add(feature.getFeature());
+                        }
+                    }
+                    ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection())
+                            .unselect(toBeUnselected);
+                }
+            }
         }
     }
 

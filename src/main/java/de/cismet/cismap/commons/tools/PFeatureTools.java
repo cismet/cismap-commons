@@ -120,16 +120,30 @@ public class PFeatureTools {
      * @return  DOCUMENT ME!
      */
     public static PFeature[] getPFeaturesInArea(final MappingComponent mc, final PBounds bounds) {
-        final ArrayList al = new ArrayList();
         final WorldToScreenTransform wtst = mc.getWtst();
         final Geometry bBox = getGeometryFromPBounds(bounds, wtst, mc.getMappingModel().getSrs().getCode());
 
-        findIntersectingPFeatures(mc.getFeatureLayer(), bBox, al);
+        return getPFeaturesInArea(mc, bBox);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   mc    DOCUMENT ME!
+     * @param   geom  bounds DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static PFeature[] getPFeaturesInArea(final MappingComponent mc, final Geometry geom) {
+        final ArrayList al = new ArrayList();
+        final WorldToScreenTransform wtst = mc.getWtst();
+
+        findIntersectingPFeatures(mc.getFeatureLayer(), geom, al);
 
         for (int i = 0; i < mc.getMapServiceLayer().getChildrenCount(); ++i) {
             final PNode p = mc.getMapServiceLayer().getChild(i);
             if (p instanceof PLayer) {
-                findIntersectingPFeatures(mc.getMapServiceLayer().getChild(i), bBox, al);
+                findIntersectingPFeatures(mc.getMapServiceLayer().getChild(i), geom, al);
             }
         }
         Iterator it = al.iterator();
