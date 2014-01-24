@@ -11,6 +11,10 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import org.deegree.model.spatialschema.Geometry;
+import org.deegree.model.spatialschema.GeometryException;
+import org.deegree.model.spatialschema.JTSAdapter;
+
 import org.openide.util.Cancellable;
 
 import java.io.BufferedWriter;
@@ -21,10 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import de.cismet.tools.gui.downloadmanager.Download;
+import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -32,33 +38,39 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class ExportTxtDownload extends AbstractDownload implements Cancellable {
+public class ExportTxtDownload extends ExportDownload {
 
     //~ Instance fields --------------------------------------------------------
 
-    private DefaultFeatureServiceFeature[] features;
-    private AbstractFeatureService service;
+    protected String separator = "\t";
+    protected boolean writeHeader = true;
+    protected String nullValue = "<null>";
+    protected String quotes = null;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
+     * Creates a new ExportShapeDownload object. The init method must be invoked before the download can be started, if
+     * this constructor is used.
+     */
+    public ExportTxtDownload() {
+    }
+
+    /**
      * Creates a new ExportShapeDownload object.
      *
-     * @param  filename   DOCUMENT ME!
-     * @param  extension  DOCUMENT ME!
-     * @param  features   DOCUMENT ME!
-     * @param  service    DOCUMENT ME!
+     * @param  filename        DOCUMENT ME!
+     * @param  extension       DOCUMENT ME!
+     * @param  features        DOCUMENT ME!
+     * @param  service         DOCUMENT ME!
+     * @param  attributeNames  DOCUMENT ME!
      */
     public ExportTxtDownload(final String filename,
             final String extension,
-            final DefaultFeatureServiceFeature[] features,
-            final AbstractFeatureService service) {
-        this.features = features;
-        this.service = service;
-        this.title = "Export " + features.length + " Features";
-
-        status = State.WAITING;
-        determineDestinationFile(filename, extension);
+            final FeatureServiceFeature[] features,
+            final AbstractFeatureService service,
+            final List<String[]> attributeNames) {
+        init(filename, extension, features, service, attributeNames);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -73,16 +85,28 @@ public class ExportTxtDownload extends AbstractDownload implements Cancellable {
 
         if ((features != null) && (features.length > 0)) {
             stateChanged();
-            List<String> attributeNames = null;
+            final List<String> attributeList = toAttributeList(aliasAttributeList);
             BufferedWriter bw = null;
+            boolean firstLine = true;
             try {
                 bw = new BufferedWriter(new FileWriter(fileToSaveTo));
 
-                for (final DefaultFeatureServiceFeature feature : features) {
-                    if (attributeNames == null) {
-                        attributeNames = getAttributeNames(feature);
+                for (final FeatureServiceFeature feature : features) {
+                    if (Thread.interrupted()) {
+                        bw.close();
+                        fileToSaveTo.delete();
+                        bw = null;
+                        break;
                     }
-                    bw.write(toString(attributeNames, feature));
+                    if (firstLine && (aliasAttributeList != null)) {
+                        if (writeHeader) {
+                            bw.write(toString(toAliasList(aliasAttributeList), true));
+                            bw.newLine();
+                        }
+
+                        firstLine = false;
+                    }
+                    bw.write(toString(attributeList, feature));
                     bw.newLine();
                 }
             } catch (final Exception ex) {
@@ -114,7 +138,7 @@ public class ExportTxtDownload extends AbstractDownload implements Cancellable {
      *
      * @return  DOCUMENT ME!
      */
-    private String toString(final List<String> attributeNames, final DefaultFeatureServiceFeature f) {
+    private String toString(final List<String> attributeNames, final FeatureServiceFeature f) {
         final Map<String, Object> hm = (Map<String, Object>)f.getProperties();
         final List<Object> vals = new ArrayList<Object>();
 
@@ -124,62 +148,58 @@ public class ExportTxtDownload extends AbstractDownload implements Cancellable {
             vals.add(o);
         }
 
-        return toString(vals);
+        return toString(vals, false);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   vals  DOCUMENT ME!
+     * @param   vals           DOCUMENT ME!
+     * @param   withoutQuotes  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private String toString(final List<Object> vals) {
+    private String toString(final List<? extends Object> vals, final boolean withoutQuotes) {
         StringBuffer result = null;
 
         for (Object tmp : vals) {
             if (tmp == null) {
-                tmp = "<null>";
+                tmp = nullValue;
+            }
+
+            if (tmp instanceof Geometry) {
+                final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)tmp);
+                tmp = "Geometry";
+                try {
+                    tmp = JTSAdapter.export(geom).getGeometryType();
+                } catch (GeometryException e) {
+                    log.error("Error while transforming deegree geometry to jts geometry.", e);
+                }
             }
 
             if (result == null) {
-                result = new StringBuffer(String.valueOf(tmp));
+                result = new StringBuffer();
             } else {
-                result.append('\t').append(String.valueOf(tmp));
+                result.append(separator);
+            }
+
+            if (!withoutQuotes && (quotes != null) && (tmp instanceof String)) {
+                result.append(quotes).append(String.valueOf(tmp)).append(quotes);
+            } else {
+                result.append(String.valueOf(tmp));
             }
         }
 
         return result.toString();
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   f  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private List<String> getAttributeNames(final DefaultFeatureServiceFeature f) {
-        final List<String> attributeNames = new ArrayList<String>();
-        final Map<String, Object> hm = (Map<String, Object>)f.getProperties();
-
-        for (final String attrName : hm.keySet()) {
-            attributeNames.add(attrName);
-        }
-
-        return attributeNames;
+    @Override
+    public String getDefaultExtension() {
+        return ".txt";
     }
 
     @Override
-    public boolean cancel() {
-        boolean cancelled = true;
-        if (downloadFuture != null) {
-            cancelled = downloadFuture.cancel(true);
-        }
-        if (cancelled) {
-            status = State.ABORTED;
-            stateChanged();
-        }
-        return cancelled;
+    public String toString() {
+        return NbBundle.getMessage(ExportShapeDownload.class, "ExportTxtDownload.toString");
     }
 }
