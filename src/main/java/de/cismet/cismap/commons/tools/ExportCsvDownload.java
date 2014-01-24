@@ -11,11 +11,12 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import org.openide.util.NbBundle;
+
 import java.util.List;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!

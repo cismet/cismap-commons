@@ -16,6 +16,7 @@ import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 
 import org.openide.util.Cancellable;
+import org.openide.util.NbBundle;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -30,7 +31,6 @@ import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 import de.cismet.tools.gui.downloadmanager.Download;
-import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
