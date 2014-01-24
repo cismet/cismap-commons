@@ -15,8 +15,9 @@ import org.deegree.io.shpapi.shape_new.ShapeFile;
 import org.deegree.io.shpapi.shape_new.ShapeFileWriter;
 import org.deegree.model.feature.FeatureCollection;
 
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import org.openide.util.NbBundle;
+
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 
 /**
  * DOCUMENT ME!
@@ -63,7 +64,8 @@ public class ExportShapeDownload extends ExportDownload {
             try {
                 final FeatureCollection fc = new SimpleFeatureCollection(
                         getId(),
-                        (FeatureServiceFeature[])features, aliasAttributeList);
+                        (FeatureServiceFeature[])features,
+                        aliasAttributeList);
                 final ShapeFile shape = new ShapeFile(
                         fc,
                         fileToSaveTo.getAbsolutePath().substring(0, fileToSaveTo.getAbsolutePath().lastIndexOf(".")));
@@ -98,7 +100,6 @@ public class ExportShapeDownload extends ExportDownload {
 
     @Override
     public String toString() {
-        // todo: i18n
         return NbBundle.getMessage(ExportShapeDownload.class, "ExportShapeDownload.toString");
     }
 }

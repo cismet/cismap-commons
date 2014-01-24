@@ -68,7 +68,7 @@ public abstract class ExportDownload extends AbstractDownload implements Cancell
 
         status = State.WAITING;
         String filenameWithoutExt = filename;
-        
+
         if (filename.charAt(filename.length() - 4) == '.') {
             filenameWithoutExt = filename.substring(0, filename.length() - 4);
         }

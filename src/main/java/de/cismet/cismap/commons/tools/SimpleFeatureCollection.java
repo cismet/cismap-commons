@@ -32,13 +32,13 @@ import org.deegree.model.spatialschema.Polygon;
 import org.deegree.model.spatialschema.Surface;
 import org.deegree.ogcbase.PropertyPath;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -54,24 +54,27 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
 
     //~ Instance fields --------------------------------------------------------
 
-    private Feature[] features;
     List<String[]> aliasAttributeList;
+
+    private Feature[] features;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new SimpleFeatureCollection object.
      *
-     * @param  id        DOCUMENT ME!
-     * @param  features  DOCUMENT ME!
+     * @param  id                  DOCUMENT ME!
+     * @param  features            DOCUMENT ME!
+     * @param  aliasAttributeList  DOCUMENT ME!
      */
     public SimpleFeatureCollection(final String id,
-            final de.cismet.cismap.commons.features.FeatureServiceFeature[] features, List<String[]> aliasAttributeList) {
+            final de.cismet.cismap.commons.features.FeatureServiceFeature[] features,
+            List<String[]> aliasAttributeList) {
         super(id);
         this.features = new Feature[features.length];
         this.aliasAttributeList = aliasAttributeList;
         int index = 0;
-        
+
         if (aliasAttributeList == null) {
             aliasAttributeList = generateAliasAttributeList(features);
         }
@@ -83,22 +86,29 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
 
     //~ Methods ----------------------------------------------------------------
 
-    
-    private List<String[]> generateAliasAttributeList(de.cismet.cismap.commons.features.FeatureServiceFeature[] features) {
-        List<String[]> aliasAttrList = new ArrayList<String[]>();
-        
-        if (features != null && features.length > 0) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   features  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private List<String[]> generateAliasAttributeList(
+            final de.cismet.cismap.commons.features.FeatureServiceFeature[] features) {
+        final List<String[]> aliasAttrList = new ArrayList<String[]>();
+
+        if ((features != null) && (features.length > 0)) {
             final Map props = features[0].getProperties();
 
             for (final Object key : props.keySet()) {
-                String[] aliasAttr = new String[2];
+                final String[] aliasAttr = new String[2];
                 aliasAttr[0] = key.toString();
                 aliasAttr[1] = key.toString();
             }
         }
         return aliasAttrList;
     }
-    
+
     @Override
     public FeatureProperty getDefaultProperty(final PropertyPath pp) throws PropertyPathResolvingException {
         throw new UnsupportedOperationException("Not supported yet.");
