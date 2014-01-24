@@ -982,7 +982,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     new Object[] { "alle Features", "selektierte Features" },
                     "alle Features");
 
-            if (option == 1) {
+            if (option == -1) {
+                // The dialog was closed
+                return;
+            } else if (option == 1) {
                 // export all selected features
                 final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
                 final SelectionListener sl = (SelectionListener)map.getInputEventListener()
