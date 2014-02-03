@@ -152,6 +152,7 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
 
         if (envelope == null) {
             envelope = gmlFeature.getGeometry().getEnvelope();
+            envelope.setSRID(currentSrid);
         } else {
             envelope = envelope.getEnvelope().union(gmlFeature.getGeometry().getEnvelope());
         }
@@ -246,11 +247,11 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         // check if thread is canceled .........................................
 
         if (featureCollection.size() > 0) {
-            final FeatureType type = featureCollection.getFeatureType();
+            final Feature type = featureCollection.getFeature(0);
             logger.info("SW[" + workerThread + "]: creating " + type.getProperties().length
                         + " featureServiceAttributes from first parsed degree feature");
             featureServiceAttributes = new Vector(type.getProperties().length);
-            for (final PropertyType pt : type.getProperties()) {
+            for (final PropertyType pt : type.getFeatureType().getProperties()) {
                 // ToDo was ist wenn zwei Geometrien dabei sind
                 featureServiceAttributes.add(
                     new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true));

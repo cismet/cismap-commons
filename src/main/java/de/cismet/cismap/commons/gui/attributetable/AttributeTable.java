@@ -15,6 +15,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.datatypes.Types;
 import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 
@@ -29,9 +30,14 @@ import java.awt.FontMetrics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +72,8 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
+
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -104,16 +112,37 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JButton butExport;
     private javax.swing.JButton butInvertSelection;
     private javax.swing.JButton butMoveSelectedRows;
+    private javax.swing.JButton butOk;
     private javax.swing.JButton butPrint;
     private javax.swing.JButton butPrintPreview;
     private javax.swing.JButton butSearch;
     private javax.swing.JButton butSelectAll;
     private javax.swing.JButton butShowCols;
     private javax.swing.JButton butZoomToSelection;
+    private javax.swing.JDialog diaStatistic;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JPanel jpControl;
+    private javax.swing.JLabel labStat;
+    private javax.swing.JLabel labStatCol;
     private javax.swing.JLabel labWaitingImage;
+    private javax.swing.JLabel lblCountLab;
+    private javax.swing.JLabel lblCountVal;
+    private javax.swing.JLabel lblMaxLab;
+    private javax.swing.JLabel lblMaxVal;
+    private javax.swing.JLabel lblMeanLab;
+    private javax.swing.JLabel lblMeanVal;
+    private javax.swing.JLabel lblMinLab;
+    private javax.swing.JLabel lblMinVal;
+    private javax.swing.JLabel lblNullLab;
+    private javax.swing.JLabel lblNullVal;
+    private javax.swing.JLabel lblStdDeviationLab;
+    private javax.swing.JLabel lblStdDeviationVal;
+    private javax.swing.JLabel lblSumLab;
+    private javax.swing.JLabel lblSumVal;
     private javax.swing.JLabel lblTotalPages;
     private javax.swing.JMenuItem miFeldberechnung;
     private javax.swing.JMenuItem miSortieren;
@@ -141,7 +170,6 @@ public class AttributeTable extends javax.swing.JPanel {
         initComponents();
         miFeldberechnung.setEnabled(false);
         miSortieren.setEnabled(false);
-        miStatistik.setEnabled(false);
 
         if (featureService instanceof ShapeFileFeatureService) {
             pageSize = -1;
@@ -169,6 +197,9 @@ public class AttributeTable extends javax.swing.JPanel {
                     if (e.isPopupTrigger()) {
                         popupColumn = table.getTableHeader().getColumnModel().getColumnIndexAtX(e.getX());
                         popupColumn = table.convertColumnIndexToModel(popupColumn);
+
+                        miStatistik.setEnabled(model.isNumeric(popupColumn));
+
                         jPopupMenu1.show((Component)e.getSource(), e.getX(), e.getY());
                     }
                 }
@@ -320,7 +351,7 @@ public class AttributeTable extends javax.swing.JPanel {
                     final FeatureFactory factory = featureService.getFeatureFactory();
 
                     setItemCount(featureService.getFeatureCount(bb));
-                    List<FeatureServiceFeature> featureList = null;
+                    List<FeatureServiceFeature> featureList;
 
                     if (pageSize != -1) {
                         featureList = factory.createFeatures(featureService.getQuery(),
@@ -384,6 +415,27 @@ public class AttributeTable extends javax.swing.JPanel {
         miSpalteAusblenden = new javax.swing.JMenuItem();
         miSpaltenUmbenennen = new javax.swing.JMenuItem();
         miFeldberechnung = new javax.swing.JMenuItem();
+        diaStatistic = new javax.swing.JDialog();
+        jPanel1 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        lblCountLab = new javax.swing.JLabel();
+        lblMinLab = new javax.swing.JLabel();
+        lblMaxLab = new javax.swing.JLabel();
+        lblSumLab = new javax.swing.JLabel();
+        lblMeanLab = new javax.swing.JLabel();
+        lblStdDeviationLab = new javax.swing.JLabel();
+        lblNullLab = new javax.swing.JLabel();
+        lblCountVal = new javax.swing.JLabel();
+        lblMaxVal = new javax.swing.JLabel();
+        lblMinVal = new javax.swing.JLabel();
+        lblSumVal = new javax.swing.JLabel();
+        lblMeanVal = new javax.swing.JLabel();
+        lblStdDeviationVal = new javax.swing.JLabel();
+        lblNullVal = new javax.swing.JLabel();
+        butOk = new javax.swing.JButton();
+        jPanel3 = new javax.swing.JPanel();
+        labStat = new javax.swing.JLabel();
+        labStatCol = new javax.swing.JLabel();
         jToolBar1 = new javax.swing.JToolBar();
         butPrintPreview = new javax.swing.JButton();
         butPrint = new javax.swing.JButton();
@@ -420,6 +472,13 @@ public class AttributeTable extends javax.swing.JPanel {
         miStatistik.setText(org.openide.util.NbBundle.getMessage(
                 AttributeTable.class,
                 "AttributeTable.miStatistik.text")); // NOI18N
+        miStatistik.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    miStatistikActionPerformed(evt);
+                }
+            });
         jPopupMenu1.add(miStatistik);
 
         miSpalteAusblenden.setText(org.openide.util.NbBundle.getMessage(
@@ -450,6 +509,218 @@ public class AttributeTable extends javax.swing.JPanel {
                 AttributeTable.class,
                 "AttributeTable.miFeldberechnung.text")); // NOI18N
         jPopupMenu1.add(miFeldberechnung);
+
+        diaStatistic.setTitle(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.diaStatistic.title")); // NOI18N
+
+        jPanel1.setLayout(new java.awt.GridBagLayout());
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel2.setLayout(new java.awt.GridBagLayout());
+
+        lblCountLab.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblCountLab.text")); // NOI18N
+        lblCountLab.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblCountLab.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblCountLab.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblCountLab, gridBagConstraints);
+
+        lblMinLab.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblMinLab.text")); // NOI18N
+        lblMinLab.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblMinLab.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblMinLab.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblMinLab, gridBagConstraints);
+
+        lblMaxLab.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblMaxLab.text")); // NOI18N
+        lblMaxLab.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblMaxLab.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblMaxLab.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblMaxLab, gridBagConstraints);
+
+        lblSumLab.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblSumLab.text")); // NOI18N
+        lblSumLab.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblSumLab.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblSumLab.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblSumLab, gridBagConstraints);
+
+        lblMeanLab.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblMeanLab.text")); // NOI18N
+        lblMeanLab.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblMeanLab.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblMeanLab.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblMeanLab, gridBagConstraints);
+
+        lblStdDeviationLab.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblStdDeviationLab.text")); // NOI18N
+        lblStdDeviationLab.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblStdDeviationLab.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblStdDeviationLab.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblStdDeviationLab, gridBagConstraints);
+
+        lblNullLab.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblNullLab.text")); // NOI18N
+        lblNullLab.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblNullLab.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblNullLab.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblNullLab, gridBagConstraints);
+
+        lblCountVal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblCountVal.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblCountVal.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblCountVal.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblCountVal, gridBagConstraints);
+
+        lblMaxVal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblMaxVal.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblMaxVal.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblMaxVal.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblMaxVal, gridBagConstraints);
+
+        lblMinVal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblMinVal.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblMinVal.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblMinVal.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblMinVal, gridBagConstraints);
+
+        lblSumVal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblSumVal.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblSumVal.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblSumVal.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblSumVal, gridBagConstraints);
+
+        lblMeanVal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblMeanVal.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblMeanVal.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblMeanVal.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblMeanVal, gridBagConstraints);
+
+        lblStdDeviationVal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblStdDeviationVal.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblStdDeviationVal.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblStdDeviationVal.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 5;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblStdDeviationVal, gridBagConstraints);
+
+        lblNullVal.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        lblNullVal.setMaximumSize(new java.awt.Dimension(150, 20));
+        lblNullVal.setMinimumSize(new java.awt.Dimension(150, 20));
+        lblNullVal.setPreferredSize(new java.awt.Dimension(150, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 6;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel2.add(lblNullVal, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        jPanel1.add(jPanel2, gridBagConstraints);
+
+        butOk.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butOk.text")); // NOI18N
+        butOk.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butOkActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(20, 0, 10, 0);
+        jPanel1.add(butOk, gridBagConstraints);
+
+        labStat.setFont(new java.awt.Font("Ubuntu", 1, 15));                                                        // NOI18N
+        labStat.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.labStat.text")); // NOI18N
+        jPanel3.add(labStat);
+
+        labStatCol.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
+        jPanel3.add(labStatCol);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 10, 0);
+        jPanel1.add(jPanel3, gridBagConstraints);
+
+        diaStatistic.getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
 
         setLayout(new java.awt.GridBagLayout());
 
@@ -1017,6 +1288,128 @@ public class AttributeTable extends javax.swing.JPanel {
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void miStatistikActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miStatistikActionPerformed
+        final int count = model.getRowCount();
+        double min = Double.MAX_VALUE;
+        double max = Double.MIN_VALUE;
+        double sum = 0;
+        double mean = 0;
+        double stdDeviation = 0;
+        int nullCount = 0;
+
+        for (int i = 0; i < model.getRowCount(); ++i) {
+            Object val = model.getValueAt(i, popupColumn);
+
+            if (val instanceof String) {
+                try {
+                    val = Double.parseDouble((String)val);
+                } catch (NumberFormatException e) {
+                    // nothing to do
+                }
+            }
+
+            if (val instanceof Number) {
+                final double doubleVal = ((Number)val).doubleValue();
+
+                if (doubleVal < min) {
+                    min = doubleVal;
+                }
+
+                if (doubleVal > max) {
+                    max = doubleVal;
+                }
+
+                sum += doubleVal;
+            } else if (val == null) {
+                ++nullCount;
+            }
+        }
+
+        for (int i = 0; i < model.getRowCount(); ++i) {
+            Object val = model.getValueAt(i, popupColumn);
+
+            if (val instanceof String) {
+                try {
+                    val = Double.parseDouble((String)val);
+                } catch (NumberFormatException e) {
+                    // nothing to do
+                }
+            }
+
+            if (val instanceof Number) {
+                final double doubleVal = ((Number)val).doubleValue();
+                stdDeviation += Math.pow(doubleVal - mean, 2);
+            }
+        }
+
+        mean = sum / (count - nullCount);
+        // formula: sqrt(1/(n-1) * sum((Xi - Y)^2)), n: value count, Xi: ith values, Y: mean
+        // see: http://en.wikipedia.org/wiki/Standard_deviation#Corrected_sample_standard_deviation
+        stdDeviation = Math.sqrt(1.0 / (count - nullCount - 1) * stdDeviation);
+
+        lblCountVal.setText(toString(count));
+        lblMinVal.setText(toString(round(min, 6)));
+        lblMaxVal.setText(toString(round(max, 6)));
+        lblMeanVal.setText(toString(round(mean, 6)));
+        lblNullVal.setText(toString(nullCount));
+        lblStdDeviationVal.setText(toString(round(stdDeviation, 6)));
+        lblSumVal.setText(toString(round(sum, 6)));
+
+        diaStatistic.setSize(400, 320);
+        diaStatistic.setResizable(false);
+        labStatCol.setText(model.getColumnName(popupColumn));
+        StaticSwingTools.showDialog(diaStatistic);
+    } //GEN-LAST:event_miStatistikActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butOkActionPerformed
+        diaStatistic.setVisible(false);
+    }                                                                         //GEN-LAST:event_butOkActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   val  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String toString(final double val) {
+        String res = String.valueOf(val);
+
+        // remove all leading points and zeros
+        for (int i = res.length() - 1; i > 0; --i) {
+            if ((res.charAt(i) == '0') || (res.charAt(i) == '.')) {
+                res = res.substring(0, i);
+            } else {
+                break;
+            }
+        }
+
+        return res;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   value   DOCUMENT ME!
+     * @param   digits  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private double round(final double value, final int digits) {
+        final BigDecimal tmpValue = new BigDecimal(value);
+        return tmpValue.setScale(digits, RoundingMode.HALF_UP).doubleValue();
+    }
+
+    /**
+     * DOCUMENT ME!
      */
     private void setTableSize() {
         final TableColumnModel columnModel = table.getColumnModel();
@@ -1257,6 +1650,35 @@ public class AttributeTable extends javax.swing.JPanel {
         /**
          * DOCUMENT ME!
          *
+         * @param   col  row DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public boolean isNumeric(final int col) {
+            final String key = attributeNames[col];
+            final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
+
+            if ((attr != null)
+                        && (attr.getType().equals(String.valueOf(Types.INTEGER))
+                            || attr.getType().equals(String.valueOf(Types.BIGINT))
+                            || attr.getType().equals(String.valueOf(Types.SMALLINT))
+                            || attr.getType().equals(String.valueOf(Types.TINYINT))
+                            || attr.getType().equals(String.valueOf(Types.DOUBLE))
+                            || attr.getType().equals(String.valueOf(Types.FLOAT))
+                            || attr.getType().equals(String.valueOf(Types.DECIMAL))
+                            || attr.getType().equals("xsd:float")
+                            || attr.getType().equals("xsd:decimal")
+                            || attr.getType().equals("xsd:double")
+                            || attr.getType().equals("xsd:integer"))) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
          * @param   row  DOCUMENT ME!
          *
          * @return  DOCUMENT ME!
@@ -1281,7 +1703,38 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public Class<?> getColumnClass(final int columnIndex) {
-            return String.class;
+            final String key = attributeNames[columnIndex];
+            final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
+
+            if (attr.isGeometry()) {
+                return String.class;
+            } else if (attr.getType().equals(String.valueOf(Types.CHAR))
+                        || attr.getType().equals(String.valueOf(Types.VARCHAR))
+                        || attr.getType().equals(String.valueOf(Types.LONGVARCHAR))) {
+                return String.class;
+            } else if (attr.getType().equals(String.valueOf(Types.INTEGER))
+                        || attr.getType().equals(String.valueOf(Types.BIGINT))
+                        || attr.getType().equals(String.valueOf(Types.SMALLINT))
+                        || attr.getType().equals(String.valueOf(Types.TINYINT))
+                        || attr.getType().equals("xsd:integer")) {
+                return Integer.class;
+            } else if (attr.getType().equals(String.valueOf(Types.DOUBLE))
+                        || attr.getType().equals(String.valueOf(Types.FLOAT))
+                        || attr.getType().equals(String.valueOf(Types.DECIMAL))
+                        || attr.getType().equals("xsd:float")
+                        || attr.getType().equals("xsd:decimal")
+                        || attr.getType().equals("xsd:double")) {
+                return Double.class;
+            } else if (attr.getType().equals(String.valueOf(Types.DATE))
+                        || attr.getType().equals(String.valueOf(Types.TIME))
+                        || attr.getType().equals(String.valueOf(Types.TIMESTAMP))) {
+                return Date.class;
+            } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN))
+                        || attr.getType().equals("xsd:boolean")) {
+                return Boolean.class;
+            } else {
+                return String.class;
+            }
         }
 
         @Override

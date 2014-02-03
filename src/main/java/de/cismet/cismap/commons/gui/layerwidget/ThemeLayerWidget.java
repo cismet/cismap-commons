@@ -177,6 +177,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         boolean folder = false;
         boolean multi = false;
         boolean root = false;
+        boolean feature = false;
         int mask = 0;
 
         final TreePath[] paths = tree.getSelectionPaths();
@@ -201,12 +202,17 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             } else {
                 node = true;
             }
+
+            if (o instanceof AbstractFeatureService) {
+                feature = true;
+            }
         }
 
         mask += (root ? ThemeLayerMenuItem.ROOT : 0);
         mask += (folder ? ThemeLayerMenuItem.FOLDER : 0);
         mask += (node ? ThemeLayerMenuItem.NODE : 0);
         mask += (multi ? ThemeLayerMenuItem.MULTI : 0);
+        mask += (feature ? ThemeLayerMenuItem.FEATURE_SERVICE : 0);
 
         for (final ThemeLayerMenuItem item : menuItems) {
             if (item.isVisible(mask)) {

@@ -16,11 +16,14 @@ import com.vividsolutions.jts.geom.*;
 import org.deegree.io.rtree.HyperBoundingBox;
 import org.deegree.io.rtree.HyperPoint;
 import org.deegree.io.rtree.RTree;
+import org.deegree.io.rtree.RTreeException;
 import org.deegree.io.shpapi.ShapeFile;
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.schema.FeatureType;
 import org.deegree.model.feature.schema.PropertyType;
 import org.deegree.model.spatialschema.JTSAdapter;
+
+import org.openide.util.Exceptions;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,8 +48,6 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import org.deegree.io.rtree.RTreeException;
-import org.openide.util.Exceptions;
 
 /**
  * DOCUMENT ME!
@@ -280,7 +281,8 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     envelope = (feature.getDefaultGeometryPropertyValue()).getEnvelope();
                     if (envelope == null) { // assume a Point-geometry
                         if (geometries[0] instanceof org.deegree.model.spatialschema.Point) {
-                            final org.deegree.model.spatialschema.Point pnt = (org.deegree.model.spatialschema.Point)geometries[0];
+                            final org.deegree.model.spatialschema.Point pnt = (org.deegree.model.spatialschema.Point)
+                                geometries[0];
                             envelope = org.deegree.model.spatialschema.GeometryFactory.createEnvelope(pnt.getX(),
                                     pnt.getY(),
                                     pnt.getX(),
@@ -314,7 +316,13 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         this.cleanup();
     }
 
-    
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
     private ShapeFile getShapeFile() throws IOException {
         cleanup();
         final Charset cs = getCharsetDefinition();
@@ -327,11 +335,10 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         }
 
         shapeFile = new ShapeFile(filename, cs);
-        
+
         return shapeFile;
     }
-    
-    
+
     @Override
     public synchronized void flush() {
         logger.warn("flushing cached features");
