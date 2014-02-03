@@ -237,6 +237,7 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="lblCountVal">
                   <Properties>
+                    <Property name="horizontalAlignment" type="int" value="4"/>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[150, 20]"/>
                     </Property>
@@ -255,6 +256,7 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="lblMaxVal">
                   <Properties>
+                    <Property name="horizontalAlignment" type="int" value="4"/>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[150, 20]"/>
                     </Property>
@@ -273,6 +275,7 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="lblMinVal">
                   <Properties>
+                    <Property name="horizontalAlignment" type="int" value="4"/>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[150, 20]"/>
                     </Property>
@@ -291,6 +294,7 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="lblSumVal">
                   <Properties>
+                    <Property name="horizontalAlignment" type="int" value="4"/>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[150, 20]"/>
                     </Property>
@@ -309,6 +313,7 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="lblMeanVal">
                   <Properties>
+                    <Property name="horizontalAlignment" type="int" value="4"/>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[150, 20]"/>
                     </Property>
@@ -327,6 +332,7 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="lblStdDeviationVal">
                   <Properties>
+                    <Property name="horizontalAlignment" type="int" value="4"/>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[150, 20]"/>
                     </Property>
@@ -345,6 +351,7 @@
                 </Component>
                 <Component class="javax.swing.JLabel" name="lblNullVal">
                   <Properties>
+                    <Property name="horizontalAlignment" type="int" value="4"/>
                     <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
                       <Dimension value="[150, 20]"/>
                     </Property>
