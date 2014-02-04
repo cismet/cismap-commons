@@ -5,20 +5,21 @@
 *              ... and it just works.
 *
 ****************************************************/
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package de.cismet.cismap.commons.wms.capabilities;
-
-import java.net.URL;
 
 import java.util.List;
 
 /**
- * The operation interface represents a wms operation. This interface should be used to eliminate the deegree dependency
- * for the capabilities parsing.
+ * DOCUMENT ME!
  *
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public interface Operation {
+public interface Parameter {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -27,27 +28,11 @@ public interface Operation {
      *
      * @return  DOCUMENT ME!
      */
-    URL getGet();
+    String getName();
     /**
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    URL getPost();
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    List<Parameter> getParameters();
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   name  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    Parameter getParameter(String name);
+    List<String> getAllowedValues();
 }
