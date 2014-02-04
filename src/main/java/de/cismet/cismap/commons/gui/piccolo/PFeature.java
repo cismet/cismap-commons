@@ -354,6 +354,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         piSelected.setSweetSpotY(piOrig.getSweetSpotY());
                     }
                 }
+            } else {
+                if (pi == null) {
+                    setFeatureAnnotationSymbols();
+                }
             }
 
             if (geom instanceof Polygon) {
@@ -375,7 +379,12 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * DOCUMENT ME!
      */
     private void setFeatureAnnotationSymbols() {
-        final FeatureAnnotationSymbol piOrig = ((StyledFeature)getFeature()).getPointAnnotationSymbol();
+        final FeatureAnnotationSymbol piOrig = null;
+
+        if (getFeature() instanceof StyledFeature) {
+            ((StyledFeature)getFeature()).getPointAnnotationSymbol();
+        }
+
         if ((piOrig == null) || (piOrig.getImage() == null)) {
             // no FeatureAnnotationSymbol is set, use PushPin Icons as  fallback case
             pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
