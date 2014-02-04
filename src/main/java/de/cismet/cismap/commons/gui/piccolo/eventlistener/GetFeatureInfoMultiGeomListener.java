@@ -70,7 +70,7 @@ import org.openide.util.NbBundle;
 /**
  * DOCUMENT ME!
  *
- * @author   thorsten.hell@cismet.de
+ * @author   therter
  * @version  $Revision$, $Date$
  */
 public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
