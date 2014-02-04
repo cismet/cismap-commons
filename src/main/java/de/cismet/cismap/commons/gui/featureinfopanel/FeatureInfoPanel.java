@@ -233,17 +233,17 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_layerCombobox1ItemStateChanged
+    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_layerCombobox1ItemStateChanged
         model.setLayerFilter((LayerFilter)evt.getItem());
         expandAll(new TreePath(model.getRoot()));
-    }//GEN-LAST:event_layerCombobox1ItemStateChanged
+    }                                                                                 //GEN-LAST:event_layerCombobox1ItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_jtFeaturesValueChanged
+    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) { //GEN-FIRST:event_jtFeaturesValueChanged
         final TreePath tp = jtFeatures.getSelectionPath();
 
         if (tp == null) {
@@ -307,7 +307,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             enableAttributeTable(true);
             tabAttributes.setModel(new DefaultTableModel(0, 0));
         }
-    }//GEN-LAST:event_jtFeaturesValueChanged
+    } //GEN-LAST:event_jtFeaturesValueChanged
 
     /**
      * DOCUMENT ME!

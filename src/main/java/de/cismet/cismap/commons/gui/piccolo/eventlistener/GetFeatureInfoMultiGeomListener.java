@@ -22,6 +22,7 @@ import org.deegree.model.feature.GMLFeatureCollectionDocument;
 import org.deegree.model.spatialschema.JTSAdapter;
 
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
@@ -65,7 +66,6 @@ import de.cismet.security.WebAccessManager;
 
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
-import org.openide.util.NbBundle;
 
 /**
  * DOCUMENT ME!
@@ -234,7 +234,9 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
                 StaticSwingTools.getParentFrame(
                     mappingComponent),
                 true,
-                NbBundle.getMessage(GetFeatureInfoMultiGeomListener.class, "GetFeatureInfoMultiGeomListener.finishGeometry.WaitingDialogThread"),
+                NbBundle.getMessage(
+                    GetFeatureInfoMultiGeomListener.class,
+                    "GetFeatureInfoMultiGeomListener.finishGeometry.WaitingDialogThread"),
                 null,
                 200) {
 
