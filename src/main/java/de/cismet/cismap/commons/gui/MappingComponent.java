@@ -2502,6 +2502,83 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * shows the given feature on the map (in the highlighting layer). The color of the feature is 40 percent darker as
+     * the style defines it.
+     *
+     * @param  feature   the feature that should be shown
+     * @param  duration  the feature will be shown for this duration (in ms)
+     */
+    public void highlightFeature(final Feature feature, final int duration) {
+        final double local_clip_offset_y = clip_offset_y;
+        final double local_clip_offset_x = clip_offset_x;
+        final PFeature p = new PFeature(
+                feature,
+                getWtst(),
+                local_clip_offset_x,
+                local_clip_offset_y,
+                MappingComponent.this);
+
+        highlightingLayer.addChild(p);
+        final Paint paint = p.getPaint();
+        final Paint strokePaint = p.getStrokePaint();
+
+        if (paint instanceof Color) {
+            p.setPaint(toHighlightingColor((Color)paint));
+        }
+        if (strokePaint instanceof Color) {
+            p.setStrokePaint(toHighlightingColor((Color)strokePaint));
+        }
+
+        p.moveToFront();
+
+        final boolean drawCrossHair = (crosshairLayer.getChildrenCount() == 0);
+
+        if (drawCrossHair) {
+            com.vividsolutions.jts.geom.Point centroid = feature.getGeometry().getCentroid();
+            centroid = CrsTransformer.transformToCurrentCrs(centroid);
+            crossHairPoint(new Coordinate(centroid.getX(), centroid.getY()), 2);
+        }
+
+        final Timer t = new Timer(duration, new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        highlightingLayer.removeChild(p);
+                        if (drawCrossHair) {
+                            crossHairPoint((Coordinate)null);
+                        }
+                    }
+                });
+        t.setRepeats(false);
+        t.start();
+    }
+
+    /**
+     * makes to given color 40 percent darker.
+     *
+     * @param   c  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Color toHighlightingColor(final Color c) {
+        int red = (int)(c.getRed() - 70);
+        int green = (int)(c.getGreen() - 70);
+        int blue = (int)(c.getBlue() - 70);
+
+        if (red < 0) {
+            red = 0;
+        }
+        if (green < 0) {
+            green = 0;
+        }
+        if (blue < 0) {
+            blue = 0;
+        }
+
+        return new Color(red, green, blue);
+    }
+
+    /**
      * is called when new feature is added to FeatureCollection.
      *
      * @param  features  DOCUMENT ME!
@@ -3935,11 +4012,23 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  c  coordinate of the crosshair's venue
      */
     public void crossHairPoint(final Coordinate c) {
+        crossHairPoint(c, 1);
+    }
+
+    /**
+     * Paints a crosshair at the delivered coordinate. Calculates a Point from the coordinate and calls
+     * crossHairPoint(Point p) internally.
+     *
+     * @param  c          coordinate of the crosshair's venue
+     * @param  thickness  DOCUMENT ME!
+     */
+    public void crossHairPoint(final Coordinate c, final int thickness) {
         Point p = null;
         if (c != null) {
-            p = new Point((int)wtst.getScreenX(c.x), (int)wtst.getScreenY(c.y));
+            wtst = null;
+            p = new Point((int)getWtst().getScreenX(c.x), (int)getWtst().getScreenY(c.y));
         }
-        crossHairPoint(p);
+        crossHairPoint(p, thickness);
     }
 
     /**
@@ -3948,6 +4037,16 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  p  point of the crosshair's venue
      */
     public void crossHairPoint(final Point p) {
+        crossHairPoint(p, 1);
+    }
+
+    /**
+     * Paints a crosshair at the delivered point.
+     *
+     * @param  p          point of the crosshair's venue
+     * @param  thickness  DOCUMENT ME!
+     */
+    public void crossHairPoint(final Point p, final int thickness) {
         if (p == null) {
             if (crosshairLayer.getChildrenCount() > 0) {
                 crosshairLayer.removeAllChildren();
@@ -3957,19 +4056,20 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             crosshairLayer.setTransparency(1);
             final PPath lineX = new PPath();
             final PPath lineY = new PPath();
-            lineX.setStroke(new FixedWidthStroke());
+            lineX.setStroke(new CustomFixedWidthStroke(thickness));
             lineX.setStrokePaint(new Color(100, 100, 100, 255));
-            lineY.setStroke(new FixedWidthStroke());
+            lineY.setStroke(new CustomFixedWidthStroke(thickness));
             lineY.setStrokePaint(new Color(100, 100, 100, 255));
 
             final PBounds current = getCamera().getViewBounds();
-            final PBounds x = new PBounds(PBounds.OUT_LEFT - current.width, p.y, 2 * current.width, 1);
-            final PBounds y = new PBounds(p.x, PBounds.OUT_TOP - current.height, 1, current.height * 2);
+            final PBounds x = new PBounds(current.x, p.y, current.width, 1);
+            final PBounds y = new PBounds(p.x, current.y, 1, current.height);
             lineX.setPathTo(x);
             crosshairLayer.addChild(lineX);
             lineY.setPathTo(y);
             crosshairLayer.addChild(lineY);
         }
+        repaint();
     }
 
     /**
