@@ -68,6 +68,8 @@ import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * DOCUMENT ME!
@@ -1153,6 +1155,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         protected Color textBackground;
         protected Boolean drawsFocusBorderAroundIcon;
         protected Font fontValue;
+        Map<Object, ActiveLayerTreeCellRenderer> renderer = new HashMap<Object, ActiveLayerTreeCellRenderer>();
 
         //~ Constructors -------------------------------------------------------
 
@@ -1179,14 +1182,19 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 final boolean leaf,
                 final int row,
                 final boolean hasFocus) {
-            final Component ret = super.getTreeCellRendererComponent(
-                    tree,
-                    value,
-                    selected,
-                    expanded,
-                    leaf,
-                    row,
-                    hasFocus);
+            JLabel lab = null;
+            synchronized (ThemeLayerWidget.this.getTreeLock()) {
+                final Component ret = super.getTreeCellRendererComponent(
+                        tree,
+                        value,
+                        selected,
+                        expanded,
+                        leaf,
+                        row,
+                        hasFocus);
+                final JLabel retLab = (JLabel)ret;
+                lab = new JLabel(retLab.getText(), retLab.getIcon(), retLab.getHorizontalAlignment());
+            }
             final JPanel pan = new JPanel();
             final JCheckBox leafRenderer = new JCheckBox();
             pan.setLayout(new GridBagLayout());
@@ -1214,7 +1222,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             leafRenderer.setSelected(isValueSelected(value));
 
             pan.add(leafRenderer);
-            pan.add(ret);
+            pan.add(lab);
             return pan;
         }
 
