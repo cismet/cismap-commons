@@ -52,6 +52,7 @@ import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.featureinfopanel.WMSGetFeatureInfoDescription;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.GetFeatureInfoListener;
@@ -66,6 +67,7 @@ import de.cismet.security.WebAccessManager;
 
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
+import javax.swing.ImageIcon;
 
 /**
  * DOCUMENT ME!
@@ -88,7 +90,9 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
     private int clickCount = 0;
     private boolean selectionInProgress = false;
     private List<GetFeatureInfoListener> listener = new ArrayList<GetFeatureInfoListener>();
-
+    private ImageIcon pointIcon = new javax.swing.ImageIcon(getClass().getResource(
+                "/de/cismet/cismap/commons/gui/res/linRefPoint.png"));
+    
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -149,6 +153,11 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
                 final PureNewFeature feature = new PureNewFeature(createPointFromInput(pInputEvent));
                 feature.setGeometryType(AbstractNewFeature.geomTypes.POINT);
                 feature.getGeometry().setSRID(currentSrid);
+                FeatureAnnotationSymbol fas = new FeatureAnnotationSymbol(pointIcon.getImage());
+                fas.setSweetSpotX(0.5);
+                fas.setSweetSpotY(0.5);
+                feature.setPointAnnotationSymbol(fas);
+                mappingComponent.highlightFeature(feature, 1500);
                 finishingEvent = pInputEvent;
                 finishGeometry(feature);
             } finally {
