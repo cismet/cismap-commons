@@ -1051,8 +1051,10 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             LOG.warn("Layer Properties are null and will not be saved"); // NOI18N
         }
         try {
-            final Document sldDoc = new org.jdom.input.SAXBuilder().build(getSLDDefiniton());
-            element.addContent(sldDoc.detachRootElement());
+            if (getSLDDefiniton() != null) {
+                final Document sldDoc = new org.jdom.input.SAXBuilder().build(getSLDDefiniton());
+                element.addContent(sldDoc.detachRootElement());
+            }
         } catch (JDOMException ex) {
             Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
