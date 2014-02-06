@@ -42,6 +42,7 @@ import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
+import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.WMSFeature;
@@ -153,11 +154,17 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
                 final PureNewFeature feature = new PureNewFeature(createPointFromInput(pInputEvent));
                 feature.setGeometryType(AbstractNewFeature.geomTypes.POINT);
                 feature.getGeometry().setSRID(currentSrid);
+                
+                //show the point on the map
+                DefaultStyledFeature styledFeature = new DefaultStyledFeature();
+                styledFeature.setGeometry(createPointFromInput(pInputEvent));
+                styledFeature.getGeometry().setSRID(currentSrid);
                 FeatureAnnotationSymbol fas = new FeatureAnnotationSymbol(pointIcon.getImage());
                 fas.setSweetSpotX(0.5);
                 fas.setSweetSpotY(0.5);
-                feature.setPointAnnotationSymbol(fas);
-                mappingComponent.highlightFeature(feature, 1500);
+                styledFeature.setPointAnnotationSymbol(fas);
+                mappingComponent.highlightFeature(styledFeature, 1500);
+                
                 finishingEvent = pInputEvent;
                 finishGeometry(feature);
             } finally {
