@@ -749,6 +749,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     } else {
                                         copy.getStickyChild().setScale(scale);
                                     }
+                                    if (((copy.getPrimaryAnnotationNode()) != null)
+                                                && (getPrintingResolution() != 0.0)) {
+                                        copy.getPrimaryAnnotationNode().setScale(scale * getPrintingResolution());
+                                    }
                                 } catch (final Exception t) {
                                     LOG.error("Fehler beim erstellen des Featureabbildes", t); // NOI18N
                                 }

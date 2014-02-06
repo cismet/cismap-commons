@@ -43,6 +43,7 @@ import java.util.ListIterator;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
@@ -120,6 +121,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private boolean wasSelected = false;
     // r/w access only in synchronized(this) block
     private transient PImage rdfImage;
+    private PropertyChangeListener annotationListener;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -980,7 +982,23 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                             getViewerCrs().getCode())
                             .getInteriorPoint();
 
-                primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()), wtst.getScreenY(intPoint.getY()));
+                if ((stickyChild != null) && (af.getPrimaryAnnotationJustification() == 0.0)) {
+                    justifyAnnotations();
+
+                    if (annotationListener == null) {
+                        annotationListener = new PropertyChangeListener() {
+
+                                @Override
+                                public void propertyChange(final PropertyChangeEvent evt) {
+                                    justifyAnnotations();
+                                }
+                            };
+
+                        stickyChild.addPropertyChangeListener("fullBounds", annotationListener);
+                    }
+                } else {
+                    primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()), wtst.getScreenY(intPoint.getY()));
+                }
 
                 addChild(primaryAnnotation);
 
@@ -990,6 +1008,22 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
                 setVisibility(primaryAnnotation, af);
                 // }
+            }
+        }
+    }
+
+    /**
+     * justifies the annotations of the feature.
+     */
+    private void justifyAnnotations() {
+        if (primaryAnnotation != null) {
+            final Point intPoint = CrsTransformer.transformToGivenCrs(feature.getGeometry(),
+                    getViewerCrs().getCode()).getInteriorPoint();
+            if (stickyChild != null) {
+                final PBounds bounds = stickyChild.getFullBounds();
+                primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2) + 1,
+                    wtst.getScreenY(intPoint.getY())
+                            - (bounds.getHeight() / 2));
             }
         }
     }
