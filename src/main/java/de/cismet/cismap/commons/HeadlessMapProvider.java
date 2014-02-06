@@ -37,6 +37,7 @@ import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
+import de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
@@ -105,6 +106,9 @@ public class HeadlessMapProvider {
     private HeadlessMapProvider.DominatingDimension dominatingDimension = HeadlessMapProvider.DominatingDimension.SIZE;
     private HeadlessMapProvider.RoundingPrecision roundScaleTo = HeadlessMapProvider.RoundingPrecision.NO_ROUNDING;
     private boolean centerMapOnResize = false;
+    private double printingResolution = 0;
+    private double resolution = 72.0;
+    private double featureResolutionFactor = PrintingSettingsWidget.FEATURE_RESOLUTION_FACTOR;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -185,6 +189,42 @@ public class HeadlessMapProvider {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the printingResolution
+     */
+    public double getPrintingResolution() {
+        return printingResolution;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  printingResolution  the printingResolution to set
+     */
+    public void setPrintingResolution(final double printingResolution) {
+        this.printingResolution = printingResolution;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the featureResolutionFactor
+     */
+    public double getFeatureResolutionFactor() {
+        return featureResolutionFactor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureResolutionFactor  the featureResolutionFactor to set
+     */
+    public void setFeatureResolutionFactor(final double featureResolutionFactor) {
+        this.featureResolutionFactor = featureResolutionFactor;
+    }
 
     /**
      * Adds a PropertyChangeListener that will notify about the progress of the map building.
@@ -278,6 +318,7 @@ public class HeadlessMapProvider {
                         * (double)targetDpi);
         final int imageHeight = (int)((double)heightInPixels / (double)basedpi
                         * (double)targetDpi);
+        resolution = targetDpi;
         return getImage(imageWidth, imageHeight);
     }
 
@@ -380,6 +421,12 @@ public class HeadlessMapProvider {
 
         imgScaleDenominator = map.getScaleDenominator();
         map.setFixedBoundingBox(correctedBoundingBox);
+
+        if (printingResolution == 0) {
+            map.setPrintingResolution(resolution / getFeatureResolutionFactor());
+        } else {
+            map.setPrintingResolution(printingResolution);
+        }
 
         final HeadlessMapProvider.HeadlessMapProviderRetrievalListener listener =
             new HeadlessMapProvider.HeadlessMapProviderRetrievalListener(
