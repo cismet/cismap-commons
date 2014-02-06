@@ -746,6 +746,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     // Wenn mal irgendwas wegen Querformat kommt :
                                     if ((copy.getStickyChild() != null) && (getPrintingResolution() != 0.0)) {
                                         copy.getStickyChild().setScale(scale * getPrintingResolution());
+                                    } else {
+                                        copy.getStickyChild().setScale(scale);
                                     }
                                 } catch (final Exception t) {
                                     LOG.error("Fehler beim erstellen des Featureabbildes", t); // NOI18N
