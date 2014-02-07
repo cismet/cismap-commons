@@ -447,6 +447,13 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             pi.setSelectedFeatureAnnotationSymbol(piSelected);
         }
+
+        if ((annotationListener != null) && (pi != null)) {
+            pi.addPropertyChangeListener(annotationListener);
+        }
+        if ((annotationListener != null) && (piSelected != null)) {
+            piSelected.addPropertyChangeListener(annotationListener);
+        }
     }
 
     /**
@@ -949,7 +956,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (((feature instanceof AnnotatedFeature) && ((AnnotatedFeature)feature).isPrimaryAnnotationVisible()
                             && (((AnnotatedFeature)feature).getPrimaryAnnotation() != null))) {
                 final AnnotatedFeature af = (AnnotatedFeature)feature;
-                primaryAnnotation = new StickyPText(af.getPrimaryAnnotation());
+                primaryAnnotation = new StickyPText(" " + af.getPrimaryAnnotation() + " ");
                 primaryAnnotation.setJustification(af.getPrimaryAnnotationJustification());
                 if (af.isAutoscale()) {
                     stickyChild = primaryAnnotation;
@@ -987,19 +994,26 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                             getViewerCrs().getCode())
                             .getInteriorPoint();
 
-                if ((stickyChild != null) && (af.getPrimaryAnnotationJustification() == 0.0)) {
-                    justifyAnnotations();
-
+                if ((stickyChild != null) && (af.getPrimaryAnnotationJustification() == 0.0)
+                            && (getFeature().getGeometry() instanceof Point)) {
                     if (annotationListener == null) {
                         annotationListener = new PropertyChangeListener() {
 
                                 @Override
                                 public void propertyChange(final PropertyChangeEvent evt) {
-                                    justifyAnnotations();
+                                    justifyAnnotations((PNode)evt.getSource());
                                 }
                             };
 
-                        stickyChild.addPropertyChangeListener("fullBounds", annotationListener);
+                        if (primaryAnnotation != stickyChild) {
+                            stickyChild.addPropertyChangeListener("fullBounds", annotationListener);
+                        }
+                        if (pi != null) {
+                            pi.addPropertyChangeListener("fullBounds", annotationListener);
+                        }
+                        if (piSelected != null) {
+                            piSelected.addPropertyChangeListener("fullBounds", annotationListener);
+                        }
                     }
                 } else {
                     primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()), wtst.getScreenY(intPoint.getY()));
@@ -1019,19 +1033,19 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
     /**
      * justifies the annotations of the feature.
+     *
+     * @param  source  DOCUMENT ME!
      */
-    private void justifyAnnotations() {
-        if (primaryAnnotation != null) {
+    private void justifyAnnotations(final PNode source) {
+        if ((primaryAnnotation != null) && (source != null)) {
             final Point intPoint = CrsTransformer.transformToGivenCrs(feature.getGeometry(),
                     getViewerCrs().getCode()).getInteriorPoint();
-            if (stickyChild != null) {
-                final PBounds bounds = stickyChild.getFullBounds();
-                primaryAnnotation.setScale(stickyChild.getScale() * 1.1);
-                primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2)
-                            + (bounds.getWidth() / 3),
-                    wtst.getScreenY(intPoint.getY())
-                            - (bounds.getHeight() / 2));
-            }
+            final PBounds bounds = source.getFullBoundsReference();
+            primaryAnnotation.setScale(source.getScale() * 1.1);
+            primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2)
+                        + (bounds.getWidth() / 4),
+                wtst.getScreenY(intPoint.getY())
+                        - (bounds.getHeight() / 2));
         }
     }
 
