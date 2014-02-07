@@ -44,6 +44,7 @@ import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.ShapeFeature;
+import de.cismet.cismap.commons.features.ShapeInfo;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
@@ -130,35 +131,35 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
     @Override
     protected ShapeFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
+        //dummy method
+        return null;
+    }
+    
+    
+    protected ShapeFeature createFeatureInstance(final Feature degreeFeature, final ShapeInfo shapeInfo, final int index) throws Exception {
+        final String filename = new File(documentURI).getName();
+//        layerName = filename;
         final ShapeFeature shapeFeature;
 
-        shapeFeature = new ShapeFeature();
+        shapeFeature = new ShapeFeature(shapeInfo);
+//        shapeFeature = new ShapeFeature(shapeInfo, getStyle(filename));
 
         // auto generate Ids!
         shapeFeature.setId(index);
 
-        try {
-            shapeFeature.setGeometry(JTSAdapter.export(degreeFeature.getGeometryPropertyValues()[geometryIndex]));
-        } catch (Exception e) {
-            logger.error("Error while parsing the geometry of a feature from a shape file.", e);
-            if (degreeFeature.getGeometryPropertyValues().length == 0) {
-                noGeometryRecognised = true;
-            } else {
-                errorInGeometryFound = true;
-            }
-            shapeFeature.setGeometry(JTSAdapter.export(degreeFeature.getDefaultGeometryPropertyValue()));
-        }
-
-        if (shapeFeature.getGeometry() != null) {
-//            if (logger.isDebugEnabled()) {
-//                logger.debug("srid of feature = " + shapeFeature.getGeometry().getSRID());
-//            }
-            shapeFeature.getGeometry().setSRID(shapeSrid);
-        }
-
         return shapeFeature;
     }
 
+    @Override
+    protected void initialiseFeature(ShapeFeature featureServiceFeature, Feature degreeFeature, boolean evaluateExpressions, int index) throws Exception {
+        // perform standard initialisation
+        featureServiceFeature.setLayerProperties(this.getLayerProperties());
+
+        if (evaluateExpressions) {
+            this.evaluateExpressions(featureServiceFeature, index);
+        }
+    }    
+    
     /**
      * DOCUMENT ME!
      */
@@ -553,16 +554,28 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
             boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
+            
+            final Charset cs = getCharsetDefinition();
+            String filename = null;
 
-            shapeFile = getShapeFile();
+            if (this.documentURI.getPath().endsWith(".shp")) {
+                filename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
+            } else {
+                filename = this.documentURI.getPath();
+            }
+
+            ShapeFile persShapeFile = getShapeFile();;            
+            
+            shapeFile = null;
             final int[] recordNumbers = shapeFile.getGeoNumbersByRect(JTSAdapter.wrap(boundingPolygon).getEnvelope());
 
             List<ShapeFeature> selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
+            ShapeInfo info = new ShapeInfo(filename, persShapeFile, shapeSrid);
 
             if (recordNumbers.length < 15000) {
                 for (final int record : recordNumbers) {
-                    final Feature f = shapeFile.getFeatureByRecNo(record);
-                    final ShapeFeature featureServiceFeature = createFeatureInstance(f, record);
+                    final Feature f = persShapeFile.getFeatureByRecNo(record);
+                    final ShapeFeature featureServiceFeature = createFeatureInstance(f, info, record);
                     this.initialiseFeature(featureServiceFeature, f, false, record);
                     selectedFeatures.add(featureServiceFeature);
                 }
