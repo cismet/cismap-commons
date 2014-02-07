@@ -970,6 +970,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 } else {
                     primaryAnnotation.setTextPaint(Color.BLACK);
                 }
+
+                if (af.getPrimaryAnnotationHalo() != null) {
+                    primaryAnnotation.setPaint(af.getPrimaryAnnotationHalo());
+                }
+
                 if (af.getPrimaryAnnotationScaling() > 0) {
                     primaryAnnotation.setScale(af.getPrimaryAnnotationScaling());
                 }
@@ -1021,7 +1026,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     getViewerCrs().getCode()).getInteriorPoint();
             if (stickyChild != null) {
                 final PBounds bounds = stickyChild.getFullBounds();
-                primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2) + 1,
+                primaryAnnotation.setScale(stickyChild.getScale() * 1.1);
+                primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2)
+                            + (bounds.getWidth() / 3),
                     wtst.getScreenY(intPoint.getY())
                             - (bounds.getHeight() / 2));
             }
