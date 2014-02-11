@@ -62,6 +62,7 @@ public class BasicStyle implements Style {
     protected double multiplier;
     protected boolean autoscale;
     protected FeatureAnnotationSymbol pointSymbol;
+    protected Color halo;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -104,6 +105,7 @@ public class BasicStyle implements Style {
      * @param  maxScale          maximum scale at which the label is still visible
      * @param  multiplier        the size multiplier (non-effective if autoscale is enabled)
      * @param  autoscale         true to resize the label according to the zoomlevel, else false
+     * @param  halo              DOCUMENT ME!
      */
     public BasicStyle(final boolean drawFill,
             final Color colorFill,
@@ -122,7 +124,8 @@ public class BasicStyle implements Style {
             final int minScale,
             final int maxScale,
             final double multiplier,
-            final boolean autoscale) {
+            final boolean autoscale,
+            final Color halo) {
         this.drawFill = drawFill;
         this.drawLine = drawLine;
         this.highlightFeature = highlightFeature;
@@ -140,6 +143,7 @@ public class BasicStyle implements Style {
         this.maxScale = maxScale;
         this.multiplier = multiplier;
         this.autoscale = autoscale;
+        this.halo = halo;
         this.setPointSymbolFilename(pointSymbolName);
     }
 
@@ -171,6 +175,7 @@ public class BasicStyle implements Style {
         this.multiplier = 1.0d;
         this.autoscale = true;
         this.pointSymbol = null;
+        this.halo = null;
     }
 
     /**
@@ -219,6 +224,9 @@ public class BasicStyle implements Style {
         if (fontColor != null) {
             label.setAttribute(COLOR, Integer.toString(fontColor.getRGB()));
         }
+        if (halo != null) {
+            label.setAttribute(HALO, Integer.toString(halo.getRGB()));
+        }
         label.setAttribute(ATTRIBUTE, attribute);
         label.setAttribute(ALIGNMENT, Float.toString(alignment));
         label.setAttribute(MIN_SCALE, Integer.toString(minScale));
@@ -260,7 +268,8 @@ public class BasicStyle implements Style {
                         && (minScale == bs.getMinScale())
                         && (alignment == bs.getAlignment())
                         && (autoscale == bs.isAutoscale())
-                        && (multiplier == bs.getMultiplier())) {
+                        && (multiplier == bs.getMultiplier())
+                        && (halo == bs.getHalo())) {
                 if (pointSymbolFilename.equals(NO_POINTSYMBOL)) {
                     if (pointSymbolSize == bs.getPointSymbolSize()) {
                         return 0;
@@ -305,7 +314,8 @@ public class BasicStyle implements Style {
                 minScale,
                 maxScale,
                 multiplier,
-                autoscale);
+                autoscale,
+                halo);
     }
 
     @Override
@@ -518,6 +528,16 @@ public class BasicStyle implements Style {
     }
 
     @Override
+    public void setHalo(final Color halo) {
+        this.halo = halo;
+    }
+
+    @Override
+    public Color getHalo() {
+        return halo;
+    }
+
+    @Override
     @Deprecated
     public String getLabel() {
         return attribute;
@@ -623,6 +643,11 @@ public class BasicStyle implements Style {
 
                 final Color tmpA = new Color(label.getAttribute(Style.COLOR).getIntValue());
                 this.setFontColor(new Color(tmpA.getRed(), tmpA.getGreen(), tmpA.getBlue()));
+
+                if (label.getAttribute(Style.HALO) != null) {
+                    final Color tmpHalo = new Color(label.getAttribute(Style.HALO).getIntValue());
+                    this.setHalo(new Color(tmpHalo.getRed(), tmpHalo.getGreen(), tmpHalo.getBlue()));
+                }
 
                 if (label.getAttribute(Style.ATTRIBUTE) != null) {
                     this.setLabel(label.getAttributeValue(Style.ATTRIBUTE));

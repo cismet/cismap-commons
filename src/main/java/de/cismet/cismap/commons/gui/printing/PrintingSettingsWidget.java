@@ -398,7 +398,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
         try {
             mappingComponent.setInteractionMode(MappingComponent.PRINTING_AREA_SELECTION);
             final Scale selectedScale = (Scale)cboScales.getSelectedItem();
@@ -415,23 +415,23 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         } catch (Exception e) {
             log.error("Fehler beim Verarbeiten der Druckeinstellungen", e);   // NOI18N
         }
-    }//GEN-LAST:event_cmdOkActionPerformed
+    }                                                                         //GEN-LAST:event_cmdOkActionPerformed
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
         mappingComponent.setInteractionMode(interactionModeAfterPrinting);
         dispose();
-    }//GEN-LAST:event_cmdCancelActionPerformed
+    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cboScalesActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboScalesActionPerformed
-    }//GEN-LAST:event_cboScalesActionPerformed
+    private void cboScalesActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboScalesActionPerformed
+    }                                                                             //GEN-LAST:event_cboScalesActionPerformed
 
     /**
      * DOCUMENT ME!

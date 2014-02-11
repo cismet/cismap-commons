@@ -49,6 +49,7 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
     private boolean highlightingEnabled;
     private float justification = JLabel.LEFT_ALIGNMENT;
     private boolean primaryAnnotationVisible = true;
+    private Color primaryAnnotationHalo;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -323,5 +324,15 @@ public class DefaultStyledFeature implements StyledFeature, CloneableFeature, An
     @Override
     public void setPrimaryAnnotationVisible(final boolean visible) {
         primaryAnnotationVisible = visible;
+    }
+
+    @Override
+    public void setPrimaryAnnotationHalo(final Color primaryAnnotationHalo) {
+        this.primaryAnnotationHalo = primaryAnnotationHalo;
+    }
+
+    @Override
+    public Color getPrimaryAnnotationHalo() {
+        return primaryAnnotationHalo;
     }
 }

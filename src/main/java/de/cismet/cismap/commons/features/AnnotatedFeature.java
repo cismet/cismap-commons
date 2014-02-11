@@ -7,6 +7,7 @@
 ****************************************************/
 package de.cismet.cismap.commons.features;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Paint;
 
@@ -156,4 +157,18 @@ public interface AnnotatedFeature {
      * @param  max  DOCUMENT ME!
      */
     void setMaxScaleDenominator(Integer max);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  paint  DOCUMENT ME!
+     */
+    void setPrimaryAnnotationHalo(Color paint);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Color getPrimaryAnnotationHalo();
 }

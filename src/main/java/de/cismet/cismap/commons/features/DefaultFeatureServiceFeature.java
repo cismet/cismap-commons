@@ -448,6 +448,16 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         this.getStyle().setMaxScale(max);
     }
 
+    @Override
+    public void setPrimaryAnnotationHalo(final Color halo) {
+        this.getStyle().setHalo(halo);
+    }
+
+    @Override
+    public Color getPrimaryAnnotationHalo() {
+        return this.getStyle().getHalo();
+    }
+
     /**
      * DOCUMENT ME!
      *

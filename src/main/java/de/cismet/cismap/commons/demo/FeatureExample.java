@@ -428,4 +428,14 @@ public class FeatureExample implements AnnotatedFeature {
     public void setPrimaryAnnotationVisible(final boolean visible) {
         throw new UnsupportedOperationException("Not supported yet."); // NOI18N
     }
+
+    @Override
+    public void setPrimaryAnnotationHalo(final Color paint) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Color getPrimaryAnnotationHalo() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }
