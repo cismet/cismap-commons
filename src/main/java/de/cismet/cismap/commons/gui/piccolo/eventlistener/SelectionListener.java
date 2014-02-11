@@ -471,7 +471,6 @@ public class SelectionListener extends CreateGeometryListener {
             }
         } finally {
             selectionInProgress = false;
-            mappingComponent.getFeatureCollection().removeFeature(feature);
         }
     }
 
