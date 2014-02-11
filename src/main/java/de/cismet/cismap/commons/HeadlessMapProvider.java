@@ -40,6 +40,7 @@ import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.AbstractWMS;
@@ -112,8 +113,10 @@ public class HeadlessMapProvider {
     private HeadlessMapProvider.DominatingDimension dominatingDimension = HeadlessMapProvider.DominatingDimension.SIZE;
     private HeadlessMapProvider.RoundingPrecision roundScaleTo = HeadlessMapProvider.RoundingPrecision.NO_ROUNDING;
     private boolean centerMapOnResize = false;
-    private double printingResolution = 72d / FEATURE_RESOLUTION_FACTOR;
-
+    private double printingResolution = 0;
+    private double resolution = 72.0;
+    private double featureResolutionFactor = PrintingSettingsWidget.FEATURE_RESOLUTION_FACTOR;
+    
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -257,6 +260,42 @@ public class HeadlessMapProvider {
         return headlessMapProvider;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the printingResolution
+     */
+    public double getPrintingResolution() {
+        return printingResolution;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  printingResolution  the printingResolution to set
+     */
+    public void setPrintingResolution(final double printingResolution) {
+        this.printingResolution = printingResolution;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the featureResolutionFactor
+     */
+    public double getFeatureResolutionFactor() {
+        return featureResolutionFactor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureResolutionFactor  the featureResolutionFactor to set
+     */
+    public void setFeatureResolutionFactor(final double featureResolutionFactor) {
+        this.featureResolutionFactor = featureResolutionFactor;
+    }    
+    
     /**
      * DOCUMENT ME!
      *
