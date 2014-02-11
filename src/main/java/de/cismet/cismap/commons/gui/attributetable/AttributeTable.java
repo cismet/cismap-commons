@@ -23,6 +23,8 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Highlighter;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 
+import org.openide.util.NbBundle;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -31,7 +33,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
@@ -59,7 +61,6 @@ import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureWithId;
-import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
@@ -70,10 +71,17 @@ import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.tools.ExportCsvDownload;
+import de.cismet.cismap.commons.tools.ExportDownload;
+import de.cismet.cismap.commons.tools.ExportShapeDownload;
+import de.cismet.cismap.commons.tools.ExportTxtDownload;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
 
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.downloadmanager.Download;
+import de.cismet.tools.gui.downloadmanager.DownloadManager;
+import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 
 /**
  * DOCUMENT ME!
@@ -107,8 +115,10 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JButton btnNextPage;
     private javax.swing.JButton btnPrevPage;
     private javax.swing.JButton butAttrib;
+    private javax.swing.JButton butCancel;
     private javax.swing.JButton butClearSelection;
     private javax.swing.JButton butColWidth;
+    private javax.swing.JButton butExpOk;
     private javax.swing.JButton butExport;
     private javax.swing.JButton butInvertSelection;
     private javax.swing.JButton butMoveSelectedRows;
@@ -119,18 +129,25 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JButton butSelectAll;
     private javax.swing.JButton butShowCols;
     private javax.swing.JButton butZoomToSelection;
+    private javax.swing.JDialog diaExport;
     private javax.swing.JDialog diaStatistic;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JComboBox jcFeatures;
+    private javax.swing.JComboBox jcFormat;
     private javax.swing.JPanel jpControl;
     private javax.swing.JLabel labStat;
     private javax.swing.JLabel labStatCol;
     private javax.swing.JLabel labWaitingImage;
     private javax.swing.JLabel lblCountLab;
     private javax.swing.JLabel lblCountVal;
+    private javax.swing.JLabel lblFeature;
+    private javax.swing.JLabel lblFormat;
     private javax.swing.JLabel lblMaxLab;
     private javax.swing.JLabel lblMaxVal;
     private javax.swing.JLabel lblMeanLab;
@@ -170,6 +187,18 @@ public class AttributeTable extends javax.swing.JPanel {
         initComponents();
         miFeldberechnung.setEnabled(false);
         miSortieren.setEnabled(false);
+
+        jcFeatures.setModel(new DefaultComboBoxModel(
+                new Object[] {
+                    new FeatureComboItem(
+                        1,
+                        NbBundle.getMessage(AttributeTable.class, "AttributeTable.FeatureComboItem.allFeatures")),
+                    new FeatureComboItem(
+                        2,
+                        NbBundle.getMessage(AttributeTable.class, "AttributeTable.FeatureComboItem.selectedFeatures"))
+                }));
+        jcFormat.setModel(new DefaultComboBoxModel(
+                new Object[] { new ExportTxtDownload(), new ExportCsvDownload(), new ExportShapeDownload() }));
 
         if (featureService instanceof ShapeFileFeatureService) {
             pageSize = -1;
@@ -216,7 +245,8 @@ public class AttributeTable extends javax.swing.JPanel {
                         final int[] selectedFeatureIds = new int[selectedFeatures.length];
 
                         for (int i = 0; i < selectedFeatures.length; ++i) {
-                            selectedFeatureIds[i] = model.getFeatureServiceFeature(selectedFeatures[i]).getId();
+                            selectedFeatureIds[i] = model.getFeatureServiceFeature(
+                                    table.convertRowIndexToModel(selectedFeatures[i])).getId();
                         }
                         Arrays.sort(selectedFeatureIds);
 
@@ -436,6 +466,15 @@ public class AttributeTable extends javax.swing.JPanel {
         jPanel3 = new javax.swing.JPanel();
         labStat = new javax.swing.JLabel();
         labStatCol = new javax.swing.JLabel();
+        diaExport = new javax.swing.JDialog();
+        jPanel4 = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        lblFeature = new javax.swing.JLabel();
+        lblFormat = new javax.swing.JLabel();
+        jcFeatures = new javax.swing.JComboBox();
+        jcFormat = new javax.swing.JComboBox();
+        butExpOk = new javax.swing.JButton();
+        butCancel = new javax.swing.JButton();
         jToolBar1 = new javax.swing.JToolBar();
         butPrintPreview = new javax.swing.JButton();
         butPrint = new javax.swing.JButton();
@@ -722,6 +761,101 @@ public class AttributeTable extends javax.swing.JPanel {
 
         diaStatistic.getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
 
+        diaExport.setTitle(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.diaExport.title")); // NOI18N
+
+        jPanel4.setLayout(new java.awt.GridBagLayout());
+
+        jPanel5.setBorder(null);
+        jPanel5.setLayout(new java.awt.GridBagLayout());
+
+        lblFeature.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.lblFeature.text")); // NOI18N
+        lblFeature.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblFeature.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblFeature.setPreferredSize(new java.awt.Dimension(100, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel5.add(lblFeature, gridBagConstraints);
+
+        lblFormat.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblFormat.text")); // NOI18N
+        lblFormat.setMaximumSize(new java.awt.Dimension(100, 20));
+        lblFormat.setMinimumSize(new java.awt.Dimension(100, 20));
+        lblFormat.setPreferredSize(new java.awt.Dimension(100, 20));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel5.add(lblFormat, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel5.add(jcFeatures, gridBagConstraints);
+
+        jcFormat.addItemListener(new java.awt.event.ItemListener() {
+
+                @Override
+                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
+                    jcFormatItemStateChanged(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        jPanel5.add(jcFormat, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        jPanel4.add(jPanel5, gridBagConstraints);
+
+        butExpOk.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExpOk.text")); // NOI18N
+        butExpOk.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butExpOkActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.insets = new java.awt.Insets(20, 0, 10, 20);
+        jPanel4.add(butExpOk, gridBagConstraints);
+
+        butCancel.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butCancel.text")); // NOI18N
+        butCancel.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butCancelActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(20, 0, 10, 20);
+        jPanel4.add(butCancel, gridBagConstraints);
+
+        diaExport.getContentPane().add(jPanel4, java.awt.BorderLayout.CENTER);
+
         setLayout(new java.awt.GridBagLayout());
 
         jToolBar1.setRollover(true);
@@ -766,6 +900,13 @@ public class AttributeTable extends javax.swing.JPanel {
         butExport.setFocusable(false);
         butExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        butExport.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butExportActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butExport);
 
         butAttrib.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butAttrib.text")); // NOI18N
@@ -1268,7 +1409,7 @@ public class AttributeTable extends javax.swing.JPanel {
         Geometry geo = null;
 
         for (final int row : selectedRows) {
-            final Geometry tmpGeo = model.getGeometryFromRow(row);
+            final Geometry tmpGeo = model.getGeometryFromRow(table.convertRowIndexToModel(row));
 
             if (geo == null) {
                 geo = tmpGeo;
@@ -1372,6 +1513,113 @@ public class AttributeTable extends javax.swing.JPanel {
     private void butOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butOkActionPerformed
         diaStatistic.setVisible(false);
     }                                                                         //GEN-LAST:event_butOkActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butExportActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butExportActionPerformed
+        diaExport.setSize(400, 120);
+        diaExport.setResizable(false);
+        diaExport.setModal(true);
+        StaticSwingTools.showDialog(diaExport);
+    }                                                                             //GEN-LAST:event_butExportActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butExpOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butExpOkActionPerformed
+        diaExport.setVisible(false);
+
+        final List<FeatureServiceFeature> features = new ArrayList<FeatureServiceFeature>();
+        final FeatureComboItem featureComboItem = (FeatureComboItem)jcFeatures.getSelectedItem();
+
+        if (featureComboItem.getId() == 2) {
+            // export all selected features
+            final int[] selectedRows = table.getSelectedRows();
+
+            for (final int row : selectedRows) {
+                final FeatureServiceFeature feature = model.getFeatureServiceFeature(table.convertRowIndexToModel(row));
+
+                if (feature != null) {
+                    features.add(feature);
+                }
+            }
+        } else if (featureComboItem.getId() == 1) {
+            // export all features
+            for (int i = 0; i < model.getRowCount(); ++i) {
+                features.add(model.getFeatureServiceFeature(table.convertRowIndexToModel(i)));
+            }
+        }
+
+        if (features.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                this,
+                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExportActionPerformed.noFeatures.text"),
+                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExportActionPerformed.noFeatures.title"),
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        if (DownloadManagerDialog.showAskingForUserTitle(this)) {
+            try {
+                ExportDownload ed = (ExportDownload)jcFormat.getSelectedItem();
+                // every download needs its own instance of the Download class
+                ed = ed.getClass().newInstance();
+                final List<String[]> attributeNames = getAliasAttributeList();
+                ed.init(featureService.getName(),
+                    ed.getDefaultExtension(),
+                    features.toArray(new FeatureServiceFeature[features.size()]),
+                    featureService,
+                    attributeNames);
+
+                DownloadManager.instance().add(ed);
+            } catch (Exception e) {
+                LOG.error("The ExportDownload class has possibly no public constructor without arguments.", e);
+            }
+        }
+    } //GEN-LAST:event_butExpOkActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butCancelActionPerformed
+        diaExport.setVisible(false);
+    }                                                                             //GEN-LAST:event_butCancelActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jcFormatItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_jcFormatItemStateChanged
+    }                                                                           //GEN-LAST:event_jcFormatItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private List<String[]> getAliasAttributeList() {
+        final List<String[]> attrNames = new ArrayList<String[]>();
+
+        for (int i = 0; i < table.getColumnCount(false); ++i) {
+            final int modelCol = table.convertColumnIndexToModel(i);
+            final String[] aliasAttr = new String[2];
+
+            aliasAttr[0] = model.getColumnName(modelCol);
+            aliasAttr[1] = model.getColumnAttributeName(modelCol);
+
+            attrNames.add(aliasAttr);
+        }
+
+        return attrNames;
+    }
 
     /**
      * DOCUMENT ME!
@@ -1608,43 +1856,30 @@ public class AttributeTable extends javax.swing.JPanel {
          * @return  DOCUMENT ME!
          */
         public Geometry getGeometryFromRow(final int row) {
-            final List<String> geometryColumns = new ArrayList<String>();
-            Geometry resultGeom = null;
+            // The geometries from the attributes has no crs. At least, if they come from a shape file final
+            // List<String> geometryColumns = new ArrayList<String>(); Geometry resultGeom = null;
+            //
+            // for (final String key : featureServiceAttributes.keySet()) { final FeatureServiceAttribute attr =
+            // featureServiceAttributes.get(key);
+            //
+            // if (attr.isGeometry()) { geometryColumns.add(attr.getName()); } }
+            //
+            // for (final String name : geometryColumns) { final Object value = featureList.get(row).getProperty(name);
+            // Geometry geo = null;
+            //
+            // if (value instanceof Geometry) { geo = ((Geometry)value); } else if (value instanceof
+            // org.deegree.model.spatialschema.Geometry) { final org.deegree.model.spatialschema.Geometry geom =
+            // ((org.deegree.model.spatialschema.Geometry) value); try { geo = JTSAdapter.export(geom); } catch
+            // (GeometryException e) { LOG.error("Error while transforming deegree geometry to jts geometry.", e); }
+            // }
+            //
+            // if (geo != null) { if (resultGeom == null) { resultGeom = geo; } else { resultGeom =
+            // resultGeom.union(geo); } } }
+            //
+            // resultGeom.setSRID(featureList.get(row).getGeometry().getSRID());
 
-            for (final String key : featureServiceAttributes.keySet()) {
-                final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
-
-                if (attr.isGeometry()) {
-                    geometryColumns.add(attr.getName());
-                }
-            }
-
-            for (final String name : geometryColumns) {
-                final Object value = featureList.get(row).getProperty(name);
-                Geometry geo = null;
-
-                if (value instanceof Geometry) {
-                    geo = ((Geometry)value);
-                } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
-                    final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)
-                            value);
-                    try {
-                        geo = JTSAdapter.export(geom);
-                    } catch (GeometryException e) {
-                        LOG.error("Error while transforming deegree geometry to jts geometry.", e);
-                    }
-                }
-
-                if (geo != null) {
-                    if (resultGeom == null) {
-                        resultGeom = geo;
-                    } else {
-                        resultGeom = resultGeom.union(geo);
-                    }
-                }
-            }
-
-            return resultGeom;
+            // the same geometry, that is shown on the map, should be returned
+            return featureList.get(row).getGeometry();
         }
 
         /**
@@ -1699,6 +1934,17 @@ public class AttributeTable extends javax.swing.JPanel {
         @Override
         public String getColumnName(final int columnIndex) {
             return attributeAlias[columnIndex];
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   columnIndex  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public String getColumnAttributeName(final int columnIndex) {
+            return attributeNames[columnIndex];
         }
 
         @Override
@@ -1801,7 +2047,7 @@ public class AttributeTable extends javax.swing.JPanel {
          * @param  name  DOCUMENT ME!
          */
         public void setColumnName(final int row, final String name) {
-            if ((row > 0) && (row < attributeAlias.length)) {
+            if ((row >= 0) && (row < attributeAlias.length)) {
                 attributeAlias[row] = name;
                 fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
             }
@@ -1854,6 +2100,48 @@ public class AttributeTable extends javax.swing.JPanel {
             }
 
             AttributeTable.this.setTableSize();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class FeatureComboItem {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private int id;
+        private String name;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new FeatureComboItem object.
+         *
+         * @param  id    DOCUMENT ME!
+         * @param  name  DOCUMENT ME!
+         */
+        public FeatureComboItem(final int id, final String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public int getId() {
+            return id;
+        }
+
+        @Override
+        public String toString() {
+            return name;
         }
     }
 }

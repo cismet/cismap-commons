@@ -20,15 +20,10 @@ import org.deegree.model.feature.AbstractFeatureCollection;
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.FeatureFactory;
 import org.deegree.model.feature.FeatureProperty;
-import org.deegree.model.feature.schema.DefaultFeatureType;
 import org.deegree.model.feature.schema.FeatureType;
 import org.deegree.model.feature.schema.PropertyType;
 import org.deegree.model.feature.schema.SimplePropertyType;
 import org.deegree.model.spatialschema.Curve;
-import org.deegree.model.spatialschema.Envelope;
-import org.deegree.model.spatialschema.Geometry;
-import org.deegree.model.spatialschema.GeometryException;
-import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.model.spatialschema.MultiCurve;
 import org.deegree.model.spatialschema.MultiPoint;
 import org.deegree.model.spatialschema.MultiSurface;
@@ -37,12 +32,13 @@ import org.deegree.model.spatialschema.Polygon;
 import org.deegree.model.spatialschema.Surface;
 import org.deegree.ogcbase.PropertyPath;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
-import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 
 /**
  * DOCUMENT ME!
@@ -58,6 +54,8 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
 
     //~ Instance fields --------------------------------------------------------
 
+    List<String[]> aliasAttributeList;
+
     private Feature[] features;
 
     //~ Constructors -----------------------------------------------------------
@@ -65,21 +63,51 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
     /**
      * Creates a new SimpleFeatureCollection object.
      *
-     * @param  id        DOCUMENT ME!
-     * @param  features  DOCUMENT ME!
+     * @param  id                  DOCUMENT ME!
+     * @param  features            DOCUMENT ME!
+     * @param  aliasAttributeList  DOCUMENT ME!
      */
     public SimpleFeatureCollection(final String id,
-            final de.cismet.cismap.commons.features.DefaultFeatureServiceFeature[] features) {
+            final de.cismet.cismap.commons.features.FeatureServiceFeature[] features,
+            List<String[]> aliasAttributeList) {
         super(id);
         this.features = new Feature[features.length];
+        this.aliasAttributeList = aliasAttributeList;
         int index = 0;
 
-        for (final DefaultFeatureServiceFeature tmp : features) {
+        if (aliasAttributeList == null) {
+            aliasAttributeList = generateAliasAttributeList(features);
+        }
+
+        for (final FeatureServiceFeature tmp : features) {
             this.features[index++] = toDeegreeFeature(tmp);
         }
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   features  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private List<String[]> generateAliasAttributeList(
+            final de.cismet.cismap.commons.features.FeatureServiceFeature[] features) {
+        final List<String[]> aliasAttrList = new ArrayList<String[]>();
+
+        if ((features != null) && (features.length > 0)) {
+            final Map props = features[0].getProperties();
+
+            for (final Object key : props.keySet()) {
+                final String[] aliasAttr = new String[2];
+                aliasAttr[0] = key.toString();
+                aliasAttr[1] = key.toString();
+            }
+        }
+        return aliasAttrList;
+    }
 
     @Override
     public FeatureProperty getDefaultProperty(final PropertyPath pp) throws PropertyPathResolvingException {
@@ -174,16 +202,16 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
      *
      * @return  DOCUMENT ME!
      */
-    private Feature toDeegreeFeature(final DefaultFeatureServiceFeature feature) {
+    private Feature toDeegreeFeature(final FeatureServiceFeature feature) {
         final Map props = feature.getProperties();
-        final DefaultFeatureProperty[] propArray = new DefaultFeatureProperty[props.size()];
-        final PropertyType[] propTypeArray = new PropertyType[props.size()];
+        final DefaultFeatureProperty[] propArray = new DefaultFeatureProperty[aliasAttributeList.size()];
+        final PropertyType[] propTypeArray = new PropertyType[aliasAttributeList.size()];
         int index = 0;
 
-        for (final Object key : props.keySet()) {
-            final QualifiedName name = new QualifiedName(key.toString());
-            propArray[index] = new DefaultFeatureProperty(name, props.get(key));
-            propTypeArray[index++] = getPropertyType(name, props.get(key));
+        for (final String[] aliasAttr : aliasAttributeList) {
+            final QualifiedName name = new QualifiedName(aliasAttr[0]);
+            propArray[index] = new DefaultFeatureProperty(name, props.get(aliasAttr[1]));
+            propTypeArray[index++] = getPropertyType(name, props.get(aliasAttr[1]));
         }
 
         final FeatureType ft = FeatureFactory.createFeatureType("test", false, propTypeArray);

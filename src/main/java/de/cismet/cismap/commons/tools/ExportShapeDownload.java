@@ -15,12 +15,9 @@ import org.deegree.io.shpapi.shape_new.ShapeFile;
 import org.deegree.io.shpapi.shape_new.ShapeFileWriter;
 import org.deegree.model.feature.FeatureCollection;
 
-import org.openide.util.Cancellable;
+import org.openide.util.NbBundle;
 
-import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
-import de.cismet.cismap.commons.features.Feature;
-
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 
 /**
  * DOCUMENT ME!
@@ -28,14 +25,16 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class ExportShapeDownload extends AbstractDownload implements Cancellable {
-
-    //~ Instance fields --------------------------------------------------------
-
-    private Feature[] features;
-    private String filename;
+public class ExportShapeDownload extends ExportDownload {
 
     //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new ExportShapeDownload object. The init method must be invoked before the download can be started, if
+     * this constructor is used.
+     */
+    public ExportShapeDownload() {
+    }
 
     /**
      * Creates a new ExportShapeDownload object.
@@ -46,13 +45,8 @@ public class ExportShapeDownload extends AbstractDownload implements Cancellable
      */
     public ExportShapeDownload(final String filename,
             final String extension,
-            final DefaultFeatureServiceFeature[] features) {
-        this.features = features;
-        this.filename = filename;
-        this.title = "Export " + features.length + " Features";
-
-        status = State.WAITING;
-        determineDestinationFile(filename, extension);
+            final FeatureServiceFeature[] features) {
+        init(filename, extension, features, null, null);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -70,7 +64,8 @@ public class ExportShapeDownload extends AbstractDownload implements Cancellable
             try {
                 final FeatureCollection fc = new SimpleFeatureCollection(
                         getId(),
-                        (DefaultFeatureServiceFeature[])features);
+                        (FeatureServiceFeature[])features,
+                        aliasAttributeList);
                 final ShapeFile shape = new ShapeFile(
                         fc,
                         fileToSaveTo.getAbsolutePath().substring(0, fileToSaveTo.getAbsolutePath().lastIndexOf(".")));
@@ -99,15 +94,12 @@ public class ExportShapeDownload extends AbstractDownload implements Cancellable
     }
 
     @Override
-    public boolean cancel() {
-        boolean cancelled = true;
-        if (downloadFuture != null) {
-            cancelled = downloadFuture.cancel(true);
-        }
-        if (cancelled) {
-            status = State.ABORTED;
-            stateChanged();
-        }
-        return cancelled;
+    public String getDefaultExtension() {
+        return ".shp";
+    }
+
+    @Override
+    public String toString() {
+        return NbBundle.getMessage(ExportShapeDownload.class, "ExportShapeDownload.toString");
     }
 }
