@@ -19,6 +19,7 @@ import org.deegree.datatypes.Types;
 import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 
+import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.Highlighter;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
@@ -372,6 +373,7 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     private void loadModel(final int page) {
         panWaiting.setVisible(true);
+        ((JXBusyLabel)labWaitingImage).setBusy(true);
 
         final SwingWorker<List<FeatureServiceFeature>, Void> worker =
             new SwingWorker<List<FeatureServiceFeature>, Void>() {
@@ -394,7 +396,7 @@ public class AttributeTable extends javax.swing.JPanel {
                     } else {
                         featureList = factory.createFeatures(featureService.getQuery(),
                                 bb,
-                                null);
+                                null, 0, 0, null);
                     }
 
                     return featureList;
@@ -423,6 +425,7 @@ public class AttributeTable extends javax.swing.JPanel {
                         LOG.error("Error while retrieving model", e);
                     } finally {
                         panWaiting.setVisible(false);
+                        ((JXBusyLabel)labWaitingImage).setBusy(false);
                     }
                 }
             };
@@ -492,7 +495,7 @@ public class AttributeTable extends javax.swing.JPanel {
         butColWidth = new javax.swing.JButton();
         butShowCols = new javax.swing.JButton();
         panWaiting = new javax.swing.JPanel();
-        labWaitingImage = new javax.swing.JLabel();
+        labWaitingImage = new org.jdesktop.swingx.JXBusyLabel();
         tableScrollPane = new javax.swing.JScrollPane();
         table = new org.jdesktop.swingx.JXTable();
         jpControl = new javax.swing.JPanel();
@@ -1112,12 +1115,6 @@ public class AttributeTable extends javax.swing.JPanel {
 
         panWaiting.setBackground(new Color(255, 255, 255, 150));
         panWaiting.setLayout(new java.awt.GridBagLayout());
-
-        labWaitingImage.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/ajax-loader.gif"))); // NOI18N
-        labWaitingImage.setText(org.openide.util.NbBundle.getMessage(
-                AttributeTable.class,
-                "AttributeTable.labWaitingImage.text"));                                                  // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -1670,7 +1667,7 @@ public class AttributeTable extends javax.swing.JPanel {
             int size = (int)fmetrics.getStringBounds(model.getColumnName(i), table.getGraphics()).getWidth();
 
             if (model.getColumnClass(i).equals(String.class)) {
-                for (int row = 0; row < model.getRowCount(); ++row) {
+                for (int row = 0; (row < model.getRowCount()) && (row < 100); ++row) {
                     final int tmpSize = (int)fmetrics.getStringBounds(String.valueOf(model.getValueAt(row, i)),
                                 table.getGraphics()).getWidth();
 
