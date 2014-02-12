@@ -471,4 +471,25 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     public void setCanBeSelected(final boolean canBeSelected) {
         this.canBeSelected = canBeSelected;
     }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj.getClass().getName().equals(getClass().getName())) {
+            final DefaultFeatureServiceFeature other = (DefaultFeatureServiceFeature)obj;
+
+            if (getId() != -1) {
+                return getId() == other.getId();
+            }
+        }
+
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = (79 * hash) + this.id;
+        hash = (79 * hash) + ((this.getClass().getName() != null) ? this.getClass().getName().hashCode() : 0);
+        return hash;
+    }
 }
