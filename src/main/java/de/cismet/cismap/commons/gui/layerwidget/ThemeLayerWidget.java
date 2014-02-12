@@ -34,7 +34,9 @@ import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.DropMode;
 import javax.swing.JCheckBox;
@@ -134,7 +136,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
      */
     public void setMappingModel(final ActiveLayerModel mappingModel) {
         layerModel = mappingModel;
-        tree.setModel(layerModel);
+        tree.setModel(new ActiveLayerModelWrapperWithoutProgress(layerModel));
 
         menuItems.add(new AddFolderMenuItem());
         menuItems.add(new RemoveGroupMenuItem());
@@ -1153,6 +1155,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         protected Color textBackground;
         protected Boolean drawsFocusBorderAroundIcon;
         protected Font fontValue;
+        Map<Object, ActiveLayerTreeCellRenderer> renderer = new HashMap<Object, ActiveLayerTreeCellRenderer>();
 
         //~ Constructors -------------------------------------------------------
 
@@ -1179,14 +1182,19 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 final boolean leaf,
                 final int row,
                 final boolean hasFocus) {
-            final Component ret = super.getTreeCellRendererComponent(
-                    tree,
-                    value,
-                    selected,
-                    expanded,
-                    leaf,
-                    row,
-                    hasFocus);
+            JLabel lab = null;
+            synchronized (ThemeLayerWidget.this.getTreeLock()) {
+                final Component ret = super.getTreeCellRendererComponent(
+                        tree,
+                        value,
+                        selected,
+                        expanded,
+                        leaf,
+                        row,
+                        hasFocus);
+                final JLabel retLab = (JLabel)ret;
+                lab = new JLabel(retLab.getText(), retLab.getIcon(), retLab.getHorizontalAlignment());
+            }
             final JPanel pan = new JPanel();
             final JCheckBox leafRenderer = new JCheckBox();
             pan.setLayout(new GridBagLayout());
@@ -1214,7 +1222,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             leafRenderer.setSelected(isValueSelected(value));
 
             pan.add(leafRenderer);
-            pan.add(ret);
+            pan.add(lab);
             return pan;
         }
 

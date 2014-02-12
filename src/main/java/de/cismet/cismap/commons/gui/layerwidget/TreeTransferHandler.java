@@ -195,7 +195,8 @@ class TreeTransferHandler extends TransferHandler {
         final TreePath dest = dl.getPath();
         final Object parent = dest.getLastPathComponent();
         final JTree tree = (JTree)support.getComponent();
-        final ActiveLayerModel model = (ActiveLayerModel)tree.getModel();
+        final ActiveLayerModel model = (ActiveLayerModel)((ActiveLayerModelWrapperWithoutProgress)tree.getModel())
+                    .getModel();
         // Configure for drop mode.
         int index = childIndex; // DropMode.INSERT
         if (childIndex == -1) { // DropMode.ON
