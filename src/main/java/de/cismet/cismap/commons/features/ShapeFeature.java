@@ -21,7 +21,8 @@ import org.deegree.style.se.unevaluated.Style;
 
 import org.deegree.feature.Feature;
 import org.deegree.feature.types.FeatureType;
-
+import org.deegree.model.feature.FeatureProperty;
+import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.style.se.unevaluated.Style;
 
 import java.util.HashMap;
@@ -215,8 +216,8 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public void addProperty(final String propertyName, final Object property) {
         // nothing to do
-    }    
-    
+    }
+
     /**
      * DOCUMENT ME!
      *
