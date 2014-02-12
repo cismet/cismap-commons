@@ -18,12 +18,12 @@ import org.deegree.io.rtree.HyperPoint;
 import org.deegree.io.rtree.RTree;
 import org.deegree.io.rtree.RTreeException;
 import org.deegree.io.shpapi.ShapeFile;
+import org.deegree.io.shpapi.shape_new.ShapeFileReader;
 import org.deegree.model.feature.Feature;
+import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.schema.FeatureType;
 import org.deegree.model.feature.schema.PropertyType;
 import org.deegree.model.spatialschema.JTSAdapter;
-
-import org.openide.util.Exceptions;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -75,6 +75,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     private int shapeSrid = 0;
     private Crs crs = CismapBroker.getInstance().getSrs();
     private org.deegree.model.spatialschema.Envelope envelope;
+    private FeatureCollection fc = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -131,12 +132,24 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
     @Override
     protected ShapeFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
-        //dummy method
+        // dummy method
         return null;
     }
-    
-    
-    protected ShapeFeature createFeatureInstance(final Feature degreeFeature, final ShapeInfo shapeInfo, final int index) throws Exception {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   degreeFeature  DOCUMENT ME!
+     * @param   shapeInfo      DOCUMENT ME!
+     * @param   index          DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    protected ShapeFeature createFeatureInstance(final Feature degreeFeature,
+            final ShapeInfo shapeInfo,
+            final int index) throws Exception {
         final String filename = new File(documentURI).getName();
 //        layerName = filename;
         final ShapeFeature shapeFeature;
@@ -151,15 +164,18 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     }
 
     @Override
-    protected void initialiseFeature(ShapeFeature featureServiceFeature, Feature degreeFeature, boolean evaluateExpressions, int index) throws Exception {
+    protected void initialiseFeature(final ShapeFeature featureServiceFeature,
+            final Feature degreeFeature,
+            final boolean evaluateExpressions,
+            final int index) throws Exception {
         // perform standard initialisation
         featureServiceFeature.setLayerProperties(this.getLayerProperties());
 
         if (evaluateExpressions) {
             this.evaluateExpressions(featureServiceFeature, index);
         }
-    }    
-    
+    }
+
     /**
      * DOCUMENT ME!
      */
@@ -251,8 +267,8 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         envelope = shapeFile.getFileMBR();
         // create an index file, if it does not alreay exists
         int currentProgress = 0;
-        int newProgress = 0;
-        String filename = null;
+        int newProgress;
+        String filename;
 
         if (this.documentURI.getPath().endsWith(".shp")) {
             filename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
@@ -260,12 +276,29 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             filename = this.documentURI.getPath();
         }
 
+        final ShapeFileReader reader = new ShapeFileReader(filename);
+        final int shapeType = reader.getShapeType();
+
+        if ((shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.MULTIPOINTM)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYLINEM)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYGONM)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POINTM)) {
+            final org.deegree.io.shpapi.shape_new.ShapeFile shapeFromReader = reader.read();
+            fc = shapeFromReader.getFeatureCollection();
+        }
+
         try {
             if (!shapeFile.hasRTreeIndex()) {
                 final int features = shapeFile.getRecordNum();
                 final RTree rtree = new RTree(2, 11, filename + ".rti");
                 for (int i = 1; i < (features + 1); i++) {
-                    final Feature feature = shapeFile.getFeatureByRecNo(i);
+                    Feature feature = null;
+
+                    if (fc != null) {
+                        feature = fc.getFeature(i);
+                    } else {
+                        feature = shapeFile.getFeatureByRecNo(i);
+                    }
 
                     final org.deegree.model.spatialschema.Geometry[] geometries = feature.getGeometryPropertyValues();
 
@@ -391,7 +424,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     public synchronized List<ShapeFeature> createFeatures(final String query,
             final BoundingBox boundingBox,
             final SwingWorker workerThread) throws TooManyFeaturesException, Exception {
-        return createFeatures(query, boundingBox, workerThread, 0, 0, null);
+        return createFeatures(query, boundingBox, workerThread, 0, 0, null, true);
     }
 
     @Override
@@ -526,6 +559,32 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             final int offset,
             final int limit,
             final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+        return createFeatures(query, boundingBox, workerThread, offset, limit, orderBy, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   query         DOCUMENT ME!
+     * @param   boundingBox   DOCUMENT ME!
+     * @param   workerThread  DOCUMENT ME!
+     * @param   offset        DOCUMENT ME!
+     * @param   limit         DOCUMENT ME!
+     * @param   orderBy       DOCUMENT ME!
+     * @param   shapeLimit    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                 DOCUMENT ME!
+     */
+    public synchronized List<ShapeFeature> createFeatures(final String query,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy,
+            final boolean shapeLimit) throws TooManyFeaturesException, Exception {
         try {
             if (!this.initialised) {
                 logger.warn("SW[" + workerThread + "]: Factory not correclty initialised, parsing shape file");
@@ -554,8 +613,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
             boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
-            
-            final Charset cs = getCharsetDefinition();
+
             String filename = null;
 
             if (this.documentURI.getPath().endsWith(".shp")) {
@@ -564,15 +622,16 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                 filename = this.documentURI.getPath();
             }
 
-            ShapeFile persShapeFile = getShapeFile();;            
-            
+            final ShapeFile persShapeFile = getShapeFile();
+
             shapeFile = null;
-            final int[] recordNumbers = shapeFile.getGeoNumbersByRect(JTSAdapter.wrap(boundingPolygon).getEnvelope());
+            final int[] recordNumbers = persShapeFile.getGeoNumbersByRect(JTSAdapter.wrap(boundingPolygon)
+                            .getEnvelope());
 
             List<ShapeFeature> selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
-            ShapeInfo info = new ShapeInfo(filename, persShapeFile, shapeSrid);
+            final ShapeInfo info = new ShapeInfo(filename, persShapeFile, shapeSrid, fc);
 
-            if (recordNumbers.length < 15000) {
+            if (!shapeLimit || (recordNumbers.length < 35000)) {
                 for (final int record : recordNumbers) {
                     final Feature f = persShapeFile.getFeatureByRecNo(record);
                     final ShapeFeature featureServiceFeature = createFeatureInstance(f, info, record);
@@ -593,7 +652,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             // check if thread is canceled .........................................
 
             logger.info("SW[" + workerThread + "]: " + selectedFeatures.size()
-                        + " features selected by bounding box out of " + this.shapeFile.getRecordNum()
+                        + " features selected by bounding box out of " + persShapeFile.getRecordNum()
                         + " in spatial index");
             if (logger.isDebugEnabled()) {
                 logger.debug("SW[" + workerThread + "]: quering spatial index for bounding box took "
