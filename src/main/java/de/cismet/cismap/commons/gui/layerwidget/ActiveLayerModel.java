@@ -1393,7 +1393,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         // Process the listeners last to first, notifying
         // those that are interested in this event
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
-            if ((listeners[i] == TreeModelListener.class) && !listenerWithOutProgress.contains(listeners[i])) {
+            if ((listeners[i] == TreeModelListener.class) && !listenerWithOutProgress.contains(listeners[i + 1])) {
                 // Lazily create the event:
                 if (e == null) {
                     e = new TreeModelEvent(source, path,
