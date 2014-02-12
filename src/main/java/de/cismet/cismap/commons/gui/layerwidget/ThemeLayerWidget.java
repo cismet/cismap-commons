@@ -34,7 +34,9 @@ import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.DropMode;
 import javax.swing.JCheckBox;
@@ -68,8 +70,6 @@ import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * DOCUMENT ME!
@@ -136,7 +136,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
      */
     public void setMappingModel(final ActiveLayerModel mappingModel) {
         layerModel = mappingModel;
-        tree.setModel(layerModel);
+        tree.setModel(new ActiveLayerModelWrapperWithoutProgress(layerModel));
 
         menuItems.add(new AddFolderMenuItem());
         menuItems.add(new RemoveGroupMenuItem());

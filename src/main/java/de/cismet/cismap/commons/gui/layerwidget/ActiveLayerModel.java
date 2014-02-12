@@ -18,6 +18,8 @@ import java.util.*;
 import javax.swing.JTree;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.*;
@@ -71,6 +73,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     private boolean initalLayerConfigurationFromServer = false;
     private HashMap<String, Element> masterLayerHashmap = new HashMap<String, Element>();
     private Crs defaultHomeSrs;
+    private List<TreeModelListener> listenerWithOutProgress = new ArrayList<TreeModelListener>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -1344,8 +1347,60 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     public void fireProgressChanged(final ServiceLayer sl) {
         final int pos = layers.indexOf(sl);
         if (pos >= 0) {
-            this.fireTreeNodesChanged(this, new Object[] { root, sl }, null, null);
+            this.fireTreeNodesProgressChanged(this, new Object[] { root, sl }, null, null);
             fireTableChanged(null);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void addTreeModelWithoutProgressListener(final TreeModelListener l) {
+        super.addTreeModelListener(l);
+        listenerWithOutProgress.add(l);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void removeTreeModelWithoutProgressListener(final TreeModelListener l) {
+        super.removeTreeModelListener(l);
+        listenerWithOutProgress.remove(l);
+    }
+
+    /**
+     * Notify all listeners that have registered interest for notification on this event type. The event instance is
+     * lazily created using the parameters passed into the fire method.
+     *
+     * @param  source        DOCUMENT ME!
+     * @param  path          DOCUMENT ME!
+     * @param  childIndices  DOCUMENT ME!
+     * @param  children      DOCUMENT ME!
+     *
+     * @see    EventListenerList
+     */
+    protected void fireTreeNodesProgressChanged(final Object source,
+            final Object[] path,
+            final int[] childIndices,
+            final Object[] children) {
+        // Guaranteed to return a non-null array
+        final Object[] listeners = listenerList.getListenerList();
+        TreeModelEvent e = null;
+        // Process the listeners last to first, notifying
+        // those that are interested in this event
+        for (int i = listeners.length - 2; i >= 0; i -= 2) {
+            if ((listeners[i] == TreeModelListener.class) && !listenerWithOutProgress.contains(listeners[i])) {
+                // Lazily create the event:
+                if (e == null) {
+                    e = new TreeModelEvent(source, path,
+                            childIndices, children);
+                }
+                ((TreeModelListener)listeners[i + 1]).treeNodesChanged(e);
+            }
         }
     }
 
