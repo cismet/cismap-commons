@@ -13,12 +13,10 @@ package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import org.deegree.model.feature.FeatureProperty;
-import org.deegree.model.spatialschema.JTSAdapter;
-
 import org.deegree.feature.Feature;
 import org.deegree.feature.types.FeatureType;
-
+import org.deegree.model.feature.FeatureProperty;
+import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.style.se.unevaluated.Style;
 
 import java.util.HashMap;
@@ -58,20 +56,18 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     public ShapeFeature(final ShapeInfo shapeInfo) {
         this.shapeInfo = shapeInfo;
     }
-    
-   /**
-    * Creates a new ShapeFeature object.
-    *
-    * @param  typename  DOCUMENT ME!
-    * @param  styles    DOCUMENT ME!
-    */
+
+    /**
+     * Creates a new ShapeFeature object.
+     *
+     * @param  shapeInfo  typename DOCUMENT ME!
+     * @param  styles     DOCUMENT ME!
+     */
     public ShapeFeature(final ShapeInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
         setSLDStyles(styles); // super.style = styles;
         this.shapeInfo = shapeInfo;
     }
 
-    
-   
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -199,13 +195,14 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public void addProperty(final String propertyName, final Object property) {
         // nothing to do
-    }    
-    
+    }
+
     /**
      * DOCUMENT ME!
      *
      * @param  map  DOCUMENT ME!
      */
+    @Override
     public void addProperties(final Map<String, Object> map) {
         // nothing to do
     }
