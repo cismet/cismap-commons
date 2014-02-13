@@ -37,6 +37,8 @@ import java.net.URL;
 
 import java.util.*;
 
+import javax.swing.ImageIcon;
+
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.XBoundingBox;
@@ -68,7 +70,6 @@ import de.cismet.security.WebAccessManager;
 
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
-import javax.swing.ImageIcon;
 
 /**
  * DOCUMENT ME!
@@ -93,7 +94,7 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
     private List<GetFeatureInfoListener> listener = new ArrayList<GetFeatureInfoListener>();
     private ImageIcon pointIcon = new javax.swing.ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/res/linRefPoint.png"));
-    
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -154,17 +155,17 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
                 final PureNewFeature feature = new PureNewFeature(createPointFromInput(pInputEvent));
                 feature.setGeometryType(AbstractNewFeature.geomTypes.POINT);
                 feature.getGeometry().setSRID(currentSrid);
-                
-                //show the point on the map
-                DefaultStyledFeature styledFeature = new DefaultStyledFeature();
+
+                // show the point on the map
+                final DefaultStyledFeature styledFeature = new DefaultStyledFeature();
                 styledFeature.setGeometry(createPointFromInput(pInputEvent));
                 styledFeature.getGeometry().setSRID(currentSrid);
-                FeatureAnnotationSymbol fas = new FeatureAnnotationSymbol(pointIcon.getImage());
+                final FeatureAnnotationSymbol fas = new FeatureAnnotationSymbol(pointIcon.getImage());
                 fas.setSweetSpotX(0.5);
                 fas.setSweetSpotY(0.5);
                 styledFeature.setPointAnnotationSymbol(fas);
                 mappingComponent.highlightFeature(styledFeature, 1500);
-                
+
                 finishingEvent = pInputEvent;
                 finishGeometry(feature);
             } finally {

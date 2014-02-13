@@ -627,7 +627,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                 }
 
                 final ShapeFile persShapeFile = getShapeFile();
-                
+
                 shapeFile = null;
                 final int[] recordNumbers = shapeFile.getGeoNumbersByRect(JTSAdapter.wrap(boundingPolygon)
                                 .getEnvelope());
@@ -635,7 +635,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                 if (recordNumbers == null) {
                     return new Vector<ShapeFeature>();
                 }
-                            
+
                 selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
                 final ShapeInfo info = new ShapeInfo(filename, persShapeFile, shapeSrid, fc);
                 int count = 0;
