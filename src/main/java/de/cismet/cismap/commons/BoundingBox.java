@@ -396,4 +396,17 @@ public class BoundingBox implements Cloneable, Serializable {
                     + " " + getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"          // NOI18N
                     + getX2() + " " + getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
     }
+
+    /**
+     * increased the bounding box.
+     *
+     * @param  percentage  DOCUMENT ME!
+     */
+    public void increase(final int percentage) {
+        final double factor = (percentage / 2.0) / 100.0;
+        setX1(getX1() - (getWidth() * factor));
+        setX2(getX2() + (getWidth() * factor));
+        setY1(getY1() - (getHeight() * factor));
+        setY2(getY2() + (getHeight() * factor));
+    }
 }
