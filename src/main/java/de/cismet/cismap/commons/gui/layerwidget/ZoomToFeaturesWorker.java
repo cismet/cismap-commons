@@ -35,6 +35,8 @@ public class ZoomToFeaturesWorker extends SwingWorker<Geometry, Geometry> {
 
     private Logger LOG = Logger.getLogger(ZoomToFeaturesWorker.class);
     private Feature[] features;
+    /** buffer in percent.* */
+    private int buffer;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -44,7 +46,18 @@ public class ZoomToFeaturesWorker extends SwingWorker<Geometry, Geometry> {
      * @param  features  tps DOCUMENT ME!
      */
     public ZoomToFeaturesWorker(final Feature[] features) {
+        this(features, 0);
+    }
+
+    /**
+     * Creates a new ZoomToLayerWorker object.
+     *
+     * @param  features  tps DOCUMENT ME!
+     * @param  buffer    DOCUMENT ME!
+     */
+    public ZoomToFeaturesWorker(final Feature[] features, final int buffer) {
         this.features = features;
+        this.buffer = buffer;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -83,11 +96,16 @@ public class ZoomToFeaturesWorker extends SwingWorker<Geometry, Geometry> {
             final Geometry geom = get();
 
             if (geom != null) {
-                CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(new XBoundingBox(geom));
+                final XBoundingBox boundingBox = new XBoundingBox(geom);
+
+                if (buffer != 0) {
+                    boundingBox.increase(buffer);
+                }
+
+                CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(boundingBox);
             }
         } catch (Exception e) {
             LOG.error("Error while zooming to selected features", e);
         }
     }
 }
-;
