@@ -1053,8 +1053,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (autoScale) {
                 primaryAnnotation.setScale(source.getScale());
             }
-            primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2)
-                        + (bounds.getWidth() / 4),
+            primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2),
+//                        + (bounds.getWidth() / 4),
                 wtst.getScreenY(intPoint.getY())
                         - (bounds.getHeight() / 2));
         }
