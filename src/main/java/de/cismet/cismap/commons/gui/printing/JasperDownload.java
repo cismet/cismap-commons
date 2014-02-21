@@ -23,8 +23,9 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 /**
  * DOCUMENT ME!
  *
- * @author   jweintraut
- * @version  $Revision$, $Date$
+ * @author      jweintraut
+ * @version     $Revision$, $Date$
+ * @deprecated  Use the class {@link JasperReportDownload} instead
  */
 public class JasperDownload extends AbstractDownload implements Cancellable {
 
