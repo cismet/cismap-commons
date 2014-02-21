@@ -104,6 +104,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected LayerInitWorker layerInitWorker = null;
     protected LayerProperties layerProperties = null;
     protected FeatureFactory featureFactory = null;
+    /* the list that holds the names of the featureServiceAttributes of the FeatureService in the specified order */
+    protected List<String> orderedFeatureServiceAttributes;
     private boolean initialisationError = false;
     private Element initElement = null;
 
@@ -578,6 +580,24 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
+     * Returns a list of all featureServiceAttributes of this featureservice.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List<String> getOrderedFeatureServiceAttributes() {
+        return this.orderedFeatureServiceAttributes;
+    }
+
+    /**
+     * Setter for the featureServiceAttributes of the featureservice.
+     *
+     * @param  orderedFeatureServiceAttributes  featureServiceAttributes to set
+     */
+    public void setOrderedFeatureServiceAttributes(final List<String> orderedFeatureServiceAttributes) {
+        this.orderedFeatureServiceAttributes = orderedFeatureServiceAttributes;
+    }
+
+    /**
      * Setter for the featureServiceAttributes of the featureservice.
      *
      * @param  featureServiceAttributesVector  featureServiceAttributes to set
@@ -586,11 +606,14 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         if (featureServiceAttributesVector != null) {
             if (this.featureServiceAttributes == null) {
                 this.featureServiceAttributes = new HashMap(featureServiceAttributesVector.size());
+                this.orderedFeatureServiceAttributes = new ArrayList<String>();
             } else {
                 this.featureServiceAttributes.clear();
+                this.orderedFeatureServiceAttributes.clear();
             }
 
             for (final FeatureServiceAttribute fsa : featureServiceAttributesVector) {
+                this.orderedFeatureServiceAttributes.add(fsa.getName());
                 this.featureServiceAttributes.put(fsa.getName(), fsa);
             }
         }
@@ -1021,6 +1044,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         final Element xmlAttributes = element.getChild("Attributes"); // NOI18N
         if (xmlAttributes != null) {
             featureServiceAttributes = FeatureServiceUtilities.getFeatureServiceAttributes(xmlAttributes);
+            orderedFeatureServiceAttributes = FeatureServiceUtilities.getOrderedFeatureServiceAttributes(xmlAttributes);
             this.setFeatureServiceAttributes(featureServiceAttributes);
         }
 

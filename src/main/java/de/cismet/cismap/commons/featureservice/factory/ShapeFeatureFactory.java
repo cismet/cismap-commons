@@ -76,6 +76,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     private Crs crs = CismapBroker.getInstance().getSrs();
     private org.deegree.model.spatialschema.Envelope envelope;
     private FeatureCollection fc = null;
+    private String filename;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -150,12 +151,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     protected ShapeFeature createFeatureInstance(final Feature degreeFeature,
             final ShapeInfo shapeInfo,
             final int index) throws Exception {
-        final String filename = new File(documentURI).getName();
-//        layerName = filename;
-        final ShapeFeature shapeFeature;
-
-        shapeFeature = new ShapeFeature(shapeInfo);
-//        shapeFeature = new ShapeFeature(shapeInfo, getStyle(filename));
+        final ShapeFeature shapeFeature = new ShapeFeature(shapeInfo);
 
         // auto generate Ids!
         shapeFeature.setId(index);
@@ -250,6 +246,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             shapeCrs = CismapBroker.getInstance().getSrs();
             shapeSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
         }
+        filename = new File(documentURI).getName();
 
         shapeFile = getShapeFile();
 
@@ -634,15 +631,19 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
             List<ShapeFeature> selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
             final ShapeInfo info = new ShapeInfo(filename, persShapeFile, shapeSrid, fc);
+            int count = 0;
 
-            if (!shapeLimit || (recordNumbers.length < 35000)) {
-                for (final int record : recordNumbers) {
-                    final Feature f = persShapeFile.getFeatureByRecNo(record);
-                    final ShapeFeature featureServiceFeature = createFeatureInstance(f, info, record);
-                    this.initialiseFeature(featureServiceFeature, f, false, record);
-                    selectedFeatures.add(featureServiceFeature);
+//            if (!shapeLimit || (recordNumbers.length < 60000)) {
+            for (final int record : recordNumbers) {
+                ++count;
+                if (shapeLimit && (count > 50000)) {
+                    break;
                 }
+                final ShapeFeature featureServiceFeature = createFeatureInstance(null, info, record);
+                this.initialiseFeature(featureServiceFeature, null, false, record);
+                selectedFeatures.add(featureServiceFeature);
             }
+//            }
 
             if (logger.isDebugEnabled()) {
                 logger.debug("feature crs: " + shapeCrs.getCode() + " features " + selectedFeatures.size()
