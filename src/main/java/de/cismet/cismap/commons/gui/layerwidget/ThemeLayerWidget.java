@@ -54,6 +54,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreePath;
 
+import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
@@ -65,6 +66,7 @@ import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
@@ -161,6 +163,31 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         tree.getSelectionModel().addTreeSelectionListener(this);
         createPopupMenu();
         tree.addMouseListener(popupMenuListener);
+        tree.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final MouseEvent e) {
+                    if (!e.isPopupTrigger() && (e.getClickCount() == 1)) {
+                        final int x = e.getX();
+                        final int y = e.getY();
+
+                        // is click over the combobox?
+                        final TreePath tp = tree.getPathForLocation(x, y);
+
+                        if (tp != null) {
+                            final int pathCount = tp.getPathCount() - 1;
+                            final int minX = pathCount * 20;
+                            final int maxX = minX + 15;
+
+                            if ((x >= minX) && (x <= maxX)) {
+                                // click is over the checkbox
+                                changeVisibility(tp.getLastPathComponent());
+                                tree.cancelEditing();
+                            }
+                        }
+                    }
+                }
+            });
     }
     /**
      * DOCUMENT ME!
@@ -230,6 +257,37 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     @Override
     public void valueChanged(final TreeSelectionEvent e) {
         createPopupMenu();
+    }
+
+    /**
+     * changes the visibility of the given object.
+     *
+     * @param  objectToChange  either the root layer, a LayerCollection or a ServiceLayer
+     */
+    private void changeVisibility(final Object objectToChange) {
+        if (objectToChange.equals(layerModel.getRoot())) {
+            for (int i = 0; i < layerModel.getChildCount(layerModel.getRoot()); ++i) {
+                changeVisibility(layerModel.getChild(layerModel.getRoot(), i));
+            }
+        } else if (objectToChange instanceof LayerCollection) {
+            final LayerCollection lc = (LayerCollection)objectToChange;
+
+            for (int i = 0; i < lc.size(); ++i) {
+                changeVisibility(lc.get(i));
+            }
+        } else if (objectToChange instanceof ServiceLayer) {
+            ((ServiceLayer)objectToChange).setEnabled(!((ServiceLayer)objectToChange).isEnabled());
+            // only the last component of the tree path will be considered within
+            // the methods isVisible(TreePath) and handleVisibiliy(TreePath)
+            final TreePath tp = new TreePath(new Object[] { layerModel.getRoot(), objectToChange });
+            layerModel.handleVisibility(tp);
+
+            if (((ServiceLayer)objectToChange).isEnabled() && (objectToChange instanceof MapService)) {
+                ((MapService)objectToChange).setBoundingBox(
+                    CismapBroker.getInstance().getMappingComponent().getCurrentBoundingBoxFromCamera());
+                ((RetrievalServiceLayer)objectToChange).retrieve(true);
+            }
+        }
     }
 
     /**
@@ -463,8 +521,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         public AddThemeMenuItem() {
             super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.AddThemeMenuItem.pmenuItem.text"),
                 ROOT
-                        | FOLDER,
-                1);
+                        | FOLDER);
         }
 
         //~ Methods ------------------------------------------------------------
@@ -563,7 +620,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
          */
         public RemoveThemeMenuItem() {
             super(NbBundle.getMessage(ThemeLayerWidget.class, "ThemeLayerWidget.RemoveThemeMenuItem.pmenuItem.text"),
-                NODE);
+                NODE
+                        | FEATURE_SERVICE
+                        | MULTI);
         }
 
         //~ Methods ------------------------------------------------------------
@@ -956,6 +1015,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         //~ Methods ------------------------------------------------------------
 
         @Override
+        public boolean isVisible(final int mask) {
+            return ((visibility & mask) == mask) && ((mask & FEATURE_SERVICE) != 0);
+        }
+
+        @Override
         public void actionPerformed(final ActionEvent e) {
             String name = null;
             final List<DefaultFeatureServiceFeature> features = new ArrayList<DefaultFeatureServiceFeature>();
@@ -1306,31 +1370,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     hasFocus);
             final JCheckBox leafRenderer = (JCheckBox)pan.getComponent(0);
             final Component ret = pan.getComponent(1);
-            final Object renderedObject = value;
-
-            leafRenderer.addMouseListener(new MouseAdapter() {
-
-                    @Override
-                    public void mouseClicked(final MouseEvent e) {
-                        if (renderedObject.equals(layerModel.getRoot())) {
-                            for (int i = 0; i < layerModel.getChildCount(layerModel.getRoot()); ++i) {
-                                changeVisibility(layerModel.getChild(layerModel.getRoot(), i));
-                            }
-                        } else {
-                            changeVisibility(renderedObject);
-                        }
-                    }
-
-                    private void changeVisibility(final Object objectToChange) {
-                        if (objectToChange instanceof ServiceLayer) {
-                            ((ServiceLayer)objectToChange).setEnabled(!((ServiceLayer)objectToChange).isEnabled());
-                            layerModel.handleVisibility(tree.getSelectionPath());
-                        } else if (objectToChange instanceof LayerCollection) {
-                            ((LayerCollection)objectToChange).setEnabled(
-                                !((LayerCollection)objectToChange).isEnabled());
-                        }
-                    }
-                });
 
             if (lastAdapter != null) {
                 ret.removeMouseListener(lastAdapter);
@@ -1358,7 +1397,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         if (ret instanceof JLabel) {
                             final String text = ((JLabel)ret).getText();
                             ((JLabel)ret).setText("");
-                            log.error("setText " + text);
                             treeEditorTextField = new JTextField(text);
                             treeEditorTextField.addKeyListener(new KeyAdapter() {
 

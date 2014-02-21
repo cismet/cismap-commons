@@ -149,11 +149,27 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      */
     public synchronized void addLayerCollection(final LayerCollection layer, final int index) {
         layers.add(index, layer);
+        registerLayerFromLayerCollection(layer);
         fireTreeStructureChanged(
             this,
             new Object[] { root },
             null,
             null);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  lc  DOCUMENT ME!
+     */
+    private void registerLayerFromLayerCollection(final LayerCollection lc) {
+        for (final Object o : lc) {
+            if (o instanceof LayerCollection) {
+                registerLayerFromLayerCollection(lc);
+            } else if (o instanceof RetrievalServiceLayer) {
+                registerRetrievalServiceLayer((RetrievalServiceLayer)o);
+            }
+        }
     }
 
     /**
