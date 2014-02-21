@@ -15,6 +15,7 @@ import org.openide.util.Cancellable;
 
 import java.io.File;
 
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
@@ -85,6 +86,8 @@ public class BackgroundTaskDownload extends AbstractDownload implements Cancella
                         get();
                     } catch (InterruptedException ex) {
                         // do nothing, the download was cancelled
+                    } catch (CancellationException ex) {
+                        // do nothing, the download was cancelled
                     } catch (ExecutionException ex) {
                         error(ex);
                     } catch (Exception ex) {
@@ -110,11 +113,9 @@ public class BackgroundTaskDownload extends AbstractDownload implements Cancella
     @Override
     public boolean cancel() {
         boolean cancelled = true;
-        if (downloadFuture != null) {
-            cancelled = downloadFuture.cancel(true);
-        }
-        if (worker != null) {
-            cancelled = worker.cancel(true);
+        status = null;
+        if ((downloadFuture != null) && (worker != null)) {
+            cancelled = worker.cancel(true) || downloadFuture.cancel(true);
         }
         if (cancelled) {
             status = State.ABORTED;
@@ -139,7 +140,10 @@ public class BackgroundTaskDownload extends AbstractDownload implements Cancella
          * File determined by BackgroundTaskDownload, due to the provided filename. Every exception thrown in this
          * method, will later on be caught by the BackgroundTaskDownload and shown in the DownloadManager.
          *
-         * @param   fileToSaveTo  A File which was determined in
+         * <p>Note: Do not forget to close the system resources e.g. FileOutputStream. This can be done with a
+         * try-finally block.</p>
+         *
+         * @param   fileToSaveTo  A File which was determined in BackgroundTaskDownload
          *
          * @throws  Exception  the Exceptions will be caught by BackgroundTaskDownload
          */
