@@ -32,8 +32,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     //~ Static fields/initializers ---------------------------------------------
 
     // caches the last feature properties
-    private static int lastFeatureId = -1;
-    private static LinkedHashMap<String, Object> lastFeatureContainer = null;
+    private static final Object sync = new Object();
 
     //~ Instance fields --------------------------------------------------------
 
@@ -66,29 +65,39 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
 
     @Override
     public HashMap getProperties() {
-        final LinkedHashMap<String, Object> container = new LinkedHashMap<String, Object>();
+        LinkedHashMap<String, Object> container = null;
+        final int id = getId();
 
         if (shapeInfo.getFc() == null) {
             try {
-                if ((lastFeatureId == getId()) && (lastFeatureContainer != null)) {
-                    return lastFeatureContainer;
+                container = shapeInfo.getPropertiesFromCache(id);
+
+                if (container != null) {
+                    return container;
+                } else {
+                    container = new LinkedHashMap<String, Object>();
                 }
 
-                final org.deegree.model.feature.Feature degreeFeature = shapeInfo.getFile().getFeatureByRecNo(getId());
+                org.deegree.model.feature.Feature degreeFeature = null;
+                synchronized (sync) {
+                    // getFeatureByRecNo is not threadsafe
+                    degreeFeature = shapeInfo.getFile().getFeatureByRecNo(id);
+                }
                 final FeatureProperty[] featureProperties = degreeFeature.getProperties();
 
                 for (final FeatureProperty fp : featureProperties) {
                     container.put(fp.getName().getAsString(), fp.getValue());
                 }
 
-                lastFeatureId = getId();
-                lastFeatureContainer = container;
+                shapeInfo.addPropertiesToCache(id, container);
             } catch (final Exception e) {
                 logger.error("Cannot read properties from file.", e);
             }
         } else {
+            container = new LinkedHashMap<String, Object>();
+
             try {
-                final org.deegree.model.feature.Feature degreeFeature = shapeInfo.getFc().getFeature(getId());
+                final org.deegree.model.feature.Feature degreeFeature = shapeInfo.getFc().getFeature(id);
                 final FeatureProperty[] featureProperties = degreeFeature.getProperties();
 
                 for (final FeatureProperty fp : featureProperties) {
@@ -129,7 +138,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public Geometry getGeometry() {
         Geometry g = null;
-
+        logger.warn("geometry id: " + getId());
         if (shapeInfo.getFc() == null) {
             try {
                 g = JTSAdapter.export(shapeInfo.getFile().getGeometryByRecNo(getId()));
