@@ -17,12 +17,21 @@ import net.sf.jasperreports.engine.util.JRLoader;
 
 import org.openide.util.Cancellable;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 
 /**
- * DOCUMENT ME!
+ * JasperReportDownload is a Download which can be immediately added to the DownloadManager and allows it to create the
+ * needed parameters and datasource afterwards. This is the advantage over {@link JasperDownload}, as the
+ * DownloadManager opens immediately. The parameters and datasource are created via the strategy pattern, which is
+ * realized with the two interfaces JasperReportParametersGenerator and JasperReportDataSourceGenerator. A concrete
+ * class of these interfaces contains the knowledge of creating the parameters or the datasource. These concrete classes
+ * are run in the run()-method of JasperReportDownload and therefor create the parameters or datasource after the
+ * download itself has been added to the download manager.
+ *
+ * <p>Note: the creation of the parameters and the datasource will not run in the EDT.</p>
  *
  * @author   DOCUMENT ME!
  * @version  $Revision$, $Date$
@@ -34,57 +43,29 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
     private JasperPrint print;
     private String reportResourceName;
     private Map parameters;
-    private JasperDownloadParametersGenerator parametersGenerator;
+    private JasperReportParametersGenerator parametersGenerator;
     private JRDataSource dataSource;
-    private JasperDownloadDataSourceGenerator dataSourceGenerator;
+    private JasperReportDataSourceGenerator dataSourceGenerator;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new JasperDownload object.
-     *
-     * @param  reportResourceName  report DOCUMENT ME!
-     * @param  parameters          DOCUMENT ME!
-     * @param  dataSource          DOCUMENT ME!
-     * @param  directory           DOCUMENT ME!
-     * @param  title               DOCUMENT ME!
-     * @param  filename            DOCUMENT ME!
-     */
-    public JasperReportDownload(final String reportResourceName,
-            final Map parameters,
-            final JRDataSource dataSource,
-            final String directory,
-            final String title,
-            final String filename) {
-        this.reportResourceName = reportResourceName;
-        this.parameters = parameters;
-        this.dataSource = dataSource;
-        this.directory = directory;
-        this.title = title;
-
-        status = State.WAITING;
-        determineDestinationFile(filename, ".pdf");
-    }
-
-    /**
-     * Creates a new AnotherJasperDownload object.
+     * Creates a new AnotherJasperDownload object. This can be used for Reports without parameters.
      *
      * @param  reportResourceName   report DOCUMENT ME!
-     * @param  parametersGenerator  DOCUMENT ME!
-     * @param  dataSource           DOCUMENT ME!
+     * @param  dataSourceGenerator  DOCUMENT ME!
      * @param  directory            DOCUMENT ME!
      * @param  title                DOCUMENT ME!
      * @param  filename             DOCUMENT ME!
      */
     public JasperReportDownload(final String reportResourceName,
-            final JasperDownloadParametersGenerator parametersGenerator,
-            final JRDataSource dataSource,
+            final JasperReportDataSourceGenerator dataSourceGenerator,
             final String directory,
             final String title,
             final String filename) {
         this.reportResourceName = reportResourceName;
-        this.parametersGenerator = parametersGenerator;
-        this.dataSource = dataSource;
+        this.parameters = new HashMap();
+        this.dataSourceGenerator = dataSourceGenerator;
         this.directory = directory;
         this.title = title;
 
@@ -93,7 +74,8 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
     }
 
     /**
-     * Creates a new AnotherJasperDownload object.
+     * Creates a new AnotherJasperDownload object. Sometimes it is easier/better to generate the parameters before the
+     * actual download. E.g. fetching user input from the GUI.
      *
      * @param  reportResourceName   report DOCUMENT ME!
      * @param  parameters           DOCUMENT ME!
@@ -104,7 +86,7 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
      */
     public JasperReportDownload(final String reportResourceName,
             final Map parameters,
-            final JasperDownloadDataSourceGenerator dataSourceGenerator,
+            final JasperReportDataSourceGenerator dataSourceGenerator,
             final String directory,
             final String title,
             final String filename) {
@@ -129,8 +111,8 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
      * @param  filename             DOCUMENT ME!
      */
     public JasperReportDownload(final String reportResourceName,
-            final JasperDownloadParametersGenerator parametersGenerator,
-            final JasperDownloadDataSourceGenerator dataSourceGenerator,
+            final JasperReportParametersGenerator parametersGenerator,
+            final JasperReportDataSourceGenerator dataSourceGenerator,
             final String directory,
             final String title,
             final String filename) {
@@ -155,6 +137,7 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
         status = State.RUNNING;
         stateChanged();
 
+        // if the paramters does not exists create them with the help of a concrete implementation of
         if (parameters == null) {
             parameters = parametersGenerator.generateParamters();
         }
@@ -212,5 +195,43 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
         if (fileToSaveTo.exists() && fileToSaveTo.isFile()) {
             fileToSaveTo.delete();
         }
+    }
+
+    //~ Inner Interfaces -------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public interface JasperReportParametersGenerator {
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * This method should contain the logic on how to create the parameters for a JasperReport. The result of this
+         * method can be used to create a JasperPrint in JasperReportDownload.
+         *
+         * @return  a parameters map for a JasperReport
+         */
+        Map generateParamters();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public interface JasperReportDataSourceGenerator {
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * This method should contain the logic on how to create the datasource for a JasperReport. The result of this
+         * method can be used to create a JasperPrint in JasperReportDownload.
+         *
+         * @return  a JRDataSource for a JasperReport
+         */
+        JRDataSource generateDataSource();
     }
 }
