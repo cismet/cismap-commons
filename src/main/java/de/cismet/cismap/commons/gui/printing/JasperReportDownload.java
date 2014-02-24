@@ -24,16 +24,18 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 
 /**
  * JasperReportDownload is a Download which can be immediately added to the DownloadManager and allows it to create the
- * needed parameters and datasource afterwards. This is the advantage over {@link JasperDownload}, as the
- * DownloadManager opens immediately. The parameters and datasource are created via the strategy pattern, which is
+ * needed datasource and parameters afterwards. This is the advantage over {@link JasperDownload}, as the
+ * DownloadManager opens immediately. The datasource and parameters are created via the strategy pattern, which is
  * realized with the two interfaces JasperReportParametersGenerator and JasperReportDataSourceGenerator. A concrete
- * class of these interfaces contains the knowledge of creating the parameters or the datasource. These concrete classes
- * are run in the run()-method of JasperReportDownload and therefor create the parameters or datasource after the
+ * class of these interfaces contains the knowledge of creating the datasource or the parameters. These concrete classes
+ * are run in the run()-method of JasperReportDownload and therefor create the datasource or parameters after the
  * download itself has been added to the download manager. Another point is that the creation of the JasperPrint is also
  * time-consuming, with this implementation it has to be created in the download, this was not necessary in
  * {@link JasperDownload}.
  *
- * <p>Note: the creation of the parameters and the datasource will not run in the EDT.</p>
+ * <p>Note 1: the creation of the datasource and the parameters will not run in the EDT.</p>
+ *
+ * <p>Note 2: the datasource will be created before the parameters</p>
  *
  * @author   DOCUMENT ME!
  * @version  $Revision$, $Date$
@@ -139,14 +141,14 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
         status = State.RUNNING;
         stateChanged();
 
-        // if the paramters does not exist create them
-        if (parameters == null) {
-            parameters = parametersGenerator.generateParamters();
-        }
-
         // if the dataSource does not exist create it
         if (dataSource == null) {
             dataSource = dataSourceGenerator.generateDataSource();
+        }
+
+        // if the paramters does not exist create them
+        if (parameters == null) {
+            parameters = parametersGenerator.generateParamters();
         }
 
         try {
