@@ -141,14 +141,19 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
         status = State.RUNNING;
         stateChanged();
 
-        // if the dataSource does not exist create it
-        if (dataSource == null) {
-            dataSource = dataSourceGenerator.generateDataSource();
-        }
+        // anything could go wrong here
+        try {
+            // if the dataSource does not exist create it
+            if (dataSource == null) {
+                dataSource = dataSourceGenerator.generateDataSource();
+            }
 
-        // if the paramters does not exist create them
-        if (parameters == null) {
-            parameters = parametersGenerator.generateParamters();
+            // if the paramters does not exist create them
+            if (parameters == null) {
+                parameters = parametersGenerator.generateParamters();
+            }
+        } catch (Exception ex) {
+            error(ex);
         }
 
         try {
