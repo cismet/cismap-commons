@@ -29,7 +29,9 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
  * realized with the two interfaces JasperReportParametersGenerator and JasperReportDataSourceGenerator. A concrete
  * class of these interfaces contains the knowledge of creating the parameters or the datasource. These concrete classes
  * are run in the run()-method of JasperReportDownload and therefor create the parameters or datasource after the
- * download itself has been added to the download manager.
+ * download itself has been added to the download manager. Another point is that the creation of the JasperPrint is also
+ * time-consuming, with this implementation it has to be created in the download, this was not necessary in
+ * {@link JasperDownload}.
  *
  * <p>Note: the creation of the parameters and the datasource will not run in the EDT.</p>
  *
@@ -137,11 +139,12 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
         status = State.RUNNING;
         stateChanged();
 
-        // if the paramters does not exists create them with the help of a concrete implementation of
+        // if the paramters does not exist create them
         if (parameters == null) {
             parameters = parametersGenerator.generateParamters();
         }
 
+        // if the dataSource does not exist create it
         if (dataSource == null) {
             dataSource = dataSourceGenerator.generateDataSource();
         }
