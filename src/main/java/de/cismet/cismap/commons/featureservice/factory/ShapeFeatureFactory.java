@@ -75,7 +75,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     private boolean noGeometryRecognised = false;
     private boolean errorInGeometryFound = false;
     private Crs shapeCrs = null;
-    private int shapeSrid = 0;
     private Crs crs = CismapBroker.getInstance().getSrs();
     private org.deegree.model.spatialschema.Envelope envelope;
     private FeatureCollection fc = null;
@@ -132,7 +131,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         this.initialised = shpff.initialised;
         this.crs = shpff.crs;
         this.shapeCrs = shpff.shapeCrs;
-        this.shapeSrid = shpff.shapeSrid;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -251,7 +249,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     protected synchronized void parseShapeFile(final SwingWorker workerThread) throws Exception {
         if (shapeCrs == null) {
             shapeCrs = CismapBroker.getInstance().getSrs();
-            shapeSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
+            featureSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
         }
         filename = new File(documentURI).getName();
 
@@ -522,7 +520,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             polyCords[4] = new Coordinate(envelope.getMin().getX(), envelope.getMin().getY());
             // The GeometryFactory must use the same srid as the elements in the deegreeFeaturesTree
             final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                    shapeSrid);
+                    featureSrid);
             final Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
             return boundingPolygon.getEnvelope();
