@@ -42,6 +42,9 @@ import org.deegree.filter.FilterEvaluationException;
 import org.deegree.filter.XPathEvaluator;
 import org.deegree.filter.expression.ValueReference;
 import org.deegree.geometry.Envelope;
+import org.deegree.geometry.standard.AbstractDefaultGeometry;
+import org.deegree.geometry.standard.primitive.DefaultPoint;
+import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.style.styling.LineStyling;
 import org.deegree.style.styling.PointStyling;
 import org.deegree.style.styling.PolygonStyling;
@@ -111,6 +114,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     protected static final String GEOMETRIE = "geo_field";
     protected static final String OBJECT_ID = "object_id";
     protected static Map<BufferedImage, BufferedImage> selectedImage = new HashMap<BufferedImage, BufferedImage>();
+    private static AbstractDefaultGeometry defaultGeom = new DefaultPoint(null, null, null, new double[] { 0.0, 0.0 });
 
     //~ Instance fields --------------------------------------------------------
 
@@ -1395,15 +1399,15 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             } else {
                 key = qname.getLocalPart();
             }
-            if (DefaultFeatureServiceFeature.this.container.containsKey(key)) {
-                value = DefaultFeatureServiceFeature.this.container.get(key);
+            if (DefaultFeatureServiceFeature.this.getProperties().containsKey(key)) {
+                value = DefaultFeatureServiceFeature.this.getProperty(key);
                 if (value == null) {
                     deegreeProperties.add(null);
                 } else {
                     deegreeProperties.add(new DeegreeProperty(qname, value));
                 }
-            } else if (DefaultFeatureServiceFeature.this.container.containsKey("app:" + qname.getLocalPart())) {
-                value = DefaultFeatureServiceFeature.this.container.get("app:" + qname.getLocalPart());
+            } else if (DefaultFeatureServiceFeature.this.getProperties().containsKey("app:" + qname.getLocalPart())) {
+                value = DefaultFeatureServiceFeature.this.getProperty("app:" + qname.getLocalPart());
                 if (value == null) {
                     deegreeProperties.add(null);
                 } else {
@@ -1605,270 +1609,191 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                 return new org.deegree.commons.tom.primitive.PrimitiveValue((Long)value,
                         new org.deegree.commons.tom.primitive.PrimitiveType(
                             org.deegree.commons.tom.primitive.BaseType.INTEGER));
+            } else if (value instanceof org.deegree.geometry.Geometry) {
+                return ((org.deegree.geometry.Geometry)value);
+            } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
+                try {
+                    final org.deegree.model.spatialschema.Geometry geo = ((org.deegree.model.spatialschema.Geometry)
+                            value);
+                    final Geometry g = JTSAdapter.export(geo);
+                    if (geo.getCoordinateSystem() != null) {
+                        final int srid = CrsTransformer.extractSridFromCrs(geo.getCoordinateSystem().getIdentifier());
+                        g.setSRID(srid);
+                    }
+                    return defaultGeom.createFromJTS(g, null);
+                } catch (final Exception e) {
+                    logger.error("Cannot create deegree3 from deegree3 geometry.", e);
+                    return new org.deegree.commons.tom.primitive.PrimitiveValue("null");
+                }
             } else if (value instanceof Geometry) {
-                return new org.deegree.geometry.Geometry() {
-
-                        @Override
-                        public org.deegree.geometry.Geometry.GeometryType getGeometryType() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public void setId(final String string) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public void setType(final org.deegree.commons.tom.gml.GMLObjectType gmlot) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public org.deegree.geometry.precision.PrecisionModel getPrecision() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public void setPrecision(final org.deegree.geometry.precision.PrecisionModel pm) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public org.deegree.cs.coordinatesystems.ICRS getCoordinateSystem() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public void setCoordinateSystem(final org.deegree.cs.coordinatesystems.ICRS icrs) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public void setProperties(final List<Property> list) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean isSFSCompliant() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public int getCoordinateDimension() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean contains(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean crosses(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean equals(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean intersects(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean isBeyond(final org.deegree.geometry.Geometry gmtr,
-                                final org.deegree.commons.uom.Measure msr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean isDisjoint(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean isWithin(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean isWithinDistance(final org.deegree.geometry.Geometry gmtr,
-                                final org.deegree.commons.uom.Measure msr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean overlaps(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public boolean touches(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public org.deegree.geometry.Geometry getBuffer(final org.deegree.commons.uom.Measure msr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public org.deegree.geometry.primitive.Point getCentroid() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public Envelope getEnvelope() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public org.deegree.geometry.Geometry getDifference(
-                                final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public org.deegree.geometry.Geometry getIntersection(
-                                final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public org.deegree.geometry.Geometry getUnion(final org.deegree.geometry.Geometry gmtr) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public org.deegree.geometry.Geometry getConvexHull() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public org.deegree.commons.uom.Measure getDistance(final org.deegree.geometry.Geometry gmtr,
-                                final org.deegree.commons.uom.Unit unit) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public String getId() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public org.deegree.commons.tom.gml.GMLObjectType getType() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public List<Property> getProperties() {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-
-                        @Override
-                        public List<Property> getProperties(final QName qname) {
-                            throw new UnsupportedOperationException("Not supported yet."); // To change body of
-                            // generated methods,
-                            // choose Tools |
-                            // Templates.
-                        }
-                    };
+                return defaultGeom.createFromJTS((Geometry)value, null);
+//                return new org.deegree.geometry.Geometry() {
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry.GeometryType getGeometryType() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public void setId(final String string) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public void setType(final org.deegree.commons.tom.gml.GMLObjectType gmlot) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.precision.PrecisionModel getPrecision() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public void setPrecision(final org.deegree.geometry.precision.PrecisionModel pm) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.cs.coordinatesystems.ICRS getCoordinateSystem() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public void setCoordinateSystem(final org.deegree.cs.coordinatesystems.ICRS icrs) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public void setProperties(final List<Property> list) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean isSFSCompliant() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public int getCoordinateDimension() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean contains(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean crosses(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean equals(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean intersects(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean isBeyond(final org.deegree.geometry.Geometry gmtr,
+//                                final org.deegree.commons.uom.Measure msr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean isDisjoint(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean isWithin(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean isWithinDistance(final org.deegree.geometry.Geometry gmtr,
+//                                final org.deegree.commons.uom.Measure msr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean overlaps(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean touches(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry getBuffer(final org.deegree.commons.uom.Measure msr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.primitive.Point getCentroid() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public Envelope getEnvelope() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry getDifference(
+//                                final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry getIntersection(
+//                                final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry getUnion(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry getConvexHull() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.commons.uom.Measure getDistance(final org.deegree.geometry.Geometry gmtr,
+//                                final org.deegree.commons.uom.Unit unit) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public String getId() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.commons.tom.gml.GMLObjectType getType() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public List<Property> getProperties() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public List<Property> getProperties(final QName qname) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//                    };
             } else {
                 return new org.deegree.commons.tom.primitive.PrimitiveValue("null");
             }

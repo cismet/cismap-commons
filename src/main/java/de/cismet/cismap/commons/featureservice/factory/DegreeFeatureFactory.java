@@ -55,6 +55,7 @@ public abstract class DegreeFeatureFactory<FT extends FeatureServiceFeature, QT>
     protected DegreeFeatureFactory(final DegreeFeatureFactory dff) {
         super(dff);
         this.geometryIndex = dff.geometryIndex;
+        this.featureSrid = dff.featureSrid;
     }
 
     //~ Methods ----------------------------------------------------------------
