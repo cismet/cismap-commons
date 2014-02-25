@@ -42,6 +42,9 @@ import org.deegree.filter.FilterEvaluationException;
 import org.deegree.filter.XPathEvaluator;
 import org.deegree.filter.expression.ValueReference;
 import org.deegree.geometry.Envelope;
+import org.deegree.geometry.standard.AbstractDefaultGeometry;
+import org.deegree.geometry.standard.primitive.DefaultPoint;
+import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.style.styling.LineStyling;
 import org.deegree.style.styling.PointStyling;
 import org.deegree.style.styling.PolygonStyling;
@@ -108,6 +111,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     protected static final String GEOMETRIE = "geo_field";
     protected static final String OBJECT_ID = "object_id";
     protected static Map<BufferedImage, BufferedImage> selectedImage = new HashMap<BufferedImage, BufferedImage>();
+    private static AbstractDefaultGeometry defaultGeom = new DefaultPoint(null, null, null, new double[] { 0.0, 0.0 });
 
     //~ Instance fields --------------------------------------------------------
 
