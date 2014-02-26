@@ -1054,9 +1054,20 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             }
         }
         pfeature.removeAllChildren();
-        pfeature.sldStyledImage.clear();
         pfeature.sldStyledPolygon.clear();
+
+        for (final PImage image : pfeature.sldStyledImage) {
+            if (image instanceof PSticky) {
+                pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+            }
+        }
+        pfeature.sldStyledImage.clear();
+
+        for (final PFeature.PTextWithDisplacement text : pfeature.sldStyledText) {
+            pfeature.getMappingComponent().removeStickyNode(text);
+        }
         pfeature.sldStyledText.clear();
+
         final Geometry geom = pfeature.getFeature().getGeometry();
         int polygonNr = -1;
         int textNr = 0;
@@ -1117,7 +1128,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     wtst,
                     intPoint.getX(),
                     intPoint.getY());
-                pfeature.getMappingComponent().rescaleStickyNode(text);
+                rescaleStickyNode(pfeature, text);
             } else if ((styling.first instanceof PointStyling)
                         && ((geom instanceof Point) || (geom instanceof MultiPoint))) {
                 PImage image;
@@ -1186,8 +1197,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     pfeature.getMappingComponent().getCamera(),
                     true);
                 if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
-                    pfeature.getMappingComponent().rescaleStickyNode((PSticky)image);
-                    pfeature.getMappingComponent().rescaleStickyNode((PSticky)selectedImage);
+                    rescaleStickyNode(pfeature, (PSticky)image);
+                    rescaleStickyNode(pfeature, (PSticky)selectedImage);
                 }
             }
         }
@@ -1205,6 +1216,17 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
          * pfeature.sldStyled.get(i).getPathReference().reset();
          * pfeature.sldStyledPolygon.get(i).setPathTo(pfeature.getPathReference());
          * applyStyling(pfeature.sldStyledPolygon.get(i), stylings.get(i + 1).first);}*/
+    }
+
+    /**
+     * does not have the limitations from the rescaleStickyNode(PSticky) method of the MappingsComponent.
+     *
+     * @param  pfeature  DOCUMENT ME!
+     * @param  sticky    DOCUMENT ME!
+     */
+    private void rescaleStickyNode(final PFeature pfeature, final PSticky sticky) {
+        final double s = pfeature.getMappingComponent().getCamera().getViewScale();
+        sticky.setScale(1 / s);
     }
 
     /**
