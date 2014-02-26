@@ -681,6 +681,17 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     }
 
     /**
+     * does not have the limitations from the rescaleStickyNode(PSticky) method of the MappingsComponent.
+     *
+     * @param  pfeature  DOCUMENT ME!
+     * @param  sticky    DOCUMENT ME!
+     */
+    private void rescaleStickyNode(final PFeature pfeature, final PSticky sticky) {
+        final double s = pfeature.getMappingComponent().getCamera().getViewScale();
+        sticky.setScale(1 / s);
+    }
+
+    /**
      * DOCUMENT ME!
      *
      * @param  primaryAnnotationPaint  DOCUMENT ME!
