@@ -415,6 +415,11 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      */
     public synchronized void setDocumentURI(final URI documentURI) {
         this.documentURI = documentURI;
+        try {
+            parseShapeFile(null);
+        } catch (Exception e) {
+            logger.error("Errro while parsing shape file", e);
+        }
     }
 
     @Override
