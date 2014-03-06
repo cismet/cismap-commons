@@ -975,7 +975,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
 
         if ((this.getFeatureServiceAttributes() != null) && (this.getFeatureServiceAttributes().size() > 0)) {
             final Element attrib = new Element("Attributes");                    // NOI18N
-            for (final FeatureServiceAttribute e : getFeatureServiceAttributes().values()) {
+            for (final String key : getOrderedFeatureServiceAttributes()) {
+                final FeatureServiceAttribute e = getFeatureServiceAttributes().get(key);
                 attrib.addContent(e.toElement());
             }
             element.addContent(attrib);
