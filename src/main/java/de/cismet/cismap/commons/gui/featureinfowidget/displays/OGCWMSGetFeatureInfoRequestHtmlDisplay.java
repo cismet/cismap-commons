@@ -428,18 +428,21 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
                         }
                     });
 
-                URL baseUrl = null;
+                final URL baseUrl;
+                final String parameter;
                 if (url.indexOf('?') != -1) {
                     baseUrl = new URL(url.substring(0, url.indexOf('?')));
+                    parameter = url.substring(url.indexOf('?') + 1, url.length());
                 } else {
                     baseUrl = new URL(url);
+                    parameter = "";
                 }
                 if (isCancelled()) {
                     return null;
                 }
                 final BufferedInputStream in = new BufferedInputStream(WebAccessManager.getInstance().doRequest(
                             baseUrl,
-                            url,
+                            parameter,
                             ACCESS_METHODS.GET_REQUEST));
                 if (isCancelled()) {
                     return null;
