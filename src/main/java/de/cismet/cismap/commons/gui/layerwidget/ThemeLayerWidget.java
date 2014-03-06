@@ -624,7 +624,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 }
             }
 
-            final ZoomToFeaturesWorker worker = new ZoomToFeaturesWorker(features);
+            final ZoomToFeaturesWorker worker = new ZoomToFeaturesWorker(features, 10);
             worker.execute();
         }
     }
@@ -654,7 +654,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         @Override
         public void actionPerformed(final ActionEvent e) {
             final TreePath[] tps = tree.getSelectionPaths();
-            final ZoomToLayerWorker worker = new ZoomToLayerWorker(tps);
+            final ZoomToLayerWorker worker = new ZoomToLayerWorker(tps, 10);
             worker.execute();
         }
     }

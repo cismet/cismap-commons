@@ -52,6 +52,8 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
 
     Logger LOG = Logger.getLogger(ZoomToLayerWorker.class);
     private TreePath[] tps;
+    /** buffer in percent.* */
+    private int buffer = 0;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -61,7 +63,18 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
      * @param  tps  DOCUMENT ME!
      */
     public ZoomToLayerWorker(final TreePath[] tps) {
+        this(tps, 0);
+    }
+
+    /**
+     * Creates a new ZoomToLayerWorker object.
+     *
+     * @param  tps     DOCUMENT ME!
+     * @param  buffer  DOCUMENT ME!
+     */
+    public ZoomToLayerWorker(final TreePath[] tps, final int buffer) {
         final List<TreePath> tpl = new ArrayList<TreePath>();
+        this.buffer = buffer;
 
         for (final TreePath tmp : tps) {
             final Object layer = tmp.getLastPathComponent();
@@ -209,10 +222,15 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
     protected void done() {
         try {
             final Geometry geom = get();
-            CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(new XBoundingBox(geom));
+            final XBoundingBox boundingBox = new XBoundingBox(geom);
+
+            if (buffer != 0) {
+                boundingBox.increase(buffer);
+            }
+
+            CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(boundingBox);
         } catch (Exception e) {
             LOG.error("Error while zooming to extend", e);
         }
     }
 }
-;
