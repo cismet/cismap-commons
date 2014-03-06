@@ -17,11 +17,14 @@ import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -40,6 +43,7 @@ import java.util.Map;
 
 import javax.swing.DropMode;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -49,6 +53,7 @@ import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.event.CellEditorListener;
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeCellEditor;
@@ -61,6 +66,7 @@ import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -69,7 +75,10 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 
+import de.cismet.tools.CismetThreadPool;
+
 import de.cismet.tools.gui.DefaultPopupMenuListener;
+import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 
@@ -952,7 +961,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.LabelMenuItem.pmenuItem.text"),
                 NODE
-                        | MULTI,
+                        | MULTI
+                        | FEATURE_SERVICE,
                 0);
             newSection = true;
         }
@@ -981,7 +991,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.StartProcessingModeMenuItem.pmenuItem.text"),
                 NODE
-                        | MULTI,
+                        | MULTI
+                        | FEATURE_SERVICE,
                 0);
         }
 
@@ -1109,8 +1120,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             super(NbBundle.getMessage(
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.OptionsMenuItem.pmenuItem.text"),
-                NODE,
-                0);
+                NODE
+                        | FEATURE_SERVICE);
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1219,7 +1230,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         protected Color textBackground;
         protected Boolean drawsFocusBorderAroundIcon;
         protected Font fontValue;
-        Map<Object, ActiveLayerTreeCellRenderer> renderer = new HashMap<Object, ActiveLayerTreeCellRenderer>();
 
         //~ Constructors -------------------------------------------------------
 
@@ -1283,10 +1293,16 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 pan.setBackground(textBackground);
             }
 
+            if ((value instanceof ShapeFileFeatureService) && ((ShapeFileFeatureService)value).isFileNotFound()) {
+                lab.setForeground(Color.GRAY);
+            }
+
             leafRenderer.setSelected(isValueSelected(value));
 
             pan.add(leafRenderer);
             pan.add(lab);
+            pan.doLayout();
+            pan.repaint();
             return pan;
         }
 
@@ -1403,14 +1419,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                                     @Override
                                     public void keyTyped(final KeyEvent e) {
                                         if (e.getKeyChar() == '\n') {
-                                            stopCellEditing();
-                                            ((JLabel)ret).setText(getCellEditorValue().toString());
-                                            ((JLabel)ret).setPreferredSize(treeEditorTextField.getPreferredSize());
-                                            ((JLabel)ret).setMinimumSize(treeEditorTextField.getMinimumSize());
-                                            ((JLabel)ret).setMaximumSize(treeEditorTextField.getMaximumSize());
-                                            pan.remove(treeEditorTextField);
-                                            pan.repaint();
-                                            pan.updateUI();
+                                            tree.stopEditing();
+                                            // workaround to avoid visualisation problems without this workaround, the
+                                            // bounds of the row of the edited path are wrong
+                                            tree.startEditingAtPath(tree.getPathForRow(row));
+                                            tree.stopEditing();
                                         }
                                     }
                                 });

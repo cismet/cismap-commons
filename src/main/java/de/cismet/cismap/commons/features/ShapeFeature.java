@@ -138,14 +138,21 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public Geometry getGeometry() {
         Geometry g = null;
-        logger.warn("geometry id: " + getId());
         if (shapeInfo.getFc() == null) {
+            g = shapeInfo.getGeometryFromCache(getId());
+
+            if (g != null) {
+                return g;
+            }
+
             try {
                 g = JTSAdapter.export(shapeInfo.getFile().getGeometryByRecNo(getId()));
                 g.setSRID(shapeInfo.getSrid());
             } catch (final Exception e) {
                 logger.error("Cannot read geometry from shape file.", e);
             }
+
+            shapeInfo.addGeometryToCache(getId(), g);
         } else {
             try {
                 g = JTSAdapter.export(shapeInfo.getFc().getFeature(getId()).getDefaultGeometryPropertyValue());
