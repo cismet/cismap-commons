@@ -293,24 +293,7 @@ public class HeadlessMapProvider {
         this.printingResolution = printingResolution;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the featureResolutionFactor
-     */
-    public double getFeatureResolutionFactor() {
-        return featureResolutionFactor;
-    }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  featureResolutionFactor  the featureResolutionFactor to set
-     */
-    public void setFeatureResolutionFactor(final double featureResolutionFactor) {
-        this.featureResolutionFactor = featureResolutionFactor;
-    }    
-    
     /**
      * DOCUMENT ME!
      *
