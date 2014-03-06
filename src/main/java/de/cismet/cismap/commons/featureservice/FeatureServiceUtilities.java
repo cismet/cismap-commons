@@ -21,6 +21,7 @@ import org.jdom.output.XMLOutputter;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -249,5 +250,26 @@ public class FeatureServiceUtilities {
             }
         }
         return fsaMap;
+    }
+
+    /**
+     * Creates the ordered FeatureServiceAttributes list by parsing the children of the delivered JDOM-element.
+     *
+     * @param   describeFeatureXML  JDOM-element
+     *
+     * @return  list with the ordered FeatureServiceAttributes
+     */
+    public static List<String> getOrderedFeatureServiceAttributes(
+            final Element describeFeatureXML) {
+        final List<String> fsaList = new ArrayList(describeFeatureXML.getChildren().size());
+        for (final Element currentElement : (List<Element>)describeFeatureXML.getChildren()) {
+            try {
+                final FeatureServiceAttribute fsa = new FeatureServiceAttribute(currentElement);
+                fsaList.add(fsa.getName());
+            } catch (Exception ex) {
+                log.warn("An element could not be parsed as attribute: " + currentElement, ex); // NOI18N
+            }
+        }
+        return fsaList;
     }
 }

@@ -36,21 +36,27 @@ import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
@@ -80,7 +86,6 @@ import de.cismet.cismap.commons.tools.ExportTxtDownload;
 import de.cismet.commons.concurrency.CismetConcurrency;
 
 import de.cismet.tools.gui.StaticSwingTools;
-import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 
@@ -279,6 +284,8 @@ public class AttributeTable extends javax.swing.JPanel {
                 }
             });
 
+        table.setDefaultRenderer(Number.class, new NumberCellRenderer());
+
         fillPopupMenu();
         txtCurrentPage.setText("1");
         final Geometry g = ZoomToLayerWorker.getServiceBounds(featureService);
@@ -410,7 +417,10 @@ public class AttributeTable extends javax.swing.JPanel {
                         if (model == null) {
                             final Map<String, FeatureServiceAttribute> featureServiceAttributes =
                                 featureService.getFeatureServiceAttributes();
+                            final List<String> orderedFeatureServiceAttributes =
+                                featureService.getOrderedFeatureServiceAttributes();
                             model = new CustomTableModel(
+                                    orderedFeatureServiceAttributes,
                                     featureServiceAttributes,
                                     (List<FeatureServiceFeature>)featureList);
                             table.setModel(model);
@@ -1418,7 +1428,9 @@ public class AttributeTable extends javax.swing.JPanel {
         }
 
         if (mappingComponent != null) {
-            mappingComponent.gotoBoundingBoxWithHistory(new XBoundingBox(geo));
+            final XBoundingBox bbox = new XBoundingBox(geo);
+            bbox.increase(10);
+            mappingComponent.gotoBoundingBoxWithHistory(bbox);
         } else {
             LOG.error("MappingComponent is not set");
         }
@@ -1431,6 +1443,7 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     private void miStatistikActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miStatistikActionPerformed
         final int count = model.getRowCount();
+        final Double[] values = new Double[model.getRowCount()];
         double min = Double.MAX_VALUE;
         double max = Double.MIN_VALUE;
         double sum = 0;
@@ -1461,23 +1474,17 @@ public class AttributeTable extends javax.swing.JPanel {
                 }
 
                 sum += doubleVal;
+                values[i] = doubleVal;
             } else if (val == null) {
                 ++nullCount;
+                values[i] = null;
             }
         }
 
-        for (int i = 0; i < model.getRowCount(); ++i) {
-            Object val = model.getValueAt(i, popupColumn);
+        for (int i = 0; i < values.length; ++i) {
+            final Double val = values[i];
 
-            if (val instanceof String) {
-                try {
-                    val = Double.parseDouble((String)val);
-                } catch (NumberFormatException e) {
-                    // nothing to do
-                }
-            }
-
-            if (val instanceof Number) {
+            if (val != null) {
                 final double doubleVal = ((Number)val).doubleValue();
                 stdDeviation += Math.pow(doubleVal - mean, 2);
             }
@@ -1488,13 +1495,13 @@ public class AttributeTable extends javax.swing.JPanel {
         // see: http://en.wikipedia.org/wiki/Standard_deviation#Corrected_sample_standard_deviation
         stdDeviation = Math.sqrt(1.0 / (count - nullCount - 1) * stdDeviation);
 
-        lblCountVal.setText(toString(count));
-        lblMinVal.setText(toString(round(min, 6)));
-        lblMaxVal.setText(toString(round(max, 6)));
-        lblMeanVal.setText(toString(round(mean, 6)));
-        lblNullVal.setText(toString(nullCount));
-        lblStdDeviationVal.setText(toString(round(stdDeviation, 6)));
-        lblSumVal.setText(toString(round(sum, 6)));
+        lblCountVal.setText(String.valueOf(count));
+        lblMinVal.setText(trimNumberString(round(min, 6)));
+        lblMaxVal.setText(trimNumberString(round(max, 6)));
+        lblMeanVal.setText(trimNumberString(round(mean, 6)));
+        lblNullVal.setText(String.valueOf(nullCount));
+        lblStdDeviationVal.setText(trimNumberString(round(stdDeviation, 6)));
+        lblSumVal.setText(trimNumberString(round(sum, 6)));
 
         diaStatistic.setSize(400, 320);
         diaStatistic.setResizable(false);
@@ -1517,7 +1524,7 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void butExportActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butExportActionPerformed
-        diaExport.setSize(400, 120);
+        diaExport.setSize(400, 150);
         diaExport.setResizable(false);
         diaExport.setModal(true);
         StaticSwingTools.showDialog(diaExport);
@@ -1625,7 +1632,7 @@ public class AttributeTable extends javax.swing.JPanel {
      *
      * @return  DOCUMENT ME!
      */
-    private String toString(final double val) {
+    private String trimNumberString(final String val) {
         String res = String.valueOf(val);
 
         // remove all leading points and zeros
@@ -1637,7 +1644,7 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
-        return res;
+        return res.replace('.', ',');
     }
 
     /**
@@ -1648,9 +1655,9 @@ public class AttributeTable extends javax.swing.JPanel {
      *
      * @return  DOCUMENT ME!
      */
-    private double round(final double value, final int digits) {
+    private String round(final double value, final int digits) {
         final BigDecimal tmpValue = new BigDecimal(value);
-        return tmpValue.setScale(digits, RoundingMode.HALF_UP).doubleValue();
+        return tmpValue.setScale(digits, RoundingMode.HALF_UP).toPlainString();
     }
 
     /**
@@ -1666,24 +1673,17 @@ public class AttributeTable extends javax.swing.JPanel {
         for (int i = 0; i < columnCount; ++i) {
             int size = (int)fmetrics.getStringBounds(model.getColumnName(i), table.getGraphics()).getWidth();
 
-            if (model.getColumnClass(i).equals(String.class)) {
-                for (int row = 0; (row < model.getRowCount()) && (row < 100); ++row) {
-                    final int tmpSize = (int)fmetrics.getStringBounds(String.valueOf(model.getValueAt(row, i)),
-                                table.getGraphics()).getWidth();
+            for (int row = 0; (row < model.getRowCount()) && (row < 50); ++row) {
+                final int tmpSize = (int)fmetrics.getStringBounds(String.valueOf(model.getValueAt(row, i)),
+                            table.getGraphics()).getWidth();
 
-                    if ((tmpSize > size) && (tmpSize < MAX_COLUMN_SIZE)) {
-                        size = tmpSize;
-                    }
+                if ((tmpSize > size) && (tmpSize < MAX_COLUMN_SIZE)) {
+                    size = tmpSize;
                 }
             }
 
-            if (i == (columnCount - 1)) {
-                if ((totalSize + size + 30) < tableScrollPane.getSize().getWidth()) {
-                    size = (int)tableScrollPane.getSize().getWidth() - 30 - totalSize;
-                }
-            }
             totalSize += size;
-            columnModel.getColumn(i).setMinWidth(size + 30);
+            columnModel.getColumn(i).setPreferredWidth(size + 30);
         }
 
         table.setMinimumSize(new Dimension(totalSize + 20, 50));
@@ -1764,6 +1764,7 @@ public class AttributeTable extends javax.swing.JPanel {
         private String[] attributeAlias;
         private String[] attributeNames;
         private Map<String, FeatureServiceAttribute> featureServiceAttributes;
+        private List<String> orderedFeatureServiceAttributes;
         private List<FeatureServiceFeature> featureList;
         private List<TableModelListener> listener = new ArrayList<TableModelListener>();
 
@@ -1772,12 +1773,15 @@ public class AttributeTable extends javax.swing.JPanel {
         /**
          * Creates a new CustomTableModel object.
          *
-         * @param  featureServiceAttributes  DOCUMENT ME!
-         * @param  propertyContainer         DOCUMENT ME!
+         * @param  orderedFeatureServiceAttributes  DOCUMENT ME!
+         * @param  featureServiceAttributes         DOCUMENT ME!
+         * @param  propertyContainer                DOCUMENT ME!
          */
-        public CustomTableModel(final Map<String, FeatureServiceAttribute> featureServiceAttributes,
+        public CustomTableModel(final List<String> orderedFeatureServiceAttributes,
+                final Map<String, FeatureServiceAttribute> featureServiceAttributes,
                 final List<FeatureServiceFeature> propertyContainer) {
             this.featureServiceAttributes = featureServiceAttributes;
+            this.orderedFeatureServiceAttributes = orderedFeatureServiceAttributes;
             this.featureList = propertyContainer;
 
             fillHeaderArrays();
@@ -1791,12 +1795,16 @@ public class AttributeTable extends javax.swing.JPanel {
          */
         private void fillHeaderArrays() {
             int index = 0;
-            attributeNames = new String[featureServiceAttributes.size()];
-            attributeAlias = new String[featureServiceAttributes.size()];
+            attributeNames = new String[orderedFeatureServiceAttributes.size()];
+            attributeAlias = new String[orderedFeatureServiceAttributes.size()];
 
-            for (final String attributeName : featureServiceAttributes.keySet()) {
+            for (final String attributeName : orderedFeatureServiceAttributes) {
                 attributeNames[index] = attributeName;
-                attributeAlias[index++] = attributeName;
+                if (attributeName.startsWith("app:")) {
+                    attributeAlias[index++] = attributeName.substring(4);
+                } else {
+                    attributeAlias[index++] = attributeName;
+                }
             }
         }
 
@@ -2139,6 +2147,44 @@ public class AttributeTable extends javax.swing.JPanel {
         @Override
         public String toString() {
             return name;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class NumberCellRenderer extends DefaultTableCellRenderer {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private DecimalFormat format;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new NumberCellRenderer object.
+         */
+        public NumberCellRenderer() {
+            format = new DecimalFormat();
+            format.setGroupingUsed(false);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public Component getTableCellRendererComponent(final JTable table,
+                Object value,
+                final boolean isSelected,
+                final boolean hasFocus,
+                final int row,
+                final int column) {
+            if (value instanceof Number) {
+                value = format.format(value);
+            }
+
+            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         }
     }
 }

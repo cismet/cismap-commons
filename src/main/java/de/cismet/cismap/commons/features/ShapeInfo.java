@@ -14,6 +14,11 @@ package de.cismet.cismap.commons.features;
 import org.deegree.io.shpapi.ShapeFile;
 import org.deegree.model.feature.FeatureCollection;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Queue;
+
 /**
  * DOCUMENT ME!
  *
@@ -23,6 +28,9 @@ import org.deegree.model.feature.FeatureCollection;
 public class ShapeInfo {
 
     //~ Instance fields --------------------------------------------------------
+
+    // caches the last feature properties
+    private Cache cache = new Cache(2);
 
     private String typename;
     private ShapeFile file;
@@ -118,5 +126,122 @@ public class ShapeInfo {
      */
     public void setFc(final FeatureCollection fc) {
         this.fc = fc;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   id  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public synchronized LinkedHashMap<String, Object> getPropertiesFromCache(final int id) {
+        return cache.get(id);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  id         DOCUMENT ME!
+     * @param  container  DOCUMENT ME!
+     */
+    public synchronized void addPropertiesToCache(final int id, final LinkedHashMap<String, Object> container) {
+        cache.add(id, container);
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class Cache {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private Integer[] ids;
+        private int index = 0;
+        private Map<Integer, LinkedHashMap<String, Object>> dataMap;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new Cache object.
+         *
+         * @param  size  DOCUMENT ME!
+         */
+        public Cache(final int size) {
+            init(size);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  size  DOCUMENT ME!
+         */
+        private void init(final int size) {
+            ids = new Integer[size];
+            index = 0;
+            dataMap = new HashMap<Integer, LinkedHashMap<String, Object>>();
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  id    DOCUMENT ME!
+         * @param  data  DOCUMENT ME!
+         */
+        public void add(final int id, final LinkedHashMap<String, Object> data) {
+            if (ids[index] != null) {
+                dataMap.remove(ids[index]);
+            }
+
+            ids[index] = id;
+            increaseIndex();
+
+            dataMap.put(id, data);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   id  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public LinkedHashMap<String, Object> get(final int id) {
+            final LinkedHashMap<String, Object> res = dataMap.get(id);
+
+            if (res != null) {
+                while ((ids[index] == null) || (ids[index] != id)) {
+                    increaseIndex();
+                }
+                increaseIndex();
+            }
+
+            return res;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  size  DOCUMENT ME!
+         */
+        private void setSize(final int size) {
+            init(size);
+        }
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void increaseIndex() {
+            ++index;
+            if (index >= ids.length) {
+                index = 0;
+            }
+        }
     }
 }
