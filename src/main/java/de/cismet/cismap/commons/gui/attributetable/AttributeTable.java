@@ -1481,6 +1481,8 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
+        mean = sum / (count - nullCount);
+
         for (int i = 0; i < values.length; ++i) {
             final Double val = values[i];
 
@@ -1490,7 +1492,6 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
-        mean = sum / (count - nullCount);
         // formula: sqrt(1/(n-1) * sum((Xi - Y)^2)), n: value count, Xi: ith values, Y: mean
         // see: http://en.wikipedia.org/wiki/Standard_deviation#Corrected_sample_standard_deviation
         stdDeviation = Math.sqrt(1.0 / (count - nullCount - 1) * stdDeviation);
@@ -1635,15 +1636,21 @@ public class AttributeTable extends javax.swing.JPanel {
     private String trimNumberString(final String val) {
         String res = String.valueOf(val);
 
-        // remove all leading points and zeros
-        for (int i = res.length() - 1; i > 0; --i) {
-            if ((res.charAt(i) == '0') || (res.charAt(i) == '.')) {
-                res = res.substring(0, i);
-            } else {
-                break;
+        if (res.indexOf(".") != -1) {
+            // remove all leading points and zeros
+            for (int i = res.length() - 1; i > 0; --i) {
+                final char c = res.charAt(i);
+
+                if ((c == '0') || (c == '.')) {
+                    res = res.substring(0, i);
+                    if (c == '.') {
+                        break;
+                    }
+                } else {
+                    break;
+                }
             }
         }
-
         return res.replace('.', ',');
     }
 
@@ -1795,17 +1802,49 @@ public class AttributeTable extends javax.swing.JPanel {
          */
         private void fillHeaderArrays() {
             int index = 0;
-            attributeNames = new String[orderedFeatureServiceAttributes.size()];
-            attributeAlias = new String[orderedFeatureServiceAttributes.size()];
+            attributeNames = new String[attributeCount()];
+            attributeAlias = new String[attributeCount()];
 
             for (final String attributeName : orderedFeatureServiceAttributes) {
-                attributeNames[index] = attributeName;
-                if (attributeName.startsWith("app:")) {
-                    attributeAlias[index++] = attributeName.substring(4);
-                } else {
-                    attributeAlias[index++] = attributeName;
+                final FeatureServiceAttribute fsa = featureServiceAttributes.get(attributeName);
+
+                if ((fsa == null) || fsa.isVisible()) {
+                    attributeNames[index] = attributeName;
+                    String aliasName = attributeName;
+
+                    if ((fsa != null) && !fsa.getAlias().equals("")) {
+                        final String alias = fsa.getAlias();
+
+                        if (alias != null) {
+                            aliasName = alias;
+                        }
+                    }
+
+                    if (aliasName.startsWith("app:")) {
+                        attributeAlias[index++] = aliasName.substring(4);
+                    } else {
+                        attributeAlias[index++] = aliasName;
+                    }
                 }
             }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private int attributeCount() {
+            int count = 0;
+
+            for (final String key : featureServiceAttributes.keySet()) {
+                final FeatureServiceAttribute fsa = featureServiceAttributes.get(key);
+                if (fsa.isVisible()) {
+                    ++count;
+                }
+            }
+
+            return count;
         }
 
         /**
