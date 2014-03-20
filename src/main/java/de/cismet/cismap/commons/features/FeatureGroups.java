@@ -133,7 +133,7 @@ public final class FeatureGroups {
             for (final Feature f : featureCollection) {
                 final Geometry newGeom = f.getGeometry();
 
-                if (!hasLinestringOrPoints && ((newGeom instanceof LineString) || (newGeom instanceof Point))) {
+                if (!hasLinestringOrPoints && !((newGeom instanceof Polygon) || (newGeom instanceof MultiPolygon))) {
                     hasLinestringOrPoints = true;
                 }
 
