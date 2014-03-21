@@ -25,7 +25,12 @@ package de.cismet.cismap.actions;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 import org.openide.util.NbBundle;
@@ -116,10 +121,22 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
 
                 @Override
                 protected Void doInBackground() throws Exception {
-                    final PureNewFeature pnf = new PureNewFeature(f.getGeometry());
+                    final Geometry geom = f.getGeometry();
+                    final PureNewFeature pnf = new PureNewFeature(geom);
+
+                    if ((geom instanceof LineString) || (geom instanceof MultiLineString)) {
+                        pnf.setGeometryType(PureNewFeature.geomTypes.LINESTRING);
+                    } else if (geom instanceof Polygon) {
+                        pnf.setGeometryType(PureNewFeature.geomTypes.POLYGON);
+                    } else if (geom instanceof MultiPolygon) {
+                        pnf.setGeometryType(PureNewFeature.geomTypes.MULTIPOLYGON);
+                    } else if ((geom instanceof Point) || (geom instanceof MultiPoint)) {
+                        pnf.setGeometryType(PureNewFeature.geomTypes.POINT);
+                    } else {
+                        pnf.setGeometryType(PureNewFeature.geomTypes.UNKNOWN);
+                    }
 
                     pnf.setEditable(true);
-                    pnf.setGeometryType(PureNewFeature.geomTypes.UNKNOWN);
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(pnf);
                     return null;
                 }
