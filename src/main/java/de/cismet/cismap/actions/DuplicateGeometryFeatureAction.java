@@ -138,6 +138,7 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
 
                     pnf.setEditable(true);
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(pnf);
+                    CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(pnf);
                     return null;
                 }
 
