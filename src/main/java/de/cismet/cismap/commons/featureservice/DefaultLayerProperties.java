@@ -21,6 +21,7 @@ import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.XMLObjectFactory;
 import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.featureservice.style.Style;
+import java.util.Map;
 
 /**
  * Default implementation of the LayerProperties Interface.

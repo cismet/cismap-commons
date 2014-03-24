@@ -46,6 +46,7 @@ import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.layerwidget.LayerCombobox;
 import de.cismet.cismap.commons.gui.layerwidget.LayerFilter;
 import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerWidget;
+import de.cismet.cismap.commons.gui.layerwidget.ZoomToFeaturesWorker;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.GetFeatureInfoClickDetectionListener;
 import de.cismet.cismap.commons.interaction.GetFeatureInfoListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
@@ -53,6 +54,8 @@ import de.cismet.cismap.commons.interaction.events.GetFeatureInfoEvent;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.tools.gui.DefaultPopupMenuListener;
+import javax.swing.JPopupMenu;
 
 /**
  * DOCUMENT ME!
@@ -73,12 +76,16 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     private ThemeLayerWidget themeLayerWidget;
     private LayerFilterTreeModel model;
     private FeatureInfoWidget featureInfo;
+    private DefaultPopupMenuListener popupMenuListener;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree jtFeatures;
     private de.cismet.cismap.commons.gui.layerwidget.LayerCombobox layerCombobox1;
+    private javax.swing.JMenuItem miPrint;
+    private javax.swing.JMenuItem miZoom;
+    private javax.swing.JPopupMenu popupMenu;
     private javax.swing.JScrollPane sbAttributes;
     private org.jdesktop.swingx.JXTable tabAttributes;
     // End of variables declaration//GEN-END:variables
@@ -103,6 +110,8 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         this.mappingComonent = mappingComonent;
         this.themeLayerWidget = themeLayerWidget;
         initComponents();
+        popupMenuListener = new DefaultPopupMenuListener(popupMenu);
+        jtFeatures.addMouseListener(popupMenuListener);
         featureInfo = new FeatureInfoWidget();
         jtFeatures.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         model = new LayerFilterTreeModel(layerModel, mappingComonent);
@@ -160,6 +169,9 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
+        popupMenu = new javax.swing.JPopupMenu();
+        miPrint = new javax.swing.JMenuItem();
+        miZoom = new javax.swing.JMenuItem();
         layerCombobox1 = new LayerCombobox(layerModel, themeLayerWidget);
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -167,15 +179,25 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         sbAttributes = new javax.swing.JScrollPane();
         tabAttributes = new org.jdesktop.swingx.JXTable();
 
+        miPrint.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miPrint.text")); // NOI18N
+        miPrint.setEnabled(false);
+        popupMenu.add(miPrint);
+
+        miZoom.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miZoom.text")); // NOI18N
+        miZoom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miZoomActionPerformed(evt);
+            }
+        });
+        popupMenu.add(miZoom);
+
         setLayout(new java.awt.GridBagLayout());
 
         layerCombobox1.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    layerCombobox1ItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                layerCombobox1ItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -194,12 +216,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         add(jLabel1, gridBagConstraints);
 
         jtFeatures.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
-
-                @Override
-                public void valueChanged(final javax.swing.event.TreeSelectionEvent evt) {
-                    jtFeaturesValueChanged(evt);
-                }
-            });
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                jtFeaturesValueChanged(evt);
+            }
+        });
         jScrollPane1.setViewportView(jtFeatures);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -213,8 +233,13 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         add(jScrollPane1, gridBagConstraints);
 
         tabAttributes.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][] {},
-                new String[] {}));
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
         sbAttributes.setViewportView(tabAttributes);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -226,24 +251,24 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(sbAttributes, gridBagConstraints);
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_layerCombobox1ItemStateChanged
+    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_layerCombobox1ItemStateChanged
         model.setLayerFilter((LayerFilter)evt.getItem());
         expandAll(new TreePath(model.getRoot()));
-    }                                                                                 //GEN-LAST:event_layerCombobox1ItemStateChanged
+    }//GEN-LAST:event_layerCombobox1ItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) { //GEN-FIRST:event_jtFeaturesValueChanged
+    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_jtFeaturesValueChanged
         final TreePath tp = jtFeatures.getSelectionPath();
 
         if (tp == null) {
@@ -307,7 +332,32 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             enableAttributeTable(true);
             tabAttributes.setModel(new DefaultTableModel(0, 0));
         }
-    } //GEN-LAST:event_jtFeaturesValueChanged
+    }//GEN-LAST:event_jtFeaturesValueChanged
+
+    private void miZoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miZoomActionPerformed
+        TreePath[] tps = jtFeatures.getSelectionPaths();
+        List<Feature> featureList = new ArrayList<Feature>();
+        
+        for (TreePath tp : tps) {
+            Object o = tp.getLastPathComponent();
+            
+            if (o instanceof Feature) {
+                Feature fsf = (Feature)o;
+                featureList.add(fsf);
+            } else if (o instanceof MapService) {
+                for (int i = 0; i < model.getChildCount(o); ++i) {
+                    Object featureObject = model.getChild(o, i);
+                    
+                    if (featureObject instanceof Feature) {
+                        featureList.add((Feature)featureObject);
+                    }
+                }
+            }
+        }
+        
+        final ZoomToFeaturesWorker worker = new ZoomToFeaturesWorker(featureList.toArray(new Feature[featureList.size()]));
+        worker.execute();
+    }//GEN-LAST:event_miZoomActionPerformed
 
     /**
      * DOCUMENT ME!
