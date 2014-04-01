@@ -39,6 +39,7 @@ import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.XMLObjectFactory;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.CachingFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.style.Style;
@@ -466,7 +467,19 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                                 + featureRetrievalWorker.isCancelled() + ")"); // NOI18N
                 }
             }
-            this.cancel(featureRetrievalWorker);
+            final FeatureRetrievalWorker currentWorker = featureRetrievalWorker; 
+//            new Thread(new Runnable() {
+//
+//                @Override
+//                public void run() {
+                    synchronized (featureFactory) {
+                        if (featureFactory instanceof AbstractFeatureFactory) {
+                            ((AbstractFeatureFactory)featureFactory).waitUntilInterruptedIsAllowed();
+                        }
+                        cancel(currentWorker);
+                    }
+//                }
+//            }).start();
         }
 
         if (!this.isEnabled() && !this.isVisible()) {

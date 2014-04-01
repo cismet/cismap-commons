@@ -51,6 +51,7 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // protected boolean primaryAnnotationExpressionChanged = true;
     // protected boolean secondaryAnnotationExpressionChanged = true;
     protected Vector<FT> lastCreatedfeatureVector = new Vector();
+    private volatile boolean isInterruptedAllowed = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -75,6 +76,25 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
 
     //~ Methods ----------------------------------------------------------------
 
+    public synchronized void waitUntilInterruptedIsAllowed() {
+        try {
+            if (!isInterruptedAllowed) {
+                wait();
+            }
+        } catch (InterruptedException e) {
+            logger.error("should never happen");
+        }
+    }
+    
+    protected synchronized void setInterruptedAllowed() {
+        isInterruptedAllowed = true;
+        notifyAll();
+    }
+    
+    protected synchronized void setInterruptedNotAllowed() {
+        isInterruptedAllowed = false;
+    }
+    
     @Override
     public void setLayerProperties(final LayerProperties layerProperties) {
         final LayerProperties oldLayerProperties = this.layerProperties;

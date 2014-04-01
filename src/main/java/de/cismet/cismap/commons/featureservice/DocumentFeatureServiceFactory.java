@@ -20,6 +20,9 @@ import java.io.RandomAccessFile;
 
 import de.cismet.cismap.commons.exceptions.FileExtensionContentMissmatchException;
 import de.cismet.cismap.commons.exceptions.UnknownDocumentException;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.security.MessageDigest;
 
 /**
  * DOCUMENT ME!
@@ -106,7 +109,7 @@ public class DocumentFeatureServiceFactory {
      *
      * @throws  Exception  java.lang.Exception
      */
-    public static DocumentFeatureService createDocumentFeatureService(final File documentFile) throws Exception {
+    public static AbstractFeatureService createDocumentFeatureService(final File documentFile) throws Exception {
 //    Element xmlConfig = null;
 //    if (configurationObject instanceof Element)
 //    {
@@ -156,10 +159,32 @@ public class DocumentFeatureServiceFactory {
                     log.debug("File extension ist shp");
                 }
                 if (isShapeFile(documentFile)) {
-                    return new ShapeFileFeatureService(documentFile.getName(),
-                            documentFile.toURI(),
-                            documentSize,
-                            null);
+                    if (true) {
+                        MessageDigest md5 = MessageDigest.getInstance("MD5");
+                        BufferedInputStream is = new BufferedInputStream(new FileInputStream(documentFile));
+                        byte[] inputArray = new byte[256];
+                        int byteCount = 0;
+                        
+                        while ( (byteCount = is.read(inputArray)) != -1) {
+                            md5.update(inputArray, 0, byteCount);
+                        }
+                        byte[] hashValue = md5.digest();
+                        StringBuffer hexString = new StringBuffer();
+                        
+                        for (byte b : hashValue) {
+                            hexString.append( String.format("%02x", b) );
+                        }
+                        
+                        String fileName = documentFile.getName();
+                        fileName = fileName.substring(0, fileName.lastIndexOf("."));
+                        String tableName = fileName + hexString;
+                        return new H2FeatureService(fileName, "~/db/test2", tableName, null, documentFile);
+                    } else {
+                        return new ShapeFileFeatureService(documentFile.getName(),
+                                documentFile.toURI(),
+                                documentSize,
+                                null);
+                    }
 
 //          if (xmlConfig != null)
 //          {

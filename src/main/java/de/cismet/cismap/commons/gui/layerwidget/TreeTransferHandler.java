@@ -11,6 +11,7 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -305,7 +306,7 @@ class TreeTransferHandler extends TransferHandler {
                         try {
                             LOG.info("DocumentUri: " + currentFile.toURI()); // NOI18N
 
-                            final DocumentFeatureService dfs = DocumentFeatureServiceFactory
+                            final AbstractFeatureService dfs = DocumentFeatureServiceFactory
                                         .createDocumentFeatureService(currentFile);
                             activeLayerModel.addLayer(dfs, activeLayerModel.layers.size() - index);
 

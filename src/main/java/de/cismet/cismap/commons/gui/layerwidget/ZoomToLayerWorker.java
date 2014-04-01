@@ -27,9 +27,11 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.GMLFeatureService;
+import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.GMLFeatureFactory;
+import de.cismet.cismap.commons.featureservice.factory.JDBCFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -210,6 +212,9 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
         } else if (rsl instanceof ShapeFileFeatureService) {
             final ShapeFileFeatureService sffs = (ShapeFileFeatureService)rsl;
             g = ((ShapeFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
+        } else if (rsl instanceof JDBCFeatureService) {
+            final JDBCFeatureService sffs = (JDBCFeatureService)rsl;
+            g = ((JDBCFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
         } else if (rsl instanceof GMLFeatureService) {
             final GMLFeatureService sffs = (GMLFeatureService)rsl;
             g = ((GMLFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
