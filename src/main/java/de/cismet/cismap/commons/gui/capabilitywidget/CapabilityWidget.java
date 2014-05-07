@@ -99,6 +99,7 @@ import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
+import de.cismet.cismap.commons.internaldb.InternalDbTree;
 import de.cismet.cismap.commons.preferences.CapabilitiesListTreeNode;
 import de.cismet.cismap.commons.preferences.CapabilitiesPreferences;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
@@ -123,6 +124,10 @@ import de.cismet.tools.configuration.Configurable;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
+import java.io.File;
+import javax.swing.AbstractAction;
+import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.TreeModel;
 
 /**
  * DOCUMENT ME!
@@ -158,6 +163,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private int acceptableActions = DnDConstants.ACTION_COPY_OR_MOVE;
     private HashMap<Component, WMSCapabilities> wmsCapabilities = new HashMap<Component, WMSCapabilities>();
     private HashMap<Component, JTree> wmsCapabilitiesTrees = new HashMap<Component, JTree>();
+    private HashMap<Component, JTree> jdbcTrees = new HashMap<Component, JTree>();
+    private HashMap<Component, JTree> cidsTrees = new HashMap<Component, JTree>();
     private HashMap<Component, WFSCapabilities> wfsCapabilities = new HashMap<Component, WFSCapabilities>();
     private HashMap<Component, JTree> wfsCapabilitiesTrees = new HashMap<Component, JTree>();
     private CapabilitiesPreferences preferences = new CapabilitiesPreferences();
@@ -195,10 +202,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         // tbpCapabilities.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT); tbpCapabilities.setUI(new
         // WindowsTabbedPaneUI());
 
-        final JMenuItem pmenuItem = new JMenuItem(NbBundle.getMessage(
-                    CapabilityWidget.class,
-                    "CapabilityWidget.CapabilityWidget().pmenuItem.text"));
-        pmenuItem.addActionListener(new ActionListener() {
+        final JMenuItem pmenuItem = new JMenuItem();
+        pmenuItem.setAction(new AbstractAction() {
+
+                {
+                    putValue(
+                        NAME,
+                        NbBundle.getMessage(
+                            CapabilityWidget.class,
+                            "CapabilityWidget.CapabilityWidget().pmenuItem.text"));
+                }
 
                 @Override
                 public void actionPerformed(final ActionEvent e) {
@@ -208,6 +221,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     }
                     if (tree instanceof DragTree) {
                         zoomToExtent((DragTree)tree);
+                    } else if (tree instanceof InternalDbTree) {
+                        // toDo: HER extend
                     }
                 }
             });
@@ -343,6 +358,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         } catch (MalformedURLException ex) {
                             log.error("Url is not wellformed no wss authentication possible", ex); // NOI18N
                         }
+                    } else if (link.toLowerCase().contains("service=cids")) {
+                        addCidsCapabilitesTree(link, load, subparent);
+                    } else if (link.toLowerCase().contains("service=internal_db")) {
+                        addInternalDBCapabilitesTree(link, load, subparent);
                     } else {
                         // ToDo cleveres Probieren wenn z.B. nur die service URL angebenen wurde -->
                         // getCapabiltiesrequest aufbauen und probieren
@@ -448,6 +467,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             processUrl(link, null);
         }
     }
+
     /**
      * restliche unbenutzte DnD-Methoden.
      *
@@ -613,30 +633,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
+    }//GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
+    }//GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
@@ -649,16 +669,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
+    }//GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
+    }//GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -688,6 +708,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 wfsCapabilities.remove(tbpCapabilities.getSelectedComponent());
                 wfsCapabilitiesTrees.remove(tbpCapabilities.getSelectedComponent());
                 tbpCapabilities.remove(tbpCapabilities.indexOfComponent(tbpCapabilities.getSelectedComponent()));
+            } else if (jdbcTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
+                jdbcTrees.remove(tbpCapabilities.getSelectedComponent());
+            } else if (cidsTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
+                cidsTrees.remove(tbpCapabilities.getSelectedComponent());
             } else {
                 log.warn("Keine Component zum entfernen aktiv"); // NOI18N
             }
@@ -713,7 +737,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -722,16 +746,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
+    }//GEN-LAST:event_cmdCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpCapabilitiesStateChanged
+    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpCapabilitiesStateChanged
         addFilterToActiveTree();
-    }                                                                                   //GEN-LAST:event_tbpCapabilitiesStateChanged
+    }//GEN-LAST:event_tbpCapabilitiesStateChanged
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
@@ -743,6 +767,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             return wmsCapabilitiesTrees.get(tbpCapabilities.getSelectedComponent());
         } else if (wfsCapabilitiesTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
             return wfsCapabilitiesTrees.get(tbpCapabilities.getSelectedComponent());
+        } else if (jdbcTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
+            return jdbcTrees.get(tbpCapabilities.getSelectedComponent());
+        } else if (cidsTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
+            return cidsTrees.get(tbpCapabilities.getSelectedComponent());
         } else {
             return null;
         }
@@ -820,9 +848,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     link = str.toString();
                 } catch (IOException ioe) {
                     /*
-                     * bug #4094987 sun.io.MalformedInputException: Missing byte-order mark e.g. if dragging from MS
-                     * Word 97 to Java still a bug in 1.2 final
-                     */
+                        * bug #4094987 sun.io.MalformedInputException: Missing byte-order mark e.g. if dragging from MS
+                        * Word 97 to Java still a bug in 1.2 final
+                        */
                     System.err.println("cannot read" + ioe);                        // NOI18N
                     dtde.dropComplete(false);
                     final String message = org.openide.util.NbBundle.getMessage(
@@ -902,6 +930,189 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         panLoad.add(panFillBottom, gridBagConstraints);
 
         return panLoad;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  link       DOCUMENT ME!
+     * @param  comp       DOCUMENT ME!
+     * @param  subparent  DOCUMENT ME!
+     */
+    private void addCidsCapabilitesTree(final String link, final JComponent comp, final String subparent) {
+        final Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final Class treeRendererClass = Class.forName("de.cismet.cismap.cidslayer.CidsCapabilitesTreeCellRenderer");
+                        final Class treeModelClass = Class.forName("de.cismet.cismap.cidslayer.CidsLayerTreeModel");
+//                        final Class treeModelClass = ClassLoader.getSystemClassLoader()
+//                                    .loadClass("de.cismet.cismap.cidslayer.CidsLayerTreeModel");
+//                        final Class treeRendererClass = ClassLoader.getSystemClassLoader()
+//                                    .loadClass("de.cismet.cismap.cidslayer.CidsCapabilitesTreeCellRenderer");
+                        final String[] args = link.split("[=&]");
+                        String domain = "";
+                        for (int i = 0; i < args.length; i++) {
+                            if (args[i].equalsIgnoreCase("domain") && ((i + 1) < args.length)) {
+                                domain = args[i + 1];
+                            }
+                        }
+                        if (domain.isEmpty()) {
+                            tbpCapabilities.remove(comp);
+                            return;
+                        }
+                        final String title = domain;
+                        final TreeModel tm = (TreeModel)treeModelClass.getConstructor(String.class).newInstance(domain);
+                        final TreeCellRenderer tcr = (TreeCellRenderer)treeRendererClass.newInstance();
+                        final DragTree tree = new DragTree();
+                        final DropTarget dt = new DropTarget(tree, acceptableActions, thisWidget);
+
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    addPopupMenu(tree);
+                                    tree.setModel(tm);
+                                    tree.setBorder(new EmptyBorder(1, 1, 1, 1));
+                                    tree.setCellRenderer(tcr);
+                                    final JScrollPane sPane = new JScrollPane();
+                                    sPane.setViewportView(tree);
+                                    sPane.setBorder(new EmptyBorder(1, 1, 1, 1));
+                                    StaticSwingTools.setNiftyScrollBars(sPane);
+                                    synchronized (this) {
+                                        tbpCapabilities.setComponentAt(tbpCapabilities.indexOfComponent(comp), sPane);
+                                    }
+                                    cidsTrees.put(sPane, tree);
+                                    stateChanged(null);
+
+                                    capabilityUrls.put(new LinkWithSubparent(link, subparent), sPane);
+                                    capabilityUrlsReverse.put(sPane, new LinkWithSubparent(link, subparent));
+
+                                    sPane.putClientProperty("tabTitle", title);
+                                    synchronized (this) {
+                                        StaticSwingTools.jTabbedPaneWithVerticalTextSetNewText(
+                                            tbpCapabilities,
+                                            title,
+                                            icoConnect,
+                                            Color.black,
+                                            sPane);
+                                    }
+                                    /*synchronized(this) {
+                                     *  tbpCapabilities.setToolTipTextAt(tbpCapabilities.indexOfComponent(sPane), );}*/
+                                    stateChanged(null);
+                                }
+                            });
+                    } catch (Exception ex) {
+                        tbpCapabilities.remove(comp);
+                        final JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
+                        capabilityUrls.remove(new LinkWithSubparent(link, null));
+                        capabilityUrlsReverse.remove(jc);
+                        log.error("Error while adding cids capabilites tree", ex);
+                    }
+                }
+            };
+        CismetThreadPool.execute(r);
+        /*try {
+         *  treeModelClass =
+         * ClassLoader.getSystemClassLoader().loadClass("de.cismet.cismap.cidslayer.CidsLayerTreeModel"); final
+         * TreeModel tm = (TreeModel) treeModelClass.getConstructor(String.class).newInstance(cl.getLink()); final
+         * DragTree tree = new DragTree(); final DropTarget dt = new DropTarget(tree, acceptableActions, thisWidget);
+         * //final ListMenuItem lmi = new ListMenuItem("cidsLayer", cl); lmi.addActionListener(new ActionListener() {
+         * @Override     public void actionPerformed(ActionEvent e) {
+         *
+         * } }); menu.add(lmi); } catch (ClassNotFoundException ex) { log.error("ClassNotFoundException", ex); } catch
+         * (NoSuchMethodException ex) { log.error("NoSuchMethodException", ex); } catch (SecurityException ex) {
+         * log.error("SecurityException", ex); } catch (InstantiationException ex) { log.error("InstantiationException",
+         * ex); } catch (IllegalAccessException ex) { log.error("IllegalAccessException", ex); } catch
+         * (IllegalArgumentException ex) { log.error("IllegalArgumentException", ex); } catch (InvocationTargetException
+         * ex) {
+         * log.error("InvocationTargetException", ex);}*/
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  link       DOCUMENT ME!
+     * @param  comp       DOCUMENT ME!
+     * @param  subparent  DOCUMENT ME!
+     */
+    private void addInternalDBCapabilitesTree(final String link, final JComponent comp, final String subparent) {
+        final Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final int index = link.lastIndexOf("?");
+                        String databasePath = link;
+
+                        if (index != -1) {
+                            databasePath = link.substring(0, index);
+                        }
+
+                        if (databasePath.startsWith("file://")) {
+                            databasePath = databasePath.substring("file://".length());
+                        }
+
+                        final String title = databasePath;
+                        final InternalDbTree tree = new InternalDbTree(databasePath);
+//                        final DropTarget dt = new DropTarget(tree, acceptableActions, thisWidget);
+
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    final JMenuItem addFolderItem = new JMenuItem(
+                                            NbBundle.getMessage(
+                                                CapabilityWidget.class,
+                                                "CapabilityWidget.addInternalDBCapabilitesTree.addFolderItem"));
+                                    addFolderItem.addActionListener(new ActionListener() {
+
+                                            @Override
+                                            public void actionPerformed(final ActionEvent e) {
+                                                tree.addFolder(
+                                                    NbBundle.getMessage(
+                                                        CapabilityWidget.class,
+                                                        "CapabilityWidget.addInternalDBCapabilitesTree.addFolder"));
+                                            }
+                                        });
+                                    addPopupMenu(tree, new JMenuItem[] { addFolderItem });
+                                    tree.setBorder(new EmptyBorder(1, 1, 1, 1));
+                                    final JScrollPane sPane = new JScrollPane();
+                                    sPane.setViewportView(tree);
+                                    sPane.setBorder(new EmptyBorder(1, 1, 1, 1));
+                                    StaticSwingTools.setNiftyScrollBars(sPane);
+                                    synchronized (this) {
+                                        tbpCapabilities.setComponentAt(tbpCapabilities.indexOfComponent(comp), sPane);
+                                    }
+                                    jdbcTrees.put(sPane, tree);
+                                    stateChanged(null);
+
+                                    capabilityUrls.put(new LinkWithSubparent(link, subparent), sPane);
+                                    capabilityUrlsReverse.put(sPane, new LinkWithSubparent(link, subparent));
+
+                                    sPane.putClientProperty("tabTitle", title);
+                                    synchronized (this) {
+                                        StaticSwingTools.jTabbedPaneWithVerticalTextSetNewText(
+                                            tbpCapabilities,
+                                            title,
+                                            icoConnect,
+                                            Color.black,
+                                            sPane);
+                                    }
+                                    stateChanged(null);
+                                }
+                            });
+                    } catch (Exception ex) {
+                        tbpCapabilities.remove(comp);
+                        final JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
+                        capabilityUrls.remove(new LinkWithSubparent(link, null));
+                        capabilityUrlsReverse.remove(jc);
+                        log.error("Error while adding internal db tree.", ex);
+                    }
+                }
+            };
+        CismetThreadPool.execute(r);
     }
 
     /**
@@ -1593,7 +1804,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             capabilityList.add(component);
         }
 
-        setSearchEnabled( cp.isSearchActivated() );
+        setSearchEnabled(cp.isSearchActivated());
     }
     //J+
 
@@ -1614,7 +1825,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
         // CapabilityLink-Einträge erzeugen
         for (final CapabilityLink cl : node.getCapabilitiesList().values()) {
-            if (cl.getType().equals(CapabilityLink.OGC) || cl.getType().equals(CapabilityLink.OGC_DEPRECATED)) {
+            if (cl.getType().equals(CapabilityLink.OGC) || cl.getType().equals(CapabilityLink.OGC_DEPRECATED)
+                        || cl.getType().equals("cidsLayer") || cl.getType().equals(CapabilityLink.INTERNAL_DB)) {
                 final ListMenuItem lmi = new ListMenuItem("test", cl); // NOI18N
                 lmi.addActionListener(new ActionListener() {
 
@@ -1678,8 +1890,35 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  trvCap  DOCUMENT ME!
      */
-    private void addPopupMenu(final DragTree trvCap) {
+    private void addPopupMenu(final JTree trvCap) {
         trvCap.addMouseListener(new DefaultPopupMenuListener(treePopMenu));
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  trvCap           DOCUMENT ME!
+     * @param  additionalItems  DOCUMENT ME!
+     */
+    private void addPopupMenu(final JTree trvCap, final JMenuItem[] additionalItems) {
+        if ((additionalItems == null) || (additionalItems.length == 0)) {
+            trvCap.addMouseListener(new DefaultPopupMenuListener(treePopMenu));
+        } else {
+            final JPopupMenu menu = new JPopupMenu();
+            for (int i = 0; i < treePopMenu.getComponentCount(); ++i) {
+                final Component c = treePopMenu.getComponent(i);
+
+                if (c instanceof JMenuItem) {
+                    menu.add(new JMenuItem(((JMenuItem)c).getAction()));
+                }
+            }
+
+            for (final JMenuItem item : additionalItems) {
+                menu.add(item);
+            }
+
+            trvCap.addMouseListener(new DefaultPopupMenuListener(menu));
+        }
     }
 
     /**
@@ -2119,6 +2358,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
                     trans = new DefaultTransferable(new WFSSelectionAndCapabilities(features));
                 }
+            } else if (this.getModel().getClass().getName().equals("de.cismet.cismap.cidslayer.CidsLayerTreeModel")) {
+                trans = new DefaultTransferable(getSelectionModel().getSelectionPath().getLastPathComponent());
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
         }
