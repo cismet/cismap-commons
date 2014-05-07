@@ -11,7 +11,21 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
+import ar.com.fdvs.dj.core.DynamicJasperHelper;
+import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
+import ar.com.fdvs.dj.domain.DynamicReport;
+
 import com.vividsolutions.jts.geom.Geometry;
+
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperPrintManager;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.view.JRViewer;
 
 import org.apache.log4j.Logger;
 
@@ -48,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -77,6 +92,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
+import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.ExportCsvDownload;
 import de.cismet.cismap.commons.tools.ExportDownload;
@@ -86,6 +102,7 @@ import de.cismet.cismap.commons.tools.ExportTxtDownload;
 import de.cismet.commons.concurrency.CismetConcurrency;
 
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.WaitingDialogThread;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 
@@ -902,6 +919,13 @@ public class AttributeTable extends javax.swing.JPanel {
         butPrint.setFocusable(false);
         butPrint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butPrint.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        butPrint.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butPrintActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butPrint);
 
         butExport.setIcon(new javax.swing.ImageIcon(
@@ -1258,7 +1282,56 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void butPrintPreviewActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintPreviewActionPerformed
-        // TODO add your handling code here:
+        final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
+                        .getParentFrame(this),
+                true,
+                NbBundle.getMessage(
+                    AttributeTable.class,
+                    "AttributeTable.butPrintPreviewActionPerformed.WaitingDialogThread"),
+                null,
+                500) {
+
+                @Override
+                protected JasperPrint doInBackground() throws Exception {
+                    final JRDataSource ds = new TableDataSource(table);
+                    final Map<String, Object> map = new HashMap<String, Object>();
+                    map.put(AttributeTableReportBuilder.DATASOURCE_NAME, ds);
+                    final DynamicReport report =
+                        new AttributeTableReportBuilder().buildReport(featureService.getName(), table);
+                    final JasperReport jasperReport = DynamicJasperHelper.generateJasperReport(
+                            report,
+                            new ClassicLayoutManager(),
+                            map);
+                    return JasperFillManager.fillReport(jasperReport, map, ds);
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        final JasperPrint jasperPrint = get();
+
+                        final JRViewer aViewer = new JRViewer(jasperPrint);
+                        final JFrame aFrame = new JFrame(org.openide.util.NbBundle.getMessage(
+                                    AttributeTable.class,
+                                    "AttributeTable.butPrintPreviewActionPerformed.aFrame.title")); // NOI18N
+                        aFrame.getContentPane().add(aViewer);
+                        final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+                        aFrame.setSize(screenSize.width / 2, screenSize.height / 2);
+                        final java.awt.Insets insets = aFrame.getInsets();
+                        aFrame.setSize(aFrame.getWidth() + insets.left + insets.right,
+                            aFrame.getHeight()
+                                    + insets.top
+                                    + insets.bottom
+                                    + 20);
+                        aFrame.setLocationRelativeTo(AttributeTable.this);
+                        aFrame.setVisible(true);
+                    } catch (Exception e) {
+                        LOG.error("Error while creating report", e);
+                    }
+                }
+            };
+
+        wdt.start();
     } //GEN-LAST:event_butPrintPreviewActionPerformed
 
     /**
@@ -1604,6 +1677,50 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     private void jcFormatItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_jcFormatItemStateChanged
     }                                                                           //GEN-LAST:event_jcFormatItemStateChanged
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butPrintActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintActionPerformed
+        final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
+                        .getParentFrame(this),
+                true,
+                NbBundle.getMessage(
+                    AttributeTable.class,
+                    "AttributeTable.butPrintActionPerformed.WaitingDialogThread"),
+                null,
+                500) {
+
+                @Override
+                protected JasperPrint doInBackground() throws Exception {
+                    final JRDataSource ds = new TableDataSource(table);
+                    final Map<String, Object> map = new HashMap<String, Object>();
+                    map.put(AttributeTableReportBuilder.DATASOURCE_NAME, ds);
+                    final DynamicReport report =
+                        new AttributeTableReportBuilder().buildReport(featureService.getName(), table);
+                    final JasperReport jasperReport = DynamicJasperHelper.generateJasperReport(
+                            report,
+                            new ClassicLayoutManager(),
+                            map);
+                    return JasperFillManager.fillReport(jasperReport, map, ds);
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        final JasperPrint jasperPrint = get();
+
+                        JasperPrintManager.printReport(jasperPrint, true);
+                    } catch (Exception e) {
+                        LOG.error("Error while creating report", e);
+                    }
+                }
+            };
+
+        wdt.start();
+    } //GEN-LAST:event_butPrintActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -2003,11 +2120,13 @@ public class AttributeTable extends javax.swing.JPanel {
                         || attr.getType().equals(String.valueOf(Types.LONGVARCHAR))) {
                 return String.class;
             } else if (attr.getType().equals(String.valueOf(Types.INTEGER))
-                        || attr.getType().equals(String.valueOf(Types.BIGINT))
                         || attr.getType().equals(String.valueOf(Types.SMALLINT))
                         || attr.getType().equals(String.valueOf(Types.TINYINT))
                         || attr.getType().equals("xsd:integer")) {
                 return Integer.class;
+            } else if (attr.getType().equals(String.valueOf(Types.BIGINT))
+                        || attr.getType().equals("xsd:long")) {
+                return Long.class;
             } else if (attr.getType().equals(String.valueOf(Types.DOUBLE))
                         || attr.getType().equals(String.valueOf(Types.FLOAT))
                         || attr.getType().equals(String.valueOf(Types.DECIMAL))
@@ -2224,6 +2343,66 @@ public class AttributeTable extends javax.swing.JPanel {
             }
 
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        }
+    }
+
+    /**
+     * Wraps a table into a data source, that can be used within a jasper report.
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static class TableDataSource implements JRDataSource {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private int index = -1;
+        private TableModel model;
+        private JTable table;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new TableDataSource object.
+         *
+         * @param  table  DOCUMENT ME!
+         */
+        public TableDataSource(final JTable table) {
+            this.model = table.getModel();
+            this.table = table;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public boolean next() throws JRException {
+            final boolean ret = ++index < model.getRowCount();
+
+            if (!ret) {
+                // Set the internal index to the first row, when the return value is false,
+                // so that the data source can used from multiple sub reports.
+                index = -1;
+            }
+
+            return ret;
+        }
+
+        @Override
+        public Object getFieldValue(final JRField jrField) throws JRException {
+            int col = 0;
+
+            try {
+                col = Integer.parseInt(jrField.getName());
+            } catch (NumberFormatException e) {
+                LOG.error("Cannot parse column name", e);
+            }
+
+            final Object result = model.getValueAt(table.convertRowIndexToModel(index), col);
+
+            if (result != null) {
+                return String.valueOf(result);
+            } else {
+                return null;
+            }
         }
     }
 }
