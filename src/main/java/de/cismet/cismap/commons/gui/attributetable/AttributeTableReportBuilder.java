@@ -54,7 +54,7 @@ public class AttributeTableReportBuilder {
     //~ Static fields/initializers ---------------------------------------------
 
     public static final String DATASOURCE_NAME = "table_data";
-    private static final int PAGE_WIDTH = 580;
+    private static final int PAGE_WIDTH = 560;
 
     //~ Instance fields --------------------------------------------------------
 
