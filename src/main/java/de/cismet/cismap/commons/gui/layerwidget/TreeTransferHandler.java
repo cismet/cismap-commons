@@ -11,7 +11,6 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
@@ -34,6 +33,7 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
 
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.LayerProperties;

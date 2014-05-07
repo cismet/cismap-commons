@@ -12,7 +12,8 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
-import de.cismet.cismap.commons.util.SimpleCache;
+
+import org.apache.log4j.Logger;
 
 import org.deegree.io.shpapi.ShapeFile;
 import org.deegree.model.feature.FeatureCollection;
@@ -25,7 +26,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Queue;
-import org.apache.log4j.Logger;
+
+import de.cismet.cismap.commons.util.SimpleCache;
 
 /**
  * DOCUMENT ME!
@@ -35,10 +37,13 @@ import org.apache.log4j.Logger;
  */
 public class JDBCFeatureInfo {
 
-    //~ Instance fields --------------------------------------------------------
+    //~ Static fields/initializers ---------------------------------------------
 
     // caches the last feature properties
     private static final Logger LOG = Logger.getLogger(JDBCFeatureInfo.class);
+
+    //~ Instance fields --------------------------------------------------------
+
     private SimpleCache<LinkedHashMap<String, Object>> cache = new SimpleCache<LinkedHashMap<String, Object>>(2);
     private SimpleCache<Geometry> geoCache = new SimpleCache<Geometry>(1);
     private SimpleCache<Object> propertyCache = new SimpleCache<Object>(10);
@@ -56,7 +61,6 @@ public class JDBCFeatureInfo {
     /**
      * Creates a new ShapeInfo object.
      *
-     * @param  typename    DOCUMENT ME!
      * @param  connection  file DOCUMENT ME!
      * @param  srid        DOCUMENT ME!
      * @param  geoField    fc DOCUMENT ME!
@@ -70,12 +74,15 @@ public class JDBCFeatureInfo {
         this.srid = srid;
         this.tableName = tableName;
         this.geoField = geoField;
-        
+
         createStatements();
     }
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     */
     private void createStatements() {
         try {
             geometryStatement = connection.prepareStatement("select " + geoField + " from \"" + tableName
@@ -89,7 +96,7 @@ public class JDBCFeatureInfo {
             LOG.error("Error while creating prepared statement for properties", e);
         }
     }
-    
+
     /**
      * DOCUMENT ME!
      *
@@ -130,7 +137,6 @@ public class JDBCFeatureInfo {
     public void setSrid(final int srid) {
         this.srid = srid;
     }
-
 
     /**
      * DOCUMENT ME!
@@ -239,16 +245,15 @@ public class JDBCFeatureInfo {
     public String getTableName() {
         return tableName;
     }
-    
+
     /**
      * DOCUMENT ME!
      *
-     * @return  the tableName
+     * @param  tableName  DOCUMENT ME!
      */
-    public void setTableName(String tableName) {
+    public void setTableName(final String tableName) {
         this.tableName = tableName;
         propStats.clear();
         createStatements();
     }
-
 }

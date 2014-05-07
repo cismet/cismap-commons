@@ -238,7 +238,7 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
             new ImageIcon(
                 getClass().getResource(
                     "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png")));            // NOI18N
-        
+
         icons.put(new IconType(H2, true, true),
             new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png"))); // NOI18N
         icons.put(new IconType(H2, false, true),

@@ -180,7 +180,12 @@ public class DocumentFeatureServiceFactory {
                         String fileName = documentFile.getName();
                         fileName = fileName.substring(0, fileName.lastIndexOf("."));
                         final String tableName = fileName + "_" + hexString;
-                        return new H2FeatureService(fileName, H2FeatureServiceFactory.DB_NAME, tableName, null, documentFile);
+                        return new H2FeatureService(
+                                fileName,
+                                H2FeatureServiceFactory.DB_NAME,
+                                tableName,
+                                null,
+                                documentFile);
                     } else {
                         return new ShapeFileFeatureService(documentFile.getName(),
                                 documentFile.toURI(),

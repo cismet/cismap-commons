@@ -34,7 +34,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -51,8 +53,6 @@ import de.cismet.cismap.commons.features.ShapeInfo;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * DOCUMENT ME!
@@ -65,6 +65,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     //~ Static fields/initializers ---------------------------------------------
 
     private static Logger LOG = Logger.getLogger(H2FeatureServiceFactory.class);
+    public static final String DB_NAME = "~/cismap/internal";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -73,7 +74,6 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private String idField = "id";
     private ConnectionWrapper conn;
     private JDBCFeatureInfo info;
-    public final static String DB_NAME = "~/cismap/internal";
     private String name;
 
     //~ Constructors -----------------------------------------------------------
@@ -90,21 +90,21 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         initConnection();
     }
 
-
     /**
      * Creates a new H2FeatureServiceFactory object.
      *
+     * @param  name          DOCUMENT ME!
      * @param  databasePath  DOCUMENT ME!
      * @param  tableName     DOCUMENT ME!
      * @param  shapeFile     DOCUMENT ME!
      * @param  workerThread  DOCUMENT ME!
      */
-//    public H2FeatureServiceFactory(final String name,
-//            final String databasePath,
-//            final String tableName,
-//            final File shapeFile,
-//            final SwingWorker workerThread,
-//            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
+// public H2FeatureServiceFactory(final String name,
+// final String databasePath,
+// final String tableName,
+// final File shapeFile,
+// final SwingWorker workerThread,
+// final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
     public H2FeatureServiceFactory(final String name,
             final String databasePath,
             final String tableName,
@@ -341,18 +341,19 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
         return createFeaturesInternal(query, boundingBox, workerThread, offset, limit, orderBy, false);
     }
-    
+
     /**
      * DOCUMENT ME!
      *
      * @param  tableName  DOCUMENT ME!
      */
+    @Override
     public void setTableName(final String tableName) {
         this.tableName = tableName;
         if (info != null) {
             info.setTableName(tableName);
         }
-    }    
+    }
 
     /**
      * DOCUMENT ME!
@@ -427,12 +428,12 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final ResultSet rs = st.executeQuery(select);
             setInterruptedAllowed();
             final List<JDBCFeature> selectedFeatures = new ArrayList<JDBCFeature>();
-            
+
             if (info == null) {
                 info = new JDBCFeatureInfo(conn, 35833, geometryField, tableName);
             }
 //            List style = getStyle(name);
-            
+
             while (rs.next()) {
                 if ((workerThread != null) && workerThread.isCancelled()) {
                     return null;

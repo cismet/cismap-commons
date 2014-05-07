@@ -15,14 +15,14 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import java.sql.Statement;
-import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -54,18 +54,19 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
         this.featureInfo = shapeInfo;
     }
 
-//    /**
-//     * Creates a new ShapeFeature object.
-//     *
-//     * @param  shapeInfo  typename DOCUMENT ME!
-//     * @param  styles     DOCUMENT ME!
-//     */
-//    public JDBCFeature(final JDBCFeatureInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
-//        setSLDStyles(styles); // super.style = styles;
-//        this.featureInfo = shapeInfo;
-//    }
-//    
     //~ Methods ----------------------------------------------------------------
+
+// /**
+// * Creates a new ShapeFeature object.
+// *
+// * @param  shapeInfo  typename DOCUMENT ME!
+// * @param  styles     DOCUMENT ME!
+// */
+// public JDBCFeature(final JDBCFeatureInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
+// setSLDStyles(styles); // super.style = styles;
+// this.featureInfo = shapeInfo;
+// }
+//
 
 // /**
 // * Creates a new ShapeFeature object.
@@ -83,7 +84,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
         if (existProperties()) {
             return super.getProperties();
         }
-        
+
         LinkedHashMap<String, Object> container = null;
         final int id = getId();
 
@@ -145,34 +146,49 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
         return result;
     }
 
-    @Override
-    public void setProperty(String propertyName, Object propertyValue) {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  propertyName   DOCUMENT ME!
+     * @param  propertyValue  DOCUMENT ME!
+     */
+    public void setProperty(final String propertyName, final Object propertyValue) {
         if (!existProperties()) {
             super.setProperties(getProperties());
         }
-        
+
         super.addProperty(propertyName, propertyValue);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     private boolean existProperties() {
         return !super.getProperties().isEmpty();
     }
-
-//    @Override
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws    Exception  DOCUMENT ME!
+     *
+     * @Override  DOCUMENT ME!
+     */
     public void saveChanges() throws Exception {
         if (!existProperties()) {
             return;
         }
-        
-        HashMap map = super.getProperties();
-        Statement st = featureInfo.getConnection().createStatement();
-        StringBuilder update = new StringBuilder("UPDATE \"");
+
+        final HashMap map = super.getProperties();
+        final Statement st = featureInfo.getConnection().createStatement();
+        final StringBuilder update = new StringBuilder("UPDATE \"");
         update.append(featureInfo.getTableName()).append("\" SET ");
-        
+
         boolean first = true;
-        
-        for (Object name : map.keySet()) {
-            Object value = map.get(name);
+
+        for (final Object name : map.keySet()) {
+            final Object value = map.get(name);
             if ((value instanceof Geometry)) {
                 continue;
             }
@@ -181,7 +197,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
             } else {
                 first = false;
             }
-            
+
             String valueString;
             if (value instanceof String) {
                 valueString = "'" + value + "'";
@@ -192,11 +208,10 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
         }
         update.append(" WHERE id = ").append(getId());
         st.execute(update.toString());
-        
+
         super.getProperties().clear();
     }
-    
-    
+
     @Override
     public void setProperties(final HashMap properties) {
         // nothing to do

@@ -15,6 +15,8 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.Method;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +41,6 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
-import java.lang.reflect.Method;
 
 /**
  * DOCUMENT ME!
@@ -49,9 +50,12 @@ import java.lang.reflect.Method;
  */
 public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
 
-    //~ Instance fields --------------------------------------------------------
+    //~ Static fields/initializers ---------------------------------------------
 
     private static Logger LOG = Logger.getLogger(ZoomToLayerWorker.class);
+
+    //~ Instance fields --------------------------------------------------------
+
     private TreePath[] tps;
     /** buffer in percent.* */
     private int buffer = 0;
@@ -216,9 +220,9 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
             g = ((JDBCFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
         } else if (rsl.getClass().getName().equals("de.cismet.cismap.cidslayer.CidsLayer")) {
             try {
-                Method getFeatureFactory = rsl.getClass().getMethod("getFeatureFactory");
-                Object o = getFeatureFactory.invoke(rsl);
-                Method getEnvelope = o.getClass().getMethod("getEnvelope");
+                final Method getFeatureFactory = rsl.getClass().getMethod("getFeatureFactory");
+                final Object o = getFeatureFactory.invoke(rsl);
+                final Method getEnvelope = o.getClass().getMethod("getEnvelope");
                 getEnvelope.setAccessible(true);
                 g = (Geometry)getEnvelope.invoke(o);
             } catch (Exception e) {

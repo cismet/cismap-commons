@@ -76,6 +76,9 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     */
     public synchronized void waitUntilInterruptedIsAllowed() {
         try {
             if (!isInterruptedAllowed) {
@@ -85,16 +88,22 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
             logger.error("should never happen");
         }
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     */
     protected synchronized void setInterruptedAllowed() {
         isInterruptedAllowed = true;
         notifyAll();
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     */
     protected synchronized void setInterruptedNotAllowed() {
         isInterruptedAllowed = false;
     }
-    
+
     @Override
     public void setLayerProperties(final LayerProperties layerProperties) {
         final LayerProperties oldLayerProperties = this.layerProperties;

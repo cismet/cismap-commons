@@ -1,3 +1,10 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -8,35 +15,37 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * DOCUMENT ME!
  *
- * @author therter
+ * @author   therter
+ * @version  $Revision$, $Date$
  */
 public class SimpleCache<T> {
 
-    //~ Instance fields ----------------------------------------------------
+    //~ Instance fields --------------------------------------------------------
 
     private String[] ids;
     private int index = 0;
     private Map<String, T> dataMap;
 
-    //~ Constructors -------------------------------------------------------
+    //~ Constructors -----------------------------------------------------------
 
     /**
-        * Creates a new Cache object.
-        *
-        * @param  size  DOCUMENT ME!
-        */
+     * Creates a new Cache object.
+     *
+     * @param  size  DOCUMENT ME!
+     */
     public SimpleCache(final int size) {
         init(size);
     }
 
-    //~ Methods ------------------------------------------------------------
+    //~ Methods ----------------------------------------------------------------
 
     /**
-        * DOCUMENT ME!
-        *
-        * @param  size  DOCUMENT ME!
-        */
+     * DOCUMENT ME!
+     *
+     * @param  size  DOCUMENT ME!
+     */
     private void init(final int size) {
         ids = new String[size];
         index = 0;
@@ -44,11 +53,11 @@ public class SimpleCache<T> {
     }
 
     /**
-        * DOCUMENT ME!
-        *
-        * @param  id    DOCUMENT ME!
-        * @param  data  DOCUMENT ME!
-        */
+     * DOCUMENT ME!
+     *
+     * @param  id    DOCUMENT ME!
+     * @param  data  DOCUMENT ME!
+     */
     public void add(final String id, final T data) {
         if (ids[index] != null) {
             dataMap.remove(ids[index]);
@@ -61,22 +70,22 @@ public class SimpleCache<T> {
     }
 
     /**
-        * DOCUMENT ME!
-        *
-        * @param  id    DOCUMENT ME!
-        * @param  data  DOCUMENT ME!
-        */
+     * DOCUMENT ME!
+     *
+     * @param  id    DOCUMENT ME!
+     * @param  data  DOCUMENT ME!
+     */
     public void add(final int id, final T data) {
         add(String.valueOf(id), data);
     }
 
     /**
-        * DOCUMENT ME!
-        *
-        * @param   id  DOCUMENT ME!
-        *
-        * @return  DOCUMENT ME!
-        */
+     * DOCUMENT ME!
+     *
+     * @param   id  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public T get(final String id) {
         final T res = dataMap.get(id);
 
@@ -91,28 +100,28 @@ public class SimpleCache<T> {
     }
 
     /**
-        * DOCUMENT ME!
-        *
-        * @param   id  DOCUMENT ME!
-        *
-        * @return  DOCUMENT ME!
-        */
+     * DOCUMENT ME!
+     *
+     * @param   id  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public T get(final int id) {
         return get(String.valueOf(id));
     }
 
     /**
-        * DOCUMENT ME!
-        *
-        * @param  size  DOCUMENT ME!
-        */
+     * DOCUMENT ME!
+     *
+     * @param  size  DOCUMENT ME!
+     */
     private void setSize(final int size) {
         init(size);
     }
 
     /**
-        * DOCUMENT ME!
-        */
+     * DOCUMENT ME!
+     */
     private void increaseIndex() {
         ++index;
         if (index >= ids.length) {

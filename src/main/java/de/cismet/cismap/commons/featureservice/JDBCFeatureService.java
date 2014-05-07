@@ -91,13 +91,15 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
 
     //~ Methods ----------------------------------------------------------------
 
-    
+    /**
+     * DOCUMENT ME!
+     */
     private void substituteHome() {
-        final String home = System.getProperty("user.home"); // NOI18N
+        final String home = System.getProperty("user.home");         // NOI18N
         final String fileSep = System.getProperty("file.separator"); // NOI18N
         databasePath = databasePath.replace("~", home);
     }
-    
+
     @Override
     protected LayerProperties createLayerProperties() {
         final DefaultLayerProperties defaultLayerProperties = new DefaultLayerProperties();

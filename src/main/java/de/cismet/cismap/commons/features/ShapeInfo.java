@@ -39,7 +39,6 @@ public class ShapeInfo {
     private int srid;
     private FeatureCollection fc;
 
-
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -56,7 +55,6 @@ public class ShapeInfo {
         this.srid = srid;
         this.fc = fc;
     }
-    
 
     //~ Methods ----------------------------------------------------------------
 

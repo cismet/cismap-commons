@@ -467,17 +467,17 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                                 + featureRetrievalWorker.isCancelled() + ")"); // NOI18N
                 }
             }
-            final FeatureRetrievalWorker currentWorker = featureRetrievalWorker; 
+            final FeatureRetrievalWorker currentWorker = featureRetrievalWorker;
 //            new Thread(new Runnable() {
 //
 //                @Override
 //                public void run() {
-                    synchronized (featureFactory) {
-                        if (featureFactory instanceof AbstractFeatureFactory) {
-                            ((AbstractFeatureFactory)featureFactory).waitUntilInterruptedIsAllowed();
-                        }
-                        cancel(currentWorker);
-                    }
+            synchronized (featureFactory) {
+                if (featureFactory instanceof AbstractFeatureFactory) {
+                    ((AbstractFeatureFactory)featureFactory).waitUntilInterruptedIsAllowed();
+                }
+                cancel(currentWorker);
+            }
 //                }
 //            }).start();
         }

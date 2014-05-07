@@ -40,14 +40,10 @@ public final class GeomFromWktConverter extends AbstractRatingConverter<String, 
      */
     @Override
     public Geometry convertForward(final String from, final String... params) throws ConversionException {
-        if ((from == null)) {
-            throw new IllegalArgumentException("'from' must not be null or empty");                       // NOI18N
+        if ((from == null) || from.isEmpty()) {
+            throw new IllegalArgumentException("'from' must not be null or empty"); // NOI18N
         }
-        
-        if (from.isEmpty()) {
-            throw new ConversionException("illegal (e)wkt format: " + from, new Exception()); // NOI18N
-        }
-        
+
         if ((params == null) || (params.length < 1)) {
             throw new IllegalArgumentException("no parameters provided, epsgcode is required parameter"); // NOI18N
         }
