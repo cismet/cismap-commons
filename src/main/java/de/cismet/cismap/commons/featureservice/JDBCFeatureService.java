@@ -82,14 +82,22 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
             final List<FeatureServiceAttribute> attributes) throws Exception {
         super(name, attributes);
         this.databasePath = databasePath;
+        substituteHome();
         this.tableName = tableName;
         if (LOG.isInfoEnabled()) {
-            LOG.info("creating new JDBCFeatureService from path: " + databasePath); // NOI18N
+            LOG.info("creating new JDBCFeatureService from path: " + this.databasePath); // NOI18N
         }
     }
 
     //~ Methods ----------------------------------------------------------------
 
+    
+    private void substituteHome() {
+        final String home = System.getProperty("user.home"); // NOI18N
+        final String fileSep = System.getProperty("file.separator"); // NOI18N
+        databasePath = databasePath.replace("~", home);
+    }
+    
     @Override
     protected LayerProperties createLayerProperties() {
         final DefaultLayerProperties defaultLayerProperties = new DefaultLayerProperties();
@@ -109,7 +117,7 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
         daPath.setText(databasePath.toString());
         final Element tabName = new Element("tableName");   // NOI18N
         tabName.setText(tableName.toString());
-        final Element queryElement = new Element("query"); // NOI18N
+        final Element queryElement = new Element("query");  // NOI18N
         queryElement.setText(query);
         parentElement.addContent(queryElement);
         parentElement.addContent(daPath);
@@ -129,7 +137,7 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
         super.initFromElement(element);
         this.setDatabasePath(element.getChildText("databasePath").trim()); // NOI18N
         this.setTableName(element.getChildText("tableName").trim());       // NOI18N
-        this.setQuery(element.getChildText("query").trim());       // NOI18N
+        this.setQuery(element.getChildText("query").trim());               // NOI18N
     }
 
     @Override
@@ -137,12 +145,11 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
         return query;
     }
 
-
     @Override
     public void setQuery(final String query) {
         this.query = query;
     }
-    
+
     /**
      * DOCUMENT ME!
      *
@@ -177,6 +184,9 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
      */
     public void setTableName(final String tableName) {
         this.tableName = tableName;
+        if (featureFactory != null) {
+            ((JDBCFeatureFactory)featureFactory).setTableName(tableName);
+        }
     }
 
     /**

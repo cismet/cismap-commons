@@ -24,8 +24,6 @@ import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
-import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.GMLFeatureService;
 import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
@@ -41,6 +39,7 @@ import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+import java.lang.reflect.Method;
 
 /**
  * DOCUMENT ME!
@@ -52,7 +51,7 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
 
     //~ Instance fields --------------------------------------------------------
 
-    Logger LOG = Logger.getLogger(ZoomToLayerWorker.class);
+    private static Logger LOG = Logger.getLogger(ZoomToLayerWorker.class);
     private TreePath[] tps;
     /** buffer in percent.* */
     private int buffer = 0;
@@ -215,6 +214,16 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
         } else if (rsl instanceof JDBCFeatureService) {
             final JDBCFeatureService sffs = (JDBCFeatureService)rsl;
             g = ((JDBCFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
+        } else if (rsl.getClass().getName().equals("de.cismet.cismap.cidslayer.CidsLayer")) {
+            try {
+                Method getFeatureFactory = rsl.getClass().getMethod("getFeatureFactory");
+                Object o = getFeatureFactory.invoke(rsl);
+                Method getEnvelope = o.getClass().getMethod("getEnvelope");
+                getEnvelope.setAccessible(true);
+                g = (Geometry)getEnvelope.invoke(o);
+            } catch (Exception e) {
+                LOG.error("Error while getting the envelope.", e);
+            }
         } else if (rsl instanceof GMLFeatureService) {
             final GMLFeatureService sffs = (GMLFeatureService)rsl;
             g = ((GMLFeatureFactory)sffs.getFeatureFactory()).getEnvelope();

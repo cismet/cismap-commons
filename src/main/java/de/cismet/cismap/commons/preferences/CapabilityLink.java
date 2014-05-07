@@ -20,10 +20,11 @@ public class CapabilityLink {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    public static final String OGC = "OGC";                // NOI18N
-    public static final String OGC_DEPRECATED = "OGC-WMS"; // NOI18N
-    public static final String SEPARATOR = "SEPARATOR";    // NOI18N
-    public static final String MENU = "MENU";              // NOI18N
+    public static final String OGC = "OGC";                 // NOI18N
+    public static final String OGC_DEPRECATED = "OGC-WMS";  // NOI18N
+    public static final String SEPARATOR = "SEPARATOR";     // NOI18N
+    public static final String MENU = "MENU";               // NOI18N
+    public static final String INTERNAL_DB = "INTERNAL-DB"; // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 

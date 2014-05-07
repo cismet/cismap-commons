@@ -12,6 +12,7 @@
 package de.cismet.cismap.commons.featureservice.factory;
 
 import com.vividsolutions.jts.geom.Geometry;
+
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -27,15 +28,22 @@ public abstract class JDBCFeatureFactory<FT extends FeatureServiceFeature, QT> e
     //~ Instance fields --------------------------------------------------------
 
     protected Crs crs = CismapBroker.getInstance().getSrs();
-    protected Geometry envelope; 
+    protected Geometry envelope;
+    protected String databasePath;
+    protected String tableName;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new DegreeFeatureFactory object.
+     *
+     * @param  databasePath  DOCUMENT ME!
+     * @param  tableName     DOCUMENT ME!
      */
-    public JDBCFeatureFactory() {
+    public JDBCFeatureFactory(final String databasePath, final String tableName) {
         super();
+        this.databasePath = databasePath;
+        this.tableName = tableName;
     }
 
     /**
@@ -45,6 +53,8 @@ public abstract class JDBCFeatureFactory<FT extends FeatureServiceFeature, QT> e
      */
     protected JDBCFeatureFactory(final JDBCFeatureFactory dff) {
         super(dff);
+        this.databasePath = dff.databasePath;
+        this.tableName = dff.tableName;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -68,9 +78,20 @@ public abstract class JDBCFeatureFactory<FT extends FeatureServiceFeature, QT> e
     }
 
     /**
-     * @return the envelope
+     * DOCUMENT ME!
+     *
+     * @return  the envelope
      */
     public Geometry getEnvelope() {
         return envelope;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  tableName  DOCUMENT ME!
+     */
+    public void setTableName(final String tableName) {
+        this.tableName = tableName;
     }
 }

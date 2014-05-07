@@ -13,16 +13,18 @@ package de.cismet.cismap.commons.featureservice;
 
 import org.deegree.io.shpapi.FileHeader;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.RandomAccessFile;
 
+import java.security.MessageDigest;
+
 import de.cismet.cismap.commons.exceptions.FileExtensionContentMissmatchException;
 import de.cismet.cismap.commons.exceptions.UnknownDocumentException;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.security.MessageDigest;
+import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 
 /**
  * DOCUMENT ME!
@@ -160,25 +162,25 @@ public class DocumentFeatureServiceFactory {
                 }
                 if (isShapeFile(documentFile)) {
                     if (true) {
-                        MessageDigest md5 = MessageDigest.getInstance("MD5");
-                        BufferedInputStream is = new BufferedInputStream(new FileInputStream(documentFile));
-                        byte[] inputArray = new byte[256];
+                        final MessageDigest md5 = MessageDigest.getInstance("MD5");
+                        final BufferedInputStream is = new BufferedInputStream(new FileInputStream(documentFile));
+                        final byte[] inputArray = new byte[256];
                         int byteCount = 0;
-                        
-                        while ( (byteCount = is.read(inputArray)) != -1) {
+
+                        while ((byteCount = is.read(inputArray)) != -1) {
                             md5.update(inputArray, 0, byteCount);
                         }
-                        byte[] hashValue = md5.digest();
-                        StringBuffer hexString = new StringBuffer();
-                        
-                        for (byte b : hashValue) {
-                            hexString.append( String.format("%02x", b) );
+                        final byte[] hashValue = md5.digest();
+                        final StringBuffer hexString = new StringBuffer();
+
+                        for (final byte b : hashValue) {
+                            hexString.append(String.format("%02x", b));
                         }
-                        
+
                         String fileName = documentFile.getName();
                         fileName = fileName.substring(0, fileName.lastIndexOf("."));
-                        String tableName = fileName + hexString;
-                        return new H2FeatureService(fileName, "~/db/test2", tableName, null, documentFile);
+                        final String tableName = fileName + "_" + hexString;
+                        return new H2FeatureService(fileName, H2FeatureServiceFactory.DB_NAME, tableName, null, documentFile);
                     } else {
                         return new ShapeFileFeatureService(documentFile.getName(),
                                 documentFile.toURI(),

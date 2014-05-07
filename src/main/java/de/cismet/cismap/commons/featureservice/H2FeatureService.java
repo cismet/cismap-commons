@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 
 import org.jdom.Element;
 
+import java.io.File;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,6 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
-import java.io.File;
 
 /**
  * DOCUMENT ME!
@@ -41,7 +42,6 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     private static final Logger LOG = Logger.getLogger(H2FeatureService.class);
     public static final Map<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
     public static final String H2_FEATURELAYER_TYPE = "H2FeatureServiceLayer"; // NOI18N
-    private File shapeFile;
 
     static {
         layerIcons.put(
@@ -66,6 +66,10 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png"))); // NOI18N
     }
 
+    //~ Instance fields --------------------------------------------------------
+
+    private File shapeFile;
+    private boolean initialised = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -96,7 +100,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             final List<FeatureServiceAttribute> attributes) throws Exception {
         this(name, databasePath, tableName, attributes, null);
     }
-    
+
     /**
      * Creates a new H2FeatureService object.
      *
@@ -104,13 +108,15 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
      * @param   databasePath  DOCUMENT ME!
      * @param   tableName     DOCUMENT ME!
      * @param   attributes    DOCUMENT ME!
+     * @param   shapeFile     DOCUMENT ME!
      *
      * @throws  Exception  DOCUMENT ME!
      */
     public H2FeatureService(final String name,
             final String databasePath,
             final String tableName,
-            final List<FeatureServiceAttribute> attributes, final File shapeFile) throws Exception {
+            final List<FeatureServiceAttribute> attributes,
+            final File shapeFile) throws Exception {
         super(name, databasePath, tableName, attributes);
         this.shapeFile = shapeFile;
     }
@@ -128,7 +134,8 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
-        return new H2FeatureServiceFactory(databasePath, tableName, shapeFile);
+        return new H2FeatureServiceFactory(name, databasePath, tableName, shapeFile, layerInitWorker);
+//        return new H2FeatureServiceFactory(name, databasePath, tableName, shapeFile, layerInitWorker, parseSLD(getSLDDefiniton()));
     }
 
     @Override
@@ -148,5 +155,14 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     @Override
     public Object clone() {
         return new H2FeatureService(this);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the initialised
+     */
+    public boolean isInitialised() {
+        return initialised;
     }
 }

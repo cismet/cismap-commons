@@ -12,8 +12,6 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 
 import org.deegree.io.shpapi.ShapeFile;
 import org.deegree.model.feature.FeatureCollection;
@@ -21,7 +19,6 @@ import org.deegree.model.feature.FeatureCollection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * DOCUMENT ME!
@@ -41,8 +38,6 @@ public class ShapeInfo {
     private ShapeFile file;
     private int srid;
     private FeatureCollection fc;
-    private Statement statement;
-    private PreparedStatement geometryStatement;
 
 
     //~ Constructors -----------------------------------------------------------
@@ -62,24 +57,6 @@ public class ShapeInfo {
         this.fc = fc;
     }
     
-    /**
-     * Creates a new ShapeInfo object.
-     *
-     * @param  typename  DOCUMENT ME!
-     * @param  file      DOCUMENT ME!
-     * @param  srid      DOCUMENT ME!
-     * @param  fc        DOCUMENT ME!
-     */
-    public ShapeInfo(final String typename, final Statement statement, final int srid, final String geoField, final String tableName) {
-        this.typename = typename;
-        this.statement = statement;
-        this.srid = srid;
-        try {
-            geometryStatement = statement.getConnection().prepareStatement("select " + geoField + " from " + tableName + " where id = ?");
-        } catch (Exception e) {
-            //todo: Ausgabe
-        }
-    }
 
     //~ Methods ----------------------------------------------------------------
 
@@ -195,27 +172,6 @@ public class ShapeInfo {
      */
     public synchronized void addGeometryToCache(final int id, final Geometry geo) {
         geoCache.add(id, geo);
-    }
-
-    /**
-     * @return the statement
-     */
-    public Statement getStatement() {
-        return statement;
-    }
-
-    /**
-     * @param statement the statement to set
-     */
-    public void setStatement(Statement statement) {
-        this.statement = statement;
-    }
-
-    /**
-     * @return the geometryStatement
-     */
-    public PreparedStatement getGeometryStatement() {
-        return geometryStatement;
     }
 
     //~ Inner Classes ----------------------------------------------------------
