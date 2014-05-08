@@ -64,20 +64,6 @@ public class HeadlessMapProvider {
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(HeadlessMapProvider.class);
     private static final double FEATURE_RESOLUTION_FACTOR = 125.0d;
 
-    /**
-     * @return the featureResolutionFactor
-     */
-    public double getFeatureResolutionFactor() {
-        return featureResolutionFactor;
-    }
-
-    /**
-     * @param featureResolutionFactor the featureResolutionFactor to set
-     */
-    public void setFeatureResolutionFactor(double featureResolutionFactor) {
-        this.featureResolutionFactor = featureResolutionFactor;
-    }
-
     //~ Enums ------------------------------------------------------------------
 
     /**
@@ -211,6 +197,24 @@ public class HeadlessMapProvider {
     //~ Methods ----------------------------------------------------------------
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  the featureResolutionFactor
+     */
+    public double getFeatureResolutionFactor() {
+        return featureResolutionFactor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureResolutionFactor  the featureResolutionFactor to set
+     */
+    public void setFeatureResolutionFactor(final double featureResolutionFactor) {
+        this.featureResolutionFactor = featureResolutionFactor;
+    }
+
+    /**
      * Creates a HeadlessMapProvider and adds the raster layers and feature layers from the mapping component to it.
      *
      * @param   mappingComponent  DOCUMENT ME!
@@ -273,7 +277,6 @@ public class HeadlessMapProvider {
         }
         return headlessMapProvider;
     }
-    
 
     /**
      * DOCUMENT ME!
@@ -293,7 +296,6 @@ public class HeadlessMapProvider {
         this.printingResolution = printingResolution;
     }
 
-
     /**
      * DOCUMENT ME!
      *
@@ -302,7 +304,6 @@ public class HeadlessMapProvider {
     public MappingComponent getMappingComponent() {
         return map;
     }
-
 
     /**
      * Adds a PropertyChangeListener that will notify about the progress of the map building.
@@ -385,7 +386,7 @@ public class HeadlessMapProvider {
     public Image getImage(final int dpi, final double widthInMillimeters, final double heightInMilimeters) {
         return null;
     }
-    
+
     /**
      * This is the method called when you need to fill in a report: for jasper with (72 as basedpi and widzth and height
      * with the dimension of the image in the report

@@ -152,6 +152,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
      * @param  propertyName   DOCUMENT ME!
      * @param  propertyValue  DOCUMENT ME!
      */
+    @Override
     public void setProperty(final String propertyName, final Object propertyValue) {
         if (!existProperties()) {
             super.setProperties(getProperties());
@@ -175,6 +176,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
      *
      * @Override  DOCUMENT ME!
      */
+    @Override
     public void saveChanges() throws Exception {
         if (!existProperties()) {
             return;
