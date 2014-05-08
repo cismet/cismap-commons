@@ -949,13 +949,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             if (info == null) {
                 info = new JDBCFeatureInfo(conn, 35833, geometryField, tableName);
             }
-//            List style = getStyle(name);
+            List style = getStyle(name);
 
             while (rs.next()) {
                 if ((workerThread != null) && workerThread.isCancelled()) {
                     return null;
                 }
-                final JDBCFeature feature = new JDBCFeature(info);
+                final JDBCFeature feature = new JDBCFeature(info, style);
                 feature.setId(rs.getInt(idField));
                 feature.setLayerProperties(this.getLayerProperties());
                 selectedFeatures.add(feature);
