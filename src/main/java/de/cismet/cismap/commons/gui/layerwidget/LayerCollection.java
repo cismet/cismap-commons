@@ -29,6 +29,7 @@ import de.cismet.cismap.commons.CidsLayerFactory;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
@@ -192,6 +193,8 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
                 ((WebFeatureService)layer).setCrs(srs);
             } else if (layer instanceof ShapeFileFeatureService) {
                 ((ShapeFileFeatureService)layer).setCrs(srs);
+            } else if (layer instanceof JDBCFeatureService) {
+                ((JDBCFeatureService)layer).setCrs(srs);
             } else if (layer instanceof LayerCollection) {
                 ((LayerCollection)layer).setCrs(srs);
             } else {

@@ -19,7 +19,6 @@ import org.deegree.model.feature.FeatureCollection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * DOCUMENT ME!

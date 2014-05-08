@@ -21,6 +21,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import de.cismet.cismap.commons.ModeLayer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.featureservice.GMLFeatureService;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
@@ -53,6 +54,7 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
     private static int SIMPLEWMS = 224;
     private static int WFS = 256;
     private static int WFST = 288;
+    private static int H2 = 300;
 
     //~ Instance fields --------------------------------------------------------
 
@@ -236,6 +238,19 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
             new ImageIcon(
                 getClass().getResource(
                     "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png")));            // NOI18N
+
+        icons.put(new IconType(H2, true, true),
+            new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png"))); // NOI18N
+        icons.put(new IconType(H2, false, true),
+            new ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShapeInvisible.png")));  // NOI18N
+        icons.put(new IconType(H2, true, false),
+            new ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShape.png")));  // NOI18N
+        icons.put(new IconType(H2, false, false),
+            new ImageIcon(
+                getClass().getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png")));            // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -310,6 +325,8 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
                 ret.setIcon(getRightIcon(SHAPE, layer.getPNode().getVisible(), layer.isEnabled()));
             } else if (value instanceof SimplePostgisFeatureService) {
                 ret.setIcon(getRightIcon(POSTGIS, layer.getPNode().getVisible(), layer.isEnabled()));
+            } else if (value instanceof H2FeatureService) {
+                ret.setIcon(getRightIcon(H2, layer.getPNode().getVisible(), layer.isEnabled()));
             } else {
                 ret.setIcon(getRightIcon(SUPPORTER, layer.getPNode().getVisible(), layer.isEnabled()));
             }
