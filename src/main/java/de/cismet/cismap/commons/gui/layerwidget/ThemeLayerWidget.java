@@ -1268,7 +1268,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         hasFocus);
                 final JLabel retLab = (JLabel)ret;
                 lab = new JLabel(retLab.getText(), retLab.getIcon(), retLab.getHorizontalAlignment());
-                
+
                 if (value instanceof LayerCollection) {
                     if (expanded) {
                         lab.setIcon(openIcon);
