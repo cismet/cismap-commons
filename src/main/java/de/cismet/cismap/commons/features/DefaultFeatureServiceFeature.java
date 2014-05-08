@@ -492,4 +492,25 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         hash = (79 * hash) + ((this.getClass().getName() != null) ? this.getClass().getName().hashCode() : 0);
         return hash;
     }
+
+    /**
+     * Ändert das dem Namen zugeordnete Property.
+     *
+     * @param  propertyName   Name des gesuchten Objekts
+     * @param  propertyValue  neuer Wert des Properties
+     */
+    @Override
+    public void setProperty(final String propertyName, final Object propertyValue) {
+        container.put(propertyName, propertyValue);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  Exception                      DOCUMENT ME!
+     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     */
+    public void saveChanges() throws Exception {
+        throw new UnsupportedOperationException();
+    }
 }
