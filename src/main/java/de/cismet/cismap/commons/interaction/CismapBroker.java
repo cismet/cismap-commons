@@ -103,6 +103,7 @@ public class CismapBroker {
     private String defaultCrs = "EPSG:31466";
     private int DefaultCrsAlias = -1;
     private MetaSearchFacade metaSearch;
+    private boolean useInternalDb = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -965,5 +966,23 @@ public class CismapBroker {
         }
 
         return result;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the useInternalDb
+     */
+    public boolean isUseInternalDb() {
+        return useInternalDb;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  useInternalDb  the useInternalDb to set
+     */
+    public void setUseInternalDb(final boolean useInternalDb) {
+        this.useInternalDb = useInternalDb;
     }
 }

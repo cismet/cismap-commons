@@ -49,6 +49,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -64,6 +65,7 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.logging.Level;
 
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -86,6 +88,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.BoundingBox;
@@ -124,10 +128,6 @@ import de.cismet.tools.configuration.Configurable;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
-import java.io.File;
-import javax.swing.AbstractAction;
-import javax.swing.tree.TreeCellRenderer;
-import javax.swing.tree.TreeModel;
 
 /**
  * DOCUMENT ME!
@@ -633,30 +633,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }//GEN-LAST:event_cmdAddFromListActionPerformed
+    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }//GEN-LAST:event_cmdRefreshActionPerformed
+    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
@@ -669,16 +669,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }//GEN-LAST:event_cmdAddByUrlActionPerformed
+    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }//GEN-LAST:event_cmdRemoveActionPerformed
+    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -737,7 +737,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -746,16 +746,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }//GEN-LAST:event_cmdCollapseActionPerformed
+    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpCapabilitiesStateChanged
+    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpCapabilitiesStateChanged
         addFilterToActiveTree();
-    }//GEN-LAST:event_tbpCapabilitiesStateChanged
+    }                                                                                   //GEN-LAST:event_tbpCapabilitiesStateChanged
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
@@ -848,9 +848,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     link = str.toString();
                 } catch (IOException ioe) {
                     /*
-                        * bug #4094987 sun.io.MalformedInputException: Missing byte-order mark e.g. if dragging from MS
-                        * Word 97 to Java still a bug in 1.2 final
-                        */
+                     * bug #4094987 sun.io.MalformedInputException: Missing byte-order mark e.g. if dragging from MS
+                     * Word 97 to Java still a bug in 1.2 final
+                     */
                     System.err.println("cannot read" + ioe);                        // NOI18N
                     dtde.dropComplete(false);
                     final String message = org.openide.util.NbBundle.getMessage(
@@ -945,7 +945,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 @Override
                 public void run() {
                     try {
-                        final Class treeRendererClass = Class.forName("de.cismet.cismap.cidslayer.CidsCapabilitesTreeCellRenderer");
+                        final Class treeRendererClass = Class.forName(
+                                "de.cismet.cismap.cidslayer.CidsCapabilitesTreeCellRenderer");
                         final Class treeModelClass = Class.forName("de.cismet.cismap.cidslayer.CidsLayerTreeModel");
 //                        final Class treeModelClass = ClassLoader.getSystemClassLoader()
 //                                    .loadClass("de.cismet.cismap.cidslayer.CidsLayerTreeModel");

@@ -25,6 +25,7 @@ import java.security.MessageDigest;
 import de.cismet.cismap.commons.exceptions.FileExtensionContentMissmatchException;
 import de.cismet.cismap.commons.exceptions.UnknownDocumentException;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -161,7 +162,7 @@ public class DocumentFeatureServiceFactory {
                     log.debug("File extension ist shp");
                 }
                 if (isShapeFile(documentFile)) {
-                    if (true) {
+                    if (CismapBroker.getInstance().isUseInternalDb()) {
                         final MessageDigest md5 = MessageDigest.getInstance("MD5");
                         final BufferedInputStream is = new BufferedInputStream(new FileInputStream(documentFile));
                         final byte[] inputArray = new byte[256];
