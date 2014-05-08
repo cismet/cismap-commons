@@ -1651,7 +1651,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
 
         return image;
     }
-    
+
     /**
      * Ändert das dem Namen zugeordnete Property.
      *
@@ -1672,7 +1672,6 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     public void saveChanges() throws Exception {
         throw new UnsupportedOperationException();
     }
-    
 
     //~ Inner Classes ----------------------------------------------------------
 

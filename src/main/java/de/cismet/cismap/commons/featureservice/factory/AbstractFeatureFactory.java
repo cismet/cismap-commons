@@ -32,7 +32,6 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.*;
-import java.util.LinkedList;
 
 /**
  * Abstract impelementation of a FeatureFactory. Supports re-evaluation of id and annotation expressions.
