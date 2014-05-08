@@ -151,10 +151,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @param  workerThread  DOCUMENT ME!
      */
     public H2FeatureServiceFactory(final String name,
-            final String databasePath,
-            final String tableName,
-            final File file,
-            final SwingWorker workerThread) {
+        final String databasePath,
+        final String tableName,
+        final File file,
+        final SwingWorker workerThread,
+        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
         super(databasePath, tableName);
         this.name = name;
 //        this.styles = styles;
@@ -948,13 +949,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             if (info == null) {
                 info = new JDBCFeatureInfo(conn, 35833, geometryField, tableName);
             }
-//            List style = getStyle(name);
+            List style = getStyle(name);
 
             while (rs.next()) {
                 if ((workerThread != null) && workerThread.isCancelled()) {
                     return null;
                 }
-                final JDBCFeature feature = new JDBCFeature(info);
+                final JDBCFeature feature = new JDBCFeature(info, style);
                 feature.setId(rs.getInt(idField));
                 feature.setLayerProperties(this.getLayerProperties());
                 selectedFeatures.add(feature);
