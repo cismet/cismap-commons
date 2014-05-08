@@ -166,6 +166,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected FeatureFactory featureFactory = null;
     /* the list that holds the names of the featureServiceAttributes of the FeatureService in the specified order */
     protected List<String> orderedFeatureServiceAttributes;
+    protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
     String sldDefinition;
     final XMLInputFactory factory = XMLInputFactory.newInstance();
     Legends legends = new Legends();
