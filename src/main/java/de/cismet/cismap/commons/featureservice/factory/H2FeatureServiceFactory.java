@@ -152,10 +152,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @param  styles        DOCUMENT ME!
      */
     public H2FeatureServiceFactory(final String name,
-            final String databasePath,
-            final String tableName,
-            final File file,
-            final SwingWorker workerThread) {
+        final String databasePath,
+        final String tableName,
+        final File file,
+        final SwingWorker workerThread,
+        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
         super(databasePath, tableName);
         this.name = name;
 //        this.styles = styles;
