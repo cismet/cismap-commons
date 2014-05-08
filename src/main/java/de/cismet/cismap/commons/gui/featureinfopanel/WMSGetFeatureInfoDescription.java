@@ -16,12 +16,13 @@ import com.vividsolutions.jts.geom.Point;
 
 import edu.umd.cs.piccolo.event.PInputEvent;
 
-import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.raster.wms.WMSLayer;
-import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.raster.wms.WMSLayer;
+import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 
 /**
  * DOCUMENT ME!
@@ -181,16 +182,23 @@ public class WMSGetFeatureInfoDescription implements Feature {
     @Override
     public String toString() {
         String label = service.getName();
-        
-        if (geometry != null && geometry instanceof Point) {
+
+        if ((geometry != null) && (geometry instanceof Point)) {
             label += round(((Point)geometry).getX()) + ", " + round(((Point)geometry).getY());
         }
-        
+
         return label;
     }
-    
-    private String round(double value) {
-        int precision = (int)Math.log10(value) + 3;
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   value  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String round(final double value) {
+        final int precision = (int)Math.log10(value) + 3;
         return new BigDecimal(value).round(new MathContext(precision, RoundingMode.HALF_EVEN)).toPlainString();
     }
 }

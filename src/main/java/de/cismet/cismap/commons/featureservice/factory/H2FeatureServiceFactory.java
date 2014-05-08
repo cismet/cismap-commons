@@ -447,8 +447,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             rs.close();
             st.close();
             if (saveAsLastCreated) {
-//                updateLastCreatedFeatures(selectedFeatures, boundingBox.getGeometry(srid), query);
-                updateLastCreatedFeatures(selectedFeatures);
+                updateLastCreatedFeatures(selectedFeatures, boundingBox.getGeometry(srid), query);
             }
             return selectedFeatures;
         } catch (SQLException e) {

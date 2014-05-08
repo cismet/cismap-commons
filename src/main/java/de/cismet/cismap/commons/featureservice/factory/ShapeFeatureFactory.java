@@ -639,19 +639,19 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                 selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
                 final ShapeInfo info = new ShapeInfo(filename, persShapeFile, shapeSrid, fc);
                 int count = 0;
-            
+
 //                if (!saveAsLastCreated || recordNumbers.length < 60000) {
-                    for (final int record : recordNumbers) {
-                        ++count;
-                        final ShapeFeature featureServiceFeature = createFeatureInstance(null, info, record);
-                        this.initialiseFeature(featureServiceFeature, null, false, record);
-                        selectedFeatures.add(featureServiceFeature);
-                        
-                        if (saveAsLastCreated && (count > 50000)) {
-                            break;
-                        }
+                for (final int record : recordNumbers) {
+                    ++count;
+                    final ShapeFeature featureServiceFeature = createFeatureInstance(null, info, record);
+                    this.initialiseFeature(featureServiceFeature, null, false, record);
+                    selectedFeatures.add(featureServiceFeature);
+
+                    if (saveAsLastCreated && (count > 50000)) {
+                        break;
                     }
                 }
+            }
 //            }
 
             if (logger.isDebugEnabled()) {

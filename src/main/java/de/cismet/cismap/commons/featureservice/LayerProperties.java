@@ -15,7 +15,6 @@ import java.util.Map;
 
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.featureservice.style.Style;
-import java.util.Map;
 
 /**
  * Combines a set of commen properties of a group of features which belong to the same layer, for example the styles, id
@@ -195,7 +194,12 @@ public interface LayerProperties extends ConvertableToXML, Cloneable {
      * @param  idExpressionEnabled  set to {@code true} if enabled
      */
     void setIdExpressionEnabled(boolean idExpressionEnabled);
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     AbstractFeatureService getFeatureService();
 
     /**
