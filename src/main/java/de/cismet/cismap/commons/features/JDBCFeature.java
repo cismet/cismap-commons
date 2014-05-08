@@ -45,18 +45,17 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
     //~ Constructors -----------------------------------------------------------
 
     /**
-    * Creates a new ShapeFeature object.
-    *
-    * @param  shapeInfo  typename DOCUMENT ME!
-    * @param  styles     DOCUMENT ME!
-    */
+     * Creates a new ShapeFeature object.
+     *
+     * @param  shapeInfo  typename DOCUMENT ME!
+     * @param  styles     DOCUMENT ME!
+     */
     public JDBCFeature(final JDBCFeatureInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
         setSLDStyles(styles); // super.style = styles;
         this.featureInfo = shapeInfo;
     }
 
     //~ Methods ----------------------------------------------------------------
-
 
     @Override
     public HashMap getProperties() {
@@ -131,6 +130,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
      * @param  propertyName   DOCUMENT ME!
      * @param  propertyValue  DOCUMENT ME!
      */
+    @Override
     public void setProperty(final String propertyName, final Object propertyValue) {
         if (!existProperties()) {
             super.setProperties(getProperties());
@@ -154,6 +154,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
      *
      * @Override  DOCUMENT ME!
      */
+    @Override
     public void saveChanges() throws Exception {
         if (!existProperties()) {
             return;
@@ -206,6 +207,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
      *
      * @param  map  DOCUMENT ME!
      */
+    @Override
     public void addProperties(final Map<String, Object> map) {
         // nothing to do
     }
