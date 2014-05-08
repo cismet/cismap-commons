@@ -1087,7 +1087,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     final XBoundingBox bb = new XBoundingBox(g);
 
                     try {
-                        features.addAll(afs.getFeatureFactory().createFeatures(afs.getQuery(), bb, null));
+                        features.addAll(afs.getFeatureFactory().createFeatures(afs.getQuery(), bb, null, 0, 0, null));
                     } catch (Exception ex) {
                         log.error("Error while retrieving features", ex);
                     }
@@ -1268,6 +1268,14 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         hasFocus);
                 final JLabel retLab = (JLabel)ret;
                 lab = new JLabel(retLab.getText(), retLab.getIcon(), retLab.getHorizontalAlignment());
+                
+                if (value instanceof LayerCollection) {
+                    if (expanded) {
+                        lab.setIcon(openIcon);
+                    } else {
+                        lab.setIcon(closedIcon);
+                    }
+                }
             }
             final JPanel pan = new JPanel();
             final JCheckBox leafRenderer = new JCheckBox();
