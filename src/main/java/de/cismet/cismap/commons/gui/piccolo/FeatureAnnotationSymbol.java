@@ -21,7 +21,8 @@ public class FeatureAnnotationSymbol extends FixedPImage implements ParentNodeIs
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(FeatureAnnotationSymbol.class);
+    private static final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
+            FeatureAnnotationSymbol.class);
 
     //~ Instance fields --------------------------------------------------------
 
