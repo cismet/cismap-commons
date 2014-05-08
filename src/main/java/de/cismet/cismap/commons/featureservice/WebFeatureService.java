@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.jdom.Element;
 
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,8 @@ import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.WFSFeatureFactory;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.DefaultQueryButtonAction;
+import de.cismet.cismap.commons.interaction.DefaultXMLQueryButtonAction;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.wfs.WFSFacade;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
@@ -94,6 +97,26 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     /** the version of the wfs. */
     private FeatureType feature;
     private String backupVersion = "";
+
+    //~ Instance initializers --------------------------------------------------
+
+    {
+        queryButtons.clear();
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsEqualTo", "="));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsNotEqualTo", "<>"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsLike", "Like"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsGreaterThan", ">"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsGreaterThanOrEqualTo", ">="));
+        queryButtons.add(new DefaultXMLQueryButtonAction("And", "And"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsLessThan", "<"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsLessThanOrEqualTo", "<="));
+        queryButtons.add(new DefaultXMLQueryButtonAction("Or", "Or"));
+        queryButtons.add(new DefaultQueryButtonAction("_", 1));
+        queryButtons.add(new DefaultQueryButtonAction("%", 1));
+        queryButtons.add(new DefaultXMLQueryButtonAction("Not", "Not"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("PropertyIsNull", "Null"));
+        queryButtons.add(new DefaultXMLQueryButtonAction("Literal", "Lit"));
+    }
 
     //~ Constructors -----------------------------------------------------------
 
@@ -465,5 +488,15 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
 //        } catch (Exception e) {
 //            LOG.error("Error while creating a new feature factory.", e);
 //        }
+    }
+
+    @Override
+    public String decoratePropertyName(final String name) {
+        return "<PropertyName>" + name + "</PropertyName>";
+    }
+
+    @Override
+    public String decoratePropertyValue(final String value) {
+        return "<Literal>" + value + "</Literal>";
     }
 }
