@@ -30,7 +30,6 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.*;
-import java.util.LinkedList;
 
 /**
  * Abstract impelementation of a FeatureFactory. Supports re-evaluation of id and annotation expressions.
@@ -58,13 +57,12 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // protected boolean primaryAnnotationExpressionChanged = true;
     // protected boolean secondaryAnnotationExpressionChanged = true;
     protected Vector<FT> lastCreatedfeatureVector = new Vector();
-    private volatile boolean isInterruptedAllowed = true;
     // private BoundingBox lastBB = null;
     // private BoundingBox diff = null;
     // private final WKTReader reader;
     protected Map<String, LinkedList<Style>> styles;
-    protected String layerName = null;
-    
+    private volatile boolean isInterruptedAllowed = true;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
