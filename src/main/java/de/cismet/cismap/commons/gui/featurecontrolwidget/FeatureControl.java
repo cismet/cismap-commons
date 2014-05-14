@@ -721,27 +721,32 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      * @param  fc  DOCUMENT ME!
      */
     private void addFeatureToSelection(final FeatureCollection fc) {
-        final Collection<Feature> features = fc.getSelectedFeatures();
-        jxtFeatures.getSelectionModel().removeListSelectionListener(theListSelectionListener);
-        jxtFeatures.getSelectionModel().clearSelection();
-        if ((features != null) && (features.size() > 0)) {
-            final Iterator<Feature> featureIt = features.iterator();
-            for (int i = 0; i < features.size(); ++i) {
-                Feature current = featureIt.next();
-                if (!FeatureGroups.SHOW_GROUPING_ENABLED && (current instanceof SubFeature)) {
-                    final SubFeature sf = (SubFeature)current;
-                    current = FeatureGroups.getRootFeature(sf);
+        try {
+            final Collection<Feature> features = fc.getSelectedFeatures();
+            jxtFeatures.getSelectionModel().removeListSelectionListener(theListSelectionListener);
+            jxtFeatures.getSelectionModel().clearSelection();
+            if ((features != null) && (features.size() > 0)) {
+                final Iterator<Feature> featureIt = features.iterator();
+                for (int i = 0; i < features.size(); ++i) {
+                    Feature current = featureIt.next();
+                    if (!FeatureGroups.SHOW_GROUPING_ENABLED && (current instanceof SubFeature)) {
+                        final SubFeature sf = (SubFeature)current;
+                        current = FeatureGroups.getRootFeature(sf);
+                    }
+                    final int collectionIndex = fc.getAllFeatures().indexOf(current);
+                    if (collectionIndex != -1) {
+                        final int viewIndex = jxtFeatures.convertRowIndexToView(collectionIndex);
+                        jxtFeatures.getSelectionModel().addSelectionInterval(viewIndex, viewIndex);
+                    }
                 }
-                final int collectionIndex = fc.getAllFeatures().indexOf(current);
-                if (collectionIndex != -1) {
-                    final int viewIndex = jxtFeatures.convertRowIndexToView(collectionIndex);
-                    jxtFeatures.getSelectionModel().addSelectionInterval(viewIndex, viewIndex);
-                }
+            } else {
+                jxtFeatures.scrollRowToVisible(0);
             }
-        } else {
-            jxtFeatures.scrollRowToVisible(0);
+            jxtFeatures.getSelectionModel().addListSelectionListener(theListSelectionListener);
+        } catch (Exception e) {
+            // TODO
+            LOG.error("Error in addFeatureToSelection", e);
         }
-        jxtFeatures.getSelectionModel().addListSelectionListener(theListSelectionListener);
     }
 
     /**
