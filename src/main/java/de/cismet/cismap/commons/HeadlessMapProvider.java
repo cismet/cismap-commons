@@ -225,7 +225,8 @@ public class HeadlessMapProvider {
         final HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
         ((ActiveLayerModel)headlessMapProvider.getMappingComponent().getMappingModel()).setSrs(
             mappingComponent.getMappingModel().getSrs());
-        headlessMapProvider.getMappingComponent().setInfoNodesVisible(mappingComponent.isInfoNodesVisible());
+        final boolean infoNodeVisible = mappingComponent.isInfoNodesVisible();
+        headlessMapProvider.getMappingComponent().setInfoNodesVisible(infoNodeVisible);
 
         // Raster Services
         final TreeMap rasterServices = mappingComponent.getMappingModel().getRasterServices();
@@ -273,7 +274,16 @@ public class HeadlessMapProvider {
 
         // Features
         for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
+            final boolean infoNodeExpanded = mappingComponent.getPFeatureHM().get(f).isInfoNodeExpanded();
             headlessMapProvider.addFeature(f);
+
+            if (infoNodeExpanded) {
+                final PFeature pf = headlessMapProvider.map.getPFeatureHM().get(f);
+
+                if (pf != null) {
+                    pf.setInfoNodeExpanded(true);
+                }
+            }
         }
         return headlessMapProvider;
     }
