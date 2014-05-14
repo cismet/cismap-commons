@@ -104,6 +104,7 @@ public class CismapBroker {
     private int DefaultCrsAlias = -1;
     private MetaSearchFacade metaSearch;
     private boolean useInternalDb = false;
+    private boolean checkForOverlappingGeometriesAfterFeatureRotation = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -984,5 +985,24 @@ public class CismapBroker {
      */
     public void setUseInternalDb(final boolean useInternalDb) {
         this.useInternalDb = useInternalDb;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isCheckForOverlappingGeometriesAfterFeatureRotation() {
+        return checkForOverlappingGeometriesAfterFeatureRotation;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  checkForOverlappingGeometriesAfterFeatureRotation  DOCUMENT ME!
+     */
+    public void setCheckForOverlappingGeometriesAfterFeatureRotation(
+            final boolean checkForOverlappingGeometriesAfterFeatureRotation) {
+        this.checkForOverlappingGeometriesAfterFeatureRotation = checkForOverlappingGeometriesAfterFeatureRotation;
     }
 }
