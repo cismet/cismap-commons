@@ -19,6 +19,7 @@ import org.jdom.Element;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -50,7 +51,6 @@ import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 
 import de.cismet.tools.StaticXMLTools;
-import java.awt.event.ActionEvent;
 
 /**
  * DOCUMENT ME!
@@ -113,8 +113,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Not"));
         SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Is"));
     }
-    
-    
+
     //~ Instance fields --------------------------------------------------------
 
     /* determines either the layer is enabled or not */
@@ -151,9 +150,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected FeatureFactory featureFactory = null;
     /* the list that holds the names of the featureServiceAttributes of the FeatureService in the specified order */
     protected List<String> orderedFeatureServiceAttributes;
+    protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
     private boolean initialisationError = false;
     private Element initElement = null;
-    protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
 
     //~ Constructors -----------------------------------------------------------
 
@@ -1233,8 +1232,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     public String decoratePropertyValue(final String value) {
         return "'" + value + "'";
     }
-    
-    
+
     /**
      * DOCUMENT ME!
      *
