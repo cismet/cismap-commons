@@ -33,6 +33,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureRotateAction;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
 
@@ -211,27 +212,28 @@ public class RotationPHandle extends PHandle {
             }
 
             boolean overlap = false;
-
-            if (!(pfeature.getFeature() instanceof SearchFeature)) {
-                // Ewig aufwändiger Check nach Überschneidungen
-                for (final Object o : selArr) {
-                    final Geometry g = ((PFeature)pfeature.getViewer().getPFeatureHM().get(o)).getFeature()
-                                .getGeometry();
-                    if (!overlap) {
-                        for (final Feature f : all) {
-                            if (!(g.equals(f.getGeometry())) && g.overlaps(f.getGeometry())) {
-                                overlap = true;
-                                break;
+            if (CismapBroker.getInstance().isCheckForOverlappingGeometriesAfterFeatureRotation()) {
+                if (!(pfeature.getFeature() instanceof SearchFeature)) {
+                    // Ewig aufwändiger Check nach Überschneidungen
+                    for (final Object o : selArr) {
+                        final Geometry g = ((PFeature)pfeature.getViewer().getPFeatureHM().get(o)).getFeature()
+                                    .getGeometry();
+                        if (!overlap) {
+                            for (final Feature f : all) {
+                                if (!(g.equals(f.getGeometry())) && g.overlaps(f.getGeometry())) {
+                                    overlap = true;
+                                    break;
+                                }
                             }
+                        } else {
+                            break;
                         }
-                    } else {
-                        break;
                     }
                 }
-            }
-            if (log.isDebugEnabled()) {
-                // Falls ja, dann Abfrage "Sind Sie sicher?"
-                log.debug("Nach Overlap-Check");
+                if (log.isDebugEnabled()) {
+                    // Falls ja, dann Abfrage "Sind Sie sicher?"
+                    log.debug("Nach Overlap-Check");
+                }
             }
             if (overlap) {
                 if (log.isDebugEnabled()) {
