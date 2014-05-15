@@ -22,21 +22,18 @@ import net.sf.jasperreports.view.JRViewer;
 import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.error.ErrorInfo;
 
-import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import java.lang.reflect.Constructor;
 
-import java.util.Collection;
+import java.util.EnumMap;
 import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import javax.swing.ImageIcon;
@@ -49,18 +46,14 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.Debug;
-import de.cismet.cismap.commons.MappingModel;
-import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.HeadlessMapProvider;
+import de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
-import de.cismet.cismap.commons.retrieval.RetrievalListener;
-import de.cismet.cismap.commons.retrieval.RetrievalService;
-
-import de.cismet.commons.concurrency.CismetConcurrency;
-import de.cismet.commons.concurrency.CismetExecutors;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -70,25 +63,20 @@ import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
 
+import static de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel.*;
+
 /**
  * DOCUMENT ME!
  *
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class PrintingWidget extends javax.swing.JDialog implements RetrievalListener {
+public class PrintingWidget extends javax.swing.JDialog implements PropertyChangeListener {
 
     //~ Static fields/initializers ---------------------------------------------
 
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(PrintingWidget.class);
     private static final boolean DEBUG = Debug.DEBUG;
-    public static final String TIP = "TIP";                   // NOI18N
-    public static final String INFO = "INFO";                 // NOI18N
-    public static final String SUCCESS = "SUCCESS";           // NOI18N
-    public static final String EXPERT = "EXPERT";             // NOI18N
-    public static final String WARN = "WARN";                 // NOI18N
-    public static final String ERROR = "ERROR";               // NOI18N
-    public static final String ERROR_REASON = "ERROR_REASON"; // NOI18N
-
     public static final String BB_MIN_X = "minX";
     public static final String BB_MIN_Y = "minY";
     public static final String BB_MAX_X = "maxX";
@@ -97,13 +85,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     //~ Instance fields --------------------------------------------------------
 
     PDFCreatingWaitDialog pdfWait;
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private MappingComponent mappingComponent = null;
     private String interactionModeAfterPrinting = "";            // NOI18N
-    private BufferedImage map;
-    private TreeMap<Integer, RetrievalService> services;
-    private TreeMap<Integer, Object> results;
-    private TreeMap<Integer, Object> erroneous;
     private AbstractPrintingInscriber inscriber = null;
     private ImageIcon errorImage = new javax.swing.ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/res/error.png")); // NOI18N
@@ -114,9 +97,9 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
     private Style styleWarn;
     private Style styleError;
     private Style styleErrorReason;
-    private HashMap<String, Style> styles = new HashMap<String, Style>();
-    private int imageWidth;
-    private int imageHeight;
+    private EnumMap<NotificationLevel, Style> styles = new EnumMap<NotificationLevel, Style>(NotificationLevel.class);
+    private HeadlessMapProvider headlessMapProvider;
+    private Future<Image> futureMapImage;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdBack;
     private javax.swing.JButton cmdCancel;
@@ -168,39 +151,41 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
         getRootPane().setDefaultButton(cmdOk);
         txpLoadingStatus.setBackground(this.getBackground());
         prbLoading.setForeground(panDesc.getBackground());
-        styleTip = txpLoadingStatus.addStyle(TIP, null);
+        styleTip = txpLoadingStatus.addStyle(TIP.name(), null);
         StyleConstants.setForeground(styleTip, Color.blue);
         StyleConstants.setFontSize(styleTip, 10);
         styles.put(TIP, styleTip);
-        styleSuccess = txpLoadingStatus.addStyle(SUCCESS, null);
+        styleSuccess = txpLoadingStatus.addStyle(SUCCESS.name(), null);
         StyleConstants.setForeground(styleSuccess, Color.green.darker());
         StyleConstants.setFontSize(styleSuccess, 10);
 
         styles.put(SUCCESS, styleSuccess);
-        styleInfo = txpLoadingStatus.addStyle(INFO, null);
+        styleInfo = txpLoadingStatus.addStyle(INFO.name(), null);
         StyleConstants.setForeground(styleInfo, Color.DARK_GRAY);
         StyleConstants.setFontSize(styleInfo, 10);
         styles.put(INFO, styleInfo);
-        styleExpert = txpLoadingStatus.addStyle(EXPERT, null);
+        styleExpert = txpLoadingStatus.addStyle(EXPERT.name(), null);
         StyleConstants.setForeground(styleExpert, Color.gray);
         StyleConstants.setFontSize(styleExpert, 10);
         styles.put(EXPERT, styleExpert);
-        styleWarn = txpLoadingStatus.addStyle(WARN, null);
+        styleWarn = txpLoadingStatus.addStyle(WARN.name(), null);
         StyleConstants.setForeground(styleWarn, Color.orange.darker());
         StyleConstants.setFontSize(styleWarn, 10);
         styles.put(WARN, styleWarn);
-        styleError = txpLoadingStatus.addStyle(ERROR, null);
+        styleError = txpLoadingStatus.addStyle(NotificationLevel.ERROR.name(), null);
         StyleConstants.setForeground(styleError, Color.red);
         StyleConstants.setFontSize(styleError, 10);
         StyleConstants.setBold(styleError, true);
-        styles.put(ERROR, styleError);
-        styleErrorReason = txpLoadingStatus.addStyle(ERROR_REASON, null);
+        styles.put(NotificationLevel.ERROR, styleError);
+        styleErrorReason = txpLoadingStatus.addStyle(ERROR_REASON.name(), null);
         StyleConstants.setForeground(styleErrorReason, Color.red);
         StyleConstants.setFontSize(styleErrorReason, 10);
         styles.put(ERROR_REASON, styleErrorReason);
 
         StaticSwingTools.setNiftyScrollBars(scpLoadingStatus);
         // txpLoadingStatus.setContentType("text/html");
+
+        headlessMapProvider = HeadlessMapProvider.createHeadlessMapProviderAndAddLayers(mappingComponent);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -500,8 +485,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      */
     public void startLoading() {
         if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("startLoading()");                        // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("startLoading()");                        // NOI18N
             }
         }
         txpLoadingStatus.setText("");                               // NOI18N
@@ -511,7 +496,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
             final Constructor constructor = c.getConstructor();
             inscriber = (AbstractPrintingInscriber)constructor.newInstance();
         } catch (Exception e) {
-            log.error("Error while loading the print template", e); // NOI18N
+            LOG.error("Error while loading the print template", e); // NOI18N
         }
         panInscribe.removeAll();
         panInscribe.add(inscriber, BorderLayout.CENTER);
@@ -524,54 +509,33 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                 PrintingWidget.class,
                 "PrintingWidget.startLoading().msg",
                 new Object[] { r.getResolution() }),
-            EXPERT);                                                        // NOI18N
+            EXPERT); // NOI18N
+
+        headlessMapProvider.addPropertyChangeListener(this);
+
         final BoundingBox bb =
             ((PrintingFrameListener)mappingComponent.getInputListener(MappingComponent.PRINTING_AREA_SELECTION))
                     .getPrintingBoundingBox();
-        imageWidth = (int)((double)t.getMapWidth() / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                        * (double)r.getResolution());
-        imageHeight = (int)((double)t.getMapHeight() / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                        * (double)r.getResolution());
+        // transform BoundingBox to XBoundingBox
+        final Crs crs = mappingComponent.getMappingModel().getSrs();
+        final boolean isMetric = crs.isMetric();
+        final XBoundingBox xbb = new XBoundingBox(bb.getX1(),
+                bb.getY1(),
+                bb.getX2(),
+                bb.getY2(),
+                crs.getCode(),
+                isMetric);
+        headlessMapProvider.setBoundingBox(xbb);
+
+        futureMapImage = headlessMapProvider.getImage((int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                r.getResolution(),
+                t.getMapWidth(),
+                t.getMapHeight());
+
         if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("image size: " + imageWidth + "x" + imageHeight); // NOI18N
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("BoundingBox:" + bb); // NOI18N
             }
-        }
-        if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("BoundingBox:" + bb);                             // NOI18N
-            }
-        }
-        map = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
-        map.getGraphics().setColor(Color.white);
-        map.getGraphics().fillRect(0, 0, imageWidth, imageHeight);
-        // map=Static2DTools.toCompatibleImage(map);
-        services = new TreeMap<Integer, RetrievalService>();
-        results = new TreeMap<Integer, Object>();
-        erroneous = new TreeMap<Integer, Object>();
-
-        final MappingModel model = mappingComponent.getMappingModel();
-
-        if (model instanceof MappingModel) {
-            final ActiveLayerModel alm = (ActiveLayerModel)model;
-
-            if ((alm.getMapServices().size() + alm.getRasterServices().size()) > 0) {
-                mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
-            } else {
-                final ThreadFactory threadFactory =
-                    CismetConcurrency.getInstance("cismap-commons")                // NOI18N
-                    .createThreadFactory("CreateImageFromFeatures-threadfactory"); // NOI18N
-                final ExecutorService dispatcher = CismetExecutors.newSingleThreadExecutor(threadFactory);
-                dispatcher.execute(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            createImageFromFeatures();
-                        }
-                    });
-            }
-        } else {
-            mappingComponent.queryServicesIndependentFromMap(imageWidth, imageHeight, bb, this);
         }
 
         prbLoading.setIndeterminate(true);
@@ -623,14 +587,14 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                     mappingComponent.getPrintingFrameLayer().removeAllChildren();
                     mappingComponent.setInteractionMode(interactionModeAfterPrinting);
                     if (DEBUG) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("interactionModeAfterPrinting:" + interactionModeAfterPrinting); // NOI18N
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("interactionModeAfterPrinting:" + interactionModeAfterPrinting); // NOI18N
                         }
                     }
 
                     try {
                         final HashMap param = new HashMap();
-                        param.put(t.getMapPlaceholder(), map);
+                        param.put(t.getMapPlaceholder(), futureMapImage.get());
                         String scaleDenomString = "" + s.getDenominator();                                            // NOI18N
                         if (scaleDenomString.equals("0") || scaleDenomString.equals("-1"))                            // NOI18N
                         {
@@ -651,8 +615,8 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                         param.put(BB_MAX_Y, bbox.getY2());
 
                         if (DEBUG) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Parameter:" + param); // NOI18N
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Parameter:" + param); // NOI18N
                             }
                         }
 
@@ -696,7 +660,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                             JasperPrintManager.printReport(jasperPrint, true);
                         }
                     } catch (Throwable tt) {
-                        log.error("Error during Jaspern", tt); // NOI18N
+                        LOG.error("Error during Jaspern", tt); // NOI18N
 
                         final ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(
                                     PrintingWidget.class,
@@ -754,206 +718,6 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
         this.interactionModeAfterPrinting = interactionModeAfterPrinting;
     }
 
-    @Override
-    public void retrievalStarted(final RetrievalEvent e) {
-        if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug("retrievalStarted" + e.getRetrievalService()); // NOI18N
-            }
-        }
-
-        if (e.isInitialisationEvent()) {
-            log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                        + "]: retrievalStarted ignored, initialisation event"); // NOI18N
-            return;
-        }
-
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                PrintingWidget.class,
-                "PrintingWidget.retrievalStarted(RetrievalEvent).msg",
-                new Object[] { e.getRetrievalService() }),
-            INFO); // NOI18N
-        if (e.getRetrievalService() instanceof ServiceLayer) {
-            final int num = ((ServiceLayer)e.getRetrievalService()).getLayerPosition();
-            services.put(num, e.getRetrievalService());
-        }
-    }
-
-    @Override
-    public void retrievalProgress(final RetrievalEvent e) {
-        if (DEBUG) {
-            if (log.isDebugEnabled()) {
-                log.debug(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrieval progress: "
-                            + e.getPercentageDone()); // NOI18N
-            }
-        }
-
-        if (e.isInitialisationEvent()) {
-            log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                        + "]: retrievalProgress ignored, initialisation event"); // NOI18N
-            return;
-        }
-    }
-
-    @Override
-    public void retrievalError(final RetrievalEvent e) {
-        log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalError"); // NOI18N
-
-        if (e.isInitialisationEvent()) {
-            log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                        + "]: retrievalError ignored, initialisation event"); // NOI18N
-            return;
-        }
-
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                PrintingWidget.class,
-                "PrintingWidget.retrievalError(RetrievalEvent).msg1",
-                new Object[] { e.getRetrievalService() }),
-            ERROR);        // NOI18N
-        addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                PrintingWidget.class,
-                "PrintingWidget.retrievalError(RetrievalEvent).msg2"),
-            ERROR_REASON); // NOI18N
-        retrievalComplete(e);
-//        if (e.getRetrievalService() instanceof  ServiceLayer) {
-//            int num=((ServiceLayer)e.getRetrievalService()).getLayerPosition();
-//            erroneous.put(num,e);
-//        }
-//        for (Object error:e.getErrors()) {
-//            addMessageToProgressPane(error.getClass().toString(),ERROR_REASON);
-//            addMessageToProgressPane(error.toString(),ERROR_REASON);
-//        }
-//        log.error("retrievalError"+e.getRetrievalService());
-    }
-
-    @Override
-    public void retrievalComplete(final RetrievalEvent e) {
-        if (log.isInfoEnabled()) {
-            log.info(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalComplete"); // NOI18N
-        }
-        if (e.isInitialisationEvent()) {
-            log.error(e.getRetrievalService() + "[" + e.getRequestIdentifier()
-                        + "]: retrievalComplete ignored, initialisation event");                         // NOI18N
-            return;
-        }
-
-        if (e.getRetrievalService() instanceof ServiceLayer) {
-            final int num = ((ServiceLayer)e.getRetrievalService()).getLayerPosition();
-            if (!e.isHasErrors()) {
-                results.put(num, e.getRetrievedObject());
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg",
-                        new Object[] { e.getRetrievalService() }),
-                    SUCCESS); // NOI18N
-            } else {
-                erroneous.put(num, e);
-                if (e.getRetrievedObject() instanceof Image) {
-                    // Image scaled=Static2DTools.scaleImage((Image)e.getRetrievedObject(),0.7);
-                    final Image i = Static2DTools.removeUnusedBorder((Image)e.getRetrievedObject(), 5, 0.7);
-                    addIconToProgressPane(errorImage, i);
-                    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                            PrintingWidget.class,
-                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg2",
-                            new Object[] { e.getRetrievalService() }),
-                        ERROR_REASON); // NOI18N
-                }
-            }
-        }
-
-        if ((results.size() + erroneous.size()) == services.size()) {
-            if (results.size() == services.size()) {
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg6"),
-                    SUCCESS); // NOI18N
-            } else if (erroneous.size() == services.size()) {
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg7"),
-                    WARN);    // NOI18N
-            } else {
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg8"),
-                    WARN);    // NOI18N
-            }
-
-            for (final Integer i : results.keySet()) {
-                final Graphics2D g2d = (Graphics2D)map.getGraphics();
-                // Transparency
-                final RetrievalService rs = services.get(i);
-
-                float transparency = 0f;
-                if (rs instanceof ServiceLayer) {
-                    transparency = ((ServiceLayer)rs).getTranslucency();
-                }
-                final Composite alphaComp = AlphaComposite.getInstance(
-                        AlphaComposite.SRC_OVER,
-                        transparency);
-                g2d.setComposite(alphaComp);
-                final Object o = results.get(i);
-
-                log.info("processing results of type '" + o.getClass().getSimpleName() + "' from service #" + i + " '"
-                            + rs + "' (" + rs.getClass().getSimpleName() + ")");                       // NOI18N
-                if (o instanceof Image) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("service '" + rs + "' returned an image, must be a raster service"); // NOI18N
-                    }
-                    final Image image2add = (Image)o;
-                    g2d.drawImage(image2add, 0, 0, null);
-                } else if (Collection.class.isAssignableFrom(o.getClass())) {
-                    final Collection featureCollection = (Collection)o;
-                    if (DEBUG) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("service '" + rs + "' returned a collection, must be a feature service ("
-                                        + featureCollection.size() + " features retrieved)");          // NOI18N
-                        }
-                    }
-                    final Image image2add = mappingComponent.getImageOfFeatures(
-                            featureCollection,
-                            imageWidth,
-                            imageHeight);
-                    g2d.drawImage(image2add, 0, 0, null);
-                } else {
-                    log.error("unknown results retrieved: " + o.getClass().getSimpleName());           // NOI18N
-                }
-            }
-
-            addFeaturesAsTopLevelLayer();
-
-            if (erroneous.size() < results.size()) {
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg4"),
-                    SUCCESS); // NOI18N
-            } else {
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg5"),
-                    INFO);    // NOI18N
-            }
-
-            if (DEBUG) {
-                if (log.isDebugEnabled()) {
-                    log.debug("ALLE FERTIG");          // NOI18N
-                    log.debug("results:" + results);   // NOI18N
-                    log.debug("services:" + services); // NOI18N
-                }
-            }
-
-            activateButton();
-        }
-    }
-
-    /**
-     * Creates an image of the features. This is required if the map does only contain features and no layer.
-     */
-    public void createImageFromFeatures() {
-        addFeaturesAsTopLevelLayer();
-        activateButton();
-    }
-
     /**
      * set the progress bar to 100 percent and activates the ok button.
      */
@@ -961,55 +725,6 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
         prbLoading.setIndeterminate(false);
         prbLoading.setValue(100);
         cmdOk.setEnabled(true);
-    }
-
-    /**
-     * Adds the features to the map image.
-     */
-    private void addFeaturesAsTopLevelLayer() {
-        // Add Existing Features as TopLevelLayer
-        if (mappingComponent.isFeatureCollectionVisible()) {
-            try {
-                final Graphics2D g2d = (Graphics2D)map.getGraphics();
-                addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
-                        PrintingWidget.class,
-                        "PrintingWidget.retrievalComplete(RetrievalEvent).msg3"),
-                    INFO); // NOI18N
-
-                // Transparency
-                float transparency = 0f;
-                transparency = mappingComponent.getFeatureLayer().getTransparency();
-                final Composite alphaComp = AlphaComposite.getInstance(
-                        AlphaComposite.SRC_OVER,
-                        transparency);
-                g2d.setComposite(alphaComp);
-                final Resolution r = mappingComponent.getPrintingSettingsDialog().getSelectedResolution();
-                final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
-                imageWidth = (int)((double)t.getMapWidth()
-                                / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                                * (double)r.getResolution());
-                imageHeight = (int)((double)t.getMapHeight()
-                                / (double)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI
-                                * (double)r.getResolution());
-                final Image image2add = mappingComponent.getFeatureImage(imageWidth, imageHeight);
-                g2d.drawImage(image2add, 0, 0, null);
-            } catch (Throwable t) {
-                log.error("Error while adding local features to the map", t); // NOI18N
-            }
-        } else {
-            final String localFeaturesNotAddedMessage = org.openide.util.NbBundle.getMessage(
-                    PrintingWidget.class,
-                    "PrintingWidget.retrievalComplete(RetrievalEvent).msg9");
-            addMessageToProgressPane(localFeaturesNotAddedMessage, INFO);     // NOI18N
-            if (log.isDebugEnabled()) {
-                log.debug(localFeaturesNotAddedMessage);
-            }
-        }
-    }
-
-    @Override
-    public void retrievalAborted(final RetrievalEvent e) {
-        log.warn(e.getRetrievalService() + "[" + e.getRequestIdentifier() + "]: retrievalAborted"); // NOI18N
     }
 
     /**
@@ -1049,10 +764,34 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                         try {
                             doc.insertString(doc.getLength(), "ico", style);                                    // NOI18N
                         } catch (BadLocationException ble) {
-                            log.error("Error in addIconToProgressPane", ble);                                   // NOI18N
+                            LOG.error("Error in addIconToProgressPane", ble);                                   // NOI18N
                         }
                     }
                 });
+        }
+    }
+
+    @Override
+    public void propertyChange(final PropertyChangeEvent evt) {
+        if (evt.getNewValue() instanceof HeadlessMapProvider.NotificationMessage) {
+            final HeadlessMapProvider.NotificationMessage message = (HeadlessMapProvider.NotificationMessage)
+                evt.getNewValue();
+            addMessageToProgressPane(message.getMsg(), message.getLevel());
+
+            if (message.getLevel().equals(UNLOCKED)) {
+                activateButton();
+            } else if (message.getLevel().equals(ERROR_REASON) && (evt.getOldValue() instanceof RetrievalEvent)) {
+                final RetrievalEvent e = (RetrievalEvent)evt.getOldValue();
+                if (e.getRetrievedObject() instanceof Image) {
+                    final Image i = Static2DTools.removeUnusedBorder((Image)e.getRetrievedObject(), 5, 0.7);
+                    addIconToProgressPane(errorImage, i);
+                    addMessageToProgressPane(org.openide.util.NbBundle.getMessage(
+                            PrintingWidget.class,
+                            "PrintingWidget.retrievalComplete(RetrievalEvent).msg2",
+                            new Object[] { e.getRetrievalService() }),
+                        ERROR_REASON); // NOI18N
+                }
+            }
         }
     }
 
@@ -1062,7 +801,7 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
      * @param  msg     DOCUMENT ME!
      * @param  reason  DOCUMENT ME!
      */
-    private void addMessageToProgressPane(final String msg, final String reason) {
+    private void addMessageToProgressPane(final String msg, final NotificationLevel reason) {
         synchronized (this) {
             java.awt.EventQueue.invokeLater(new Runnable() {
 
@@ -1076,11 +815,10 @@ public class PrintingWidget extends javax.swing.JDialog implements RetrievalList
                                         + "\n",
                                         styles.get(reason));       // NOI18N
                         } catch (BadLocationException ble) {
-                            log.error("error during Insert", ble); // NOI18N
+                            LOG.error("error during Insert", ble); // NOI18N
                         }
                     }
                 });
         }
-//        // txpLoadingStatus.setCaretPosition(txpLoadingStatus.getText().length());
     }
 }
