@@ -151,11 +151,11 @@ public final class FeatureGroups {
                 // But buffer(0) handles LineStrings and Points as empty polygons, so it can only be used,
                 // if only polygons should be unioned.
                 int srid = 0;
-                
+
                 if (array.length > 0) {
                     srid = array[0].getSRID();
                 }
-                
+
                 final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
                 final GeometryCollection collection = factory.createGeometryCollection(array);
                 union = collection.buffer(0);
