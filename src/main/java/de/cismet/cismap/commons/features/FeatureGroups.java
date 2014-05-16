@@ -123,7 +123,6 @@ public final class FeatureGroups {
      * @return  DOCUMENT ME!
      */
     public static Geometry getEnclosingGeometry(final Collection<? extends Feature> featureCollection) {
-        final GeometryFactory factory = new GeometryFactory();
         boolean hasLinestringOrPoints = false;
         Geometry union = null;
         final Geometry[] array = new Geometry[featureCollection.size()];
@@ -151,6 +150,13 @@ public final class FeatureGroups {
                 // See http://www.vividsolutions.com/JTS/bin/JTS%20Developer%20Guide.pdf
                 // But buffer(0) handles LineStrings and Points as empty polygons, so it can only be used,
                 // if only polygons should be unioned.
+                int srid = 0;
+                
+                if (array.length > 0) {
+                    srid = array[0].getSRID();
+                }
+                
+                final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
                 final GeometryCollection collection = factory.createGeometryCollection(array);
                 union = collection.buffer(0);
             } else {
