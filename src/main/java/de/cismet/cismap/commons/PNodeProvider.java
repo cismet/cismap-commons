@@ -5,36 +5,35 @@
 *              ... and it just works.
 *
 ****************************************************/
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package de.cismet.cismap.commons;
 
-import de.cismet.cismap.commons.retrieval.RetrievalService;
+import edu.umd.cs.piccolo.PNode;
 
 /**
  * DOCUMENT ME!
  *
- * @author   thorsten.hell@cismet.de
+ * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public interface RetrievalServiceLayer extends ServiceLayer, RetrievalService, PNodeProvider {
+public interface PNodeProvider {
 
     //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
      *
-     * @param  error  DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
-    void setErrorObject(Object error);
+    PNode getPNode();
+
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @param  pNode  DOCUMENT ME!
      */
-    Object getErrorObject();
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    boolean hasErrors();
+    void setPNode(final PNode pNode);
 }
