@@ -116,7 +116,7 @@ public class HeadlessMapProvider {
     private double printingResolution = 0;
     private double resolution = 72.0;
     private double featureResolutionFactor = PrintingSettingsWidget.FEATURE_RESOLUTION_FACTOR;
-    
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -197,6 +197,24 @@ public class HeadlessMapProvider {
     //~ Methods ----------------------------------------------------------------
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  the featureResolutionFactor
+     */
+    public double getFeatureResolutionFactor() {
+        return featureResolutionFactor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureResolutionFactor  the featureResolutionFactor to set
+     */
+    public void setFeatureResolutionFactor(final double featureResolutionFactor) {
+        this.featureResolutionFactor = featureResolutionFactor;
+    }
+
+    /**
      * Creates a HeadlessMapProvider and adds the raster layers and feature layers from the mapping component to it.
      *
      * @param   mappingComponent  DOCUMENT ME!
@@ -207,7 +225,8 @@ public class HeadlessMapProvider {
         final HeadlessMapProvider headlessMapProvider = new HeadlessMapProvider();
         ((ActiveLayerModel)headlessMapProvider.getMappingComponent().getMappingModel()).setSrs(
             mappingComponent.getMappingModel().getSrs());
-        headlessMapProvider.getMappingComponent().setInfoNodesVisible(mappingComponent.isInfoNodesVisible());
+        final boolean infoNodeVisible = mappingComponent.isInfoNodesVisible();
+        headlessMapProvider.getMappingComponent().setInfoNodesVisible(infoNodeVisible);
 
         // Raster Services
         final TreeMap rasterServices = mappingComponent.getMappingModel().getRasterServices();
@@ -255,7 +274,16 @@ public class HeadlessMapProvider {
 
         // Features
         for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
+            final boolean infoNodeExpanded = mappingComponent.getPFeatureHM().get(f).isInfoNodeExpanded();
             headlessMapProvider.addFeature(f);
+
+            if (infoNodeExpanded) {
+                final PFeature pf = headlessMapProvider.map.getPFeatureHM().get(f);
+
+                if (pf != null) {
+                    pf.setInfoNodeExpanded(true);
+                }
+            }
         }
         return headlessMapProvider;
     }
@@ -278,24 +306,6 @@ public class HeadlessMapProvider {
         this.printingResolution = printingResolution;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  the featureResolutionFactor
-     */
-    public double getFeatureResolutionFactor() {
-        return featureResolutionFactor;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  featureResolutionFactor  the featureResolutionFactor to set
-     */
-    public void setFeatureResolutionFactor(final double featureResolutionFactor) {
-        this.featureResolutionFactor = featureResolutionFactor;
-    }    
-    
     /**
      * DOCUMENT ME!
      *
@@ -386,6 +396,7 @@ public class HeadlessMapProvider {
     public Image getImage(final int dpi, final double widthInMillimeters, final double heightInMilimeters) {
         return null;
     }
+
     /**
      * This is the method called when you need to fill in a report: for jasper with (72 as basedpi and widzth and height
      * with the dimension of the image in the report

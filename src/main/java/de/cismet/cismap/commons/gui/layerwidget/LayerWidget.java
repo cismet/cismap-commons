@@ -45,11 +45,15 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.*;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
+import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.JDBCFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
@@ -57,6 +61,7 @@ import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
 import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
+import de.cismet.cismap.commons.internaldb.DBTableInformation;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
@@ -732,6 +737,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                             } else if (rsl instanceof ShapeFileFeatureService) {
                                 final ShapeFileFeatureService sffs = (ShapeFileFeatureService)rsl;
                                 g = ((ShapeFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
+                            } else if (rsl instanceof JDBCFeatureService) {
+                                final JDBCFeatureService sffs = (JDBCFeatureService)rsl;
+                                g = ((JDBCFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
                             }
                         }
 
@@ -874,7 +882,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         try {
                             log.info("DocumentUri: " + currentFile.toURI()); // NOI18N
 
-                            final DocumentFeatureService dfs = DocumentFeatureServiceFactory
+                            final AbstractFeatureService dfs = DocumentFeatureServiceFactory
                                         .createDocumentFeatureService(currentFile);
                             activeLayerModel.addLayer(dfs);
 
@@ -1006,21 +1014,32 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                                 JOptionPane.ERROR_MESSAGE);
                         }
                     }
+                } else if (o instanceof DBTableInformation[]) {
+                    final DBTableInformation[] infos = (DBTableInformation[])o;
+
+                    for (final DBTableInformation i : infos) {
+                        final H2FeatureService layer = new H2FeatureService(i.getName(),
+                                i.getDatabasePath(),
+                                i.getDatabaseTable(),
+                                null);
+
+                        activeLayerModel.addLayer(layer);
+                    }
                 }
             } catch (final IllegalArgumentException schonVorhanden) {
                 JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
                     org.openide.util.NbBundle.getMessage(
                         LayerWidget.class,
-                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"),           // NOI18N
+                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
                     org.openide.util.NbBundle.getMessage(
                         LayerWidget.class,
-                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"),             // NOI18N
+                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
                     JOptionPane.ERROR_MESSAGE);
             } catch (final Exception e) {
                 log.error(e, e);
             }
         } else {
-            log.warn("No Matching dataFlavour: " + dtde.getCurrentDataFlavorsAsList());         // NOI18N
+            log.warn("No Matching dataFlavour: " + dtde.getCurrentDataFlavorsAsList()); // NOI18N
         }
     }
 

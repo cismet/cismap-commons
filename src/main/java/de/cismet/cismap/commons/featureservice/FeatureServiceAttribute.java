@@ -40,6 +40,9 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
     private String name;
     private boolean geometry;
     private boolean selected;
+    private boolean visible = true;
+    private boolean nameElement = false;
+    private String alias;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -107,6 +110,28 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
      *
      * @return  DOCUMENT ME!
      */
+    public String getAlias() {
+        if (alias == null) {
+            return "";
+        } else {
+            return alias;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  alias  DOCUMENT ME!
+     */
+    public void setAlias(final String alias) {
+        this.alias = alias;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public String getType() {
         return type;
     }
@@ -156,6 +181,42 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
         this.selected = isSelected;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isVisible() {
+        return visible;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  visible  DOCUMENT ME!
+     */
+    public void setVisible(final boolean visible) {
+        this.visible = visible;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isNameElement() {
+        return nameElement;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  nameElement  visible DOCUMENT ME!
+     */
+    public void setNameElement(final boolean nameElement) {
+        this.nameElement = nameElement;
+    }
+
     @Override
     public boolean equals(final Object obj) {
         if (obj == null) {
@@ -171,10 +232,19 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
         if ((this.name != other.name) && ((this.name == null) || !this.name.equals(other.name))) {
             return false;
         }
+        if ((this.alias != other.alias) && ((this.alias == null) || !this.alias.equals(other.alias))) {
+            return false;
+        }
         if (this.geometry != other.geometry) {
             return false;
         }
         if (this.selected != other.selected) {
+            return false;
+        }
+        if (this.visible != other.visible) {
+            return false;
+        }
+        if (this.nameElement != other.nameElement) {
             return false;
         }
         return true;
@@ -196,8 +266,11 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
 
         featureServiceAttribute.setAttribute(ConvertableToXML.TYPE_ATTRIBUTE, this.getClass().getCanonicalName());
         featureServiceAttribute.setAttribute(FeatureServiceUtilities.XML_NAME_STRING, getName());
+        featureServiceAttribute.setAttribute(FeatureServiceUtilities.XML_ALIAS_STRING, getAlias());
         featureServiceAttribute.setAttribute(FeatureServiceUtilities.IS_GEOMETRY, String.valueOf(isGeometry()));
         featureServiceAttribute.setAttribute(IS_SELECTED, String.valueOf(selected));
+        featureServiceAttribute.setAttribute(FeatureServiceUtilities.IS_VISIBLE, String.valueOf(visible));
+        featureServiceAttribute.setAttribute(FeatureServiceUtilities.IS_NAME_ELEMENT, String.valueOf(nameElement));
         featureServiceAttribute.setAttribute(FeatureServiceUtilities.XML_TYPE_STRING, getType());
         return featureServiceAttribute;
     }
@@ -209,11 +282,20 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
         }
 
         this.setName(element.getAttributeValue(FeatureServiceUtilities.XML_NAME_STRING));
+        this.setAlias(element.getAttributeValue(FeatureServiceUtilities.XML_ALIAS_STRING));
         this.setType(element.getAttributeValue(FeatureServiceUtilities.XML_TYPE_STRING));
 
         final boolean newSelected = (element.getAttributeValue(IS_SELECTED) != null)
             ? Boolean.valueOf(element.getAttributeValue(IS_SELECTED)) : true;
         this.setSelected(newSelected);
+
+        final boolean newVisible = (element.getAttributeValue(FeatureServiceUtilities.IS_VISIBLE) != null)
+            ? Boolean.valueOf(element.getAttributeValue(FeatureServiceUtilities.IS_VISIBLE)) : true;
+        this.setVisible(newVisible);
+
+        final boolean newNameElement = (element.getAttributeValue(FeatureServiceUtilities.IS_NAME_ELEMENT) != null)
+            ? Boolean.valueOf(element.getAttributeValue(FeatureServiceUtilities.IS_NAME_ELEMENT)) : false;
+        this.setNameElement(newNameElement);
 
         final boolean newGeometry = (this.getType() != null) && (FeatureServiceUtilities.isElementOfGeometryType(type));
         this.setGeometry(newGeometry);

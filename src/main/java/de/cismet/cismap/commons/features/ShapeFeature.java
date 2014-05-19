@@ -67,6 +67,9 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     public HashMap getProperties() {
         LinkedHashMap<String, Object> container = null;
         final int id = getId();
+        if (existProperties()) {
+            return super.getProperties();
+        }
 
         if (shapeInfo.getFc() == null) {
             try {
@@ -117,8 +120,39 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     }
 
     @Override
-    public void setProperties(final HashMap properties) {
-        // nothing to do
+    public void setProperty(final String propertyName, final Object propertyValue) {
+        if (!existProperties()) {
+            super.setProperties(getProperties());
+        }
+
+        super.addProperty(propertyName, propertyValue);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean existProperties() {
+        return !super.getProperties().isEmpty();
+    }
+
+    @Override
+    public void saveChanges() throws Exception {
+//        org.deegree.model.feature.Feature deegreeFeature = null;
+//        synchronized (sync) {
+//            deegreeFeature = shapeInfo.getFile().getFeatureByRecNo(getId());
+//        }
+//
+//        Map<String, Object> map = super.getProperties();
+//
+//        final FeatureProperty[] featureProperties = deegreeFeature.getProperties();
+//        for (final FeatureProperty fp : featureProperties) {
+//            fp.setValue(map.get(fp.getName().getAsString()));
+//        }
+//
+//        shapeInfo.getFile().writeShape(null);
+//        super.getProperties().clear();
     }
 
     @Override
@@ -138,14 +172,21 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public Geometry getGeometry() {
         Geometry g = null;
-        logger.warn("geometry id: " + getId());
         if (shapeInfo.getFc() == null) {
+            g = shapeInfo.getGeometryFromCache(getId());
+
+            if (g != null) {
+                return g;
+            }
+
             try {
                 g = JTSAdapter.export(shapeInfo.getFile().getGeometryByRecNo(getId()));
                 g.setSRID(shapeInfo.getSrid());
             } catch (final Exception e) {
                 logger.error("Cannot read geometry from shape file.", e);
             }
+
+            shapeInfo.addGeometryToCache(getId(), g);
         } else {
             try {
                 g = JTSAdapter.export(shapeInfo.getFc().getFeature(getId()).getDefaultGeometryPropertyValue());

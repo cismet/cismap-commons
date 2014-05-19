@@ -33,6 +33,7 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
 
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
@@ -305,7 +306,7 @@ class TreeTransferHandler extends TransferHandler {
                         try {
                             LOG.info("DocumentUri: " + currentFile.toURI()); // NOI18N
 
-                            final DocumentFeatureService dfs = DocumentFeatureServiceFactory
+                            final AbstractFeatureService dfs = DocumentFeatureServiceFactory
                                         .createDocumentFeatureService(currentFile);
                             activeLayerModel.addLayer(dfs, activeLayerModel.layers.size() - index);
 

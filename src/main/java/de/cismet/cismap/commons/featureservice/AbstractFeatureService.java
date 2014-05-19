@@ -19,6 +19,7 @@ import org.jdom.Element;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -39,9 +40,11 @@ import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.XMLObjectFactory;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.CachingFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.style.Style;
+import de.cismet.cismap.commons.interaction.DefaultQueryButtonAction;
 import de.cismet.cismap.commons.rasterservice.FeatureMapService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
@@ -69,6 +72,47 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
 
     /* defaulttype-constant */
     public static final String DEFAULT_TYPE = "default"; // NOI18N
+    public static final List<DefaultQueryButtonAction> SQL_QUERY_BUTTONS = new ArrayList<DefaultQueryButtonAction>();
+
+    static {
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("="));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("<>"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Like"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction(">"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction(">="));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("And"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("<"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("<="));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Or"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("_", 1));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("%", 1));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("()") {
+
+                {
+                    posCorrection = -1;
+                }
+
+                @Override
+                public void actionPerformed(final ActionEvent e) {
+                    if (queryTextArea.getSelectionEnd() == 0) {
+                        super.actionPerformed(e);
+                    } else {
+                        final int start = queryTextArea.getSelectionStart();
+                        final int end = queryTextArea.getSelectionEnd();
+                        queryTextArea.insert("(", start);
+                        queryTextArea.insert(")", end + 1);
+                        // jTextArea1.setCaretPosition(end + 2);
+                        if (start == end) {
+                            CorrectCarret(posCorrection);
+                        } else {
+                            CorrectCarret((short)2);
+                        }
+                    }
+                }
+            });
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Not"));
+        SQL_QUERY_BUTTONS.add(new DefaultQueryButtonAction("Is"));
+    }
 
     //~ Instance fields --------------------------------------------------------
 
@@ -106,6 +150,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected FeatureFactory featureFactory = null;
     /* the list that holds the names of the featureServiceAttributes of the FeatureService in the specified order */
     protected List<String> orderedFeatureServiceAttributes;
+    protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
     private boolean initialisationError = false;
     private Element initElement = null;
 
@@ -466,7 +511,19 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                                 + featureRetrievalWorker.isCancelled() + ")"); // NOI18N
                 }
             }
-            this.cancel(featureRetrievalWorker);
+            final FeatureRetrievalWorker currentWorker = featureRetrievalWorker;
+//            new Thread(new Runnable() {
+//
+//                @Override
+//                public void run() {
+            synchronized (featureFactory) {
+                if (featureFactory instanceof AbstractFeatureFactory) {
+                    ((AbstractFeatureFactory)featureFactory).waitUntilInterruptedIsAllowed();
+                }
+                cancel(currentWorker);
+            }
+//                }
+//            }).start();
         }
 
         if (!this.isEnabled() && !this.isVisible()) {
@@ -975,7 +1032,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
 
         if ((this.getFeatureServiceAttributes() != null) && (this.getFeatureServiceAttributes().size() > 0)) {
             final Element attrib = new Element("Attributes");                    // NOI18N
-            for (final FeatureServiceAttribute e : getFeatureServiceAttributes().values()) {
+            for (final String key : getOrderedFeatureServiceAttributes()) {
+                final FeatureServiceAttribute e = getFeatureServiceAttributes().get(key);
                 attrib.addContent(e.toElement());
             }
             element.addContent(attrib);
@@ -1142,6 +1200,37 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      */
     public boolean getInitialisationError() {
         return this.initialisationError;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List<DefaultQueryButtonAction> getQueryButtons() {
+        return queryButtons;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   name  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String decoratePropertyName(final String name) {
+        return name;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   value  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String decoratePropertyValue(final String value) {
+        return "'" + value + "'";
     }
 
     /**

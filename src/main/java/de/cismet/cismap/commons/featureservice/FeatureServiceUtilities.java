@@ -77,10 +77,16 @@ public class FeatureServiceUtilities {
     public static final String INTEGER_PROPERTY_TYPE = "integer"; // NOI18N
     /** name of the name-attribute. */
     public static final String XML_NAME_STRING = "name"; // NOI18N
+    /** name of the alias-attribute. */
+    public static final String XML_ALIAS_STRING = "alias"; // NOI18N
     /** name of the type-attribute. */
     public static final String XML_TYPE_STRING = "type"; // NOI18N
     /** name of the isGeometry-attribute. */
     public static final String IS_GEOMETRY = "isGeometry"; // NOI18N
+    /** name of the isVisible-attribute. */
+    public static final String IS_VISIBLE = "isVisible"; // NOI18N
+    /** name of the toName-attribute. */
+    public static final String IS_NAME_ELEMENT = "isNameElement"; // NOI18N
     /** name of the GetFeature-element. */
     public static final String GET_FEATURE = "GetFeature"; // NOI18N
     /** WFS namespace-contant. */

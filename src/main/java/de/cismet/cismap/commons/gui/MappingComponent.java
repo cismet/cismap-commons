@@ -920,7 +920,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 }
             }
 
-            rescaleStickyNodes(stickyPNodes);
+            rescaleStickyNodes(stickyNodeList);
         }
     }
 

@@ -967,7 +967,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 final AnnotatedFeature af = (AnnotatedFeature)feature;
                 primaryAnnotation = new StickyPText(" " + af.getPrimaryAnnotation() + " ");
                 primaryAnnotation.setJustification(af.getPrimaryAnnotationJustification());
-                if (af.isAutoscale()) {
+                if (af.isAutoscale() && !(getFeature().getGeometry() instanceof Point)) {
                     stickyChild = primaryAnnotation;
                 }
                 viewer.getCamera()
@@ -1010,7 +1010,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
                                 @Override
                                 public void propertyChange(final PropertyChangeEvent evt) {
-                                    justifyAnnotations((PNode)evt.getSource());
+                                    justifyAnnotations((PNode)evt.getSource(), af.isAutoscale());
                                 }
                             };
 
@@ -1035,7 +1035,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     viewer.rescaleStickyNode(primaryAnnotation);
                 }
                 setVisibility(primaryAnnotation, af);
-                // }
             }
         }
     }
@@ -1043,16 +1042,19 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     /**
      * justifies the annotations of the feature.
      *
-     * @param  source  DOCUMENT ME!
+     * @param  source     the parent symbol of the primary annotation
+     * @param  autoScale  true, if the annotation has autoscale enabled
      */
-    private void justifyAnnotations(final PNode source) {
+    private void justifyAnnotations(final PNode source, final boolean autoScale) {
         if ((primaryAnnotation != null) && (source != null)) {
             final Point intPoint = CrsTransformer.transformToGivenCrs(feature.getGeometry(),
                     getViewerCrs().getCode()).getInteriorPoint();
             final PBounds bounds = source.getFullBoundsReference();
-            primaryAnnotation.setScale(source.getScale() * 1.1);
-            primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2)
-                        + (bounds.getWidth() / 4),
+            if (autoScale) {
+                primaryAnnotation.setScale(source.getScale());
+            }
+            primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2),
+//                        + (bounds.getWidth() / 4),
                 wtst.getScreenY(intPoint.getY())
                         - (bounds.getHeight() / 2));
         }
@@ -3169,6 +3171,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (secondStickyChild != null) {
             viewer.removeStickyNode(secondStickyChild);
         }
+
+//        if (primaryAnnotation != null) {
+//            viewer.removeStickyNode(primaryAnnotation);
+//        }
     }
 
     //~ Inner Classes ----------------------------------------------------------

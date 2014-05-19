@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
+import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.SimplePostgisFeatureService;
 import de.cismet.cismap.commons.featureservice.SimpleUpdateablePostgisFeatureService;
@@ -412,6 +413,8 @@ public class CidsLayerFactory {
             ((LayerCollection)layer).setCrs(crs);
         } else if (layer instanceof ModeLayer) {
             ((ModeLayer)layer).setCrs(crs);
+        } else if (layer instanceof JDBCFeatureService) {
+            ((JDBCFeatureService)layer).setCrs(crs);
         } else {
             log.error("The SRS of a layer cannot be changed. Layer is of type  " + layer.getClass().getName());
         }
@@ -445,6 +448,8 @@ public class CidsLayerFactory {
             return ((ModeLayer)layer).toElement();
         } else if (layer instanceof ConvertableToXML) {
             return ((ConvertableToXML)layer).toElement();
+        } else if (layer instanceof JDBCFeatureService) {
+            return ((JDBCFeatureService)layer).toElement();
         } else {
             log.warn("saving configuration not supported by service: " + layer); // NOI18N
             return null;

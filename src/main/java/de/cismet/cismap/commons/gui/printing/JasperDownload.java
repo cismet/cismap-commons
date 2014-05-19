@@ -21,10 +21,14 @@ import java.util.Map;
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 
 /**
- * DOCUMENT ME!
+ * A deprecated download for JasperReports. The disadvantage of this class is that it needs the already created
+ * parameters and datasource for the report. This creation is often a time-consuming task, which has to happen before
+ * the download can be added to DownloadManager. During this waiting time the user has no feedback or an extra dialog
+ * has to be shown. This behavior should be avoided.
  *
- * @author   jweintraut
- * @version  $Revision$, $Date$
+ * @author      jweintraut
+ * @version     $Revision$, $Date$
+ * @deprecated  Use the class {@link JasperReportDownload} instead.
  */
 public class JasperDownload extends AbstractDownload implements Cancellable {
 

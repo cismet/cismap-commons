@@ -267,10 +267,12 @@ public class InfoPanel extends JPanel {
             // ... and all of the children.
             for (int c = 0; c < getComponentCount(); c++) {
                 final Component comp = getComponent(c);
-                final Rectangle cr = comp.getBounds();
+                if (comp.isVisible()) {
+                    final Rectangle cr = comp.getBounds();
 
-                final Graphics cg = gr.create(cr.x, cr.y, cr.width, cr.height);
-                comp.printAll(cg);
+                    final Graphics cg = gr.create(cr.x, cr.y, cr.width, cr.height);
+                    comp.printAll(cg);
+                }
             }
         }
     }

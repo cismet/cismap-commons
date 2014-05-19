@@ -11,13 +11,14 @@
  */
 package de.cismet.cismap.commons.features;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.deegree.io.shpapi.ShapeFile;
 import org.deegree.model.feature.FeatureCollection;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * DOCUMENT ME!
@@ -30,7 +31,8 @@ public class ShapeInfo {
     //~ Instance fields --------------------------------------------------------
 
     // caches the last feature properties
-    private Cache cache = new Cache(2);
+    private Cache<LinkedHashMap<String, Object>> cache = new Cache<LinkedHashMap<String, Object>>(2);
+    private Cache<Geometry> geoCache = new Cache<Geometry>(1);
 
     private String typename;
     private ShapeFile file;
@@ -149,6 +151,27 @@ public class ShapeInfo {
         cache.add(id, container);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   id  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public synchronized Geometry getGeometryFromCache(final int id) {
+        return geoCache.get(id);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  id   DOCUMENT ME!
+     * @param  geo  container DOCUMENT ME!
+     */
+    public synchronized void addGeometryToCache(final int id, final Geometry geo) {
+        geoCache.add(id, geo);
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -156,13 +179,13 @@ public class ShapeInfo {
      *
      * @version  $Revision$, $Date$
      */
-    private class Cache {
+    private class Cache<T> {
 
         //~ Instance fields ----------------------------------------------------
 
         private Integer[] ids;
         private int index = 0;
-        private Map<Integer, LinkedHashMap<String, Object>> dataMap;
+        private Map<Integer, T> dataMap;
 
         //~ Constructors -------------------------------------------------------
 
@@ -185,7 +208,7 @@ public class ShapeInfo {
         private void init(final int size) {
             ids = new Integer[size];
             index = 0;
-            dataMap = new HashMap<Integer, LinkedHashMap<String, Object>>();
+            dataMap = new HashMap<Integer, T>();
         }
 
         /**
@@ -194,7 +217,7 @@ public class ShapeInfo {
          * @param  id    DOCUMENT ME!
          * @param  data  DOCUMENT ME!
          */
-        public void add(final int id, final LinkedHashMap<String, Object> data) {
+        public void add(final int id, final T data) {
             if (ids[index] != null) {
                 dataMap.remove(ids[index]);
             }
@@ -212,8 +235,8 @@ public class ShapeInfo {
          *
          * @return  DOCUMENT ME!
          */
-        public LinkedHashMap<String, Object> get(final int id) {
-            final LinkedHashMap<String, Object> res = dataMap.get(id);
+        public T get(final int id) {
+            final T res = dataMap.get(id);
 
             if (res != null) {
                 while ((ids[index] == null) || (ids[index] != id)) {

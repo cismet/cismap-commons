@@ -235,6 +235,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             new Object[] { root },
             null,
             null);
+
+        reorderLayer();
     }
 
     /**

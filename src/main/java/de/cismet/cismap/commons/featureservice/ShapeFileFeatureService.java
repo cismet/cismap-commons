@@ -15,6 +15,10 @@ import org.apache.log4j.Logger;
 
 import org.jdom.Element;
 
+import java.awt.Graphics2D;
+
+import java.io.File;
+
 import java.net.URI;
 
 import java.util.HashMap;
@@ -71,6 +75,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
 
     private boolean noGeometryRecognised = false;
     private boolean errorInGeometryFound = false;
+    private boolean fileNotFound = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -83,6 +88,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
      */
     public ShapeFileFeatureService(final Element e) throws Exception {
         super(e);
+        checkFile();
     }
 
     /**
@@ -101,6 +107,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
             final List<FeatureServiceAttribute> attributes) throws Exception {
         super(name, documentURI, documentSize, attributes);
         this.maxFeatureCount = Integer.MAX_VALUE;
+        checkFile();
     }
 
     /**
@@ -110,9 +117,23 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
      */
     protected ShapeFileFeatureService(final ShapeFileFeatureService sfs) {
         super(sfs);
+        checkFile();
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void checkFile() {
+        final File file = new File(documentURI);
+
+        if (!file.exists()) {
+            fileNotFound = true;
+        } else {
+            fileNotFound = false;
+        }
+    }
 
     @Override
     public Icon getLayerIcon(final int type) {
@@ -162,6 +183,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
         if (this.getFeatureFactory() != null) {
             ((ShapeFeatureFactory)this.getFeatureFactory()).setDocumentURI(documentURI);
         }
+        checkFile();
     }
 
     @Override
@@ -191,6 +213,15 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
      */
     public boolean isErrorInGeometryFound() {
         return errorInGeometryFound;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the fileNotFound
+     */
+    public boolean isFileNotFound() {
+        return fileNotFound;
     }
 
     /**

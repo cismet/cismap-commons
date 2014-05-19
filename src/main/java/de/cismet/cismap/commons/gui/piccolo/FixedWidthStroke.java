@@ -14,18 +14,20 @@ package de.cismet.cismap.commons.gui.piccolo;
 
 import java.awt.BasicStroke;
 
+import java.io.Serializable;
+
 /**
  * DOCUMENT ME!
  *
  * @author   hell
  * @version  $Revision$, $Date$
  */
-public class FixedWidthStroke extends BasicStroke {
+public class FixedWidthStroke extends BasicStroke implements Serializable {
 
     //~ Instance fields --------------------------------------------------------
 
     protected float multiplyer = 1.0f;
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
     //~ Methods ----------------------------------------------------------------
 

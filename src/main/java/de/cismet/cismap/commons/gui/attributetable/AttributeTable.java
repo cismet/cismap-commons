@@ -11,11 +11,28 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
+import ar.com.fdvs.dj.core.DynamicJasperHelper;
+import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
+import ar.com.fdvs.dj.domain.DynamicReport;
+
 import com.vividsolutions.jts.geom.Geometry;
+
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRField;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperPrintManager;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.view.JRViewer;
 
 import org.apache.log4j.Logger;
 
 import org.deegree.datatypes.Types;
+import org.deegree.io.shpapi.shape_new.ShapeFile;
+import org.deegree.io.shpapi.shape_new.ShapeFileWriter;
+import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 
@@ -29,6 +46,7 @@ import org.openide.util.NbBundle;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.FontMetrics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -48,6 +66,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -57,12 +76,15 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
@@ -77,15 +99,18 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
+import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.ExportCsvDownload;
 import de.cismet.cismap.commons.tools.ExportDownload;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.tools.ExportTxtDownload;
+import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
 
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.WaitingDialogThread;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 
@@ -114,6 +139,8 @@ public class AttributeTable extends javax.swing.JPanel {
     private MappingComponent mappingComponent;
     private boolean selectionChangeFromMap = false;
     private FeatureCollectionListener featureCollectionListener;
+    private List<FeatureServiceFeature> changedFeatures = new ArrayList<FeatureServiceFeature>();
+    private DefaultAttributeTableRuleSet tableRuleSet = new DefaultAttributeTableRuleSet();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFirstPage;
@@ -191,8 +218,25 @@ public class AttributeTable extends javax.swing.JPanel {
     public AttributeTable(final AbstractFeatureService featureService) {
         this.featureService = featureService;
         initComponents();
-        miFeldberechnung.setEnabled(false);
-        miSortieren.setEnabled(false);
+        miFeldberechnung.setVisible(false);
+        miSortieren.setVisible(false);
+        butAttrib.setVisible(false);
+        tbAlias.setVisible(false);
+//        tbProcessing.setEnabled(false);
+        butSearch.setVisible(false);
+        tbLookup.setVisible(false);
+
+        final String ruleSetName = camelize(featureService.getName()) + "RuleSet";
+
+        try {
+            final Class ruleSetClass = Class.forName("de.cismet.cismap.custom.attributerule." + ruleSetName);
+            final Object o = ruleSetClass.newInstance();
+            if (o instanceof DefaultAttributeTableRuleSet) {
+                tableRuleSet = (DefaultAttributeTableRuleSet)o;
+            }
+        } catch (Exception e) {
+            // nothing to do
+        }
 
         jcFeatures.setModel(new DefaultComboBoxModel(
                 new Object[] {
@@ -206,10 +250,10 @@ public class AttributeTable extends javax.swing.JPanel {
         jcFormat.setModel(new DefaultComboBoxModel(
                 new Object[] { new ExportTxtDownload(), new ExportCsvDownload(), new ExportShapeDownload() }));
 
-        if (featureService instanceof ShapeFileFeatureService) {
-            pageSize = -1;
-            jpControl.setVisible(false);
-        }
+//        if ((featureService instanceof ShapeFileFeatureService) || (featureService instanceof H2FeatureService)) {
+        pageSize = -1;
+        jpControl.setVisible(false);
+//        }
 
         table.getTableHeader().addMouseListener(new MouseAdapter() {
 
@@ -286,7 +330,22 @@ public class AttributeTable extends javax.swing.JPanel {
 
         table.setDefaultRenderer(Number.class, new NumberCellRenderer());
 
-        fillPopupMenu();
+        if (tableRuleSet != null) {
+            for (int i = 0; i < table.getColumnCount(); ++i) {
+                final String columnName = model.getColumnAttributeName(i);
+                final TableCellEditor editor = tableRuleSet.getCellEditor(columnName);
+                final TableCellRenderer renderer = tableRuleSet.getCellRenderer(columnName);
+
+                if (editor != null) {
+                    table.getColumn(i).setCellEditor(editor);
+                }
+
+                if (renderer != null) {
+                    table.getColumn(i).setCellRenderer(renderer);
+                }
+            }
+        }
+
         txtCurrentPage.setText("1");
         final Geometry g = ZoomToLayerWorker.getServiceBounds(featureService);
         bb = new XBoundingBox(g);
@@ -368,9 +427,30 @@ public class AttributeTable extends javax.swing.JPanel {
 
     /**
      * DOCUMENT ME!
+     *
+     * @param   toCamelize  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    private void fillPopupMenu() {
-        final JMenuItem item = new JMenuItem("Sortieren");
+    public static String camelize(final String toCamelize) {
+        boolean upperCase = true;
+        final char[] result = new char[toCamelize.length()];
+        int resultPosition = 0;
+        for (int i = 0; i < toCamelize.length(); ++i) {
+            char current = toCamelize.charAt(i);
+            if (Character.isLetterOrDigit(current)) {
+                if (upperCase) {
+                    current = Character.toUpperCase(current);
+                    upperCase = false;
+                } else {
+                    current = Character.toLowerCase(current);
+                }
+                result[resultPosition++] = current;
+            } else {
+                upperCase = true;
+            }
+        }
+        return String.valueOf(result, 0, resultPosition);
     }
 
     /**
@@ -902,6 +982,13 @@ public class AttributeTable extends javax.swing.JPanel {
         butPrint.setFocusable(false);
         butPrint.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         butPrint.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        butPrint.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butPrintActionPerformed(evt);
+                }
+            });
         jToolBar1.add(butPrint);
 
         butExport.setIcon(new javax.swing.ImageIcon(
@@ -964,15 +1051,21 @@ public class AttributeTable extends javax.swing.JPanel {
         tbAlias.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(tbAlias);
 
-        tbProcessing.setText(org.openide.util.NbBundle.getMessage(
-                AttributeTable.class,
-                "AttributeTable.tbProcessing.text"));        // NOI18N
+        tbProcessing.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-edit.png"))); // NOI18N
         tbProcessing.setToolTipText(org.openide.util.NbBundle.getMessage(
                 AttributeTable.class,
-                "AttributeTable.tbProcessing.toolTipText")); // NOI18N
+                "AttributeTable.tbProcessing.toolTipText"));                                                // NOI18N
         tbProcessing.setFocusable(false);
         tbProcessing.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         tbProcessing.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        tbProcessing.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    tbProcessingActionPerformed(evt);
+                }
+            });
         jToolBar1.add(tbProcessing);
 
         butMoveSelectedRows.setIcon(new javax.swing.ImageIcon(
@@ -1258,7 +1351,56 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void butPrintPreviewActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintPreviewActionPerformed
-        // TODO add your handling code here:
+        final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
+                        .getParentFrame(this),
+                true,
+                NbBundle.getMessage(
+                    AttributeTable.class,
+                    "AttributeTable.butPrintPreviewActionPerformed.WaitingDialogThread"),
+                null,
+                500) {
+
+                @Override
+                protected JasperPrint doInBackground() throws Exception {
+                    final JRDataSource ds = new TableDataSource(table);
+                    final Map<String, Object> map = new HashMap<String, Object>();
+                    map.put(AttributeTableReportBuilder.DATASOURCE_NAME, ds);
+                    final DynamicReport report =
+                        new AttributeTableReportBuilder().buildReport(featureService.getName(), table);
+                    final JasperReport jasperReport = DynamicJasperHelper.generateJasperReport(
+                            report,
+                            new ClassicLayoutManager(),
+                            map);
+                    return JasperFillManager.fillReport(jasperReport, map, ds);
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        final JasperPrint jasperPrint = get();
+
+                        final JRViewer aViewer = new JRViewer(jasperPrint);
+                        final JFrame aFrame = new JFrame(org.openide.util.NbBundle.getMessage(
+                                    AttributeTable.class,
+                                    "AttributeTable.butPrintPreviewActionPerformed.aFrame.title")); // NOI18N
+                        aFrame.getContentPane().add(aViewer);
+                        final java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+                        aFrame.setSize(screenSize.width / 2, screenSize.height / 2);
+                        final java.awt.Insets insets = aFrame.getInsets();
+                        aFrame.setSize(aFrame.getWidth() + insets.left + insets.right,
+                            aFrame.getHeight()
+                                    + insets.top
+                                    + insets.bottom
+                                    + 20);
+                        aFrame.setLocationRelativeTo(AttributeTable.this);
+                        aFrame.setVisible(true);
+                    } catch (Exception e) {
+                        LOG.error("Error while creating report", e);
+                    }
+                }
+            };
+
+        wdt.start();
     } //GEN-LAST:event_butPrintPreviewActionPerformed
 
     /**
@@ -1481,6 +1623,8 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
+        mean = sum / (count - nullCount);
+
         for (int i = 0; i < values.length; ++i) {
             final Double val = values[i];
 
@@ -1490,7 +1634,6 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
-        mean = sum / (count - nullCount);
         // formula: sqrt(1/(n-1) * sum((Xi - Y)^2)), n: value count, Xi: ith values, Y: mean
         // see: http://en.wikipedia.org/wiki/Standard_deviation#Corrected_sample_standard_deviation
         stdDeviation = Math.sqrt(1.0 / (count - nullCount - 1) * stdDeviation);
@@ -1607,6 +1750,160 @@ public class AttributeTable extends javax.swing.JPanel {
     /**
      * DOCUMENT ME!
      *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butPrintActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintActionPerformed
+        final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
+                        .getParentFrame(this),
+                true,
+                NbBundle.getMessage(
+                    AttributeTable.class,
+                    "AttributeTable.butPrintActionPerformed.WaitingDialogThread"),
+                null,
+                500) {
+
+                @Override
+                protected JasperPrint doInBackground() throws Exception {
+                    final JRDataSource ds = new TableDataSource(table);
+                    final Map<String, Object> map = new HashMap<String, Object>();
+                    map.put(AttributeTableReportBuilder.DATASOURCE_NAME, ds);
+                    final DynamicReport report =
+                        new AttributeTableReportBuilder().buildReport(featureService.getName(), table);
+                    final JasperReport jasperReport = DynamicJasperHelper.generateJasperReport(
+                            report,
+                            new ClassicLayoutManager(),
+                            map);
+                    return JasperFillManager.fillReport(jasperReport, map, ds);
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        final JasperPrint jasperPrint = get();
+
+                        JasperPrintManager.printReport(jasperPrint, true);
+                    } catch (Exception e) {
+                        LOG.error("Error while creating report", e);
+                    }
+                }
+            };
+
+        wdt.start();
+    } //GEN-LAST:event_butPrintActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void tbProcessingActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_tbProcessingActionPerformed
+        model.setEditable(tbProcessing.isSelected());
+
+        if (!tbProcessing.isSelected()) {
+            saveChangedRows();
+        }
+    } //GEN-LAST:event_tbProcessingActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void saveChangedRows() {
+        if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(model)) {
+            return;
+        }
+
+        final WaitingDialogThread<Void> wdt = new WaitingDialogThread<Void>(StaticSwingTools.getParentFrame(this),
+                true,
+                "Speichere Änderungen",
+                null,
+                200) {
+
+                @Override
+                protected Void doInBackground() throws Exception {
+                    if (featureService instanceof ShapeFileFeatureService) {
+                        final List<FeatureServiceFeature> features = new ArrayList<FeatureServiceFeature>();
+
+                        for (int i = 0; i < model.getRowCount(); ++i) {
+                            features.add(model.getFeatureServiceFeature(table.convertRowIndexToModel(i)));
+                        }
+
+                        try {
+                            if ((features != null) && (features.size() > 0)) {
+                                final FeatureCollection fc = new SimpleFeatureCollection(
+                                        String.valueOf(System.currentTimeMillis()),
+                                        features.toArray(new FeatureServiceFeature[features.size()]),
+                                        getAliasAttributeList());
+                                String filename = ((ShapeFileFeatureService)featureService).getDocumentURI().getPath();
+                                if (filename.indexOf(".") != -1) {
+                                    filename = filename.substring(0, filename.lastIndexOf("."));
+                                }
+
+                                for (final FeatureServiceFeature fsf : changedFeatures) {
+                                    if (fsf instanceof DefaultFeatureServiceFeature) {
+                                        try {
+                                            final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)
+                                                fsf;
+                                            if (tableRuleSet != null) {
+                                                tableRuleSet.beforeSave(fsf);
+                                            }
+                                            feature.saveChanges();
+                                        } catch (Exception e) {
+                                            LOG.error("Cannot save object", e);
+                                        }
+                                    }
+                                }
+                                final ShapeFile shape = new ShapeFile(
+                                        fc,
+                                        filename);
+                                final ShapeFileWriter writer = new ShapeFileWriter(shape);
+                                writer.write();
+                            }
+                        } catch (Exception e) {
+                            LOG.error("Error while refreshing shape file.", e);
+                        }
+                    } else {
+                        wd.setMax(changedFeatures.size());
+                        int count = 0;
+
+                        for (final FeatureServiceFeature fsf : changedFeatures) {
+                            if (fsf instanceof DefaultFeatureServiceFeature) {
+                                try {
+                                    final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)fsf;
+                                    if (tableRuleSet != null) {
+                                        tableRuleSet.beforeSave(fsf);
+                                    }
+                                    feature.saveChanges();
+                                } catch (Exception e) {
+                                    LOG.error("Cannot save object", e);
+                                }
+                            }
+
+                            wd.setProgress(++count);
+                        }
+                    }
+                    changedFeatures.clear();
+
+                    if (tableRuleSet != null) {
+                        tableRuleSet.afterSave(model);
+                    }
+
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                model.fireContentsChanged();
+                            }
+                        });
+                    return null;
+                }
+            };
+
+        wdt.start();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  DOCUMENT ME!
      */
     private List<String[]> getAliasAttributeList() {
@@ -1635,15 +1932,21 @@ public class AttributeTable extends javax.swing.JPanel {
     private String trimNumberString(final String val) {
         String res = String.valueOf(val);
 
-        // remove all leading points and zeros
-        for (int i = res.length() - 1; i > 0; --i) {
-            if ((res.charAt(i) == '0') || (res.charAt(i) == '.')) {
-                res = res.substring(0, i);
-            } else {
-                break;
+        if (res.indexOf(".") != -1) {
+            // remove all leading points and zeros
+            for (int i = res.length() - 1; i > 0; --i) {
+                final char c = res.charAt(i);
+
+                if ((c == '0') || (c == '.')) {
+                    res = res.substring(0, i);
+                    if (c == '.') {
+                        break;
+                    }
+                } else {
+                    break;
+                }
             }
         }
-
         return res.replace('.', ',');
     }
 
@@ -1764,9 +2067,11 @@ public class AttributeTable extends javax.swing.JPanel {
         private String[] attributeAlias;
         private String[] attributeNames;
         private Map<String, FeatureServiceAttribute> featureServiceAttributes;
+        private String[] additionalAttributes = new String[0];
         private List<String> orderedFeatureServiceAttributes;
         private List<FeatureServiceFeature> featureList;
         private List<TableModelListener> listener = new ArrayList<TableModelListener>();
+        private boolean editable = false;
 
         //~ Constructors -------------------------------------------------------
 
@@ -1795,17 +2100,57 @@ public class AttributeTable extends javax.swing.JPanel {
          */
         private void fillHeaderArrays() {
             int index = 0;
-            attributeNames = new String[orderedFeatureServiceAttributes.size()];
-            attributeAlias = new String[orderedFeatureServiceAttributes.size()];
+            attributeNames = new String[attributeCount()];
+            attributeAlias = new String[attributeCount()];
 
             for (final String attributeName : orderedFeatureServiceAttributes) {
-                attributeNames[index] = attributeName;
-                if (attributeName.startsWith("app:")) {
-                    attributeAlias[index++] = attributeName.substring(4);
-                } else {
-                    attributeAlias[index++] = attributeName;
+                final FeatureServiceAttribute fsa = featureServiceAttributes.get(attributeName);
+
+                if ((fsa == null) || fsa.isVisible()) {
+                    attributeNames[index] = attributeName;
+                    String aliasName = attributeName;
+
+                    if ((fsa != null) && !fsa.getAlias().equals("")) {
+                        final String alias = fsa.getAlias();
+
+                        if (alias != null) {
+                            aliasName = alias;
+                        }
+                    }
+
+                    if (aliasName.startsWith("app:")) {
+                        attributeAlias[index++] = aliasName.substring(4);
+                    } else {
+                        attributeAlias[index++] = aliasName;
+                    }
                 }
             }
+
+            if (tableRuleSet != null) {
+                final String[] fields = tableRuleSet.getAdditionalFieldNames();
+
+                if (fields != null) {
+                    additionalAttributes = fields;
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private int attributeCount() {
+            int count = 0;
+
+            for (final String key : orderedFeatureServiceAttributes) {
+                final FeatureServiceAttribute fsa = featureServiceAttributes.get(key);
+                if (fsa.isVisible()) {
+                    ++count;
+                }
+            }
+
+            return count;
         }
 
         /**
@@ -1827,12 +2172,30 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public boolean isEditable() {
+            return editable;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  editable  DOCUMENT ME!
+         */
+        public void setEditable(final boolean editable) {
+            this.editable = editable;
+        }
+
         @Override
         public int getColumnCount() {
             if (attributeAlias == null) {
                 return 0;
             } else {
-                return attributeAlias.length;
+                return attributeAlias.length + additionalAttributes.length;
             }
         }
 
@@ -1938,7 +2301,11 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public String getColumnName(final int columnIndex) {
-            return attributeAlias[columnIndex];
+            if (columnIndex < attributeAlias.length) {
+                return attributeAlias[columnIndex];
+            } else {
+                return additionalAttributes[columnIndex - attributeAlias.length];
+            }
         }
 
         /**
@@ -1949,71 +2316,105 @@ public class AttributeTable extends javax.swing.JPanel {
          * @return  DOCUMENT ME!
          */
         public String getColumnAttributeName(final int columnIndex) {
-            return attributeNames[columnIndex];
+            if (columnIndex < attributeAlias.length) {
+                return attributeNames[columnIndex];
+            } else {
+                return additionalAttributes[columnIndex - attributeAlias.length];
+            }
         }
 
         @Override
         public Class<?> getColumnClass(final int columnIndex) {
-            final String key = attributeNames[columnIndex];
-            final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
+            if (columnIndex < attributeAlias.length) {
+                final String key = attributeNames[columnIndex];
+                final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
 
-            if (attr.isGeometry()) {
-                return String.class;
-            } else if (attr.getType().equals(String.valueOf(Types.CHAR))
-                        || attr.getType().equals(String.valueOf(Types.VARCHAR))
-                        || attr.getType().equals(String.valueOf(Types.LONGVARCHAR))) {
-                return String.class;
-            } else if (attr.getType().equals(String.valueOf(Types.INTEGER))
-                        || attr.getType().equals(String.valueOf(Types.BIGINT))
-                        || attr.getType().equals(String.valueOf(Types.SMALLINT))
-                        || attr.getType().equals(String.valueOf(Types.TINYINT))
-                        || attr.getType().equals("xsd:integer")) {
-                return Integer.class;
-            } else if (attr.getType().equals(String.valueOf(Types.DOUBLE))
-                        || attr.getType().equals(String.valueOf(Types.FLOAT))
-                        || attr.getType().equals(String.valueOf(Types.DECIMAL))
-                        || attr.getType().equals("xsd:float")
-                        || attr.getType().equals("xsd:decimal")
-                        || attr.getType().equals("xsd:double")) {
-                return Double.class;
-            } else if (attr.getType().equals(String.valueOf(Types.DATE))
-                        || attr.getType().equals(String.valueOf(Types.TIME))
-                        || attr.getType().equals(String.valueOf(Types.TIMESTAMP))) {
-                return Date.class;
-            } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN))
-                        || attr.getType().equals("xsd:boolean")) {
-                return Boolean.class;
+                if (attr.isGeometry()) {
+                    return String.class;
+                } else if (attr.getType().equals(String.valueOf(Types.CHAR))
+                            || attr.getType().equals(String.valueOf(Types.VARCHAR))
+                            || attr.getType().equals(String.valueOf(Types.LONGVARCHAR))) {
+                    return String.class;
+                } else if (attr.getType().equals(String.valueOf(Types.INTEGER))
+                            || attr.getType().equals(String.valueOf(Types.SMALLINT))
+                            || attr.getType().equals(String.valueOf(Types.TINYINT))
+                            || attr.getType().equals("xsd:integer")) {
+                    return Integer.class;
+                } else if (attr.getType().equals(String.valueOf(Types.BIGINT))
+                            || attr.getType().equals("xsd:long")) {
+                    return Long.class;
+                } else if (attr.getType().equals(String.valueOf(Types.DOUBLE))
+                            || attr.getType().equals(String.valueOf(Types.FLOAT))
+                            || attr.getType().equals(String.valueOf(Types.DECIMAL))
+                            || attr.getType().equals("xsd:float")
+                            || attr.getType().equals("xsd:decimal")
+                            || attr.getType().equals("xsd:double")) {
+                    return Double.class;
+                } else if (attr.getType().equals(String.valueOf(Types.DATE))
+                            || attr.getType().equals(String.valueOf(Types.TIME))
+                            || attr.getType().equals(String.valueOf(Types.TIMESTAMP))) {
+                    return Date.class;
+                } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN))
+                            || attr.getType().equals("xsd:boolean")) {
+                    return Boolean.class;
+                } else {
+                    return String.class;
+                }
             } else {
-                return String.class;
+                return tableRuleSet.getAdditionalFieldClass(columnIndex - attributeAlias.length);
             }
         }
 
         @Override
         public boolean isCellEditable(final int rowIndex, final int columnIndex) {
-            return false;
+            if (columnIndex < attributeAlias.length) {
+                if (tableRuleSet != null) {
+                    return editable && tableRuleSet.isColumnEditable(attributeNames[columnIndex]);
+                } else {
+                    return editable;
+                }
+            } else {
+                return false;
+            }
         }
 
         @Override
         public Object getValueAt(final int rowIndex, final int columnIndex) {
-            Object value = featureList.get(rowIndex).getProperty(attributeNames[columnIndex]);
+            if (columnIndex < attributeAlias.length) {
+                Object value = featureList.get(rowIndex).getProperty(attributeNames[columnIndex]);
 
-            if (value instanceof Geometry) {
-                value = ((Geometry)value).getGeometryType();
-            } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
-                final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)value);
-                try {
-                    value = JTSAdapter.export(geom).getGeometryType();
-                } catch (GeometryException e) {
-                    LOG.error("Error while transforming deegree geometry to jts geometry.", e);
+                if (value instanceof Geometry) {
+                    value = ((Geometry)value).getGeometryType();
+                } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
+                    final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)
+                            value);
+                    try {
+                        value = JTSAdapter.export(geom).getGeometryType();
+                    } catch (GeometryException e) {
+                        LOG.error("Error while transforming deegree geometry to jts geometry.", e);
+                    }
                 }
-            }
 
-            return value;
+                return value;
+            } else {
+                return tableRuleSet.getAdditionalFieldValue(columnIndex - attributeAlias.length,
+                        featureList.get(rowIndex));
+            }
         }
 
         @Override
         public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            final FeatureServiceFeature feature = featureList.get(rowIndex);
+            final String attrName = attributeNames[columnIndex];
+            Object newObject = aValue;
+
+            if (tableRuleSet != null) {
+                newObject = tableRuleSet.afterEdit(attrName, rowIndex, feature.getProperty(attrName), aValue);
+            }
+            feature.setProperty(attrName, newObject);
+            if (!changedFeatures.contains(feature)) {
+                changedFeatures.add(feature);
+            }
         }
 
         @Override
@@ -2032,6 +2433,7 @@ public class AttributeTable extends javax.swing.JPanel {
          * @param  col  DOCUMENT ME!
          */
         public void hideColumn(final int col) {
+            // todo fuer virtuelle Spalten
             this.attributeNames = remove(this.attributeNames, col);
             this.attributeAlias = remove(this.attributeAlias, col);
             fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
@@ -2055,6 +2457,8 @@ public class AttributeTable extends javax.swing.JPanel {
             if ((row >= 0) && (row < attributeAlias.length)) {
                 attributeAlias[row] = name;
                 fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
+            } else if ((row - attributeAlias.length) >= 0) {
+                additionalAttributes[row - attributeAlias.length] = name;
             }
         }
 
@@ -2185,6 +2589,66 @@ public class AttributeTable extends javax.swing.JPanel {
             }
 
             return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        }
+    }
+
+    /**
+     * Wraps a table into a data source, that can be used within a jasper report.
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static class TableDataSource implements JRDataSource {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private int index = -1;
+        private TableModel model;
+        private JTable table;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new TableDataSource object.
+         *
+         * @param  table  DOCUMENT ME!
+         */
+        public TableDataSource(final JTable table) {
+            this.model = table.getModel();
+            this.table = table;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public boolean next() throws JRException {
+            final boolean ret = ++index < model.getRowCount();
+
+            if (!ret) {
+                // Set the internal index to the first row, when the return value is false,
+                // so that the data source can used from multiple sub reports.
+                index = -1;
+            }
+
+            return ret;
+        }
+
+        @Override
+        public Object getFieldValue(final JRField jrField) throws JRException {
+            int col = 0;
+
+            try {
+                col = Integer.parseInt(jrField.getName());
+            } catch (NumberFormatException e) {
+                LOG.error("Cannot parse column name", e);
+            }
+
+            final Object result = model.getValueAt(table.convertRowIndexToModel(index), col);
+
+            if (result != null) {
+                return String.valueOf(result);
+            } else {
+                return null;
+            }
         }
     }
 }

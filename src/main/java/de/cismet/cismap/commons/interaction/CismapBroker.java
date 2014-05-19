@@ -103,6 +103,8 @@ public class CismapBroker {
     private String defaultCrs = "EPSG:31466";
     private int DefaultCrsAlias = -1;
     private MetaSearchFacade metaSearch;
+    private boolean useInternalDb = false;
+    private boolean checkForOverlappingGeometriesAfterFeatureRotation = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -965,5 +967,42 @@ public class CismapBroker {
         }
 
         return result;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the useInternalDb
+     */
+    public boolean isUseInternalDb() {
+        return useInternalDb;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  useInternalDb  the useInternalDb to set
+     */
+    public void setUseInternalDb(final boolean useInternalDb) {
+        this.useInternalDb = useInternalDb;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isCheckForOverlappingGeometriesAfterFeatureRotation() {
+        return checkForOverlappingGeometriesAfterFeatureRotation;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  checkForOverlappingGeometriesAfterFeatureRotation  DOCUMENT ME!
+     */
+    public void setCheckForOverlappingGeometriesAfterFeatureRotation(
+            final boolean checkForOverlappingGeometriesAfterFeatureRotation) {
+        this.checkForOverlappingGeometriesAfterFeatureRotation = checkForOverlappingGeometriesAfterFeatureRotation;
     }
 }
