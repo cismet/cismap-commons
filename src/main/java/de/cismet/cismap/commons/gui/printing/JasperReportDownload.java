@@ -68,6 +68,25 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
             final String directory,
             final String title,
             final String filename) {
+        this(reportResourceName, dataSourceGenerator, directory, title, filename, ".pdf");
+    }
+
+    /**
+     * Creates a new JasperReportDownload object.
+     *
+     * @param  reportResourceName   DOCUMENT ME!
+     * @param  dataSourceGenerator  DOCUMENT ME!
+     * @param  directory            DOCUMENT ME!
+     * @param  title                DOCUMENT ME!
+     * @param  filename             DOCUMENT ME!
+     * @param  extension            DOCUMENT ME!
+     */
+    public JasperReportDownload(final String reportResourceName,
+            final JasperReportDataSourceGenerator dataSourceGenerator,
+            final String directory,
+            final String title,
+            final String filename,
+            final String extension) {
         this.reportResourceName = reportResourceName;
         this.parameters = new HashMap();
         this.dataSourceGenerator = dataSourceGenerator;
@@ -75,7 +94,7 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
         this.title = title;
 
         status = State.WAITING;
-        determineDestinationFile(filename, ".pdf");
+        determineDestinationFile(filename, extension);
     }
 
     /**

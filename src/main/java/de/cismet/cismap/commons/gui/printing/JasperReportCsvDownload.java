@@ -42,48 +42,14 @@ public class JasperReportCsvDownload extends JasperReportDownload {
             final String directory,
             final String title,
             final String filename) {
-        super(reportResourceName, dataSourceGenerator, directory, title, filename);
-        determineDestinationFile(filename, ".csv");
-    }
+        super(reportResourceName,
 
-    /**
-     * Creates a new JasperReportCsvDownload object.
-     *
-     * @param  reportResourceName   DOCUMENT ME!
-     * @param  parameters           DOCUMENT ME!
-     * @param  dataSourceGenerator  DOCUMENT ME!
-     * @param  directory            DOCUMENT ME!
-     * @param  title                DOCUMENT ME!
-     * @param  filename             DOCUMENT ME!
-     */
-    public JasperReportCsvDownload(final String reportResourceName,
-            final Map parameters,
-            final JasperReportDataSourceGenerator dataSourceGenerator,
-            final String directory,
-            final String title,
-            final String filename) {
-        super(reportResourceName, parameters, dataSourceGenerator, directory, title, filename);
-        determineDestinationFile(filename, ".csv");
-    }
 
-    /**
-     * Creates a new JasperReportCsvDownload object.
-     *
-     * @param  reportResourceName   DOCUMENT ME!
-     * @param  parametersGenerator  DOCUMENT ME!
-     * @param  dataSourceGenerator  DOCUMENT ME!
-     * @param  directory            DOCUMENT ME!
-     * @param  title                DOCUMENT ME!
-     * @param  filename             DOCUMENT ME!
-     */
-    public JasperReportCsvDownload(final String reportResourceName,
-            final JasperReportParametersGenerator parametersGenerator,
-            final JasperReportDataSourceGenerator dataSourceGenerator,
-            final String directory,
-            final String title,
-            final String filename) {
-        super(reportResourceName, parametersGenerator, dataSourceGenerator, directory, title, filename);
-        determineDestinationFile(filename, ".csv");
+            dataSourceGenerator,
+            directory,
+            title,
+            filename,
+            ".csv");
     }
 
     //~ Methods ----------------------------------------------------------------
