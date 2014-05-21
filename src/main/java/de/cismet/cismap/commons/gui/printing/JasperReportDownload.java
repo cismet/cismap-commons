@@ -13,6 +13,7 @@ import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
 
 import org.openide.util.Cancellable;
@@ -44,12 +45,12 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
 
     //~ Instance fields --------------------------------------------------------
 
-    private JasperPrint print;
-    private String reportResourceName;
-    private Map parameters;
-    private JasperReportParametersGenerator parametersGenerator;
-    private JRDataSource dataSource;
-    private JasperReportDataSourceGenerator dataSourceGenerator;
+    protected JasperPrint print;
+    protected String reportResourceName;
+    protected Map parameters;
+    protected JasperReportParametersGenerator parametersGenerator;
+    protected JRDataSource dataSource;
+    protected JasperReportDataSourceGenerator dataSourceGenerator;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -168,7 +169,7 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
         if (print != null) {
             try {
                 if (!Thread.interrupted()) {
-                    JasperExportManager.exportReportToPdfFile(print, fileToSaveTo.getPath());
+                    exportReportFile();
                 } else {
                     log.info("Download was interuppted");
                     deleteFile();
@@ -183,6 +184,15 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
             status = State.COMPLETED;
             stateChanged();
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  JRException  DOCUMENT ME!
+     */
+    protected void exportReportFile() throws JRException {
+        JasperExportManager.exportReportToPdfFile(print, fileToSaveTo.getPath());
     }
 
     @Override
