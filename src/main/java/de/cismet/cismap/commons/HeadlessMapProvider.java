@@ -239,12 +239,13 @@ public class HeadlessMapProvider {
             if ((rasterService instanceof RetrievalServiceLayer)
                         && ((RetrievalServiceLayer)rasterService).isEnabled()) {
                 if ((rasterService instanceof AbstractWMSServiceLayer)
-                            && ((AbstractWMSServiceLayer)rasterService).isVisible()) {
+                            && ((AbstractWMSServiceLayer)rasterService).getPNode().getVisible()) {
                     addable = true;
-                } else if ((rasterService instanceof AbstractWMS) && ((AbstractWMS)rasterService).isVisible()) {
+                } else if ((rasterService instanceof AbstractWMS)
+                            && ((AbstractWMS)rasterService).getPNode().getVisible()) {
                     addable = true;
                 } else if ((rasterService instanceof AbstractFeatureService)
-                            && ((AbstractFeatureService)rasterService).isVisible()) {
+                            && ((AbstractFeatureService)rasterService).getPNode().getVisible()) {
                     addable = true;
                 }
             }
