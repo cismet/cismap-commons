@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.layerwidget;
 
-import org.jdom.Attribute;
 import org.jdom.Element;
 
 import java.awt.EventQueue;
@@ -16,6 +15,7 @@ import java.awt.Image;
 import java.util.*;
 
 import javax.swing.JTree;
+import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TreeModelEvent;
@@ -26,15 +26,16 @@ import de.cismet.cismap.commons.*;
 import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
+import de.cismet.cismap.commons.raster.wms.AbstractWMS;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.featuresupportlayer.SimpleFeatureSupportingRasterLayer;
+import de.cismet.cismap.commons.rasterservice.FeatureAwareRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
-import de.cismet.tools.CismetThreadPool;
 import de.cismet.tools.PropertyEqualsProvider;
 
 import de.cismet.tools.configuration.Configurable;
@@ -561,7 +562,15 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         final Object layer = treePath.getLastPathComponent();
         if (layer instanceof RetrievalServiceLayer) {
             final RetrievalServiceLayer wmsServiceLayer = ((RetrievalServiceLayer)layer);
-            wmsServiceLayer.getPNode().setVisible(!wmsServiceLayer.getPNode().getVisible());
+            final boolean flag = !wmsServiceLayer.getPNode().getVisible();
+            if (wmsServiceLayer instanceof MapService) {
+                ((AbstractWMS)wmsServiceLayer).setVisible(flag);
+            } else if (wmsServiceLayer instanceof ModeLayer) {
+                ((ModeLayer)wmsServiceLayer).setVisible(flag);
+            } else if (wmsServiceLayer instanceof ModeLayer) {
+                ((ModeLayer)wmsServiceLayer).setVisible(flag);
+            }
+            wmsServiceLayer.getPNode().setVisible(flag);
 
             fireTreeNodesChanged(
                 this,
