@@ -767,7 +767,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         copy.setStroke(stroke);
                                     } else {
                                         copy.setStroke(
-                                            new CustomFixedWidthStroke(1));
+                                            new CustomFixedWidthStroke(1, MappingComponent.this));
                                     }
                                     copy.addInfoNode();
                                     copy.setInfoNodeExpanded(false);
@@ -4094,9 +4094,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             crosshairLayer.setTransparency(1);
             final PPath lineX = new PPath();
             final PPath lineY = new PPath();
-            lineX.setStroke(new CustomFixedWidthStroke(thickness));
+            lineX.setStroke(new CustomFixedWidthStroke(thickness, this));
             lineX.setStrokePaint(new Color(100, 100, 100, 255));
-            lineY.setStroke(new CustomFixedWidthStroke(thickness));
+            lineY.setStroke(new CustomFixedWidthStroke(thickness, this));
             lineY.setStrokePaint(new Color(100, 100, 100, 255));
 
             final PBounds current = getCamera().getViewBounds();

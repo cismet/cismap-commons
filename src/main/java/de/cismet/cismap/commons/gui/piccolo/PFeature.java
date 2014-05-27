@@ -924,7 +924,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if (sf.getLineWidth() <= 1) {
                     setStroke(FIXED_WIDTH_STROKE);
                 } else {
-                    final CustomFixedWidthStroke old = new CustomFixedWidthStroke(sf.getLineWidth());
+                    final CustomFixedWidthStroke old = new CustomFixedWidthStroke(sf.getLineWidth(), viewer);
                     setStroke(old);
                 }
                 // Falls absichtlich keine Linie gesetzt worden ist (z.B. im StyleDialog)
@@ -2339,7 +2339,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }                                                                                                  // LINESTRING
         else if ((feature.getGeometry() instanceof LineString) || (feature.getGeometry() instanceof MultiLineString)) {
             if (selected) {
-                final CustomFixedWidthStroke fws = new CustomFixedWidthStroke(5f);
+                final CustomFixedWidthStroke fws = new CustomFixedWidthStroke(5f, viewer);
                 setStroke(fws);
                 setStrokePaint(javax.swing.UIManager.getDefaults().getColor("Table.selectionBackground")); // NOI18N
                 setPaint(null);
