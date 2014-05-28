@@ -563,12 +563,12 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         if (layer instanceof RetrievalServiceLayer) {
             final RetrievalServiceLayer wmsServiceLayer = ((RetrievalServiceLayer)layer);
             final boolean flag = !wmsServiceLayer.getPNode().getVisible();
-            if (wmsServiceLayer instanceof MapService) {
+            if (wmsServiceLayer instanceof AbstractWMS) {
                 ((AbstractWMS)wmsServiceLayer).setVisible(flag);
             } else if (wmsServiceLayer instanceof ModeLayer) {
                 ((ModeLayer)wmsServiceLayer).setVisible(flag);
-            } else if (wmsServiceLayer instanceof ModeLayer) {
-                ((ModeLayer)wmsServiceLayer).setVisible(flag);
+            } else if (wmsServiceLayer instanceof AbstractFeatureService) {
+                ((AbstractFeatureService)wmsServiceLayer).setVisible(flag);
             }
             wmsServiceLayer.getPNode().setVisible(flag);
 
