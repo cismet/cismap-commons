@@ -405,22 +405,23 @@ public class HeadlessMapProvider {
      * This is the method called when you need to fill in a report: for jasper with (72 as basedpi and widzth and height
      * with the dimension of the image in the report
      *
-     * @param   basedpi         DOCUMENT ME!
+     * @param   baseDpi         DOCUMENT ME!
      * @param   targetDpi       DOCUMENT ME!
      * @param   widthInPixels   DOCUMENT ME!
      * @param   heightInPixels  DOCUMENT ME!
      *
-     * @return  A future object that can provide an image
+     * @return  DOCUMENT ME!
      */
-    public Future<Image> getImage(final int basedpi,
+    public Future<Image> getImage(final int baseDpi,
             final int targetDpi,
             final double widthInPixels,
             final double heightInPixels) {
         printingResolution = targetDpi / FEATURE_RESOLUTION_FACTOR;
-        final int imageWidth = (int)((double)widthInPixels / (double)basedpi
+        final int imageWidth = (int)((double)widthInPixels / (double)baseDpi
                         * (double)targetDpi);
-        final int imageHeight = (int)((double)heightInPixels / (double)basedpi
+        final int imageHeight = (int)((double)heightInPixels / (double)baseDpi
                         * (double)targetDpi);
+        map.setStickyFeatureCorrectionFactor(targetDpi / featureResolutionFactor);
         resolution = targetDpi;
         return getImage(imageWidth, imageHeight);
     }

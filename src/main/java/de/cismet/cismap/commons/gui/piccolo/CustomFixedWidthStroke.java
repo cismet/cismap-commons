@@ -70,9 +70,11 @@ public class CustomFixedWidthStroke extends BasicStroke {
         if (PPaintContext.CURRENT_PAINT_CONTEXT != null) {
             // log.fatal("LineWidth:"+super.getLineWidth() / (float) PPaintContext.CURRENT_PAINT_CONTEXT.getScale());
             if (mc != null) {
-                return super.getLineWidth() * multiplyer / (float)mc.getCamera().getViewScale();
+                return super.getLineWidth() * multiplyer * (float)mc.getStickyFeatureCorrectionFactor()
+                            / (float)mc.getCamera().getViewScale();
             } else {
-                return super.getLineWidth() * multiplyer / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+                return super.getLineWidth() * multiplyer * (float)mc.getStickyFeatureCorrectionFactor()
+                            / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
             }
         } else {
             return super.getLineWidth() * multiplyer;

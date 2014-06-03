@@ -275,6 +275,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
     private final ArrayList<RepaintListener> repaintListeners = new ArrayList<RepaintListener>();
     private boolean resizeEventActivated = true;
+    private double stickyFeatureCorrectionFactor = 1d;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -894,13 +895,31 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getStickyFeatureCorrectionFactor() {
+        return stickyFeatureCorrectionFactor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  stickyFeatureCorrectionFactor  DOCUMENT ME!
+     */
+    public void setStickyFeatureCorrectionFactor(final double stickyFeatureCorrectionFactor) {
+        this.stickyFeatureCorrectionFactor = stickyFeatureCorrectionFactor;
+    }
+
+    /**
      * Sets the scale of the given PNode to the value of the camera scale.
      *
      * @param  n  PNode to rescale
      */
     private void rescaleStickyNodeWork(final PNode n) {
         final double s = MappingComponent.this.getCamera().getViewScale();
-        n.setScale(1 / s);
+        n.setScale(getStickyFeatureCorrectionFactor() / s);
     }
 
     /**
