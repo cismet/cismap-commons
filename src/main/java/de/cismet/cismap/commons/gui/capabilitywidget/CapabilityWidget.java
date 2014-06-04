@@ -1780,22 +1780,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     //J-
     public void configure(final CapabilitiesPreferences cp) {
         removeAllServer();
-        JComponent activeComponent = null;
         final Iterator<Integer> it = cp.getCapabilities().keySet().iterator();
+        LinkWithSubparent activeLink = null;
         while (it.hasNext()) {
             final Integer i = it.next();
             final CapabilityLink cl = cp.getCapabilities().get(i);
-            if (cl.getType().equals(CapabilityLink.OGC) || cl.getType().equals(CapabilityLink.OGC_DEPRECATED)) {
-                addLinkManually(new LinkWithSubparent(cl.getLink(), cl.getSubparent()));
+            LinkWithSubparent link = new LinkWithSubparent(cl.getLink(), cl.getSubparent());
+            if (cl.getType().equals(CapabilityLink.OGC) || cl.getType().equals(CapabilityLink.OGC_DEPRECATED)|| cl.getType().equals("cidsLayer") || cl.getType().equals(CapabilityLink.INTERNAL_DB)) {
+                addLinkManually(link);
             }
 
             if (cl.isActive()) {
-                activeComponent = capabilityUrls.get(cl.getLink());
+                activeLink = link;
             }
 // TODO Hier WFS, ESRI, Google, ...
         }
-        if (activeComponent != null) {
-            tbpCapabilities.setSelectedComponent(activeComponent);
+        if (activeLink != null) {
+            final LinkWithSubparent componentToSelect = activeLink;
+            EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    tbpCapabilities.setSelectedComponent(capabilityUrls.get(componentToSelect));
+                }
+            });
         }
 
         // CapabilityList-Baum neu aufbauen
