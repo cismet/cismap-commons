@@ -259,6 +259,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private boolean mainMappingComponent = false;
     private volatile boolean rescaleStickyNodesEnabled = true;
     private volatile int retrievalCompleteInProgressCount = 0;
+    private double featurePrintingDpi = PrintingSettingsWidget.FEATURE_RESOLUTION_FACTOR;
 
     /**
      * Creates new PFeatures for all features in the given array and adds them to the PFeatureHashmap. Then adds the
@@ -5344,6 +5345,24 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         if (retrievalCompleteInProgressCount == 0) {
             rescaleStickyNodesEnabled = true;
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public double getFeaturePrintingDpi() {
+        return featurePrintingDpi;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featurePrintingDpi  DOCUMENT ME!
+     */
+    public void setFeaturePrintingDpi(final double featurePrintingDpi) {
+        this.featurePrintingDpi = featurePrintingDpi;
     }
 
     //~ Inner Classes ----------------------------------------------------------

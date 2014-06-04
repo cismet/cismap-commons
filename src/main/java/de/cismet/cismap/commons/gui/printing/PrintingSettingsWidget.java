@@ -403,7 +403,8 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
             mappingComponent.setInteractionMode(MappingComponent.PRINTING_AREA_SELECTION);
             final Scale selectedScale = (Scale)cboScales.getSelectedItem();
             final Resolution selectedResolution = (Resolution)cboResolution.getSelectedItem();
-            mappingComponent.setPrintingResolution(selectedResolution.getResolution() / FEATURE_RESOLUTION_FACTOR);
+            mappingComponent.setPrintingResolution(selectedResolution.getResolution()
+                        / mappingComponent.getFeaturePrintingDpi());
             final Template selectedTemplate = (Template)cboTemplates.getSelectedItem();
             mappingComponent.setInteractionMode(MappingComponent.PRINTING_AREA_SELECTION);
             ((PrintingFrameListener)(mappingComponent.getInputListener(MappingComponent.PRINTING_AREA_SELECTION))).init(

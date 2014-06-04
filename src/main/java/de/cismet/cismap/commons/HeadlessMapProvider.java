@@ -11,10 +11,7 @@
  */
 package de.cismet.cismap.commons;
 
-import edu.umd.cs.piccolo.PNode;
-
 import java.awt.Image;
-import java.awt.geom.Rectangle2D;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -35,7 +32,6 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.StyledFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
@@ -416,12 +412,12 @@ public class HeadlessMapProvider {
             final int targetDpi,
             final double widthInPixels,
             final double heightInPixels) {
-        printingResolution = targetDpi / FEATURE_RESOLUTION_FACTOR;
+        printingResolution = targetDpi / CismapBroker.getInstance().getMappingComponent().getFeaturePrintingDpi();
         final int imageWidth = (int)((double)widthInPixels / (double)baseDpi
                         * (double)targetDpi);
         final int imageHeight = (int)((double)heightInPixels / (double)baseDpi
                         * (double)targetDpi);
-        map.setStickyFeatureCorrectionFactor(targetDpi / featureResolutionFactor);
+        map.setStickyFeatureCorrectionFactor(printingResolution);
         resolution = targetDpi;
         return getImage(imageWidth, imageHeight);
     }
