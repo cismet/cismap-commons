@@ -73,8 +73,7 @@ public class CustomFixedWidthStroke extends BasicStroke {
                 return super.getLineWidth() * multiplyer * (float)mc.getStickyFeatureCorrectionFactor()
                             / (float)mc.getCamera().getViewScale();
             } else {
-                return super.getLineWidth() * multiplyer * (float)mc.getStickyFeatureCorrectionFactor()
-                            / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+                return super.getLineWidth() * multiplyer / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
             }
         } else {
             return super.getLineWidth() * multiplyer;
