@@ -41,6 +41,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.AddHandleDialog;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
@@ -526,6 +527,16 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
      */
     private void addPoint(final PFeature pf, final float handleX, final float handleY) {
         pf.insertCoordinate(entityPosition, ringPosition, coordPosition, handleX, handleY);
+        pf.getViewer()
+                .getMemUndo()
+                .addAction(new HandleDeleteAction(
+                        pf.getViewer(),
+                        pf.getFeature(),
+                        entityPosition,
+                        ringPosition,
+                        coordPosition,
+                        handleX,
+                        handleY));
     }
 
     /**
