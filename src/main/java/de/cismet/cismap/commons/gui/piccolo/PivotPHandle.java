@@ -114,4 +114,13 @@ public class PivotPHandle extends PHandle {
             log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
         }
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Point2D getMid() {
+        return mid;
+    }
 }
