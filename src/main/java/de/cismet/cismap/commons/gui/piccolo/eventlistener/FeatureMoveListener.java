@@ -20,6 +20,7 @@ import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.util.PDimension;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
+import edu.umd.cs.piccolox.util.PLocator;
 
 import java.awt.Color;
 import java.awt.event.InputEvent;
@@ -34,7 +35,7 @@ import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PHandle;
-import de.cismet.cismap.commons.gui.piccolo.TransformationPHandle;
+import de.cismet.cismap.commons.gui.piccolo.PivotPHandle;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureMoveAction;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
@@ -103,9 +104,11 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                     features.add(feature);
                     feature.moveToFront();
                 }
-                mc.getFeatureCollection().unselectAll();
-                mc.getFeatureCollection().select(feature.getFeature());
-                postSelectionChanged();
+                if (!feature.isSelected() || (mc.getFeatureCollection().getSelectedFeatures().size() != 1)) {
+                    mc.getFeatureCollection().unselectAll();
+                    mc.getFeatureCollection().select(feature.getFeature());
+                    postSelectionChanged();
+                }
             } else {
                 feature = null;
             }
@@ -145,8 +148,17 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                         f.moveFeature(delta);
                     }
                 }
+                final double scale = mc.getCamera().getViewScale();
                 for (int i = 0; i < handleLayer.getChildrenCount(); i++) {
                     final PNode child = handleLayer.getChild(i);
+                    if (child instanceof PivotPHandle) {
+                        final PivotPHandle pivotHandle = (PivotPHandle)child;
+                        final PLocator pLocator = pivotHandle.getLocator();
+                        final Point2D newMid = new Point2D.Double(pLocator.locateX() + (delta.getWidth() / scale),
+                                pLocator.locateY()
+                                        + (delta.getHeight() / scale));
+                        pivotHandle.getMid().setLocation(newMid);
+                    }
                     if (child instanceof PHandle) {
                         final PHandle pHandle = (PHandle)child;
                         pHandle.relocateHandle();
@@ -232,9 +244,10 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                 final PFeature f = (PFeature)o;
                 if (f.getFeature() instanceof AbstractNewFeature) {
                     f.setStrokePaint(Color.black);
-                } else {
-                    mc.reconsiderFeature(f.getFeature());
                 }
+//                else {
+//                    mc.reconsiderFeature(f.getFeature());
+//                }
             }
         }
         features = new Vector();
