@@ -21,8 +21,10 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import java.util.List;
 
 /**
  * Implementiert das CustomAction-Interface und wird von der Memento-Klasse verwendet, um ein (oder mehrere) vom
@@ -37,7 +39,7 @@ public class FeatureMoveAction implements CustomAction {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private MappingComponent mc;
-    private Vector features;
+    private List<PFeature> features;
     private PDimension dim;
 
     //~ Constructors -----------------------------------------------------------
@@ -51,7 +53,7 @@ public class FeatureMoveAction implements CustomAction {
      * @param  dimensionInPixel  DOCUMENT ME!
      */
     public FeatureMoveAction(final MappingComponent mc,
-            final Vector features,
+            final List<PFeature> features,
             final PDimension dim,
             final boolean dimensionInPixel) {
         this.mc = mc;
@@ -76,17 +78,25 @@ public class FeatureMoveAction implements CustomAction {
         if (log.isDebugEnabled()) {
             log.debug("Y=" + dim.getHeight()); // NOI18N
         }
-        final Iterator it = features.iterator();
+        final Iterator<PFeature> it = features.iterator();
         while (it.hasNext()) {
-            final Object o = it.next();
-            if ((o instanceof PFeature) && ((PFeature)o).getFeature().isEditable()
+            final PFeature o = it.next();
+            if (((PFeature)o).getFeature().isEditable()
                         && ((PFeature)o).getFeature().canBeSelected()) {
-                final PFeature f = (PFeature)o;
-                f.moveFeature(createDimension(dim, true));
-                if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                    final Vector v = new Vector();
-                    v.add(f.getFeature());
-                    ((DefaultFeatureCollection)mc.getFeatureCollection()).fireFeaturesChanged(v);
+                PFeature f = (PFeature)o;
+
+                // the pfeature from the map should be used. Otherwise, the undo/redo buttons does not
+                // work properly (only one polygon of a multi polygon is moved),
+                // if the featureMoveAction is used in a sequence with the featureAddEntityAction
+                f = mc.getPFeatureHM().get(f.getFeature());
+
+                if (f != null) {
+                    f.moveFeature(createDimension(dim, true));
+                    if (mc.getFeatureCollection() instanceof DefaultFeatureCollection) {
+                        final Vector v = new Vector();
+                        v.add(f.getFeature());
+                        ((DefaultFeatureCollection)mc.getFeatureCollection()).fireFeaturesChanged(v);
+                    }
                 }
             }
         }
@@ -133,5 +143,17 @@ public class FeatureMoveAction implements CustomAction {
             newDim = new PDimension(dim.getWidth() / scale, dim.getHeight() / scale);
         }
         return newDim;
+    }
+
+
+    @Override
+    public boolean featureConcerned(Feature feature) {
+        for (PFeature f : features) {
+            if (f.getFeature().equals(feature)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

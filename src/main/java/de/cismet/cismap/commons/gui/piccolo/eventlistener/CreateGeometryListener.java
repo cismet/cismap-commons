@@ -48,8 +48,7 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public class CreateGeometryListener extends PBasicInputEventHandler implements FeatureCollectionListener,
-    CreateGeometryListenerInterface {
+public class CreateGeometryListener extends PBasicInputEventHandler implements CreateGeometryListenerInterface {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -106,9 +105,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
 
         if (mc != null) {
             moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
-            // srichter: fehlerpotential! this referenz eines nicht fertig initialisieren Objekts wieder nach aussen
-            // geliefert! loesungsvorschlag: createInstance-methode, welche den aufruf nach dem erzeugen ausfuehrt.
-            mc.getFeatureCollection().addFeatureCollectionListener(this);
         }
     }
 
@@ -623,20 +619,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
         this.geometryFeatureClass = geometryFeatureClass;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  newFeature  DOCUMENT ME!
-     */
-    private void postGeometryCreatedNotificaton(final AbstractNewFeature newFeature) {
-        final PNotificationCenter pn = PNotificationCenter.defaultCenter();
-        pn.postNotification(GEOMETRY_CREATED_NOTIFICATION, newFeature);
-    }
-
-    @Override
-    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-    }
-
     @Override
     public void mouseDragged(final PInputEvent pInputEvent) {
         super.mouseDragged(pInputEvent);
@@ -683,42 +665,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
 
             updatePolygon(null);
         }
-    }
-
-    @Override
-    public void featureCollectionChanged() {
-    }
-
-    @Override
-    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
-    }
-
-    @Override
-    public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-    }
-
-    @Override
-    public void featuresAdded(final FeatureCollectionEvent fce) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Features added to map");                                                          // NOI18N
-        }
-        for (final Feature curFeature : fce.getEventFeatures()) {
-            if (curFeature instanceof AbstractNewFeature) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Added Feature is AbstractNewFeature. PostingGeometryCreateNotification"); // NOI18N
-                }
-                postGeometryCreatedNotificaton((AbstractNewFeature)curFeature);
-                createAction(mappingComponent, (AbstractNewFeature)curFeature);
-            }
-        }
-    }
-
-    @Override
-    public void featuresChanged(final FeatureCollectionEvent fce) {
-    }
-
-    @Override
-    public void featuresRemoved(final FeatureCollectionEvent fce) {
     }
 
     /**
@@ -783,12 +729,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements F
      * @param  mappingComponent  the mappingComponent to set
      */
     public void setMappingComponent(final MappingComponent mappingComponent) {
-        if (this.mappingComponent != null) {
-            mappingComponent.getFeatureCollection().removeFeatureCollectionListener(this);
-        }
         this.mappingComponent = mappingComponent;
         this.mappingComponent = mappingComponent;
         moveListener = (SimpleMoveListener)mappingComponent.getInputListener(MappingComponent.MOTION);
-        mappingComponent.getFeatureCollection().addFeatureCollectionListener(this);
     }
 }
