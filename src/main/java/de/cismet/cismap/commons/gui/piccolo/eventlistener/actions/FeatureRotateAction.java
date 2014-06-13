@@ -51,7 +51,10 @@ public class FeatureRotateAction implements CustomAction {
      * @param  pivot  Kopie des Angelpunkts der Drehung
      * @param  rot    Drehwinkel im Bogenma\u00DF
      */
-    public FeatureRotateAction(final MappingComponent mc, final Collection<Feature> arr, final Point2D pivot, final double rot) {
+    public FeatureRotateAction(final MappingComponent mc,
+            final Collection<Feature> arr,
+            final Point2D pivot,
+            final double rot) {
         this.mc = mc;
         this.arr = arr;
         this.pivot = pivot;
@@ -103,9 +106,9 @@ public class FeatureRotateAction implements CustomAction {
     public FeatureRotateAction getInverse() {
         return new FeatureRotateAction(mc, arr, pivot, rot * (-1));
     }
-    
+
     @Override
-    public boolean featureConcerned(Feature feature) {
+    public boolean featureConcerned(final Feature feature) {
         for (final Feature o : arr) {
             if (o.equals(feature)) {
                 return true;

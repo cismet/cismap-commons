@@ -18,13 +18,13 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 import edu.umd.cs.piccolo.util.PDimension;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
-import java.util.List;
 
 /**
  * Implementiert das CustomAction-Interface und wird von der Memento-Klasse verwendet, um ein (oder mehrere) vom
@@ -145,15 +145,14 @@ public class FeatureMoveAction implements CustomAction {
         return newDim;
     }
 
-
     @Override
-    public boolean featureConcerned(Feature feature) {
-        for (PFeature f : features) {
+    public boolean featureConcerned(final Feature feature) {
+        for (final PFeature f : features) {
             if (f.getFeature().equals(feature)) {
                 return true;
             }
         }
-        
+
         return false;
     }
 }

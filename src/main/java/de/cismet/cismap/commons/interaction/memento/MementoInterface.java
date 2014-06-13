@@ -17,8 +17,10 @@ package de.cismet.cismap.commons.interaction.memento;
 
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 
+import java.util.Collection;
 import java.util.Observable;
 
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
 
 /**
@@ -69,4 +71,11 @@ public interface MementoInterface {
      * @return  DOCUMENT ME!
      */
     String getHistory();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
+    void featuresRemoved(Collection<Feature> f);
 }

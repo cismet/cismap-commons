@@ -18,7 +18,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 
 /**
- * Is used to restore removed polygons from multipolygons
+ * Is used to restore removed polygons from multipolygons.
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -34,7 +34,7 @@ public class FeatureAddEntityAction implements CustomAction {
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new FeatureAddEntityAction instance
+     * Creates a new FeatureAddEntityAction instance.
      *
      * @param  mc      the MappingComponent, the parent polygon is contained in
      * @param  f       the feature, the polygone should be added to
@@ -49,7 +49,7 @@ public class FeatureAddEntityAction implements CustomAction {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * adds the polygon
+     * adds the polygon.
      */
     @Override
     public void doAction() {
@@ -61,7 +61,7 @@ public class FeatureAddEntityAction implements CustomAction {
     }
 
     /**
-     * delivers the description of the action as string
+     * delivers the description of the action as string.
      *
      * @return  a description of the action
      */
@@ -83,7 +83,7 @@ public class FeatureAddEntityAction implements CustomAction {
     }
 
     @Override
-    public boolean featureConcerned(Feature feature) {
-        return f != null && f.equals(feature);
+    public boolean featureConcerned(final Feature feature) {
+        return (f != null) && f.equals(feature);
     }
 }

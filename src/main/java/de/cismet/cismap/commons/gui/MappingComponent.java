@@ -2478,6 +2478,14 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         removeFeatures(fce.getEventFeatures());
         checkFeatureSupportingRasterServiceAfterFeatureRemoval(fce);
         showHandles(false);
+        EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    memUndo.featuresRemoved(fce.getEventFeatures());
+                    memRedo.featuresRemoved(fce.getEventFeatures());
+                }
+            });
     }
 
     /**

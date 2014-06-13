@@ -46,12 +46,13 @@ public interface CustomAction {
      * @return  invertiertes Action-Objekt
      */
     CustomAction getInverse();
-    
+
     /**
-     * Checks, if the given feature is concerned from this action
-     * 
-     * @param feature the feature that should be checked
-     * @return true, iff the given feature is concerned from this action
+     * Checks, if the given feature is concerned from this action.
+     *
+     * @param   feature  the feature that should be checked
+     *
+     * @return  true, iff the given feature is concerned from this action
      */
     boolean featureConcerned(Feature feature);
 }

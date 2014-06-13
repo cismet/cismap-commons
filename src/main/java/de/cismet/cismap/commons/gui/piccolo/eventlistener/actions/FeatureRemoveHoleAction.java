@@ -18,7 +18,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 
 /**
- * Is used to remove added holes from (multi)polygons
+ * Is used to remove added holes from (multi)polygons.
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -35,12 +35,12 @@ public class FeatureRemoveHoleAction implements CustomAction {
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new FeatureRemoveHoleAction instance
+     * Creates a new FeatureRemoveHoleAction instance.
      *
-     * @param  mc      the MappingComponent, the parent polygon is contained in
-     * @param  f       the feature, the hole should be removed from
-     * @param  postion the postion of the hole in the polygon
-     * @param  hole    the hole to remove
+     * @param  mc        the MappingComponent, the parent polygon is contained in
+     * @param  f         the feature, the hole should be removed from
+     * @param  position  the postion of the hole in the polygon
+     * @param  hole      the hole to remove
      */
     public FeatureRemoveHoleAction(final MappingComponent mc,
             final Feature f,
@@ -55,7 +55,7 @@ public class FeatureRemoveHoleAction implements CustomAction {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * Removes the hole
+     * Removes the hole.
      */
     @Override
     public void doAction() {
@@ -68,7 +68,7 @@ public class FeatureRemoveHoleAction implements CustomAction {
     }
 
     /**
-     * delivers the description of the action as string
+     * delivers the description of the action as string.
      *
      * @return  a description of the action
      */
@@ -90,7 +90,7 @@ public class FeatureRemoveHoleAction implements CustomAction {
     }
 
     @Override
-    public boolean featureConcerned(Feature feature) {
-        return f != null && f.equals(feature);
+    public boolean featureConcerned(final Feature feature) {
+        return (f != null) && f.equals(feature);
     }
 }

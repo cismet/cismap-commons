@@ -18,7 +18,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 
 /**
- * Is used to remove added polygons from multipolygons
+ * Is used to remove added polygons from multipolygons.
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -34,7 +34,7 @@ public class FeatureRemoveEntityAction implements CustomAction {
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new FeatureRemoveEntityAction instance
+     * Creates a new FeatureRemoveEntityAction instance.
      *
      * @param  mc      the MappingComponent, the parent polygon is contained in
      * @param  f       the feature, the polygone should be removed from
@@ -49,7 +49,7 @@ public class FeatureRemoveEntityAction implements CustomAction {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * Removes the entity
+     * Removes the entity.
      */
     @Override
     public void doAction() {
@@ -62,7 +62,7 @@ public class FeatureRemoveEntityAction implements CustomAction {
     }
 
     /**
-     * delivers the description of the action as string
+     * delivers the description of the action as string.
      *
      * @return  a description of the action
      */
@@ -84,7 +84,7 @@ public class FeatureRemoveEntityAction implements CustomAction {
     }
 
     @Override
-    public boolean featureConcerned(Feature feature) {
-        return f != null && f.equals(feature);
+    public boolean featureConcerned(final Feature feature) {
+        return (f != null) && f.equals(feature);
     }
 }

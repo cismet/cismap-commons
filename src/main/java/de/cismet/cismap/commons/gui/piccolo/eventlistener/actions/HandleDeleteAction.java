@@ -105,9 +105,9 @@ public class HandleDeleteAction implements CustomAction {
     public CustomAction getInverse() {
         return new HandleAddAction(mc, f, entityPosition, ringPosition, coordPosition, x, y);
     }
-    
+
     @Override
-    public boolean featureConcerned(Feature feature) {
-        return f != null && f.equals(feature);
+    public boolean featureConcerned(final Feature feature) {
+        return (f != null) && f.equals(feature);
     }
 }
