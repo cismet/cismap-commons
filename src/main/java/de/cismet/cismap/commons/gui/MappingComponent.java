@@ -2480,12 +2480,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         showHandles(false);
         EventQueue.invokeLater(new Runnable() {
 
-            @Override
-            public void run() {
-                memUndo.featuresRemoved(fce.getEventFeatures());
-                memRedo.featuresRemoved(fce.getEventFeatures());
-            }
-        });
+                @Override
+                public void run() {
+                    memUndo.featuresRemoved(fce.getEventFeatures());
+                    memRedo.featuresRemoved(fce.getEventFeatures());
+                }
+            });
     }
 
     /**

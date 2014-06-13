@@ -130,17 +130,30 @@ public class DeleteFeatureListener extends PBasicInputEventHandler {
 
                             final int selectedEntityPosition = selectedPFeature.getEntityPositionUnderPoint(mousePoint);
                             if (selectedEntityPosition >= 0) { // gefunden => teil-polygon entfernen
-                                Polygon entity = selectedPFeature.getEntityByPosition(selectedEntityPosition);
+                                final Polygon entity = selectedPFeature.getEntityByPosition(selectedEntityPosition);
                                 selectedPFeature.removeEntity(selectedEntityPosition);
-                                mappingComponent.getMemUndo().addAction(new FeatureAddEntityAction(mappingComponent, selectedPFeature.getFeature(), entity));
+                                mappingComponent.getMemUndo()
+                                        .addAction(new FeatureAddEntityAction(
+                                                mappingComponent,
+                                                selectedPFeature.getFeature(),
+                                                entity));
                                 mappingComponent.getMemRedo().clear();
                             } else {                           // nicht gefunden => es muss also ein loch sein => suchen
                                                                // und entfernen (komplex)
-                                int entityPosition = selectedPFeature.getMostInnerEntityUnderPoint(mousePoint);
-                                int holePosition = selectedPFeature.getHolePositionUnderPoint(mousePoint, entityPosition);
-                                LineString hole = selectedPFeature.getHoleByPosition(entityPosition, holePosition);
+                                final int entityPosition = selectedPFeature.getMostInnerEntityUnderPoint(mousePoint);
+                                final int holePosition = selectedPFeature.getHolePositionUnderPoint(
+                                        mousePoint,
+                                        entityPosition);
+                                final LineString hole = selectedPFeature.getHoleByPosition(
+                                        entityPosition,
+                                        holePosition);
                                 selectedPFeature.removeHoleUnderPoint(mousePoint);
-                                mappingComponent.getMemUndo().addAction(new FeatureAddHoleAction(mappingComponent, selectedPFeature.getFeature(), entityPosition, hole));
+                                mappingComponent.getMemUndo()
+                                        .addAction(new FeatureAddHoleAction(
+                                                mappingComponent,
+                                                selectedPFeature.getFeature(),
+                                                entityPosition,
+                                                hole));
                                 mappingComponent.getMemRedo().clear();
                             }
                         }

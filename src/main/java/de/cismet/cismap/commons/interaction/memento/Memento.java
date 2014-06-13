@@ -15,15 +15,15 @@
  */
 package de.cismet.cismap.commons.interaction.memento;
 
-import de.cismet.cismap.commons.features.Feature;
-import java.util.Observable;
-import java.util.Stack;
-
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureCreateAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Observable;
+import java.util.Stack;
+
+import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureCreateAction;
 
 /**
  * Die Memento-Klasse liefert die Moeglichkeit Aktionen zu speichern und zu einem spaeteren Zeitpunkt wieder nach dem
@@ -106,16 +106,17 @@ public class Memento extends Observable implements MementoInterface {
     public String getHistory() {
         return this.history.toString();
     }
-    
+
     @Override
-    public void featuresRemoved(Collection<Feature> f) {
-        for (Feature feature : f) {
-            CustomAction lastAction = history.lastElement();
+    public void featuresRemoved(final Collection<Feature> f) {
+        for (final Feature feature : f) {
+            final CustomAction lastAction = history.lastElement();
 
-            if (!(lastAction instanceof FeatureCreateAction && ((FeatureCreateAction)lastAction).featureConcerned(feature))) {
-                List<CustomAction> historyList = new ArrayList<CustomAction>(history);
+            if (!((lastAction instanceof FeatureCreateAction)
+                            && ((FeatureCreateAction)lastAction).featureConcerned(feature))) {
+                final List<CustomAction> historyList = new ArrayList<CustomAction>(history);
 
-                for (CustomAction action : historyList) {
+                for (final CustomAction action : historyList) {
                     if (action.featureConcerned(feature)) {
                         history.remove(action);
                         setChanged();
@@ -123,7 +124,7 @@ public class Memento extends Observable implements MementoInterface {
                 }
             }
         }
-        
+
         if (history.isEmpty()) {
             notifyObservers(MementoInterface.DEACTIVATE);
         }

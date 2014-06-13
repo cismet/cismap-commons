@@ -162,9 +162,9 @@ public class HandleMoveAction implements CustomAction {
                 startY,
                 isGluedAction);
     }
-    
+
     @Override
-    public boolean featureConcerned(Feature feature) {
-        return pf != null && pf.getFeature().equals(feature);
+    public boolean featureConcerned(final Feature feature) {
+        return (pf != null) && pf.getFeature().equals(feature);
     }
 }

@@ -15,13 +15,13 @@
  */
 package de.cismet.cismap.commons.interaction.memento;
 
-import de.cismet.cismap.commons.features.Feature;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 
+import java.util.Collection;
 import java.util.Observable;
 
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.CustomAction;
-import java.util.Collection;
 
 /**
  * MementoInterface schreibt bestimmte Methoden vor, die von einer Klasse implementiert werden, um eine korrekte
@@ -71,6 +71,11 @@ public interface MementoInterface {
      * @return  DOCUMENT ME!
      */
     String getHistory();
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  f  DOCUMENT ME!
+     */
     void featuresRemoved(Collection<Feature> f);
 }

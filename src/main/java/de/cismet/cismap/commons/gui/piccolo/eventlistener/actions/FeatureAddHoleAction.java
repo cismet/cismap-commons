@@ -19,7 +19,7 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 
 /**
- * Is used to restore removed holes from (multi)polygons
+ * Is used to restore removed holes from (multi)polygons.
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -36,12 +36,12 @@ public class FeatureAddHoleAction implements CustomAction {
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Creates a new FeatureAddHoleAction instance
+     * Creates a new FeatureAddHoleAction instance.
      *
-     * @param  mc      the MappingComponent, the parent polygon is contained in
-     * @param  f       the feature, the hole should be added to
-     * @param  postion the postion of the hole in the polygon
-     * @param  hole    the new hole
+     * @param  mc        the MappingComponent, the parent polygon is contained in
+     * @param  f         the feature, the hole should be added to
+     * @param  position  the postion of the hole in the polygon
+     * @param  hole      the new hole
      */
     public FeatureAddHoleAction(final MappingComponent mc, final Feature f, final int position, final LineString hole) {
         this.hole = hole;
@@ -53,7 +53,7 @@ public class FeatureAddHoleAction implements CustomAction {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * Adds the hole to the feature
+     * Adds the hole to the feature.
      */
     @Override
     public void doAction() {
@@ -65,7 +65,7 @@ public class FeatureAddHoleAction implements CustomAction {
     }
 
     /**
-     * delivers the description of the action as string
+     * delivers the description of the action as string.
      *
      * @return  a description of the action
      */
@@ -87,7 +87,7 @@ public class FeatureAddHoleAction implements CustomAction {
     }
 
     @Override
-    public boolean featureConcerned(Feature feature) {
-        return f != null && f.equals(feature);
+    public boolean featureConcerned(final Feature feature) {
+        return (f != null) && f.equals(feature);
     }
 }

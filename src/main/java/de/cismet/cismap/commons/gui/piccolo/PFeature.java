@@ -2451,30 +2451,45 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             updatePath();
         }
     }
-    
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   entityPosition  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public Polygon getEntityByPosition(final int entityPosition) {
-        Coordinate[][] coords = entityRingCoordArr[entityPosition];
-        int srid = CrsTransformer.extractSridFromCrs(getViewerCrs().getCode());
-        GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
-        
+        final Coordinate[][] coords = entityRingCoordArr[entityPosition];
+        final int srid = CrsTransformer.extractSridFromCrs(getViewerCrs().getCode());
+        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+
         CoordinateSequence cs = factory.getCoordinateSequenceFactory().create(coords[0]);
-        LinearRing shell = new LinearRing(cs, factory);
-        LinearRing[] holes = new LinearRing[coords.length - 1];
-        
+        final LinearRing shell = new LinearRing(cs, factory);
+        final LinearRing[] holes = new LinearRing[coords.length - 1];
+
         for (int i = 1; i < coords.length; ++i) {
             cs = factory.getCoordinateSequenceFactory().create(coords[i]);
-            holes[i-1] = new LinearRing(cs, factory);
+            holes[i - 1] = new LinearRing(cs, factory);
         }
-        
+
         return factory.createPolygon(shell, holes);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   entityPosition  DOCUMENT ME!
+     * @param   holePosition    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public LineString getHoleByPosition(final int entityPosition, final int holePosition) {
-        Coordinate[][] entityCoords = entityRingCoordArr[entityPosition];
-        Coordinate[] holeCoords = entityCoords[holePosition];
-        int srid = CrsTransformer.extractSridFromCrs(getViewerCrs().getCode());
-        GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
-        
+        final Coordinate[][] entityCoords = entityRingCoordArr[entityPosition];
+        final Coordinate[] holeCoords = entityCoords[holePosition];
+        final int srid = CrsTransformer.extractSridFromCrs(getViewerCrs().getCode());
+        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+
         return factory.createLineString(holeCoords);
     }
 
