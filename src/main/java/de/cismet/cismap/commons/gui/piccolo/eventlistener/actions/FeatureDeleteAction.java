@@ -79,4 +79,10 @@ public class FeatureDeleteAction implements CustomAction {
     public CustomAction getInverse() {
         return new FeatureCreateAction(mc, f);
     }
+    
+    
+    @Override
+    public boolean featureConcerned(Feature feature) {
+        return f != null && f.equals(feature);
+    }
 }

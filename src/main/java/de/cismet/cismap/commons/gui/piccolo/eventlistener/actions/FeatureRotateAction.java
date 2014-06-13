@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Vector;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 
@@ -38,7 +39,7 @@ public class FeatureRotateAction implements CustomAction {
     private MappingComponent mc;
     private double rot;
     private Point2D pivot;
-    private Collection arr;
+    private Collection<Feature> arr;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -50,7 +51,7 @@ public class FeatureRotateAction implements CustomAction {
      * @param  pivot  Kopie des Angelpunkts der Drehung
      * @param  rot    Drehwinkel im Bogenma\u00DF
      */
-    public FeatureRotateAction(final MappingComponent mc, final Collection arr, final Point2D pivot, final double rot) {
+    public FeatureRotateAction(final MappingComponent mc, final Collection<Feature> arr, final Point2D pivot, final double rot) {
         this.mc = mc;
         this.arr = arr;
         this.pivot = pivot;
@@ -65,7 +66,7 @@ public class FeatureRotateAction implements CustomAction {
     @Override
     public void doAction() {
         final Vector v = new Vector();
-        for (final Object o : arr) {
+        for (final Feature o : arr) {
             final PFeature pf = ((PFeature)mc.getPFeatureHM().get(o));
             v.add(pf.getFeature());
             pf.rotateAllPoints(rot, pivot);
@@ -101,5 +102,15 @@ public class FeatureRotateAction implements CustomAction {
     @Override
     public FeatureRotateAction getInverse() {
         return new FeatureRotateAction(mc, arr, pivot, rot * (-1));
+    }
+    
+    @Override
+    public boolean featureConcerned(Feature feature) {
+        for (final Feature o : arr) {
+            if (o.equals(feature)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -15,6 +15,8 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
+import de.cismet.cismap.commons.features.Feature;
+
 /**
  * Definiert Methoden, die Veraenderungs-Aktionen von Features implementieren muessen. Diese Methoden sind wichtig fuer
  * die korrekte Arbeit der Undo/Redo- Funktion in Cismap.
@@ -44,4 +46,12 @@ public interface CustomAction {
      * @return  invertiertes Action-Objekt
      */
     CustomAction getInverse();
+    
+    /**
+     * Checks, if the given feature is concerned from this action
+     * 
+     * @param feature the feature that should be checked
+     * @return true, iff the given feature is concerned from this action
+     */
+    boolean featureConcerned(Feature feature);
 }
