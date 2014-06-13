@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 
 import de.cismet.tools.collections.MultiMap;
@@ -160,5 +161,10 @@ public class HandleMoveAction implements CustomAction {
                 startX,
                 startY,
                 isGluedAction);
+    }
+    
+    @Override
+    public boolean featureConcerned(Feature feature) {
+        return pf != null && pf.getFeature().equals(feature);
     }
 }
