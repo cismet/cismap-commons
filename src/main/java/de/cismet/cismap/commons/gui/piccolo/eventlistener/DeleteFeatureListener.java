@@ -31,8 +31,9 @@ import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureAddEntityAction;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureAddHoleAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureCreateAction;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 /**
@@ -129,10 +130,18 @@ public class DeleteFeatureListener extends PBasicInputEventHandler {
 
                             final int selectedEntityPosition = selectedPFeature.getEntityPositionUnderPoint(mousePoint);
                             if (selectedEntityPosition >= 0) { // gefunden => teil-polygon entfernen
+                                Polygon entity = selectedPFeature.getEntityByPosition(selectedEntityPosition);
                                 selectedPFeature.removeEntity(selectedEntityPosition);
+                                mappingComponent.getMemUndo().addAction(new FeatureAddEntityAction(mappingComponent, selectedPFeature.getFeature(), entity));
+                                mappingComponent.getMemRedo().clear();
                             } else {                           // nicht gefunden => es muss also ein loch sein => suchen
                                                                // und entfernen (komplex)
+                                int entityPosition = selectedPFeature.getMostInnerEntityUnderPoint(mousePoint);
+                                int holePosition = selectedPFeature.getHolePositionUnderPoint(mousePoint, entityPosition);
+                                LineString hole = selectedPFeature.getHoleByPosition(entityPosition, holePosition);
                                 selectedPFeature.removeHoleUnderPoint(mousePoint);
+                                mappingComponent.getMemUndo().addAction(new FeatureAddHoleAction(mappingComponent, selectedPFeature.getFeature(), entityPosition, hole));
+                                mappingComponent.getMemRedo().clear();
                             }
                         }
                     }
