@@ -6,41 +6,42 @@
 *
 ****************************************************/
 /*
- * FeatureCreateAction.java
- *
- * Created on 7. Dezember 2007, 11:29
- *
- * To change this template, choose Tools | Template Manager
+ * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
+import com.vividsolutions.jts.geom.Polygon;
+
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
 
 /**
- * Implementiert das CustomAction-Interface und wird von der Memento-Klasse verwendet, um gel\u00F6schte Features
- * wiederherzustellen.
+ * Is used to restore removed polygons from multipolygons.
  *
- * @author   nh
+ * @author   therter
  * @version  $Revision$, $Date$
  */
-public class FeatureCreateAction implements CustomAction {
+public class FeatureAddEntityAction implements CustomAction {
 
     //~ Instance fields --------------------------------------------------------
 
     private Feature f;
     private MappingComponent mc;
+    private Polygon entity;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
-     * Erzeugt eine FeatureCreateAction-Instanz.
+     * Creates a new FeatureAddEntityAction instance.
      *
-     * @param  mc  MappingComponent in dem das Feature angelegt werden soll
-     * @param  f   feature das zu erzeugende Feature
+     * @param  mc      the MappingComponent, the parent polygon is contained in
+     * @param  f       the feature, the polygone should be added to
+     * @param  entity  the new polygon
      */
-    public FeatureCreateAction(final MappingComponent mc, final Feature f) {
+    public FeatureAddEntityAction(final MappingComponent mc, final Feature f, final Polygon entity) {
+        this.entity = entity;
         this.mc = mc;
         this.f = f;
     }
@@ -48,36 +49,37 @@ public class FeatureCreateAction implements CustomAction {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * Erzeugt das gespeicherte Feature.
+     * adds the polygon.
      */
     @Override
     public void doAction() {
-        f.setEditable(true);
-        mc.getFeatureCollection().addFeature(f);
-        mc.getFeatureCollection().holdFeature(f);
+        final PFeature pf = mc.getPFeatureHM().get(f);
+
+        if (pf != null) {
+            pf.addEntity(entity);
+        }
     }
 
     /**
-     * Liefert eine Beschreibung der Aktion als String.
+     * delivers the description of the action as string.
      *
-     * @return  Beschreibungsstring
+     * @return  a description of the action
      */
     @Override
     public String info() {
         return org.openide.util.NbBundle.getMessage(
                 FeatureCreateAction.class,
-                "FeatureCreateAction.info().return",
-                new Object[] { f }); // NOI18N
+                "FeatureAddEntityAction.info().return"); // NOI18N
     }
 
     /**
-     * Liefert als Gegenteil die Loeschaktion des Features.
+     * Delivers the inverse action.
      *
-     * @return  Loeschaktion
+     * @return  the inverse operation
      */
     @Override
     public CustomAction getInverse() {
-        return new FeatureDeleteAction(mc, f);
+        return new FeatureRemoveEntityAction(mc, f, entity);
     }
 
     @Override

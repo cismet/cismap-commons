@@ -2455,6 +2455,47 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     /**
      * DOCUMENT ME!
      *
+     * @param   entityPosition  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Polygon getEntityByPosition(final int entityPosition) {
+        final Coordinate[][] coords = entityRingCoordArr[entityPosition];
+        final int srid = CrsTransformer.extractSridFromCrs(getViewerCrs().getCode());
+        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+
+        CoordinateSequence cs = factory.getCoordinateSequenceFactory().create(coords[0]);
+        final LinearRing shell = new LinearRing(cs, factory);
+        final LinearRing[] holes = new LinearRing[coords.length - 1];
+
+        for (int i = 1; i < coords.length; ++i) {
+            cs = factory.getCoordinateSequenceFactory().create(coords[i]);
+            holes[i - 1] = new LinearRing(cs, factory);
+        }
+
+        return factory.createPolygon(shell, holes);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   entityPosition  DOCUMENT ME!
+     * @param   holePosition    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public LineString getHoleByPosition(final int entityPosition, final int holePosition) {
+        final Coordinate[][] entityCoords = entityRingCoordArr[entityPosition];
+        final Coordinate[] holeCoords = entityCoords[holePosition];
+        final int srid = CrsTransformer.extractSridFromCrs(getViewerCrs().getCode());
+        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+
+        return factory.createLineString(holeCoords);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  entityPosition  DOCUMENT ME!
      */
     public void removeEntity(final int entityPosition) {
@@ -2532,7 +2573,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         final Geometry geometry = getFeature().getGeometry();
         for (int entityIndex = 0; entityIndex < geometry.getNumGeometries(); entityIndex++) {
             final Geometry envelope = geometry.getEnvelope(); // ohne löscher
-            if (envelope.contains(point)) {
+            if (envelope.covers(point)) {
                 positions.add(entityIndex);
             }
         }
@@ -2599,7 +2640,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (polygon.getNumInteriorRing() > 0) { // hat überhaupt löscher ?
                 for (int ringIndex = 0; ringIndex < polygon.getNumInteriorRing(); ringIndex++) {
                     final Geometry envelope = polygon.getInteriorRingN(ringIndex).getEnvelope();
-                    if (envelope.contains(point)) {
+                    if (envelope.covers(point)) {
                         return ringIndex + 1;       // +1 weil ring 0 der äußere ring ist
                     }
                 }
@@ -2615,7 +2656,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  DOCUMENT ME!
      */
-    private int getMostInnerEntityUnderPoint(final Point point) {
+    public int getMostInnerEntityUnderPoint(final Point point) {
         // alle außenringe (löscher werden zunächst ignoriert) holen die grundsätzlich unter der koordinate liegen
         final List<Integer> entityPositions = getEntitiesPositionsUnderPoint(point);
 
@@ -2642,7 +2683,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     if (indexA != indexB) {
                         final int entityPositionB = entityPositionsWithHoles.get(indexB);
                         final Geometry envelopeB = geometry.getGeometryN(entityPositionB).getEnvelope();
-                        if (envelopeA.contains(envelopeB)) {
+                        if (envelopeA.covers(envelopeB)) {
                             containsAnyOtherRing = true;
                         }
                     }
@@ -2667,7 +2708,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
             final Geometry geometry = getFeature().getGeometry().getGeometryN(entityIndex);
 
-            if (geometry.contains(point)) {
+            if (geometry.covers(point)) {
                 return entityIndex;
             }
         }
@@ -2685,7 +2726,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
             final Geometry entityGeometry = getFeature().getGeometry().getGeometryN(entityIndex);
 
-            if (geometry.contains(entityGeometry)) {
+            if (geometry.covers(entityGeometry)) {
                 return true;
             }
         }
