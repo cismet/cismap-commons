@@ -7,6 +7,7 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -30,7 +31,7 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
  * @version     $Revision$, $Date$
  * @deprecated  Use the class {@link JasperReportDownload} instead.
  */
-public class JasperDownload extends AbstractDownload implements Cancellable {
+public class JasperDownload extends AbstractCancellableDownload {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -130,18 +131,6 @@ public class JasperDownload extends AbstractDownload implements Cancellable {
         }
     }
 
-    @Override
-    public boolean cancel() {
-        boolean cancelled = true;
-        if (downloadFuture != null) {
-            cancelled = downloadFuture.cancel(true);
-        }
-        if (cancelled) {
-            status = State.ABORTED;
-            stateChanged();
-        }
-        return cancelled;
-    }
 
     /**
      * DOCUMENT ME!

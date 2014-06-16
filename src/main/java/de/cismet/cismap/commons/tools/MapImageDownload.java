@@ -33,6 +33,7 @@ import java.util.concurrent.Future;
 import javax.imageio.ImageIO;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 
@@ -43,7 +44,7 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
  * @author   Gilles Baatz
  * @version  $Revision$, $Date$
  */
-public class MapImageDownload extends AbstractDownload implements Cancellable {
+public class MapImageDownload extends AbstractCancellableDownload {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -152,19 +153,6 @@ public class MapImageDownload extends AbstractDownload implements Cancellable {
         }
 
         return whiteBackgroundImage;
-    }
-
-    @Override
-    public boolean cancel() {
-        boolean cancelled = true;
-        if (downloadFuture != null) {
-            cancelled = downloadFuture.cancel(true);
-        }
-        if (cancelled) {
-            status = State.ABORTED;
-            stateChanged();
-        }
-        return cancelled;
     }
 
     /**
