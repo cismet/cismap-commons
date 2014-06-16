@@ -117,55 +117,57 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
 
     @Override
     public void mouseDragged(final PInputEvent e) {
-        drag = true;
-        final SimpleMoveListener moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
-        if (moveListener != null) {
-            moveListener.mouseMoved(e);
-        } else {
-            log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
-        }
-        super.mouseDragged(e);
-        if (feature != null) {
-            dragPoint = e.getPosition();
-            final Feature feat = feature.getFeature();
-            // bestimmt selbst wie es bewegt wird?
-            if (feat instanceof SelfManipulatingFeature) {
-                final SelfManipulatingFeature smFeature = (SelfManipulatingFeature)feat;
-                final Coordinate coord = new Coordinate(
-                        mc.getWtst().getSourceX(dragPoint.getX()),
-                        mc.getWtst().getSourceY(dragPoint.getY()));
-                smFeature.moveTo(coord);
+        if (handleLayer.getChildrenCount() > 0) {
+            drag = true;
+            final SimpleMoveListener moveListener = (SimpleMoveListener)mc.getInputListener(MappingComponent.MOTION);
+            if (moveListener != null) {
+                moveListener.mouseMoved(e);
             } else {
-                // PDimension delta = e.getDeltaRelativeTo(pressPoint);
-                final PDimension delta = e.getCanvasDelta();
-                dragDim.setSize((dragDim.getWidth() - e.getCanvasDelta().getWidth()),
-                    (dragDim.getHeight() - e.getCanvasDelta().getHeight()));
-                final Iterator it = features.iterator();
-                while (it.hasNext()) {
-                    final Object o = it.next();
-                    if (o instanceof PFeature) {
-                        final PFeature f = (PFeature)o;
-                        f.moveFeature(delta);
-                    }
-                }
-                final double scale = mc.getCamera().getViewScale();
-                for (int i = 0; i < handleLayer.getChildrenCount(); i++) {
-                    final PNode child = handleLayer.getChild(i);
-                    if (child instanceof PivotPHandle) {
-                        final PivotPHandle pivotHandle = (PivotPHandle)child;
-                        final PLocator pLocator = pivotHandle.getLocator();
-                        final Point2D newMid = new Point2D.Double(pLocator.locateX() + (delta.getWidth() / scale),
-                                pLocator.locateY()
-                                        + (delta.getHeight() / scale));
-                        pivotHandle.getMid().setLocation(newMid);
-                    }
-                    if (child instanceof PHandle) {
-                        final PHandle pHandle = (PHandle)child;
-                        pHandle.relocateHandle();
-                    }
-                }
+                log.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden."); // NOI18N
             }
-            mc.syncSelectedObjectPresenter(0);
+            super.mouseDragged(e);
+            if (feature != null) {
+                dragPoint = e.getPosition();
+                final Feature feat = feature.getFeature();
+                // bestimmt selbst wie es bewegt wird?
+                if (feat instanceof SelfManipulatingFeature) {
+                    final SelfManipulatingFeature smFeature = (SelfManipulatingFeature)feat;
+                    final Coordinate coord = new Coordinate(
+                            mc.getWtst().getSourceX(dragPoint.getX()),
+                            mc.getWtst().getSourceY(dragPoint.getY()));
+                    smFeature.moveTo(coord);
+                } else {
+                    // PDimension delta = e.getDeltaRelativeTo(pressPoint);
+                    final PDimension delta = e.getCanvasDelta();
+                    dragDim.setSize((dragDim.getWidth() - e.getCanvasDelta().getWidth()),
+                        (dragDim.getHeight() - e.getCanvasDelta().getHeight()));
+                    final Iterator it = features.iterator();
+                    while (it.hasNext()) {
+                        final Object o = it.next();
+                        if (o instanceof PFeature) {
+                            final PFeature f = (PFeature)o;
+                            f.moveFeature(delta);
+                        }
+                    }
+                    final double scale = mc.getCamera().getViewScale();
+                    for (int i = 0; i < handleLayer.getChildrenCount(); i++) {
+                        final PNode child = handleLayer.getChild(i);
+                        if (child instanceof PivotPHandle) {
+                            final PivotPHandle pivotHandle = (PivotPHandle)child;
+                            final PLocator pLocator = pivotHandle.getLocator();
+                            final Point2D newMid = new Point2D.Double(pLocator.locateX() + (delta.getWidth() / scale),
+                                    pLocator.locateY()
+                                            + (delta.getHeight() / scale));
+                            pivotHandle.getMid().setLocation(newMid);
+                        }
+                        if (child instanceof PHandle) {
+                            final PHandle pHandle = (PHandle)child;
+                            pHandle.relocateHandle();
+                        }
+                    }
+                }
+                mc.syncSelectedObjectPresenter(0);
+            }
         }
     }
 
