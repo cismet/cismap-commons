@@ -659,7 +659,11 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             if (lastService == null) {
                 lastService = s;
             } else {
-                s.getPNode().moveInFrontOf(((MapService)lastService).getPNode());
+                if ((s.getPNode() != null) && (lastService.getPNode() != null)) {
+                    s.getPNode().moveInFrontOf(lastService.getPNode());
+                } else {
+                    log.warn("reorder layer on a service without a pnode");
+                }
                 lastService = s;
             }
         }
