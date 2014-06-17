@@ -47,6 +47,8 @@ import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
 
+import de.cismet.tools.CismetThreadPool;
+
 /**
  * DOCUMENT ME!
  *
@@ -945,11 +947,11 @@ public class HeadlessMapProvider {
         @Override
         public Image get() throws InterruptedException, ExecutionException {
             lock.lock();
-            if (!isDone()) {
-                condition.await();
-            }
-
             try {
+                if (!isDone()) {
+                    condition.await();
+                }
+
                 return map.getImage();
             } finally {
                 lock.unlock();
