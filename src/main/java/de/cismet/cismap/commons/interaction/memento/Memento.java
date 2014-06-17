@@ -109,24 +109,26 @@ public class Memento extends Observable implements MementoInterface {
 
     @Override
     public void featuresRemoved(final Collection<Feature> f) {
-        for (final Feature feature : f) {
-            final CustomAction lastAction = history.lastElement();
+        if (history.size() > 0) {
+            for (final Feature feature : f) {
+                final CustomAction lastAction = history.lastElement();
 
-            if (!((lastAction instanceof FeatureCreateAction)
-                            && ((FeatureCreateAction)lastAction).featureConcerned(feature))) {
-                final List<CustomAction> historyList = new ArrayList<CustomAction>(history);
+                if (!((lastAction instanceof FeatureCreateAction)
+                                && ((FeatureCreateAction)lastAction).featureConcerned(feature))) {
+                    final List<CustomAction> historyList = new ArrayList<CustomAction>(history);
 
-                for (final CustomAction action : historyList) {
-                    if (action.featureConcerned(feature)) {
-                        history.remove(action);
-                        setChanged();
+                    for (final CustomAction action : historyList) {
+                        if (action.featureConcerned(feature)) {
+                            history.remove(action);
+                            setChanged();
+                        }
                     }
                 }
             }
-        }
 
-        if (history.isEmpty()) {
-            notifyObservers(MementoInterface.DEACTIVATE);
+            if (history.isEmpty()) {
+                notifyObservers(MementoInterface.DEACTIVATE);
+            }
         }
     }
 }
