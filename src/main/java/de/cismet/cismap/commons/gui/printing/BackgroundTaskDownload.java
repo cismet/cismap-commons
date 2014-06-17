@@ -11,8 +11,6 @@
  */
 package de.cismet.cismap.commons.gui.printing;
 
-import org.openide.util.Cancellable;
-
 import java.io.File;
 
 import java.util.concurrent.CancellationException;
@@ -20,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
 /**
  * A Download which can immediately be added to the download manager and afterwards executes some task, containing the
@@ -37,7 +35,7 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
  * @author   Gilles Baatz
  * @version  $Revision$, $Date$
  */
-public class BackgroundTaskDownload extends AbstractDownload implements Cancellable {
+public class BackgroundTaskDownload extends AbstractCancellableDownload {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -108,20 +106,6 @@ public class BackgroundTaskDownload extends AbstractDownload implements Cancella
         status = State.RUNNING;
         stateChanged();
         worker.execute();
-    }
-
-    @Override
-    public boolean cancel() {
-        boolean cancelled = true;
-        status = null;
-        if ((downloadFuture != null) && (worker != null)) {
-            cancelled = worker.cancel(true) || downloadFuture.cancel(true);
-        }
-        if (cancelled) {
-            status = State.ABORTED;
-            stateChanged();
-        }
-        return cancelled;
     }
 
     //~ Inner Interfaces -------------------------------------------------------

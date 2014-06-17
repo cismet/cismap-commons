@@ -11,7 +11,6 @@
  */
 package de.cismet.cismap.commons.tools;
 
-import org.openide.util.Cancellable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +18,8 @@ import java.util.Map;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 import de.cismet.tools.gui.downloadmanager.Download;
 
 /**

@@ -13,10 +13,6 @@ package de.cismet.cismap.commons.tools;
 
 import org.apache.log4j.Logger;
 
-import org.jfree.util.Log;
-
-import org.openide.util.Cancellable;
-import org.openide.util.Exceptions;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -27,15 +23,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
 /**
  * A Download which can be added to the DownloadManager and saves an image to a file. The transparency of the files gets

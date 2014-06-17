@@ -7,7 +7,6 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
-import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -15,11 +14,10 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 
-import org.openide.util.Cancellable;
 
 import java.util.Map;
 
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
 /**
  * A deprecated download for JasperReports. The disadvantage of this class is that it needs the already created
@@ -130,7 +128,6 @@ public class JasperDownload extends AbstractCancellableDownload {
             stateChanged();
         }
     }
-
 
     /**
      * DOCUMENT ME!
