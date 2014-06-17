@@ -14,11 +14,10 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 
-import org.openide.util.Cancellable;
 
 import java.util.Map;
 
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
 /**
  * A deprecated download for JasperReports. The disadvantage of this class is that it needs the already created
@@ -30,7 +29,7 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
  * @version     $Revision$, $Date$
  * @deprecated  Use the class {@link JasperReportDownload} instead.
  */
-public class JasperDownload extends AbstractDownload implements Cancellable {
+public class JasperDownload extends AbstractCancellableDownload {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -128,19 +127,6 @@ public class JasperDownload extends AbstractDownload implements Cancellable {
             status = State.COMPLETED;
             stateChanged();
         }
-    }
-
-    @Override
-    public boolean cancel() {
-        boolean cancelled = true;
-        if (downloadFuture != null) {
-            cancelled = downloadFuture.cancel(true);
-        }
-        if (cancelled) {
-            status = State.ABORTED;
-            stateChanged();
-        }
-        return cancelled;
     }
 
     /**

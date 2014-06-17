@@ -11,7 +11,6 @@
  */
 package de.cismet.cismap.commons.tools;
 
-import org.openide.util.Cancellable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.Map;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 import de.cismet.tools.gui.downloadmanager.Download;
 
 /**
@@ -29,7 +28,7 @@ import de.cismet.tools.gui.downloadmanager.Download;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public abstract class ExportDownload extends AbstractDownload implements Cancellable {
+public abstract class ExportDownload extends AbstractCancellableDownload {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -140,19 +139,6 @@ public abstract class ExportDownload extends AbstractDownload implements Cancell
         }
 
         return attrList;
-    }
-
-    @Override
-    public boolean cancel() {
-        boolean cancelled = true;
-        if (downloadFuture != null) {
-            cancelled = downloadFuture.cancel(true);
-        }
-        if (cancelled) {
-            status = State.ABORTED;
-            stateChanged();
-        }
-        return cancelled;
     }
 
     @Override

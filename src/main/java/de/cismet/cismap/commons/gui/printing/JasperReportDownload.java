@@ -13,15 +13,12 @@ import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.export.JRCsvExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
-
-import org.openide.util.Cancellable;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 
 /**
  * JasperReportDownload is a Download which can be immediately added to the DownloadManager and allows it to create the
@@ -41,7 +38,7 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
  * @author   DOCUMENT ME!
  * @version  $Revision$, $Date$
  */
-public class JasperReportDownload extends AbstractDownload implements Cancellable {
+public class JasperReportDownload extends AbstractCancellableDownload {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -212,19 +209,6 @@ public class JasperReportDownload extends AbstractDownload implements Cancellabl
      */
     protected void exportReportFile() throws JRException {
         JasperExportManager.exportReportToPdfFile(print, fileToSaveTo.getPath());
-    }
-
-    @Override
-    public boolean cancel() {
-        boolean cancelled = true;
-        if (downloadFuture != null) {
-            cancelled = downloadFuture.cancel(true);
-        }
-        if (cancelled) {
-            status = State.ABORTED;
-            stateChanged();
-        }
-        return cancelled;
     }
 
     /**
