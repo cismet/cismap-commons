@@ -382,7 +382,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     @Override
     public boolean canBeSelected() {
         if (canBeSelected == null) {
-            if (layerProperties != null && layerProperties.getFeatureService() != null) {
+            if ((layerProperties != null) && (layerProperties.getFeatureService() != null)) {
                 return layerProperties.getFeatureService().isSelectable();
             } else {
                 return true;

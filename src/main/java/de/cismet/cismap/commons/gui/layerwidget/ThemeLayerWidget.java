@@ -1133,7 +1133,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         public void actionPerformed(final ActionEvent e) {
         }
     }
-    
+
     /**
      * DOCUMENT ME!
      *
@@ -1151,7 +1151,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     ThemeLayerWidget.class,
                     "ThemeLayerWidget.SelectionMenuItem.pmenuItem.text"),
                 NODE
-                        | FEATURE_SERVICE | MULTI);
+                        | FEATURE_SERVICE
+                        | MULTI);
         }
 
         //~ Methods ------------------------------------------------------------
@@ -1171,30 +1172,30 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     tree.stopEditing();
                 }
             }
-            
+
             refreshText(paths);
         }
 
         @Override
-        public void refreshText(TreePath[] paths) {
+        public void refreshText(final TreePath[] paths) {
             boolean isSelected = true;
-            
-            for (TreePath tp : paths) {
+
+            for (final TreePath tp : paths) {
                 if (tp.getLastPathComponent() instanceof AbstractFeatureService) {
-                    if ( !((AbstractFeatureService)tp.getLastPathComponent()).isSelectable() ) {
+                    if (!((AbstractFeatureService)tp.getLastPathComponent()).isSelectable()) {
                         isSelected = false;
                     }
                 }
             }
-            
+
             if (!isSelected) {
                 setText(NbBundle.getMessage(
-                    ThemeLayerWidget.class,
-                    "ThemeLayerWidget.SelectionMenuItem.pmenuItem.text"));
+                        ThemeLayerWidget.class,
+                        "ThemeLayerWidget.SelectionMenuItem.pmenuItem.text"));
             } else {
                 setText(NbBundle.getMessage(
-                    ThemeLayerWidget.class,
-                    "ThemeLayerWidget.NotSelectionMenuItem.pmenuItem.text"));
+                        ThemeLayerWidget.class,
+                        "ThemeLayerWidget.NotSelectionMenuItem.pmenuItem.text"));
             }
         }
     }
@@ -1280,9 +1281,13 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         public boolean isNewSection() {
             return newSection;
         }
-        
-        public void refreshText(TreePath[] paths) {
-            
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  paths  DOCUMENT ME!
+         */
+        public void refreshText(final TreePath[] paths) {
         }
     }
 
@@ -1352,10 +1357,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             final JPanel pan = new JPanel();
             final JCheckBox leafRenderer = new JCheckBox();
             pan.setLayout(new GridBagLayout());
-            
+
             if (value instanceof AbstractFeatureService) {
-                if ( ((AbstractFeatureService)value).isSelectable() ) {
-                    Font boldFont = lab.getFont().deriveFont(Font.BOLD);
+                if (((AbstractFeatureService)value).isSelectable()) {
+                    final Font boldFont = lab.getFont().deriveFont(Font.BOLD);
                     lab.setFont(boldFont);
                 }
             }

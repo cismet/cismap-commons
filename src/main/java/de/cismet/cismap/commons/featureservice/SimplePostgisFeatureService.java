@@ -178,7 +178,7 @@ public class SimplePostgisFeatureService
         defaultLayerProperties.getStyle().setFillColor(new Color(0.2f, 0.2f, 0.2f, 0.7f));
         defaultLayerProperties.setQueryType(LayerProperties.QUERYTYPE_UNDEFINED);
         defaultLayerProperties.setFeatureService(this);
-        
+
         return defaultLayerProperties;
     }
 

@@ -366,6 +366,7 @@ public class DefaultLayerProperties implements LayerProperties {
      *
      * @param  featureService  DOCUMENT ME!
      */
+    @Override
     public void setFeatureService(final AbstractFeatureService featureService) {
         this.featureService = featureService;
     }

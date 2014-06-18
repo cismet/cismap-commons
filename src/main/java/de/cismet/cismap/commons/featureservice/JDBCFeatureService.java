@@ -105,7 +105,7 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
         final DefaultLayerProperties defaultLayerProperties = new DefaultLayerProperties();
         defaultLayerProperties.setIdExpression(null, LayerProperties.EXPRESSIONTYPE_UNDEFINED);
         defaultLayerProperties.setFeatureService(this);
-        
+
         return defaultLayerProperties;
     }
 

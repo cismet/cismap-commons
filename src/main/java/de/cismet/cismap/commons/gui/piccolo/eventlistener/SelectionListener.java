@@ -21,6 +21,8 @@ import org.openide.util.Lookup;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
+import java.lang.reflect.Constructor;
+
 import java.util.*;
 
 import javax.swing.Action;
@@ -45,7 +47,6 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.tools.gui.ActionsProvider;
-import java.lang.reflect.Constructor;
 
 /**
  * DOCUMENT ME!
@@ -216,15 +217,18 @@ public class SelectionListener extends CreateGeometryListener {
                         try {
                             Point2D point = null;
                             if (mappingComponent.isSnappingEnabled()) {
-                                point = PFeatureTools.getNearestPointInArea(mappingComponent, pInputEvent.getCanvasPosition());
+                                point = PFeatureTools.getNearestPointInArea(
+                                        mappingComponent,
+                                        pInputEvent.getCanvasPosition());
                             }
                             if (point == null) {
                                 point = pInputEvent.getPosition();
                             }
-                            
-                            AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
 
-                            final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
+                            final AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
+
+                            final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance()
+                                            .getSrs().getCode());
                             final AbstractNewFeature newFeature = new PureNewFeature(point, mappingComponent.getWtst());
                             newFeature.setGeometryType(geomType);
                             newFeature.getGeometry().setSRID(currentSrid);
@@ -236,20 +240,20 @@ public class SelectionListener extends CreateGeometryListener {
                             finishGeometry(newFeature);
                         } catch (Throwable throwable) {
                             log.error("Error during the creation of the geometry", throwable); // NOI18N
-                        }                        
+                        }
 
                         if (pInputEvent.getClickCount() == 2) {
-                                if (sel.getFeature() instanceof SearchFeature) {
-                                    final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
-                                    if (pInputEvent.isLeftMouseButton()) {
-                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                                        mappingComponent.getHandleLayer().removeAllChildren();
-                                        // neue Suche mit Geometry auslösen
-                                        ((AbstractCreateSearchGeometryListener)mappingComponent.getInputListener(
-                                                searchFeature.getInteractionMode())).search(searchFeature);
-                                    }
+                            if (sel.getFeature() instanceof SearchFeature) {
+                                final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
+                                if (pInputEvent.isLeftMouseButton()) {
+                                    ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                                    mappingComponent.getHandleLayer().removeAllChildren();
+                                    // neue Suche mit Geometry auslösen
+                                    ((AbstractCreateSearchGeometryListener)mappingComponent.getInputListener(
+                                            searchFeature.getInteractionMode())).search(searchFeature);
                                 }
                             }
+                        }
                     } else {
                         if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
                             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();

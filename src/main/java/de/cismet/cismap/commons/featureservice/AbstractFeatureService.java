@@ -1340,11 +1340,21 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     public void setInitElement(final Element initElement) {
         this.initElement = initElement;
     }
-    
-    public void setSelectable(boolean selectable) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectable  DOCUMENT ME!
+     */
+    public void setSelectable(final boolean selectable) {
         this.selectable = selectable;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public boolean isSelectable() {
         return this.selectable;
     }
