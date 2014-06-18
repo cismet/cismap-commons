@@ -34,8 +34,10 @@ import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.SearchFeature;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MapPopupAction;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -43,6 +45,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.tools.gui.ActionsProvider;
+import java.lang.reflect.Constructor;
 
 /**
  * DOCUMENT ME!
@@ -209,73 +212,44 @@ public class SelectionListener extends CreateGeometryListener {
                     if (o instanceof PFeature) {
                         super.mouseClicked(pInputEvent);
                         sel = (PFeature)o;
-                        if (sel.getFeature().canBeSelected()) {
-                            if ((mappingComponent != null) && pInputEvent.isLeftMouseButton()
-                                        && pInputEvent.isControlDown()) {
-                                if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                                    if (
-                                        !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
-                                                    sel.getFeature())) {
-                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                                .addToSelection(
-                                                    sel.getFeature());
-                                    } else {
-                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(
-                                            sel.getFeature());
-                                    }
-                                } else {
-                                    log.warn(
-                                        "mc.getFeatureCollection() instanceof DefaultFeatureCollection == false !!!!!!!"); // NOI18N
-                                }
 
-                                changeSelection(sel);
-                            } else {
-                                mappingComponent.getFeatureCollection().select(sel.getFeature());
-                                unselectAll();
-                                changeSelection(sel);
-                                if (pInputEvent.isAltDown()) {
-                                    final Coordinate mouseCoord = new Coordinate(
-                                            mappingComponent.getWtst().getSourceX(
-                                                pInputEvent.getPosition().getX()
-                                                        - mappingComponent.getClip_offset_x()),
-                                            mappingComponent.getWtst().getSourceY(
-                                                pInputEvent.getPosition().getY()
-                                                        - mappingComponent.getClip_offset_y()));
+                        try {
+                            Point2D point = null;
+                            if (mappingComponent.isSnappingEnabled()) {
+                                point = PFeatureTools.getNearestPointInArea(mappingComponent, pInputEvent.getCanvasPosition());
+                            }
+                            if (point == null) {
+                                point = pInputEvent.getPosition();
+                            }
+                            
+                            AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
 
-                                    final GeometryFactory geometryFactory = new GeometryFactory(
-                                            new PrecisionModel(PrecisionModel.FLOATING),
-                                            CrsTransformer.extractSridFromCrs(
-                                                mappingComponent.getMappingModel().getSrs().getCode()));
-                                    final Point mousePoint = CrsTransformer.transformToGivenCrs(
-                                            geometryFactory.createPoint(
-                                                mouseCoord),
-                                            CismapBroker.getInstance().getDefaultCrs());
+                            final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
+                            final AbstractNewFeature newFeature = new PureNewFeature(point, mappingComponent.getWtst());
+                            newFeature.setGeometryType(geomType);
+                            newFeature.getGeometry().setSRID(currentSrid);
+                            final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
+                                    mappingComponent.getMappingModel().getSrs().getCode());
+                            newFeature.setGeometry(geom);
 
-                                    sel.setSelectedEntity(sel.getEntityPositionUnderPoint(mousePoint));
-                                }
-                            }
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Feature cannot be selected"); // NOI18N
-                            }
-                            if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                            }
-                            unselectAll();
-                        }
-                        postSelectionChanged();
+                            finishingEvent = pInputEvent;
+                            finishGeometry(newFeature);
+                        } catch (Throwable throwable) {
+                            log.error("Error during the creation of the geometry", throwable); // NOI18N
+                        }                        
+
                         if (pInputEvent.getClickCount() == 2) {
-                            if (sel.getFeature() instanceof SearchFeature) {
-                                final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
-                                if (pInputEvent.isLeftMouseButton()) {
-                                    ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                                    mappingComponent.getHandleLayer().removeAllChildren();
-                                    // neue Suche mit Geometry auslösen
-                                    ((AbstractCreateSearchGeometryListener)mappingComponent.getInputListener(
-                                            searchFeature.getInteractionMode())).search(searchFeature);
+                                if (sel.getFeature() instanceof SearchFeature) {
+                                    final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
+                                    if (pInputEvent.isLeftMouseButton()) {
+                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
+                                        mappingComponent.getHandleLayer().removeAllChildren();
+                                        // neue Suche mit Geometry auslösen
+                                        ((AbstractCreateSearchGeometryListener)mappingComponent.getInputListener(
+                                                searchFeature.getInteractionMode())).search(searchFeature);
+                                    }
                                 }
                             }
-                        }
                     } else {
                         if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
                             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();

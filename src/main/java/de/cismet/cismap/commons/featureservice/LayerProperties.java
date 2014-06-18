@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
+import java.util.Map;
+
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.featureservice.style.Style;
 
@@ -192,6 +194,20 @@ public interface LayerProperties extends ConvertableToXML, Cloneable {
      * @param  idExpressionEnabled  set to {@code true} if enabled
      */
     void setIdExpressionEnabled(boolean idExpressionEnabled);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    AbstractFeatureService getFeatureService();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    void setFeatureService(AbstractFeatureService service);
 
     /**
      * Creates a 1:1 copy of this object.

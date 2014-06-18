@@ -48,7 +48,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     private String secondaryAnnotation;
     private boolean hiding = false;
     private boolean editable = false;
-    private boolean canBeSelected = true;
+    private Boolean canBeSelected = null;
     private LinkedHashMap<String, Object> container = new LinkedHashMap<String, Object>();
     private Geometry geometry = null;
     private LayerProperties layerProperties;
@@ -381,7 +381,15 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public boolean canBeSelected() {
-        return this.canBeSelected;
+        if (canBeSelected == null) {
+            if (layerProperties != null && layerProperties.getFeatureService() != null) {
+                return layerProperties.getFeatureService().isSelectable();
+            } else {
+                return true;
+            }
+        } else {
+            return canBeSelected.booleanValue();
+        }
     }
 
     /**
