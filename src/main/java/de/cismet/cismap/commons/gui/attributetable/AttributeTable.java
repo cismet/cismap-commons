@@ -119,8 +119,6 @@ import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
 
-import de.cismet.locking.exception.LockAlreadyExistsException;
-
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
