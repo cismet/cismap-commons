@@ -149,6 +149,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @param  tableName     DOCUMENT ME!
      * @param  file          supported file formats are shp, dbf and csv (really comma separated)
      * @param  workerThread  DOCUMENT ME!
+     * @param  styles        DOCUMENT ME!
      */
     public H2FeatureServiceFactory(final String name,
         final String databasePath,
@@ -949,7 +950,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             if (info == null) {
                 info = new JDBCFeatureInfo(conn, 35833, geometryField, tableName);
             }
-            List style = getStyle(name);
+            final List style = getStyle(name);
 
             while (rs.next()) {
                 if ((workerThread != null) && workerThread.isCancelled()) {

@@ -22,6 +22,7 @@ import org.openide.util.NbBundle;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
@@ -1223,6 +1224,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         CismapBroker.getInstance().getMappingComponent(),
                         args);
 
+                dialog.setPreferredSize(new Dimension(
+                        dialog.getPreferredSize().width
+                                + 70,
+                        dialog.getPreferredSize().height));
                 if (log.isDebugEnabled()) {
                     log.debug("set dialog visible");                                // NOI18N
                 }

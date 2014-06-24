@@ -59,11 +59,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     //~ Constructors -----------------------------------------------------------
 
     /**
-    * Creates a new ShapeFeature object.
-    *
-    * @param  shapeInfo  typename DOCUMENT ME!
-    * @param  styles     DOCUMENT ME!
-    */
+     * Creates a new ShapeFeature object.
+     *
+     * @param  shapeInfo  typename DOCUMENT ME!
+     * @param  styles     DOCUMENT ME!
+     */
     public JDBCFeature(final JDBCFeatureInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
         setSLDStyles(styles); // super.style = styles;
         this.featureInfo = shapeInfo;
@@ -470,6 +470,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
      *
      * @param  map  DOCUMENT ME!
      */
+    @Override
     public void addProperties(final Map<String, Object> map) {
         // nothing to do
     }
