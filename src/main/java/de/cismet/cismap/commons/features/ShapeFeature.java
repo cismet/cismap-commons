@@ -156,6 +156,11 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     }
 
     @Override
+    public void undoAll() {
+        super.getProperties().clear();
+    }
+
+    @Override
     public void addProperty(final String propertyName, final Object property) {
         // nothing to do
     }

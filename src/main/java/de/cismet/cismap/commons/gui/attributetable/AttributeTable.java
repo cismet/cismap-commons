@@ -38,6 +38,10 @@ import org.deegree.model.spatialschema.JTSAdapter;
 
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.ComponentAdapter;
+import org.jdesktop.swingx.decorator.CompoundHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.decorator.Highlighter;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 
@@ -50,6 +54,11 @@ import java.awt.EventQueue;
 import java.awt.FontMetrics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import java.lang.reflect.Method;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -95,6 +104,7 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
+import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -108,6 +118,8 @@ import de.cismet.cismap.commons.tools.ExportTxtDownload;
 import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
+
+import de.cismet.locking.exception.LockAlreadyExistsException;
 
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
@@ -161,6 +173,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JButton butSearch;
     private javax.swing.JButton butSelectAll;
     private javax.swing.JButton butShowCols;
+    private javax.swing.JButton butUndo;
     private javax.swing.JButton butZoomToSelection;
     private javax.swing.JDialog diaExport;
     private javax.swing.JDialog diaStatistic;
@@ -222,9 +235,10 @@ public class AttributeTable extends javax.swing.JPanel {
         miSortieren.setVisible(false);
         butAttrib.setVisible(false);
         tbAlias.setVisible(false);
-//        tbProcessing.setEnabled(false);
+        tbProcessing.setEnabled(featureService.isEditable());
         butSearch.setVisible(false);
         tbLookup.setVisible(false);
+        butUndo.setVisible(false);
 
         final String ruleSetName = camelize(featureService.getName()) + "RuleSet";
 
@@ -324,27 +338,30 @@ public class AttributeTable extends javax.swing.JPanel {
                                 }
                             }
                         }
+
+                        if (tbProcessing.isSelected() && !selectionChangeFromMap) {
+                            final int[] rows = table.getSelectedRows();
+
+                            for (final int row : rows) {
+                                final FeatureServiceFeature feature = model.getFeatureServiceFeature(
+                                        table.convertRowIndexToModel(row));
+                                if ((feature != null) && !feature.isEditable()) {
+                                    feature.setEditable(true);
+                                    if (!changedFeatures.contains(feature)) {
+                                        changedFeatures.add(feature);
+                                        ((DefaultFeatureServiceFeature)feature).addPropertyChangeListener(model);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             });
 
+        table.setDefaultRenderer(String.class, new AttributeTableCellRenderer());
+        table.setDefaultRenderer(Boolean.class, new AttributeTableCellRenderer());
+        table.setDefaultRenderer(Date.class, new AttributeTableCellRenderer());
         table.setDefaultRenderer(Number.class, new NumberCellRenderer());
-
-        if (tableRuleSet != null) {
-            for (int i = 0; i < table.getColumnCount(); ++i) {
-                final String columnName = model.getColumnAttributeName(i);
-                final TableCellEditor editor = tableRuleSet.getCellEditor(columnName);
-                final TableCellRenderer renderer = tableRuleSet.getCellRenderer(columnName);
-
-                if (editor != null) {
-                    table.getColumn(i).setCellEditor(editor);
-                }
-
-                if (renderer != null) {
-                    table.getColumn(i).setCellRenderer(renderer);
-                }
-            }
-        }
 
         txtCurrentPage.setText("1");
         final Geometry g = ZoomToLayerWorker.getServiceBounds(featureService);
@@ -359,9 +376,19 @@ public class AttributeTable extends javax.swing.JPanel {
 
         loadModel(currentPage);
 
-        final Highlighter alternateRowHighlighter = HighlighterFactory.createAlternateStriping(
+//        final Highlighter alternateRowHighlighter = HighlighterFactory.createAlternateStriping(
+//                new Color(255, 255, 255),
+//                new Color(235, 235, 235));
+        final ColorHighlighter base = new CustomColorHighlighter(
+                HighlightPredicate.EVEN,
                 new Color(255, 255, 255),
-                new Color(235, 235, 235));
+                null);
+        final ColorHighlighter alternate = new CustomColorHighlighter(
+                HighlightPredicate.ODD,
+                new Color(235, 235, 235),
+                null);
+        final Highlighter alternateRowHighlighter = new CompoundHighlighter(base, alternate);
+
         ((JXTable)table).setHighlighters(alternateRowHighlighter);
 
         featureCollectionListener = new FeatureCollectionListener() {
@@ -399,7 +426,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
                     table.getSelectionModel().setValueIsAdjusting(true);
                     for (int index = 0; index < tableFeatures.size(); ++index) {
-                        final FeatureServiceFeature feature = tableFeatures.get(index);
+                        final FeatureServiceFeature feature = tableFeatures.get(table.convertRowIndexToModel(index));
 
                         if (selectedFeatures.contains(feature)) {
                             table.addRowSelectionInterval(index, index);
@@ -510,6 +537,23 @@ public class AttributeTable extends javax.swing.JPanel {
 
                         applySelection();
                         setTableSize();
+                        // add custom renderer and editors
+                        if (tableRuleSet != null) {
+                            for (int i = 0; i < table.getColumnCount(); ++i) {
+                                final String columnName = model.getColumnAttributeName(i);
+                                final TableCellEditor editor = tableRuleSet.getCellEditor(columnName);
+                                final TableCellRenderer renderer = tableRuleSet.getCellRenderer(columnName);
+
+                                if (editor != null) {
+                                    table.getColumn(i).setCellEditor(editor);
+                                }
+
+                                if (renderer != null) {
+                                    table.getColumn(i).setCellRenderer(renderer);
+                                }
+                            }
+                        }
+
                         txtCurrentPage.setText(String.valueOf(page));
                     } catch (Exception e) {
                         LOG.error("Error while retrieving model", e);
@@ -584,6 +628,7 @@ public class AttributeTable extends javax.swing.JPanel {
         butZoomToSelection = new javax.swing.JButton();
         butColWidth = new javax.swing.JButton();
         butShowCols = new javax.swing.JButton();
+        butUndo = new javax.swing.JButton();
         panWaiting = new javax.swing.JPanel();
         labWaitingImage = new org.jdesktop.swingx.JXBusyLabel();
         tableScrollPane = new javax.swing.JScrollPane();
@@ -1209,6 +1254,24 @@ public class AttributeTable extends javax.swing.JPanel {
             });
         jToolBar1.add(butShowCols);
 
+        butUndo.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-undo.png")));         // NOI18N
+        butUndo.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butUndo.text")); // NOI18N
+        butUndo.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butUndo.toolTipText"));                                                             // NOI18N
+        butUndo.setFocusable(false);
+        butUndo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        butUndo.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        butUndo.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butUndoActionPerformed(evt);
+                }
+            });
+        jToolBar1.add(butUndo);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -1802,7 +1865,29 @@ public class AttributeTable extends javax.swing.JPanel {
         if (!tbProcessing.isSelected()) {
             saveChangedRows();
         }
+        butUndo.setVisible(tbProcessing.isSelected());
     } //GEN-LAST:event_tbProcessingActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butUndoActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butUndoActionPerformed
+        final int ans = JOptionPane.showConfirmDialog(
+                this,
+                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butUndoActionPerformed().text"),
+                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butUndoActionPerformed().title"),
+                JOptionPane.YES_NO_OPTION);
+
+        if (ans == JOptionPane.YES_OPTION) {
+            for (final FeatureServiceFeature f : changedFeatures) {
+                if (f instanceof DefaultFeatureServiceFeature) {
+                    ((DefaultFeatureServiceFeature)f).undoAll();
+                }
+            }
+        }
+    } //GEN-LAST:event_butUndoActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -1886,6 +1971,8 @@ public class AttributeTable extends javax.swing.JPanel {
                     if (tableRuleSet != null) {
                         tableRuleSet.afterSave(model);
                     }
+
+                    model.setEditable(false);
 
                     EventQueue.invokeLater(new Runnable() {
 
@@ -2053,6 +2140,18 @@ public class AttributeTable extends javax.swing.JPanel {
         featureCollectionListener.featureSelectionChanged(e);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   row  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public FeatureServiceFeature getFeatureByRow(final int row) {
+        model.getFeatureServiceFeature(table.convertRowIndexToModel(row));
+        return model.getFeatureServiceFeature(table.convertRowIndexToModel(row));
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -2060,7 +2159,7 @@ public class AttributeTable extends javax.swing.JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    private class CustomTableModel implements TableModel {
+    private class CustomTableModel implements TableModel, PropertyChangeListener {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -2187,6 +2286,13 @@ public class AttributeTable extends javax.swing.JPanel {
          * @param  editable  DOCUMENT ME!
          */
         public void setEditable(final boolean editable) {
+            if (this.editable && !editable) {
+                // set all feature to editable = false
+                for (final FeatureServiceFeature fsf : featureList) {
+                    fsf.setEditable(false);
+                }
+            }
+
             this.editable = editable;
         }
 
@@ -2369,9 +2475,10 @@ public class AttributeTable extends javax.swing.JPanel {
         public boolean isCellEditable(final int rowIndex, final int columnIndex) {
             if (columnIndex < attributeAlias.length) {
                 if (tableRuleSet != null) {
-                    return editable && tableRuleSet.isColumnEditable(attributeNames[columnIndex]);
+                    return editable && tableRuleSet.isColumnEditable(attributeNames[columnIndex])
+                                && getFeatureServiceFeature(rowIndex).isEditable();
                 } else {
-                    return editable;
+                    return editable && getFeatureServiceFeature(rowIndex).isEditable();
                 }
             } else {
                 return false;
@@ -2510,6 +2617,23 @@ public class AttributeTable extends javax.swing.JPanel {
 
             AttributeTable.this.setTableSize();
         }
+
+        @Override
+        public void propertyChange(final PropertyChangeEvent evt) {
+            final int eCol = table.getEditingColumn();
+            final int eRow = table.getEditingRow();
+
+            if ((eRow != -1) && (eCol != -1)) {
+                for (int i = 0; i < getColumnCount(); ++i) {
+                    if (i != eCol) {
+                        final TableModelEvent e = new TableModelEvent(this, eRow, eRow, i);
+                        fireContentsChanged(e);
+                    }
+                }
+            } else {
+                fireContentsChanged();
+            }
+        }
     }
 
     /**
@@ -2559,7 +2683,93 @@ public class AttributeTable extends javax.swing.JPanel {
      *
      * @version  $Revision$, $Date$
      */
-    private class NumberCellRenderer extends DefaultTableCellRenderer {
+    private class CustomColorHighlighter extends org.jdesktop.swingx.decorator.ColorHighlighter {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new CustomColorHighlighter object.
+         *
+         * @param  predicate       DOCUMENT ME!
+         * @param  cellBackground  DOCUMENT ME!
+         * @param  cellForeground  DOCUMENT ME!
+         */
+        public CustomColorHighlighter(final HighlightPredicate predicate,
+                final Color cellBackground,
+                final Color cellForeground) {
+            super(predicate, cellBackground, cellForeground);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        protected void applyBackground(final Component renderer, final ComponentAdapter adapter) {
+            super.applyBackground(renderer, adapter);
+
+            final FeatureServiceFeature feature = model.getFeatureServiceFeature(table.convertRowIndexToModel(
+                        adapter.row));
+
+            if (feature.isEditable() && feature.getClass().getName().endsWith("CidsLayerFeature")) {
+                try {
+                    final Method m = feature.getClass().getMethod("getBackgroundColor");
+                    final Color backgroundColor = (Color)m.invoke(feature);
+
+                    if (backgroundColor != null) {
+                        if (adapter.isSelected()) {
+                            renderer.setBackground(backgroundColor);
+                        } else {
+                            renderer.setBackground(BasicStyle.lighten(backgroundColor));
+                        }
+                    }
+                } catch (Exception e) {
+                    LOG.error("Cannot determine the background color.", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class AttributeTableCellRenderer extends DefaultTableCellRenderer {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public Component getTableCellRendererComponent(final JTable table,
+                final Object value,
+                final boolean isSelected,
+                final boolean hasFocus,
+                final int row,
+                final int column) {
+            final Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            final FeatureServiceFeature feature = model.getFeatureServiceFeature(table.convertRowIndexToModel(row));
+
+            if (feature.isEditable() && feature.getClass().getName().endsWith("CidsLayerFeature")) {
+                try {
+                    final Method m = feature.getClass().getMethod("getBackgroundColor");
+                    final Color backgroundColor = (Color)m.invoke(feature);
+
+                    if (backgroundColor != null) {
+                        c.setBackground(backgroundColor);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Cannot determine the background color.", e);
+                }
+            }
+
+            return c;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class NumberCellRenderer extends AttributeTableCellRenderer {
 
         //~ Instance fields ----------------------------------------------------
 
