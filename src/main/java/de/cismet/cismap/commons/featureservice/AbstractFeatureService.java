@@ -1339,6 +1339,15 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         this.initElement = initElement;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isEditable() {
+        return false;
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**

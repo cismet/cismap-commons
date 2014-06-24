@@ -19,6 +19,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Paint;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -49,6 +52,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     private LinkedHashMap<String, Object> container = new LinkedHashMap<String, Object>();
     private Geometry geometry = null;
     private LayerProperties layerProperties;
+    private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     //~ Constructors -----------------------------------------------------------
 
@@ -501,7 +505,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setProperty(final String propertyName, final Object propertyValue) {
+        final Object oldValue = container.get(propertyName);
         container.put(propertyName, propertyValue);
+
+        propertyChangeSupport.firePropertyChange(propertyName, oldValue, propertyValue);
     }
 
     /**
@@ -512,5 +519,43 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     public void saveChanges() throws Exception {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     */
+    public void undoAll() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Add a new PropertyChangeListener.
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void addPropertyChangeListener(final PropertyChangeListener l) {
+        propertyChangeSupport.addPropertyChangeListener(l);
+    }
+
+    /**
+     * Remove the given PropertyChangeListener.
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void removePropertyChangeListener(final PropertyChangeListener l) {
+        propertyChangeSupport.removePropertyChangeListener(l);
+    }
+
+    /**
+     * fires a propertyChange event.
+     *
+     * @param  propertyName  the name of the changed property
+     * @param  oldValue      the old value
+     * @param  newValue      the new value
+     */
+    protected void firePropertyChange(final String propertyName, final Object oldValue, final Object newValue) {
+        propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
     }
 }

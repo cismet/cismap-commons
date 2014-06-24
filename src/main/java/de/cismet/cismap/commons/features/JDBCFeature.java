@@ -19,10 +19,7 @@ import java.sql.Statement;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-
-import de.cismet.cismap.commons.gui.piccolo.PFeature;
 
 /**
  * DOCUMENT ME!
@@ -211,6 +208,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
         update.append(" WHERE id = ").append(getId());
         st.execute(update.toString());
 
+        super.getProperties().clear();
+    }
+
+    @Override
+    public void undoAll() {
         super.getProperties().clear();
     }
 
