@@ -134,7 +134,13 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
-        return new H2FeatureServiceFactory(name, databasePath, tableName, shapeFile, layerInitWorker, parseSLD(getSLDDefiniton()));
+        return new H2FeatureServiceFactory(
+                name,
+                databasePath,
+                tableName,
+                shapeFile,
+                layerInitWorker,
+                parseSLD(getSLDDefiniton()));
     }
 
     @Override

@@ -98,13 +98,14 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @param  tableName     DOCUMENT ME!
      * @param  shapeFile     DOCUMENT ME!
      * @param  workerThread  DOCUMENT ME!
+     * @param  styles        DOCUMENT ME!
      */
     public H2FeatureServiceFactory(final String name,
-        final String databasePath,
-        final String tableName,
-        final File shapeFile,
-        final SwingWorker workerThread,
-        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
+            final String databasePath,
+            final String tableName,
+            final File shapeFile,
+            final SwingWorker workerThread,
+            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
         super(databasePath, tableName);
         this.name = name;
 //        this.styles = styles;
@@ -427,7 +428,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             if (info == null) {
                 info = new JDBCFeatureInfo(conn, 35833, geometryField, tableName);
             }
-            List style = getStyle(name);
+            final List style = getStyle(name);
 
             while (rs.next()) {
                 if ((workerThread != null) && workerThread.isCancelled()) {
