@@ -989,7 +989,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                     lineJoin,
                     1.0F,
                     dash_array,
-                    (float)(stroke.dashoffset));
+                    (float)(stroke.dashoffset),
+                    map);
         } else {
             newStroke = new BasicStroke((float)(stroke.width * multiplier),
                     linecap,

@@ -73,8 +73,29 @@ public class CustomFixedWidthStroke extends BasicStroke {
             final float miterlimit,
             final float[] dash,
             final float dash_phase) {
+        this(width, lineCap, lineJoin, miterlimit, dash, dash_phase, null);
+    }
+
+    /**
+     * Creates a new CustomFixedWidthStroke object.
+     *
+     * @param  width       DOCUMENT ME!
+     * @param  lineCap     DOCUMENT ME!
+     * @param  lineJoin    DOCUMENT ME!
+     * @param  miterlimit  DOCUMENT ME!
+     * @param  dash        DOCUMENT ME!
+     * @param  dash_phase  DOCUMENT ME!
+     * @param  mc          DOCUMENT ME!
+     */
+    public CustomFixedWidthStroke(final float width,
+            final int lineCap,
+            final int lineJoin,
+            final float miterlimit,
+            final float[] dash,
+            final float dash_phase,
+            final MappingComponent mc) {
         super(width, lineCap, lineJoin, miterlimit, dash, dash_phase);
-        this.mc = null;
+        this.mc = mc;
     }
 
     /**
@@ -104,7 +125,14 @@ public class CustomFixedWidthStroke extends BasicStroke {
     @Override
     public float getMiterLimit() {
         if (PPaintContext.CURRENT_PAINT_CONTEXT != null) {
-            final float ml = super.getMiterLimit() / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+            float ml;
+
+            if (mc != null) {
+                ml = super.getMiterLimit() / (float)mc.getCamera().getViewScale();
+            } else {
+                ml = super.getMiterLimit() / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+            }
+
             if (ml < 1.0f) {
                 return 1.0f;
             } else {
@@ -122,7 +150,14 @@ public class CustomFixedWidthStroke extends BasicStroke {
             if ((dash == null) || (dash.length == 0)) {
                 return null;
             }
-            final float scale = (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+            float scale;
+
+            if (mc != null) {
+                scale = (float)mc.getCamera().getViewScale();
+            } else {
+                scale = (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+            }
+
             final float[] temp = new float[dash.length];
             for (int i = dash.length - 1; i >= 0; i--) {
                 temp[i] = dash[i] / scale;
@@ -136,7 +171,11 @@ public class CustomFixedWidthStroke extends BasicStroke {
     @Override
     public float getDashPhase() {
         if (PPaintContext.CURRENT_PAINT_CONTEXT != null) {
-            return super.getDashPhase() / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+            if (mc != null) {
+                return super.getDashPhase() / (float)mc.getCamera().getViewScale();
+            } else {
+                return super.getDashPhase() / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+            }
         } else {
             return super.getDashPhase(); // To change body of generated methods, choose Tools | Templates.
         }
