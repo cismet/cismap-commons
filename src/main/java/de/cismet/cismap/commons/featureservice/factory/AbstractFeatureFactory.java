@@ -119,33 +119,6 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         isInterruptedAllowed = false;
     }
 
-    
-    @Override
-    public void setLayerName(final String layerName) {
-        this.layerName = layerName;
-    }
-
-    @Override
-    public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
-        this.styles = styles;
-        for (final FT feature : lastCreatedfeatureVector) {
-            feature.setSLDStyles(getStyle(layerName));
-        }
-    }
-
-    @Override
-    public void setLayerName(final String layerName) {
-        this.layerName = layerName;
-    }
-
-    @Override
-    public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
-        this.styles = styles;
-        for (final FT feature : lastCreatedfeatureVector) {
-            feature.setSLDStyles(getStyle(layerName));
-        }
-    }
-
     @Override
     public void setLayerName(final String layerName) {
         this.layerName = layerName;
@@ -677,40 +650,6 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      * @return  DOCUMENT ME!
      */
     public List<Style> getStyle(final String layerName) {
-        if (layerName == null) {
-            return getStyle();
-        } else if ((styles != null) && styles.containsKey(layerName)) {
-            return styles.get(layerName);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   layerName  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    protected List<Style> getStyle(final String layerName) {
-        if (layerName == null) {
-            return getStyle();
-        } else if ((styles != null) && styles.containsKey(layerName)) {
-            return styles.get(layerName);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   layerName  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    protected List<Style> getStyle(final String layerName) {
         if (layerName == null) {
             return getStyle();
         } else if ((styles != null) && styles.containsKey(layerName)) {

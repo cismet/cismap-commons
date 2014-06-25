@@ -13,12 +13,6 @@ package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import org.deegree.model.feature.FeatureProperty;
-import org.deegree.model.spatialschema.JTSAdapter;
-import org.deegree.feature.Feature;
-import org.deegree.feature.types.FeatureType;
-import org.deegree.style.se.unevaluated.Style;
-
 import org.deegree.feature.Feature;
 import org.deegree.feature.types.FeatureType;
 import org.deegree.model.feature.FeatureProperty;
@@ -28,12 +22,7 @@ import org.deegree.style.se.unevaluated.Style;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-
-import javax.xml.namespace.QName;
 
 import javax.xml.namespace.QName;
 
@@ -53,7 +42,6 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     //~ Instance fields --------------------------------------------------------
 
     private final ShapeInfo shapeInfo;
-    private String typename;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -65,20 +53,15 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     public ShapeFeature(final ShapeInfo shapeInfo) {
         this.shapeInfo = shapeInfo;
     }
-    
+
     /**
-     * DOCUMENT ME!
+     * Creates a new ShapeFeature object.
      *
-     * @param  typename  DOCUMENT ME!
+     * @param  shapeInfo  typename DOCUMENT ME!
+     * @param  styles     DOCUMENT ME!
      */
-    public ShapeFeature(final ShapeInfo shapeInfo, final String typename) {
-        this.typename = typename;
-        this.shapeInfo = shapeInfo;
-    }
-    
-    public ShapeFeature(final ShapeInfo shapeInfo, final String typename, org.deegree.style.se.unevaluated.Style styles) {
-        super.style = styles;
-        this.typename = typename;
+    public ShapeFeature(final ShapeInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
+        setSLDStyles(styles); // super.style = styles;
         this.shapeInfo = shapeInfo;
     }
 
@@ -200,12 +183,6 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         super.getProperties().clear();
     }
 
-
-    @Override
-    protected Feature getDeegreeFeature() {
-        return new ShapeFileLayerDeegreeFeature();
-    }
-
     @Override
     public void addProperty(final String propertyName, final Object property) {
         // nothing to do
@@ -266,16 +243,13 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         // do nothing
     }
 
-    
-    //~ Methods ----------------------------------------------------------------
-
     @Override
     protected Feature getDeegreeFeature() {
         return new ShapeFileLayerDeegreeFeature();
     }
 
     //~ Inner Classes ----------------------------------------------------------
-    
+
     /**
      * DOCUMENT ME!
      *

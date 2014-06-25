@@ -28,6 +28,7 @@ import org.openide.util.Exceptions;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 
 import java.beans.PropertyChangeEvent;
@@ -164,12 +165,6 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected LayerInitWorker layerInitWorker = null;
     protected LayerProperties layerProperties = null;
     protected FeatureFactory featureFactory = null;
-    /* the list that holds the names of the featureServiceAttributes of the FeatureService in the specified order */
-    protected List<String> orderedFeatureServiceAttributes;
-    protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
-    String sldDefinition;
-    final XMLInputFactory factory = XMLInputFactory.newInstance();
-    Legends legends = new Legends();
     /* the list that holds the names of the featureServiceAttributes of the FeatureService in the specified order */
     protected List<String> orderedFeatureServiceAttributes;
     protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
@@ -1391,7 +1386,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     public boolean isEditable() {
         return false;
     }
-    
+
     @Override
     public Reader getSLDDefiniton() {
         return (sldDefinition == null) ? null // new InputStreamReader(getClass().getResourceAsStream("/testSLD.xml"))
@@ -1432,226 +1427,6 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             LOG.info("SLD Parser funtkioniert nicht");
         }
         return styles;
-    }
-
-    @Override
-    public Pair<Integer, Integer> getLegendSize(final int nr) {
-        if (featureFactory instanceof AbstractFeatureFactory) {
-            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            return getLegendSize((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0));
-        }
-        return null;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   style  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private Pair<Integer, Integer> getLegendSize(final org.deegree.style.se.unevaluated.Style style) {
-        return legends.getLegendSize(style);
-    }
-
-    @Override
-    public Pair<Integer, Integer> getLegendSize() {
-        return getLegendSize(0);
-    }
-
-    @Override
-    public List<Pair<Integer, Integer>> getLegendSizes() {
-        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
-        final List<Pair<Integer, Integer>> sizes = new LinkedList<Pair<Integer, Integer>>();
-        for (final org.deegree.style.se.unevaluated.Style style : styles) {
-            sizes.add(getLegendSize(style));
-        }
-        return sizes;
-    }
-
-    @Override
-    public void getLegend(final int width, final int height, final Graphics2D g2d) {
-        getLegend(0, width, height, g2d);
-    }
-
-    @Override
-    public void getLegend(final int nr, final int width, final int height, final Graphics2D g2d) {
-        if (featureFactory instanceof AbstractFeatureFactory) {
-            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            getLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0),
-                width,
-                height,
-                g2d);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  style   DOCUMENT ME!
-     * @param  width   DOCUMENT ME!
-     * @param  height  DOCUMENT ME!
-     * @param  g2d     DOCUMENT ME!
-     */
-    private void getLegend(final org.deegree.style.se.unevaluated.Style style,
-            final int width,
-            final int height,
-            final Graphics2D g2d) {
-        legends.paintLegend(style,
-            width,
-            height,
-            g2d);
-    }
-
-    @Override
-    public void getLegends(final List<Pair<Integer, Integer>> sizes, final Graphics2D[] g2d) {
-        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
-        for (int i = 0; i < styles.size(); i++) {
-            legends.paintLegend(styles.get(i), sizes.get(i).first, sizes.get(i).second, g2d[i]);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    public void refreshFeatures() {
-        final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
-        if (lastCreatedFeatures.size() > 0) {
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(lastCreatedFeatures.size()
-                                + " last created features refreshed, fiering retrival event"); // NOI18N
-                }
-            }
-            EventQueue.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        final RetrievalEvent re = new RetrievalEvent();
-                        re.setIsComplete(true);
-                        re.setHasErrors(false);
-                        re.setRefreshExisting(true);
-                        re.setRetrievedObject(lastCreatedFeatures);
-                        re.setRequestIdentifier(System.currentTimeMillis());
-                        fireRetrievalStarted(re);
-                        fireRetrievalComplete(re);
-                    }
-                });
-        } else {
-            LOG.warn("no last created features that could be refreshed found"); // NOI18N
-        }
-    }
-
-    @Override
-    public Pair<Integer, Integer> getLegendSize(final int nr) {
-        if (featureFactory instanceof AbstractFeatureFactory) {
-            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            return getLegendSize((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0));
-        }
-        return null;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   style  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private Pair<Integer, Integer> getLegendSize(final org.deegree.style.se.unevaluated.Style style) {
-        return legends.getLegendSize(style);
-    }
-
-    @Override
-    public Pair<Integer, Integer> getLegendSize() {
-        return getLegendSize(0);
-    }
-
-    @Override
-    public List<Pair<Integer, Integer>> getLegendSizes() {
-        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
-        final List<Pair<Integer, Integer>> sizes = new LinkedList<Pair<Integer, Integer>>();
-        for (final org.deegree.style.se.unevaluated.Style style : styles) {
-            sizes.add(getLegendSize(style));
-        }
-        return sizes;
-    }
-
-    @Override
-    public void getLegend(final int width, final int height, final Graphics2D g2d) {
-        getLegend(0, width, height, g2d);
-    }
-
-    @Override
-    public void getLegend(final int nr, final int width, final int height, final Graphics2D g2d) {
-        if (featureFactory instanceof AbstractFeatureFactory) {
-            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-            getLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0),
-                width,
-                height,
-                g2d);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  style   DOCUMENT ME!
-     * @param  width   DOCUMENT ME!
-     * @param  height  DOCUMENT ME!
-     * @param  g2d     DOCUMENT ME!
-     */
-    private void getLegend(final org.deegree.style.se.unevaluated.Style style,
-            final int width,
-            final int height,
-            final Graphics2D g2d) {
-        legends.paintLegend(style,
-            width,
-            height,
-            g2d);
-    }
-
-    @Override
-    public void getLegends(final List<Pair<Integer, Integer>> sizes, final Graphics2D[] g2d) {
-        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
-        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
-        for (int i = 0; i < styles.size(); i++) {
-            legends.paintLegend(styles.get(i), sizes.get(i).first, sizes.get(i).second, g2d[i]);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    public void refreshFeatures() {
-        final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
-        if (lastCreatedFeatures.size() > 0) {
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(lastCreatedFeatures.size()
-                                + " last created features refreshed, fiering retrival event"); // NOI18N
-                }
-            }
-            EventQueue.invokeLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        final RetrievalEvent re = new RetrievalEvent();
-                        re.setIsComplete(true);
-                        re.setHasErrors(false);
-                        re.setRefreshExisting(true);
-                        re.setRetrievedObject(lastCreatedFeatures);
-                        re.setRequestIdentifier(System.currentTimeMillis());
-                        fireRetrievalStarted(re);
-                        fireRetrievalComplete(re);
-                    }
-                });
-        } else {
-            LOG.warn("no last created features that could be refreshed found"); // NOI18N
-        }
     }
 
     @Override

@@ -121,7 +121,6 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     private javax.swing.JButton cmdTreeCollapse;
     private javax.swing.JButton cmdUp;
     private javax.swing.JButton cmdZoomToFullExtent;
-    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JScrollPane scpMain;
@@ -286,7 +285,6 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         cmdDisable = new javax.swing.JButton();
         cmdRemove = new javax.swing.JButton();
         cmdMakeInvisible = new javax.swing.JButton();
-        jButton1 = new javax.swing.JButton();
 
         setBorder(javax.swing.BorderFactory.createCompoundBorder(
                 javax.swing.BorderFactory.createEtchedBorder(),
@@ -421,19 +419,6 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             });
         jToolBar1.add(cmdMakeInvisible);
 
-        jButton1.setText("CidsLayer");
-        jButton1.setFocusable(false);
-        jButton1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButton1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    jButton1ActionPerformed(evt);
-                }
-            });
-        jToolBar1.add(jButton1);
-
         jPanel1.add(jToolBar1, java.awt.BorderLayout.CENTER);
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
@@ -451,7 +436,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshSingleLayerActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshSingleLayerActionPerformed
+    private void cmdRefreshSingleLayerActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshSingleLayerActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
         final SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 
@@ -481,14 +466,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             };
 
         worker.execute();
-    }//GEN-LAST:event_cmdRefreshSingleLayerActionPerformed
+    } //GEN-LAST:event_cmdRefreshSingleLayerActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdDownActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDownActionPerformed
+    private void cmdDownActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdDownActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -519,14 +504,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                 }
             });
-    }//GEN-LAST:event_cmdDownActionPerformed
+    } //GEN-LAST:event_cmdDownActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdUpActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdUpActionPerformed
+    private void cmdUpActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdUpActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -558,14 +543,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                 }
             });
-    }//GEN-LAST:event_cmdUpActionPerformed
+    } //GEN-LAST:event_cmdUpActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdMakeInvisibleActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMakeInvisibleActionPerformed
+    private void cmdMakeInvisibleActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdMakeInvisibleActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -586,14 +571,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     treeTable.getTree().setSelectionPaths(tps);
                 }
             });
-    }//GEN-LAST:event_cmdMakeInvisibleActionPerformed
+    } //GEN-LAST:event_cmdMakeInvisibleActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdDisableActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDisableActionPerformed
+    private void cmdDisableActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdDisableActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -613,14 +598,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     treeTable.getTree().setSelectionPaths(tps);
                 }
             });
-    }//GEN-LAST:event_cmdDisableActionPerformed
+    } //GEN-LAST:event_cmdDisableActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdTreeCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdTreeCollapseActionPerformed
+    private void cmdTreeCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdTreeCollapseActionPerformed
         // StaticSwingTools.jTreeCollapseAllNodes(treeTable.getTree());
 // int sel = treeTable.getSelectionModel().getMinSelectionIndex();
 // if (treeTable.getRowCount() > 0) {
@@ -635,14 +620,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 // }
 
         treeTable.getColumnModel().getColumn(3).getCellEditor().stopCellEditing();
-    }//GEN-LAST:event_cmdTreeCollapseActionPerformed
+    } //GEN-LAST:event_cmdTreeCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
         try {
             final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
@@ -679,14 +664,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         } catch (final Exception e) {
             log.error("Error during removal of layer", e);
         }
-    }//GEN-LAST:event_cmdRemoveActionPerformed
+    } //GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
+    private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
         final SwingWorker<Geometry, Geometry> worker = new SwingWorker<Geometry, Geometry>() {
 
@@ -792,64 +777,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             };
 
         worker.execute();
-    }//GEN-LAST:event_cmdZoomToFullExtentActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        try {
-            final Class classInfo = ClassLoader.getSystemClassLoader()
-                        .loadClass("de.cismet.cismap.cidslayer.CidsLayer");
-            activeLayerModel.addLayer((RetrievalServiceLayer)classInfo.newInstance());
-        } catch (ClassNotFoundException ex) {
-            log.error("ClassNotFound", ex);
-        } catch (InstantiationException ex) {
-            log.error("InstantiationException", ex);
-        } catch (IllegalAccessException ex) {
-            log.error("IllegalAccessException", ex);
-        }
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
-        try {
-            final Class classInfo = ClassLoader.getSystemClassLoader()
-                        .loadClass("de.cismet.cismap.cidslayer.CidsLayer");
-            activeLayerModel.addLayer((RetrievalServiceLayer)classInfo.newInstance());
-        } catch (ClassNotFoundException ex) {
-            log.error("ClassNotFound", ex);
-        } catch (InstantiationException ex) {
-            log.error("InstantiationException", ex);
-        } catch (IllegalAccessException ex) {
-            log.error("IllegalAccessException", ex);
-        }
-    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
-        try {
-            final Class classInfo = ClassLoader.getSystemClassLoader()
-                        .loadClass("de.cismet.cismap.cidslayer.CidsLayer");
-            activeLayerModel.addLayer((RetrievalServiceLayer)classInfo.newInstance());
-        } catch (ClassNotFoundException ex) {
-            log.error("ClassNotFound", ex);
-        } catch (InstantiationException ex) {
-            log.error("InstantiationException", ex);
-        } catch (IllegalAccessException ex) {
-            log.error("IllegalAccessException", ex);
-        }
-    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+    } //GEN-LAST:event_cmdZoomToFullExtentActionPerformed
 
     /**
      * DOCUMENT ME!

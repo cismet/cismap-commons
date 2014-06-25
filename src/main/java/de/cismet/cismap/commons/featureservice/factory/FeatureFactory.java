@@ -184,32 +184,9 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
     /**
      * DOCUMENT ME!
      *
-     * @param  styles  DOCUMENT ME!
-     */
-    void setSLDStyle(Map<String, LinkedList<Style>> styles);
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  styles  DOCUMENT ME!
-     */
-    void setSLDStyle(Map<String, LinkedList<Style>> styles);
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   bb  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
+     * @param  layerName  DOCUMENT ME!
      */
     void setLayerName(final String layerName);
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  name  DOCUMENT ME!
-     */
-    void setLayerName(String name);
 
     //~ Inner Classes ----------------------------------------------------------
 
