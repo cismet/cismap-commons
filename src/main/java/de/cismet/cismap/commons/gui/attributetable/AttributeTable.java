@@ -24,7 +24,6 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperPrintManager;
 import net.sf.jasperreports.engine.JasperReport;
-import net.sf.jasperreports.engine.util.JRLoader;
 import net.sf.jasperreports.view.JRViewer;
 
 import org.apache.log4j.Logger;
@@ -43,7 +42,6 @@ import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.CompoundHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.decorator.Highlighter;
-import org.jdesktop.swingx.decorator.HighlighterFactory;
 
 import org.openide.util.NbBundle;
 
@@ -64,7 +62,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,7 +73,6 @@ import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFrame;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
@@ -109,7 +105,6 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
-import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.ExportCsvDownload;
 import de.cismet.cismap.commons.tools.ExportDownload;
@@ -118,8 +113,6 @@ import de.cismet.cismap.commons.tools.ExportTxtDownload;
 import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
-
-import de.cismet.locking.exception.LockAlreadyExistsException;
 
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
@@ -348,42 +341,7 @@ public class AttributeTable extends javax.swing.JPanel {
                             for (final int row : rows) {
                                 final FeatureServiceFeature feature = model.getFeatureServiceFeature(
                                         table.convertRowIndexToModel(row));
-                                if ((feature != null) && !feature.isEditable()) {
-                                    try {
-                                        if (locker != null) {
-                                            lockingObjects.add(locker.lock(feature));
-                                        }
-                                        feature.setEditable(true);
-                                        if (!changedFeatures.contains(feature)) {
-                                            changedFeatures.add(feature);
-                                            ((DefaultFeatureServiceFeature)feature).addPropertyChangeListener(model);
-                                        }
-                                    } catch (LockAlreadyExistsException ex) {
-                                        JOptionPane.showMessageDialog(
-                                            AttributeTable.this,
-                                            NbBundle.getMessage(
-                                                AttributeTable.class,
-                                                "AttributeTable.ListSelectionListener.valueChanged().lockexists.message",
-                                                feature.getId(),
-                                                ex.getLockMessage()),
-                                            NbBundle.getMessage(
-                                                AttributeTable.class,
-                                                "AttributeTable.ListSelectionListener.valueChanged().lockexists.title"),
-                                            JOptionPane.ERROR_MESSAGE);
-                                    } catch (Exception ex) {
-                                        LOG.error("Error while locking feature.", ex);
-                                        JOptionPane.showMessageDialog(
-                                            AttributeTable.this,
-                                            NbBundle.getMessage(
-                                                AttributeTable.class,
-                                                "AttributeTable.ListSelectionListener.valueChanged().exception.message",
-                                                ex.getMessage()),
-                                            NbBundle.getMessage(
-                                                AttributeTable.class,
-                                                "AttributeTable.ListSelectionListener.valueChanged().exception.title"),
-                                            JOptionPane.ERROR_MESSAGE);
-                                    }
-                                }
+                                makeFeatureEditable(feature);
                             }
                         }
                     }
@@ -485,11 +443,55 @@ public class AttributeTable extends javax.swing.JPanel {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Locks the given feature, if a corresponding locker exists and make the feature editable.
      *
-     * @param   toCamelize  DOCUMENT ME!
+     * @param  feature  the feature to make editable
+     */
+    private void makeFeatureEditable(final FeatureServiceFeature feature) {
+        if ((feature != null) && !feature.isEditable()) {
+            try {
+                if (locker != null) {
+                    lockingObjects.add(locker.lock(feature));
+                }
+                feature.setEditable(true);
+                if (!changedFeatures.contains(feature)) {
+                    changedFeatures.add(feature);
+                    ((DefaultFeatureServiceFeature)feature).addPropertyChangeListener(model);
+                }
+            } catch (LockAlreadyExistsException ex) {
+                JOptionPane.showMessageDialog(
+                    AttributeTable.this,
+                    NbBundle.getMessage(
+                        AttributeTable.class,
+                        "AttributeTable.ListSelectionListener.valueChanged().lockexists.message",
+                        feature.getId(),
+                        ex.getLockMessage()),
+                    NbBundle.getMessage(
+                        AttributeTable.class,
+                        "AttributeTable.ListSelectionListener.valueChanged().lockexists.title"),
+                    JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                LOG.error("Error while locking feature.", ex);
+                JOptionPane.showMessageDialog(
+                    AttributeTable.this,
+                    NbBundle.getMessage(
+                        AttributeTable.class,
+                        "AttributeTable.ListSelectionListener.valueChanged().exception.message",
+                        ex.getMessage()),
+                    NbBundle.getMessage(
+                        AttributeTable.class,
+                        "AttributeTable.ListSelectionListener.valueChanged().exception.title"),
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * camelizes the given string.
      *
-     * @return  DOCUMENT ME!
+     * @param   toCamelize  string to camalize
+     *
+     * @return  the camalized string
      */
     public static String camelize(final String toCamelize) {
         boolean upperCase = true;
@@ -513,9 +515,9 @@ public class AttributeTable extends javax.swing.JPanel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Load the model to show into the table.
      *
-     * @param  page  DOCUMENT ME!
+     * @param  page  the page to show. At the moment, all data will be displayed on one page
      */
     private void loadModel(final int page) {
         panWaiting.setVisible(true);
@@ -2756,7 +2758,7 @@ public class AttributeTable extends javax.swing.JPanel {
     }
 
     /**
-     * DOCUMENT ME!
+     * This highlighter considers the editable attribute of the displayed features.
      *
      * @version  $Revision$, $Date$
      */

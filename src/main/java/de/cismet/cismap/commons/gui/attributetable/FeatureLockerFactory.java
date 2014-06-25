@@ -5,10 +5,6 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.cismet.cismap.commons.gui.attributetable;
 
 import org.openide.util.Lookup;
@@ -20,7 +16,7 @@ import java.util.Map;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 
 /**
- * DOCUMENT ME!
+ * Uses the lookup netbeans mechanism to identify all available FeatureLockingInterface implementaions.
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -52,20 +48,20 @@ public class FeatureLockerFactory {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * returns a new instance.
      *
-     * @return  DOCUMENT ME!
+     * @return  a new instance
      */
     public static FeatureLockerFactory getInstance() {
         return LazyInitialiser.INSTANCE;
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns a locker that supports the given feature service.
      *
-     * @param   featureService  DOCUMENT ME!
+     * @param   featureService  the feature service, the locker should support
      *
-     * @return  DOCUMENT ME!
+     * @return  a locker that supports the given feature service
      */
     public FeatureLockingInterface getLockerForFeatureService(final AbstractFeatureService featureService) {
         return locker.get(featureService.getClass());
@@ -74,7 +70,7 @@ public class FeatureLockerFactory {
     //~ Inner Classes ----------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * To realise the lazy initialised singleton implementation.
      *
      * @version  $Revision$, $Date$
      */

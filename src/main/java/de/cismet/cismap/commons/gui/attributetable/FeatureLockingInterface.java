@@ -5,18 +5,12 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.cismet.cismap.commons.gui.attributetable;
 
 import de.cismet.cismap.commons.features.Feature;
 
-import de.cismet.locking.exception.LockAlreadyExistsException;
-
 /**
- * DOCUMENT ME!
+ * This interface is used to lock and unlock features. See also {@link FeatureLockerFactory}
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -26,28 +20,28 @@ public interface FeatureLockingInterface {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * locks the given feature.
      *
-     * @param   bean  DOCUMENT ME!
+     * @param   feature  the feature that should be locked
      *
-     * @return  DOCUMENT ME!
+     * @return  The unlock object for the given feature. This can be used with {@link unlock(Object)}
      *
-     * @throws  LockAlreadyExistsException  DOCUMENT ME!
-     * @throws  Exception                   DOCUMENT ME!
+     * @throws  LockAlreadyExistsException  if the given feature is already locked
+     * @throws  Exception                   if the locking failed for some reason
      */
-    Object lock(final Feature bean) throws LockAlreadyExistsException, Exception;
+    Object lock(final Feature feature) throws LockAlreadyExistsException, Exception;
     /**
-     * DOCUMENT ME!
+     * Unlocks the feature, that is associated with the given unlock-object.
      *
-     * @param   bean  DOCUMENT ME!
+     * @param   unlockObject  the unlock object from {@link lock(Feature)}
      *
-     * @throws  Exception  DOCUMENT ME!
+     * @throws  Exception  if the unlock process failed
      */
-    void unlock(final Object bean) throws Exception;
+    void unlock(final Object unlockObject) throws Exception;
     /**
-     * DOCUMENT ME!
+     * Returns the supported feature services.
      *
-     * @return  DOCUMENT ME!
+     * @return  the supported feature services
      */
     Class[] getSupportedFeatureServiceClasses();
 }
