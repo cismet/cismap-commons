@@ -119,6 +119,8 @@ import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
 
+import de.cismet.locking.exception.LockAlreadyExistsException;
+
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
@@ -151,6 +153,8 @@ public class AttributeTable extends javax.swing.JPanel {
     private FeatureCollectionListener featureCollectionListener;
     private List<FeatureServiceFeature> changedFeatures = new ArrayList<FeatureServiceFeature>();
     private DefaultAttributeTableRuleSet tableRuleSet = new DefaultAttributeTableRuleSet();
+    private FeatureLockingInterface locker;
+    private List<Object> lockingObjects = new ArrayList<Object>();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFirstPage;
@@ -237,6 +241,7 @@ public class AttributeTable extends javax.swing.JPanel {
         butSearch.setVisible(false);
         tbLookup.setVisible(false);
         butUndo.setVisible(false);
+        locker = FeatureLockerFactory.getInstance().getLockerForFeatureService(featureService);
 
         final String ruleSetName = camelize(featureService.getName()) + "RuleSet";
 
@@ -344,10 +349,39 @@ public class AttributeTable extends javax.swing.JPanel {
                                 final FeatureServiceFeature feature = model.getFeatureServiceFeature(
                                         table.convertRowIndexToModel(row));
                                 if ((feature != null) && !feature.isEditable()) {
-                                    feature.setEditable(true);
-                                    if (!changedFeatures.contains(feature)) {
-                                        changedFeatures.add(feature);
-                                        ((DefaultFeatureServiceFeature)feature).addPropertyChangeListener(model);
+                                    try {
+                                        if (locker != null) {
+                                            lockingObjects.add(locker.lock(feature));
+                                        }
+                                        feature.setEditable(true);
+                                        if (!changedFeatures.contains(feature)) {
+                                            changedFeatures.add(feature);
+                                            ((DefaultFeatureServiceFeature)feature).addPropertyChangeListener(model);
+                                        }
+                                    } catch (LockAlreadyExistsException ex) {
+                                        JOptionPane.showMessageDialog(
+                                            AttributeTable.this,
+                                            NbBundle.getMessage(
+                                                AttributeTable.class,
+                                                "AttributeTable.ListSelectionListener.valueChanged().lockexists.message",
+                                                feature.getId(),
+                                                ex.getLockMessage()),
+                                            NbBundle.getMessage(
+                                                AttributeTable.class,
+                                                "AttributeTable.ListSelectionListener.valueChanged().lockexists.title"),
+                                            JOptionPane.ERROR_MESSAGE);
+                                    } catch (Exception ex) {
+                                        LOG.error("Error while locking feature.", ex);
+                                        JOptionPane.showMessageDialog(
+                                            AttributeTable.this,
+                                            NbBundle.getMessage(
+                                                AttributeTable.class,
+                                                "AttributeTable.ListSelectionListener.valueChanged().exception.message",
+                                                ex.getMessage()),
+                                            NbBundle.getMessage(
+                                                AttributeTable.class,
+                                                "AttributeTable.ListSelectionListener.valueChanged().exception.title"),
+                                            JOptionPane.ERROR_MESSAGE);
                                     }
                                 }
                             }
@@ -2289,11 +2323,36 @@ public class AttributeTable extends javax.swing.JPanel {
          * @param  editable  DOCUMENT ME!
          */
         public void setEditable(final boolean editable) {
+            boolean allLocksRemoved = true;
+
             if (this.editable && !editable) {
                 // set all feature to editable = false
                 for (final FeatureServiceFeature fsf : featureList) {
                     fsf.setEditable(false);
                 }
+
+                for (final Object tmp : lockingObjects) {
+                    try {
+                        locker.unlock(tmp);
+                    } catch (Exception e) {
+                        LOG.error("Locking object can't be removed.", e);
+                        allLocksRemoved = false;
+                    }
+                }
+
+                if (!allLocksRemoved) {
+                    JOptionPane.showMessageDialog(
+                        AttributeTable.this,
+                        NbBundle.getMessage(
+                            CustomTableModel.class,
+                            "AttributeTable.CustomTableModel.setEditable.message"),
+                        NbBundle.getMessage(
+                            CustomTableModel.class,
+                            "AttributeTable.CustomTableModel.setEditable.message"),
+                        JOptionPane.ERROR_MESSAGE);
+                }
+
+                lockingObjects.clear();
             }
 
             this.editable = editable;
