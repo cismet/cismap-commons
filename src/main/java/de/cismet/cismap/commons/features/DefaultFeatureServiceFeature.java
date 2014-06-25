@@ -1673,6 +1673,44 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  UnsupportedOperationException  DOCUMENT ME!
+     */
+    public void undoAll() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Add a new PropertyChangeListener.
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void addPropertyChangeListener(final PropertyChangeListener l) {
+        propertyChangeSupport.addPropertyChangeListener(l);
+    }
+
+    /**
+     * Remove the given PropertyChangeListener.
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void removePropertyChangeListener(final PropertyChangeListener l) {
+        propertyChangeSupport.removePropertyChangeListener(l);
+    }
+
+    /**
+     * fires a propertyChange event.
+     *
+     * @param  propertyName  the name of the changed property
+     * @param  oldValue      the old value
+     * @param  newValue      the new value
+     */
+    protected void firePropertyChange(final String propertyName, final Object oldValue, final Object newValue) {
+        propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**

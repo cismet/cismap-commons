@@ -28,6 +28,7 @@ import org.openide.util.Exceptions;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 
 import java.beans.PropertyChangeEvent;

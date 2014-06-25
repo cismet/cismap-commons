@@ -119,33 +119,6 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         isInterruptedAllowed = false;
     }
 
-    
-    @Override
-    public void setLayerName(final String layerName) {
-        this.layerName = layerName;
-    }
-
-    @Override
-    public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
-        this.styles = styles;
-        for (final FT feature : lastCreatedfeatureVector) {
-            feature.setSLDStyles(getStyle(layerName));
-        }
-    }
-
-    @Override
-    public void setLayerName(final String layerName) {
-        this.layerName = layerName;
-    }
-
-    @Override
-    public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
-        this.styles = styles;
-        for (final FT feature : lastCreatedfeatureVector) {
-            feature.setSLDStyles(getStyle(layerName));
-        }
-    }
-
     @Override
     public void setLayerName(final String layerName) {
         this.layerName = layerName;

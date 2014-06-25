@@ -61,20 +61,15 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     public ShapeFeature(final ShapeInfo shapeInfo) {
         this.shapeInfo = shapeInfo;
     }
-    
+
     /**
-     * DOCUMENT ME!
+     * Creates a new ShapeFeature object.
      *
-     * @param  typename  DOCUMENT ME!
+     * @param  shapeInfo  typename DOCUMENT ME!
+     * @param  styles     DOCUMENT ME!
      */
-    public ShapeFeature(final ShapeInfo shapeInfo, final String typename) {
-        this.typename = typename;
-        this.shapeInfo = shapeInfo;
-    }
-    
-    public ShapeFeature(final ShapeInfo shapeInfo, final String typename, org.deegree.style.se.unevaluated.Style styles) {
-        super.style = styles;
-        this.typename = typename;
+    public ShapeFeature(final ShapeInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
+        setSLDStyles(styles); // super.style = styles;
         this.shapeInfo = shapeInfo;
     }
 
@@ -205,12 +200,6 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public void undoAll() {
         super.getProperties().clear();
-    }
-
-
-    @Override
-    protected Feature getDeegreeFeature() {
-        return new ShapeFileLayerDeegreeFeature();
     }
 
     @Override
