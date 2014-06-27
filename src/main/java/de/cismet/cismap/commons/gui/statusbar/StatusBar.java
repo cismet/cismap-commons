@@ -21,7 +21,6 @@ import org.deegree.model.spatialschema.Point;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -36,7 +35,6 @@ import java.util.HashSet;
 import javax.swing.ImageIcon;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.ServiceLayer;
@@ -58,6 +56,7 @@ import de.cismet.tools.StaticDebuggingTools;
 import de.cismet.tools.StaticDecimalTools;
 
 import de.cismet.tools.gui.Static2DTools;
+import de.cismet.tools.gui.exceptionnotification.ExceptionNotificationStatusPanel;
 
 /**
  * DOCUMENT ME!
@@ -71,7 +70,28 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
 
     //~ Instance fields --------------------------------------------------------
 
+    String mode;
+    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource(
+                "/de/cismet/cismap/commons/gui/res/map.png")); // NOI18N
+    MappingComponent mappingComponent;
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    private GeoTransformer transformer = null;
+    private DecimalFormat df = new DecimalFormat("0.000"); // NOI18N
+    private int servicesCounter = 0;
+    private int servicesErroneousCounter = 0;
+    private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
+    private Collection<ServiceLayer> erroneousServices = new HashSet<ServiceLayer>();
+    private JPanel servicesBusyPanel = new ServicesBusyPanel();
+    private JPanel servicesRetrievedPanel = new ServicesRetrievedPanel();
+    private JPanel servicesErrorPanel = new ServicesErrorPanel();
+    private JPanel mapExtentFixedPanel = new MapExtentFixedPanel();
+    private JPanel mapExtentUnfixedPanel = new MapExtentUnfixedPanel();
+    private JPanel mapScaleFixedPanel = new MapScaleFixedPanel();
+    private JPanel mapScaleUnfixedPanel = new MapScaleUnfixedPanel();
+    private boolean developerMode = false;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private de.cismet.tools.gui.exceptionnotification.ExceptionNotificationStatusPanel exceptionNotificationStatusPanel;
     private javax.swing.Box.Filler gluFiller;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblCoordinates;
@@ -88,10 +108,14 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     private javax.swing.JPopupMenu pomScale;
     private javax.swing.JSeparator sepCoordinates;
     private javax.swing.JSeparator sepCrs;
+    private javax.swing.JSeparator sepExcNotStat;
     private javax.swing.JSeparator sepFeedbackIcons;
     private javax.swing.JSeparator sepMeasurement;
     private javax.swing.JSeparator sepScale;
     private de.cismet.cismap.commons.gui.statusbar.ServicesRetrievedPanel servicesRetrievedPanel1;
+    // End of variables declaration//GEN-END:variables
+
+    //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates new form StatusBar.
@@ -122,6 +146,8 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
 
         developerMode = StaticDebuggingTools.checkHomeForFile("cismetDeveloper");
     }
+
+    //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
@@ -434,6 +460,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         lblCoordinates = new javax.swing.JLabel();
         sepCoordinates = new javax.swing.JSeparator();
         lblWgs84Coordinates = new javax.swing.JLabel();
+        exceptionNotificationStatusPanel =
+            new de.cismet.tools.gui.exceptionnotification.ExceptionNotificationStatusPanel();
+        sepExcNotStat = new javax.swing.JSeparator();
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
@@ -571,32 +600,19 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         add(lblWgs84Coordinates, gridBagConstraints);
-    }                                                          // </editor-fold>//GEN-END:initComponents
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 17;
+        gridBagConstraints.gridy = 0;
+        add(exceptionNotificationStatusPanel, gridBagConstraints);
 
-    //~ Instance fields --------------------------------------------------------
-
-    String mode;
-    ImageIcon defaultIcon = new javax.swing.ImageIcon(getClass().getResource(
-                "/de/cismet/cismap/commons/gui/res/map.png")); // NOI18N
-    MappingComponent mappingComponent;
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private GeoTransformer transformer = null;
-    private DecimalFormat df = new DecimalFormat("0.000");     // NOI18N
-    private int servicesCounter = 0;
-    private int servicesErroneousCounter = 0;
-    private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
-    private Collection<ServiceLayer> erroneousServices = new HashSet<ServiceLayer>();
-    private JPanel servicesBusyPanel = new ServicesBusyPanel();
-    private JPanel servicesRetrievedPanel = new ServicesRetrievedPanel();
-    private JPanel servicesErrorPanel = new ServicesErrorPanel();
-    private JPanel mapExtentFixedPanel = new MapExtentFixedPanel();
-    private JPanel mapExtentUnfixedPanel = new MapExtentUnfixedPanel();
-    private JPanel mapScaleFixedPanel = new MapScaleFixedPanel();
-    private JPanel mapScaleUnfixedPanel = new MapScaleUnfixedPanel();
-    // End of variables declaration//GEN-END:variables
-    private boolean developerMode = false;
-
-    //~ Methods ----------------------------------------------------------------
+        sepExcNotStat.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 16;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
+        add(sepExcNotStat, gridBagConstraints);
+    } // </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
@@ -845,5 +861,14 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         // NOP
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ExceptionNotificationStatusPanel getExceptionNotificationStatusPanel() {
+        return exceptionNotificationStatusPanel;
     }
 }
