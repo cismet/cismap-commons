@@ -110,6 +110,7 @@ import de.cismet.cismap.commons.tools.ExportCsvDownload;
 import de.cismet.cismap.commons.tools.ExportDownload;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.tools.ExportTxtDownload;
+import de.cismet.cismap.commons.tools.FeatureTools;
 import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
@@ -236,17 +237,7 @@ public class AttributeTable extends javax.swing.JPanel {
         butUndo.setVisible(false);
         locker = FeatureLockerFactory.getInstance().getLockerForFeatureService(featureService);
 
-        final String ruleSetName = camelize(featureService.getName()) + "RuleSet";
-
-        try {
-            final Class ruleSetClass = Class.forName("de.cismet.cismap.custom.attributerule." + ruleSetName);
-            final Object o = ruleSetClass.newInstance();
-            if (o instanceof DefaultAttributeTableRuleSet) {
-                tableRuleSet = (DefaultAttributeTableRuleSet)o;
-            }
-        } catch (Exception e) {
-            // nothing to do
-        }
+        tableRuleSet = getTableRuleSetForFeatureService(featureService);
 
         jcFeatures.setModel(new DefaultComboBoxModel(
                 new Object[] {
@@ -442,6 +433,22 @@ public class AttributeTable extends javax.swing.JPanel {
 
     //~ Methods ----------------------------------------------------------------
 
+    public static DefaultAttributeTableRuleSet getTableRuleSetForFeatureService(AbstractFeatureService featureService) {
+        final String ruleSetName = camelize(featureService.getName()) + "RuleSet";
+
+        try {
+            final Class ruleSetClass = Class.forName("de.cismet.cismap.custom.attributerule." + ruleSetName);
+            final Object o = ruleSetClass.newInstance();
+            if (o instanceof DefaultAttributeTableRuleSet) {
+                return (DefaultAttributeTableRuleSet)o;
+            }
+        } catch (Exception e) {
+            // nothing to do
+        }
+        
+        return null;
+    }
+    
     /**
      * Locks the given feature, if a corresponding locker exists and make the feature editable.
      *
@@ -1447,7 +1454,7 @@ public class AttributeTable extends javax.swing.JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butPrintPreviewActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintPreviewActionPerformed
+    private void butPrintPreviewActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butPrintPreviewActionPerformed
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
                         .getParentFrame(this),
                 true,
@@ -1498,69 +1505,69 @@ public class AttributeTable extends javax.swing.JPanel {
             };
 
         wdt.start();
-    } //GEN-LAST:event_butPrintPreviewActionPerformed
+    }//GEN-LAST:event_butPrintPreviewActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnPrevPageActionPerformed
+    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrevPageActionPerformed
         if (currentPage > 1) {
             loadModel(--currentPage);
         }
-    }                                                                               //GEN-LAST:event_btnPrevPageActionPerformed
+    }//GEN-LAST:event_btnPrevPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnFirstPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnFirstPageActionPerformed
+    private void btnFirstPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFirstPageActionPerformed
         currentPage = 1;
         loadModel(currentPage);
-    }                                                                                //GEN-LAST:event_btnFirstPageActionPerformed
+    }//GEN-LAST:event_btnFirstPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnNextPageActionPerformed
+    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextPageActionPerformed
         if ((pageSize != -1) && ((currentPage * pageSize) < itemCount)) {
             loadModel(++currentPage);
         }
-    }                                                                               //GEN-LAST:event_btnNextPageActionPerformed
+    }//GEN-LAST:event_btnNextPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnLastPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnLastPageActionPerformed
+    private void btnLastPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLastPageActionPerformed
         currentPage = itemCount / pageSize;
 
         if ((pageSize != -1) && ((currentPage * pageSize) < itemCount)) {
             ++currentPage;
             loadModel(currentPage);
         }
-    } //GEN-LAST:event_btnLastPageActionPerformed
+    }//GEN-LAST:event_btnLastPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miSpalteAusblendenActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miSpalteAusblendenActionPerformed
+    private void miSpalteAusblendenActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miSpalteAusblendenActionPerformed
         model.hideColumn(popupColumn);
-    }                                                                                      //GEN-LAST:event_miSpalteAusblendenActionPerformed
+    }//GEN-LAST:event_miSpalteAusblendenActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miSpaltenUmbenennenActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miSpaltenUmbenennenActionPerformed
+    private void miSpaltenUmbenennenActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miSpaltenUmbenennenActionPerformed
         final String newName = (String)JOptionPane.showInputDialog(
                 this,
                 "Geben Sie den neuen Namen der Spalte ein.",
@@ -1572,50 +1579,50 @@ public class AttributeTable extends javax.swing.JPanel {
         if (newName != null) {
             model.setColumnName(popupColumn, newName);
         }
-    }                                                                                       //GEN-LAST:event_miSpaltenUmbenennenActionPerformed
+    }//GEN-LAST:event_miSpaltenUmbenennenActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butShowColsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butShowColsActionPerformed
+    private void butShowColsActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butShowColsActionPerformed
         model.showColumns();
-    }                                                                               //GEN-LAST:event_butShowColsActionPerformed
+    }//GEN-LAST:event_butShowColsActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butColWidthActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butColWidthActionPerformed
+    private void butColWidthActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butColWidthActionPerformed
         setTableSize();
-    }                                                                               //GEN-LAST:event_butColWidthActionPerformed
+    }//GEN-LAST:event_butColWidthActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butSelectAllActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butSelectAllActionPerformed
+    private void butSelectAllActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butSelectAllActionPerformed
         table.getSelectionModel().setSelectionInterval(0, model.getRowCount() - 1);
-    }                                                                                //GEN-LAST:event_butSelectAllActionPerformed
+    }//GEN-LAST:event_butSelectAllActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butClearSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butClearSelectionActionPerformed
+    private void butClearSelectionActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butClearSelectionActionPerformed
         table.getSelectionModel().clearSelection();
-    }                                                                                     //GEN-LAST:event_butClearSelectionActionPerformed
+    }//GEN-LAST:event_butClearSelectionActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butInvertSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butInvertSelectionActionPerformed
+    private void butInvertSelectionActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butInvertSelectionActionPerformed
         final int[] selectedIndices = table.getSelectedRows();
         table.selectAll();
         table.getSelectionModel().setValueIsAdjusting(true);
@@ -1624,14 +1631,14 @@ public class AttributeTable extends javax.swing.JPanel {
             table.removeRowSelectionInterval(selectedIndex, selectedIndex);
         }
         table.getSelectionModel().setValueIsAdjusting(false);
-    } //GEN-LAST:event_butInvertSelectionActionPerformed
+    }//GEN-LAST:event_butInvertSelectionActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butMoveSelectedRowsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butMoveSelectedRowsActionPerformed
+    private void butMoveSelectedRowsActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butMoveSelectedRowsActionPerformed
         final int[] selectedRows = table.getSelectedRows();
         final int selectedRowCount = table.getSelectedRowCount();
         int count = 0;
@@ -1643,14 +1650,14 @@ public class AttributeTable extends javax.swing.JPanel {
         }
 
         table.getSelectionModel().setSelectionInterval(0, selectedRowCount - 1);
-    } //GEN-LAST:event_butMoveSelectedRowsActionPerformed
+    }//GEN-LAST:event_butMoveSelectedRowsActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butZoomToSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butZoomToSelectionActionPerformed
+    private void butZoomToSelectionActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butZoomToSelectionActionPerformed
         final int[] selectedRows = table.getSelectedRows();
         Geometry geo = null;
 
@@ -1673,14 +1680,14 @@ public class AttributeTable extends javax.swing.JPanel {
         } else {
             LOG.error("MappingComponent is not set");
         }
-    } //GEN-LAST:event_butZoomToSelectionActionPerformed
+    }//GEN-LAST:event_butZoomToSelectionActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miStatistikActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miStatistikActionPerformed
+    private void miStatistikActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miStatistikActionPerformed
         final int count = model.getRowCount();
         final Double[] values = new Double[model.getRowCount()];
         double min = Double.MAX_VALUE;
@@ -1747,35 +1754,35 @@ public class AttributeTable extends javax.swing.JPanel {
         diaStatistic.setResizable(false);
         labStatCol.setText(model.getColumnName(popupColumn));
         StaticSwingTools.showDialog(diaStatistic);
-    } //GEN-LAST:event_miStatistikActionPerformed
+    }//GEN-LAST:event_miStatistikActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butOkActionPerformed
+    private void butOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butOkActionPerformed
         diaStatistic.setVisible(false);
-    }                                                                         //GEN-LAST:event_butOkActionPerformed
+    }//GEN-LAST:event_butOkActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butExportActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butExportActionPerformed
+    private void butExportActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butExportActionPerformed
         diaExport.setSize(400, 150);
         diaExport.setResizable(false);
         diaExport.setModal(true);
         StaticSwingTools.showDialog(diaExport);
-    }                                                                             //GEN-LAST:event_butExportActionPerformed
+    }//GEN-LAST:event_butExportActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butExpOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butExpOkActionPerformed
+    private void butExpOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butExpOkActionPerformed
         diaExport.setVisible(false);
 
         final List<FeatureServiceFeature> features = new ArrayList<FeatureServiceFeature>();
@@ -1825,31 +1832,31 @@ public class AttributeTable extends javax.swing.JPanel {
                 LOG.error("The ExportDownload class has possibly no public constructor without arguments.", e);
             }
         }
-    } //GEN-LAST:event_butExpOkActionPerformed
+    }//GEN-LAST:event_butExpOkActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butCancelActionPerformed
+    private void butCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butCancelActionPerformed
         diaExport.setVisible(false);
-    }                                                                             //GEN-LAST:event_butCancelActionPerformed
+    }//GEN-LAST:event_butCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jcFormatItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_jcFormatItemStateChanged
-    }                                                                           //GEN-LAST:event_jcFormatItemStateChanged
+    private void jcFormatItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jcFormatItemStateChanged
+    }//GEN-LAST:event_jcFormatItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butPrintActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintActionPerformed
+    private void butPrintActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butPrintActionPerformed
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
                         .getParentFrame(this),
                 true,
@@ -1886,28 +1893,28 @@ public class AttributeTable extends javax.swing.JPanel {
             };
 
         wdt.start();
-    } //GEN-LAST:event_butPrintActionPerformed
+    }//GEN-LAST:event_butPrintActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbProcessingActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_tbProcessingActionPerformed
+    private void tbProcessingActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tbProcessingActionPerformed
         model.setEditable(tbProcessing.isSelected());
 
         if (!tbProcessing.isSelected()) {
             saveChangedRows();
         }
         butUndo.setVisible(tbProcessing.isSelected());
-    } //GEN-LAST:event_tbProcessingActionPerformed
+    }//GEN-LAST:event_tbProcessingActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butUndoActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butUndoActionPerformed
+    private void butUndoActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butUndoActionPerformed
         final int ans = JOptionPane.showConfirmDialog(
                 this,
                 NbBundle.getMessage(AttributeTable.class, "AttributeTable.butUndoActionPerformed().text"),
@@ -1921,7 +1928,7 @@ public class AttributeTable extends javax.swing.JPanel {
                 }
             }
         }
-    } //GEN-LAST:event_butUndoActionPerformed
+    }//GEN-LAST:event_butUndoActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -2517,38 +2524,8 @@ public class AttributeTable extends javax.swing.JPanel {
             if (columnIndex < attributeAlias.length) {
                 final String key = attributeNames[columnIndex];
                 final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
-
-                if (attr.isGeometry()) {
-                    return String.class;
-                } else if (attr.getType().equals(String.valueOf(Types.CHAR))
-                            || attr.getType().equals(String.valueOf(Types.VARCHAR))
-                            || attr.getType().equals(String.valueOf(Types.LONGVARCHAR))) {
-                    return String.class;
-                } else if (attr.getType().equals(String.valueOf(Types.INTEGER))
-                            || attr.getType().equals(String.valueOf(Types.SMALLINT))
-                            || attr.getType().equals(String.valueOf(Types.TINYINT))
-                            || attr.getType().equals("xsd:integer")) {
-                    return Integer.class;
-                } else if (attr.getType().equals(String.valueOf(Types.BIGINT))
-                            || attr.getType().equals("xsd:long")) {
-                    return Long.class;
-                } else if (attr.getType().equals(String.valueOf(Types.DOUBLE))
-                            || attr.getType().equals(String.valueOf(Types.FLOAT))
-                            || attr.getType().equals(String.valueOf(Types.DECIMAL))
-                            || attr.getType().equals("xsd:float")
-                            || attr.getType().equals("xsd:decimal")
-                            || attr.getType().equals("xsd:double")) {
-                    return Double.class;
-                } else if (attr.getType().equals(String.valueOf(Types.DATE))
-                            || attr.getType().equals(String.valueOf(Types.TIME))
-                            || attr.getType().equals(String.valueOf(Types.TIMESTAMP))) {
-                    return Date.class;
-                } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN))
-                            || attr.getType().equals("xsd:boolean")) {
-                    return Boolean.class;
-                } else {
-                    return String.class;
-                }
+                
+                return FeatureTools.getClass(attr);
             } else {
                 return tableRuleSet.getAdditionalFieldClass(columnIndex - attributeAlias.length);
             }

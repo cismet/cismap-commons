@@ -41,7 +41,10 @@ import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.WMSFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.attributetable.AttributeTable;
+import de.cismet.cismap.commons.gui.attributetable.DefaultAttributeTableRuleSet;
 import de.cismet.cismap.commons.gui.featureinfowidget.FeatureInfoWidget;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.layerwidget.LayerCombobox;
@@ -55,8 +58,12 @@ import de.cismet.cismap.commons.interaction.events.GetFeatureInfoEvent;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.tools.FeatureTools;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 
 /**
  * DOCUMENT ME!
@@ -78,12 +85,15 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     private LayerFilterTreeModel model;
     private FeatureInfoWidget featureInfo;
     private DefaultPopupMenuListener popupMenuListener;
+    private List<FeatureServiceFeature> changedFeatures = new ArrayList<FeatureServiceFeature>();
+    private AttribueTableModel currentTableModel;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree jtFeatures;
     private de.cismet.cismap.commons.gui.layerwidget.LayerCombobox layerCombobox1;
+    private javax.swing.JMenuItem miEdit;
     private javax.swing.JMenuItem miPrint;
     private javax.swing.JMenuItem miZoom;
     private javax.swing.JPopupMenu popupMenu;
@@ -171,8 +181,9 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
 
         popupMenu = new javax.swing.JPopupMenu();
-        miPrint = new javax.swing.JMenuItem();
         miZoom = new javax.swing.JMenuItem();
+        miPrint = new javax.swing.JMenuItem();
+        miEdit = new javax.swing.JMenuItem();
         layerCombobox1 = new LayerCombobox(layerModel, themeLayerWidget);
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -180,29 +191,34 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         sbAttributes = new javax.swing.JScrollPane();
         tabAttributes = new org.jdesktop.swingx.JXTable();
 
+        miZoom.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miZoom.text")); // NOI18N
+        miZoom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miZoomActionPerformed(evt);
+            }
+        });
+        popupMenu.add(miZoom);
+
         miPrint.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miPrint.text")); // NOI18N
         miPrint.setEnabled(false);
         popupMenu.add(miPrint);
 
-        miZoom.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miZoom.text")); // NOI18N
-        miZoom.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    miZoomActionPerformed(evt);
-                }
-            });
-        popupMenu.add(miZoom);
+        miEdit.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miEdit.text")); // NOI18N
+        miEdit.setEnabled(false);
+        miEdit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                miEditActionPerformed(evt);
+            }
+        });
+        popupMenu.add(miEdit);
 
         setLayout(new java.awt.GridBagLayout());
 
         layerCombobox1.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    layerCombobox1ItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                layerCombobox1ItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -221,12 +237,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         add(jLabel1, gridBagConstraints);
 
         jtFeatures.addTreeSelectionListener(new javax.swing.event.TreeSelectionListener() {
-
-                @Override
-                public void valueChanged(final javax.swing.event.TreeSelectionEvent evt) {
-                    jtFeaturesValueChanged(evt);
-                }
-            });
+            public void valueChanged(javax.swing.event.TreeSelectionEvent evt) {
+                jtFeaturesValueChanged(evt);
+            }
+        });
         jScrollPane1.setViewportView(jtFeatures);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -240,8 +254,13 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         add(jScrollPane1, gridBagConstraints);
 
         tabAttributes.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][] {},
-                new String[] {}));
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
         sbAttributes.setViewportView(tabAttributes);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -253,24 +272,24 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(sbAttributes, gridBagConstraints);
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_layerCombobox1ItemStateChanged
+    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_layerCombobox1ItemStateChanged
         model.setLayerFilter((LayerFilter)evt.getItem());
         expandAll(new TreePath(model.getRoot()));
-    }                                                                                 //GEN-LAST:event_layerCombobox1ItemStateChanged
+    } 										//GEN-LAST:event_layerCombobox1ItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) { //GEN-FIRST:event_jtFeaturesValueChanged
+    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_jtFeaturesValueChanged
         final TreePath tp = jtFeatures.getSelectionPath();
 
         if (tp == null) {
@@ -283,40 +302,12 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
         if (selectedComp instanceof DefaultFeatureServiceFeature) {
             final DefaultFeatureServiceFeature selectedFeature = (DefaultFeatureServiceFeature)selectedComp;
-            final HashMap properties = selectedFeature.getProperties();
-            final Object[] keys = properties.keySet().toArray();
 
-            final Object[][] data = new Object[properties.size()][];
-            int index = 0;
-            enableAttributeTable(true);
-            mappingComonent.highlightFeature(selectedFeature, 1500);
 
-            for (final Object key : keys) {
-                Object value = properties.get(key);
-
-                // do not show complete geometries, but only the geometry type
-                if (value instanceof Geometry) {
-                    value = ((Geometry)value).getGeometryType();
-                } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
-                    final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)
-                            value);
-                    try {
-                        value = JTSAdapter.export(geom).getGeometryType();
-                    } catch (GeometryException e) {
-                        LOG.error("Error while transforming deegree geometry to jts geometry.", e);
-                    }
-                }
-
-                final Object[] row = new Object[] { key, value };
-                data[index++] = row;
-            }
-
-            tabAttributes.setModel(new DefaultTableModel(
-                    data,
-                    new String[] {
-                        NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.jtFeaturesValueChanged.name"),
-                        NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.jtFeaturesValueChanged.value")
-                    }));
+            currentTableModel = new AttribueTableModel(selectedFeature);
+            
+            
+            tabAttributes.setModel(currentTableModel);
         } else if (selectedComp instanceof WMSGetFeatureInfoDescription) {
             // the default wms mechanism should be used
             enableAttributeTable(false);
@@ -334,14 +325,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             enableAttributeTable(true);
             tabAttributes.setModel(new DefaultTableModel(0, 0));
         }
-    } //GEN-LAST:event_jtFeaturesValueChanged
+    }//GEN-LAST:event_jtFeaturesValueChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miZoomActionPerformed
+    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miZoomActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
         final List<Feature> featureList = new ArrayList<Feature>();
 
@@ -365,7 +356,32 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         final ZoomToFeaturesWorker worker = new ZoomToFeaturesWorker(featureList.toArray(
                     new Feature[featureList.size()]));
         worker.execute();
-    } //GEN-LAST:event_miZoomActionPerformed
+    }//GEN-LAST:event_miZoomActionPerformed
+
+    private void miEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miEditActionPerformed
+        final TreePath[] tps = jtFeatures.getSelectionPaths();
+
+        for (final TreePath tp : tps) {
+            final Object o = tp.getLastPathComponent();
+
+            if (o instanceof Feature) {
+                final Feature feature = (Feature)o;
+                if ((feature != null) && !feature.isEditable()) {
+                    if (feature instanceof FeatureServiceFeature) {
+                        FeatureServiceFeature fsf = (FeatureServiceFeature)feature;
+                        if (fsf.getLayerProperties().getFeatureService().isEditable()) {
+                            feature.setEditable(true);
+                            if (!changedFeatures.contains(fsf)) {
+                                changedFeatures.add(fsf);
+//                                ((DefaultFeatureServiceFeature)fsf).addPropertyChangeListener(model);
+                            }
+                        }
+                    }
+                }
+                
+            }
+        }
+    }//GEN-LAST:event_miEditActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -601,6 +617,190 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         private void fireTreeStructureChanged() {
             for (final TreeModelListener l : listener) {
                 l.treeStructureChanged(new TreeModelEvent(this, new Object[] { root }));
+            }
+        }
+    }
+    
+    
+    class AttribueTableModel implements TableModel {
+        private DefaultFeatureServiceFeature feature;
+        private DefaultAttributeTableRuleSet tableRuleSet;
+        private String[] attributeAlias;
+        private String[] attributeNames;
+        private Map<String, FeatureServiceAttribute> featureServiceAttributes;
+        private String[] additionalAttributes = new String[0];
+        private List<String> orderedFeatureServiceAttributes;
+        private List<TableModelListener> listener = new ArrayList<TableModelListener>();
+        
+
+        public AttribueTableModel(DefaultFeatureServiceFeature feature) {
+            this.feature = feature;
+            tableRuleSet = AttributeTable.getTableRuleSetForFeatureService(feature.getLayerProperties().getFeatureService());
+            initTable();
+        }
+
+        
+        private void initTable() {
+            AbstractFeatureService service = feature.getLayerProperties().getFeatureService();
+            orderedFeatureServiceAttributes = service.getOrderedFeatureServiceAttributes();
+            featureServiceAttributes = service.getFeatureServiceAttributes();
+            fillHeaderArrays();
+        }
+
+        
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void fillHeaderArrays() {
+            int index = 0;
+            attributeNames = new String[attributeCount()];
+            attributeAlias = new String[attributeCount()];
+
+            for (final String attributeName : orderedFeatureServiceAttributes) {
+                final FeatureServiceAttribute fsa = featureServiceAttributes.get(attributeName);
+
+                if ((fsa == null) || fsa.isVisible()) {
+                    attributeNames[index] = attributeName;
+                    String aliasName = attributeName;
+
+                    if ((fsa != null) && !fsa.getAlias().equals("")) {
+                        final String alias = fsa.getAlias();
+
+                        if (alias != null) {
+                            aliasName = alias;
+                        }
+                    }
+
+                    if (aliasName.startsWith("app:")) {
+                        attributeAlias[index++] = aliasName.substring(4);
+                    } else {
+                        attributeAlias[index++] = aliasName;
+                    }
+                }
+            }
+
+            if (tableRuleSet != null) {
+                final String[] fields = tableRuleSet.getAdditionalFieldNames();
+
+                if (fields != null) {
+                    additionalAttributes = fields;
+                }
+            }
+        }
+        
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private int attributeCount() {
+            int count = 0;
+
+            for (final String key : orderedFeatureServiceAttributes) {
+                final FeatureServiceAttribute fsa = featureServiceAttributes.get(key);
+                if (fsa.isVisible()) {
+                    ++count;
+                }
+            }
+
+            return count;
+        }        
+        
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            if (column == 1) {
+                if (row < attributeNames.length) {
+                    if (tableRuleSet != null) {
+                        return feature.isEditable() && tableRuleSet.isColumnEditable(attributeNames[row])
+                                    && feature.getLayerProperties().getFeatureService().isEditable();
+                    } else {
+                        return feature.isEditable() && feature.getLayerProperties().getFeatureService().isEditable();
+                    }
+                }
+            }
+            
+            return false;
+        }
+
+        @Override
+        public int getRowCount() {
+            return attributeNames.length + additionalAttributes.length;
+        }
+
+        @Override
+        public int getColumnCount() {
+            return 2;
+        }
+
+        @Override
+        public String getColumnName(int columnIndex) {
+            if (columnIndex == 0) {
+                return NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.jtFeaturesValueChanged.name");
+            } else {
+                return NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.jtFeaturesValueChanged.value");
+            }
+        }
+
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+//            if (columnIndex < attributeAlias.length) {
+//                final String key = attributeNames[columnIndex];
+//                final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
+//                
+//                return FeatureTools.getClass(attr);
+//            } else {
+//                return tableRuleSet.getAdditionalFieldClass(columnIndex - attributeAlias.length);
+//            }
+            return String.class;
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            if (rowIndex < attributeNames.length) {
+                if (columnIndex == 0) {
+                    return attributeAlias[rowIndex];
+                } else {
+                    return feature.getProperty(attributeNames[rowIndex]);
+                }
+            } else {
+                return additionalAttributes[rowIndex - attributeNames.length];
+            }
+        }
+
+        @Override
+        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        }
+
+        @Override
+        public void addTableModelListener(final TableModelListener l) {
+            listener.add(l);
+        }
+
+        @Override
+        public void removeTableModelListener(final TableModelListener l) {
+            listener.remove(l);
+        }
+        /**
+         * DOCUMENT ME!
+         */
+        private void fireContentsChanged() {
+            final TableModelEvent e = new TableModelEvent(this);
+
+            for (final TableModelListener tmp : listener) {
+                tmp.tableChanged(e);
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  e  DOCUMENT ME!
+         */
+        private void fireContentsChanged(final TableModelEvent e) {
+            for (final TableModelListener tmp : listener) {
+                tmp.tableChanged(e);
             }
         }
     }
