@@ -5,18 +5,11 @@
 *              ... and it just works.
 *
 ****************************************************/
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package de.cismet.cismap.commons.tools;
 
 import org.apache.log4j.Logger;
 
-import org.jfree.util.Log;
-
 import org.openide.util.Cancellable;
-import org.openide.util.Exceptions;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -35,8 +28,8 @@ import javax.imageio.ImageIO;
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 
 /**
- * A Download which can be added to the DownloadManager and saves an image from a Future&lt;Image&gt; to a file. The
- * transparency of the files gets removed.
+ * A Download which can be added to the DownloadManager and saves an image from a Future&lt;Image&gt; to a file. If the
+ * image should be saved as jpeg then the transparency of the image gets removed.
  *
  * @author   Gilles Baatz
  * @version  $Revision$, $Date$
@@ -111,7 +104,7 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
 
         if ((image != null) && !Thread.interrupted()) {
             try {
-                ImageIO.write(removeTransparency(image), extension, fileToSaveTo);
+                ImageIO.write(prepareImage(image), extension, fileToSaveTo);
             } catch (IOException ex) {
                 LOG.error("Error while saving the image", ex);
                 status = State.COMPLETED_WITH_ERROR;
@@ -129,6 +122,35 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
         if (status == State.RUNNING) {
             status = State.COMPLETED;
             stateChanged();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   image  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private BufferedImage prepareImage(final Image image) {
+        if (extension.endsWith("jpg") || extension.endsWith("jpeg")) {
+            return removeTransparency(image);
+        } else if (image instanceof BufferedImage) {
+            return (BufferedImage)image;
+        } else {
+            // Convert the image to a buffered image
+            // Create a buffered image with transparency
+            final BufferedImage bimage = new BufferedImage(image.getWidth(null),
+                    image.getHeight(null),
+                    BufferedImage.TYPE_INT_ARGB);
+
+            // Draw the image on to the buffered image
+            final Graphics2D bGr = bimage.createGraphics();
+            bGr.drawImage(image, 0, 0, null);
+            bGr.dispose();
+
+            // Return the buffered image
+            return bimage;
         }
     }
 
