@@ -771,7 +771,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     protected void firePropertyChange(final String propertyName, final Object oldValue, final Object newValue) {
         propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
     }
-    
+
     @Override
     public String toString() {
         final AbstractFeatureService service = layerProperties.getFeatureService();

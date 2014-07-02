@@ -1,20 +1,40 @@
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 package de.cismet.cismap.commons.tools;
 
-import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
-import java.util.Date;
 import org.deegree.datatypes.Types;
 
+import java.util.Date;
+
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+
 /**
+ * DOCUMENT ME!
  *
- * @author therter
+ * @author   therter
+ * @version  $Revision$, $Date$
  */
 public class FeatureTools {
-    
-    public static Class<?> getClass(FeatureServiceAttribute attr) {
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   attr  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Class<?> getClass(final FeatureServiceAttribute attr) {
         if (attr.isGeometry()) {
             return String.class;
         } else if (attr.getType().equals(String.valueOf(Types.CHAR))
