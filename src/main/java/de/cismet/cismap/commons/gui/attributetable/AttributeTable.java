@@ -2260,6 +2260,11 @@ public class AttributeTable extends javax.swing.JPanel {
             fireContentsChanged();
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public int getRowCount() {
             if (featureList == null) {
@@ -2294,6 +2299,11 @@ public class AttributeTable extends javax.swing.JPanel {
             this.editable = editable;
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public int getColumnCount() {
             if (attributeAlias == null) {
@@ -2403,6 +2413,13 @@ public class AttributeTable extends javax.swing.JPanel {
             return featureList;
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   columnIndex  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public String getColumnName(final int columnIndex) {
             if (columnIndex < attributeAlias.length) {
@@ -2427,6 +2444,13 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   columnIndex  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public Class<?> getColumnClass(final int columnIndex) {
             if (columnIndex < attributeAlias.length) {
@@ -2469,6 +2493,14 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   rowIndex     DOCUMENT ME!
+         * @param   columnIndex  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public boolean isCellEditable(final int rowIndex, final int columnIndex) {
             if (columnIndex < attributeAlias.length) {
@@ -2483,6 +2515,14 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   rowIndex     DOCUMENT ME!
+         * @param   columnIndex  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public Object getValueAt(final int rowIndex, final int columnIndex) {
             if (columnIndex < attributeAlias.length) {
@@ -2507,6 +2547,13 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  aValue       DOCUMENT ME!
+         * @param  rowIndex     DOCUMENT ME!
+         * @param  columnIndex  DOCUMENT ME!
+         */
         @Override
         public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
             final FeatureServiceFeature feature = featureList.get(rowIndex);
@@ -2522,11 +2569,21 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  l  DOCUMENT ME!
+         */
         @Override
         public void addTableModelListener(final TableModelListener l) {
             listener.add(l);
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  l  DOCUMENT ME!
+         */
         @Override
         public void removeTableModelListener(final TableModelListener l) {
             listener.remove(l);
@@ -2616,6 +2673,11 @@ public class AttributeTable extends javax.swing.JPanel {
             AttributeTable.this.setTableSize();
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  evt  DOCUMENT ME!
+         */
         @Override
         public void propertyChange(final PropertyChangeEvent evt) {
             final int eCol = table.getEditingColumn();
@@ -2670,6 +2732,11 @@ public class AttributeTable extends javax.swing.JPanel {
             return id;
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public String toString() {
             return name;
@@ -2700,6 +2767,12 @@ public class AttributeTable extends javax.swing.JPanel {
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  renderer  DOCUMENT ME!
+         * @param  adapter   DOCUMENT ME!
+         */
         @Override
         protected void applyBackground(final Component renderer, final ComponentAdapter adapter) {
             super.applyBackground(renderer, adapter);
@@ -2735,6 +2808,18 @@ public class AttributeTable extends javax.swing.JPanel {
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   table       DOCUMENT ME!
+         * @param   value       DOCUMENT ME!
+         * @param   isSelected  DOCUMENT ME!
+         * @param   hasFocus    DOCUMENT ME!
+         * @param   row         DOCUMENT ME!
+         * @param   column      DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public Component getTableCellRendererComponent(final JTable table,
                 final Object value,
@@ -2785,6 +2870,18 @@ public class AttributeTable extends javax.swing.JPanel {
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   table       DOCUMENT ME!
+         * @param   value       DOCUMENT ME!
+         * @param   isSelected  DOCUMENT ME!
+         * @param   hasFocus    DOCUMENT ME!
+         * @param   row         DOCUMENT ME!
+         * @param   column      DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public Component getTableCellRendererComponent(final JTable table,
                 Object value,
@@ -2827,6 +2924,13 @@ public class AttributeTable extends javax.swing.JPanel {
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         *
+         * @throws  JRException  DOCUMENT ME!
+         */
         @Override
         public boolean next() throws JRException {
             final boolean ret = ++index < model.getRowCount();
@@ -2840,6 +2944,15 @@ public class AttributeTable extends javax.swing.JPanel {
             return ret;
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   jrField  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         *
+         * @throws  JRException  DOCUMENT ME!
+         */
         @Override
         public Object getFieldValue(final JRField jrField) throws JRException {
             int col = 0;

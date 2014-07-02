@@ -109,6 +109,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Object clone() {
         return new DefaultFeatureServiceFeature(this);
@@ -206,257 +211,434 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     public void setIdExpression(final String idExpression) {
         this.layerProperties.setIdExpression(idExpression, layerProperties.getIdExpressionType());
     }
-
-//  /**
-//   * Erzeugt ein JDOM-Element, das das DefaultFeatureServiceFeature und dessen Attribute
-//   * widerspiegelt.
-//   * @return JDOM-Element
-//   */
-//  @Override
-//  public Element toElement()
-//  {
-//    Element element = new Element("DefaultFeatureServiceFeature");
-//    element.setAttribute("id", new Integer(getId()).toString());
-//    element.setAttribute("idExpression", getIdExpression());
-//    element.setAttribute("lineWidth", new Integer(getLineWidth()).toString());
-//    element.setAttribute("transparency", new Float(getTransparency()).toString());
-//    element.setAttribute("highlightingEnabled", new Boolean(isHighlightingEnabled()).toString());
-//    element.setAttribute("primaryAnnotation", getPrimaryAnnotation());
-//    element.setAttribute("primaryAnnotationScaling", new Double(getPrimaryAnnotationScaling()).toString());
-//    element.setAttribute("primaryAnnotationJustification", new Float(getPrimaryAnnotationJustification()).toString());
-//    element.setAttribute("minScaleDenominator", getMinScaleDenominator().toString());
-//    element.setAttribute("maxScaleDenominator", getMaxScaleDenominator().toString());
-//    element.setAttribute("autoscale", new Boolean(isAutoscale()).toString());
-//    if (getFillingPaint() != null)
-//    {
-//      element.addContent(new Element("fillingColor").addContent(StaticXMLTools.convertColorToXML((Color) getFillingPaint())));
-//    }
-//    if (getLinePaint() != null)
-//    {
-//      element.addContent(new Element("lineColor").addContent(StaticXMLTools.convertColorToXML((Color) getLinePaint())));
-//    }
-//    element.addContent(new Element("primaryAnnotationFont").addContent(StaticXMLTools.convertFontToXML(getPrimaryAnnotationFont())));
-//    element.addContent(new Element("primaryAnnotationColor").addContent(StaticXMLTools.convertColorToXML((Color) getPrimaryAnnotationPaint())));
-//    return element;
-//  }
-//  @Override
-//  public void initFromElement(Element element) throws Exception
-//  {
-//    throw new UnsupportedOperationException("Not supported yet.");
-//
-//  }
+    /**
+     * /** * Erzeugt ein JDOM-Element, das das DefaultFeatureServiceFeature und dessen Attribute * widerspiegelt. *
+     * &#064;return JDOM-Element
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public LayerProperties getLayerProperties() {
         return this.layerProperties;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layerProperties  DOCUMENT ME!
+     */
     @Override
     public void setLayerProperties(final LayerProperties layerProperties) {
         this.layerProperties = layerProperties;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Paint getLinePaint() {
         return this.getStyle().isDrawLine() ? this.getStyle().getLineColor() : null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  linePaint  DOCUMENT ME!
+     */
     @Override
     public void setLinePaint(final Paint linePaint) {
         this.getStyle().setLineColor((Color)linePaint);
         this.getStyle().setDrawLine(true);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public int getLineWidth() {
         return this.getStyle().getLineWidth();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  width  DOCUMENT ME!
+     */
     @Override
     public void setLineWidth(final int width) {
         this.getStyle().setLineWidth(width);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Paint getFillingPaint() {
         return this.getStyle().isDrawFill() ? this.getStyle().getFillColor() : null;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fillingStyle  DOCUMENT ME!
+     */
     @Override
     public void setFillingPaint(final Paint fillingStyle) {
         this.getStyle().setFillColor((Color)fillingStyle);
         this.getStyle().setDrawFill(true);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public float getTransparency() {
         return this.getStyle().getAlpha();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  transparrency  DOCUMENT ME!
+     */
     @Override
     public void setTransparency(final float transparrency) {
         this.getStyle().setAlpha(transparrency);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
         return this.getStyle().getPointSymbol();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureAnnotationSymbol  DOCUMENT ME!
+     */
     @Override
     public void setPointAnnotationSymbol(final FeatureAnnotationSymbol featureAnnotationSymbol) {
         this.getStyle().setPointSymbol(featureAnnotationSymbol);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isHighlightingEnabled() {
         return this.getStyle().isHighlightFeature();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  enabled  DOCUMENT ME!
+     */
     @Override
     public void setHighlightingEnabled(final boolean enabled) {
         this.getStyle().setHighlightFeature(enabled);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Geometry getGeometry() {
         return this.geometry;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  geom  DOCUMENT ME!
+     */
     @Override
     public void setGeometry(final Geometry geom) {
         this.geometry = geom;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean canBeSelected() {
         return this.canBeSelected;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isEditable() {
         return this.editable;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  editable  DOCUMENT ME!
+     */
     @Override
     public void setEditable(final boolean editable) {
         this.editable = editable;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isHidden() {
         return this.hiding;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  hiding  DOCUMENT ME!
+     */
     @Override
     public void hide(final boolean hiding) {
         this.hiding = hiding;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getPrimaryAnnotation() {
         return this.primaryAnnotation;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isPrimaryAnnotationVisible() {
         return this.getStyle().isDrawLabel();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  visible  DOCUMENT ME!
+     */
     @Override
     public void setPrimaryAnnotationVisible(final boolean visible) {
         this.getStyle().setDrawLabel(visible);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Font getPrimaryAnnotationFont() {
         return this.getStyle().getFont();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Paint getPrimaryAnnotationPaint() {
         return this.getStyle().getFontColor();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public double getPrimaryAnnotationScaling() {
         return this.getStyle().getMultiplier();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public float getPrimaryAnnotationJustification() {
         return this.getStyle().getAlignment();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  just  DOCUMENT ME!
+     */
     @Override
     public void setPrimaryAnnotationJustification(final float just) {
         this.getStyle().setAlignment(just);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public String getSecondaryAnnotation() {
         return this.secondaryAnnotation;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  primaryAnnotation  DOCUMENT ME!
+     */
     @Override
     public void setPrimaryAnnotation(final String primaryAnnotation) {
         this.primaryAnnotation = primaryAnnotation;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  primaryAnnotationFont  DOCUMENT ME!
+     */
     @Override
     public void setPrimaryAnnotationFont(final Font primaryAnnotationFont) {
         this.getStyle().setFont(primaryAnnotationFont);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  primaryAnnotationPaint  DOCUMENT ME!
+     */
     @Override
     public void setPrimaryAnnotationPaint(final Paint primaryAnnotationPaint) {
         this.getStyle().setFontColor((Color)primaryAnnotationPaint);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  primaryAnnotationScaling  DOCUMENT ME!
+     */
     @Override
     public void setPrimaryAnnotationScaling(final double primaryAnnotationScaling) {
         this.getStyle().setMultiplier(primaryAnnotationScaling);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  secondaryAnnotation  DOCUMENT ME!
+     */
     @Override
     public void setSecondaryAnnotation(final String secondaryAnnotation) {
         this.secondaryAnnotation = secondaryAnnotation;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isAutoscale() {
         return this.getStyle().isAutoscale();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  autoScale  DOCUMENT ME!
+     */
     @Override
     public void setAutoScale(final boolean autoScale) {
         this.getStyle().setAutoscale(autoScale);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Integer getMinScaleDenominator() {
         return this.getStyle().getMinScale();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Integer getMaxScaleDenominator() {
         return this.getStyle().getMaxScale();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  min  DOCUMENT ME!
+     */
     @Override
     public void setMinScaleDenominator(final Integer min) {
         this.getStyle().setMinScale(min);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  max  DOCUMENT ME!
+     */
     @Override
     public void setMaxScaleDenominator(final Integer max) {
         this.getStyle().setMaxScale(max);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  halo  DOCUMENT ME!
+     */
     @Override
     public void setPrimaryAnnotationHalo(final Color halo) {
         this.getStyle().setHalo(halo);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Color getPrimaryAnnotationHalo() {
         return this.getStyle().getHalo();
@@ -471,11 +653,23 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         return this.layerProperties.getStyle();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  canBeSelected  DOCUMENT ME!
+     */
     @Override
     public void setCanBeSelected(final boolean canBeSelected) {
         this.canBeSelected = canBeSelected;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   obj  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean equals(final Object obj) {
         if (obj.getClass().getName().equals(getClass().getName())) {
@@ -489,6 +683,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         return super.equals(obj);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public int hashCode() {
         int hash = 7;

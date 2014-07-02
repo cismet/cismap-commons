@@ -821,6 +821,13 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   node  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public boolean isLeaf(final Object node) {
         return getChildCount(node) == 0;

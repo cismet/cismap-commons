@@ -53,29 +53,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
 
     //~ Methods ----------------------------------------------------------------
 
-// /**
-// * Creates a new ShapeFeature object.
-// *
-// * @param  shapeInfo  typename DOCUMENT ME!
-// * @param  styles     DOCUMENT ME!
-// */
-// public JDBCFeature(final JDBCFeatureInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
-// setSLDStyles(styles); // super.style = styles;
-// this.featureInfo = shapeInfo;
-// }
-//
-
-// /**
-// * Creates a new ShapeFeature object.
-// *
-// * @param  typename  DOCUMENT ME!
-// * @param  styles    DOCUMENT ME!
-// */
-// public ShapeFeature(final ShapeInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
-// setSLDStyles(styles); // super.style = styles;
-// this.shapeInfo = shapeInfo;
-// }
-
+    /**
+     * /** * Creates a new ShapeFeature object. * * @param shapeInfo typename DOCUMENT ME! * @param styles DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public HashMap getProperties() {
         if (existProperties()) {
@@ -114,6 +96,13 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
         return container;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   propertyName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Object getProperty(final String propertyName) {
         if (existProperties()) {
@@ -211,16 +200,30 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
         super.getProperties().clear();
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     @Override
     public void undoAll() {
         super.getProperties().clear();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  properties  DOCUMENT ME!
+     */
     @Override
     public void setProperties(final HashMap properties) {
         // nothing to do
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  propertyName  DOCUMENT ME!
+     * @param  property      DOCUMENT ME!
+     */
     @Override
     public void addProperty(final String propertyName, final Object property) {
         // nothing to do
@@ -235,6 +238,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
         // nothing to do
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Geometry getGeometry() {
         Geometry g = null;
@@ -262,6 +270,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
         return g;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  geom  DOCUMENT ME!
+     */
     @Override
     public void setGeometry(final Geometry geom) {
         // do nothing

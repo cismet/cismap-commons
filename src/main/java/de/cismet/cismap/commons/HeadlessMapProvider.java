@@ -720,6 +720,11 @@ public class HeadlessMapProvider {
 
         //~ Methods ------------------------------------------------------------
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  repaintEvent  DOCUMENT ME!
+         */
         @Override
         public synchronized void repaintStart(final RepaintEvent repaintEvent) {
             final RetrievalEvent e = repaintEvent.getRetrievalEvent();
@@ -749,6 +754,11 @@ public class HeadlessMapProvider {
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  repaintEvent  DOCUMENT ME!
+         */
         @Override
         public void repaintError(final RepaintEvent repaintEvent) {
             final RetrievalEvent e = repaintEvent.getRetrievalEvent();
@@ -773,6 +783,11 @@ public class HeadlessMapProvider {
             repaintComplete(repaintEvent);
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  repaintEvent  DOCUMENT ME!
+         */
         @Override
         public synchronized void repaintComplete(final RepaintEvent repaintEvent) {
             final RetrievalEvent e = repaintEvent.getRetrievalEvent();
@@ -927,6 +942,13 @@ public class HeadlessMapProvider {
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   mayInterruptIfRunning  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public boolean cancel(final boolean mayInterruptIfRunning) {
             this.cancel = true;
@@ -934,16 +956,34 @@ public class HeadlessMapProvider {
             return !done;
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public boolean isCancelled() {
             return cancel;
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
         @Override
         public boolean isDone() {
             return done;
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         *
+         * @throws  InterruptedException  DOCUMENT ME!
+         * @throws  ExecutionException    DOCUMENT ME!
+         */
         @Override
         public Image get() throws InterruptedException, ExecutionException {
             lock.lock();
@@ -958,6 +998,18 @@ public class HeadlessMapProvider {
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   timeout  DOCUMENT ME!
+         * @param   unit     DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         *
+         * @throws  InterruptedException  DOCUMENT ME!
+         * @throws  ExecutionException    DOCUMENT ME!
+         * @throws  TimeoutException      DOCUMENT ME!
+         */
         @Override
         public Image get(final long timeout, final TimeUnit unit) throws InterruptedException,
             ExecutionException,

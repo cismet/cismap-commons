@@ -52,17 +52,11 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
 
     //~ Methods ----------------------------------------------------------------
 
-// /**
-// * Creates a new ShapeFeature object.
-// *
-// * @param  typename  DOCUMENT ME!
-// * @param  styles    DOCUMENT ME!
-// */
-// public ShapeFeature(final ShapeInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
-// setSLDStyles(styles); // super.style = styles;
-// this.shapeInfo = shapeInfo;
-// }
-
+    /**
+     * /** * Creates a new ShapeFeature object. * * @param typename DOCUMENT ME! * @param styles DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public HashMap getProperties() {
         LinkedHashMap<String, Object> container = null;
@@ -114,11 +108,24 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         return container;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   propertyName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Object getProperty(final String propertyName) {
         return getProperties().get(propertyName);
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  propertyName   DOCUMENT ME!
+     * @param  propertyValue  DOCUMENT ME!
+     */
     @Override
     public void setProperty(final String propertyName, final Object propertyValue) {
         if (!existProperties()) {
@@ -137,6 +144,11 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         return !super.getProperties().isEmpty();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
     @Override
     public void saveChanges() throws Exception {
 //        org.deegree.model.feature.Feature deegreeFeature = null;
@@ -155,11 +167,20 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
 //        super.getProperties().clear();
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     @Override
     public void undoAll() {
         super.getProperties().clear();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  propertyName  DOCUMENT ME!
+     * @param  property      DOCUMENT ME!
+     */
     @Override
     public void addProperty(final String propertyName, final Object property) {
         // nothing to do
@@ -174,6 +195,11 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         // nothing to do
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     @Override
     public Geometry getGeometry() {
         Geometry g = null;
@@ -204,6 +230,11 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         return g;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  geom  DOCUMENT ME!
+     */
     @Override
     public void setGeometry(final Geometry geom) {
         // do nothing

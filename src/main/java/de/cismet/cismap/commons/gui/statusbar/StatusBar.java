@@ -77,7 +77,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
     MappingComponent mappingComponent;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private GeoTransformer transformer = null;
-    private DecimalFormat df = new DecimalFormat("0.000"); // NOI18N
+    private DecimalFormat df = new DecimalFormat("0.000");     // NOI18N
     private int servicesCounter = 0;
     private int servicesErroneousCounter = 0;
     private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
@@ -620,22 +620,22 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblScaleMousePressed
+    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblScaleMousePressed
         if (evt.isPopupTrigger()) {
             pomScale.setVisible(true);
         }
-    }//GEN-LAST:event_lblScaleMousePressed
+    }                                                                        //GEN-LAST:event_lblScaleMousePressed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCrsMousePressed
+    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblCrsMousePressed
         if (evt.isPopupTrigger()) {
             pomCrs.setVisible(true);
         }
-    }//GEN-LAST:event_lblCrsMousePressed
+    }                                                                      //GEN-LAST:event_lblCrsMousePressed
 
     /**
      * DOCUMENT ME!
@@ -822,11 +822,21 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         return result;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerAdded(final ActiveLayerEvent e) {
         // TODO: Use this for counting starting retrievals?
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerRemoved(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof ServiceLayer) {
@@ -834,16 +844,31 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerPositionChanged(final ActiveLayerEvent e) {
         // NOP
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerVisibilityChanged(final ActiveLayerEvent e) {
         // NOP
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerAvailabilityChanged(final ActiveLayerEvent e) {
         if (e.getLayer() instanceof ServiceLayer) {
@@ -854,11 +879,21 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerInformationStatusChanged(final ActiveLayerEvent e) {
         // NOP
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
     @Override
     public void layerSelectionChanged(final ActiveLayerEvent e) {
         // NOP
