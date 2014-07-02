@@ -145,6 +145,11 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
     }
 
     @Override
+    public boolean isEditable() {
+        return true;
+    }
+
+    @Override
     public String getQuery() {
         return query;
     }
