@@ -224,7 +224,6 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         popupMenu.add(miPrint);
 
         miEdit.setText(org.openide.util.NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.miEdit.text")); // NOI18N
-        miEdit.setEnabled(false);
         miEdit.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
