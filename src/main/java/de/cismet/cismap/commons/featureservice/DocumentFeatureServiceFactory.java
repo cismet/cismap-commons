@@ -157,11 +157,13 @@ public class DocumentFeatureServiceFactory {
                     throw new FileExtensionContentMissmatchException(
                         "File extension ist xml/gml aber kein gültiges xml/gml Dokument");
                 }
-            } else if (documentFile.getPath().endsWith(SHP_FILE_EXTENSION)) {
+            } else if (documentFile.getPath().endsWith(SHP_FILE_EXTENSION)
+                        || documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION)) {
                 if (log.isDebugEnabled()) {
                     log.debug("File extension ist shp");
                 }
-                if (isShapeFile(documentFile)) {
+                if ((documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION)
+                                && CismapBroker.getInstance().isUseInternalDb()) || isShapeFile(documentFile)) {
                     if (CismapBroker.getInstance().isUseInternalDb()) {
                         final MessageDigest md5 = MessageDigest.getInstance("MD5");
                         final BufferedInputStream is = new BufferedInputStream(new FileInputStream(documentFile));

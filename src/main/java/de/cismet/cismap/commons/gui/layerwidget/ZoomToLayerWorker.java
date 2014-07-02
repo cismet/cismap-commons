@@ -240,13 +240,15 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
     protected void done() {
         try {
             final Geometry geom = get();
-            final XBoundingBox boundingBox = new XBoundingBox(geom);
+            if (geom != null) {
+                final XBoundingBox boundingBox = new XBoundingBox(geom);
 
-            if (buffer != 0) {
-                boundingBox.increase(buffer);
+                if (buffer != 0) {
+                    boundingBox.increase(buffer);
+                }
+
+                CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(boundingBox);
             }
-
-            CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(boundingBox);
         } catch (Exception e) {
             LOG.error("Error while zooming to extend", e);
         }
