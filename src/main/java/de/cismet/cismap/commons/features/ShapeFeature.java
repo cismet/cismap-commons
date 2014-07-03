@@ -108,13 +108,6 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         return container;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   propertyName  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
     @Override
     public Object getProperty(final String propertyName) {
         return getProperties().get(propertyName);
