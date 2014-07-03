@@ -7,19 +7,12 @@
 ****************************************************/
 package de.cismet.cismap.commons.featureservice.factory;
 
-import edu.umd.cs.piccolo.event.PInputEvent;
-
-import org.jdesktop.swingx.JXErrorPane;
-import org.jdesktop.swingx.error.ErrorInfo;
+import org.apache.log4j.Logger;
 
 import org.postgis.Geometry;
 import org.postgis.PGgeometry;
 
 import org.postgresql.PGConnection;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -29,19 +22,15 @@ import java.sql.Statement;
 
 import java.util.List;
 import java.util.Vector;
-import java.util.logging.Level;
 
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.features.InputEventAwareFeature;
 import de.cismet.cismap.commons.features.PostgisFeature;
+import de.cismet.cismap.commons.features.UpdateablePostgisFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.SimpleFeatureServiceSqlStatement;
-import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.jtsgeometryfactories.PostGisGeometryFactory;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
 
@@ -56,6 +45,7 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
 
     //~ Static fields/initializers ---------------------------------------------
 
+    private static Logger logger = Logger.getLogger(PostgisFeatureFactory.class);
     public static final String ID_TOKEN = "<cismap::update::id>";
     public static final String QUERY_CANCELED = "57014";
 
@@ -118,9 +108,9 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    protected Connection createConnection(final ConnectionInfo connectionInfo) throws Exception {
+    public static Connection createConnection(final ConnectionInfo connectionInfo) throws Exception {
         try {
-            this.logger.info("creating new PostgisFeatureFactory instance with connection: connection: \n"
+            logger.info("creating new PostgisFeatureFactory instance with connection: connection: \n"
                         + connectionInfo.getUrl() + ", " + connectionInfo.getDriver() + ", "
                         + connectionInfo.getUser());
             Class.forName(connectionInfo.getDriver());
@@ -131,7 +121,7 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
             ((PGConnection)theConnection).addDataType("box3d", "org.postgis.PGbox3d");
             return theConnection;
         } catch (Throwable t) {
-            this.logger.fatal("could not create database connection (" + connectionInfo + "):\n " + t.getMessage(), t);
+            logger.fatal("could not create database connection (" + connectionInfo + "):\n " + t.getMessage(), t);
             throw new Exception("could not create database connection (" + connectionInfo + "):\n " + t.getMessage(),
                 t);
         }
@@ -178,35 +168,6 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
             statement.close();
             statement = null;
         } catch (Exception ex) {
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   id  DOCUMENT ME!
-     *
-     * @throws  Exception  DOCUMENT ME!
-     */
-    protected void doAction(final int id) throws Exception {
-        if ((this.postgisAction.getAction() != null) && (this.postgisAction.getAction().length() > 0)) {
-            if ((this.connection == null) || this.connection.isClosed()) {
-                this.logger.error("Connection to database lost or not correctly initialised");
-                this.connection = createConnection(this.connectionInfo);
-            }
-
-            final java.sql.Statement statement = connection.createStatement();
-            final String sql = this.postgisAction.getAction().replaceAll(ID_TOKEN, String.valueOf(id));
-            if (DEBUG) {
-                if (logger.isDebugEnabled()) {
-                    logger.debug("performing action on feature #" + id + ": \n" + sql);
-                }
-            }
-            statement.execute(sql);
-            statement.close();
-        } else {
-            logger.warn("Feature Service not yet correclty initialised, ignoring action");
-            throw new Exception("Feature Service not yet correclty initialised, ignoring action");
         }
     }
 
@@ -344,7 +305,11 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
                 PostgisFeature postgisFeature;
 
                 if (this.postgisAction != null) {
-                    postgisFeature = new UpdateablePostgisFeature();
+                    postgisFeature = new UpdateablePostgisFeature(
+                            connectionInfo,
+                            parentService,
+                            postgisAction,
+                            connection);
                 } else {
                     postgisFeature = new PostgisFeature();
                 }
@@ -378,91 +343,5 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
                     + " ms");
         updateLastCreatedFeatures(postgisFeatures);
         return postgisFeatures;
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class UpdateablePostgisFeature extends PostgisFeature implements InputEventAwareFeature {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public boolean noFurtherEventProcessing(final PInputEvent event) {
-            return true;
-        }
-
-        @Override
-        public void mouseClicked(final PInputEvent event) {
-        }
-
-        @Override
-        public void mouseEntered(final PInputEvent event) {
-        }
-
-        @Override
-        public void mouseExited(final PInputEvent event) {
-        }
-
-        @Override
-        public void mousePressed(final PInputEvent event) {
-            final MappingComponent mappingComponent = (MappingComponent)event.getComponent();
-            if (!mappingComponent.isReadOnly() && (event.getModifiers() == InputEvent.BUTTON3_MASK)) {
-                if (DEBUG) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("showing menu on feature #" + this.getId());
-                    }
-                }
-                final JPopupMenu pop = new JPopupMenu();
-                final JMenuItem mni = new JMenuItem(PostgisFeatureFactory.this.postgisAction.getActionText(),
-                        PostgisFeatureFactory.this.postgisAction.getIcon());
-                mni.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(final ActionEvent e) {
-                            try {
-                                PostgisFeatureFactory.this.doAction(UpdateablePostgisFeature.this.getId());
-                                PostgisFeatureFactory.this.parentService.retrieve(true);
-                            } catch (Exception ex) {
-                                logger.error("Error during doAction(): " + ex.getMessage(), ex);
-                                final ErrorInfo ei = new ErrorInfo(
-                                        "Fehler",
-                                        "Fehler beim Zugriff auf den FeatureService",
-                                        null,
-                                        null,
-                                        ex,
-                                        Level.ALL,
-                                        null);
-                                JXErrorPane.showDialog(mappingComponent, ei);
-                            }
-                        }
-                    });
-                pop.add(mni);
-                pop.show(
-                    mappingComponent,
-                    (int)event.getCanvasPosition().getX(),
-                    (int)event.getCanvasPosition().getY());
-            }
-        }
-
-        @Override
-        public void mouseWheelRotated(final PInputEvent event) {
-        }
-
-        @Override
-        public void mouseReleased(final PInputEvent event) {
-        }
-
-        @Override
-        public void mouseMoved(final PInputEvent event) {
-        }
-
-        @Override
-        public void mouseDragged(final PInputEvent event) {
-        }
     }
 }

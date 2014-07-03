@@ -27,7 +27,6 @@ import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import pswing.PSwingCanvas;
@@ -57,8 +56,6 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -1047,7 +1044,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void initInputListener() {
         inputEventListener.put(MOTION, new SimpleMoveListener(this));
-        inputEventListener.put(CUSTOM_FEATUREACTION, new CustomFeatureActionListener(this));
         inputEventListener.put(ZOOM, new RubberBandZoomListener());
         inputEventListener.put(PAN, new PanAndMousewheelZoomListener());
         inputEventListener.put(SELECT, new SelectionListener());
@@ -5276,6 +5272,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             return -1;
         }
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -6150,6 +6147,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
     }
 }
+
 /**
  * DOCUMENT ME!
  *
