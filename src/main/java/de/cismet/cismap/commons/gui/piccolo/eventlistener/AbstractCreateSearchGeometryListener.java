@@ -187,6 +187,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     @Override
     public void showLastFeature() {
         showFeature(lastFeature);
+        getMappingComponent().getFeatureCollection().holdFeature(lastFeature);
     }
 
     /**
