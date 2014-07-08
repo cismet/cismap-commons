@@ -19,6 +19,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
@@ -32,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
@@ -86,6 +89,11 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private static List<Integer> uniqueNumbers = new ArrayList<Integer>();
     private static String addedInternalWidget = null;
 
+    private static final ImageIcon LOCK_ICON = new javax.swing.ImageIcon(
+            SlidableWMSServiceLayerGroup.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock.png"));        // NOI18N
+    private static final ImageIcon UNLOCK_ICON = new javax.swing.ImageIcon(
+            SlidableWMSServiceLayerGroup.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock-unlock.png")); // NOI18N
+
     //~ Instance fields --------------------------------------------------------
 
     private final List<WMSServiceLayer> layers = new ArrayList<WMSServiceLayer>();
@@ -108,6 +116,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private XBoundingBox boundingBox;
     private String customSLD;
     private boolean selected = false;
+    private JButton btnLock = new JButton();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -528,20 +537,46 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             final JLabel label = new JLabel(layerTitle);
             final Font font = label.getFont().deriveFont(10f);
             label.setFont(font);
-            lableTable.put(Integer.valueOf(x * 100), label);
+            lableTable.put(x * 100, label);
             x++;
         }
         slider.setLabelTable(lableTable);
         internalFrame.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N
-        internalFrame.getContentPane().add(slider);
+        internalFrame.getContentPane().setLayout(new BorderLayout());
+        internalFrame.getContentPane().add(slider, BorderLayout.CENTER);
         slider.setSnapToTicks(true);
         slider.repaint();
+
+        btnLock.setText("");
+        btnLock.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnLockResultsActionPerformed(evt);
+                }
+            });
+
+        btnLock.setIcon(LOCK_ICON);
+        btnLock.setBorder(null);
+        btnLock.setContentAreaFilled(false);
+        btnLock.setPreferredSize(new Dimension(32, (int)slider.getPreferredSize().getHeight()));
+        internalFrame.getContentPane().add(btnLock, BorderLayout.WEST);
+
         internalFrame.setPreferredSize(new Dimension(
                 (int)getSliderWidth(),
                 (int)slider.getPreferredSize().getHeight()
                         + 15));
         internalFrame.pack();
         internalFrame.setResizable(true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void btnLockResultsActionPerformed(final ActionEvent evt) {
+        LOG.fatal(".btnLockResultsActionPerformed: Not supported yet.", new Exception()); // NOI18N
     }
 
     /**
