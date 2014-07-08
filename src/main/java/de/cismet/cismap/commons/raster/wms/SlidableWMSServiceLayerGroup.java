@@ -20,6 +20,7 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import javax.swing.JDialog;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.TreePath;
@@ -141,6 +143,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private boolean selected = false;
     private JButton btnLock = new JButton();
     private boolean locked;
+    private boolean lockBeforeNextRetrieve;
+    private Timer lockTimer;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -154,6 +158,15 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         final TreePath tp = ((TreePath)treePaths.get(0));
         final Layer selectedLayer = (de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent();
         final List<Layer> children = Arrays.asList(selectedLayer.getChildren());
+
+        lockTimer = new Timer(TIME_TILL_LOCKED * 1000, new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        lockBeforeNextRetrieve = !lockTimer.isRunning();
+                    }
+                });
+        lockTimer.setRepeats(false);
 
         setName(selectedLayer.getTitle());
 
@@ -666,6 +679,14 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void retrieve(final boolean forced) {
+        if (!isLocked()) {
+            if (lockBeforeNextRetrieve) {
+                setLocked(true);
+            } else {
+                lockTimer.restart();
+            }
+        }
+
         if (isLocked()) {
             getSelectedLayer().retrieve(forced);
         } else {
@@ -909,7 +930,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             btnLock.setIcon(LOCK_ICON);
         } else {
             btnLock.setIcon(UNLOCK_ICON);
-
+            lockBeforeNextRetrieve = false;
+            lockTimer.restart();
             // refresh the other layers
             this.retrieve(false);
         }
