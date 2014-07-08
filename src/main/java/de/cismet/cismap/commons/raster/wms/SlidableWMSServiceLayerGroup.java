@@ -1068,6 +1068,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                 CismapBroker.getInstance().getMappingComponent().showInternalWidget(addedInternalWidget, false, 800);
             }
         }
+
+        updateTimerDelay();
     }
 
     /**
@@ -1082,6 +1084,23 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             return layers.get(i);
         } else {
             return layers.get(layers.size() - 1);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void updateTimerDelay() {
+        if (selected) {
+            lockTimer.setDelay(TIME_TILL_LOCKED * 1000);
+            lockTimer.setInitialDelay(TIME_TILL_LOCKED * 1000);
+        } else {
+            lockTimer.setDelay(INACTIVE_TIME_TILL_LOCKED * 1000);
+            lockTimer.setInitialDelay(INACTIVE_TIME_TILL_LOCKED * 1000);
+        }
+
+        if (lockTimer.isRunning()) {
+            lockTimer.restart();
         }
     }
 }
