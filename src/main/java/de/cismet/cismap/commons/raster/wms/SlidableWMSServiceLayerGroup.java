@@ -393,7 +393,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                             progress += i;
                         }
 
-                        progress /= layers.size();
+                        if (!isLocked()) {
+                            progress /= layers.size();
+                        }
 
                         event.setPercentageDone(progress);
                         fireRetrievalProgress(event);
