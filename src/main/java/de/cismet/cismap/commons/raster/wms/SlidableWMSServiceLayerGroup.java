@@ -31,6 +31,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
@@ -93,6 +94,26 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             SlidableWMSServiceLayerGroup.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock.png"));        // NOI18N
     private static final ImageIcon UNLOCK_ICON = new javax.swing.ImageIcon(
             SlidableWMSServiceLayerGroup.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock-unlock.png")); // NOI18N
+
+    private static boolean ASCENDING;
+    private static int TIME_TILL_LOCKED;
+    private static int INACTIVE_TIME_TILL_LOCKED;
+
+    static {
+        final Properties prop = new Properties();
+        try {
+            prop.load(SlidableWMSServiceLayerGroup.class.getResourceAsStream(
+                    "SlidableWMSServiceLayerGroup.properties"));
+            ASCENDING = prop.getProperty("ascending").trim().equalsIgnoreCase("true");
+            TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("timeTillLocked")));
+            INACTIVE_TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("inactiveTimeTillLocked")));
+        } catch (Exception ex) {
+            LOG.error("Could not load the properties for the SlidableWMSServiceLayerGroup", ex);
+            ASCENDING = true;
+            TIME_TILL_LOCKED = 60;
+            INACTIVE_TIME_TILL_LOCKED = 10;
+        }
+    }
 
     //~ Instance fields --------------------------------------------------------
 
