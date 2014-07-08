@@ -23,7 +23,9 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -151,7 +153,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         final TreePath tp = ((TreePath)treePaths.get(0));
         final Layer selectedLayer = (de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent();
-        final Layer[] children = selectedLayer.getChildren();
+        final List<Layer> children = Arrays.asList(selectedLayer.getChildren());
 
         setName(selectedLayer.getTitle());
 
@@ -171,6 +173,11 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         double miny = Double.NaN;
         String srsCode = null;
         boolean usesMultipleSrs = false;
+
+        if (!ASCENDING) {
+            Collections.reverse(children);
+        }
+
         for (final Layer l : children) {
             final WMSServiceLayer wsl = new WMSServiceLayer(l);
             layers.add(wsl);
