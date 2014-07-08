@@ -117,6 +117,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private String customSLD;
     private boolean selected = false;
     private JButton btnLock = new JButton();
+    private boolean locked;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -209,6 +210,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         }
 
         init();
+        setLocked(true);
     }
 
     /**
@@ -576,7 +578,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * @param  evt  DOCUMENT ME!
      */
     private void btnLockResultsActionPerformed(final ActionEvent evt) {
-        LOG.fatal(".btnLockResultsActionPerformed: Not supported yet.", new Exception()); // NOI18N
+        setLocked(!isLocked());
     }
 
     /**
@@ -634,8 +636,12 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void retrieve(final boolean forced) {
-        for (final WMSServiceLayer layer : layers) {
-            layer.retrieve(forced);
+        if (isLocked()) {
+            getSelectedLayer().retrieve(forced);
+        } else {
+            for (final WMSServiceLayer layer : layers) {
+                layer.retrieve(forced);
+            }
         }
     }
 
@@ -856,6 +862,34 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      *
      * @return  DOCUMENT ME!
      */
+    public boolean isLocked() {
+        return locked;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  locked  DOCUMENT ME!
+     */
+    public void setLocked(final boolean locked) {
+        this.locked = locked;
+        slider.setEnabled(!locked);
+
+        if (locked) {
+            btnLock.setIcon(LOCK_ICON);
+        } else {
+            btnLock.setIcon(UNLOCK_ICON);
+
+            // refresh the other layers
+            this.retrieve(false);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public List<WMSServiceLayer> getLayers() {
         return layers;
     }
@@ -981,6 +1015,21 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             if ((addedInternalWidget != null) && !(e.getLayer() instanceof SlidableWMSServiceLayerGroup)) {
                 CismapBroker.getInstance().getMappingComponent().showInternalWidget(addedInternalWidget, false, 800);
             }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private WMSServiceLayer getSelectedLayer() {
+        final int i = (slider.getValue() / 100);
+
+        if (i < layers.size()) {
+            return layers.get(i);
+        } else {
+            return layers.get(layers.size() - 1);
         }
     }
 }
