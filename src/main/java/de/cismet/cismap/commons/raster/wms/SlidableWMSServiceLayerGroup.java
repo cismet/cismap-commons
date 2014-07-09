@@ -254,7 +254,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         }
 
         init();
-        setLocked(true);
     }
 
     /**
@@ -408,6 +407,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * initialises a new SlidableWMSServiceLayerGroup object.
      */
     private void init() {
+        setLocked(RESOURCE_CONSERVING);
         setDefaults();
 
         for (final WMSServiceLayer wsl : layers) {
@@ -608,6 +608,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         btnLock.setBorder(null);
         btnLock.setContentAreaFilled(false);
         btnLock.setPreferredSize(new Dimension(32, (int)slider.getPreferredSize().getHeight()));
+        btnLock.setVisible(RESOURCE_CONSERVING);
         internalFrame.getContentPane().add(btnLock, BorderLayout.WEST);
 
         internalFrame.setPreferredSize(new Dimension(
@@ -682,7 +683,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void retrieve(final boolean forced) {
-        if (!isLocked()) {
+        if (!isLocked() && RESOURCE_CONSERVING) {
             if (lockBeforeNextRetrieve) {
                 setLocked(true);
             } else {
@@ -921,22 +922,27 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     }
 
     /**
-     * DOCUMENT ME!
+     * Locks the SlidableWMSServiceLayerGroup, this is not possible if RESOURCE_CONSERVING is false. Locked means that
+     * the slider is disabled (generally) and that only the currently selected layer gets loaded.
      *
      * @param  locked  DOCUMENT ME!
      */
     public void setLocked(final boolean locked) {
-        this.locked = locked;
-        slider.setEnabled(!locked);
+        if (RESOURCE_CONSERVING) {
+            this.locked = locked;
+            slider.setEnabled(!locked);
 
-        if (locked) {
-            btnLock.setIcon(LOCK_ICON);
+            if (locked) {
+                btnLock.setIcon(LOCK_ICON);
+            } else {
+                btnLock.setIcon(UNLOCK_ICON);
+                lockBeforeNextRetrieve = false;
+                lockTimer.restart();
+                // refresh the other layers
+                this.retrieve(false);
+            }
         } else {
-            btnLock.setIcon(UNLOCK_ICON);
-            lockBeforeNextRetrieve = false;
-            lockTimer.restart();
-            // refresh the other layers
-            this.retrieve(false);
+            this.locked = false;
         }
     }
 
