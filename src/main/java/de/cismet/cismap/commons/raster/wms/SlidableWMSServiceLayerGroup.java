@@ -695,6 +695,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         // layers are completely loaded
         slider.setEnabled(false);
 
+        // stop the timer, otherwise it can happen that SlidableWMSServiceLayerGroup gets locked during the retrieval.
+        lockTimer.stop();
+
         if (isLocked()) {
             getSelectedLayer().retrieve(forced);
         } else {
