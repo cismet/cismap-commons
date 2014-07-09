@@ -1210,7 +1210,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             for (final WMSServiceLayer wsl : layers) {
                 final String layerTitle = getLayerTitle(wsl);
                 final JLabel label = new JLabel();
-                label.setIcon(new VerticalTextIcon(layerTitle, false, Color.LIGHT_GRAY));
+                label.setIcon(new VerticalTextIcon(layerTitle, false, Color.DARK_GRAY));
                 lableTable.put(x * 100, label);
                 x++;
             }
