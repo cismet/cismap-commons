@@ -43,6 +43,7 @@ import javax.swing.JDialog;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -477,6 +478,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                     re.setRetrievedObject(null);
                                     fireRetrievalComplete(re);
                                     stateChanged(new ChangeEvent(this));
+                                    enableSliderAndRestartTimer();
                                 }
                             }
                         }.start();
@@ -690,7 +692,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             if (lockBeforeNextRetrieve) {
                 setLocked(true);
             } else {
-                lockTimer.restart();
+                // the slider is disabled till all the layers are completely loaded
+                slider.setEnabled(false);
             }
         }
 
@@ -926,26 +929,48 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     /**
      * Locks the SlidableWMSServiceLayerGroup, this is not possible if RESOURCE_CONSERVING is false. Locked means that
-     * the slider is disabled (generally) and that only the currently selected layer gets loaded.
+     * the slider is disabled (generally) and that only the currently selected layer gets loaded. Otherwise all the
+     * layers get loaded every time.
      *
      * @param  locked  DOCUMENT ME!
      */
     public void setLocked(final boolean locked) {
         if (RESOURCE_CONSERVING) {
             this.locked = locked;
-            slider.setEnabled(!locked);
 
             if (locked) {
                 btnLock.setIcon(LOCK_ICON);
+                slider.setEnabled(false);
             } else {
                 btnLock.setIcon(UNLOCK_ICON);
                 lockBeforeNextRetrieve = false;
-                lockTimer.restart();
                 // refresh the other layers
                 this.retrieve(false);
             }
         } else {
             this.locked = false;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void enableSliderAndRestartTimer() {
+        final Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    slider.setEnabled(true);
+                    lockTimer.restart();
+                    slider.setEnabled(false);
+                }
+            };
+        if (!isLocked()) {
+            if (SwingUtilities.isEventDispatchThread()) {
+                r.run();
+            } else {
+                SwingUtilities.invokeLater(r);
+            }
         }
     }
 
