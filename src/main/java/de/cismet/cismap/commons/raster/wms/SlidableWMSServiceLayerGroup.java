@@ -100,6 +100,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             SlidableWMSServiceLayerGroup.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock-unlock.png")); // NOI18N
 
     private static boolean ASCENDING;
+    private static boolean RESOURCE_CONSERVING;
     private static int TIME_TILL_LOCKED;
     private static int INACTIVE_TIME_TILL_LOCKED;
 
@@ -108,12 +109,14 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         try {
             prop.load(SlidableWMSServiceLayerGroup.class.getResourceAsStream(
                     "SlidableWMSServiceLayerGroup.properties"));
-            ASCENDING = prop.getProperty("ascending").trim().equalsIgnoreCase("true");
-            TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("timeTillLocked")));
-            INACTIVE_TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("inactiveTimeTillLocked")));
+            ASCENDING = prop.getProperty("ascending", "true").trim().equalsIgnoreCase("true");
+            RESOURCE_CONSERVING = prop.getProperty("resource-conserving", "false").trim().equalsIgnoreCase("true");
+            TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("timeTillLocked", "60")));
+            INACTIVE_TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("inactiveTimeTillLocked", "10")));
         } catch (Exception ex) {
             LOG.error("Could not load the properties for the SlidableWMSServiceLayerGroup", ex);
             ASCENDING = true;
+            RESOURCE_CONSERVING = false;
             TIME_TILL_LOCKED = 60;
             INACTIVE_TIME_TILL_LOCKED = 10;
         }
