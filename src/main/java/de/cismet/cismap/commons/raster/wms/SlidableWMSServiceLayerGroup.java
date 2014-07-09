@@ -962,7 +962,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                 public void run() {
                     slider.setEnabled(true);
                     lockTimer.restart();
-                    slider.setEnabled(false);
                 }
             };
         if (!isLocked()) {
