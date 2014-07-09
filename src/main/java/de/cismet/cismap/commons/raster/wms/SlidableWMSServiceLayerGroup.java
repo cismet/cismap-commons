@@ -44,6 +44,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.Timer;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.TreePath;
@@ -565,6 +566,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         slider.addChangeListener(this);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
+        slider.setBorder(new EmptyBorder(3, 3, 3, 3));
 
         final Hashtable lableTable = new Hashtable();
         int x = 0;
@@ -608,6 +610,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         btnLock.setBorder(null);
         btnLock.setContentAreaFilled(false);
         btnLock.setPreferredSize(new Dimension(32, (int)slider.getPreferredSize().getHeight()));
+        btnLock.setFocusPainted(false);
         btnLock.setVisible(RESOURCE_CONSERVING);
         internalFrame.getContentPane().add(btnLock, BorderLayout.WEST);
 
