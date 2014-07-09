@@ -107,6 +107,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private static boolean RESOURCE_CONSERVING;
     private static int TIME_TILL_LOCKED;
     private static int INACTIVE_TIME_TILL_LOCKED;
+    private static double SLIDER_MAPC_RATIO_CHANGE_TO_VERTICAL = 0.5;
 
     static {
         final Properties prop = new Properties();
@@ -114,15 +115,18 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             prop.load(SlidableWMSServiceLayerGroup.class.getResourceAsStream(
                     "SlidableWMSServiceLayerGroup.properties"));
             ASCENDING = prop.getProperty("ascending", "true").trim().equalsIgnoreCase("true");
-            RESOURCE_CONSERVING = prop.getProperty("resource-conserving", "false").trim().equalsIgnoreCase("true");
+            RESOURCE_CONSERVING = prop.getProperty("resourceConserving", "false").trim().equalsIgnoreCase("true");
             TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("timeTillLocked", "60")));
             INACTIVE_TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("inactiveTimeTillLocked", "10")));
+            SLIDER_MAPC_RATIO_CHANGE_TO_VERTICAL = Math.abs(Double.parseDouble(
+                        prop.getProperty("sliderMapCRatioChangeToVertical", "0.5")));
         } catch (Exception ex) {
             LOG.error("Could not load the properties for the SlidableWMSServiceLayerGroup", ex);
             ASCENDING = true;
             RESOURCE_CONSERVING = false;
             TIME_TILL_LOCKED = 60;
             INACTIVE_TIME_TILL_LOCKED = 10;
+            SLIDER_MAPC_RATIO_CHANGE_TO_VERTICAL = 0.5;
         }
     }
 
@@ -594,7 +598,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
         final int mapCWidth = CismapBroker.getInstance().getMappingComponent().getWidth();
         double sliderWidth = slider.estimateSliderWidthHorizontalLabels();
-        if (sliderWidth < (mapCWidth / 2.)) {
+        if ((sliderWidth / mapCWidth) < SLIDER_MAPC_RATIO_CHANGE_TO_VERTICAL) {
             slider.drawLabels(LabelDirection.HORIZONTAL);
         } else {
             slider.drawLabels(LabelDirection.VERTICAL);
