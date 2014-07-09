@@ -642,6 +642,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         if (allowMorphing && ((i + 1) < getPNode().getChildrenCount())) {
             getPNode().getChild(i + 1).setTransparency(((float)rest) / 100f);
         }
+
+        if (lockTimer.isRunning()) {
+            lockTimer.restart();
+        }
     }
 
     @Override
