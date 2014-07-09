@@ -126,6 +126,20 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         }
     }
 
+    //~ Enums ------------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public enum LabelDirection {
+
+        //~ Enum constants -----------------------------------------------------
+
+        HORIZONTAL, VERTICAL;
+    }
+
     //~ Instance fields --------------------------------------------------------
 
     private final List<WMSServiceLayer> layers = new ArrayList<WMSServiceLayer>();
@@ -581,9 +595,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         final int mapCWidth = CismapBroker.getInstance().getMappingComponent().getWidth();
         double sliderWidth = slider.estimateSliderWidthHorizontalLabels();
         if (sliderWidth < (mapCWidth / 2.)) {
-            slider.drawLabelsHorizontally();
+            slider.drawLabels(LabelDirection.HORIZONTAL);
         } else {
-            slider.drawLabelsVertically();
+            slider.drawLabels(LabelDirection.VERTICAL);
             sliderWidth = slider.estimateSliderWidthVerticalLabels();
         }
 
@@ -1124,12 +1138,35 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      */
     private class SlidableWMSServiceLayerGroupJSlider extends JSlider {
 
+        //~ Instance fields ----------------------------------------------------
+
+        private LabelDirection labelDirection;
+
         //~ Methods ------------------------------------------------------------
 
         /**
          * DOCUMENT ME!
+         *
+         * @param  direction  DOCUMENT ME!
          */
-        public void drawLabelsHorizontally() {
+        public void drawLabels(final LabelDirection direction) {
+            labelDirection = direction;
+            switch (direction) {
+                case HORIZONTAL: {
+                    drawLabelsHorizontally();
+                    break;
+                }
+                case VERTICAL: {
+                    drawLabelsVertically();
+                    break;
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void drawLabelsHorizontally() {
             this.setLabelTable(null);
             final Hashtable lableTable = new Hashtable();
             int x = 0;
@@ -1148,7 +1185,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         /**
          * DOCUMENT ME!
          */
-        public void drawLabelsVertically() {
+        private void drawLabelsVertically() {
             this.setLabelTable(null);
             final Hashtable lableTable = new Hashtable();
             int x = 0;
@@ -1166,7 +1203,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         /**
          * DOCUMENT ME!
          */
-        public void drawDisabledLabelsVertically() {
+        private void drawDisabledLabelsVertically() {
             this.setLabelTable(null);
             final Hashtable lableTable = new Hashtable();
             int x = 0;
@@ -1234,6 +1271,18 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                 }
             }
             return layerTitle;
+        }
+
+        @Override
+        public void setEnabled(final boolean enabled) {
+            super.setEnabled(enabled);
+            if ((labelDirection != null) && labelDirection.equals(LabelDirection.VERTICAL)) {
+                if (enabled) {
+                    drawLabelsVertically();
+                } else {
+                    drawDisabledLabelsVertically();
+                }
+            }
         }
     }
 }
