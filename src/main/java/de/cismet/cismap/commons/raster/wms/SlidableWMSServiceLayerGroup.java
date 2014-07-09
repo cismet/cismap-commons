@@ -148,7 +148,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private boolean selected = false;
     private JButton btnLock = new JButton();
     private boolean locked;
-    private boolean lockBeforeNextRetrieve;
+    private boolean doNotDisableSlider;
     private Timer lockTimer;
 
     //~ Constructors -----------------------------------------------------------
@@ -168,7 +168,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
                     @Override
                     public void actionPerformed(final ActionEvent e) {
-                        lockBeforeNextRetrieve = !lockTimer.isRunning();
+                        doNotDisableSlider = !lockTimer.isRunning();
+                        SlidableWMSServiceLayerGroup.this.setLocked(!lockTimer.isRunning());
                     }
                 });
         lockTimer.setRepeats(false);
@@ -688,14 +689,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void retrieve(final boolean forced) {
-        if (!isLocked() && RESOURCE_CONSERVING) {
-            if (lockBeforeNextRetrieve) {
-                setLocked(true);
-            } else {
-                // the slider is disabled till all the layers are completely loaded
-                slider.setEnabled(false);
-            }
-        }
+        // the slider is always disabled during the retrieval of the layers and might be enabled later on when all the
+        // layers are completely loaded
+        slider.setEnabled(false);
 
         if (isLocked()) {
             getSelectedLayer().retrieve(forced);
@@ -940,10 +936,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
             if (locked) {
                 btnLock.setIcon(LOCK_ICON);
-                slider.setEnabled(false);
+                slider.setEnabled(false || doNotDisableSlider);
             } else {
                 btnLock.setIcon(UNLOCK_ICON);
-                lockBeforeNextRetrieve = false;
+                doNotDisableSlider = false;
                 // refresh the other layers
                 this.retrieve(false);
             }
