@@ -467,10 +467,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                             .getViewScale();
                                 wsl.getPNode().setScale(1 / localScale);
                                 wsl.getPNode().setOffset(localOrigin);
-                                CismapBroker.getInstance().getMappingComponent().repaint();
                                 ++layerComplete;
 
                                 if (layerComplete == layers.size()) {
+                                    CismapBroker.getInstance().getMappingComponent().repaint();
                                     final RetrievalEvent re = new RetrievalEvent();
                                     re.setIsComplete(true);
                                     re.setRetrievalService(SlidableWMSServiceLayerGroup.this);
@@ -480,6 +480,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                     fireRetrievalComplete(re);
                                     stateChanged(new ChangeEvent(this));
                                     enableSliderAndRestartTimer();
+                                } else if (wsl == getSelectedLayer()) {
+                                    CismapBroker.getInstance().getMappingComponent().repaint();
                                 }
                             }
                         }.start();
