@@ -75,7 +75,6 @@ import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 import de.cismet.tools.gui.VerticalTextIcon;
 
-
 /**
  * DOCUMENT ME!
  *
@@ -153,6 +152,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private boolean locked;
     private boolean doNotDisableSlider;
     private Timer lockTimer;
+    private boolean allowMorphing;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -416,6 +416,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         setLocked(RESOURCE_CONSERVING);
         setDefaults();
 
+        allowMorphing = layers.size() <= 10;
+
         for (final WMSServiceLayer wsl : layers) {
             if (capabilitiesUrl == null) {
                 capabilitiesUrl = wsl.getCapabilitiesUrl();
@@ -637,7 +639,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                 getPNode().getChild(j).setTransparency(0f);
             }
         }
-        if ((i + 1) < getPNode().getChildrenCount()) {
+        if (allowMorphing && ((i + 1) < getPNode().getChildrenCount())) {
             getPNode().getChild(i + 1).setTransparency(((float)rest) / 100f);
         }
     }
