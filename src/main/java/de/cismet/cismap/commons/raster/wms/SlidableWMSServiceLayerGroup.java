@@ -15,6 +15,7 @@ import org.jdom.DataConversionException;
 import org.jdom.Element;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -27,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -37,6 +36,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -72,6 +72,9 @@ import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
 import de.cismet.cismap.commons.wms.capabilities.Position;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+
+import de.cismet.tools.gui.VerticalTextIcon;
+
 
 /**
  * DOCUMENT ME!
@@ -130,7 +133,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private boolean layerQuerySelected = false;
     private final String sliderName;
     private PNode pnode = new XPImage();
-    private JSlider slider = new JSlider();
+    private SlidableWMSServiceLayerGroupJSlider slider = new SlidableWMSServiceLayerGroupJSlider();
     private JDialog dialog = new JDialog();
     private JInternalFrame internalFrame = new JInternalFrame();
     private int layerPosition;
@@ -573,29 +576,15 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         slider.setPaintLabels(true);
         slider.setBorder(new EmptyBorder(3, 3, 3, 3));
 
-        final Hashtable lableTable = new Hashtable();
-        int x = 0;
-        for (final WMSServiceLayer wsl : layers) {
-            String layerTitle = wsl.getTitle();
-            if (layerTitle == null) {
-                layerTitle = wsl.getName();
-            }
-
-            if ((layerTitle != null) && (layerTitle.length() > 8)) {
-                layerTitle = layerTitle.substring(0, 3) + "." + layerTitle.substring(layerTitle.length() - 4); // NOI18N
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("No title found for WMSServiceLayer '" + wsl + "'.");
-                }
-            }
-
-            final JLabel label = new JLabel(layerTitle);
-            final Font font = label.getFont().deriveFont(10f);
-            label.setFont(font);
-            lableTable.put(x * 100, label);
-            x++;
+        final int mapCWidth = CismapBroker.getInstance().getMappingComponent().getWidth();
+        double sliderWidth = slider.estimateSliderWidthHorizontalLabels();
+        if (sliderWidth < (mapCWidth / 2.)) {
+            slider.drawLabelsHorizontally();
+        } else {
+            slider.drawLabelsVertically();
+            sliderWidth = slider.estimateSliderWidthVerticalLabels();
         }
-        slider.setLabelTable(lableTable);
+
         internalFrame.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N
         internalFrame.getContentPane().setLayout(new BorderLayout());
         internalFrame.getContentPane().add(slider, BorderLayout.CENTER);
@@ -620,7 +609,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         internalFrame.getContentPane().add(btnLock, BorderLayout.WEST);
 
         internalFrame.setPreferredSize(new Dimension(
-                (int)getSliderWidth(),
+                (int)sliderWidth,
                 (int)slider.getPreferredSize().getHeight()
                         + 15));
         internalFrame.pack();
@@ -634,27 +623,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      */
     private void btnLockResultsActionPerformed(final ActionEvent evt) {
         setLocked(!isLocked());
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private double getSliderWidth() {
-        final Dictionary dic = slider.getLabelTable();
-        final Enumeration e = dic.keys();
-        final StringBuilder text = new StringBuilder();
-
-        while (e.hasMoreElements()) {
-            final Object o = dic.get(e.nextElement());
-            if (o instanceof JLabel) {
-                text.append(((JLabel)o).getText());
-                text.append("  ");
-            }
-        }
-        return slider.getFontMetrics(slider.getFont()).getStringBounds(text.toString(), slider.getGraphics())
-                    .getWidth();
     }
 
     @Override
@@ -1138,6 +1106,128 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
         if (lockTimer.isRunning()) {
             lockTimer.restart();
+        }
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class SlidableWMSServiceLayerGroupJSlider extends JSlider {
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         */
+        public void drawLabelsHorizontally() {
+            this.setLabelTable(null);
+            final Hashtable lableTable = new Hashtable();
+            int x = 0;
+            for (final WMSServiceLayer wsl : layers) {
+                final String layerTitle = getLayerTitle(wsl);
+
+                final JLabel label = new JLabel(layerTitle);
+                final Font font = label.getFont().deriveFont(10f);
+                label.setFont(font);
+                lableTable.put(x * 100, label);
+                x++;
+            }
+            this.setLabelTable(lableTable);
+        }
+
+        /**
+         * DOCUMENT ME!
+         */
+        public void drawLabelsVertically() {
+            this.setLabelTable(null);
+            final Hashtable lableTable = new Hashtable();
+            int x = 0;
+            for (final WMSServiceLayer wsl : layers) {
+                final String layerTitle = getLayerTitle(wsl);
+
+                final JLabel label = new JLabel();
+                label.setIcon(new VerticalTextIcon(layerTitle, false));
+                lableTable.put(x * 100, label);
+                x++;
+            }
+            this.setLabelTable(lableTable);
+        }
+
+        /**
+         * DOCUMENT ME!
+         */
+        public void drawDisabledLabelsVertically() {
+            this.setLabelTable(null);
+            final Hashtable lableTable = new Hashtable();
+            int x = 0;
+            for (final WMSServiceLayer wsl : layers) {
+                final String layerTitle = getLayerTitle(wsl);
+                final JLabel label = new JLabel();
+                label.setIcon(new VerticalTextIcon(layerTitle, false, Color.LIGHT_GRAY));
+                lableTable.put(x * 100, label);
+                x++;
+            }
+            this.setLabelTable(lableTable);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public double estimateSliderWidthHorizontalLabels() {
+            final StringBuilder text = new StringBuilder();
+            for (final WMSServiceLayer wsl : layers) {
+                final String layerTitle = getLayerTitle(wsl);
+                text.append(layerTitle);
+                text.append("  ");
+            }
+
+            return this.getFontMetrics(this.getFont()).getStringBounds(text.toString(), this.getGraphics()).getWidth();
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public double estimateSliderWidthVerticalLabels() {
+            double sliderWidth = 0;
+            final Icon icon = new VerticalTextIcon(getLayerTitle(layers.get(0)), false);
+            final int iconWidth = icon.getIconWidth();
+            final int gap = 5;
+            for (final WMSServiceLayer wsl : layers) {
+                sliderWidth += iconWidth + gap;
+            }
+
+            return sliderWidth;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   layer  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private String getLayerTitle(final WMSServiceLayer layer) {
+            String layerTitle = layer.getTitle();
+            if (layerTitle == null) {
+                layerTitle = layer.getName();
+            }
+
+            if ((layerTitle != null) && (layerTitle.length() > 8)) {
+                layerTitle = layerTitle.substring(0, 3) + "." + layerTitle.substring(layerTitle.length() - 4); // NOI18N
+            } else {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("No title found for WMSServiceLayer '" + layer + "'.");
+                }
+            }
+            return layerTitle;
         }
     }
 }
