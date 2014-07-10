@@ -24,6 +24,8 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
@@ -74,7 +76,6 @@ import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
 import de.cismet.cismap.commons.wms.capabilities.Position;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
-import de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer;
 
 import de.cismet.tools.gui.VerticalTextIcon;
 
@@ -479,8 +480,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private void init() {
         setDefaults();
         setLocked(resourceConserving);
-
-        allowCrossfade = (layers.size() <= 10) || crossfadeEnabled;
 
         for (final WMSServiceLayer wsl : layers) {
             if (capabilitiesUrl == null) {
@@ -1292,11 +1291,20 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      *
      * @version  $Revision$, $Date$
      */
-    private class SlidableWMSServiceLayerGroupJSlider extends JSlider {
+    private class SlidableWMSServiceLayerGroupJSlider extends JSlider implements ComponentListener {
 
         //~ Instance fields ----------------------------------------------------
 
         private LabelDirection labelDirection;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new SlidableWMSServiceLayerGroupJSlider object.
+         */
+        public SlidableWMSServiceLayerGroupJSlider() {
+            this.addComponentListener(this);
+        }
 
         //~ Methods ------------------------------------------------------------
 
@@ -1453,6 +1461,24 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                     drawDisabledLabelsVertically();
                 }
             }
+        }
+
+        @Override
+        public void componentResized(final ComponentEvent e) {
+            allowCrossfade = ((this.getWidth() * 1. / layers.size()) > 30) || crossfadeEnabled;
+        }
+
+        @Override
+        public void componentMoved(final ComponentEvent e) {
+        }
+
+        @Override
+        public void componentShown(final ComponentEvent e) {
+            allowCrossfade = ((this.getWidth() * 1. / layers.size()) > 30) || crossfadeEnabled;
+        }
+
+        @Override
+        public void componentHidden(final ComponentEvent e) {
         }
     }
 }
