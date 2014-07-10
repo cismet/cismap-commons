@@ -105,30 +105,30 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private static final ImageIcon UNLOCK_ICON = new javax.swing.ImageIcon(
             SlidableWMSServiceLayerGroup.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock-unlock.png")); // NOI18N
 
-    private static boolean ASCENDING;
+    private static boolean BOTTOM_UP;
     private static boolean RESOURCE_CONSERVING;
     private static int TIME_TILL_LOCKED;
     private static int INACTIVE_TIME_TILL_LOCKED;
-    private static double SLIDER_MAPC_RATIO_CHANGE_TO_VERTICAL;
+    private static double VERTICAL_LABEL_WIDTH_THRESHOLD;
 
     static {
         final Properties prop = new Properties();
         try {
             prop.load(SlidableWMSServiceLayerGroup.class.getResourceAsStream(
                     "SlidableWMSServiceLayerGroup.properties"));
-            ASCENDING = prop.getProperty("ascending", "true").trim().equalsIgnoreCase("true");
+            BOTTOM_UP = prop.getProperty("bottomUp", "true").trim().equalsIgnoreCase("true");
             RESOURCE_CONSERVING = prop.getProperty("resourceConserving", "false").trim().equalsIgnoreCase("true");
             TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("timeTillLocked", "60")));
             INACTIVE_TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("inactiveTimeTillLocked", "10")));
-            SLIDER_MAPC_RATIO_CHANGE_TO_VERTICAL = Math.abs(Double.parseDouble(
-                        prop.getProperty("sliderMapCRatioChangeToVertical", "0.5")));
+            VERTICAL_LABEL_WIDTH_THRESHOLD = Math.abs(Double.parseDouble(
+                        prop.getProperty("verticalLabelWidthThreshold", "0.5")));
         } catch (Exception ex) {
             LOG.error("Could not load the properties for the SlidableWMSServiceLayerGroup", ex);
-            ASCENDING = true;
+            BOTTOM_UP = true;
             RESOURCE_CONSERVING = false;
             TIME_TILL_LOCKED = 60;
             INACTIVE_TIME_TILL_LOCKED = 10;
-            SLIDER_MAPC_RATIO_CHANGE_TO_VERTICAL = 0.5;
+            VERTICAL_LABEL_WIDTH_THRESHOLD = 0.5;
         }
     }
 
@@ -175,7 +175,11 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private boolean doNotDisableSlider;
     private Timer lockTimer;
     private boolean allowMorphing;
-    private Layer selectedLayer;
+    private boolean bottomUp;
+    private boolean enableAllChildren;
+    private int timeTillLocked;
+    private int inactiveTimeTillLocked;
+    private double verticalLabelWidthThreshold;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -187,10 +191,11 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     public SlidableWMSServiceLayerGroup(final List treePaths) {
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         final TreePath tp = ((TreePath)treePaths.get(0));
-        selectedLayer = (de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent();
+        final Layer selectedLayer = (de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent();
+        evaluateLayerKeywords(selectedLayer);
         final List<Layer> children = Arrays.asList(selectedLayer.getChildren());
 
-        lockTimer = new Timer(TIME_TILL_LOCKED * 1000, new ActionListener() {
+        lockTimer = new Timer(timeTillLocked * 1000, new ActionListener() {
 
                     @Override
                     public void actionPerformed(final ActionEvent e) {
@@ -219,7 +224,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         String srsCode = null;
         boolean usesMultipleSrs = false;
 
-        if (!ASCENDING) {
+        if (bottomUp) {
             Collections.reverse(children);
         }
 
@@ -343,6 +348,11 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         final Element layersElement = element.getChild("layers");
         final List layersList = layersElement.getChildren();
 
+        evaluateLayerKeywords(null);
+        if (bottomUp) {
+            Collections.reverse(layersList);
+        }
+
         for (final Object o : layersList) {
             layers.add(new WMSServiceLayer((Element)o, capabilities));
         }
@@ -375,6 +385,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         double minx = Double.NaN;
         double maxy = Double.NaN;
         double miny = Double.NaN;
+
+        evaluateLayerKeywords(null);
+
         for (final Layer l : layers) {
             this.layers.add(new WMSServiceLayer(l));
 
@@ -437,7 +450,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      */
     private void init() {
         setDefaults();
-        evaluateLayerKeywords();
         setLocked(resourceConserving);
 
         allowMorphing = layers.size() <= 10;
@@ -544,17 +556,99 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     /**
      * DOCUMENT ME!
+     *
+     * @param  selectedLayer  DOCUMENT ME!
      */
-    private void evaluateLayerKeywords() {
+    private void evaluateLayerKeywords(final Layer selectedLayer) {
         if (selectedLayer != null) {
-            final List<String> keywords = Arrays.asList(selectedLayer.getKeywords());
-            if (keywords.contains("resourceConserving")) {
-                resourceConserving = true;
+            Boolean resourceConserving = null;
+            Integer timeTillLocked = null;
+            Integer inactiveTimeTillLocked = null;
+            Boolean bottomUp = null;
+            Double verticalLabelWidthThreshold = null;
+            this.enableAllChildren = false;
+
+            for (final String keyword : selectedLayer.getKeywords()) {
+                if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.resourceConserving.enabled")) {
+                    resourceConserving = true;
+                } else if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.resourceConserving.disabled")) {
+                    resourceConserving = false;
+                }
+
+                if (keyword.startsWith("cismapSlidingLayerGroup.config.resourceConserving.timeTillLocked")) {
+                    try {
+                        final String value = keyword.split(":")[1];
+                        timeTillLocked = Integer.parseInt(value);
+                    } catch (Exception ex) {
+                        LOG.error("An error occured while parsing timeTillLocked. Use default value.", ex);
+                    }
+                }
+
+                if (keyword.startsWith("cismapSlidingLayerGroup.config.resourceConserving.inactiveTimeTillLocked")) {
+                    try {
+                        final String value = keyword.split(":")[1];
+                        inactiveTimeTillLocked = Integer.parseInt(value);
+                    } catch (Exception ex) {
+                        LOG.error("An error occured while parsing inactiveTimeTillLocked. Use default value.", ex);
+                    }
+                }
+
+                if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.bottomUp")) {
+                    bottomUp = true;
+                } else if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.bottomDown")) {
+                    bottomUp = false;
+                }
+
+                if (keyword.startsWith("cismapSlidingLayerGroup.config.verticalLabelWidthThreshold")) {
+                    try {
+                        final String value = keyword.split(":")[1];
+                        verticalLabelWidthThreshold = Double.parseDouble(value);
+                    } catch (Exception ex) {
+                        LOG.error("An error occured while parsing inactiveTimeTillLocked. Use default value.", ex);
+                    }
+                }
+
+                if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.enableAllChildren")) {
+                    this.enableAllChildren = true;
+                }
+            }
+
+            if (resourceConserving == null) {
+                this.resourceConserving = RESOURCE_CONSERVING;
             } else {
-                resourceConserving = RESOURCE_CONSERVING;
+                this.resourceConserving = resourceConserving;
+            }
+
+            if (timeTillLocked == null) {
+                this.timeTillLocked = TIME_TILL_LOCKED;
+            } else {
+                this.timeTillLocked = timeTillLocked;
+            }
+
+            if (inactiveTimeTillLocked == null) {
+                this.inactiveTimeTillLocked = INACTIVE_TIME_TILL_LOCKED;
+            } else {
+                this.inactiveTimeTillLocked = inactiveTimeTillLocked;
+            }
+
+            if (bottomUp == null) {
+                this.bottomUp = BOTTOM_UP;
+            } else {
+                this.bottomUp = bottomUp;
+            }
+
+            if (verticalLabelWidthThreshold == null) {
+                this.verticalLabelWidthThreshold = VERTICAL_LABEL_WIDTH_THRESHOLD;
+            } else {
+                this.verticalLabelWidthThreshold = verticalLabelWidthThreshold;
             }
         } else {
             resourceConserving = RESOURCE_CONSERVING;
+            timeTillLocked = TIME_TILL_LOCKED;
+            inactiveTimeTillLocked = INACTIVE_TIME_TILL_LOCKED;
+            bottomUp = BOTTOM_UP;
+            verticalLabelWidthThreshold = VERTICAL_LABEL_WIDTH_THRESHOLD;
+            enableAllChildren = false;
         }
     }
 
@@ -620,7 +714,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
         final int mapCWidth = CismapBroker.getInstance().getMappingComponent().getWidth();
         double sliderWidth = slider.estimateSliderWidthHorizontalLabels();
-        if ((sliderWidth / mapCWidth) < SLIDER_MAPC_RATIO_CHANGE_TO_VERTICAL) {
+        if ((sliderWidth / mapCWidth) < verticalLabelWidthThreshold) {
             slider.drawLabels(LabelDirection.HORIZONTAL);
         } else {
             slider.drawLabels(LabelDirection.VERTICAL);
@@ -1146,11 +1240,11 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      */
     private void updateTimerDelay() {
         if (selected) {
-            lockTimer.setDelay(TIME_TILL_LOCKED * 1000);
-            lockTimer.setInitialDelay(TIME_TILL_LOCKED * 1000);
+            lockTimer.setDelay(timeTillLocked * 1000);
+            lockTimer.setInitialDelay(timeTillLocked * 1000);
         } else {
-            lockTimer.setDelay(INACTIVE_TIME_TILL_LOCKED * 1000);
-            lockTimer.setInitialDelay(INACTIVE_TIME_TILL_LOCKED * 1000);
+            lockTimer.setDelay(inactiveTimeTillLocked * 1000);
+            lockTimer.setInitialDelay(inactiveTimeTillLocked * 1000);
         }
 
         if (lockTimer.isRunning()) {

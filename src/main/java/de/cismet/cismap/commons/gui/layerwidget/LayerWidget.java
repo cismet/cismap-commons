@@ -1201,7 +1201,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 
         final List<String> keywords = Arrays.asList(layer.getKeywords());
 
-        return keywords.contains("isArray");
+        return keywords.contains("cismapSlidingLayerGroup");
     }
 
     /**
