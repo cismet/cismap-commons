@@ -14,28 +14,42 @@ import org.apache.log4j.Logger;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
+import org.openide.util.NbBundle;
+
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Dictionary;
-import java.util.Enumeration;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.TreePath;
@@ -63,6 +77,8 @@ import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
 import de.cismet.cismap.commons.wms.capabilities.Position;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
+import de.cismet.tools.gui.VerticalTextIcon;
+
 /**
  * DOCUMENT ME!
  *
@@ -86,13 +102,61 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private static List<Integer> uniqueNumbers = new ArrayList<Integer>();
     private static String addedInternalWidget = null;
 
+    private static final ImageIcon LOCK_ICON = new javax.swing.ImageIcon(
+            SlidableWMSServiceLayerGroup.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock.png"));        // NOI18N
+    private static final ImageIcon UNLOCK_ICON = new javax.swing.ImageIcon(
+            SlidableWMSServiceLayerGroup.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock-unlock.png")); // NOI18N
+
+    private static boolean BOTTOM_UP;
+    private static boolean RESOURCE_CONSERVING;
+    private static int TIME_TILL_LOCKED;
+    private static int INACTIVE_TIME_TILL_LOCKED;
+    private static double VERTICAL_LABEL_WIDTH_THRESHOLD;
+
+    static {
+        final Properties prop = new Properties();
+        try {
+            prop.load(SlidableWMSServiceLayerGroup.class.getResourceAsStream(
+                    "SlidableWMSServiceLayerGroup.properties"));
+            BOTTOM_UP = prop.getProperty("bottomUp", "true").trim().equalsIgnoreCase("true");
+            RESOURCE_CONSERVING = prop.getProperty("resourceConserving", "false").trim().equalsIgnoreCase("true");
+            TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("timeTillLocked", "60")));
+            INACTIVE_TIME_TILL_LOCKED = Math.abs(Integer.parseInt(prop.getProperty("inactiveTimeTillLocked", "10")));
+            VERTICAL_LABEL_WIDTH_THRESHOLD = Math.abs(Double.parseDouble(
+                        prop.getProperty("verticalLabelWidthThreshold", "0.5")));
+        } catch (Exception ex) {
+            LOG.error("Could not load the properties for the SlidableWMSServiceLayerGroup", ex);
+            BOTTOM_UP = true;
+            RESOURCE_CONSERVING = false;
+            TIME_TILL_LOCKED = 60;
+            INACTIVE_TIME_TILL_LOCKED = 10;
+            VERTICAL_LABEL_WIDTH_THRESHOLD = 0.5;
+        }
+    }
+
+    //~ Enums ------------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public enum LabelDirection {
+
+        //~ Enum constants -----------------------------------------------------
+
+        HORIZONTAL, VERTICAL;
+    }
+
     //~ Instance fields --------------------------------------------------------
+
+    private boolean resourceConserving;
 
     private final List<WMSServiceLayer> layers = new ArrayList<WMSServiceLayer>();
     private boolean layerQuerySelected = false;
     private final String sliderName;
     private PNode pnode = new XPImage();
-    private JSlider slider = new JSlider();
+    private SlidableWMSServiceLayerGroupJSlider slider = new SlidableWMSServiceLayerGroupJSlider();
     private JDialog dialog = new JDialog();
     private JInternalFrame internalFrame = new JInternalFrame();
     private int layerPosition;
@@ -108,6 +172,17 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private XBoundingBox boundingBox;
     private String customSLD;
     private boolean selected = false;
+    private JButton btnLock = new JButton();
+    private boolean locked;
+    private boolean doNotDisableSlider;
+    private Timer lockTimer;
+    private boolean allowCrossfade;
+    private boolean crossfadeEnabled;
+    private boolean bottomUp;
+    private boolean enableAllChildren;
+    private int timeTillLocked;
+    private int inactiveTimeTillLocked;
+    private double verticalLabelWidthThreshold;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -120,7 +195,18 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         final TreePath tp = ((TreePath)treePaths.get(0));
         final Layer selectedLayer = (de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent();
-        final Layer[] children = selectedLayer.getChildren();
+        evaluateLayerKeywords(selectedLayer);
+        final List<Layer> children = Arrays.asList(selectedLayer.getChildren());
+
+        lockTimer = new Timer(timeTillLocked * 1000, new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        doNotDisableSlider = !lockTimer.isRunning();
+                        SlidableWMSServiceLayerGroup.this.setLocked(!lockTimer.isRunning());
+                    }
+                });
+        lockTimer.setRepeats(false);
 
         setName(selectedLayer.getTitle());
 
@@ -140,44 +226,62 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         double miny = Double.NaN;
         String srsCode = null;
         boolean usesMultipleSrs = false;
+
+        if (bottomUp) {
+            Collections.reverse(children);
+        }
+
         for (final Layer l : children) {
-            final WMSServiceLayer wsl = new WMSServiceLayer(l);
-            layers.add(wsl);
-
-            final Position min;
-            final Position max;
-            final LayerBoundingBox[] boundingBoxes = l.getBoundingBoxes();
-            if (boundingBoxes.length > 0) {
-                min = boundingBoxes[0].getMin();
-                max = boundingBoxes[0].getMax();
-
-                if (srsCode == null) {
-                    srsCode = boundingBoxes[0].getSRS();
-                } else if (!srsCode.equalsIgnoreCase(boundingBoxes[0].getSRS())) {
-                    usesMultipleSrs = true;
-                }
+            boolean addLayer = false;
+            if (enableAllChildren) {
+                addLayer = true;
             } else {
-                final Envelope envelope = l.getLatLonBoundingBoxes();
-                min = envelope.getMin();
-                max = envelope.getMax();
-
-                if (srsCode == null) {
-                    srsCode = "EPSG:4326";
-                } else if (!srsCode.equalsIgnoreCase("EPSG:4326")) {
-                    usesMultipleSrs = true;
+                for (final String keyword : l.getKeywords()) {
+                    if (keyword.equalsIgnoreCase("cismapSlidingLayerGroupMember")) {
+                        addLayer = true;
+                    }
                 }
             }
-            if ((Double.isNaN(maxx)) || (maxx < max.getX())) {
-                maxx = max.getX();
-            }
-            if ((Double.isNaN(minx)) || (minx > min.getX())) {
-                minx = min.getX();
-            }
-            if ((Double.isNaN(maxy)) || (maxy < max.getY())) {
-                maxy = max.getY();
-            }
-            if ((Double.isNaN(miny)) || (miny > min.getY())) {
-                miny = min.getY();
+
+            if (addLayer) {
+                final WMSServiceLayer wsl = new WMSServiceLayer(l);
+                layers.add(wsl);
+
+                final Position min;
+                final Position max;
+                final LayerBoundingBox[] boundingBoxes = l.getBoundingBoxes();
+                if (boundingBoxes.length > 0) {
+                    min = boundingBoxes[0].getMin();
+                    max = boundingBoxes[0].getMax();
+
+                    if (srsCode == null) {
+                        srsCode = boundingBoxes[0].getSRS();
+                    } else if (!srsCode.equalsIgnoreCase(boundingBoxes[0].getSRS())) {
+                        usesMultipleSrs = true;
+                    }
+                } else {
+                    final Envelope envelope = l.getLatLonBoundingBoxes();
+                    min = envelope.getMin();
+                    max = envelope.getMax();
+
+                    if (srsCode == null) {
+                        srsCode = "EPSG:4326";
+                    } else if (!srsCode.equalsIgnoreCase("EPSG:4326")) {
+                        usesMultipleSrs = true;
+                    }
+                }
+                if ((Double.isNaN(maxx)) || (maxx < max.getX())) {
+                    maxx = max.getX();
+                }
+                if ((Double.isNaN(minx)) || (minx > min.getX())) {
+                    minx = min.getX();
+                }
+                if ((Double.isNaN(maxy)) || (maxy < max.getY())) {
+                    maxy = max.getY();
+                }
+                if ((Double.isNaN(miny)) || (miny > min.getY())) {
+                    miny = min.getY();
+                }
             }
         }
 
@@ -260,8 +364,26 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         final Element layersElement = element.getChild("layers");
         final List layersList = layersElement.getChildren();
 
+        evaluateLayerKeywords(null);
+        if (bottomUp) {
+            Collections.reverse(layersList);
+        }
+
         for (final Object o : layersList) {
-            layers.add(new WMSServiceLayer((Element)o, capabilities));
+            final WMSServiceLayer l = new WMSServiceLayer((Element)o, capabilities);
+            boolean addLayer = false;
+            if (enableAllChildren) {
+                addLayer = true;
+            } else {
+                for (final String keyword : ((WMSLayer)l.getWMSLayers().get(0)).getOgcCapabilitiesLayer().getKeywords()) {
+                    if (keyword.equalsIgnoreCase("cismapSlidingLayerGroupMember")) {
+                        addLayer = true;
+                    }
+                }
+            }
+            if (addLayer) {
+                layers.add(l);
+            }
         }
 
         init();
@@ -292,6 +414,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         double minx = Double.NaN;
         double maxy = Double.NaN;
         double miny = Double.NaN;
+
+        evaluateLayerKeywords(null);
+
         for (final Layer l : layers) {
             this.layers.add(new WMSServiceLayer(l));
 
@@ -354,6 +479,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      */
     private void init() {
         setDefaults();
+        setLocked(resourceConserving);
 
         for (final WMSServiceLayer wsl : layers) {
             if (capabilitiesUrl == null) {
@@ -382,7 +508,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                             progress += i;
                         }
 
-                        progress /= layers.size();
+                        if (!isLocked()) {
+                            progress /= layers.size();
+                        }
 
                         event.setPercentageDone(progress);
                         fireRetrievalProgress(event);
@@ -407,10 +535,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                             .getViewScale();
                                 wsl.getPNode().setScale(1 / localScale);
                                 wsl.getPNode().setOffset(localOrigin);
-                                CismapBroker.getInstance().getMappingComponent().repaint();
                                 ++layerComplete;
 
                                 if (layerComplete == layers.size()) {
+                                    CismapBroker.getInstance().getMappingComponent().repaint();
                                     final RetrievalEvent re = new RetrievalEvent();
                                     re.setIsComplete(true);
                                     re.setRetrievalService(SlidableWMSServiceLayerGroup.this);
@@ -419,6 +547,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                     re.setRetrievedObject(null);
                                     fireRetrievalComplete(re);
                                     stateChanged(new ChangeEvent(this));
+                                    enableSliderAndRestartTimer();
+                                } else if (wsl == getSelectedLayer()) {
+                                    CismapBroker.getInstance().getMappingComponent().repaint();
                                 }
                             }
                         }.start();
@@ -448,6 +579,109 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         layers.get(0).setVisible(true);
         initDialog();
         CismapBroker.getInstance().addActiveLayerListener(this);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectedLayer  DOCUMENT ME!
+     */
+    private void evaluateLayerKeywords(final Layer selectedLayer) {
+        if (selectedLayer != null) {
+            Boolean resourceConserving = null;
+            Integer timeTillLocked = null;
+            Integer inactiveTimeTillLocked = null;
+            Boolean bottomUp = null;
+            Double verticalLabelWidthThreshold = null;
+            this.enableAllChildren = false;
+            this.crossfadeEnabled = false;
+
+            for (final String keyword : selectedLayer.getKeywords()) {
+                if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.resourceConserving.enabled")) {
+                    resourceConserving = true;
+                } else if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.resourceConserving.disabled")) {
+                    resourceConserving = false;
+                }
+
+                if (keyword.startsWith("cismapSlidingLayerGroup.config.resourceConserving.timeTillLocked")) {
+                    try {
+                        final String value = keyword.split(":")[1];
+                        timeTillLocked = Integer.parseInt(value);
+                    } catch (Exception ex) {
+                        LOG.error("An error occured while parsing timeTillLocked. Use default value.", ex);
+                    }
+                }
+
+                if (keyword.startsWith("cismapSlidingLayerGroup.config.resourceConserving.inactiveTimeTillLocked")) {
+                    try {
+                        final String value = keyword.split(":")[1];
+                        inactiveTimeTillLocked = Integer.parseInt(value);
+                    } catch (Exception ex) {
+                        LOG.error("An error occured while parsing inactiveTimeTillLocked. Use default value.", ex);
+                    }
+                }
+
+                if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.bottomUp")) {
+                    bottomUp = true;
+                } else if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.topDown")) {
+                    bottomUp = false;
+                }
+
+                if (keyword.startsWith("cismapSlidingLayerGroup.config.verticalLabelWidthThreshold")) {
+                    try {
+                        final String value = keyword.split(":")[1];
+                        verticalLabelWidthThreshold = Double.parseDouble(value);
+                    } catch (Exception ex) {
+                        LOG.error("An error occured while parsing inactiveTimeTillLocked. Use default value.", ex);
+                    }
+                }
+
+                if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.enableAllChildren")) {
+                    this.enableAllChildren = true;
+                }
+
+                if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.crossfadeEnabled")) {
+                    this.crossfadeEnabled = true;
+                }
+            }
+
+            if (resourceConserving == null) {
+                this.resourceConserving = RESOURCE_CONSERVING;
+            } else {
+                this.resourceConserving = resourceConserving;
+            }
+
+            if (timeTillLocked == null) {
+                this.timeTillLocked = TIME_TILL_LOCKED;
+            } else {
+                this.timeTillLocked = timeTillLocked;
+            }
+
+            if (inactiveTimeTillLocked == null) {
+                this.inactiveTimeTillLocked = INACTIVE_TIME_TILL_LOCKED;
+            } else {
+                this.inactiveTimeTillLocked = inactiveTimeTillLocked;
+            }
+
+            if (bottomUp == null) {
+                this.bottomUp = BOTTOM_UP;
+            } else {
+                this.bottomUp = bottomUp;
+            }
+
+            if (verticalLabelWidthThreshold == null) {
+                this.verticalLabelWidthThreshold = VERTICAL_LABEL_WIDTH_THRESHOLD;
+            } else {
+                this.verticalLabelWidthThreshold = verticalLabelWidthThreshold;
+            }
+        } else {
+            resourceConserving = RESOURCE_CONSERVING;
+            timeTillLocked = TIME_TILL_LOCKED;
+            inactiveTimeTillLocked = INACTIVE_TIME_TILL_LOCKED;
+            bottomUp = BOTTOM_UP;
+            verticalLabelWidthThreshold = VERTICAL_LABEL_WIDTH_THRESHOLD;
+            enableAllChildren = false;
+        }
     }
 
     /**
@@ -508,36 +742,45 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         slider.addChangeListener(this);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
+        slider.setBorder(new EmptyBorder(3, 3, 3, 3));
 
-        final Hashtable lableTable = new Hashtable();
-        int x = 0;
-        for (final WMSServiceLayer wsl : layers) {
-            String layerTitle = wsl.getTitle();
-            if (layerTitle == null) {
-                layerTitle = wsl.getName();
-            }
-
-            if ((layerTitle != null) && (layerTitle.length() > 8)) {
-                layerTitle = layerTitle.substring(0, 3) + "." + layerTitle.substring(layerTitle.length() - 4); // NOI18N
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("No title found for WMSServiceLayer '" + wsl + "'.");
-                }
-            }
-
-            final JLabel label = new JLabel(layerTitle);
-            final Font font = label.getFont().deriveFont(10f);
-            label.setFont(font);
-            lableTable.put(Integer.valueOf(x * 100), label);
-            x++;
+        final int mapCWidth = CismapBroker.getInstance().getMappingComponent().getWidth();
+        double sliderWidth = slider.estimateSliderWidthHorizontalLabels();
+        if ((sliderWidth / mapCWidth) < verticalLabelWidthThreshold) {
+            slider.drawLabels(LabelDirection.HORIZONTAL);
+        } else {
+            slider.drawLabels(LabelDirection.VERTICAL);
+            sliderWidth = slider.estimateSliderWidthVerticalLabels();
         }
-        slider.setLabelTable(lableTable);
+
         internalFrame.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N
-        internalFrame.getContentPane().add(slider);
+        internalFrame.getContentPane().setLayout(new BorderLayout());
+        internalFrame.getContentPane().add(slider, BorderLayout.CENTER);
         slider.setSnapToTicks(true);
         slider.repaint();
+
+        btnLock.setText("");
+        btnLock.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    btnLockResultsActionPerformed(evt);
+                }
+            });
+
+        btnLock.setIcon(LOCK_ICON);
+        btnLock.setBorder(null);
+        btnLock.setContentAreaFilled(false);
+        btnLock.setPreferredSize(new Dimension(32, (int)slider.getPreferredSize().getHeight()));
+        btnLock.setFocusPainted(false);
+        btnLock.setToolTipText(NbBundle.getMessage(
+                SlidableWMSServiceLayerGroup.class,
+                "SlidableWMSServiceLayerGroup.initDialog().btnLock.tooltip"));
+        btnLock.setVisible(resourceConserving);
+        internalFrame.getContentPane().add(btnLock, BorderLayout.WEST);
+
         internalFrame.setPreferredSize(new Dimension(
-                (int)getSliderWidth(),
+                (int)sliderWidth,
                 (int)slider.getPreferredSize().getHeight()
                         + 15));
         internalFrame.pack();
@@ -547,22 +790,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @param  evt  DOCUMENT ME!
      */
-    private double getSliderWidth() {
-        final Dictionary dic = slider.getLabelTable();
-        final Enumeration e = dic.keys();
-        final StringBuilder text = new StringBuilder();
-
-        while (e.hasMoreElements()) {
-            final Object o = dic.get(e.nextElement());
-            if (o instanceof JLabel) {
-                text.append(((JLabel)o).getText());
-                text.append("  ");
-            }
-        }
-        return slider.getFontMetrics(slider.getFont()).getStringBounds(text.toString(), slider.getGraphics())
-                    .getWidth();
+    private void btnLockResultsActionPerformed(final ActionEvent evt) {
+        setLocked(!isLocked());
     }
 
     @Override
@@ -577,8 +808,12 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                 getPNode().getChild(j).setTransparency(0f);
             }
         }
-        if ((i + 1) < getPNode().getChildrenCount()) {
+        if (allowCrossfade && ((i + 1) < getPNode().getChildrenCount())) {
             getPNode().getChild(i + 1).setTransparency(((float)rest) / 100f);
+        }
+
+        if (lockTimer.isRunning()) {
+            lockTimer.restart();
         }
     }
 
@@ -599,8 +834,19 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void retrieve(final boolean forced) {
-        for (final WMSServiceLayer layer : layers) {
-            layer.retrieve(forced);
+        // the slider is always disabled during the retrieval of the layers and might be enabled later on when all the
+        // layers are completely loaded
+        slider.setEnabled(false);
+
+        // stop the timer, otherwise it can happen that SlidableWMSServiceLayerGroup gets locked during the retrieval.
+        lockTimer.stop();
+
+        if (isLocked()) {
+            getSelectedLayer().retrieve(forced);
+        } else {
+            for (final WMSServiceLayer layer : layers) {
+                layer.retrieve(forced);
+            }
         }
     }
 
@@ -821,6 +1067,61 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      *
      * @return  DOCUMENT ME!
      */
+    public boolean isLocked() {
+        return locked;
+    }
+
+    /**
+     * Locks the SlidableWMSServiceLayerGroup, this is not possible if RESOURCE_CONSERVING is false. Locked means that
+     * the slider is disabled (generally) and that only the currently selected layer gets loaded. Otherwise all the
+     * layers get loaded every time.
+     *
+     * @param  locked  DOCUMENT ME!
+     */
+    public void setLocked(final boolean locked) {
+        if (resourceConserving) {
+            this.locked = locked;
+
+            if (locked) {
+                btnLock.setIcon(LOCK_ICON);
+                slider.setEnabled(false || doNotDisableSlider);
+            } else {
+                btnLock.setIcon(UNLOCK_ICON);
+                doNotDisableSlider = false;
+                // refresh the other layers
+                this.retrieve(false);
+            }
+        } else {
+            this.locked = false;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void enableSliderAndRestartTimer() {
+        final Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    slider.setEnabled(true);
+                    lockTimer.restart();
+                }
+            };
+        if (!isLocked()) {
+            if (SwingUtilities.isEventDispatchThread()) {
+                r.run();
+            } else {
+                SwingUtilities.invokeLater(r);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
     public List<WMSServiceLayer> getLayers() {
         return layers;
     }
@@ -946,6 +1247,238 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             if ((addedInternalWidget != null) && !(e.getLayer() instanceof SlidableWMSServiceLayerGroup)) {
                 CismapBroker.getInstance().getMappingComponent().showInternalWidget(addedInternalWidget, false, 800);
             }
+        }
+
+        updateTimerDelay();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private WMSServiceLayer getSelectedLayer() {
+        final int i = (slider.getValue() / 100);
+
+        if (i < layers.size()) {
+            return layers.get(i);
+        } else {
+            return layers.get(layers.size() - 1);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void updateTimerDelay() {
+        if (selected) {
+            lockTimer.setDelay(timeTillLocked * 1000);
+            lockTimer.setInitialDelay(timeTillLocked * 1000);
+        } else {
+            lockTimer.setDelay(inactiveTimeTillLocked * 1000);
+            lockTimer.setInitialDelay(inactiveTimeTillLocked * 1000);
+        }
+
+        if (lockTimer.isRunning()) {
+            lockTimer.restart();
+        }
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class SlidableWMSServiceLayerGroupJSlider extends JSlider implements ComponentListener {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private LabelDirection labelDirection;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new SlidableWMSServiceLayerGroupJSlider object.
+         */
+        public SlidableWMSServiceLayerGroupJSlider() {
+            this.addComponentListener(this);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  direction  DOCUMENT ME!
+         */
+        public void drawLabels(final LabelDirection direction) {
+            labelDirection = direction;
+            switch (direction) {
+                case HORIZONTAL: {
+                    drawLabelsHorizontally();
+                    break;
+                }
+                case VERTICAL: {
+                    drawLabelsVertically();
+                    break;
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void drawLabelsHorizontally() {
+            this.setLabelTable(null);
+            final Hashtable lableTable = new Hashtable();
+            int x = 0;
+            for (final WMSServiceLayer wsl : layers) {
+                final String layerTitle = getLayerTitle(wsl);
+
+                final JLabel label = new JLabel(layerTitle);
+                final Font font = label.getFont().deriveFont(10f);
+                label.setFont(font);
+                lableTable.put(x * 100, label);
+                x++;
+            }
+            this.setLabelTable(lableTable);
+        }
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void drawLabelsVertically() {
+            this.setLabelTable(null);
+            final Hashtable lableTable = new Hashtable();
+            int x = 0;
+            for (final WMSServiceLayer wsl : layers) {
+                final String layerTitle = getLayerTitle(wsl);
+
+                final JLabel label = new JLabel();
+                label.setIcon(new VerticalTextIcon(layerTitle, false));
+                lableTable.put(x * 100, label);
+                x++;
+            }
+            this.setLabelTable(lableTable);
+        }
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void drawDisabledLabelsVertically() {
+            this.setLabelTable(null);
+            final Hashtable lableTable = new Hashtable();
+            int x = 0;
+            for (final WMSServiceLayer wsl : layers) {
+                final String layerTitle = getLayerTitle(wsl);
+                final JLabel label = new JLabel();
+                label.setIcon(new VerticalTextIcon(layerTitle, false, Color.DARK_GRAY));
+                lableTable.put(x * 100, label);
+                x++;
+            }
+            this.setLabelTable(lableTable);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public double estimateSliderWidthHorizontalLabels() {
+            final StringBuilder text = new StringBuilder();
+            for (final WMSServiceLayer wsl : layers) {
+                final String layerTitle = getLayerTitle(wsl);
+                text.append(layerTitle);
+                text.append("  ");
+            }
+
+            return this.getFontMetrics(this.getFont()).getStringBounds(text.toString(), this.getGraphics()).getWidth();
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public double estimateSliderWidthVerticalLabels() {
+            double sliderWidth = 0;
+            final Icon icon = new VerticalTextIcon(getLayerTitle(layers.get(0)), false);
+            final int iconWidth = icon.getIconWidth();
+            final int gap = 5;
+            for (final WMSServiceLayer wsl : layers) {
+                sliderWidth += iconWidth + gap;
+            }
+
+            return sliderWidth;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   layer  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private String getLayerTitle(final WMSServiceLayer layer) {
+            String layerTitle = null;
+            try {
+                final String[] keywords = ((Layer)layer.ogcLayers.get(0)).getKeywords();
+                for (final String keyword : keywords) {
+                    if (keyword.startsWith("cismapSlidingLayerGroupMember.tickTitle")) {
+                        layerTitle = keyword.split(":")[1];
+                    }
+                }
+            } catch (Exception ex) {
+                LOG.error("An error occured while parsing tickTitle. Use layer title or name.", ex);
+            }
+
+            if (layerTitle == null) {
+                layerTitle = layer.getTitle();
+                if (layerTitle == null) {
+                    layerTitle = layer.getName();
+                }
+
+                if ((layerTitle != null) && (layerTitle.length() > 8)) {
+                    layerTitle = layerTitle.substring(0, 3) + "." + layerTitle.substring(layerTitle.length() - 4); // NOI18N
+                } else {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No title found for WMSServiceLayer '" + layer + "'.");
+                    }
+                }
+            }
+            return layerTitle;
+        }
+
+        @Override
+        public void setEnabled(final boolean enabled) {
+            super.setEnabled(enabled);
+            if ((labelDirection != null) && labelDirection.equals(LabelDirection.VERTICAL)) {
+                if (enabled) {
+                    drawLabelsVertically();
+                } else {
+                    drawDisabledLabelsVertically();
+                }
+            }
+        }
+
+        @Override
+        public void componentResized(final ComponentEvent e) {
+            allowCrossfade = ((this.getWidth() * 1. / layers.size()) > 30) || crossfadeEnabled;
+        }
+
+        @Override
+        public void componentMoved(final ComponentEvent e) {
+        }
+
+        @Override
+        public void componentShown(final ComponentEvent e) {
+            allowCrossfade = ((this.getWidth() * 1. / layers.size()) > 30) || crossfadeEnabled;
+        }
+
+        @Override
+        public void componentHidden(final ComponentEvent e) {
         }
     }
 }

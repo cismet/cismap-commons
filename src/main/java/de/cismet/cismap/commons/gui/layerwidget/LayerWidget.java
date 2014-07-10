@@ -1199,13 +1199,9 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             return false;
         }
 
-        String titleOrName = layer.getTitle();
+        final List<String> keywords = Arrays.asList(layer.getKeywords());
 
-        if (titleOrName == null) {
-            titleOrName = layer.getName();
-        }
-
-        return (titleOrName != null) && titleOrName.endsWith("[]");
+        return keywords.contains("cismapSlidingLayerGroup");
     }
 
     /**

@@ -24,6 +24,7 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -442,13 +443,9 @@ class TreeTransferHandler extends TransferHandler {
             return false;
         }
 
-        String titleOrName = layer.getTitle();
+        final List<String> keywords = Arrays.asList(layer.getKeywords());
 
-        if (titleOrName == null) {
-            titleOrName = layer.getName();
-        }
-
-        return (titleOrName != null) && titleOrName.endsWith("[]");
+        return keywords.contains("cismapSlidingLayerGroup");
     }
 
     @Override
