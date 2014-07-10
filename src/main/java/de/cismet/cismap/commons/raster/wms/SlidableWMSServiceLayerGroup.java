@@ -229,43 +229,56 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         }
 
         for (final Layer l : children) {
-            final WMSServiceLayer wsl = new WMSServiceLayer(l);
-            layers.add(wsl);
-
-            final Position min;
-            final Position max;
-            final LayerBoundingBox[] boundingBoxes = l.getBoundingBoxes();
-            if (boundingBoxes.length > 0) {
-                min = boundingBoxes[0].getMin();
-                max = boundingBoxes[0].getMax();
-
-                if (srsCode == null) {
-                    srsCode = boundingBoxes[0].getSRS();
-                } else if (!srsCode.equalsIgnoreCase(boundingBoxes[0].getSRS())) {
-                    usesMultipleSrs = true;
-                }
+            boolean addLayer = false;
+            if (enableAllChildren) {
+                addLayer = true;
             } else {
-                final Envelope envelope = l.getLatLonBoundingBoxes();
-                min = envelope.getMin();
-                max = envelope.getMax();
-
-                if (srsCode == null) {
-                    srsCode = "EPSG:4326";
-                } else if (!srsCode.equalsIgnoreCase("EPSG:4326")) {
-                    usesMultipleSrs = true;
+                for (final String keyword : l.getKeywords()) {
+                    if (keyword.equalsIgnoreCase("cismapSlidingLayerGroupMember")) {
+                        addLayer = true;
+                    }
                 }
             }
-            if ((Double.isNaN(maxx)) || (maxx < max.getX())) {
-                maxx = max.getX();
-            }
-            if ((Double.isNaN(minx)) || (minx > min.getX())) {
-                minx = min.getX();
-            }
-            if ((Double.isNaN(maxy)) || (maxy < max.getY())) {
-                maxy = max.getY();
-            }
-            if ((Double.isNaN(miny)) || (miny > min.getY())) {
-                miny = min.getY();
+
+            if (addLayer) {
+                final WMSServiceLayer wsl = new WMSServiceLayer(l);
+                layers.add(wsl);
+
+                final Position min;
+                final Position max;
+                final LayerBoundingBox[] boundingBoxes = l.getBoundingBoxes();
+                if (boundingBoxes.length > 0) {
+                    min = boundingBoxes[0].getMin();
+                    max = boundingBoxes[0].getMax();
+
+                    if (srsCode == null) {
+                        srsCode = boundingBoxes[0].getSRS();
+                    } else if (!srsCode.equalsIgnoreCase(boundingBoxes[0].getSRS())) {
+                        usesMultipleSrs = true;
+                    }
+                } else {
+                    final Envelope envelope = l.getLatLonBoundingBoxes();
+                    min = envelope.getMin();
+                    max = envelope.getMax();
+
+                    if (srsCode == null) {
+                        srsCode = "EPSG:4326";
+                    } else if (!srsCode.equalsIgnoreCase("EPSG:4326")) {
+                        usesMultipleSrs = true;
+                    }
+                }
+                if ((Double.isNaN(maxx)) || (maxx < max.getX())) {
+                    maxx = max.getX();
+                }
+                if ((Double.isNaN(minx)) || (minx > min.getX())) {
+                    minx = min.getX();
+                }
+                if ((Double.isNaN(maxy)) || (maxy < max.getY())) {
+                    maxy = max.getY();
+                }
+                if ((Double.isNaN(miny)) || (miny > min.getY())) {
+                    miny = min.getY();
+                }
             }
         }
 
@@ -354,7 +367,20 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         }
 
         for (final Object o : layersList) {
-            layers.add(new WMSServiceLayer((Element)o, capabilities));
+            final WMSServiceLayer l = new WMSServiceLayer((Element)o, capabilities);
+            boolean addLayer = false;
+            if (enableAllChildren) {
+                addLayer = true;
+            } else {
+                for (final String keyword : l.getLayerInformation().getKeywords()) {
+                    if (keyword.equalsIgnoreCase("cismapSlidingLayerGroupMember")) {
+                        addLayer = true;
+                    }
+                }
+            }
+            if (addLayer) {
+                layers.add(l);
+            }
         }
 
         init();
