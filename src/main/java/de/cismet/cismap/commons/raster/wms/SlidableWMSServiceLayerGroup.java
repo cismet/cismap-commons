@@ -146,6 +146,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     //~ Instance fields --------------------------------------------------------
 
+    private boolean resourceConserving;
+
     private final List<WMSServiceLayer> layers = new ArrayList<WMSServiceLayer>();
     private boolean layerQuerySelected = false;
     private final String sliderName;
@@ -171,6 +173,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private boolean doNotDisableSlider;
     private Timer lockTimer;
     private boolean allowMorphing;
+    private Layer selectedLayer;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -182,7 +185,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     public SlidableWMSServiceLayerGroup(final List treePaths) {
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         final TreePath tp = ((TreePath)treePaths.get(0));
-        final Layer selectedLayer = (de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent();
+        selectedLayer = (de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent();
         final List<Layer> children = Arrays.asList(selectedLayer.getChildren());
 
         lockTimer = new Timer(TIME_TILL_LOCKED * 1000, new ActionListener() {
@@ -431,8 +434,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * initialises a new SlidableWMSServiceLayerGroup object.
      */
     private void init() {
-        setLocked(RESOURCE_CONSERVING);
+        setLocked(resourceConserving);
         setDefaults();
+        evaluateLayerKeywords();
 
         allowMorphing = layers.size() <= 10;
 
@@ -539,6 +543,20 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     /**
      * DOCUMENT ME!
      */
+    private void evaluateLayerKeywords() {
+        if (selectedLayer != null) {
+            final List<String> keywords = Arrays.asList(selectedLayer.getKeywords());
+            if (keywords.contains("resourceConserving")) {
+                resourceConserving = true;
+            }
+        } else {
+            resourceConserving = RESOURCE_CONSERVING;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
     private void setDefaults() {
         preferredRasterFormat = "image/png";                      // NOI18N
         preferredBGColor = "0xF0F0F0";                            // NOI18N
@@ -625,7 +643,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         btnLock.setContentAreaFilled(false);
         btnLock.setPreferredSize(new Dimension(32, (int)slider.getPreferredSize().getHeight()));
         btnLock.setFocusPainted(false);
-        btnLock.setVisible(RESOURCE_CONSERVING);
+        btnLock.setVisible(resourceConserving);
         internalFrame.getContentPane().add(btnLock, BorderLayout.WEST);
 
         internalFrame.setPreferredSize(new Dimension(
@@ -928,7 +946,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * @param  locked  DOCUMENT ME!
      */
     public void setLocked(final boolean locked) {
-        if (RESOURCE_CONSERVING) {
+        if (resourceConserving) {
             this.locked = locked;
 
             if (locked) {
