@@ -174,7 +174,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private boolean locked;
     private boolean doNotDisableSlider;
     private Timer lockTimer;
-    private boolean allowMorphing;
+    private boolean allowCrossfade;
+    private boolean crossfadeEnabled;
     private boolean bottomUp;
     private boolean enableAllChildren;
     private int timeTillLocked;
@@ -478,7 +479,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         setDefaults();
         setLocked(resourceConserving);
 
-        allowMorphing = layers.size() <= 10;
+        allowCrossfade = (layers.size() <= 10) || crossfadeEnabled;
 
         for (final WMSServiceLayer wsl : layers) {
             if (capabilitiesUrl == null) {
@@ -593,6 +594,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             Boolean bottomUp = null;
             Double verticalLabelWidthThreshold = null;
             this.enableAllChildren = false;
+            this.crossfadeEnabled = false;
 
             for (final String keyword : selectedLayer.getKeywords()) {
                 if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.resourceConserving.enabled")) {
@@ -636,6 +638,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
                 if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.enableAllChildren")) {
                     this.enableAllChildren = true;
+                }
+
+                if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.crossfadeEnabled")) {
+                    this.crossfadeEnabled = true;
                 }
             }
 
@@ -802,7 +808,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                 getPNode().getChild(j).setTransparency(0f);
             }
         }
-        if (allowMorphing && ((i + 1) < getPNode().getChildrenCount())) {
+        if (allowCrossfade && ((i + 1) < getPNode().getChildrenCount())) {
             getPNode().getChild(i + 1).setTransparency(((float)rest) / 100f);
         }
 
