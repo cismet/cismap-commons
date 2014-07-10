@@ -107,7 +107,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private static boolean RESOURCE_CONSERVING;
     private static int TIME_TILL_LOCKED;
     private static int INACTIVE_TIME_TILL_LOCKED;
-    private static double SLIDER_MAPC_RATIO_CHANGE_TO_VERTICAL = 0.5;
+    private static double SLIDER_MAPC_RATIO_CHANGE_TO_VERTICAL;
 
     static {
         final Properties prop = new Properties();
@@ -434,9 +434,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * initialises a new SlidableWMSServiceLayerGroup object.
      */
     private void init() {
-        setLocked(resourceConserving);
         setDefaults();
         evaluateLayerKeywords();
+        setLocked(resourceConserving);
 
         allowMorphing = layers.size() <= 10;
 
@@ -548,6 +548,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             final List<String> keywords = Arrays.asList(selectedLayer.getKeywords());
             if (keywords.contains("resourceConserving")) {
                 resourceConserving = true;
+            } else {
+                resourceConserving = RESOURCE_CONSERVING;
             }
         } else {
             resourceConserving = RESOURCE_CONSERVING;
