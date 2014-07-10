@@ -14,6 +14,8 @@ import org.apache.log4j.Logger;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
+import org.openide.util.NbBundle;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -645,6 +647,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         btnLock.setContentAreaFilled(false);
         btnLock.setPreferredSize(new Dimension(32, (int)slider.getPreferredSize().getHeight()));
         btnLock.setFocusPainted(false);
+        btnLock.setToolTipText(NbBundle.getMessage(
+                SlidableWMSServiceLayerGroup.class,
+                "SlidableWMSServiceLayerGroup.initDialog().btnLock.tooltip"));
         btnLock.setVisible(resourceConserving);
         internalFrame.getContentPane().add(btnLock, BorderLayout.WEST);
 
