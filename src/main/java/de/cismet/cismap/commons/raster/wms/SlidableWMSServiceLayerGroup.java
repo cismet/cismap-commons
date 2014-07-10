@@ -623,7 +623,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
                 if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.bottomUp")) {
                     bottomUp = true;
-                } else if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.bottomDown")) {
+                } else if (keyword.equalsIgnoreCase("cismapSlidingLayerGroup.config.topDown")) {
                     bottomUp = false;
                 }
 
