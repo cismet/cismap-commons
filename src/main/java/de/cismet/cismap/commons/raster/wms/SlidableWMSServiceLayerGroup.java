@@ -74,6 +74,7 @@ import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
 import de.cismet.cismap.commons.wms.capabilities.Position;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
+import de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer;
 
 import de.cismet.tools.gui.VerticalTextIcon;
 
@@ -373,7 +374,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             if (enableAllChildren) {
                 addLayer = true;
             } else {
-                for (final String keyword : l.getLayerInformation().getKeywords()) {
+                for (final String keyword : ((WMSLayer)l.getWMSLayers().get(0)).getOgcCapabilitiesLayer().getKeywords()) {
                     if (keyword.equalsIgnoreCase("cismapSlidingLayerGroupMember")) {
                         addLayer = true;
                     }
@@ -1413,16 +1414,30 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
          * @return  DOCUMENT ME!
          */
         private String getLayerTitle(final WMSServiceLayer layer) {
-            String layerTitle = layer.getTitle();
-            if (layerTitle == null) {
-                layerTitle = layer.getName();
+            String layerTitle = null;
+            try {
+                final String[] keywords = ((Layer)layer.ogcLayers.get(0)).getKeywords();
+                for (final String keyword : keywords) {
+                    if (keyword.startsWith("cismapSlidingLayerGroupMember.tickTitle")) {
+                        layerTitle = keyword.split(":")[1];
+                    }
+                }
+            } catch (Exception ex) {
+                LOG.error("An error occured while parsing tickTitle. Use layer title or name.", ex);
             }
 
-            if ((layerTitle != null) && (layerTitle.length() > 8)) {
-                layerTitle = layerTitle.substring(0, 3) + "." + layerTitle.substring(layerTitle.length() - 4); // NOI18N
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("No title found for WMSServiceLayer '" + layer + "'.");
+            if (layerTitle == null) {
+                layerTitle = layer.getTitle();
+                if (layerTitle == null) {
+                    layerTitle = layer.getName();
+                }
+
+                if ((layerTitle != null) && (layerTitle.length() > 8)) {
+                    layerTitle = layerTitle.substring(0, 3) + "." + layerTitle.substring(layerTitle.length() - 4); // NOI18N
+                } else {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No title found for WMSServiceLayer '" + layer + "'.");
+                    }
                 }
             }
             return layerTitle;
