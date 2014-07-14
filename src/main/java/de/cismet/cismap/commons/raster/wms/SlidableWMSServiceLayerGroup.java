@@ -501,7 +501,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                     public void retrievalProgress(final RetrievalEvent e) {
                         final RetrievalEvent event = new RetrievalEvent();
                         progressTable.put(wsl, e.getPercentageDone());
-                        progress = 0;
+                        int progress = 0;
 
                         for (final int i : progressTable.values()) {
                             progress += i;
@@ -511,6 +511,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                             progress /= layers.size();
                         }
 
+                        SlidableWMSServiceLayerGroup.this.progress = progress;
                         event.setPercentageDone(progress);
                         fireRetrievalProgress(event);
                     }
