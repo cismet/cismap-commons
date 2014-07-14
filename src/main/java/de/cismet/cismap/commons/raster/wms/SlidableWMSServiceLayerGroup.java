@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -162,8 +164,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private int layerPosition;
     private String name;
     private String completePath = null;
-    private Map<WMSServiceLayer, Integer> progressTable = new HashMap<WMSServiceLayer, Integer>();
-    private int layerComplete = 0;
+    private Map<WMSServiceLayer, Integer> progressTable = new ConcurrentHashMap<WMSServiceLayer, Integer>();
+    private AtomicInteger layerComplete = new AtomicInteger(0);
     private String preferredRasterFormat;
     private String preferredBGColor;
     private String preferredExceptionsFormat;
@@ -532,9 +534,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                             .getViewScale();
                                 wsl.getPNode().setScale(1 / localScale);
                                 wsl.getPNode().setOffset(localOrigin);
-                                ++layerComplete;
+                                layerComplete.incrementAndGet();
 
-                                if (layerComplete == layers.size()) {
+                                if (layerComplete.get() == layers.size()) {
                                     CismapBroker.getInstance().getMappingComponent().repaint();
                                     final RetrievalEvent re = new RetrievalEvent();
                                     re.setIsComplete(true);
