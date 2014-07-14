@@ -492,9 +492,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
                     @Override
                     public void retrievalStarted(final RetrievalEvent e) {
-                        progress = -1;
-                        layerComplete = 0;
-                        progressTable.clear();
                         fireRetrievalStarted(e);
                     }
 
@@ -834,6 +831,11 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void retrieve(final boolean forced) {
+        // these fields are needed to determine the progress of the retrieval
+        progress = -1;
+        layerComplete.set(0);
+        progressTable.clear();
+
         // the slider is always disabled during the retrieval of the layers and might be enabled later on when all the
         // layers are completely loaded
         slider.setEnabled(false);
