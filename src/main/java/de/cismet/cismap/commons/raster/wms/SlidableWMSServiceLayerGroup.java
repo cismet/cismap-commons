@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -162,8 +164,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private int layerPosition;
     private String name;
     private String completePath = null;
-    private Map<WMSServiceLayer, Integer> progressTable = new HashMap<WMSServiceLayer, Integer>();
-    private int layerComplete = 0;
+    private Map<WMSServiceLayer, Integer> progressTable = new ConcurrentHashMap<WMSServiceLayer, Integer>();
+    private AtomicInteger layerComplete = new AtomicInteger(0);
     private String preferredRasterFormat;
     private String preferredBGColor;
     private String preferredExceptionsFormat;
@@ -492,9 +494,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
                     @Override
                     public void retrievalStarted(final RetrievalEvent e) {
-                        progress = -1;
-                        layerComplete = 0;
-                        progressTable.clear();
                         fireRetrievalStarted(e);
                     }
 
@@ -502,7 +501,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                     public void retrievalProgress(final RetrievalEvent e) {
                         final RetrievalEvent event = new RetrievalEvent();
                         progressTable.put(wsl, e.getPercentageDone());
-                        progress = 0;
+                        int progress = 0;
 
                         for (final int i : progressTable.values()) {
                             progress += i;
@@ -512,6 +511,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                             progress /= layers.size();
                         }
 
+                        SlidableWMSServiceLayerGroup.this.progress = progress;
                         event.setPercentageDone(progress);
                         fireRetrievalProgress(event);
                     }
@@ -535,9 +535,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                             .getViewScale();
                                 wsl.getPNode().setScale(1 / localScale);
                                 wsl.getPNode().setOffset(localOrigin);
-                                ++layerComplete;
+                                layerComplete.incrementAndGet();
 
-                                if (layerComplete == layers.size()) {
+                                if (layerComplete.get() == layers.size()) {
                                     CismapBroker.getInstance().getMappingComponent().repaint();
                                     final RetrievalEvent re = new RetrievalEvent();
                                     re.setIsComplete(true);
@@ -834,6 +834,11 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void retrieve(final boolean forced) {
+        // these fields are needed to determine the progress of the retrieval
+        progress = -1;
+        layerComplete.set(0);
+        progressTable.clear();
+
         // the slider is always disabled during the retrieval of the layers and might be enabled later on when all the
         // layers are completely loaded
         slider.setEnabled(false);
