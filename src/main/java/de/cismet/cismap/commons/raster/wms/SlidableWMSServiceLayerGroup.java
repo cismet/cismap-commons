@@ -14,18 +14,10 @@ import org.apache.log4j.Logger;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
-import org.openide.util.NbBundle;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
@@ -33,7 +25,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,16 +33,8 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.TreePath;
@@ -61,7 +44,6 @@ import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.LayerInfoProvider;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.gui.FloatingControlProvider;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.XPImage;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
@@ -79,8 +61,6 @@ import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
 import de.cismet.cismap.commons.wms.capabilities.Position;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
-import de.cismet.tools.gui.VerticalTextIcon;
-
 /**
  * DOCUMENT ME!
  *
@@ -88,7 +68,6 @@ import de.cismet.tools.gui.VerticalTextIcon;
  * @version  $Revision$, $Date$
  */
 public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService implements RetrievalServiceLayer,
-    FloatingControlProvider,
     RasterMapService,
     ChangeListener,
     MapService,
@@ -103,11 +82,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private static final String SLIDER_PREFIX = "Slider";                         // NOI18N
     private static List<Integer> uniqueNumbers = new ArrayList<Integer>();
     private static String addedInternalWidget = null;
-
-    private static final ImageIcon LOCK_ICON = new javax.swing.ImageIcon(
-            SlidableWMSServiceLayerGroup.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock.png"));        // NOI18N
-    private static final ImageIcon UNLOCK_ICON = new javax.swing.ImageIcon(
-            SlidableWMSServiceLayerGroup.class.getResource("/de/cismet/cismap/commons/raster/wms/res/lock-unlock.png")); // NOI18N
 
     private static boolean BOTTOM_UP;
     private static boolean RESOURCE_CONSERVING;
@@ -152,15 +126,14 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     //~ Instance fields --------------------------------------------------------
 
+    SlidableWMSServiceLayerGroupInternalFrame internalFrame;
+
     private boolean resourceConserving;
 
     private final List<WMSServiceLayer> layers = new ArrayList<WMSServiceLayer>();
     private boolean layerQuerySelected = false;
     private final String sliderName;
     private PNode pnode = new XPImage();
-    private SlidableWMSServiceLayerGroupJSlider slider = new SlidableWMSServiceLayerGroupJSlider();
-    private JDialog dialog = new JDialog();
-    private JInternalFrame internalFrame = new JInternalFrame();
     private int layerPosition;
     private String name;
     private String completePath = null;
@@ -174,17 +147,22 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private XBoundingBox boundingBox;
     private String customSLD;
     private boolean selected = false;
-    private JButton btnLock = new JButton();
     private boolean locked;
     private boolean doNotDisableSlider;
     private Timer lockTimer;
-    private boolean allowCrossfade;
     private boolean crossfadeEnabled;
     private boolean bottomUp;
     private boolean enableAllChildren;
     private int timeTillLocked;
     private int inactiveTimeTillLocked;
     private double verticalLabelWidthThreshold;
+    private ActionListener btnLockListener = new java.awt.event.ActionListener() {
+
+            @Override
+            public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                btnLockResultsActionPerformed(evt);
+            }
+        };
 
     //~ Constructors -----------------------------------------------------------
 
@@ -481,7 +459,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      */
     private void init() {
         setDefaults();
-        setLocked(resourceConserving);
 
         for (final WMSServiceLayer wsl : layers) {
             if (capabilitiesUrl == null) {
@@ -548,6 +525,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                     fireRetrievalComplete(re);
                                     stateChanged(new ChangeEvent(this));
                                     enableSliderAndRestartTimer();
+                                    progressTable.clear();
                                 } else if (wsl == getSelectedLayer()) {
                                     CismapBroker.getInstance().getMappingComponent().repaint();
                                 }
@@ -732,59 +710,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * DOCUMENT ME!
      */
     private void initDialog() {
-        dialog.getContentPane().setLayout(new BorderLayout());
-
-        slider.setMinimum(0);
-        slider.setMaximum((layers.size() - 1) * 100);
-        slider.setValue(0);
-
-        slider.setMinorTickSpacing(100);
-        slider.addChangeListener(this);
-        slider.setPaintTicks(true);
-        slider.setPaintLabels(true);
-        slider.setBorder(new EmptyBorder(3, 3, 3, 3));
-
-        final int mapCWidth = CismapBroker.getInstance().getMappingComponent().getWidth();
-        double sliderWidth = slider.estimateSliderWidthHorizontalLabels();
-        if ((sliderWidth / mapCWidth) < verticalLabelWidthThreshold) {
-            slider.drawLabels(LabelDirection.HORIZONTAL);
-        } else {
-            slider.drawLabels(LabelDirection.VERTICAL);
-            sliderWidth = slider.estimateSliderWidthVerticalLabels();
-        }
-
-        internalFrame.putClientProperty("JInternalFrame.isPalette", Boolean.TRUE); // NOI18N
-        internalFrame.getContentPane().setLayout(new BorderLayout());
-        internalFrame.getContentPane().add(slider, BorderLayout.CENTER);
-        slider.setSnapToTicks(true);
-        slider.repaint();
-
-        btnLock.setText("");
-        btnLock.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    btnLockResultsActionPerformed(evt);
-                }
-            });
-
-        btnLock.setIcon(LOCK_ICON);
-        btnLock.setBorder(null);
-        btnLock.setContentAreaFilled(false);
-        btnLock.setPreferredSize(new Dimension(32, (int)slider.getPreferredSize().getHeight()));
-        btnLock.setFocusPainted(false);
-        btnLock.setToolTipText(NbBundle.getMessage(
-                SlidableWMSServiceLayerGroup.class,
-                "SlidableWMSServiceLayerGroup.initDialog().btnLock.tooltip"));
-        btnLock.setVisible(resourceConserving);
-        internalFrame.getContentPane().add(btnLock, BorderLayout.WEST);
-
-        internalFrame.setPreferredSize(new Dimension(
-                (int)sliderWidth,
-                (int)slider.getPreferredSize().getHeight()
-                        + 15));
-        internalFrame.pack();
-        internalFrame.setResizable(true);
+        internalFrame = new SlidableWMSServiceLayerGroupInternalFrame(this);
+        setLocked(resourceConserving);
     }
 
     /**
@@ -798,8 +725,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void stateChanged(final ChangeEvent e) {
-        final int i = (slider.getValue() / 100);
-        final int rest = slider.getValue() % 100;
+        final int i = (internalFrame.getSliderValue() / 100);
+        final int rest = internalFrame.getSliderValue() % 100;
 
         for (int j = 0; j < getPNode().getChildrenCount(); ++j) {
             if (i == j) {
@@ -808,7 +735,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                 getPNode().getChild(j).setTransparency(0f);
             }
         }
-        if (allowCrossfade && ((i + 1) < getPNode().getChildrenCount())) {
+        if (internalFrame.isAllowCrossfade() && ((i + 1) < getPNode().getChildrenCount())) {
             getPNode().getChild(i + 1).setTransparency(((float)rest) / 100f);
         }
 
@@ -828,11 +755,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     }
 
     @Override
-    public JDialog getFloatingControlComponent() {
-        return dialog;
-    }
-
-    @Override
     public void retrieve(final boolean forced) {
         // these fields are needed to determine the progress of the retrieval
         progress = -1;
@@ -841,7 +763,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
         // the slider is always disabled during the retrieval of the layers and might be enabled later on when all the
         // layers are completely loaded
-        slider.setEnabled(false);
+        internalFrame.enableSlider(false);
 
         // stop the timer, otherwise it can happen that SlidableWMSServiceLayerGroup gets locked during the retrieval.
         lockTimer.stop();
@@ -998,6 +920,33 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    public double getVerticalLabelWidthThreshold() {
+        return verticalLabelWidthThreshold;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isCrossfadeEnabled() {
+        return crossfadeEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isResourceConserving() {
+        return resourceConserving;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @return  the layer capabilities object of the current layer
      */
     @Override
@@ -1088,10 +1037,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             this.locked = locked;
 
             if (locked) {
-                btnLock.setIcon(LOCK_ICON);
-                slider.setEnabled(false || doNotDisableSlider);
+                internalFrame.setLockIcon();
+                internalFrame.enableSlider(false || doNotDisableSlider);
             } else {
-                btnLock.setIcon(UNLOCK_ICON);
+                internalFrame.setUnlocIcon();
                 doNotDisableSlider = false;
                 // refresh the other layers
                 this.retrieve(false);
@@ -1103,13 +1052,22 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     /**
      * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ActionListener getLockListener() {
+        return btnLockListener;
+    }
+
+    /**
+     * DOCUMENT ME!
      */
     private void enableSliderAndRestartTimer() {
         final Runnable r = new Runnable() {
 
                 @Override
                 public void run() {
-                    slider.setEnabled(true);
+                    internalFrame.enableSlider(true);
                     lockTimer.restart();
                 }
             };
@@ -1173,6 +1131,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         if (e.getLayer() == this) {
             if ((addedInternalWidget != null) && addedInternalWidget.equals(sliderName)) {
                 CismapBroker.getInstance().getMappingComponent().removeInternalWidget(sliderName);
+                internalFrame.removeModel();
+                internalFrame.dispose();
+                internalFrame = null;
                 addedInternalWidget = null;
             }
 
@@ -1189,6 +1150,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             } catch (final NumberFormatException ex) {
                 LOG.error("The name of the internal slider widget is not valid.", ex);
             }
+            lockTimer.stop();
+            lockTimer = null;
         }
     }
 
@@ -1263,7 +1226,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * @return  DOCUMENT ME!
      */
     private WMSServiceLayer getSelectedLayer() {
-        final int i = (slider.getValue() / 100);
+        final int i = (internalFrame.getSliderValue() / 100);
 
         if (i < layers.size()) {
             return layers.get(i);
@@ -1286,204 +1249,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
         if (lockTimer.isRunning()) {
             lockTimer.restart();
-        }
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class SlidableWMSServiceLayerGroupJSlider extends JSlider implements ComponentListener {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private LabelDirection labelDirection;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new SlidableWMSServiceLayerGroupJSlider object.
-         */
-        public SlidableWMSServiceLayerGroupJSlider() {
-            this.addComponentListener(this);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  direction  DOCUMENT ME!
-         */
-        public void drawLabels(final LabelDirection direction) {
-            labelDirection = direction;
-            switch (direction) {
-                case HORIZONTAL: {
-                    drawLabelsHorizontally();
-                    break;
-                }
-                case VERTICAL: {
-                    drawLabelsVertically();
-                    break;
-                }
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         */
-        private void drawLabelsHorizontally() {
-            this.setLabelTable(null);
-            final Hashtable lableTable = new Hashtable();
-            int x = 0;
-            for (final WMSServiceLayer wsl : layers) {
-                final String layerTitle = getLayerTitle(wsl);
-
-                final JLabel label = new JLabel(layerTitle);
-                final Font font = label.getFont().deriveFont(10f);
-                label.setFont(font);
-                lableTable.put(x * 100, label);
-                x++;
-            }
-            this.setLabelTable(lableTable);
-        }
-
-        /**
-         * DOCUMENT ME!
-         */
-        private void drawLabelsVertically() {
-            this.setLabelTable(null);
-            final Hashtable lableTable = new Hashtable();
-            int x = 0;
-            for (final WMSServiceLayer wsl : layers) {
-                final String layerTitle = getLayerTitle(wsl);
-
-                final JLabel label = new JLabel();
-                label.setIcon(new VerticalTextIcon(layerTitle, false));
-                lableTable.put(x * 100, label);
-                x++;
-            }
-            this.setLabelTable(lableTable);
-        }
-
-        /**
-         * DOCUMENT ME!
-         */
-        private void drawDisabledLabelsVertically() {
-            this.setLabelTable(null);
-            final Hashtable lableTable = new Hashtable();
-            int x = 0;
-            for (final WMSServiceLayer wsl : layers) {
-                final String layerTitle = getLayerTitle(wsl);
-                final JLabel label = new JLabel();
-                label.setIcon(new VerticalTextIcon(layerTitle, false, Color.DARK_GRAY));
-                lableTable.put(x * 100, label);
-                x++;
-            }
-            this.setLabelTable(lableTable);
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public double estimateSliderWidthHorizontalLabels() {
-            final StringBuilder text = new StringBuilder();
-            for (final WMSServiceLayer wsl : layers) {
-                final String layerTitle = getLayerTitle(wsl);
-                text.append(layerTitle);
-                text.append("  ");
-            }
-
-            return this.getFontMetrics(this.getFont()).getStringBounds(text.toString(), this.getGraphics()).getWidth();
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public double estimateSliderWidthVerticalLabels() {
-            double sliderWidth = 0;
-            final Icon icon = new VerticalTextIcon(getLayerTitle(layers.get(0)), false);
-            final int iconWidth = icon.getIconWidth();
-            final int gap = 5;
-            for (final WMSServiceLayer wsl : layers) {
-                sliderWidth += iconWidth + gap;
-            }
-
-            return sliderWidth;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   layer  DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        private String getLayerTitle(final WMSServiceLayer layer) {
-            String layerTitle = null;
-            try {
-                final String[] keywords = ((Layer)layer.ogcLayers.get(0)).getKeywords();
-                for (final String keyword : keywords) {
-                    if (keyword.startsWith("cismapSlidingLayerGroupMember.tickTitle")) {
-                        layerTitle = keyword.split(":")[1];
-                    }
-                }
-            } catch (Exception ex) {
-                LOG.error("An error occured while parsing tickTitle. Use layer title or name.", ex);
-            }
-
-            if (layerTitle == null) {
-                layerTitle = layer.getTitle();
-                if (layerTitle == null) {
-                    layerTitle = layer.getName();
-                }
-
-                if ((layerTitle != null) && (layerTitle.length() > 8)) {
-                    layerTitle = layerTitle.substring(0, 3) + "." + layerTitle.substring(layerTitle.length() - 4); // NOI18N
-                } else {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("No title found for WMSServiceLayer '" + layer + "'.");
-                    }
-                }
-            }
-            return layerTitle;
-        }
-
-        @Override
-        public void setEnabled(final boolean enabled) {
-            super.setEnabled(enabled);
-            if ((labelDirection != null) && labelDirection.equals(LabelDirection.VERTICAL)) {
-                if (enabled) {
-                    drawLabelsVertically();
-                } else {
-                    drawDisabledLabelsVertically();
-                }
-            }
-        }
-
-        @Override
-        public void componentResized(final ComponentEvent e) {
-            allowCrossfade = ((this.getWidth() * 1. / layers.size()) > 30) || crossfadeEnabled;
-        }
-
-        @Override
-        public void componentMoved(final ComponentEvent e) {
-        }
-
-        @Override
-        public void componentShown(final ComponentEvent e) {
-            allowCrossfade = ((this.getWidth() * 1. / layers.size()) > 30) || crossfadeEnabled;
-        }
-
-        @Override
-        public void componentHidden(final ComponentEvent e) {
         }
     }
 }
