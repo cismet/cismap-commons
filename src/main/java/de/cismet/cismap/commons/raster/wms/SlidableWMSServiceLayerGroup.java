@@ -1209,7 +1209,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
 
             if (fadeOutOldWidget) {
-                CismapBroker.getInstance().getMappingComponent().showInternalWidget(addedInternalWidget, false, 800);
+                CismapBroker.getInstance().getMappingComponent().removeInternalWidget(addedInternalWidget);
                 addedInternalWidget = null;
             }
 
