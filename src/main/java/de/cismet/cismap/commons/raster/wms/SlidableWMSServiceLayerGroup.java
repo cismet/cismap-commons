@@ -458,7 +458,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     }
 
     /**
-     * initialises a new SlidableWMSServiceLayerGroup object.
+     * initializes a new SlidableWMSServiceLayerGroup object.
      */
     private void init() {
         setDefaults();
@@ -815,7 +815,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     /**
      * Returns the path of this layer. It's formatted by concatenating the names of parent layers with '/' as delimiter.
-     * /[<...>/]<Name of grand parent>/<Name of parent>/<Name of this layer>
+     * /[&lt;...&gt;/]&lt;Name of grand parent&gt;/&lt;Name of parent&gt;/&lt;Name of this layer&gt;
      *
      * @return  Extent of this layer.
      */
@@ -1144,7 +1144,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                 addedInternalWidget = null;
             }
 
-            // use invoke lateer to avoid a java.util.ConcurrentModificationException
+            // use invoke later to avoid a java.util.ConcurrentModificationException
             EventQueue.invokeLater(new Runnable() {
 
                     @Override
