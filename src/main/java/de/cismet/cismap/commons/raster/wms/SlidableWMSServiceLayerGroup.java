@@ -164,6 +164,15 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
         };
 
+    private ActionListener lockTimerListener = new ActionListener() {
+
+            @Override
+            public void actionPerformed(final ActionEvent e) {
+                doNotDisableSlider = !lockTimer.isRunning();
+                SlidableWMSServiceLayerGroup.this.setLocked(!lockTimer.isRunning());
+            }
+        };
+
     private HashMap<WMSServiceLayer, RetrievalListener> layerRetrievalListeners =
         new HashMap<WMSServiceLayer, RetrievalListener>();
 
@@ -181,14 +190,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         evaluateLayerKeywords(selectedLayer);
         final List<Layer> children = Arrays.asList(selectedLayer.getChildren());
 
-        lockTimer = new Timer(timeTillLocked * 1000, new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(final ActionEvent e) {
-                        doNotDisableSlider = !lockTimer.isRunning();
-                        SlidableWMSServiceLayerGroup.this.setLocked(!lockTimer.isRunning());
-                    }
-                });
+        lockTimer = new Timer(timeTillLocked * 1000, lockTimerListener);
         lockTimer.setRepeats(false);
 
         setName(selectedLayer.getTitle());
@@ -1157,8 +1159,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             } catch (final NumberFormatException ex) {
                 LOG.error("The name of the internal slider widget is not valid.", ex);
             }
+            lockTimer.removeActionListener(lockTimerListener);
             lockTimer.stop();
-            lockTimer = null;
 
             for (final WMSServiceLayer wsl : layers) {
                 wsl.removeRetrievalListener(layerRetrievalListeners.get(wsl));
