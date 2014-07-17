@@ -1141,7 +1141,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             if ((addedInternalWidget != null) && addedInternalWidget.equals(sliderName)) {
                 CismapBroker.getInstance().getMappingComponent().removeInternalWidget(sliderName);
                 internalFrame.removeModel();
-                internalFrame.dispose();
+//                internalFrame.dispose();
                 internalFrame = null;
                 addedInternalWidget = null;
             }
