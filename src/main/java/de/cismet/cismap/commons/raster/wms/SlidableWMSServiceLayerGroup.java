@@ -164,6 +164,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
         };
 
+    private HashMap<WMSServiceLayer, RetrievalListener> layerRetrievalListeners =
+        new HashMap<WMSServiceLayer, RetrievalListener>();
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -467,7 +470,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
             wsl.setPNode(new XPImage());
             pnode.addChild(wsl.getPNode());
-            wsl.addRetrievalListener(new RetrievalListener() {
+
+            final RetrievalListener retrievalListener = new RetrievalListener() {
 
                     @Override
                     public void retrievalStarted(final RetrievalEvent e) {
@@ -499,38 +503,38 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                         ((XPImage)wsl.getPNode()).setImage(i);
                         new Thread() {
 
-                            @Override
-                            public void run() {
-                                final Point2D localOrigin = CismapBroker.getInstance()
-                                            .getMappingComponent()
-                                            .getCamera()
-                                            .getViewBounds()
-                                            .getOrigin();
-                                final double localScale = CismapBroker.getInstance()
-                                            .getMappingComponent()
-                                            .getCamera()
-                                            .getViewScale();
-                                wsl.getPNode().setScale(1 / localScale);
-                                wsl.getPNode().setOffset(localOrigin);
-                                layerComplete.incrementAndGet();
+                                @Override
+                                public void run() {
+                                    final Point2D localOrigin = CismapBroker.getInstance()
+                                                .getMappingComponent()
+                                                .getCamera()
+                                                .getViewBounds()
+                                                .getOrigin();
+                                    final double localScale = CismapBroker.getInstance()
+                                                .getMappingComponent()
+                                                .getCamera()
+                                                .getViewScale();
+                                    wsl.getPNode().setScale(1 / localScale);
+                                    wsl.getPNode().setOffset(localOrigin);
+                                    layerComplete.incrementAndGet();
 
-                                if (layerComplete.get() == layers.size()) {
-                                    CismapBroker.getInstance().getMappingComponent().repaint();
-                                    final RetrievalEvent re = new RetrievalEvent();
-                                    re.setIsComplete(true);
-                                    re.setRetrievalService(SlidableWMSServiceLayerGroup.this);
-                                    re.setHasErrors(false);
+                                    if (layerComplete.get() == layers.size()) {
+                                        CismapBroker.getInstance().getMappingComponent().repaint();
+                                        final RetrievalEvent re = new RetrievalEvent();
+                                        re.setIsComplete(true);
+                                        re.setRetrievalService(SlidableWMSServiceLayerGroup.this);
+                                        re.setHasErrors(false);
 
-                                    re.setRetrievedObject(null);
-                                    fireRetrievalComplete(re);
-                                    stateChanged(new ChangeEvent(this));
-                                    enableSliderAndRestartTimer();
-                                    progressTable.clear();
-                                } else if (wsl == getSelectedLayer()) {
-                                    CismapBroker.getInstance().getMappingComponent().repaint();
+                                        re.setRetrievedObject(null);
+                                        fireRetrievalComplete(re);
+                                        stateChanged(new ChangeEvent(this));
+                                        enableSliderAndRestartTimer();
+                                        progressTable.clear();
+                                    } else if (wsl == getSelectedLayer()) {
+                                        CismapBroker.getInstance().getMappingComponent().repaint();
+                                    }
                                 }
-                            }
-                        }.start();
+                            }.start();
                     }
 
                     @Override
@@ -542,7 +546,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                     public void retrievalError(final RetrievalEvent e) {
                         fireRetrievalError(e);
                     }
-                });
+                };
+
+            layerRetrievalListeners.put(wsl, retrievalListener);
+            wsl.addRetrievalListener(retrievalListener);
             if (wsl.getBackgroundColor() == null) {
                 wsl.setBackgroundColor(preferredBGColor);
             }
@@ -1152,6 +1159,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
             lockTimer.stop();
             lockTimer = null;
+
+            for (final WMSServiceLayer wsl : layers) {
+                wsl.removeRetrievalListener(layerRetrievalListeners.get(wsl));
+            }
         }
     }
 
