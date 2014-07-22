@@ -21,6 +21,8 @@ import org.openide.util.Lookup;
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
+import java.lang.reflect.Constructor;
+
 import java.util.*;
 
 import javax.swing.Action;
@@ -34,8 +36,10 @@ import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.SearchFeature;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MapPopupAction;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -209,61 +213,35 @@ public class SelectionListener extends CreateGeometryListener {
                     if (o instanceof PFeature) {
                         super.mouseClicked(pInputEvent);
                         sel = (PFeature)o;
-                        if (sel.getFeature().canBeSelected()) {
-                            if ((mappingComponent != null) && pInputEvent.isLeftMouseButton()
-                                        && pInputEvent.isControlDown()) {
-                                if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                                    if (
-                                        !((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).isSelected(
-                                                    sel.getFeature())) {
-                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                                .addToSelection(
-                                                    sel.getFeature());
-                                    } else {
-                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(
-                                            sel.getFeature());
-                                    }
-                                } else {
-                                    log.warn(
-                                        "mc.getFeatureCollection() instanceof DefaultFeatureCollection == false !!!!!!!"); // NOI18N
-                                }
 
-                                changeSelection(sel);
-                            } else {
-                                mappingComponent.getFeatureCollection().select(sel.getFeature());
-                                unselectAll();
-                                changeSelection(sel);
-                                if (pInputEvent.isAltDown()) {
-                                    final Coordinate mouseCoord = new Coordinate(
-                                            mappingComponent.getWtst().getSourceX(
-                                                pInputEvent.getPosition().getX()
-                                                        - mappingComponent.getClip_offset_x()),
-                                            mappingComponent.getWtst().getSourceY(
-                                                pInputEvent.getPosition().getY()
-                                                        - mappingComponent.getClip_offset_y()));
+                        try {
+                            Point2D point = null;
+                            if (mappingComponent.isSnappingEnabled()) {
+                                point = PFeatureTools.getNearestPointInArea(
+                                        mappingComponent,
+                                        pInputEvent.getCanvasPosition());
+                            }
+                            if (point == null) {
+                                point = pInputEvent.getPosition();
+                            }
 
-                                    final GeometryFactory geometryFactory = new GeometryFactory(
-                                            new PrecisionModel(PrecisionModel.FLOATING),
-                                            CrsTransformer.extractSridFromCrs(
-                                                mappingComponent.getMappingModel().getSrs().getCode()));
-                                    final Point mousePoint = CrsTransformer.transformToGivenCrs(
-                                            geometryFactory.createPoint(
-                                                mouseCoord),
-                                            CismapBroker.getInstance().getDefaultCrs());
+                            final AbstractNewFeature.geomTypes geomType = AbstractNewFeature.geomTypes.POINT;
 
-                                    sel.setSelectedEntity(sel.getEntityPositionUnderPoint(mousePoint));
-                                }
-                            }
-                        } else {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Feature cannot be selected"); // NOI18N
-                            }
-                            if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
-                                ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
-                            }
-                            unselectAll();
+                            final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance()
+                                            .getSrs().getCode());
+                            final AbstractNewFeature newFeature = new PureNewFeature(point, mappingComponent.getWtst());
+                            newFeature.setGeometryType(geomType);
+                            newFeature.getGeometry().setSRID(currentSrid);
+                            final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
+                                    mappingComponent.getMappingModel().getSrs().getCode());
+                            newFeature.setGeometry(geom);
+
+                            finishingEvent = pInputEvent;
+                            finishGeometry(newFeature);
+                        } catch (Throwable throwable) {
+                            log.error("Error during the creation of the geometry", throwable); // NOI18N
                         }
-                        postSelectionChanged();
+
                         if (pInputEvent.getClickCount() == 2) {
                             if (sel.getFeature() instanceof SearchFeature) {
                                 final SearchFeature searchFeature = (SearchFeature)sel.getFeature();
@@ -424,9 +402,23 @@ public class SelectionListener extends CreateGeometryListener {
                     ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                     unselectAll();
                 }
-                final PFeature[] pfArr = PFeatureTools.getPFeaturesInArea(
-                        mappingComponent,
-                        geom);
+                PFeature[] pfArr;
+
+                if (geom.getGeometryType().equalsIgnoreCase("point")) {
+                    // getAllValidObjectsUnderPointer: Uses the pnodes to check, if a PFeature intersects the given
+                    // point
+                    pfArr = (PFeature[])PFeatureTools.getAllValidObjectsUnderPointer(
+                                finishingEvent,
+                                new Class[] { PFeature.class }).toArray(new PFeature[0]);
+                } else {
+                    // getPFeaturesInArea: Uses the geometry of the underlying features to check, if a PFeature
+                    // intersects the given area. So it is almost impossible to match a point feature. Even if it is
+                    // displayed by a big symbol. For this reason, getPFeaturesInArea should only be used, if geom is an
+                    // area and not just a point.
+                    pfArr = PFeatureTools.getPFeaturesInArea(
+                            mappingComponent,
+                            geom);
+                }
                 final Vector<Feature> toBeSelected = new Vector<Feature>();
                 final Vector<Feature> toBeUnselected = new Vector<Feature>();
 

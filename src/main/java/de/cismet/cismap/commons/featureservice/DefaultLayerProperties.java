@@ -15,6 +15,8 @@ import org.apache.log4j.Logger;
 
 import org.jdom.Element;
 
+import java.util.Map;
+
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.XMLObjectFactory;
 import de.cismet.cismap.commons.featureservice.style.BasicStyle;
@@ -47,6 +49,7 @@ public class DefaultLayerProperties implements LayerProperties {
     // private String queryTemplate;
 
     private boolean idExpressionEnabled = true;
+    private AbstractFeatureService featureService;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -351,5 +354,20 @@ public class DefaultLayerProperties implements LayerProperties {
     @Override
     public void setQueryType(final int queryType) {
         this.queryType = queryType;
+    }
+
+    @Override
+    public AbstractFeatureService getFeatureService() {
+        return featureService;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureService  DOCUMENT ME!
+     */
+    @Override
+    public void setFeatureService(final AbstractFeatureService featureService) {
+        this.featureService = featureService;
     }
 }

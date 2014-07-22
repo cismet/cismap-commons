@@ -1693,11 +1693,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
     /**
      * Removes an existing internal widget from the map.
-     * <p>
-     * <b>Note:</b> the internalFrame will be disposed and then removed from the mappingComponent.
-     * This has to be done because of a Java Bug, as otherwise a memory leak will be created.
-     * See https://bugs.openjdk.java.net/browse/JDK-8041452 for a similar problem.
-     * </p>
+     *
+     * <p><b>Note:</b> the internalFrame will be disposed and then removed from the mappingComponent. This has to be
+     * done because of a Java Bug, as otherwise a memory leak will be created. See
+     * https://bugs.openjdk.java.net/browse/JDK-8041452 for a similar problem.</p>
      *
      * @param   name  name of the widget to be removed
      *

@@ -153,6 +153,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
     private boolean initialisationError = false;
     private Element initElement = null;
+    private boolean selectable = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -1120,6 +1121,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                 final Element layerPropertiesElement = element.getChild(LayerProperties.LAYER_PROPERTIES_ELEMENT);
                 restoredLayerProperties = (LayerProperties)XMLObjectFactory.restoreObjectfromElement(
                         layerPropertiesElement);
+                restoredLayerProperties.setFeatureService(this);
             } catch (Exception t) {
                 LOG.error("could not restore generic style element '"                           // NOI18N
                             + element.getChild("LayerProperties").getAttribute(ConvertableToXML.TYPE_ATTRIBUTE)
@@ -1337,6 +1339,24 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      */
     public void setInitElement(final Element initElement) {
         this.initElement = initElement;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectable  DOCUMENT ME!
+     */
+    public void setSelectable(final boolean selectable) {
+        this.selectable = selectable;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isSelectable() {
+        return this.selectable;
     }
 
     /**

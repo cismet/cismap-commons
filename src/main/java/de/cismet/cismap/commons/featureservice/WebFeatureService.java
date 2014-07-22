@@ -379,6 +379,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         defaultLayerProperties.getStyle().setFont(new Font("sansserif", Font.PLAIN, 12));               // NOI18N
         defaultLayerProperties.setIdExpression("app:gid", LayerProperties.EXPRESSIONTYPE_PROPERTYNAME); // NOI18N
         defaultLayerProperties.setQueryType(LayerProperties.QUERYTYPE_XML);
+        defaultLayerProperties.setFeatureService(this);
 
         return defaultLayerProperties;
     }
