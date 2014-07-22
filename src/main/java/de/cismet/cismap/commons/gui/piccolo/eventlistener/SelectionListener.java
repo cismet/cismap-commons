@@ -34,6 +34,7 @@ import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
+import de.cismet.cismap.commons.features.CommonFeaturePreciseAction;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
@@ -135,9 +136,10 @@ public class SelectionListener extends CreateGeometryListener {
                     pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
                 }
 
-                final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
+                final List oup = PFeatureTools.getAllValidObjectsUnderPointer(
                         pInputEvent,
                         new Class[] { PFeature.class });
+                final Object o = oup.isEmpty() ? null : oup.get(0);
                 if (pInputEvent.isRightMouseButton()) {
                     if (log.isDebugEnabled()) {
                         log.debug("right mouseclick"); // NOI18N
@@ -164,6 +166,18 @@ public class SelectionListener extends CreateGeometryListener {
                         if (commonFeatureActions != null) {
                             for (final CommonFeatureAction cfa : commonFeatureActions) {
                                 cfa.setSourceFeature(pf.getFeature());
+                                if (cfa instanceof CommonFeaturePreciseAction) {
+                                    final Point2D pos = pInputEvent.getPosition();
+                                    final WorldToScreenTransform wtst = getMappingComponent().getWtst();
+                                    final Coordinate coord = new Coordinate(wtst.getSourceX(pos.getX()),
+                                            wtst.getSourceY(pos.getY()));
+                                    final Collection<Feature> allFeatures = new ArrayList();
+                                    for (final PFeature feature : (Collection<PFeature>)oup) {
+                                        allFeatures.add(feature.getFeature());
+                                    }
+                                    ((CommonFeaturePreciseAction)cfa).setActionCoordinate(coord);
+                                    ((CommonFeaturePreciseAction)cfa).setAllSourceFeatures(allFeatures);
+                                }
                                 if (cfa.isActive()) {
                                     popup.add(cfa);
                                     commonActionCounter++;

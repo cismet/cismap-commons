@@ -62,7 +62,7 @@ public class PFeatureTools {
     /**
      * DOCUMENT ME!
      *
-     * @param   pInputEvent   mc DOCUMENT ME!
+     * @param   pInputEvent   DOCUMENT ME!
      * @param   validClasses  DOCUMENT ME!
      * @param   halo          DOCUMENT ME!
      *
@@ -71,6 +71,57 @@ public class PFeatureTools {
     public static Object getFirstValidObjectUnderPointer2(final PInputEvent pInputEvent,
             final Class[] validClasses,
             final double halo) {
+        final List allValids = (List)getFirstObjectsUnderPointer(pInputEvent, validClasses, halo);
+        if (allValids.isEmpty()) {
+            return null;
+        }
+        return allValids.get(0);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pInputEvent   DOCUMENT ME!
+     * @param   validClasses  DOCUMENT ME!
+     * @param   halo          DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Collection<Object> getFirstObjectsUnderPointer(final PInputEvent pInputEvent,
+            final Class[] validClasses,
+            final double halo) {
+        return getValidObjectsUnderPointer(pInputEvent, validClasses, halo, true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pInputEvent   DOCUMENT ME!
+     * @param   validClasses  DOCUMENT ME!
+     * @param   halo          DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Collection<Object> getValidObjectsUnderPointer(final PInputEvent pInputEvent,
+            final Class[] validClasses,
+            final double halo) {
+        return getValidObjectsUnderPointer(pInputEvent, validClasses, halo, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   pInputEvent          mc DOCUMENT ME!
+     * @param   validClasses         DOCUMENT ME!
+     * @param   halo                 DOCUMENT ME!
+     * @param   stopAfterFirstValid  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static LinkedList getValidObjectsUnderPointer(final PInputEvent pInputEvent,
+            final Class[] validClasses,
+            final double halo,
+            final boolean stopAfterFirstValid) {
         final ArrayList al = new ArrayList();
         final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
         final WorldToScreenTransform wtst = mc.getWtst();
@@ -95,20 +146,21 @@ public class PFeatureTools {
             }
         }
         final Iterator it = al.iterator();
-        Object o = null;
-        boolean rightType = false;
-        do {
-            if (!it.hasNext()) {
-                return null;
-            }
+        Object o;
+        final LinkedList allValids = new LinkedList();
+        while (it.hasNext()) {
             o = it.next();
             for (int i = 0; i < validClasses.length; ++i) {
-                if ((o != null) && validClasses[i].isAssignableFrom(o.getClass())) {
-                    rightType = true;
+                if ((o != null) && validClasses[i].isAssignableFrom(o.getClass()) && (((PNode)o).getParent() != null)
+                            && ((PNode)o).getParent().getVisible() && ((PNode)o).getVisible()) {
+                    allValids.add(o);
+                    if (stopAfterFirstValid) {
+                        break;
+                    }
                 }
             }
-        } while ((o != null) && !rightType);
-        return o;
+        }
+        return allValids;
     }
 
     /**
@@ -327,7 +379,7 @@ public class PFeatureTools {
      * @return  DOCUMENT ME!
      */
     public static Object getFirstValidObjectUnderPointer(final PInputEvent pInputEvent, final Class[] validClasses) {
-        return getFirstValidObjectUnderPointer(pInputEvent, validClasses, 0.001d);
+        return getFirstValidObjectUnderPointer(pInputEvent, validClasses, 1d);
     }
 
     /**
@@ -401,44 +453,7 @@ public class PFeatureTools {
      * @return  DOCUMENT ME!
      */
     public static LinkedList getAllValidObjectsUnderPointer(final PInputEvent pInputEvent, final Class[] validClasses) {
-        Object o = null;
-        boolean first = true;
-        final LinkedList v = new LinkedList();
-        final PPickPath pp = ((MappingComponent)pInputEvent.getComponent()).getCamera()
-                    .pick(pInputEvent.getCanvasPosition().getX(), pInputEvent.getCanvasPosition().getY(), 0.001d);
-        final double xPos = pInputEvent.getPosition().getX();
-        final double yPos = pInputEvent.getPosition().getY();
-        do {
-            if (first) {
-                o = pp.getPickedNode();
-                first = false;
-            } else {
-                o = pp.nextPickedNode();
-            }
-            if ((o != null) && (o instanceof PPath) && !((PPath)o).getPathReference().contains(xPos, yPos)) {
-                // In diesem Fall handelte es sich zwar um ein PPATH aber x,y war nicht im PPath enthalten, deshalb mach
-                // nix
-            } else {
-                for (int i = 0; i < validClasses.length; ++i) {
-                    // if (o!=null) log.debug("_ getFirstValidObjectUnderPointer teste "+o.getClass()+
-                    // ":"+validClasses[i].getName()+" :"+ validClasses[i].isAssignableFrom(o.getClass()));
-                    if ((o != null) && validClasses[i].isAssignableFrom(o.getClass())
-                                && (((PNode)o).getParent() != null) && ((PNode)o).getParent().getVisible()) {
-                        v.add(o);
-                        break;
-                    } else if ((validClasses[i] == PFeature.class) && (o != null)
-                                && ParentNodeIsAPFeature.class.isAssignableFrom(o.getClass())
-                                && (((PNode)o).getParent() != null) && ((PNode)o).getParent().getVisible()) {
-                        o = getPFeatureByChild((ParentNodeIsAPFeature)o);
-                        if (o != null) {
-                            v.add(o);
-                            break;
-                        }
-                    }
-                }
-            }
-        } while (o != null);
-        return v;
+        return getValidObjectsUnderPointer(pInputEvent, validClasses, 0.001d, false);
     }
 
     /**
