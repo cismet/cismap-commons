@@ -403,21 +403,25 @@ public class SelectionListener extends CreateGeometryListener {
                     unselectAll();
                 }
                 PFeature[] pfArr;
-                
+
                 if (geom.getGeometryType().equalsIgnoreCase("point")) {
-                    // getAllValidObjectsUnderPointer: Uses the pnodes to check, if a PFeature intersects the given point
-                    pfArr = (PFeature[])PFeatureTools.getAllValidObjectsUnderPointer(finishingEvent, new Class[] {PFeature.class}).toArray(new PFeature[0]);
+                    // getAllValidObjectsUnderPointer: Uses the pnodes to check, if a PFeature intersects the given
+                    // point
+                    pfArr = (PFeature[])PFeatureTools.getAllValidObjectsUnderPointer(
+                                finishingEvent,
+                                new Class[] { PFeature.class }).toArray(new PFeature[0]);
                 } else {
-                    // getPFeaturesInArea: Uses the geometry of the underlying features to check, if a PFeature intersects the given area. 
-                    // So it is almost impossible to match a point feature. Even if it is displayed by a big symbol. For this reason, getPFeaturesInArea 
-                    // should only be used, if geom is an area and not just a point.
+                    // getPFeaturesInArea: Uses the geometry of the underlying features to check, if a PFeature
+                    // intersects the given area. So it is almost impossible to match a point feature. Even if it is
+                    // displayed by a big symbol. For this reason, getPFeaturesInArea should only be used, if geom is an
+                    // area and not just a point.
                     pfArr = PFeatureTools.getPFeaturesInArea(
                             mappingComponent,
                             geom);
                 }
                 final Vector<Feature> toBeSelected = new Vector<Feature>();
                 final Vector<Feature> toBeUnselected = new Vector<Feature>();
-                
+
                 for (final PFeature pf : pfArr) {
                     if (pf.getFeature().canBeSelected()) {
                         if (mappingComponent.getFeatureCollection() instanceof DefaultFeatureCollection) {
