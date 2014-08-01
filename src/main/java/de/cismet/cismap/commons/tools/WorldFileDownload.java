@@ -127,7 +127,7 @@ public class WorldFileDownload extends AbstractDownload {
         df.setDecimalFormatSymbols(dfs);
         df.setMaximumFractionDigits(32);
         final double widthPixel = image.getWidth(null);
-        final double heightPixel = image.getWidth(null);
+        final double heightPixel = image.getHeight(null);
 
         // pixel size in the x-direction in map units/pixel
         final double xPixelSize = (boundingBox.getX2() - boundingBox.getX1()) / widthPixel;
@@ -144,7 +144,7 @@ public class WorldFileDownload extends AbstractDownload {
         final double xPixelCenter = boundingBox.getX1() + (xPixelSize / 2);
 
         // y-coordinate of the center of the upper left pixel
-        final double yPixelCenter = boundingBox.getY1() + (yPixelSize / 2);
+        final double yPixelCenter = boundingBox.getY2() + (yPixelSize / 2);
 
         final StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(df.format(xPixelSize));
