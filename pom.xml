@@ -119,12 +119,6 @@
         </dependency>
         <dependency>
             <groupId>org.orbisgis</groupId>
-            <artifactId>h2gis</artifactId>
-            <version>1.0.2</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>org.orbisgis</groupId>
             <artifactId>spatial-utilities</artifactId>
             <version>1.0.2</version>
         </dependency>
