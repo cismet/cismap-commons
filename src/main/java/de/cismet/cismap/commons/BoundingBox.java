@@ -404,9 +404,12 @@ public class BoundingBox implements Cloneable, Serializable {
      */
     public void increase(final int percentage) {
         final double factor = (percentage / 2.0) / 100.0;
-        setX1(getX1() - (getWidth() * factor));
-        setX2(getX2() + (getWidth() * factor));
-        setY1(getY1() - (getHeight() * factor));
-        setY2(getY2() + (getHeight() * factor));
+        final double additionalWidth = getWidth() * factor;
+        final double additionalHeight = getHeight() * factor;
+
+        setX1(getX1() - additionalWidth);
+        setX2(getX2() + additionalWidth);
+        setY1(getY1() - additionalHeight);
+        setY2(getY2() + additionalHeight);
     }
 }

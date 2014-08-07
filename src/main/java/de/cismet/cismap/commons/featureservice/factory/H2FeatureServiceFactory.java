@@ -24,6 +24,8 @@ import org.h2gis.utilities.SFSUtilities;
 import org.h2gis.utilities.wrapper.ConnectionWrapper;
 import org.h2gis.utilities.wrapper.StatementWrapper;
 
+import org.openide.util.Exceptions;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.ObjectInputStream;
@@ -70,6 +72,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     //~ Instance fields --------------------------------------------------------
 
     protected Vector<FeatureServiceAttribute> featureServiceAttributes;
+    // the geometry field in the database or null, if the data were imported from a
+    // dbf and does not contain geometries
     private String geometryField;
     private String idField = "id";
     private ConnectionWrapper conn;
@@ -381,21 +385,31 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 //        final StringBuilder sb = new StringBuilder("select id, the_geom from ");
         final StringBuilder sb = new StringBuilder("select id from \"");
         final int srid = CrsTransformer.extractSridFromCrs(crs.getCode());
-        sb.append(tableName)
-                .append("\" WHERE ")
-                .append(geometryField)
-                .append(" && '")
-                .append(boundingBox.getGeometry(srid))
-                .append("'");
+
+        if (boundingBox != null) {
+            sb.append(tableName)
+                    .append("\" WHERE ")
+                    .append(geometryField)
+                    .append(" && '")
+                    .append(boundingBox.getGeometry(srid))
+                    .append("'");
 //                .append("' and ")
 //                .append("intersects(")
 //                .append(geometryField)
 //                .append(", '")
 //                .append(boundingBox.getGeometry(srid))
 //                .append("')");
+        } else {
+            sb.append(tableName).append("\"");
+        }
 
         if ((query != null) && !query.equals("")) {
-            sb.append(" and ").append(query);
+            if (boundingBox != null) {
+                sb.append(" and ");
+            } else {
+                sb.append(" WHERE ");
+            }
+            sb.append(query);
         }
         if (limit != 0) {
             sb.append(" limit ").append(limit);
@@ -478,26 +492,47 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     public int getFeatureCount(final BoundingBox bb) {
         final StringBuilder sb = new StringBuilder("select count(*) from \"");
         final int srid = CrsTransformer.extractSridFromCrs(crs.getCode());
-        sb.append(tableName)
-                .append("\" WHERE ")
-                .append(geometryField)
-                .append(" && '")
-                .append(bb.getGeometry(srid))
-                .append("'");
+
+        if (bb != null) {
+            sb.append(tableName)
+                    .append("\" WHERE ")
+                    .append(geometryField)
+                    .append(" && '")
+                    .append(bb.getGeometry(srid))
+                    .append("'");
+        } else {
+            sb.append(tableName).append("\"");
+        }
         final String query = sb.toString();
         int result = 0;
 
-        try {
-            final StatementWrapper st = createStatement();
-            final ResultSet rs = st.executeQuery(query);
+        StatementWrapper st = null;
+        ResultSet rs = null;
 
+        try {
+            st = createStatement();
+            rs = st.executeQuery(query);
             if (rs.next()) {
                 result = rs.getInt(1);
             }
-            rs.close();
-            st.close();
         } catch (SQLException e) {
             LOG.error("Error while determining the feature count. Query: " + query, e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close result set", ex);
+                }
+            }
+
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close statement", ex);
+                }
+            }
         }
 
         return result;

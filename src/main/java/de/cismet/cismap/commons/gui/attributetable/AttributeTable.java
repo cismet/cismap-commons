@@ -136,6 +136,7 @@ public class AttributeTable extends javax.swing.JPanel {
     //~ Instance fields --------------------------------------------------------
 
     private AbstractFeatureService featureService;
+    // bb will be null, if the featureService has no geometries
     private XBoundingBox bb;
     private int pageSize = 40;
     private int currentPage = 1;
@@ -346,13 +347,18 @@ public class AttributeTable extends javax.swing.JPanel {
 
         txtCurrentPage.setText("1");
         final Geometry g = ZoomToLayerWorker.getServiceBounds(featureService);
-        bb = new XBoundingBox(g);
 
-        try {
-            final CrsTransformer transformer = new CrsTransformer(CismapBroker.getInstance().getSrs().getCode());
-            bb = transformer.transformBoundingBox(bb);
-        } catch (Exception e) {
-            LOG.error("Cannot transform CRS.", e);
+        if (g != null) {
+            bb = new XBoundingBox(g);
+
+            try {
+                final CrsTransformer transformer = new CrsTransformer(CismapBroker.getInstance().getSrs().getCode());
+                bb = transformer.transformBoundingBox(bb);
+            } catch (Exception e) {
+                LOG.error("Cannot transform CRS.", e);
+            }
+        } else {
+            bb = null;
         }
 
         loadModel(currentPage);
