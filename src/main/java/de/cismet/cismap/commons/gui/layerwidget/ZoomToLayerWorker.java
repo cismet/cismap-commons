@@ -38,6 +38,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.wms.capabilities.Envelope;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
@@ -231,6 +232,9 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
         } else if (rsl instanceof GMLFeatureService) {
             final GMLFeatureService sffs = (GMLFeatureService)rsl;
             g = ((GMLFeatureFactory)sffs.getFeatureFactory()).getEnvelope();
+        } else if (rsl instanceof ImageRasterService) {
+            final ImageRasterService irs = (ImageRasterService)rsl;
+            g = irs.getEnvelope();
         }
 
         return g;
@@ -240,13 +244,15 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
     protected void done() {
         try {
             final Geometry geom = get();
-            final XBoundingBox boundingBox = new XBoundingBox(geom);
+            if (geom != null) {
+                final XBoundingBox boundingBox = new XBoundingBox(geom);
 
-            if (buffer != 0) {
-                boundingBox.increase(buffer);
+                if (buffer != 0) {
+                    boundingBox.increase(buffer);
+                }
+
+                CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(boundingBox);
             }
-
-            CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(boundingBox);
         } catch (Exception e) {
             LOG.error("Error while zooming to extend", e);
         }
