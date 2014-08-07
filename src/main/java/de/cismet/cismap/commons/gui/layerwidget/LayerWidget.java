@@ -67,6 +67,7 @@ import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
@@ -92,6 +93,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     //~ Static fields/initializers ---------------------------------------------
 
     private static DataFlavor uriListFlavor;
+    private static final String[] SUPPORTED_IMAGE_FORMATS = { "png", "jpg", "tif", "tiff", "gif" };
 
     static {
         try {
@@ -436,7 +438,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshSingleLayerActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshSingleLayerActionPerformed
+    private void cmdRefreshSingleLayerActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshSingleLayerActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
         final SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 
@@ -466,14 +468,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             };
 
         worker.execute();
-    } //GEN-LAST:event_cmdRefreshSingleLayerActionPerformed
+    }//GEN-LAST:event_cmdRefreshSingleLayerActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdDownActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdDownActionPerformed
+    private void cmdDownActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDownActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -504,14 +506,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                 }
             });
-    } //GEN-LAST:event_cmdDownActionPerformed
+    }//GEN-LAST:event_cmdDownActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdUpActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdUpActionPerformed
+    private void cmdUpActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdUpActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -543,14 +545,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                 }
             });
-    } //GEN-LAST:event_cmdUpActionPerformed
+    }//GEN-LAST:event_cmdUpActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdMakeInvisibleActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdMakeInvisibleActionPerformed
+    private void cmdMakeInvisibleActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMakeInvisibleActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -571,14 +573,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     treeTable.getTree().setSelectionPaths(tps);
                 }
             });
-    } //GEN-LAST:event_cmdMakeInvisibleActionPerformed
+    }//GEN-LAST:event_cmdMakeInvisibleActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdDisableActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdDisableActionPerformed
+    private void cmdDisableActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDisableActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -598,14 +600,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     treeTable.getTree().setSelectionPaths(tps);
                 }
             });
-    } //GEN-LAST:event_cmdDisableActionPerformed
+    }//GEN-LAST:event_cmdDisableActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdTreeCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdTreeCollapseActionPerformed
+    private void cmdTreeCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdTreeCollapseActionPerformed
         // StaticSwingTools.jTreeCollapseAllNodes(treeTable.getTree());
 // int sel = treeTable.getSelectionModel().getMinSelectionIndex();
 // if (treeTable.getRowCount() > 0) {
@@ -620,14 +622,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 // }
 
         treeTable.getColumnModel().getColumn(3).getCellEditor().stopCellEditing();
-    } //GEN-LAST:event_cmdTreeCollapseActionPerformed
+    }//GEN-LAST:event_cmdTreeCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         try {
             final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
@@ -664,14 +666,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         } catch (final Exception e) {
             log.error("Error during removal of layer", e);
         }
-    } //GEN-LAST:event_cmdRemoveActionPerformed
+    }//GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
+    private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
         final SwingWorker<Geometry, Geometry> worker = new SwingWorker<Geometry, Geometry>() {
 
@@ -777,7 +779,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             };
 
         worker.execute();
-    } //GEN-LAST:event_cmdZoomToFullExtentActionPerformed
+    }//GEN-LAST:event_cmdZoomToFullExtentActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -901,47 +903,52 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         // NO HARDCODING
                         try {
                             log.info("DocumentUri: " + currentFile.toURI()); // NOI18N
+                            if (isGeoImage(currentFile.getName())) {
+                                final ImageRasterService irs = new ImageRasterService(currentFile);
 
-                            final AbstractFeatureService dfs = DocumentFeatureServiceFactory
-                                        .createDocumentFeatureService(currentFile);
-                            activeLayerModel.addLayer(dfs);
+                                activeLayerModel.addLayer(irs);
+                            } else {
+                                final AbstractFeatureService dfs = DocumentFeatureServiceFactory
+                                            .createDocumentFeatureService(currentFile);
+                                activeLayerModel.addLayer(dfs);
 
-                            if (dfs instanceof ShapeFileFeatureService) {
-                                new Thread(new Runnable() {
+                                if (dfs instanceof ShapeFileFeatureService) {
+                                    new Thread(new Runnable() {
 
-                                        @Override
-                                        public void run() {
-                                            do {
-                                                try {
-                                                    Thread.sleep(500);
-                                                } catch (final InterruptedException e) {
-                                                    // nothing to do
+                                            @Override
+                                            public void run() {
+                                                do {
+                                                    try {
+                                                        Thread.sleep(500);
+                                                    } catch (final InterruptedException e) {
+                                                        // nothing to do
+                                                    }
+                                                } while (!dfs.isInitialized());
+
+                                                if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
+                                                    JOptionPane.showMessageDialog(
+                                                        StaticSwingTools.getParentFrame(LayerWidget.this),
+                                                        NbBundle.getMessage(
+                                                            LayerWidget.class,
+                                                            "LayerWidget.drop().errorInShapeGeometryFoundMessage"),
+                                                        NbBundle.getMessage(
+                                                            LayerWidget.class,
+                                                            "LayerWidget.drop().errorInShapeGeometryFoundTitle"),
+                                                        JOptionPane.ERROR_MESSAGE);
+                                                } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
+                                                    JOptionPane.showMessageDialog(
+                                                        StaticSwingTools.getParentFrame(LayerWidget.this),
+                                                        NbBundle.getMessage(
+                                                            LayerWidget.class,
+                                                            "LayerWidget.drop().noGeometryFoundInShapeMessage"),
+                                                        NbBundle.getMessage(
+                                                            LayerWidget.class,
+                                                            "LayerWidget.drop().noGeometryFoundInShapeTitle"),
+                                                        JOptionPane.WARNING_MESSAGE);
                                                 }
-                                            } while (!dfs.isInitialized());
-
-                                            if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
-                                                JOptionPane.showMessageDialog(
-                                                    StaticSwingTools.getParentFrame(LayerWidget.this),
-                                                    NbBundle.getMessage(
-                                                        LayerWidget.class,
-                                                        "LayerWidget.drop().errorInShapeGeometryFoundMessage"),
-                                                    NbBundle.getMessage(
-                                                        LayerWidget.class,
-                                                        "LayerWidget.drop().errorInShapeGeometryFoundTitle"),
-                                                    JOptionPane.ERROR_MESSAGE);
-                                            } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
-                                                JOptionPane.showMessageDialog(
-                                                    StaticSwingTools.getParentFrame(LayerWidget.this),
-                                                    NbBundle.getMessage(
-                                                        LayerWidget.class,
-                                                        "LayerWidget.drop().noGeometryFoundInShapeMessage"),
-                                                    NbBundle.getMessage(
-                                                        LayerWidget.class,
-                                                        "LayerWidget.drop().noGeometryFoundInShapeTitle"),
-                                                    JOptionPane.WARNING_MESSAGE);
                                             }
-                                        }
-                                    }).start();
+                                        }).start();
+                                }
                             }
                         } catch (final Exception ex) {
                             log.error("Error during creation of a FeatureServices", ex); // NOI18N
@@ -1064,6 +1071,23 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         }
     }
 
+    /**
+     * Checks, if the given file name is the name of an image file
+     *
+     * @param   fileName  the name of the file to check
+     *
+     * @return  true, iff the given file name is the name of an image file
+     */
+    private static boolean isGeoImage(final String fileName) {
+        for (final String ending : SUPPORTED_IMAGE_FORMATS) {
+            if (fileName.endsWith(ending)) {
+                return true;
+            }
+        }
+
+        return false;
+    }    
+    
     /**
      * DOCUMENT ME!
      *
