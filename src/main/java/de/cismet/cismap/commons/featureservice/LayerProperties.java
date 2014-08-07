@@ -205,13 +205,6 @@ public interface LayerProperties extends ConvertableToXML, Cloneable {
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
-     */
-    AbstractFeatureService getFeatureService();
-
-    /**
-     * DOCUMENT ME!
-     *
      * @param  service  DOCUMENT ME!
      */
     void setFeatureService(AbstractFeatureService service);

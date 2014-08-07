@@ -26,11 +26,13 @@ import java.util.Vector;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.PostgisFeature;
 import de.cismet.cismap.commons.features.UpdateablePostgisFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.SimpleFeatureServiceSqlStatement;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.jtsgeometryfactories.PostGisGeometryFactory;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
 
