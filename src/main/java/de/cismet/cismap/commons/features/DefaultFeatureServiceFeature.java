@@ -22,9 +22,15 @@ import java.awt.Paint;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
@@ -764,5 +770,61 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     protected void firePropertyChange(final String propertyName, final Object oldValue, final Object newValue) {
         propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
+    }
+
+    @Override
+    public String toString() {
+        final AbstractFeatureService service = layerProperties.getFeatureService();
+        final List<String> nameParts = new ArrayList<String>();
+
+        if (service != null) {
+            final Map<String, FeatureServiceAttribute> attributes = service.getFeatureServiceAttributes();
+            final List<String> attributeNames = service.getOrderedFeatureServiceAttributes();
+
+            for (final String key : attributeNames) {
+                final FeatureServiceAttribute attr = attributes.get(key);
+
+                if (attr.isNameElement()) {
+                    nameParts.add(String.valueOf(getProperty(key)));
+                }
+            }
+        }
+
+        if (!nameParts.isEmpty()) {
+            StringBuilder sb = null;
+
+            for (final String part : nameParts) {
+                if (sb == null) {
+                    sb = new StringBuilder();
+                    sb.append(part);
+                } else {
+                    sb.append(" - ").append(part);
+                }
+            }
+
+            return sb.toString();
+        } else {
+            final String[] prefferedKeys = { "ID", "id", "Id", "app:ID", "app:id", "app:Id" };
+            final HashMap propertyMap = getProperties();
+
+            for (final String key : prefferedKeys) {
+                if (propertyMap.containsKey(key)) {
+                    final Object id = propertyMap.get(key);
+
+                    if (id != null) {
+                        return id.toString();
+                    }
+                }
+            }
+
+            // no ID key found. Return a random attribute
+            final Iterator it = propertyMap.keySet().iterator();
+
+            if (it.hasNext()) {
+                return String.valueOf(propertyMap.get(it.next()));
+            } else {
+                return super.toString();
+            }
+        }
     }
 }

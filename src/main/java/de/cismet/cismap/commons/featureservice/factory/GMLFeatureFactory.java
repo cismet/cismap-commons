@@ -341,7 +341,7 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
     public synchronized List<DefaultFeatureServiceFeature> createFeatures(final String query,
             final BoundingBox boundingBox,
             final SwingWorker workerThread) throws TooManyFeaturesException, Exception {
-        return createFeatures(query, boundingBox, workerThread, 0, 0, null);
+        return createFeatures_internal(query, boundingBox, workerThread, 0, 0, null, true);
     }
 
     /**
@@ -418,6 +418,32 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
             final int offset,
             final int limit,
             final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+        return createFeatures_internal(query, boundingBox, workerThread, offset, limit, orderBy, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   query              DOCUMENT ME!
+     * @param   boundingBox        DOCUMENT ME!
+     * @param   workerThread       DOCUMENT ME!
+     * @param   offset             DOCUMENT ME!
+     * @param   limit              DOCUMENT ME!
+     * @param   orderBy            DOCUMENT ME!
+     * @param   saveAsLastCreated  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                 DOCUMENT ME!
+     */
+    private synchronized List<DefaultFeatureServiceFeature> createFeatures_internal(final String query,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy,
+            final boolean saveAsLastCreated) throws TooManyFeaturesException, Exception {
         if (!this.initialised) {
             logger.warn("SW[" + workerThread + "]: Factory not correclty initialised, parsing gml file");
             this.parseGMLFile(workerThread);
@@ -440,30 +466,35 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
                 CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
         final Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
+        List<DefaultFeatureServiceFeature> selectedFeatures;
 
-        List<DefaultFeatureServiceFeature> selectedFeatures = this.degreeFeaturesTree.query(
-                boundingPolygon.getEnvelopeInternal());
+        if (featuresAlreadyInMemory(boundingPolygon, query)) {
+            selectedFeatures = createFeaturesFromMemory(query, boundingPolygon);
+        } else {
+            selectedFeatures = this.degreeFeaturesTree.query(
+                    boundingPolygon.getEnvelopeInternal());
 
-        // check if thread is canceled .........................................
-        if (this.checkCancelled(workerThread, " quering spatial index structure")) {
-            return null;
-        }
-        // check if thread is canceled .........................................
+            // check if thread is canceled .........................................
+            if (this.checkCancelled(workerThread, " quering spatial index structure")) {
+                return null;
+            }
+            // check if thread is canceled .........................................
 
-        logger.info("SW[" + workerThread + "]: " + selectedFeatures.size()
-                    + " features selected by bounding box out of " + this.degreeFeaturesTree.size()
-                    + " in spatial index");
-        if (DEBUG) {
-            if (logger.isDebugEnabled()) {
-                logger.debug("SW[" + workerThread + "]: quering spatial index for bounding box took "
-                            + (System.currentTimeMillis() - start) + " ms");
+            logger.info("SW[" + workerThread + "]: " + selectedFeatures.size()
+                        + " features selected by bounding box out of " + this.degreeFeaturesTree.size()
+                        + " in spatial index");
+            if (DEBUG) {
+                if (logger.isDebugEnabled()) {
+                    logger.debug("SW[" + workerThread + "]: quering spatial index for bounding box took "
+                                + (System.currentTimeMillis() - start) + " ms");
+                }
             }
         }
 
         if (selectedFeatures.size() > this.getMaxFeatureCount()) {
             throw new TooManyFeaturesException("features in selected area " + selectedFeatures.size()
                         + " exceeds max feature count " + this.getMaxFeatureCount());
-        } else if (selectedFeatures.size() == 0) {
+        } else if (selectedFeatures.isEmpty()) {
             logger.warn("SW[" + workerThread + "]: no features found in selected bounding box");
             return null;
         }
@@ -488,7 +519,10 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
         }
         // check if thread is canceled .........................................
 
-        this.updateLastCreatedFeatures(selectedFeatures);
+        if (saveAsLastCreated) {
+            this.updateLastCreatedFeatures(selectedFeatures, boundingPolygon, query);
+        }
+
         return new Vector<DefaultFeatureServiceFeature>(selectedFeatures);
     }
 

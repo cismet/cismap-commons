@@ -771,6 +771,34 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  DOCUMENT ME!
      */
     public String getGetFeatureInfoUrl(final int x, final int y, final WMSLayer l) {
+        return getGetFeatureInfoUrl_internal(x, y, l, "text/html");
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   x       DOCUMENT ME!
+     * @param   y       DOCUMENT ME!
+     * @param   l       DOCUMENT ME!
+     * @param   format  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getGetFeatureInfoUrl(final int x, final int y, final WMSLayer l, final String format) {
+        return getGetFeatureInfoUrl_internal(x, y, l, format);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   x       DOCUMENT ME!
+     * @param   y       DOCUMENT ME!
+     * @param   l       DOCUMENT ME!
+     * @param   format  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String getGetFeatureInfoUrl_internal(final int x, final int y, final WMSLayer l, final String format) {
         String url = getGetFeatureInfoPrefix();
 
         if ((bb != null) && (url != null)) {
@@ -808,7 +836,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             }
 
             url += "&QUERY_LAYERS=" + l.getOgcCapabilitiesLayer().getName(); // NOI18N
-            url += "&INFO_FORMAT=text/html";                                 // NOI18N
+            url += "&INFO_FORMAT=" + format;                                 // NOI18N
             if (version.trim().equals("1.3") || version.trim().equals("1.3.0")) {
                 url += "&I=" + x;                                            // NOI18N
                 url += "&J=" + y;                                            // NOI18N

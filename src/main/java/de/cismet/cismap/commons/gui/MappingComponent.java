@@ -75,7 +75,9 @@ import de.cismet.cismap.commons.gui.simplelayerwidget.LayerControl;
 import de.cismet.cismap.commons.gui.simplelayerwidget.NewSimpleInternalLayerWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.CrsChangeListener;
+import de.cismet.cismap.commons.interaction.GetFeatureInfoListener;
 import de.cismet.cismap.commons.interaction.events.CrsChangedEvent;
+import de.cismet.cismap.commons.interaction.events.GetFeatureInfoEvent;
 import de.cismet.cismap.commons.interaction.events.MapDnDEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.interaction.memento.Memento;
@@ -127,6 +129,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public static final String PAN = "PAN";                                                 // NOI18N
     public static final String ALKIS_PRINT = "ALKIS_PRINT";                                 // NOI18N
     public static final String FEATURE_INFO = "FEATURE_INFO";                               // NOI18N
+    public static final String FEATURE_INFO_MULTI_GEOM = "FEATURE_INFO_MULTI_GEOM";         // NOI18N
     public static final String CREATE_SEARCH_POLYGON = "SEARCH_POLYGON";                    // NOI18N
     public static final String CREATE_SIMPLE_GEOMETRY = "CREATE_SIMPLE_GEOMETRY";           // NOI18N
     public static final String MOVE_POLYGON = "MOVE_POLYGON";                               // NOI18N
@@ -1049,6 +1052,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         inputEventListener.put(SELECT, new SelectionListener());
 
         inputEventListener.put(FEATURE_INFO, new GetFeatureInfoClickDetectionListener());
+        inputEventListener.put(FEATURE_INFO_MULTI_GEOM, new GetFeatureInfoMultiGeomListener());
         inputEventListener.put(CREATE_SEARCH_POLYGON, new MetaSearchCreateSearchGeometryListener(this));
         inputEventListener.put(CREATE_SIMPLE_GEOMETRY, new CreateSimpleGeometryListener(this));
 
@@ -1084,6 +1088,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         putCursor(ZOOM, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(PAN, new Cursor(Cursor.HAND_CURSOR));
         putCursor(FEATURE_INFO, new Cursor(Cursor.DEFAULT_CURSOR));
+        putCursor(FEATURE_INFO_MULTI_GEOM, new Cursor(Cursor.DEFAULT_CURSOR));
         putCursor(CREATE_SEARCH_POLYGON, new Cursor(Cursor.CROSSHAIR_CURSOR));
 
         putCursor(MOVE_POLYGON, new Cursor(Cursor.HAND_CURSOR));
@@ -5138,6 +5143,25 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void setInputEventListener(final HashMap<String, PBasicInputEventHandler> inputEventListener) {
         this.inputEventListener.clear();
         this.inputEventListener.putAll(inputEventListener);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void addGetFeatureInfoListener(final GetFeatureInfoListener l) {
+        ((GetFeatureInfoMultiGeomListener)inputEventListener.get(FEATURE_INFO_MULTI_GEOM)).addGetFeatureInfoListener(l);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void removeGetFeatureInfoListener(final GetFeatureInfoListener l) {
+        ((GetFeatureInfoMultiGeomListener)inputEventListener.get(FEATURE_INFO_MULTI_GEOM)).removeGetFeatureInfoListener(
+            l);
     }
 
     /**

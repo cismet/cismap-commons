@@ -426,7 +426,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     public synchronized List<ShapeFeature> createFeatures(final String query,
             final BoundingBox boundingBox,
             final SwingWorker workerThread) throws TooManyFeaturesException, Exception {
-        return createFeatures(query, boundingBox, workerThread, 0, 0, null, true);
+        return createFeatures_internal(query, boundingBox, workerThread, 0, 0, null, true);
     }
 
     @Override
@@ -561,32 +561,32 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             final int offset,
             final int limit,
             final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
-        return createFeatures(query, boundingBox, workerThread, offset, limit, orderBy, false);
+        return createFeatures_internal(query, boundingBox, workerThread, offset, limit, orderBy, false);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param   query         DOCUMENT ME!
-     * @param   boundingBox   DOCUMENT ME!
-     * @param   workerThread  DOCUMENT ME!
-     * @param   offset        DOCUMENT ME!
-     * @param   limit         DOCUMENT ME!
-     * @param   orderBy       DOCUMENT ME!
-     * @param   shapeLimit    DOCUMENT ME!
+     * @param   query              DOCUMENT ME!
+     * @param   boundingBox        DOCUMENT ME!
+     * @param   workerThread       DOCUMENT ME!
+     * @param   offset             DOCUMENT ME!
+     * @param   limit              DOCUMENT ME!
+     * @param   orderBy            DOCUMENT ME!
+     * @param   saveAsLastCreated  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      *
      * @throws  TooManyFeaturesException  DOCUMENT ME!
      * @throws  Exception                 DOCUMENT ME!
      */
-    public synchronized List<ShapeFeature> createFeatures(final String query,
+    private synchronized List<ShapeFeature> createFeatures_internal(final String query,
             final BoundingBox boundingBox,
             final SwingWorker workerThread,
             final int offset,
             final int limit,
             final FeatureServiceAttribute[] orderBy,
-            final boolean shapeLimit) throws TooManyFeaturesException, Exception {
+            final boolean saveAsLastCreated) throws TooManyFeaturesException, Exception {
         try {
             if (!this.initialised) {
                 logger.warn("SW[" + workerThread + "]: Factory not correclty initialised, parsing shape file");
@@ -600,8 +600,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                 // check if thread is canceled .........................................
             }
 
-            // this.lastCreatedfeatureVector.clear();
-
+            List<ShapeFeature> selectedFeatures;
             final long start = System.currentTimeMillis();
             final Coordinate[] polyCords = new Coordinate[5];
             polyCords[0] = new Coordinate(boundingBox.getX1(), boundingBox.getY1());
@@ -616,37 +615,42 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
             boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
 
-            String filename = null;
-
-            if (this.documentURI.getPath().endsWith(".shp")) {
-                filename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
+            if (featuresAlreadyInMemory(boundingPolygon, query)) {
+                selectedFeatures = createFeaturesFromMemory(query, boundingPolygon);
             } else {
-                filename = this.documentURI.getPath();
-            }
+                String filename = null;
 
-            final ShapeFile persShapeFile = getShapeFile();
-
-            shapeFile = null;
-            final int[] recordNumbers = persShapeFile.getGeoNumbersByRect(JTSAdapter.wrap(boundingPolygon)
-                            .getEnvelope());
-
-            if (recordNumbers == null) {
-                return new Vector<ShapeFeature>();
-            }
-
-            List<ShapeFeature> selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
-            final ShapeInfo info = new ShapeInfo(filename, persShapeFile, shapeSrid, fc);
-            int count = 0;
-
-//            if (!shapeLimit || (recordNumbers.length < 60000)) {
-            for (final int record : recordNumbers) {
-                ++count;
-                if (shapeLimit && (count > 50000)) {
-                    break;
+                if (this.documentURI.getPath().endsWith(".shp")) {
+                    filename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
+                } else {
+                    filename = this.documentURI.getPath();
                 }
-                final ShapeFeature featureServiceFeature = createFeatureInstance(null, info, record);
-                this.initialiseFeature(featureServiceFeature, null, false, record);
-                selectedFeatures.add(featureServiceFeature);
+
+                final ShapeFile persShapeFile = getShapeFile();
+
+                shapeFile = null;
+                final int[] recordNumbers = persShapeFile.getGeoNumbersByRect(JTSAdapter.wrap(boundingPolygon)
+                                .getEnvelope());
+
+                if (recordNumbers == null) {
+                    return new Vector<ShapeFeature>();
+                }
+
+                selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
+                final ShapeInfo info = new ShapeInfo(filename, persShapeFile, shapeSrid, fc);
+                int count = 0;
+
+//                if (!saveAsLastCreated || recordNumbers.length < 60000) {
+                for (final int record : recordNumbers) {
+                    ++count;
+                    final ShapeFeature featureServiceFeature = createFeatureInstance(null, info, record);
+                    this.initialiseFeature(featureServiceFeature, null, false, record);
+                    selectedFeatures.add(featureServiceFeature);
+
+                    if (saveAsLastCreated && (count > 50000)) {
+                        break;
+                    }
+                }
             }
 //            }
 
@@ -661,9 +665,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             }
             // check if thread is canceled .........................................
 
-            logger.info("SW[" + workerThread + "]: " + selectedFeatures.size()
-                        + " features selected by bounding box out of " + persShapeFile.getRecordNum()
-                        + " in spatial index");
             if (logger.isDebugEnabled()) {
                 logger.debug("SW[" + workerThread + "]: quering spatial index for bounding box took "
                             + (System.currentTimeMillis() - start) + " ms");
@@ -697,7 +698,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             }
             // check if thread is canceled .........................................
 
-            this.updateLastCreatedFeatures(selectedFeatures);
+            if (saveAsLastCreated) {
+                this.updateLastCreatedFeatures(selectedFeatures, boundingPolygon, query);
+            }
             return new Vector<ShapeFeature>(selectedFeatures);
         } finally {
             cleanup();

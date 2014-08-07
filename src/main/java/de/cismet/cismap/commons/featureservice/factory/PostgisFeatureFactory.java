@@ -26,11 +26,13 @@ import java.util.Vector;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.PostgisFeature;
 import de.cismet.cismap.commons.features.UpdateablePostgisFeature;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.SimpleFeatureServiceSqlStatement;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.jtsgeometryfactories.PostGisGeometryFactory;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
 
@@ -136,7 +138,7 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
     public synchronized List<PostgisFeature> createFeatures(final SimpleFeatureServiceSqlStatement sqlStatement,
             final BoundingBox boundingBox,
             final SwingWorker workerThread) throws FeatureFactory.TooManyFeaturesException, Exception {
-        return createFeatures(sqlStatement, boundingBox, workerThread, 0, 0, null);
+        return createFeatures_internal(sqlStatement, boundingBox, workerThread, 0, 0, null, true);
     }
 
     @Override
@@ -188,6 +190,33 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
             final int offset,
             final int limit,
             final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+        return createFeatures_internal(sqlStatement, boundingBox, workerThread, offset, limit, orderBy, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   sqlStatement       DOCUMENT ME!
+     * @param   boundingBox        DOCUMENT ME!
+     * @param   workerThread       DOCUMENT ME!
+     * @param   offset             DOCUMENT ME!
+     * @param   limit              DOCUMENT ME!
+     * @param   orderBy            DOCUMENT ME!
+     * @param   saveAsLastCreated  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                 DOCUMENT ME!
+     */
+    private synchronized List<PostgisFeature> createFeatures_internal(
+            final SimpleFeatureServiceSqlStatement sqlStatement,
+            final BoundingBox boundingBox,
+            final SwingWorker workerThread,
+            final int offset,
+            final int limit,
+            final FeatureServiceAttribute[] orderBy,
+            final boolean saveAsLastCreated) throws TooManyFeaturesException, Exception {
         if (checkCancelled(workerThread, "createFeatures()")) {
             return null;
         }
@@ -341,7 +370,11 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
 
         this.logger.info("FRW[" + workerThread + "]: Postgis request took " + (System.currentTimeMillis() - start)
                     + " ms");
-        updateLastCreatedFeatures(postgisFeatures);
+
+        if (saveAsLastCreated) {
+            final int crs = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
+            updateLastCreatedFeatures(postgisFeatures, boundingBox.getGeometry(crs), sqlStatement);
+        }
         return postgisFeatures;
     }
 }

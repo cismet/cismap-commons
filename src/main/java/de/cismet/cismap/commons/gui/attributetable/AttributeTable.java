@@ -110,6 +110,7 @@ import de.cismet.cismap.commons.tools.ExportCsvDownload;
 import de.cismet.cismap.commons.tools.ExportDownload;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.tools.ExportTxtDownload;
+import de.cismet.cismap.commons.tools.FeatureTools;
 import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
@@ -236,17 +237,7 @@ public class AttributeTable extends javax.swing.JPanel {
         butUndo.setVisible(false);
         locker = FeatureLockerFactory.getInstance().getLockerForFeatureService(featureService);
 
-        final String ruleSetName = camelize(featureService.getName()) + "RuleSet";
-
-        try {
-            final Class ruleSetClass = Class.forName("de.cismet.cismap.custom.attributerule." + ruleSetName);
-            final Object o = ruleSetClass.newInstance();
-            if (o instanceof DefaultAttributeTableRuleSet) {
-                tableRuleSet = (DefaultAttributeTableRuleSet)o;
-            }
-        } catch (Exception e) {
-            // nothing to do
-        }
+        tableRuleSet = getTableRuleSetForFeatureService(featureService);
 
         jcFeatures.setModel(new DefaultComboBoxModel(
                 new Object[] {
@@ -441,6 +432,30 @@ public class AttributeTable extends javax.swing.JPanel {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   featureService  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static DefaultAttributeTableRuleSet getTableRuleSetForFeatureService(
+            final AbstractFeatureService featureService) {
+        final String ruleSetName = camelize(featureService.getName()) + "RuleSet";
+
+        try {
+            final Class ruleSetClass = Class.forName("de.cismet.cismap.custom.attributerule." + ruleSetName);
+            final Object o = ruleSetClass.newInstance();
+            if (o instanceof DefaultAttributeTableRuleSet) {
+                return (DefaultAttributeTableRuleSet)o;
+            }
+        } catch (Exception e) {
+            // nothing to do
+        }
+
+        return null;
+    }
 
     /**
      * Locks the given feature, if a corresponding locker exists and make the feature editable.
@@ -2518,37 +2533,7 @@ public class AttributeTable extends javax.swing.JPanel {
                 final String key = attributeNames[columnIndex];
                 final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
 
-                if (attr.isGeometry()) {
-                    return String.class;
-                } else if (attr.getType().equals(String.valueOf(Types.CHAR))
-                            || attr.getType().equals(String.valueOf(Types.VARCHAR))
-                            || attr.getType().equals(String.valueOf(Types.LONGVARCHAR))) {
-                    return String.class;
-                } else if (attr.getType().equals(String.valueOf(Types.INTEGER))
-                            || attr.getType().equals(String.valueOf(Types.SMALLINT))
-                            || attr.getType().equals(String.valueOf(Types.TINYINT))
-                            || attr.getType().equals("xsd:integer")) {
-                    return Integer.class;
-                } else if (attr.getType().equals(String.valueOf(Types.BIGINT))
-                            || attr.getType().equals("xsd:long")) {
-                    return Long.class;
-                } else if (attr.getType().equals(String.valueOf(Types.DOUBLE))
-                            || attr.getType().equals(String.valueOf(Types.FLOAT))
-                            || attr.getType().equals(String.valueOf(Types.DECIMAL))
-                            || attr.getType().equals("xsd:float")
-                            || attr.getType().equals("xsd:decimal")
-                            || attr.getType().equals("xsd:double")) {
-                    return Double.class;
-                } else if (attr.getType().equals(String.valueOf(Types.DATE))
-                            || attr.getType().equals(String.valueOf(Types.TIME))
-                            || attr.getType().equals(String.valueOf(Types.TIMESTAMP))) {
-                    return Date.class;
-                } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN))
-                            || attr.getType().equals("xsd:boolean")) {
-                    return Boolean.class;
-                } else {
-                    return String.class;
-                }
+                return FeatureTools.getClass(attr);
             } else {
                 return tableRuleSet.getAdditionalFieldClass(columnIndex - attributeAlias.length);
             }

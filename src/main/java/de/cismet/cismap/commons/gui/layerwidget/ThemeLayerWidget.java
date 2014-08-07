@@ -70,6 +70,7 @@ import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
+import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerWidget.CheckBoxNodeRenderer;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -269,6 +270,33 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     @Override
     public void valueChanged(final TreeSelectionEvent e) {
         createPopupMenu();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void addTreeSelectionListener(final TreeSelectionListener l) {
+        tree.getSelectionModel().addTreeSelectionListener(l);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  l  DOCUMENT ME!
+     */
+    public void removeTreeSelectionListener(final TreeSelectionListener l) {
+        tree.getSelectionModel().removeTreeSelectionListener(l);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public TreePath[] getSelectionPath() {
+        return tree.getSelectionPaths();
     }
 
     /**

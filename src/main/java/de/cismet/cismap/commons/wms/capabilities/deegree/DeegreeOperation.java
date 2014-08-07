@@ -27,9 +27,12 @@ import org.deegree.owscommon_new.HTTP;
 
 import java.net.URL;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import de.cismet.cismap.commons.wms.capabilities.Operation;
+import de.cismet.cismap.commons.wms.capabilities.Parameter;
 
 /**
  * DOCUMENT ME!
@@ -88,6 +91,32 @@ public class DeegreeOperation implements Operation {
 
             if (urlList.size() > 0) {
                 return urlList.get(0);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<Parameter> getParameters() {
+        final List<Parameter> parameterList = new ArrayList<Parameter>();
+
+        for (final org.deegree.owscommon_new.Parameter p : op.getParameters()) {
+            parameterList.add(new DeegreeParameter(p));
+        }
+
+        return parameterList;
+    }
+
+    @Override
+    public Parameter getParameter(final String name) {
+        final List<Parameter> paras = getParameters();
+
+        if (paras != null) {
+            for (final Parameter p : paras) {
+                if (p.getName().equalsIgnoreCase(name)) {
+                    return p;
+                }
             }
         }
 
