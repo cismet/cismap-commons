@@ -83,13 +83,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.LinkedList;
-
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 
 import javax.swing.ImageIcon;
 
@@ -97,6 +94,8 @@ import javax.xml.namespace.QName;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -141,6 +140,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     private Geometry geometry = null;
     private LayerProperties layerProperties;
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private Paint customFillingStyle;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -404,10 +404,14 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public Paint getFillingPaint() {
-        if ((styles == null) || styles.isEmpty()) {
-            return this.getStyle().isDrawFill() ? this.getStyle().getFillColor() : null;
+        if (customFillingStyle != null) {
+            return customFillingStyle;
         } else {
-            return null;
+            if ((styles == null) || styles.isEmpty()) {
+                return this.getStyle().isDrawFill() ? this.getStyle().getFillColor() : null;
+            } else {
+                return null;
+            }
         }
     }
 
@@ -418,8 +422,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setFillingPaint(final Paint fillingStyle) {
-        this.getStyle().setFillColor((Color)fillingStyle);
-        this.getStyle().setDrawFill(true);
+        customFillingStyle = fillingStyle;
+//        this.getStyle().setFillColor((Color)fillingStyle);
+//        this.getStyle().setDrawFill(true);
     }
 
     /**
@@ -1475,99 +1480,6 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
-     * @throws  UnsupportedOperationException  DOCUMENT ME!
-     */
-    public void undoAll() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Add a new PropertyChangeListener.
-     *
-     * @param  l  DOCUMENT ME!
-     */
-    public void addPropertyChangeListener(final PropertyChangeListener l) {
-        propertyChangeSupport.addPropertyChangeListener(l);
-    }
-
-    /**
-     * Remove the given PropertyChangeListener.
-     *
-     * @param  l  DOCUMENT ME!
-     */
-    public void removePropertyChangeListener(final PropertyChangeListener l) {
-        propertyChangeSupport.removePropertyChangeListener(l);
-    }
-
-    /**
-     * fires a propertyChange event.
-     *
-     * @param  propertyName  the name of the changed property
-     * @param  oldValue      the old value
-     * @param  newValue      the new value
-     */
-    protected void firePropertyChange(final String propertyName, final Object oldValue, final Object newValue) {
-        propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
-    }
-
-    @Override
-    public String toString() {
-        final AbstractFeatureService service = layerProperties.getFeatureService();
-        final List<String> nameParts = new ArrayList<String>();
-
-        if (service != null) {
-            final Map<String, FeatureServiceAttribute> attributes = service.getFeatureServiceAttributes();
-            final List<String> attributeNames = service.getOrderedFeatureServiceAttributes();
-
-            for (final String key : attributeNames) {
-                final FeatureServiceAttribute attr = attributes.get(key);
-
-                if (attr.isNameElement()) {
-                    nameParts.add(String.valueOf(getProperty(key)));
-                }
-            }
-        }
-
-        if (!nameParts.isEmpty()) {
-            StringBuilder sb = null;
-
-            for (final String part : nameParts) {
-                if (sb == null) {
-                    sb = new StringBuilder();
-                    sb.append(part);
-                } else {
-                    sb.append(" - ").append(part);
-                }
-            }
-
-            return sb.toString();
-        } else {
-            final String[] prefferedKeys = { "ID", "id", "Id", "app:ID", "app:id", "app:Id" };
-            final HashMap propertyMap = getProperties();
-
-            for (final String key : prefferedKeys) {
-                if (propertyMap.containsKey(key)) {
-                    final Object id = propertyMap.get(key);
-
-                    if (id != null) {
-                        return id.toString();
-                    }
-                }
-            }
-
-            // no ID key found. Return a random attribute
-            final Iterator it = propertyMap.keySet().iterator();
-
-            if (it.hasNext()) {
-                return String.valueOf(propertyMap.get(it.next()));
-            } else {
-                return super.toString();
-            }
-        }
-    
-    /**
-     * DOCUMENT ME!
-     *
      * @param   uom  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -1602,7 +1514,15 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         if ((styles == null) || !styles.equals(featureStyles)) {
             this.styles = featureStyles;
             stylings = null;
+            resetCustomStylesAdjustments();
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void resetCustomStylesAdjustments() {
+        customFillingStyle = null;
     }
 
     /**
@@ -1710,6 +1630,62 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     protected void firePropertyChange(final String propertyName, final Object oldValue, final Object newValue) {
         propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
+    }
+
+    @Override
+    public String toString() {
+        final AbstractFeatureService service = layerProperties.getFeatureService();
+        final List<String> nameParts = new ArrayList<String>();
+
+        if (service != null) {
+            final Map<String, FeatureServiceAttribute> attributes = service.getFeatureServiceAttributes();
+            final List<String> attributeNames = service.getOrderedFeatureServiceAttributes();
+
+            for (final String key : attributeNames) {
+                final FeatureServiceAttribute attr = attributes.get(key);
+
+                if (attr.isNameElement()) {
+                    nameParts.add(String.valueOf(getProperty(key)));
+                }
+            }
+        }
+
+        if (!nameParts.isEmpty()) {
+            StringBuilder sb = null;
+
+            for (final String part : nameParts) {
+                if (sb == null) {
+                    sb = new StringBuilder();
+                    sb.append(part);
+                } else {
+                    sb.append(" - ").append(part);
+                }
+            }
+
+            return sb.toString();
+        } else {
+            final String[] prefferedKeys = { "ID", "id", "Id", "app:ID", "app:id", "app:Id" };
+            final HashMap propertyMap = getProperties();
+
+            for (final String key : prefferedKeys) {
+                if (propertyMap.containsKey(key)) {
+                    final Object id = propertyMap.get(key);
+
+                    if (id != null) {
+                        return id.toString();
+                    }
+                }
+            }
+
+            // no ID key found. Return a random attribute
+            final Iterator it = propertyMap.keySet().iterator();
+
+            if (it.hasNext()) {
+                return String.valueOf(propertyMap.get(it.next()));
+            } else {
+                return super.toString();
+            }
+        }
     }
 
     //~ Inner Classes ----------------------------------------------------------
