@@ -11,30 +11,12 @@
  */
 package de.cismet.cismap.commons.featureservice.factory;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.geom.PrecisionModel;
 
 import groovy.lang.GroovyShell;
 
 import org.apache.log4j.Logger;
 
-import org.deegree.model.feature.Feature;
-import org.deegree.model.feature.FeatureCollection;
-import org.deegree.model.feature.GMLFeatureCollectionDocument;
-import org.deegree.model.spatialschema.JTSAdapter;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-
-import java.net.URL;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -43,19 +25,9 @@ import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Debug;
-import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
-import de.cismet.cismap.commons.features.ShapeFeature;
-import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.*;
-import de.cismet.cismap.commons.wfs.WFSFacade;
-
-import de.cismet.security.AccessHandler;
-import de.cismet.security.WebAccessManager;
 
 /**
  * Abstract impelementation of a FeatureFactory. Supports re-evaluation of id and annotation expressions.
@@ -70,6 +42,8 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     public static final boolean DEBUG = Debug.DEBUG;
 
     //~ Instance fields --------------------------------------------------------
+
+    public String layerName = null;
 
     // -1 = not id available
     protected int ID = -1;
@@ -578,6 +552,11 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         this.lastCreatedfeatureVector.trimToSize();
         this.lastGeom = geom;
         this.lastQuery = query;
+    }
+
+    @Override
+    public FeatureServiceFeature createNewFeature() {
+        throw new UnsupportedOperationException();
     }
 
     /**

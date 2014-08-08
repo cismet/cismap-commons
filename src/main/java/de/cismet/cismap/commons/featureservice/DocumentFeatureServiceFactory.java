@@ -42,6 +42,7 @@ public class DocumentFeatureServiceFactory {
     public static final String XML_FILE_EXTENSION = ".xml";
     public static final String GML_FILE_EXTENSION = ".gml";
     public static final String SHP_FILE_EXTENSION = ".shp";
+    public static final String CSV_FILE_EXTENSION = ".csv";
     public static final String SHP_DBF_FILE_EXTENSION = ".dbf";
     public static final String SHP_INDEX_FILE_EXTENSION = ".shx";
     public static final String XML_IDENTIFICATION_STRING = "<?xml";
@@ -158,12 +159,15 @@ public class DocumentFeatureServiceFactory {
                         "File extension ist xml/gml aber kein gültiges xml/gml Dokument");
                 }
             } else if (documentFile.getPath().endsWith(SHP_FILE_EXTENSION)
-                        || documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION)) {
+                        || documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION)
+                        || documentFile.getPath().endsWith(CSV_FILE_EXTENSION)) {
                 if (log.isDebugEnabled()) {
-                    log.debug("File extension ist shp");
+                    log.debug("File extension ist shp/dbf/csv");
                 }
-                if ((documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION)
+                if (((documentFile.getPath().endsWith(SHP_DBF_FILE_EXTENSION)
+                                    || documentFile.getPath().endsWith(CSV_FILE_EXTENSION))
                                 && CismapBroker.getInstance().isUseInternalDb()) || isShapeFile(documentFile)) {
+                    // dbf and csv will only be supported, if the internal db is used
                     if (CismapBroker.getInstance().isUseInternalDb()) {
                         final MessageDigest md5 = MessageDigest.getInstance("MD5");
                         final BufferedInputStream is = new BufferedInputStream(new FileInputStream(documentFile));

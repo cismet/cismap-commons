@@ -13,9 +13,18 @@ package de.cismet.cismap.commons.featureservice;
 
 import org.apache.log4j.Logger;
 
+import org.h2gis.utilities.SFSUtilities;
+import org.h2gis.utilities.wrapper.ConnectionWrapper;
+
 import org.jdom.Element;
 
+import org.openide.util.Exceptions;
+
 import java.io.File;
+
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +77,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
 
     //~ Instance fields --------------------------------------------------------
 
+    private List<FeatureServiceFeature> features;
     private File shapeFile;
     private boolean initialised = true;
 
@@ -98,7 +108,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             final String databasePath,
             final String tableName,
             final List<FeatureServiceAttribute> attributes) throws Exception {
-        this(name, databasePath, tableName, attributes, null);
+        this(name, databasePath, tableName, attributes, null, null);
     }
 
     /**
@@ -117,8 +127,49 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             final String tableName,
             final List<FeatureServiceAttribute> attributes,
             final File shapeFile) throws Exception {
+        this(name, databasePath, tableName, attributes, shapeFile, null);
+    }
+
+    /**
+     * Creates a new H2FeatureService object.
+     *
+     * @param   name          DOCUMENT ME!
+     * @param   databasePath  DOCUMENT ME!
+     * @param   tableName     DOCUMENT ME!
+     * @param   attributes    DOCUMENT ME!
+     * @param   features      DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public H2FeatureService(final String name,
+            final String databasePath,
+            final String tableName,
+            final List<FeatureServiceAttribute> attributes,
+            final List<FeatureServiceFeature> features) throws Exception {
+        this(name, databasePath, tableName, attributes, null, features);
+    }
+
+    /**
+     * Creates a new H2FeatureService object.
+     *
+     * @param   name          DOCUMENT ME!
+     * @param   databasePath  DOCUMENT ME!
+     * @param   tableName     DOCUMENT ME!
+     * @param   attributes    DOCUMENT ME!
+     * @param   shapeFile     DOCUMENT ME!
+     * @param   features      DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public H2FeatureService(final String name,
+            final String databasePath,
+            final String tableName,
+            final List<FeatureServiceAttribute> attributes,
+            final File shapeFile,
+            final List<FeatureServiceFeature> features) throws Exception {
         super(name, databasePath, tableName, attributes);
         this.shapeFile = shapeFile;
+        this.features = features;
     }
 
     /**
@@ -134,8 +185,21 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
-        return new H2FeatureServiceFactory(name, databasePath, tableName, shapeFile, layerInitWorker);
-//        return new H2FeatureServiceFactory(name, databasePath, tableName, shapeFile, layerInitWorker, parseSLD(getSLDDefiniton()));
+        if (features != null) {
+            return new H2FeatureServiceFactory(
+                    name,
+                    databasePath,
+                    tableName,
+                    features,
+                    layerInitWorker);
+        } else {
+            return new H2FeatureServiceFactory(
+                    name,
+                    databasePath,
+                    tableName,
+                    shapeFile,
+                    layerInitWorker);
+        }
     }
 
     @Override
@@ -145,6 +209,19 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     @Override
     protected String getFeatureLayerType() {
         return H2_FEATURELAYER_TYPE;
+    }
+
+    @Override
+    protected LayerProperties createLayerProperties() {
+        final LayerProperties properties = super.createLayerProperties();
+
+        if (featureFactory != null) {
+            final H2FeatureServiceFactory f = (H2FeatureServiceFactory)featureFactory;
+            ((DefaultLayerProperties)properties).setAttributeTableRuleSet(new H2AttributeTableRuleSet(
+                    f.getLinRefList()));
+        }
+
+        return properties;
     }
 
     @Override
@@ -164,5 +241,76 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
      */
     public boolean isInitialised() {
         return initialised;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fromField       DOCUMENT ME!
+     * @param  tillField       DOCUMENT ME!
+     * @param  routeField      DOCUMENT ME!
+     * @param  routeJoinField  DOCUMENT ME!
+     * @param  routeService    DOCUMENT ME!
+     * @param  layerName       DOCUMENT ME!
+     * @param  domain          DOCUMENT ME!
+     */
+    public void setLinearReferencingInformation(final String fromField,
+            final String tillField,
+            final String routeField,
+            final String routeJoinField,
+            final AbstractFeatureService routeService,
+            final String layerName,
+            final String domain) {
+        ((H2FeatureServiceFactory)getFeatureFactory()).setLinearReferencingInformation(
+            fromField,
+            tillField,
+            routeField,
+            routeJoinField,
+            routeService,
+            layerName,
+            domain);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   tableName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static boolean tableAlreadyExists(final String tableName) {
+        ConnectionWrapper conn = null;
+        ResultSet rs = null;
+        boolean tableExists = false;
+
+        try {
+            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+                        "jdbc:h2:"
+                                + H2FeatureServiceFactory.DB_NAME));
+            rs = conn.getMetaData().getTables(null, null, tableName, null);
+            tableExists = rs.next();
+            rs.close();
+            conn.close();
+            return tableExists;
+        } catch (SQLException e) {
+            LOG.error("Cannot connect to database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close result set", ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close connection", ex);
+                }
+            }
+        }
+
+        return tableExists;
     }
 }

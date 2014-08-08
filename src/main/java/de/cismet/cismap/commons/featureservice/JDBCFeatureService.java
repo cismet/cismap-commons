@@ -20,7 +20,6 @@ import java.util.List;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.factory.JDBCFeatureFactory;
-import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
 
 /**
  * DOCUMENT ME!
@@ -118,9 +117,9 @@ public abstract class JDBCFeatureService<FT extends FeatureServiceFeature> exten
     public Element toElement() {
         final Element parentElement = super.toElement();
         final Element daPath = new Element("databasePath"); // NOI18N
-        daPath.setText(databasePath.toString());
+        daPath.setText(databasePath);
         final Element tabName = new Element("tableName");   // NOI18N
-        tabName.setText(tableName.toString());
+        tabName.setText(tableName);
         final Element queryElement = new Element("query");  // NOI18N
         queryElement.setText(query);
         parentElement.addContent(queryElement);

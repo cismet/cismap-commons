@@ -45,11 +45,9 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -60,9 +58,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
@@ -92,28 +92,32 @@ import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
-import de.cismet.cismap.commons.exceptions.ConvertException;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
+import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
+import de.cismet.cismap.commons.internaldb.DBEntry;
+import de.cismet.cismap.commons.internaldb.DBFolder;
 import de.cismet.cismap.commons.internaldb.InternalDbTree;
 import de.cismet.cismap.commons.preferences.CapabilitiesListTreeNode;
 import de.cismet.cismap.commons.preferences.CapabilitiesPreferences;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
+import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
 import de.cismet.cismap.commons.wms.capabilities.*;
-import de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeEnvelope;
+
+import de.cismet.cismap.linearreferencing.tools.LinearReferencingDialog;
 
 import de.cismet.security.AccessHandler;
 import de.cismet.security.WebAccessManager;
@@ -777,6 +781,21 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     }
 
     /**
+     * refreshs all open JDBCtrees.
+     */
+    public void refreshJdbcTrees() {
+        final Set<Component> keys = new HashSet(jdbcTrees.keySet());
+
+        for (final Component key : keys) {
+            final JTree jdbcTree = jdbcTrees.get(key);
+
+            if (jdbcTree instanceof InternalDbTree) {
+                ((InternalDbTree)jdbcTree).refresh();
+            }
+        }
+    }
+
+    /**
      * Testmethode, um das Widget Standalone zu testen.
      *
      * @param  args  Parameter
@@ -1056,6 +1075,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         }
 
                         final String title = databasePath;
+                        final String dbPath = databasePath;
                         final InternalDbTree tree = new InternalDbTree(databasePath);
 //                        final DropTarget dt = new DropTarget(tree, acceptableActions, thisWidget);
 
@@ -1077,7 +1097,81 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                                         "CapabilityWidget.addInternalDBCapabilitesTree.addFolder"));
                                             }
                                         });
-                                    addPopupMenu(tree, new JMenuItem[] { addFolderItem });
+
+                                    final JMenuItem removeItem = new JMenuItem(
+                                            NbBundle.getMessage(
+                                                CapabilityWidget.class,
+                                                "CapabilityWidget.addInternalDBCapabilitesTree.removeItem"));
+                                    removeItem.addActionListener(new ActionListener() {
+
+                                            @Override
+                                            public void actionPerformed(final ActionEvent e) {
+                                                final TreePath[] tps = tree.getSelectionPaths();
+                                                final MappingComponent mc = CismapBroker.getInstance()
+                                                            .getMappingComponent();
+                                                final TreeMap<Integer, MapService> serviceMap = mc.getMappingModel()
+                                                            .getRasterServices();
+
+                                                for (final TreePath tp : tps) {
+                                                    final DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                                                    if (tp.getLastPathComponent() instanceof DBEntry) {
+                                                        tree.removeEntry(entry);
+                                                    }
+
+                                                    // remove service from active mapping model
+                                                    for (final MapService service : serviceMap.values()) {
+                                                        if (service instanceof H2FeatureService) {
+                                                            final H2FeatureService h2Service = (H2FeatureService)
+                                                                service;
+                                                            if (h2Service.getTableName().equals(entry.getName())) {
+                                                                mc.getMappingModel().removeLayer(h2Service);
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                                    final JMenuItem addLinearReferencing = new JMenuItem(
+                                            NbBundle.getMessage(
+                                                CapabilityWidget.class,
+                                                "CapabilityWidget.addInternalDBCapabilitesTree.addLinearReferencing"));
+                                    addLinearReferencing.addActionListener(new ActionListener() {
+
+                                            @Override
+                                            public void actionPerformed(final ActionEvent e) {
+                                                final TreePath[] tps = tree.getSelectionPaths();
+
+                                                for (final TreePath tp : tps) {
+                                                    if ((tp.getLastPathComponent() instanceof DBEntry)
+                                                                && !(tp.getLastPathComponent() instanceof DBFolder)) {
+                                                        try {
+                                                            final DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                                                            final H2FeatureService service = new H2FeatureService(
+                                                                    entry.getNameWithoutFolder(),
+                                                                    dbPath,
+                                                                    entry.getName(),
+                                                                    null);
+                                                            final LinearReferencingDialog dialog =
+                                                                new LinearReferencingDialog(
+                                                                    StaticSwingTools.getParentFrame(comp),
+                                                                    true,
+                                                                    service);
+                                                            dialog.setSize(645, 260);
+                                                            StaticSwingTools.showDialog(dialog);
+                                                        } catch (Exception ex) {
+                                                            log.error(
+                                                                "Error while creating a H2 service instance.",
+                                                                ex);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    addPopupMenu(
+                                        tree,
+                                        new JMenuItem[] { addFolderItem, removeItem, addLinearReferencing });
+
                                     tree.setBorder(new EmptyBorder(1, 1, 1, 1));
                                     final JScrollPane sPane = new JScrollPane();
                                     sPane.setViewportView(tree);

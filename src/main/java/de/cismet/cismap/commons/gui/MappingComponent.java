@@ -5954,7 +5954,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     final int index = Arrays.binarySearch(deletionCandidatesFeature, (Feature)o, comp);
 
                                     if (index >= 0) {
-                                        deletionCandidates.remove(featureMap.get(deletionCandidatesFeature[index]));
+                                        final PFeature noCand = featureMap.get(deletionCandidatesFeature[index]);
+
+                                        if (noCand.hasSameGeometry(((Feature)o).getGeometry())) {
+                                            noCand.refreshDesign();
+                                            deletionCandidates.remove(noCand);
+                                        } else {
+                                            final PFeature p = new PFeature((Feature)o,
+                                                    wtst,
+                                                    clip_offset_x,
+                                                    clip_offset_y,
+                                                    MappingComponent.this);
+                                            newFeatures.add(p);
+                                        }
                                     } else { // else add the PFeature to the new features
                                         final PFeature p = new PFeature((Feature)o,
                                                 wtst,

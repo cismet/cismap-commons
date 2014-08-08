@@ -497,7 +497,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     }
 
     @Override
-    public String decoratePropertyValue(final String value) {
+    public String decoratePropertyValue(final String column, final String value) {
         return "<Literal>" + value + "</Literal>";
     }
 }

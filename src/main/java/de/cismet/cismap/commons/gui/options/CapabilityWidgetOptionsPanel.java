@@ -115,7 +115,7 @@ public class CapabilityWidgetOptionsPanel extends AbstractOptionsPanel implement
      *
      * @return  DOCUMENT ME!
      */
-    private CapabilityWidget getCapabilityWidget() {
+    public static CapabilityWidget getCapabilityWidget() {
         return capabilityWidget;
     }
 
