@@ -95,21 +95,27 @@ import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
+import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
+import de.cismet.cismap.commons.internaldb.DBEntry;
+import de.cismet.cismap.commons.internaldb.DBFolder;
 import de.cismet.cismap.commons.internaldb.InternalDbTree;
 import de.cismet.cismap.commons.preferences.CapabilitiesListTreeNode;
 import de.cismet.cismap.commons.preferences.CapabilitiesPreferences;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
+import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
 import de.cismet.cismap.commons.wms.capabilities.*;
+import de.cismet.cismap.linearreferencing.tools.LinearReferencingDialog;
 
 import de.cismet.security.AccessHandler;
 import de.cismet.security.WebAccessManager;
@@ -124,6 +130,7 @@ import de.cismet.tools.configuration.Configurable;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
+import java.util.TreeMap;
 
 /**
  * DOCUMENT ME!
@@ -629,30 +636,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
+    }//GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
+    }//GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
@@ -665,16 +672,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
+    }//GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
+    }//GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -733,7 +740,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -742,16 +749,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
+    }//GEN-LAST:event_cmdCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpCapabilitiesStateChanged
+    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpCapabilitiesStateChanged
         addFilterToActiveTree();
-    }                                                                                   //GEN-LAST:event_tbpCapabilitiesStateChanged
+    }//GEN-LAST:event_tbpCapabilitiesStateChanged
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
@@ -1067,6 +1074,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         }
 
                         final String title = databasePath;
+                        final String dbPath = databasePath;
                         final InternalDbTree tree = new InternalDbTree(databasePath);
 //                        final DropTarget dt = new DropTarget(tree, acceptableActions, thisWidget);
 
@@ -1088,7 +1096,78 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                                         "CapabilityWidget.addInternalDBCapabilitesTree.addFolder"));
                                             }
                                         });
-                                    addPopupMenu(tree, new JMenuItem[] { addFolderItem });
+                                    
+                                    final JMenuItem removeItem = new JMenuItem(
+                                            NbBundle.getMessage(
+                                                CapabilityWidget.class,
+                                                "CapabilityWidget.addInternalDBCapabilitesTree.removeItem"));
+                                    removeItem.addActionListener(new ActionListener() {
+
+                                            @Override
+                                            public void actionPerformed(final ActionEvent e) {
+                                                final TreePath[] tps = tree.getSelectionPaths();
+                                                MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+                                                TreeMap<Integer, MapService> serviceMap = mc.getMappingModel().getRasterServices();
+
+                                                for (final TreePath tp : tps) {
+                                                    DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                                                    if (tp.getLastPathComponent() instanceof DBEntry) {
+                                                        tree.removeEntry(entry);
+                                                    }
+                                                    
+                                                    //remove service from active mapping model
+                                                    for (MapService service : serviceMap.values()) {
+                                                        if (service instanceof H2FeatureService) {
+                                                            H2FeatureService h2Service = (H2FeatureService)service;
+                                                            if (h2Service.getTableName().equals(entry.getName())) {
+                                                                mc.getMappingModel().removeLayer(h2Service);
+                                                            }
+                                                        } 
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                                    final JMenuItem addLinearReferencing = new JMenuItem(
+                                            NbBundle.getMessage(
+                                                CapabilityWidget.class,
+                                                "CapabilityWidget.addInternalDBCapabilitesTree.addLinearReferencing"));
+                                    addLinearReferencing.addActionListener(new ActionListener() {
+
+                                            @Override
+                                            public void actionPerformed(final ActionEvent e) {
+                                                final TreePath[] tps = tree.getSelectionPaths();
+
+                                                for (final TreePath tp : tps) {
+                                                    if ((tp.getLastPathComponent() instanceof DBEntry)
+                                                                && !(tp.getLastPathComponent() instanceof DBFolder)) {
+                                                        try {
+                                                            final DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                                                            final H2FeatureService service = new H2FeatureService(
+                                                                    entry.getNameWithoutFolder(),
+                                                                    dbPath,
+                                                                    entry.getName(),
+                                                                    null);
+                                                            final LinearReferencingDialog dialog =
+                                                                new LinearReferencingDialog(
+                                                                    StaticSwingTools.getParentFrame(comp),
+                                                                    true,
+                                                                    service);
+                                                            dialog.setSize(645, 260);
+                                                            StaticSwingTools.showDialog(dialog);
+                                                        } catch (Exception ex) {
+                                                            log.error(
+                                                                "Error while creating a H2 service instance.",
+                                                                ex);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    addPopupMenu(
+                                        tree,
+                                        new JMenuItem[] { addFolderItem, removeItem, addLinearReferencing });
+                                    
                                     tree.setBorder(new EmptyBorder(1, 1, 1, 1));
                                     final JScrollPane sPane = new JScrollPane();
                                     sPane.setViewportView(tree);
