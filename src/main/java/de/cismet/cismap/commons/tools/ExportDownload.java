@@ -34,6 +34,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
     protected FeatureServiceFeature[] features;
     protected AbstractFeatureService service;
     protected List<String[]> aliasAttributeList;
+    protected String extension;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -57,6 +58,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
         this.service = service;
         this.aliasAttributeList = aliasAttributeList;
         this.title = "Export " + features.length + " Features";
+        this.extension = extension;
 
         if (aliasAttributeList == null) {
             if ((features != null) && (features.length > 0)) {
@@ -64,7 +66,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
             }
         }
 
-        status = State.WAITING;
+        status = Download.State.WAITING;
         String filenameWithoutExt = filename;
 
         if (filename.charAt(filename.length() - 4) == '.') {

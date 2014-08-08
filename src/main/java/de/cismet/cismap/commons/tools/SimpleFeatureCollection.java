@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.apache.log4j.Logger;
 
 import org.deegree.datatypes.QualifiedName;
@@ -24,6 +26,8 @@ import org.deegree.model.feature.schema.FeatureType;
 import org.deegree.model.feature.schema.PropertyType;
 import org.deegree.model.feature.schema.SimplePropertyType;
 import org.deegree.model.spatialschema.Curve;
+import org.deegree.model.spatialschema.GeometryException;
+import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.model.spatialschema.MultiCurve;
 import org.deegree.model.spatialschema.MultiPoint;
 import org.deegree.model.spatialschema.MultiSurface;
@@ -31,6 +35,8 @@ import org.deegree.model.spatialschema.Point;
 import org.deegree.model.spatialschema.Polygon;
 import org.deegree.model.spatialschema.Surface;
 import org.deegree.ogcbase.PropertyPath;
+
+import java.sql.Timestamp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -210,8 +216,17 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
 
         for (final String[] aliasAttr : aliasAttributeList) {
             final QualifiedName name = new QualifiedName(aliasAttr[0]);
-            propArray[index] = new DefaultFeatureProperty(name, props.get(aliasAttr[1]));
-            propTypeArray[index++] = getPropertyType(name, props.get(aliasAttr[1]));
+            Object value = props.get(aliasAttr[1]);
+
+            if (value instanceof Geometry) {
+                try {
+                    value = JTSAdapter.wrap((Geometry)value);
+                } catch (GeometryException ex) {
+                    LOG.error("Cannot convert JTS geometry to deegree geometry.", ex);
+                }
+            }
+            propArray[index] = new DefaultFeatureProperty(name, value);
+            propTypeArray[index++] = getPropertyType(name, value);
         }
 
         final FeatureType ft = FeatureFactory.createFeatureType("test", false, propTypeArray);
@@ -251,6 +266,8 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
             return new SimplePropertyType(name, Types.SURFACE, 0, 1);
         } else if (value instanceof MultiSurface) {
             return new SimplePropertyType(name, Types.MULTISURFACE, 0, 1);
+        } else if (value instanceof Timestamp) {
+            return new SimplePropertyType(name, Types.TIMESTAMP, 0, 1);
         } else {
             LOG.error("unbekannter Typ: " + value.getClass().getName());
         }

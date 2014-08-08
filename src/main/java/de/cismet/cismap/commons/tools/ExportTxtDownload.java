@@ -15,7 +15,6 @@ import org.deegree.model.spatialschema.Geometry;
 import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 
-import org.openide.util.Cancellable;
 import org.openide.util.NbBundle;
 
 import java.io.BufferedWriter;
@@ -29,7 +28,6 @@ import java.util.Map;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 
-import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 import de.cismet.tools.gui.downloadmanager.Download;
 
 /**
@@ -77,11 +75,11 @@ public class ExportTxtDownload extends ExportDownload {
 
     @Override
     public void run() {
-        if (status != State.WAITING) {
+        if (status != Download.State.WAITING) {
             return;
         }
 
-        status = State.RUNNING;
+        status = Download.State.RUNNING;
 
         if ((features != null) && (features.length > 0)) {
             stateChanged();
@@ -124,8 +122,8 @@ public class ExportTxtDownload extends ExportDownload {
             error(new Exception("No features found"));
         }
 
-        if (status == State.RUNNING) {
-            status = State.COMPLETED;
+        if (status == Download.State.RUNNING) {
+            status = Download.State.COMPLETED;
             stateChanged();
         }
     }
@@ -171,7 +169,7 @@ public class ExportTxtDownload extends ExportDownload {
                 final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)tmp);
                 tmp = "Geometry";
                 try {
-                    tmp = JTSAdapter.export(geom).getGeometryType();
+                    tmp = JTSAdapter.export(geom);
                 } catch (GeometryException e) {
                     log.error("Error while transforming deegree geometry to jts geometry.", e);
                 }
@@ -183,7 +181,8 @@ public class ExportTxtDownload extends ExportDownload {
                 result.append(separator);
             }
 
-            if (!withoutQuotes && (quotes != null) && (tmp instanceof String)) {
+            if (!withoutQuotes && (quotes != null)
+                        && ((tmp instanceof String) || (tmp instanceof com.vividsolutions.jts.geom.Geometry))) {
                 result.append(quotes).append(String.valueOf(tmp)).append(quotes);
             } else {
                 result.append(String.valueOf(tmp));
