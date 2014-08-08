@@ -9,9 +9,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.cismet.cismap.commons.gui.attributetable;
+package de.cismet.cismap.linearreferencing.tools;
 
-import javax.swing.JPanel;
+import java.util.List;
+
+import javax.swing.table.TableCellEditor;
+
+import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
 
 /**
  * DOCUMENT ME!
@@ -19,25 +23,21 @@ import javax.swing.JPanel;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public interface AttributeTableListener {
+public interface StationTableCellEditorInterface extends TableCellEditor {
 
     //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
      *
-     * @param  panel    DOCUMENT ME!
-     * @param  id       DOCUMENT ME!
-     * @param  name     DOCUMENT ME!
-     * @param  tooltip  DOCUMENT ME!
+     * @param  columnName  the columnName to set
      */
-    void showPanel(JPanel panel, String id, String name, String tooltip);
+    void setColumnName(String columnName);
 
     /**
      * DOCUMENT ME!
      *
-     * @param  id    DOCUMENT ME!
-     * @param  name  DOCUMENT ME!
+     * @param  linRefInfos  DOCUMENT ME!
      */
-    void changeName(String id, String name);
+    void setLinRefInfos(List<LinearReferencingInfo> linRefInfos);
 }

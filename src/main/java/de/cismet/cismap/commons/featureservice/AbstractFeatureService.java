@@ -277,6 +277,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         if (this.isInitialized() || this.isRefreshNeeded()) {
             LOG.warn("layer already initialised, forcing complete re-initialisation"); // NOI18N
             this.setInitialized(false);
+            featureFactory = null;
+            featureServiceAttributes = null;
             // this.layerProperties = null;
             // this.featureFactory = null;
             // this.featureServiceAttributes = null;
@@ -420,6 +422,17 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         this.initConcreteInstance();
 
         // initilaized = true is set in the layerInitWorker
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public void initAndWait() throws Exception {
+        layerInitWorker = new LayerInitWorker();
+        init();
+        layerInitWorker = null;
     }
 
     /**
@@ -812,7 +825,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                     LOG.debug("setLayerProperties: new layer properties are also applied to all cached features!"); // NOI18N
                 }
             }
-            // layer properties are appiled to last created features
+            // layer properties are applied to last created features
             if ((featureRetrievalWorker != null) && !featureRetrievalWorker.isDone()) {
                 LOG.warn("must wait until thread '" + featureRetrievalWorker
                             + "' is finished before applying new layer properties");   // NOI18N
@@ -1227,11 +1240,12 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     /**
      * DOCUMENT ME!
      *
-     * @param   value  DOCUMENT ME!
+     * @param   columnName  DOCUMENT ME!
+     * @param   value       DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    public String decoratePropertyValue(final String value) {
+    public String decoratePropertyValue(final String columnName, final String value) {
         return "'" + value + "'";
     }
 
@@ -1249,6 +1263,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      */
     public List retrieveFeatures(final BoundingBox boundingBox, final int offset, final int limit, final String orderBy)
             throws Exception {
+        if (!initialized) {
+            initConcreteInstance();
+        }
         return getFeatureFactory().createFeatures(getQuery(), boundingBox, layerInitWorker);
     }
 

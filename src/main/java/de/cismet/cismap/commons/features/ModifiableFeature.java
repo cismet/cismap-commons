@@ -9,9 +9,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.cismet.cismap.commons.gui.attributetable;
-
-import javax.swing.JPanel;
+package de.cismet.cismap.commons.features;
 
 /**
  * DOCUMENT ME!
@@ -19,25 +17,26 @@ import javax.swing.JPanel;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public interface AttributeTableListener {
+public interface ModifiableFeature extends Feature {
 
     //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
      *
-     * @param  panel    DOCUMENT ME!
-     * @param  id       DOCUMENT ME!
-     * @param  name     DOCUMENT ME!
-     * @param  tooltip  DOCUMENT ME!
+     * @throws  Exception  DOCUMENT ME!
      */
-    void showPanel(JPanel panel, String id, String name, String tooltip);
+    void saveChanges() throws Exception;
 
     /**
      * DOCUMENT ME!
      *
-     * @param  id    DOCUMENT ME!
-     * @param  name  DOCUMENT ME!
+     * @throws  Exception  DOCUMENT ME!
      */
-    void changeName(String id, String name);
+    void delete() throws Exception;
+
+    /**
+     * DOCUMENT ME!
+     */
+    void undoAll();
 }

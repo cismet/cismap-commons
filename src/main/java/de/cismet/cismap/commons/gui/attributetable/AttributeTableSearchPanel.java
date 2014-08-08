@@ -11,7 +11,7 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
-import javax.swing.JPanel;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 
 /**
  * DOCUMENT ME!
@@ -19,25 +19,15 @@ import javax.swing.JPanel;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public interface AttributeTableListener {
+public interface AttributeTableSearchPanel {
 
     //~ Methods ----------------------------------------------------------------
 
     /**
      * DOCUMENT ME!
      *
-     * @param  panel    DOCUMENT ME!
-     * @param  id       DOCUMENT ME!
-     * @param  name     DOCUMENT ME!
-     * @param  tooltip  DOCUMENT ME!
+     * @param  table    DOCUMENT ME!
+     * @param  service  DOCUMENT ME!
      */
-    void showPanel(JPanel panel, String id, String name, String tooltip);
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  id    DOCUMENT ME!
-     * @param  name  DOCUMENT ME!
-     */
-    void changeName(String id, String name);
+    void openPanel(AttributeTable table, AbstractFeatureService service);
 }

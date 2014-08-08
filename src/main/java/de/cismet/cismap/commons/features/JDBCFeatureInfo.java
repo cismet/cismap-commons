@@ -15,17 +15,12 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.apache.log4j.Logger;
 
-import org.deegree.io.shpapi.ShapeFile;
-import org.deegree.model.feature.FeatureCollection;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Queue;
 
 import de.cismet.cismap.commons.util.SimpleCache;
 
@@ -44,17 +39,17 @@ public class JDBCFeatureInfo {
 
     //~ Instance fields --------------------------------------------------------
 
-    private SimpleCache<LinkedHashMap<String, Object>> cache = new SimpleCache<LinkedHashMap<String, Object>>(2);
-    private SimpleCache<Geometry> geoCache = new SimpleCache<Geometry>(1);
-    private SimpleCache<Object> propertyCache = new SimpleCache<Object>(10);
+    private final SimpleCache<LinkedHashMap<String, Object>> cache = new SimpleCache<LinkedHashMap<String, Object>>(2);
+    private final SimpleCache<Geometry> geoCache = new SimpleCache<Geometry>(1);
+    private final SimpleCache<Object> propertyCache = new SimpleCache<Object>(10);
 
     private int srid;
     private Connection connection;
     private PreparedStatement geometryStatement;
     private PreparedStatement propertiesStatement;
     private String tableName;
-    private String geoField;
-    private Map<String, PreparedStatement> propStats = new HashMap<String, PreparedStatement>();
+    private final String geoField;
+    private final Map<String, PreparedStatement> propStats = new HashMap<String, PreparedStatement>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -85,7 +80,7 @@ public class JDBCFeatureInfo {
      */
     private void createStatements() {
         try {
-            geometryStatement = connection.prepareStatement("select " + geoField + " from \"" + tableName
+            geometryStatement = connection.prepareStatement("select " + getGeoField() + " from \"" + tableName
                             + "\" where id = ?");
         } catch (Exception e) {
             LOG.error("Error while creating prepared statement for geometries", e);
@@ -255,5 +250,14 @@ public class JDBCFeatureInfo {
         this.tableName = tableName;
         propStats.clear();
         createStatements();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the geoField
+     */
+    public String getGeoField() {
+        return geoField;
     }
 }

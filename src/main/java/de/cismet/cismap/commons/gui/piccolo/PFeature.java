@@ -37,13 +37,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.ListIterator;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
@@ -725,56 +724,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  geom  vorhandenes Geometry-Objekt
      */
     private void doGeometry(final Geometry geom) {
-        if (geom instanceof Point) {
-            final Point point = (Point)geom;
-            entityRingCoordArr = new Coordinate[][][] {
-                    {
-                        { point.getCoordinate() }
-                    }
-                };
-        } else if (geom instanceof LineString) {
-            final LineString lineString = (LineString)geom;
-            entityRingCoordArr = new Coordinate[][][] {
-                    { lineString.getCoordinates() }
-                };
-        } else if (geom instanceof Polygon) {
-            final Polygon polygon = (Polygon)geom;
-            final int numOfHoles = polygon.getNumInteriorRing();
-            entityRingCoordArr = new Coordinate[1][1 + numOfHoles][];
-            entityRingCoordArr[0][0] = polygon.getExteriorRing().getCoordinates();
-            for (int ringIndex = 1; ringIndex < entityRingCoordArr[0].length; ++ringIndex) {
-                entityRingCoordArr[0][ringIndex] = polygon.getInteriorRingN(ringIndex - 1).getCoordinates();
-            }
-        } else if (geom instanceof LinearRing) {
-            // doPolygon((Polygon)geom);
-        } else if (geom instanceof MultiPoint) {
-            entityRingCoordArr = new Coordinate[][][] {
-                    { ((MultiPoint)geom).getCoordinates() }
-                };
-        } else if (geom instanceof MultiLineString) {
-            final MultiLineString multiLineString = (MultiLineString)geom;
-            final int numOfGeoms = multiLineString.getNumGeometries();
-            entityRingCoordArr = new Coordinate[numOfGeoms][][];
-            for (int entityIndex = 0; entityIndex < numOfGeoms; ++entityIndex) {
-                final Coordinate[] coordSubArr = ((LineString)multiLineString.getGeometryN(entityIndex))
-                            .getCoordinates();
-                entityRingCoordArr[entityIndex] = new Coordinate[][] { coordSubArr };
-            }
-        } else if (geom instanceof MultiPolygon) {
-            final MultiPolygon multiPolygon = (MultiPolygon)geom;
-            final int numOfEntities = multiPolygon.getNumGeometries();
-            entityRingCoordArr = new Coordinate[numOfEntities][][];
-            for (int entityIndex = 0; entityIndex < numOfEntities; ++entityIndex) {
-                final Polygon polygon = (Polygon)multiPolygon.getGeometryN(entityIndex);
-                final int numOfHoles = polygon.getNumInteriorRing();
-                entityRingCoordArr[entityIndex] = new Coordinate[1 + numOfHoles][];
-                entityRingCoordArr[entityIndex][0] = polygon.getExteriorRing().getCoordinates();
-                for (int ringIndex = 1; ringIndex < entityRingCoordArr[entityIndex].length; ++ringIndex) {
-                    entityRingCoordArr[entityIndex][ringIndex] = polygon.getInteriorRingN(ringIndex - 1)
-                                .getCoordinates();
-                }
-            }
-        }
+        entityRingCoordArr = getCoordinateArray(geom);
 
         if (geom != null) {
             updateXpAndYp();
@@ -782,6 +732,82 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
 
         refreshDesign();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   geom  vorhandenes Geometry-Objekt
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Coordinate[][][] getCoordinateArray(final Geometry geom) {
+        Coordinate[][][] otherCoords = null;
+
+        if (geom instanceof Point) {
+            final Point point = (Point)geom;
+            otherCoords = new Coordinate[][][] {
+                    {
+                        { point.getCoordinate() }
+                    }
+                };
+        } else if (geom instanceof LineString) {
+            final LineString lineString = (LineString)geom;
+            otherCoords = new Coordinate[][][] {
+                    { lineString.getCoordinates() }
+                };
+        } else if (geom instanceof Polygon) {
+            final Polygon polygon = (Polygon)geom;
+            final int numOfHoles = polygon.getNumInteriorRing();
+            otherCoords = new Coordinate[1][1 + numOfHoles][];
+            otherCoords[0][0] = polygon.getExteriorRing().getCoordinates();
+            for (int ringIndex = 1; ringIndex < otherCoords[0].length; ++ringIndex) {
+                otherCoords[0][ringIndex] = polygon.getInteriorRingN(ringIndex - 1).getCoordinates();
+            }
+        } else if (geom instanceof LinearRing) {
+            // doPolygon((Polygon)geom);
+        } else if (geom instanceof MultiPoint) {
+            otherCoords = new Coordinate[][][] {
+                    { ((MultiPoint)geom).getCoordinates() }
+                };
+        } else if (geom instanceof MultiLineString) {
+            final MultiLineString multiLineString = (MultiLineString)geom;
+            final int numOfGeoms = multiLineString.getNumGeometries();
+            otherCoords = new Coordinate[numOfGeoms][][];
+            for (int entityIndex = 0; entityIndex < numOfGeoms; ++entityIndex) {
+                final Coordinate[] coordSubArr = ((LineString)multiLineString.getGeometryN(entityIndex))
+                            .getCoordinates();
+                otherCoords[entityIndex] = new Coordinate[][] { coordSubArr };
+            }
+        } else if (geom instanceof MultiPolygon) {
+            final MultiPolygon multiPolygon = (MultiPolygon)geom;
+            final int numOfEntities = multiPolygon.getNumGeometries();
+            otherCoords = new Coordinate[numOfEntities][][];
+            for (int entityIndex = 0; entityIndex < numOfEntities; ++entityIndex) {
+                final Polygon polygon = (Polygon)multiPolygon.getGeometryN(entityIndex);
+                final int numOfHoles = polygon.getNumInteriorRing();
+                otherCoords[entityIndex] = new Coordinate[1 + numOfHoles][];
+                otherCoords[entityIndex][0] = polygon.getExteriorRing().getCoordinates();
+                for (int ringIndex = 1; ringIndex < otherCoords[entityIndex].length; ++ringIndex) {
+                    otherCoords[entityIndex][ringIndex] = polygon.getInteriorRingN(ringIndex - 1).getCoordinates();
+                }
+            }
+        }
+
+        return otherCoords;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   geom  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean hasSameGeometry(final Geometry geom) {
+        final Coordinate[][][] otherCoords = getCoordinateArray(geom);
+
+        return Arrays.deepEquals(otherCoords, entityRingCoordArr);
     }
 
     /**

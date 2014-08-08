@@ -125,6 +125,14 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
     LayerProperties getLayerProperties();
 
     /**
+     * This method must be implemented, if
+     * {@link de.cismet.cismap.commons.featureservice.AbstractFeatureService#isEditable() }.
+     *
+     * @return  a new object with a valid id
+     */
+    FeatureServiceFeature createNewFeature();
+
+    /**
      * Returns the maximum number of features that can be <b>returned</b> by this feature factory. Since the number of
      * features returned is resticted by the specified BoundingBox a FeatureFactory implementation may be able to
      * allocate more features as specified by {@code maxFeatureCount}.

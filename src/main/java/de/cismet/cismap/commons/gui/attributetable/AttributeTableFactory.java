@@ -15,6 +15,8 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
 import java.util.List;
 import java.util.Map;
 
@@ -77,8 +79,6 @@ public class AttributeTableFactory {
      * @param  featureService  DOCUMENT ME!
      */
     public void showAttributeTable(final AbstractFeatureService featureService) {
-        final FeatureFactory factory = featureService.getFeatureFactory();
-
         try {
             final AttributeTable table = new AttributeTable(featureService);
             table.setMappingComponent(mappingComponent);
@@ -86,9 +86,27 @@ public class AttributeTableFactory {
             listener.showPanel(
                 table,
                 featureService.getName(),
-                "Attribute "
-                        + featureService.getName(),
+                NbBundle.getMessage(
+                    AttributeTableFactory.class,
+                    "AttributeTableFactory.showAttributeTable().name",
+                    featureService.getName()),
                 featureService.getName());
+        } catch (Exception e) {
+            LOG.error("Error while retrieving all features", e);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureService  DOCUMENT ME!
+     * @param  newName         DOCUMENT ME!
+     */
+    public void ChangeAttributeTableName(final AbstractFeatureService featureService, final String newName) {
+        try {
+            listener.changeName(
+                featureService.getName(),
+                newName);
         } catch (Exception e) {
             LOG.error("Error while retrieving all features", e);
         }

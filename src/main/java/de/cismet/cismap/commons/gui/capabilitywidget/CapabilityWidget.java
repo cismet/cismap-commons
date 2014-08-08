@@ -45,11 +45,9 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -60,6 +58,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -92,11 +91,9 @@ import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
-import de.cismet.cismap.commons.exceptions.ConvertException;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
@@ -113,7 +110,6 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
 import de.cismet.cismap.commons.wms.capabilities.*;
-import de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeEnvelope;
 
 import de.cismet.security.AccessHandler;
 import de.cismet.security.WebAccessManager;
@@ -773,6 +769,21 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             return cidsTrees.get(tbpCapabilities.getSelectedComponent());
         } else {
             return null;
+        }
+    }
+
+    /**
+     * refreshs all open JDBCtrees.
+     */
+    public void refreshJdbcTrees() {
+        final Set<Component> keys = new HashSet(jdbcTrees.keySet());
+
+        for (final Component key : keys) {
+            final JTree jdbcTree = jdbcTrees.get(key);
+
+            if (jdbcTree instanceof InternalDbTree) {
+                ((InternalDbTree)jdbcTree).refresh();
+            }
         }
     }
 

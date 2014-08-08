@@ -115,6 +115,9 @@
               <Table columnCount="0" rowCount="0"/>
             </Property>
           </Properties>
+          <AuxValues>
+            <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new de.cismet.tools.gui.CellSpecificRenderedTable();"/>
+          </AuxValues>
         </Component>
       </SubComponents>
     </Container>

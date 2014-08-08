@@ -11,15 +11,11 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
-import com.vividsolutions.jts.geom.Geometry;
-
-import org.deegree.model.spatialschema.GeometryException;
-import org.deegree.model.spatialschema.JTSAdapter;
-
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 
 /**
@@ -28,7 +24,7 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class DefaultAttributeTableRuleSet {
+public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -39,6 +35,7 @@ public class DefaultAttributeTableRuleSet {
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public boolean isColumnEditable(final String columnName) {
         return true;
     }
@@ -53,6 +50,7 @@ public class DefaultAttributeTableRuleSet {
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public Object afterEdit(final String column, final int row, final Object oldValue, final Object newValue) {
         return newValue;
     }
@@ -64,6 +62,7 @@ public class DefaultAttributeTableRuleSet {
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public TableCellRenderer getCellRenderer(final String columnName) {
         return null;
     }
@@ -75,6 +74,7 @@ public class DefaultAttributeTableRuleSet {
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public TableCellEditor getCellEditor(final String columnName) {
         return null;
     }
@@ -86,6 +86,7 @@ public class DefaultAttributeTableRuleSet {
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public boolean prepareForSave(final TableModel model) {
         return true;
     }
@@ -95,6 +96,7 @@ public class DefaultAttributeTableRuleSet {
      *
      * @param  feature  DOCUMENT ME!
      */
+    @Override
     public void beforeSave(final FeatureServiceFeature feature) {
     }
 
@@ -103,6 +105,7 @@ public class DefaultAttributeTableRuleSet {
      *
      * @param  model  DOCUMENT ME!
      */
+    @Override
     public void afterSave(final TableModel model) {
     }
 
@@ -111,6 +114,7 @@ public class DefaultAttributeTableRuleSet {
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public String[] getAdditionalFieldNames() {
         return new String[0];
     }
@@ -123,6 +127,7 @@ public class DefaultAttributeTableRuleSet {
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public Object getAdditionalFieldValue(final int index, final FeatureServiceFeature feature) {
         return null;
     }
@@ -134,7 +139,18 @@ public class DefaultAttributeTableRuleSet {
      *
      * @return  DOCUMENT ME!
      */
+    @Override
     public Class getAdditionalFieldClass(final int index) {
         return String.class;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    @Override
+    public FeatureCreator getFeatureCreator() {
+        return null;
     }
 }
