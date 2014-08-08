@@ -39,19 +39,20 @@ import javax.swing.TransferHandler;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.cismet.cismap.commons.MappingModel;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.MapService;
 
 /**
- * DOCUMENT ME!
+ * This trees are shown in the capability widget to show the content of an internal db.
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -68,7 +69,6 @@ public class InternalDbTree extends JTree {
                 "/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png"));
 
     private String databasePath;
-//    private String
 
     //~ Constructors -----------------------------------------------------------
 
@@ -105,9 +105,15 @@ public class InternalDbTree extends JTree {
                             hasFocus);
 
                     if (c instanceof JLabel) {
-                        if ((value instanceof DBEntry) && !(value instanceof DbFolder)) {
+                        if ((value instanceof DBEntry) && !(value instanceof DBFolder)) {
                             ((JLabel)c).setIcon(shapeIcon);
                         } else if (value instanceof DBEntry) {
+                            if (expanded) {
+                                ((JLabel)c).setIcon(getOpenIcon());
+                            } else {
+                                ((JLabel)c).setIcon(getClosedIcon());
+                            }
+                        } else if (value.equals(getModel().getRoot())) {
                             if (expanded) {
                                 ((JLabel)c).setIcon(getOpenIcon());
                             } else {
@@ -125,6 +131,81 @@ public class InternalDbTree extends JTree {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * refreshs the tree model.
+     */
+    public void refresh() {
+        setModel(new InternalDBTreeModel());
+    }
+
+    /**
+     * Removes the given DbFolder from the data base and the tree model.
+     *
+     * @param  folder  DOCUMENT ME!
+     */
+    public void removeFolder(final DBFolder folder) {
+        final List<DBEntry> copy = new ArrayList<DBEntry>(folder.getChildren());
+        for (final DBEntry entry : copy) {
+            removeEntry(entry);
+        }
+
+        final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
+        model.removeFolder(folder);
+    }
+
+    /**
+     * Removes the given DBEntry from the data base and the tree model. If the given entry has the type DbFolder, the
+     * method {@link #removeFolder(de.cismet.cismap.commons.internaldb.DbFolder) } will be invoked.
+     *
+     * @param  entry  the entry to remove
+     */
+    public void removeEntry(final DBEntry entry) {
+        try {
+            if (entry instanceof DBFolder) {
+                removeFolder(((DBFolder)entry));
+                return;
+            }
+            final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
+            final Connection con = model.getConnection();
+            final Statement st = con.createStatement();
+            st.execute("DROP TABLE \"" + entry.getName() + "\";");
+
+            model.remove(entry.getName());
+
+            removeEntryFromActiveLayerModel(entry);
+        } catch (Exception e) {
+            LOG.error("Cannot remove entry", e);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  entry  DOCUMENT ME!
+     */
+    private void removeEntryFromActiveLayerModel(final DBEntry entry) {
+        final MappingModel model = CismapBroker.getInstance().getMappingComponent().getMappingModel();
+        final TreeMap<Integer, MapService> map = model.getRasterServices();
+
+        if (map != null) {
+            for (final Integer key : map.keySet()) {
+                final MapService mapService = map.get(key);
+
+                if (mapService instanceof H2FeatureService) {
+                    final H2FeatureService other = (H2FeatureService)mapService;
+                    if (other.getTableName().equals(entry.getName())) {
+                        try {
+                            other.initAndWait();
+                        } catch (Exception ex) {
+                            LOG.error("Error while reinitialise layer.", ex);
+                        }
+                        other.retrieve(true);
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * DOCUMENT ME!
@@ -181,8 +262,8 @@ public class InternalDbTree extends JTree {
             for (final TreePath path : paths) {
                 final Object o = path.getLastPathComponent();
 
-                if (o instanceof DbFolder) {
-                    addEntriesToList(entries, (DbFolder)o);
+                if (o instanceof DBFolder) {
+                    addEntriesToList(entries, (DBFolder)o);
                 } else if (o instanceof DBEntry) {
                     entries.add((DBEntry)o);
                 }
@@ -195,7 +276,7 @@ public class InternalDbTree extends JTree {
                 databaseTables[i] = new DBTableInformation(e.toString(),
                         databasePath,
                         e.getName(),
-                        (e instanceof DbFolder));
+                        (e instanceof DBFolder));
             }
 
             return new DBTransferable(databaseTables);
@@ -207,10 +288,10 @@ public class InternalDbTree extends JTree {
          * @param  entries  DOCUMENT ME!
          * @param  folder   DOCUMENT ME!
          */
-        private void addEntriesToList(final List<DBEntry> entries, final DbFolder folder) {
+        private void addEntriesToList(final List<DBEntry> entries, final DBFolder folder) {
             for (final DBEntry entry : folder.getChildren()) {
-                if (entry instanceof DbFolder) {
-                    addEntriesToList(entries, (DbFolder)entry);
+                if (entry instanceof DBFolder) {
+                    addEntriesToList(entries, (DBFolder)entry);
                 } else {
                     entries.add(entry);
                 }
@@ -227,7 +308,7 @@ public class InternalDbTree extends JTree {
                     info.getDropLocation().getDropPoint().x,
                     info.getDropLocation().getDropPoint().y);
             return ((p != null)
-                            && ((p.getLastPathComponent() instanceof DbFolder)
+                            && ((p.getLastPathComponent() instanceof DBFolder)
                                 || p.getLastPathComponent().equals(t.getModel().getRoot())));
 //            return b;
         }
@@ -249,21 +330,21 @@ public class InternalDbTree extends JTree {
                 final InternalDBTreeModel model = (InternalDBTreeModel)target.getModel();
                 final Object targetFolder = p.getLastPathComponent();
 
-                if ((p != null) && ((targetFolder instanceof DbFolder) || targetFolder.equals(model.getRoot()))) {
-                    DbFolder folder = null;
+                if ((p != null) && ((targetFolder instanceof DBFolder) || targetFolder.equals(model.getRoot()))) {
+                    DBFolder folder = null;
                     final DBTableInformation[] o = (DBTableInformation[])info.getTransferable()
                                 .getTransferData(TREEPATH_FLAVOR);
                     for (final DBTableInformation ti : o) {
                         DBEntry entry;
                         String newName = null;
-                        if (targetFolder instanceof DbFolder) {
-                            folder = (DbFolder)targetFolder;
+                        if (targetFolder instanceof DBFolder) {
+                            folder = (DBFolder)targetFolder;
                             newName = folder.getName() + "->" + getNameWithoutFolder(ti.getDatabaseTable());
                         } else if (targetFolder.equals(model.getRoot())) {
                             newName = getNameWithoutFolder(ti.getDatabaseTable());
                         }
                         if (ti.isFolder()) {
-                            entry = new DbFolder(newName);
+                            entry = new DBFolder(newName);
                         } else {
                             entry = new DBEntry(newName);
                             final Connection con = model.getConnection();
@@ -272,7 +353,7 @@ public class InternalDbTree extends JTree {
                             st.close();
                         }
                         model.remove(ti.getDatabaseTable());
-                        if (targetFolder instanceof DbFolder) {
+                        if (targetFolder instanceof DBFolder) {
                             folder.addChildren(entry);
                         } else if (targetFolder.equals(model.getRoot())) {
                             model.addEntry(entry);
@@ -360,7 +441,9 @@ public class InternalDbTree extends JTree {
                 while (rs.next()) {
                     final String name = rs.getString("TABLE_NAME");
 
-                    if (name.equalsIgnoreCase("spatial_ref_sys")) {
+                    if (name.equalsIgnoreCase("spatial_ref_sys")
+                                || name.equalsIgnoreCase(H2FeatureServiceFactory.LR_META_TABLE_NAME)
+                                || name.equalsIgnoreCase(H2FeatureServiceFactory.META_TABLE_NAME)) {
                         continue;
                     }
 
@@ -380,13 +463,13 @@ public class InternalDbTree extends JTree {
                             } else {
                                 newFolderName = part;
                             }
-                            DbFolder folder = new DbFolder(newFolderName);
+                            DBFolder folder = new DBFolder(newFolderName);
                             final int folderIndex = parent.indexOf(folder);
 
                             if (folderIndex == -1) {
                                 parent.add(folder);
                             } else {
-                                folder = (DbFolder)parent.get(folderIndex);
+                                folder = (DBFolder)parent.get(folderIndex);
                             }
 
                             if (!parentFolder.equals("")) {
@@ -414,8 +497,8 @@ public class InternalDbTree extends JTree {
         public Object getChild(final Object parent, final int index) {
             if (parent == root) {
                 return entries.get(index);
-            } else if (parent instanceof DbFolder) {
-                return ((DbFolder)parent).getChildren().get(index);
+            } else if (parent instanceof DBFolder) {
+                return ((DBFolder)parent).getChildren().get(index);
             } else {
                 return null;
             }
@@ -425,8 +508,8 @@ public class InternalDbTree extends JTree {
         public int getChildCount(final Object parent) {
             if (parent == root) {
                 return entries.size();
-            } else if (parent instanceof DbFolder) {
-                return ((DbFolder)parent).getChildren().size();
+            } else if (parent instanceof DBFolder) {
+                return ((DBFolder)parent).getChildren().size();
             } else {
                 return 0;
             }
@@ -436,8 +519,8 @@ public class InternalDbTree extends JTree {
         public boolean isLeaf(final Object node) {
             if (node == root) {
                 return entries.isEmpty();
-            } else if (node instanceof DbFolder) {
-                return ((DbFolder)node).getChildren().isEmpty();
+            } else if (node instanceof DBFolder) {
+                return ((DBFolder)node).getChildren().isEmpty();
             } else {
                 return true;
             }
@@ -450,12 +533,12 @@ public class InternalDbTree extends JTree {
                     final DBEntry entry = (DBEntry)path.getLastPathComponent();
                     final Statement st = conn.createStatement();
 
-                    if (entry instanceof DbFolder) {
+                    if (entry instanceof DBFolder) {
                         String folderName = newValue.toString();
                         if ((entry.getFolderName() != null) && !entry.getFolderName().equals("")) {
                             folderName = entry.getFolderName() + "->" + folderName;
                         }
-                        renameFolder((DbFolder)entry, folderName);
+                        renameFolder((DBFolder)entry, folderName);
                     } else {
                         String newName = newValue.toString() + "_" + entry.getHash();
                         if ((entry.getFolderName() != null) && !entry.getFolderName().equals("")) {
@@ -476,13 +559,13 @@ public class InternalDbTree extends JTree {
          * @param  folder   DOCUMENT ME!
          * @param  newName  DOCUMENT ME!
          */
-        private void renameFolder(final DbFolder folder, final String newName) {
+        private void renameFolder(final DBFolder folder, final String newName) {
             try {
                 final Statement st = conn.createStatement();
 
                 for (final DBEntry e : folder.getChildren()) {
-                    if (e instanceof DbFolder) {
-                        renameFolder((DbFolder)e, newName + "->" + e.getNameWithoutFolder());
+                    if (e instanceof DBFolder) {
+                        renameFolder((DBFolder)e, newName + "->" + e.getNameWithoutFolder());
                     } else {
                         final String name = newName + "->" + e.getNameWithoutFolder();
                         st.execute("alter table \"" + e.getName() + "\" rename to \"" + name + "\"");
@@ -509,8 +592,8 @@ public class InternalDbTree extends JTree {
         public int getIndexOfChild(final Object parent, final Object child) {
             if (parent == root) {
                 return entries.indexOf(child);
-            } else if (parent instanceof DbFolder) {
-                return ((DbFolder)parent).getChildren().indexOf(child);
+            } else if (parent instanceof DBFolder) {
+                return ((DBFolder)parent).getChildren().indexOf(child);
             } else {
                 return 0;
             }
@@ -541,11 +624,11 @@ public class InternalDbTree extends JTree {
          * @param  name  DOCUMENT ME!
          */
         public void addFolder(final String name) {
-            DbFolder folder = new DbFolder(name);
+            DBFolder folder = new DBFolder(name);
             int count = 0;
 
             while (entries.contains(folder)) {
-                folder = new DbFolder(name + "_" + (++count));
+                folder = new DBFolder(name + "_" + (++count));
             }
 
             entries.add(folder);
@@ -567,13 +650,52 @@ public class InternalDbTree extends JTree {
                 if (i == (parts.length - 1)) {
                     parent.remove(new DBEntry(tableName));
                 } else {
-                    DbFolder folder = new DbFolder(part);
+                    DBFolder folder = new DBFolder(part);
                     final int folderIndex = parent.indexOf(folder);
 
                     if (folderIndex == -1) {
                         break;
                     } else {
-                        folder = (DbFolder)parent.get(folderIndex);
+                        folder = (DBFolder)parent.get(folderIndex);
+                    }
+
+                    parent = folder.getChildren();
+                }
+            }
+
+            fireTreeStructureChanged();
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  folderToRemove  tableName DOCUMENT ME!
+         */
+        public void removeFolder(final DBFolder folderToRemove) {
+            for (final DBEntry e : folderToRemove.getChildren()) {
+                if (e instanceof DBFolder) {
+                    removeFolder((DBFolder)e);
+                } else {
+                    remove(e.getName());
+                }
+            }
+
+            final String[] parts = folderToRemove.getName().split("->");
+            List<DBEntry> parent = entries;
+
+            for (int i = 0; i < parts.length; ++i) {
+                final String part = parts[i];
+
+                if (i == (parts.length - 1)) {
+                    parent.remove(folderToRemove);
+                } else {
+                    DBFolder folder = new DBFolder(part);
+                    final int folderIndex = parent.indexOf(folder);
+
+                    if (folderIndex == -1) {
+                        break;
+                    } else {
+                        folder = (DBFolder)parent.get(folderIndex);
                     }
 
                     parent = folder.getChildren();
@@ -590,174 +712,6 @@ public class InternalDbTree extends JTree {
          */
         public Connection getConnection() {
             return conn;
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class DbFolder extends DBEntry {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private List<DBEntry> children = new ArrayList<DBEntry>();
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new DbFolder object.
-         *
-         * @param  name  DOCUMENT ME!
-         */
-        public DbFolder(final String name) {
-            super(name);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  the children
-         */
-        public List<DBEntry> getChildren() {
-            return children;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  child  the children to set
-         */
-        public void addChildren(final DBEntry child) {
-            this.children.add(child);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class DBEntry {
-
-        //~ Instance fields ----------------------------------------------------
-
-        private String name;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new DBEntry object.
-         *
-         * @param  name  DOCUMENT ME!
-         */
-        public DBEntry(final String name) {
-            this.name = name;
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  the name
-         */
-        public String getName() {
-            return name;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  name  the name to set
-         */
-        public void setName(final String name) {
-            this.name = name;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            return getClass().equals(obj.getClass()) && name.equals(((DBEntry)obj).name);
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public String getFolderName() {
-            int end = 0;
-
-            if (name.indexOf("->") != -1) {
-                end = name.lastIndexOf("->");
-            }
-
-            if (end == 0) {
-                return "";
-            } else {
-                return name.substring(0, end);
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public String getHash() {
-            int start = 0;
-
-            if (name.lastIndexOf("_") != -1) {
-                start = name.lastIndexOf("_") + 1;
-            }
-
-            if (start == 0) {
-                return "";
-            } else {
-                return name.substring(start);
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        private String getNameWithoutFolder() {
-            int start = 0;
-
-            if (name.indexOf("->") != -1) {
-                start = name.lastIndexOf("->") + 2;
-            }
-
-            return name.substring(start);
-        }
-
-        @Override
-        public String toString() {
-            int start = 0;
-            int end = name.length();
-
-            if (name.indexOf("->") != -1) {
-                start = name.lastIndexOf("->") + 2;
-            }
-            if (!(this instanceof DbFolder)) {
-                if (name.lastIndexOf("_") != -1) {
-                    end = name.lastIndexOf("_");
-                }
-            }
-
-            return name.substring(start, end);
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = (71 * hash) + ((this.name != null) ? this.name.hashCode() : 0);
-            return hash;
         }
     }
 }

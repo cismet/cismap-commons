@@ -13,13 +13,26 @@ package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import java.awt.Color;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
+import de.cismet.cismap.commons.featureservice.H2AttributeTableRuleSet;
+import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+
+import de.cismet.cismap.linearreferencing.tools.StationEditorInterface;
 
 /**
  * DOCUMENT ME!
@@ -27,14 +40,18 @@ import java.util.Map;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class JDBCFeature extends DefaultFeatureServiceFeature {
+public class JDBCFeature extends DefaultFeatureServiceFeature implements ModifiableFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
     // caches the last feature properties
     private static final Object sync = new Object();
+    private static final String DELETE_STATEMENT = "DELETE FROM \"%1s\" WHERE id = %2s;";
 
     //~ Instance fields --------------------------------------------------------
+
+    private Map<String, StationEditorInterface> stations = null;
+    private Color backgroundColor;
 
     private final JDBCFeatureInfo featureInfo;
 //    private PFeature pfeature = null;
@@ -53,11 +70,80 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
 
     //~ Methods ----------------------------------------------------------------
 
-    /**
-     * /** * Creates a new ShapeFeature object. * * @param shapeInfo typename DOCUMENT ME! * @param styles DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
+    @Override
+    public void setEditable(final boolean editable) {
+        final boolean oldEditableStatus = isEditable();
+        super.setEditable(editable);
+
+        if (oldEditableStatus != editable) {
+            if (!editable && (stations != null)) {
+                for (final String key : stations.keySet()) {
+                    final StationEditorInterface editor = stations.get(key);
+
+//                    if (editor instanceof TableLinearReferencedLineEditor) {
+//                        ((TableLinearReferencedLineEditor)editor).removePropertyChangeListener(propListener);
+//                    }
+                    stations.get(key).dispose();
+                }
+                stations.clear();
+            } else {
+                CismapBroker.getInstance().getMappingComponent().getFeatureCollection().unholdFeature(this);
+                CismapBroker.getInstance().getMappingComponent().getFeatureCollection().removeFeature(this);
+            }
+
+            if (editable) {
+                final H2AttributeTableRuleSet tableRuleSet = (H2AttributeTableRuleSet)getLayerProperties()
+                            .getAttributeTableRuleSet();
+
+                if ((tableRuleSet.getAllLinRefInfos() != null) && !tableRuleSet.getAllLinRefInfos().isEmpty()) {
+//                    try {
+//                        List<LinearReferencingInfo> allLineRefInfos = tableRuleSet.getAllLinRefInfos();
+//                        for (int i = 0; i < allLineRefInfos.size(); ++i) {
+//                            LinearReferencingInfo info = allLineRefInfos.get(i);
+//
+//                            if (info.getTillField() == null) {
+//                                final StationInfo statInfo = layerInfo.getStationInfo(col);
+//
+//                                if (statInfo.isStationLine()) {
+//                                    if (stations == null) {
+//                                        stations = new HashMap<String, DisposableCidsBeanStore>();
+//                                    }
+//                                    TableLinearReferencedLineEditor st = (TableLinearReferencedLineEditor)stations.get(
+//                                            String.valueOf(statInfo.getLineId()));
+//
+//                                    if (st == null) {
+//                                        final CidsBean bean = (CidsBean)getMetaObject().getBean()
+//                                                    .getProperty(layerInfo.getColumnPropertyNames()[i]);
+//                                        st = new TableLinearReferencedLineEditor();
+//                                        st.setCidsBean(bean);
+//                                        st.addPropertyChangeListener(propListener);
+//                                        backgroundColor = st.getLineColor();
+//
+//                                        stations.put(String.valueOf(statInfo.getLineId()), st);
+//                                    }
+//
+//                                    if (statInfo.isFromStation()) {
+//                                        stations.put(col, st.getFromStation());
+//                                    } else {
+//                                        stations.put(col, st.getToStation());
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    } catch (Exception e) {
+//                        LOG.error("Error while retrieving meta object", e);
+//                    }
+                } else {
+//                    backupGeometry = (Geometry)getGeometry().clone();
+//                    backupProperties = (HashMap)super.getProperties().clone();
+                    CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(this);
+                    CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(this);
+                    setBackgroundColor(new Color(255, 91, 0));
+                }
+            }
+        }
+    }
+
     @Override
     public HashMap getProperties() {
         if (existProperties()) {
@@ -144,7 +230,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
             super.setProperties(getProperties());
         }
 
-        super.addProperty(propertyName, propertyValue);
+        if (getProperty(propertyName.toUpperCase()) != null) {
+            super.addProperty(propertyName.toUpperCase(), propertyValue);
+        } else {
+            super.addProperty(propertyName, propertyValue);
+        }
     }
 
     /**
@@ -168,8 +258,39 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
             return;
         }
 
-        final HashMap map = super.getProperties();
+        final String checkSql = "SELECT id FROM \"%1s\" WHERE id = %2s";
         final Statement st = featureInfo.getConnection().createStatement();
+
+        try {
+            final String sql = String.format(checkSql, featureInfo.getTableName(), getId());
+            final ResultSet rs = st.executeQuery(sql);
+            final boolean alreadyExists = ((rs != null) && rs.next());
+
+            if (rs != null) {
+                rs.close();
+            }
+
+            if (alreadyExists) {
+                updateFeature(st);
+            } else {
+                addFeature(st);
+            }
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   st  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private void updateFeature(final Statement st) throws Exception {
+        final HashMap map = super.getProperties();
         final StringBuilder update = new StringBuilder("UPDATE \"");
         update.append(featureInfo.getTableName()).append("\" SET ");
 
@@ -177,9 +298,6 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
 
         for (final Object name : map.keySet()) {
             final Object value = map.get(name);
-            if ((value instanceof Geometry)) {
-                continue;
-            }
             if (!first) {
                 update.append(", ");
             } else {
@@ -187,7 +305,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
             }
 
             String valueString;
-            if (value instanceof String) {
+            if ((value instanceof String) || (value instanceof Geometry)) {
                 valueString = "'" + value + "'";
             } else {
                 valueString = value.toString();
@@ -195,9 +313,79 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
             update.append(name).append(" = ").append(valueString);
         }
         update.append(" WHERE id = ").append(getId());
-        st.execute(update.toString());
+        st.executeUpdate(update.toString());
 
         super.getProperties().clear();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   st  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private void addFeature(final Statement st) throws Exception {
+        final HashMap map = super.getProperties();
+        final String insertSql = "INSERT INTO \"%1s\" (%2s) VALUES (%3s)";
+        final List<String> attributes = new ArrayList<String>();
+        final List<String> values = new ArrayList<String>();
+
+        for (final Object name : map.keySet()) {
+            final Object value = map.get(name);
+            String valueString;
+
+            if ((value instanceof String) || (value instanceof Geometry)) {
+                valueString = "'" + value + "'";
+            } else {
+                valueString = value.toString();
+            }
+
+            attributes.add(String.valueOf(name));
+            values.add(valueString);
+        }
+        attributes.add(String.valueOf("id"));
+        values.add(String.valueOf(getId()));
+
+        final String query = String.format(
+                insertSql,
+                featureInfo.getTableName(),
+                listToString(attributes),
+                listToString(values));
+        st.executeUpdate(query);
+
+        super.getProperties().clear();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   attributes  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String listToString(final List<String> attributes) {
+        boolean firstElement = true;
+        final StringBuilder sb = new StringBuilder();
+
+        for (final String element : attributes) {
+            if (firstElement) {
+                firstElement = false;
+            } else {
+                sb.append(",");
+            }
+
+            sb.append(element);
+        }
+
+        return sb.toString();
+    }
+
+    @Override
+    public void delete() throws Exception {
+        final String deleteStat = String.format(DELETE_STATEMENT, featureInfo.getTableName(), getId());
+        final Statement st = featureInfo.getConnection().createStatement();
+        st.executeUpdate(deleteStat);
     }
 
     /**
@@ -216,6 +404,53 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
     @Override
     public void setProperties(final HashMap properties) {
         // nothing to do
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   colName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Object getStationEditor(final String colName) {
+        if (stations != null) {
+            return stations.get(colName);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  colName  DOCUMENT ME!
+     * @param  editor   DOCUMENT ME!
+     */
+    public void setStationEditor(final String colName, final StationEditorInterface editor) {
+        if (stations == null) {
+            stations = new HashMap<String, StationEditorInterface>();
+        }
+
+        stations.put(colName, editor);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public PropertyChangeListener getPropertyChangeListener() {
+        return new PropertyChangeListener() {
+
+                @Override
+                public void propertyChange(final PropertyChangeEvent evt) {
+                    for (final String name : stations.keySet()) {
+                        setProperty(name, stations.get(name).getValue());
+                        firePropertyChange(name, evt.getOldValue(), evt.getNewValue());
+                    }
+                }
+            };
     }
 
     /**
@@ -245,6 +480,9 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
      */
     @Override
     public Geometry getGeometry() {
+        if (existProperties()) {
+            return (Geometry)super.getProperty(featureInfo.getGeoField());
+        }
         Geometry g = null;
         g = featureInfo.getGeometryFromCache(getId());
 
@@ -277,7 +515,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
      */
     @Override
     public void setGeometry(final Geometry geom) {
-        // do nothing
+        if (!existProperties()) {
+            super.setProperties(getProperties());
+        }
+
+        super.addProperty(featureInfo.getGeoField(), geom);
     }
 
 //    public PFeature getPFeature() {
@@ -287,4 +529,22 @@ public class JDBCFeature extends DefaultFeatureServiceFeature {
 //    public void setPFeature(PFeature pfeature) {
 //        this.pfeature = pfeature;
 //    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the backgroundColor
+     */
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  backgroundColor  the backgroundColor to set
+     */
+    public void setBackgroundColor(final Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
 }
