@@ -81,10 +81,10 @@
                 <updatePolicy>interval:60</updatePolicy>
             </snapshots>
         </repository>
-        <repository>
+<!--        <repository>
             <id>fdvsolution.public</id>
             <url>http://archiva.fdvs.com.ar/repository/public1/</url>
-        </repository>
+        </repository>-->
     </repositories>
     
     <pluginRepositories>

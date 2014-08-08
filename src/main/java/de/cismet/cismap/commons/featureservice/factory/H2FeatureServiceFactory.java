@@ -152,14 +152,14 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @param  styles        DOCUMENT ME!
      */
     public H2FeatureServiceFactory(final String name,
-        final String databasePath,
-        final String tableName,
-        final File file,
-        final SwingWorker workerThread,
-        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
+            final String databasePath,
+            final String tableName,
+            final File file,
+            final SwingWorker workerThread,
+            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
         super(databasePath, tableName);
         this.name = name;
-//        this.styles = styles;
+        this.styles = styles;
         initConnection();
 
         if (file != null) {
@@ -176,15 +176,17 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @param  tableName     DOCUMENT ME!
      * @param  featureList   DOCUMENT ME!
      * @param  workerThread  DOCUMENT ME!
+     * @param  styles        DOCUMENT ME!
      */
     public H2FeatureServiceFactory(final String name,
             final String databasePath,
             final String tableName,
             final List<FeatureServiceFeature> featureList,
-            final SwingWorker workerThread) {
+            final SwingWorker workerThread,
+            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
         super(databasePath, tableName);
         this.name = name;
-//        this.styles = styles;
+        this.styles = styles;
         initConnection();
 
         if (featureList != null) {
@@ -790,7 +792,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
     @Override
     public List createFeatures(final Object query, final BoundingBox boundingBox, final SwingWorker workerThread)
-            throws TooManyFeaturesException, Exception {
+            throws FeatureFactory.TooManyFeaturesException, Exception {
         return createFeaturesInternal(query, boundingBox, workerThread, 0, 80000, null, true);
     }
 
@@ -800,7 +802,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final SwingWorker workerThread,
             final int offset,
             final int limit,
-            final FeatureServiceAttribute[] orderBy) throws TooManyFeaturesException, Exception {
+            final FeatureServiceAttribute[] orderBy) throws FeatureFactory.TooManyFeaturesException, Exception {
         return createFeaturesInternal(query, boundingBox, workerThread, offset, limit, orderBy, false);
     }
 
@@ -819,7 +821,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
     @Override
     public synchronized FeatureServiceFeature createNewFeature() {
-        final JDBCFeature feature = new JDBCFeature(info);
+        final JDBCFeature feature = new JDBCFeature(info, getStyle(name));
         feature.setId(getFreeId());
         feature.setLayerProperties(this.getLayerProperties());
 
@@ -877,8 +879,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      *
      * @return  DOCUMENT ME!
      *
-     * @throws  TooManyFeaturesException  DOCUMENT ME!
-     * @throws  Exception                 DOCUMENT ME!
+     * @throws  FeatureFactory.TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                                DOCUMENT ME!
      */
     private List createFeaturesInternal(final Object query,
             final BoundingBox boundingBox,
@@ -886,7 +888,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final int offset,
             final int limit,
             final FeatureServiceAttribute[] orderBy,
-            final boolean saveAsLastCreated) throws TooManyFeaturesException, Exception {
+            final boolean saveAsLastCreated) throws FeatureFactory.TooManyFeaturesException, Exception {
 //        final StringBuilder sb = new StringBuilder("select id, the_geom from ");
         final StringBuilder sb = new StringBuilder("select id from \"");
         final int srid = CrsTransformer.extractSridFromCrs(crs.getCode());
@@ -977,9 +979,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     @Override
-    public synchronized List createAttributes(final SwingWorker workerThread) throws TooManyFeaturesException,
-        UnsupportedOperationException,
-        Exception {
+    public synchronized List createAttributes(final SwingWorker workerThread)
+            throws FeatureFactory.TooManyFeaturesException, UnsupportedOperationException, Exception {
         if ((featureServiceAttributes == null) || featureServiceAttributes.isEmpty()) {
             initFactory();
         }
