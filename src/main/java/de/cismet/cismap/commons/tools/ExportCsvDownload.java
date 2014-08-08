@@ -50,7 +50,7 @@ public class ExportCsvDownload extends ExportTxtDownload {
             final AbstractFeatureService service,
             final List<String[]> attributeNames) {
         super(filename, extension, features, service, attributeNames);
-        separator = ";";
+        separator = ",";
         writeHeader = true;
         nullValue = "";
         quotes = "\"";
@@ -65,7 +65,7 @@ public class ExportCsvDownload extends ExportTxtDownload {
             final AbstractFeatureService service,
             final List<String[]> aliasAttributeList) {
         super.init(filename, extension, features, service, aliasAttributeList);
-        separator = ";";
+        separator = ",";
         writeHeader = true;
         nullValue = "";
         quotes = "\"";

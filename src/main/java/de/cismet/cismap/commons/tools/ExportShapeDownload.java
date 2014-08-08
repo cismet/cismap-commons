@@ -17,7 +17,11 @@ import org.deegree.model.feature.FeatureCollection;
 
 import org.openide.util.NbBundle;
 
+import java.io.File;
+
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+
+import de.cismet.tools.gui.downloadmanager.Download;
 
 /**
  * DOCUMENT ME!
@@ -53,11 +57,11 @@ public class ExportShapeDownload extends ExportDownload {
 
     @Override
     public void run() {
-        if (status != State.WAITING) {
+        if (status != Download.State.WAITING) {
             return;
         }
 
-        status = State.RUNNING;
+        status = Download.State.RUNNING;
 
         if ((features != null) && (features.length > 0)) {
             stateChanged();
@@ -71,6 +75,18 @@ public class ExportShapeDownload extends ExportDownload {
                         fileToSaveTo.getAbsolutePath().substring(0, fileToSaveTo.getAbsolutePath().lastIndexOf(".")));
                 final ShapeFileWriter writer = new ShapeFileWriter(shape);
                 writer.write();
+
+                if (extension.equalsIgnoreCase(".dbf")) {
+                    if (fileToSaveTo.getAbsolutePath().toLowerCase().endsWith(".dbf")) {
+                        final String fileNameWithoutExt = fileToSaveTo.getAbsolutePath()
+                                    .substring(0, fileToSaveTo.getAbsolutePath().length() - 4);
+                        String fileName = fileNameWithoutExt + ".shp";
+
+                        deleteFileIfExists(fileName);
+                        fileName = fileNameWithoutExt + ".shx";
+                        deleteFileIfExists(fileName);
+                    }
+                }
             } catch (Exception ex) {
                 error(ex);
             }
@@ -78,9 +94,22 @@ public class ExportShapeDownload extends ExportDownload {
             error(new Exception("No features found"));
         }
 
-        if (status == State.RUNNING) {
-            status = State.COMPLETED;
+        if (status == Download.State.RUNNING) {
+            status = Download.State.COMPLETED;
             stateChanged();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fileName  DOCUMENT ME!
+     */
+    private void deleteFileIfExists(final String fileName) {
+        final File fileToDelete = new File(fileName);
+
+        if (fileToDelete.exists()) {
+            fileToDelete.delete();
         }
     }
 
