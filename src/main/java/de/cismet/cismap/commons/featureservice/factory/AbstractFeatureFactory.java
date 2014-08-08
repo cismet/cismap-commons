@@ -29,9 +29,19 @@ import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
+import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Debug;
+import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.features.ShapeFeature;
+import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.*;
+import de.cismet.cismap.commons.wfs.WFSFacade;
+
+import de.cismet.security.AccessHandler;
+import de.cismet.security.WebAccessManager;
 
 /**
  * Abstract impelementation of a FeatureFactory. Supports re-evaluation of id and annotation expressions.
@@ -59,14 +69,13 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // protected boolean primaryAnnotationExpressionChanged = true;
     // protected boolean secondaryAnnotationExpressionChanged = true;
     protected Vector<FT> lastCreatedfeatureVector = new Vector();
-    private volatile boolean isInterruptedAllowed = true;
-    private Geometry lastGeom = null;
-    private QT lastQuery;
     // private BoundingBox lastBB = null;
     // private BoundingBox diff = null;
     // private final WKTReader reader;
     protected Map<String, LinkedList<Style>> styles;
     private volatile boolean isInterruptedAllowed = true;
+    private Geometry lastGeom = null;
+    private QT lastQuery;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -606,11 +615,11 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      *
      * @return  DOCUMENT ME!
      *
-     * @throws  TooManyFeaturesException  DOCUMENT ME!
-     * @throws  Exception                 DOCUMENT ME!
+     * @throws  FeatureFactory.TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                                DOCUMENT ME!
      */
     protected Vector<FT> createFeaturesFromMemory(final QT query,
-            final Geometry geom) throws TooManyFeaturesException, Exception {
+            final Geometry geom) throws FeatureFactory.TooManyFeaturesException, Exception {
         if (!featuresAlreadyInMemory(geom, query)) {
             return null;
         }

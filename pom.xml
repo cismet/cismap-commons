@@ -35,8 +35,8 @@
     </scm>
 
     <repositories>
-        <repository>
-			<!-- Releases for geopublishing.org and more by www.wikisquare.de -->
+<!--        <repository>
+			 Releases for geopublishing.org and more by www.wikisquare.de 
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -46,7 +46,7 @@
 			<url>http://artifactory.wikisquare.de/artifactory/libs-releases</url>
 		</repository>
                 <repository>
-			<!-- Snapshot releases geopublishing.org and more by www.wikisquare.de -->
+			 Snapshot releases geopublishing.org and more by www.wikisquare.de 
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>daily</updatePolicy>
@@ -66,7 +66,7 @@
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
-    </repository>
+    </repository>-->
         <repository>
             <id>cismet-repo</id>
             <url>https://repo.cismet.de/repo</url>
@@ -81,16 +81,16 @@
                 <updatePolicy>interval:60</updatePolicy>
             </snapshots>
         </repository>
-        <repository>
+<!--        <repository>
             <id>fdvsolution.public</id>
             <url>http://archiva.fdvs.com.ar/repository/public1/</url>
-        </repository>
+        </repository>-->
     </repositories>
     
-    <pluginRepositories>
+<!--    <pluginRepositories>
 
 		<pluginRepository>
-			<!-- Plugins needed to create exe files -->
+			 Plugins needed to create exe files 
 			<snapshots>
 				<enabled>true</enabled>
 				<updatePolicy>always</updatePolicy>
@@ -101,7 +101,7 @@
 		</pluginRepository>
 
 		<pluginRepository>
-			<!-- Plugins needed to create exe files -->
+			 Plugins needed to create exe files 
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
@@ -110,7 +110,7 @@
 			</url>
 		</pluginRepository>
 
-	</pluginRepositories>
+	</pluginRepositories>-->
 
     <dependencies>
         <dependency>
@@ -219,11 +219,11 @@
             <artifactId>deegree-core-rendering-2d</artifactId>
             <version>3.2.0</version>
         </dependency>
-        <dependency>
+<!--        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-        </dependency>        
+        </dependency>        -->
     </dependencies>
 
     <build>

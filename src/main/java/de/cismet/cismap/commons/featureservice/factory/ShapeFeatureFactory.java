@@ -53,6 +53,8 @@ import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
+import static de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory.DEBUG;
+
 /**
  * DOCUMENT ME!
  *
@@ -642,7 +644,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                 }
 
                 selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
-                final ShapeInfo info = new ShapeInfo(filename, persShapeFile, shapeSrid, fc);
+                final ShapeInfo info = new ShapeInfo(filename, persShapeFile, featureSrid, fc);
                 int count = 0;
 
 //                if (!saveAsLastCreated || recordNumbers.length < 60000) {
