@@ -44,6 +44,7 @@ import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
 import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
+import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 
@@ -60,6 +61,7 @@ class TreeTransferHandler extends TransferHandler {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger LOG = Logger.getLogger(TreeTransferHandler.class);
+    private static final String[] SUPPORTED_IMAGE_FORMATS = { "png", "jpg", "tif", "tiff", "gif" };
 
     //~ Instance fields --------------------------------------------------------
 
@@ -306,33 +308,38 @@ class TreeTransferHandler extends TransferHandler {
                         // NO HARDCODING
                         try {
                             LOG.info("DocumentUri: " + currentFile.toURI()); // NOI18N
+                            if (isGeoImage(currentFile.getName())) {
+                                final ImageRasterService irs = new ImageRasterService(currentFile);
 
-                            final AbstractFeatureService dfs = DocumentFeatureServiceFactory
-                                        .createDocumentFeatureService(currentFile);
-                            activeLayerModel.addLayer(dfs, activeLayerModel.layers.size() - index);
+                                activeLayerModel.addLayer(irs);
+                            } else {
+                                final AbstractFeatureService dfs = DocumentFeatureServiceFactory
+                                            .createDocumentFeatureService(currentFile);
+                                activeLayerModel.addLayer(dfs, activeLayerModel.layers.size() - index);
 
-                            if (dfs instanceof ShapeFileFeatureService) {
-                                new Thread(new Runnable() {
+                                if (dfs instanceof ShapeFileFeatureService) {
+                                    new Thread(new Runnable() {
 
-                                        @Override
-                                        public void run() {
-                                            do {
-                                                try {
-                                                    Thread.sleep(500);
-                                                } catch (final InterruptedException e) {
-                                                    // nothing to do
+                                            @Override
+                                            public void run() {
+                                                do {
+                                                    try {
+                                                        Thread.sleep(500);
+                                                    } catch (final InterruptedException e) {
+                                                        // nothing to do
+                                                    }
+                                                } while (!dfs.isInitialized());
+
+                                                if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
+                                                    LOG.error("Error in shape geometry found.");
+                                                } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
+                                                    LOG.error("No geometry in shape recognised.");
                                                 }
-                                            } while (!dfs.isInitialized());
-
-                                            if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
-                                                LOG.error("Error in shape geometry found.");
-                                            } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
-                                                LOG.error("No geometry in shape recognised.");
                                             }
-                                        }
-                                    }).start();
+                                        }).start();
 
-                                return true;
+                                    return true;
+                                }
                             }
                         } catch (final Exception ex) {
                             LOG.error("Error during creation of a FeatureServices", ex); // NOI18N
@@ -424,6 +431,23 @@ class TreeTransferHandler extends TransferHandler {
             }
             return true;
         }
+        return false;
+    }
+    
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   fileName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static boolean isGeoImage(final String fileName) {
+        for (final String ending : SUPPORTED_IMAGE_FORMATS) {
+            if (fileName.endsWith(ending)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
