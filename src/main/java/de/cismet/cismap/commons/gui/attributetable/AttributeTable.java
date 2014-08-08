@@ -107,6 +107,7 @@ import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.ExportCsvDownload;
+import de.cismet.cismap.commons.tools.ExportDbfDownload;
 import de.cismet.cismap.commons.tools.ExportDownload;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.tools.ExportTxtDownload;
@@ -250,7 +251,12 @@ public class AttributeTable extends javax.swing.JPanel {
                         NbBundle.getMessage(AttributeTable.class, "AttributeTable.FeatureComboItem.selectedFeatures"))
                 }));
         jcFormat.setModel(new DefaultComboBoxModel(
-                new Object[] { new ExportTxtDownload(), new ExportCsvDownload(), new ExportShapeDownload() }));
+                new Object[] {
+                    new ExportTxtDownload(),
+                    new ExportCsvDownload(),
+                    new ExportShapeDownload(),
+                    new ExportDbfDownload()
+                }));
 
 //        if ((featureService instanceof ShapeFileFeatureService) || (featureService instanceof H2FeatureService)) {
         pageSize = -1;
