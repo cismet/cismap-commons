@@ -58,6 +58,7 @@ import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.featureservice.style.StyleDialog;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
+import de.cismet.cismap.commons.raster.wms.AbstractWMS;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.wfs.WFSFacade;
@@ -145,7 +146,6 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                         if (value instanceof RetrievalServiceLayer) {
                             final RetrievalServiceLayer layer = ((RetrievalServiceLayer)value);
                             final boolean flag = layer.getPNode().getVisible();
-                            layer.getPNode().setVisible(!flag);
                             layer.setEnabled(!flag);
 //                        fireTreeNodesChanged(this, new Object[]{root}, null, null);
 
@@ -153,6 +153,15 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
 //                            layer.setRefreshNeeded(true);
                                 layer.retrieve(true);
                             }
+                            if (layer instanceof AbstractFeatureService) {
+                                ((AbstractFeatureService)layer).setVisible(!flag);
+                            } else if (layer instanceof AbstractWMS) {
+                                ((AbstractWMS)layer).setVisible(!flag);
+                            } else if (layer instanceof ModeLayer) {
+                                ((ModeLayer)layer).setVisible(!flag);
+                            }
+                            layer.getPNode().setVisible(!flag);
+
                             final ActiveLayerEvent ale = new ActiveLayerEvent();
                             ale.setLayer(value);
                             CismapBroker.getInstance().fireLayerVisibilityChanged(ale);
