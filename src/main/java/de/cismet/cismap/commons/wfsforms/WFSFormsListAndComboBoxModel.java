@@ -44,7 +44,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JProgressBar;
 
-import de.cismet.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
 
 import de.cismet.security.WebAccessManager;
 

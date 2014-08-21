@@ -119,7 +119,8 @@ import de.cismet.cismap.commons.wms.capabilities.*;
 
 import de.cismet.cismap.linearreferencing.tools.LinearReferencingDialog;
 
-import de.cismet.security.AccessHandler;
+import de.cismet.commons.security.AccessHandler;
+
 import de.cismet.security.WebAccessManager;
 
 import de.cismet.security.exceptions.RequestFailedException;
