@@ -12,9 +12,12 @@
  */
 package de.cismet.cismap.commons.gui.featureinfowidget.displays;
 
-import javafx.application.Platform;
+import calpa.html.CalCons;
+import calpa.html.CalHTMLPane;
+import calpa.html.CalHTMLPreferences;
+import calpa.html.DefaultCalHTMLObserver;
 
-import javafx.scene.web.WebEngine;
+import javafx.application.Platform;
 
 import org.apache.log4j.Logger;
 
@@ -59,6 +62,7 @@ import de.cismet.security.WebAccessManager;
 import de.cismet.security.handler.WSSAccessHandler;
 
 import de.cismet.tools.gui.FXWebViewPanel;
+
 /**
  * DOCUMENT ME!
  *
@@ -85,12 +89,43 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
     private final Icon icoInfo = new ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/featureinfowidget/res/info.png"));       // NOI18N
 
+    private final DefaultCalHTMLObserver htmlObserver = new DefaultCalHTMLObserver() {
+
+            @Override
+            public void statusUpdate(final CalHTMLPane calHTMLPane,
+                    final int i,
+                    final URL uRL,
+                    final int i0,
+                    final String string) {
+                super.statusUpdate(calHTMLPane, i, uRL, i0, string);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("StatusUpdate" + i + uRL); // NOI18N
+                }
+            }
+
+            @Override
+            public void linkActivatedUpdate(final CalHTMLPane calHTMLPane,
+                    final URL uRL,
+                    final String string,
+                    final String string0) {
+                super.linkActivatedUpdate(calHTMLPane, uRL, string, string0);
+            }
+
+            @Override
+            public void linkFocusedUpdate(final CalHTMLPane calHTMLPane, final URL uRL) {
+                super.linkFocusedUpdate(calHTMLPane, uRL);
+            }
+        };
+
+    private calpa.html.CalHTMLPane calpaHtmlPane;
+    private final CalHTMLPreferences htmlPrefs;
     private AppletContext appletContext;
     private boolean shiftDown;
     private JTabbedPane tabbedparent;
     private String urlBuffer;
     private SwingWorker currentWorker;
-    private FXWebViewPanel browserPanel;
+    private FXWebViewPanel fxBrowserPanel;
+    private boolean fxIniterror = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdOpenExternal;
     private javax.swing.JTextPane htmlPane_;
@@ -109,12 +144,42 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
                 FeatureInfoDisplayKey.ANY_SERVER,
                 FeatureInfoDisplayKey.ANY_LAYER));
 
+        htmlPrefs = new CalHTMLPreferences();
+        htmlPrefs.setAutomaticallyFollowHyperlinks(false);
+        htmlPrefs.setHandleFormSubmission(false);
+        htmlPrefs.setOptimizeDisplay(CalCons.OPTIMIZE_ALL);
+        htmlPrefs.setDisplayErrorDialogs(false);
+        htmlPrefs.setLoadImages(true);
+
         initComponents();
-        browserPanel = new FXWebViewPanel();
-        pnlWebView.add(browserPanel, BorderLayout.CENTER);
+        /*
+         *If something wents wrong with the initialistion of the JavaFX WebView we fall back to calpa to ensure backward
+         * compatibilty
+         */
+        try {
+            fxBrowserPanel = new FXWebViewPanel();
+            pnlWebView.add(fxBrowserPanel, BorderLayout.CENTER);
+        } catch (Error e) {
+            fxIniterror = true;
+            LOG.warn("Error initialising JavaFX WebView. Using Calpa as Fallback", e);
+            initCalpaAsFallback();
+        } catch (Exception ex) {
+            fxIniterror = true;
+            LOG.warn("Excpetion initialising JavaFX WebView. Using Calpa as Fallback", ex);
+            initCalpaAsFallback();
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void initCalpaAsFallback() {
+        calpaHtmlPane = new CalHTMLPane(htmlPrefs, htmlObserver, "cismap");
+        pnlWebView.removeAll();
+        pnlWebView.add(calpaHtmlPane, BorderLayout.CENTER);
+    }
 
     @Override
     public void init(final WMSLayer layer, final JTabbedPane parentTabbedPane) {
@@ -170,14 +235,12 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
             tabbedparent.setIconAt(tabbedparent.indexOfComponent(this), icoInfo);
         }
         if (e.getRetrievedObject() instanceof String) {
-            Platform.runLater(new Runnable() {
+            if (fxIniterror) {
+                calpaHtmlPane.showHTMLDocument(e.getRetrievedObject().toString());
+            } else {
+                fxBrowserPanel.loadContent(e.getRetrievedObject().toString());
+            }
 
-                    @Override
-                    public void run() {
-                        browserPanel.loadContent(e.getRetrievedObject().toString());
-                    }
-                });
-//            htmlPane.showHTMLDocument(e.getRetrievedObject().toString());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("String:" + e.getRetrievedObject().toString()); // NOI18N
             }
@@ -450,14 +513,11 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
                 }
                 final String result = get();
                 // ToDo more generic it should be possible to display images
-                Platform.runLater(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            browserPanel.loadContent(result);
-                        }
-                    });
-//                htmlPane.showHTMLDocument(result);
+                if (fxIniterror) {
+                    calpaHtmlPane.showHTMLDocument(result);
+                } else {
+                    fxBrowserPanel.loadContent(result);
+                }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("String:" + result);                                    // NOI18N
                 }
