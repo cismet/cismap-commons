@@ -12,10 +12,9 @@
  */
 package de.cismet.cismap.commons.gui.featureinfowidget.displays;
 
-import calpa.html.CalCons;
-import calpa.html.CalHTMLPane;
-import calpa.html.CalHTMLPreferences;
-import calpa.html.DefaultCalHTMLObserver;
+import javafx.application.Platform;
+
+import javafx.scene.web.WebEngine;
 
 import org.apache.log4j.Logger;
 
@@ -23,6 +22,7 @@ import org.openide.util.lookup.ServiceProvider;
 
 import java.applet.AppletContext;
 
+import java.awt.BorderLayout;
 import java.awt.ComponentOrientation;
 import java.awt.EventQueue;
 import java.awt.Image;
@@ -58,6 +58,7 @@ import de.cismet.security.WebAccessManager;
 
 import de.cismet.security.handler.WSSAccessHandler;
 
+import de.cismet.tools.gui.FXWebViewPanel;
 /**
  * DOCUMENT ME!
  *
@@ -84,45 +85,16 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
     private final Icon icoInfo = new ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/featureinfowidget/res/info.png"));       // NOI18N
 
-    private final DefaultCalHTMLObserver htmlObserver = new DefaultCalHTMLObserver() {
-
-            @Override
-            public void statusUpdate(final CalHTMLPane calHTMLPane,
-                    final int i,
-                    final URL uRL,
-                    final int i0,
-                    final String string) {
-                super.statusUpdate(calHTMLPane, i, uRL, i0, string);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("StatusUpdate" + i + uRL); // NOI18N
-                }
-            }
-
-            @Override
-            public void linkActivatedUpdate(final CalHTMLPane calHTMLPane,
-                    final URL uRL,
-                    final String string,
-                    final String string0) {
-                super.linkActivatedUpdate(calHTMLPane, uRL, string, string0);
-            }
-
-            @Override
-            public void linkFocusedUpdate(final CalHTMLPane calHTMLPane, final URL uRL) {
-                super.linkFocusedUpdate(calHTMLPane, uRL);
-            }
-        };
-
-    private final CalHTMLPreferences htmlPrefs;
     private AppletContext appletContext;
     private boolean shiftDown;
     private JTabbedPane tabbedparent;
     private String urlBuffer;
     private SwingWorker currentWorker;
-
+    private FXWebViewPanel browserPanel;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdOpenExternal;
-    private calpa.html.CalHTMLPane htmlPane;
     private javax.swing.JTextPane htmlPane_;
+    private javax.swing.JPanel pnlWebView;
     private javax.swing.JToolBar tbRight;
     // End of variables declaration//GEN-END:variables
 
@@ -137,14 +109,9 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
                 FeatureInfoDisplayKey.ANY_SERVER,
                 FeatureInfoDisplayKey.ANY_LAYER));
 
-        htmlPrefs = new CalHTMLPreferences();
-        htmlPrefs.setAutomaticallyFollowHyperlinks(false);
-        htmlPrefs.setHandleFormSubmission(false);
-        htmlPrefs.setOptimizeDisplay(CalCons.OPTIMIZE_ALL);
-        htmlPrefs.setDisplayErrorDialogs(false);
-        htmlPrefs.setLoadImages(true);
-
         initComponents();
+        browserPanel = new FXWebViewPanel();
+        pnlWebView.add(browserPanel, BorderLayout.CENTER);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -203,7 +170,14 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
             tabbedparent.setIconAt(tabbedparent.indexOfComponent(this), icoInfo);
         }
         if (e.getRetrievedObject() instanceof String) {
-            htmlPane.showHTMLDocument(e.getRetrievedObject().toString());
+            Platform.runLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        browserPanel.loadContent(e.getRetrievedObject().toString());
+                    }
+                });
+//            htmlPane.showHTMLDocument(e.getRetrievedObject().toString());
             if (LOG.isDebugEnabled()) {
                 LOG.debug("String:" + e.getRetrievedObject().toString()); // NOI18N
             }
@@ -278,7 +252,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
         tbRight = new javax.swing.JToolBar();
         tbRight.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         cmdOpenExternal = new javax.swing.JButton();
-        htmlPane = new CalHTMLPane(htmlPrefs, htmlObserver, "cismap");
+        pnlWebView = new javax.swing.JPanel();
 
         htmlPane_.setEditable(false);
         htmlPane_.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
@@ -320,8 +294,8 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
 
         add(tbRight, java.awt.BorderLayout.NORTH);
 
-        htmlPane.setDoubleBuffered(true);
-        add(htmlPane, java.awt.BorderLayout.CENTER);
+        pnlWebView.setLayout(new java.awt.BorderLayout());
+        add(pnlWebView, java.awt.BorderLayout.CENTER);
     } // </editor-fold>//GEN-END:initComponents
 
     /**
@@ -476,7 +450,14 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
                 }
                 final String result = get();
                 // ToDo more generic it should be possible to display images
-                htmlPane.showHTMLDocument(result);
+                Platform.runLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            browserPanel.loadContent(result);
+                        }
+                    });
+//                htmlPane.showHTMLDocument(result);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("String:" + result);                                    // NOI18N
                 }
