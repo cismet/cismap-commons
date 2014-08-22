@@ -53,9 +53,8 @@ import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
 import de.cismet.cismap.commons.retrieval.UniversalRetrieval;
 
-import de.cismet.security.AccessHandler;
-
-import de.cismet.security.AccessHandler.ACCESS_METHODS;
+import de.cismet.commons.security.AccessHandler;
+import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
 
 import de.cismet.security.WebAccessManager;
 
