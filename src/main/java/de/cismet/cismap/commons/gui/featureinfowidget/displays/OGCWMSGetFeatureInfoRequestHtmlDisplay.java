@@ -17,8 +17,6 @@ import calpa.html.CalHTMLPane;
 import calpa.html.CalHTMLPreferences;
 import calpa.html.DefaultCalHTMLObserver;
 
-import javafx.application.Platform;
-
 import org.apache.log4j.Logger;
 
 import org.openide.util.lookup.ServiceProvider;
@@ -123,7 +121,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
     private JTabbedPane tabbedparent;
     private String urlBuffer;
     private SwingWorker currentWorker;
-    private FXWebViewPanel fxBrowserPanel;
+    private FXPanelWrapper fxBrowserPanel;
     private boolean fxIniterror = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdOpenExternal;
@@ -156,8 +154,13 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
          * compatibilty
          */
         try {
-            fxBrowserPanel = new FXWebViewPanel();
-            pnlWebView.add(fxBrowserPanel, BorderLayout.CENTER);
+            if (System.getProperty("java.version").startsWith("1.6")) {
+                fxIniterror = true;
+                initCalpaAsFallback();
+            } else {
+                fxBrowserPanel = new FXPanelWrapper();
+                pnlWebView.add(fxBrowserPanel, BorderLayout.CENTER);
+            }
         } catch (Error e) {
             fxIniterror = true;
             LOG.warn("Error initialising JavaFX WebView. Using Calpa as Fallback", e);
@@ -237,7 +240,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
             if (fxIniterror) {
                 calpaHtmlPane.showHTMLDocument(e.getRetrievedObject().toString());
             } else {
-                fxBrowserPanel.loadContent(e.getRetrievedObject().toString());
+                fxBrowserPanel.getJfxPanel().loadContent(e.getRetrievedObject().toString());
             }
 
             if (LOG.isDebugEnabled()) {
@@ -515,7 +518,7 @@ public class OGCWMSGetFeatureInfoRequestHtmlDisplay extends AbstractFeatureInfoD
                 if (fxIniterror) {
                     calpaHtmlPane.showHTMLDocument(result);
                 } else {
-                    fxBrowserPanel.loadContent(result);
+                    fxBrowserPanel.getJfxPanel().loadContent(result);
                 }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("String:" + result);                                    // NOI18N
