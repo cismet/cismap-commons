@@ -377,12 +377,17 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     /**
      * Creates a new SlidableWMSServiceLayerGroup object.
      *
-     * @param  name             DOCUMENT ME!
-     * @param  completePath     DOCUMENT ME!
-     * @param  layers           DOCUMENT ME!
-     * @param  wmsCapabilities  DOCUMENT ME!
-     * @param  capabilitiesUrl  DOCUMENT ME!
-     * @param  srs              DOCUMENT ME!
+     * <p>Note: Deprecated - please test before using this constructor. If everything works as expected, the deprecated
+     * tag can be removed.</p>
+     *
+     * @param       name             DOCUMENT ME!
+     * @param       completePath     DOCUMENT ME!
+     * @param       layers           DOCUMENT ME!
+     * @param       wmsCapabilities  DOCUMENT ME!
+     * @param       capabilitiesUrl  DOCUMENT ME!
+     * @param       srs              DOCUMENT ME!
+     *
+     * @deprecated  DOCUMENT ME!
      */
     public SlidableWMSServiceLayerGroup(final String name,
             final String completePath,
