@@ -1112,7 +1112,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         element.setAttribute("bgColor", preferredBGColor);
         element.setAttribute("imageFormat", preferredRasterFormat);
         element.setAttribute("exceptionFormat", preferredExceptionsFormat);
-        element.setAttribute("completePath", completePath);
+        element.setAttribute("completePath", String.valueOf(completePath));
 
         if (boundingBox != null) {
             element.addContent(boundingBox.getJDOMElement());
