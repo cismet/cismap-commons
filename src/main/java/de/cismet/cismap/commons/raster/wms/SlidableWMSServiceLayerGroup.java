@@ -288,7 +288,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             }
         }
 
-        init();
+        init(0);
     }
 
     /**
@@ -362,7 +362,13 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             layers.add(l);
         }
 
-        init();
+        int sliderValue = 0;
+        try {
+            sliderValue = element.getAttribute("sliderValue").getIntValue();
+        } catch (DataConversionException ex) {
+            LOG.warn("Could not load attribute sliderValue.", ex);
+        }
+        init(sliderValue);
     }
 
     /**
@@ -433,7 +439,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         setWmsCapabilities(wmsCapabilities);
         setCapabilitiesUrl(capabilitiesUrl);
 
-        init();
+        init(0);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -457,8 +463,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     /**
      * initializes a new SlidableWMSServiceLayerGroup object.
+     *
+     * @param  sliderValue  the initial position of the slider
      */
-    private void init() {
+    private void init(final int sliderValue) {
         setDefaults();
 
         for (final WMSServiceLayer wsl : layers) {
@@ -560,7 +568,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         }
 
         layers.get(0).setVisible(true);
-        initDialog();
+        initDialog(sliderValue);
         CismapBroker.getInstance().addActiveLayerListener(this);
     }
 
@@ -733,10 +741,12 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     }
 
     /**
-     * DOCUMENT ME!
+     * Initializes the internal frame, which contains the slider.
+     *
+     * @param  sliderValue  the initial position of the slider
      */
-    private void initDialog() {
-        internalFrame = new SlidableWMSServiceLayerGroupInternalFrame(this);
+    private void initDialog(final int sliderValue) {
+        internalFrame = new SlidableWMSServiceLayerGroupInternalFrame(this, sliderValue);
         setLocked(resourceConserving);
     }
 
@@ -1138,6 +1148,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         element.setAttribute("bottomUp", Boolean.toString(bottomUp));
         element.setAttribute("verticalLabelWidthThreshold", Double.toString(verticalLabelWidthThreshold));
         element.setAttribute("crossfadeEnabled", Boolean.toString(crossfadeEnabled));
+
+        element.setAttribute("sliderValue", Integer.toString(internalFrame.getSliderValue()));
 
         if (boundingBox != null) {
             element.addContent(boundingBox.getJDOMElement());

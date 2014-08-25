@@ -65,13 +65,14 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
     /**
      * Creates a new SlidableWMSServiceLayerGroupInternalFrame object.
      *
-     * @param  model  DOCUMENT ME!
+     * @param  model        DOCUMENT ME!
+     * @param  sliderValue  the initial position of the slider
      */
-    public SlidableWMSServiceLayerGroupInternalFrame(final SlidableWMSServiceLayerGroup model) {
+    public SlidableWMSServiceLayerGroupInternalFrame(final SlidableWMSServiceLayerGroup model, final int sliderValue) {
         this.model = model;
         slider.setMinimum(0);
         slider.setMaximum((model.getLayers().size() - 1) * 100);
-        slider.setValue(0);
+        slider.setValue(sliderValue);
 
         slider.setMinorTickSpacing(100);
         slider.setPaintTicks(true);
