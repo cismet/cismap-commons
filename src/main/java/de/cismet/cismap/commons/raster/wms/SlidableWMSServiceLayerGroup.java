@@ -301,6 +301,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         setName(element.getAttributeValue("name"));
 
+        lockTimer = new Timer(timeTillLocked * 1000, lockTimerListener);
+        lockTimer.setRepeats(false);
+
         try {
             pnode.setVisible(element.getAttribute("visible").getBooleanValue());
         } catch (final DataConversionException e) {
@@ -349,26 +352,14 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         final Element layersElement = element.getChild("layers");
         final List layersList = layersElement.getChildren();
 
-        evaluateLayerKeywords(null);
+        evaluateElementKeywords(element);
         if (bottomUp) {
             Collections.reverse(layersList);
         }
 
         for (final Object o : layersList) {
             final WMSServiceLayer l = new WMSServiceLayer((Element)o, capabilities);
-            boolean addLayer = false;
-            if (enableAllChildren) {
-                addLayer = true;
-            } else {
-                for (final String keyword : ((WMSLayer)l.getWMSLayers().get(0)).getOgcCapabilitiesLayer().getKeywords()) {
-                    if (keyword.equalsIgnoreCase("cismapSlidingLayerGroupMember")) {
-                        addLayer = true;
-                    }
-                }
-            }
-            if (addLayer) {
-                layers.add(l);
-            }
+            layers.add(l);
         }
 
         init();
