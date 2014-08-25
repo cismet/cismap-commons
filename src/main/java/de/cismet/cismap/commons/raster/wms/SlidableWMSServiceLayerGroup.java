@@ -576,6 +576,27 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     /**
      * DOCUMENT ME!
      *
+     * @param  slidableLayerElement  DOCUMENT ME!
+     */
+    private void evaluateElementKeywords(final Element slidableLayerElement) {
+        try {
+            resourceConserving = slidableLayerElement.getAttribute("resourceConserving").getBooleanValue();
+            timeTillLocked = slidableLayerElement.getAttribute("timeTillLocked").getIntValue();
+            inactiveTimeTillLocked = slidableLayerElement.getAttribute("inactiveTimeTillLocked").getIntValue();
+            bottomUp = slidableLayerElement.getAttribute("bottomUp").getBooleanValue();
+            verticalLabelWidthThreshold = slidableLayerElement.getAttribute("verticalLabelWidthThreshold")
+                        .getDoubleValue();
+            crossfadeEnabled = slidableLayerElement.getAttribute("crossfadeEnabled").getBooleanValue();
+        } catch (final NullPointerException e) {
+            LOG.warn("Attribute not found.", e);
+        } catch (DataConversionException ex) {
+            LOG.warn("Attribute could not be converted.", ex);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  selectedLayer  DOCUMENT ME!
      */
     private void evaluateLayerKeywords(final Layer selectedLayer) {
@@ -1118,6 +1139,14 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         element.setAttribute("imageFormat", preferredRasterFormat);
         element.setAttribute("exceptionFormat", preferredExceptionsFormat);
         element.setAttribute("completePath", String.valueOf(completePath));
+
+        // set the slidable layer keywords
+        element.setAttribute("resourceConserving", Boolean.toString(resourceConserving));
+        element.setAttribute("timeTillLocked", Integer.toString(timeTillLocked));
+        element.setAttribute("inactiveTimeTillLocked", Integer.toString(inactiveTimeTillLocked));
+        element.setAttribute("bottomUp", Boolean.toString(bottomUp));
+        element.setAttribute("verticalLabelWidthThreshold", Double.toString(verticalLabelWidthThreshold));
+        element.setAttribute("crossfadeEnabled", Boolean.toString(crossfadeEnabled));
 
         if (boundingBox != null) {
             element.addContent(boundingBox.getJDOMElement());
