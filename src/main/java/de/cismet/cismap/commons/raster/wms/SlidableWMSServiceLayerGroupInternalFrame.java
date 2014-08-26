@@ -191,6 +191,56 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
     public boolean isAllowCrossfade() {
         return allowCrossfade;
     }
+    /**
+     * Returns a string which can be used as the title of a tick in the slider. If the model was created from an JDom
+     * element, then the layer name has a certain suffix. In this case the suffix is removed and the name is returned.
+     * Otherwise a shortened title for the layer will be returned.
+     *
+     * @param   wsl  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getTickTitle(final WMSServiceLayer wsl) {
+        final String name = wsl.getName();
+        if (name.contains(SlidableWMSServiceLayerGroup.LAYERNAME_FROM_CONFIG_SUFFIX)) {
+            return name.replace(SlidableWMSServiceLayerGroup.LAYERNAME_FROM_CONFIG_SUFFIX, "");
+        } else {
+            return createShortLayerTitle(wsl);
+        }
+    }
+
+    /**
+     * Returns a title for a layer which can be shown in the Slider. The method tries to load the keyword
+     * cismapSlidingLayerGroupMember.tickTitle from the layer, if this is not possible then a shortened version of the
+     * layer name will be returned.
+     *
+     * @param   layer  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String createShortLayerTitle(final WMSServiceLayer layer) {
+        String layerTitle = "";
+        try {
+            final String[] keywords = ((Layer)layer.ogcLayers.get(0)).getKeywords();
+            for (final String keyword : keywords) {
+                if (keyword.startsWith("cismapSlidingLayerGroupMember.tickTitle")) {
+                    layerTitle = keyword.split(":")[1];
+                }
+            }
+        } catch (Exception ex) {
+            LOG.warn("An error occured while parsing tickTitle. Use layer title or name.", ex);
+        }
+        if (layerTitle.trim().equals("")) {
+            layerTitle = layer.getTitle();
+            if (layerTitle.trim().equals("")) {
+                layerTitle = layer.getName();
+            }
+            if (layerTitle.length() > 8) {
+                layerTitle = layerTitle.substring(0, 3) + "." + layerTitle.substring(layerTitle.length() - 4);
+            }
+        }
+        return layerTitle;
+    }
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -243,7 +293,7 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
             final Hashtable lableTable = new Hashtable();
             int x = 0;
             for (final WMSServiceLayer wsl : model.getLayers()) {
-                final String layerTitle = getLayerTitle(wsl);
+                final String layerTitle = getTickTitle(wsl);
 
                 final JLabel label = new JLabel(layerTitle);
                 final Font font = label.getFont().deriveFont(10f);
@@ -262,7 +312,7 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
             final Hashtable lableTable = new Hashtable();
             int x = 0;
             for (final WMSServiceLayer wsl : model.getLayers()) {
-                final String layerTitle = getLayerTitle(wsl);
+                final String layerTitle = getTickTitle(wsl);
 
                 final JLabel label = new JLabel();
                 label.setIcon(new VerticalTextIcon(layerTitle, false));
@@ -280,7 +330,7 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
             final Hashtable lableTable = new Hashtable();
             int x = 0;
             for (final WMSServiceLayer wsl : model.getLayers()) {
-                final String layerTitle = getLayerTitle(wsl);
+                final String layerTitle = getTickTitle(wsl);
                 final JLabel label = new JLabel();
                 label.setIcon(new VerticalTextIcon(layerTitle, false, Color.DARK_GRAY));
                 lableTable.put(x * 100, label);
@@ -297,7 +347,7 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
         public double estimateSliderWidthHorizontalLabels() {
             final StringBuilder text = new StringBuilder();
             for (final WMSServiceLayer wsl : model.getLayers()) {
-                final String layerTitle = getLayerTitle(wsl);
+                final String layerTitle = getTickTitle(wsl);
                 text.append(layerTitle);
                 text.append("  ");
             }
@@ -312,7 +362,9 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
          */
         public double estimateSliderWidthVerticalLabels() {
             double sliderWidth = 0;
-            final Icon icon = new VerticalTextIcon(getLayerTitle(model.getLayers().get(0)), false);
+            final WMSServiceLayer firstLayer = model.getLayers().get(0);
+            final String layerTitle = getTickTitle(firstLayer);
+            final Icon icon = new VerticalTextIcon(layerTitle, false);
             final int iconWidth = icon.getIconWidth();
             final int gap = 5;
             for (final WMSServiceLayer wsl : model.getLayers()) {
@@ -320,43 +372,6 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
             }
 
             return sliderWidth;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   layer  DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        private String getLayerTitle(final WMSServiceLayer layer) {
-            String layerTitle = null;
-            try {
-                final String[] keywords = ((Layer)layer.ogcLayers.get(0)).getKeywords();
-                for (final String keyword : keywords) {
-                    if (keyword.startsWith("cismapSlidingLayerGroupMember.tickTitle")) {
-                        layerTitle = keyword.split(":")[1];
-                    }
-                }
-            } catch (Exception ex) {
-                LOG.error("An error occured while parsing tickTitle. Use layer title or name.", ex);
-            }
-
-            if (layerTitle == null) {
-                layerTitle = layer.getTitle();
-                if (layerTitle == null) {
-                    layerTitle = layer.getName();
-                }
-
-                if ((layerTitle != null) && (layerTitle.length() > 8)) {
-                    layerTitle = layerTitle.substring(0, 3) + "." + layerTitle.substring(layerTitle.length() - 4); // NOI18N
-                } else {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("No title found for WMSServiceLayer '" + layer + "'.");
-                    }
-                }
-            }
-            return layerTitle;
         }
 
         @Override
