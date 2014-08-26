@@ -79,7 +79,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private static final transient Logger LOG = Logger.getLogger(SlidableWMSServiceLayerGroup.class);
 
     public static final String XML_ELEMENT_NAME = "SlidableWMSServiceLayerGroup"; // NOI18N
-    private static final String SLIDER_PREFIX = "Slider";                         // NOI18N
+    /** A suffix which makes it clear, if a layer name was loaded from the config file. */
+    public static final String LAYERNAME_FROM_CONFIG_SUFFIX = "$fromConfig$";
+    private static final String SLIDER_PREFIX = "Slider"; // NOI18N
     private static List<Integer> uniqueNumbers = new ArrayList<Integer>();
     private static String addedInternalWidget = null;
 
@@ -1160,11 +1162,13 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         capElement.addContent(capLink.getElement());
 
         element.addContent(capElement);
-        final Element layerElement = new Element("layers"); // NOI18N
+        final Element layersElement = new Element("layers"); // NOI18N
         for (final WMSServiceLayer l : layers) {
-            layerElement.addContent(l.getElement());
+            final Element layerElement = l.getElement();
+            layerElement.setAttribute("name", internalFrame.getTickTitle(l) + LAYERNAME_FROM_CONFIG_SUFFIX);
+            layersElement.addContent(layerElement);
         }
-        element.addContent(layerElement);
+        element.addContent(layersElement);
         return element;
     }
 
