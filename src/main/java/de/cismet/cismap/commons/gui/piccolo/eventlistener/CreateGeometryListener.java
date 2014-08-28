@@ -395,11 +395,11 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     private void readyForFinishing(final PInputEvent event) {
         try {
             finishingEvent = event;
-            if (currentFeature.getGeometry().isValid()) {
+//            if (currentFeature.getGeometry().isValid()) {
                 createCurrentNewFeature(null);
                 finishGeometry(currentFeature);
-                inProgress = false;
-            }
+//                inProgress = false;
+//            }
         } catch (Throwable t) {
             LOG.error("Error during the creation of the geometry", t); // NOI18N
         }
