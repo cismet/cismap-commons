@@ -42,6 +42,8 @@ import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.tools.gui.StaticSwingTools;
 
+import static de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface.POLYGON;
+
 /**
  * DOCUMENT ME!
  *
@@ -284,7 +286,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     if (dialog.getReturnStatus() == RectangleFromLineDialog.STATUS_OK) {
                         // fertig
                         readyForFinishing(pInputEvent);
-                        inProgress = false;
                     } else {
                         // abbrechen
                         mappingComponent.getTmpFeatureLayer().removeChild(tempFeature);
@@ -299,8 +300,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                 inProgress = false;
             }
         } else if (isInMode(POLYGON) || isInMode(LINESTRING)) {
-            if (pInputEvent.getClickCount() == 1) {
-                if (pInputEvent.isLeftMouseButton()) {
+            if (pInputEvent.isLeftMouseButton()) {
+                if (pInputEvent.getClickCount() == 1) {
                     Point2D point = null;
                     undoPoints.clear();
                     if (mappingComponent.isSnappingEnabled()) {
@@ -324,49 +325,64 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                         points.add(point);
                         updatePolygon(null);
                     }
-                } else if (pInputEvent.isRightMouseButton()) {
-                    // abbrechen
-                    if (tempFeature != null) {
-                        mappingComponent.getTmpFeatureLayer().removeChild(tempFeature);
+                } else if (pInputEvent.getClickCount() == 2) {
+                    if (isInMode(POLYGON)) {
+                        if (points.size() == 2) { // bei polygonen mit nur 2 punkten
+                                                  // wird eine boundingbox angelegt
+                            //
+                            // Rectangle QuickSnap
+                            //
+                            // because of this code one is able to create a rectangular polygon with a click and a
+                            // following doubleclick
+                            //
+                            // .....P1--------------P2 .....|               | .....|               | .....|
+                            // | .....P3--------------P4
+                            //
+                            //
+
+                            final Point2D pointP1 = points.get(0);
+                            final Point2D pointP4 = points.get(1);
+                            points.remove(pointP4);
+
+                            // P2
+                            points.add(new Point2D.Double(pointP1.getX(), pointP4.getY()));
+
+                            // P4
+                            points.add(pointP4);
+
+                            // P3
+                            points.add(new Point2D.Double(pointP4.getX(), pointP1.getY()));
+
+                            // No need to add P1 to close the polygon, because the polygon part of the code will care
+                            // about that
+                        } else if (points.size() < 2) {
+                            return; // ignorieren, da weniger als 2 Punkte nicht ausreichen
+                        }
                     }
-                    inProgress = false;
+                    readyForFinishing(pInputEvent);
                 }
-            } else if (pInputEvent.getClickCount() == 2) {
-                if (isInMode(POLYGON)) {
-                    if (points.size() == 2) { // bei polygonen mit nur 2 punkten
-                                              // wird eine boundingbox angelegt
-                        //
-                        // Rectangle QuickSnap
-                        //
-                        // because of this code one is able to create a rectangular polygon with a click and a following
-                        // doubleclick
-                        //
-                        // .....P1--------------P2 .....|               | .....|               | .....|               |
-                        // .....P3--------------P4
-                        //
-                        //
-
-                        final Point2D pointP1 = points.get(0);
-                        final Point2D pointP4 = points.get(1);
-                        points.remove(pointP4);
-
-                        // P2
-                        points.add(new Point2D.Double(pointP1.getX(), pointP4.getY()));
-
-                        // P4
-                        points.add(pointP4);
-
-                        // P3
-                        points.add(new Point2D.Double(pointP4.getX(), pointP1.getY()));
-
-                        // No need to add P1 to close the polygon, because the polygon part of the code will care
-                        // about that
-                    } else if (points.size() < 2) {
-                        return; // ignorieren, da weniger als 2 Punkte nicht ausreichen
+            } else if (pInputEvent.isRightMouseButton()) {
+                if (inProgress) {
+                    if ((points.size() < 2) || (pInputEvent.getClickCount() == 2)) {
+                        // abbrechen
+                        if (tempFeature != null) {
+                            mappingComponent.getTmpFeatureLayer().removeChild(tempFeature);
+                        }
+                        inProgress = false;
+                    } else {
+                        points.remove(points.size() - 1);
+                        Point2D point = null;
+                        if (mappingComponent.isSnappingEnabled()) {
+                            point = PFeatureTools.getNearestPointInArea(
+                                    mappingComponent,
+                                    pInputEvent.getCanvasPosition());
+                        }
+                        if (point == null) {
+                            point = pInputEvent.getPosition();
+                        }
+                        updatePolygon(point);
                     }
                 }
-                readyForFinishing(pInputEvent);
-                inProgress = false;
             }
         }
     }
@@ -379,8 +395,11 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     private void readyForFinishing(final PInputEvent event) {
         try {
             finishingEvent = event;
-            createCurrentNewFeature(null);
-            finishGeometry(currentFeature);
+            if (currentFeature.getGeometry().isValid()) {
+                createCurrentNewFeature(null);
+                finishGeometry(currentFeature);
+                inProgress = false;
+            }
         } catch (Throwable t) {
             LOG.error("Error during the creation of the geometry", t); // NOI18N
         }
@@ -446,7 +465,6 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
         if (inProgress) {
             if (isInMode(RECTANGLE) || isInMode(ELLIPSE)) {
                 readyForFinishing(arg0);
-                inProgress = false;
             }
         }
     }
