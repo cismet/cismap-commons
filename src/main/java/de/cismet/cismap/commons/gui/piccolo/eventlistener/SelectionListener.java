@@ -71,6 +71,7 @@ public class SelectionListener extends CreateGeometryListener {
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private int clickCount = 0;
     private Map<Feature, PFeature> selectedFeatures = new HashMap<Feature, PFeature>();
+    private boolean selectMultipleFeatures = false;
     private boolean featuresFromServicesSelectable = false;
     private boolean selectionInProgress = false;
 
@@ -421,9 +422,16 @@ public class SelectionListener extends CreateGeometryListener {
                 if (geom.getGeometryType().equalsIgnoreCase("point")) {
                     // getAllValidObjectsUnderPointer: Uses the pnodes to check, if a PFeature intersects the given
                     // point
-                    pfArr = (PFeature[])PFeatureTools.getAllValidObjectsUnderPointer(
+                    if (isSelectMultipleFeatures()) {
+                        pfArr = (PFeature[])PFeatureTools.getAllValidObjectsUnderPointer(
+                                    finishingEvent,
+                                    new Class[] { PFeature.class }).toArray(new PFeature[0]);
+                    } else {
+                        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(
                                 finishingEvent,
-                                new Class[] { PFeature.class }).toArray(new PFeature[0]);
+                                new Class[] { PFeature.class });
+                        pfArr = new PFeature[] { (PFeature)o };
+                    }
                 } else {
                     // getPFeaturesInArea: Uses the geometry of the underlying features to check, if a PFeature
                     // intersects the given area. So it is almost impossible to match a point feature. Even if it is
@@ -577,5 +585,23 @@ public class SelectionListener extends CreateGeometryListener {
      */
     public void setSelectionInProgress(final boolean selectionInProgress) {
         this.selectionInProgress = selectionInProgress;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the selectMultipleFeatures
+     */
+    public boolean isSelectMultipleFeatures() {
+        return selectMultipleFeatures;
+    }
+
+    /**
+     * If this is false, a simgle click on a feature selects only the first feature.
+     *
+     * @param  selectMultipleFeatures  the selectMultipleFeatures to set
+     */
+    public void setSelectMultipleFeatures(final boolean selectMultipleFeatures) {
+        this.selectMultipleFeatures = selectMultipleFeatures;
     }
 }
