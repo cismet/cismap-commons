@@ -937,6 +937,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         clonedLayer.setLayerQuerySelected(layerQuerySelected);
         clonedLayer.setLocked(locked);
         clonedLayer.setName(name);
+        // The cloned service layer and the origin service layer should not use the same pnode,
+        // because this would lead to problems, if the cloned layer and the origin layer are
+        // used in 2 different MappingComponents
+        // This has to be set afterwards.
         clonedLayer.setPNode(null);
         clonedLayer.setTranslucency(this.getTranslucency());
         clonedLayer.setWmsCapabilities(wmsCapabilities);
