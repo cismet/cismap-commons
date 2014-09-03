@@ -347,15 +347,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         }
 
         try {
-            final Element capElement = element.getChild("capabilities");
-            final CapabilityLink cp = new CapabilityLink(capElement);
-            setWmsCapabilities(capabilities.get(cp.getLink()));
-            capabilitiesUrl = cp.getLink();
-        } catch (final NullPointerException e) {
-            LOG.warn("Child element capabilities not found.", e);
-        }
-
-        try {
             boundingBox = new XBoundingBox(element);
         } catch (final Exception ex) {
             LOG.warn("Child element BoundingBox not found.", ex);
@@ -372,6 +363,15 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         for (final Object o : layersList) {
             final WMSServiceLayer l = new WMSServiceLayer((Element)o, capabilities);
             layers.add(l);
+        }
+
+        try {
+            final Element capElement = element.getChild("capabilities");
+            final CapabilityLink cp = new CapabilityLink(capElement);
+            setWmsCapabilities(capabilities.get(cp.getLink()));
+            capabilitiesUrl = cp.getLink();
+        } catch (final NullPointerException e) {
+            LOG.warn("Child element capabilities not found.", e);
         }
 
         int sliderValue = 0;
@@ -407,7 +407,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         setName(name);
         this.completePath = completePath;
-        this.wmsCapabilities = wmsCapabilities;
+        setWmsCapabilities(wmsCapabilities);
 
         double maxx = Double.NaN;
         double minx = Double.NaN;
@@ -550,8 +550,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                         progressTable.clear();
                                     } else if (wsl == getSelectedLayer()) {
                                         CismapBroker.getInstance().getMappingComponent().repaint();
+                                        }
                                     }
-                                }
                             }.start();
                     }
 
@@ -922,6 +922,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         SlidableWMSServiceLayerGroup clonedLayer;
         if (originalTreePaths != null) {
             clonedLayer = new SlidableWMSServiceLayerGroup(originalTreePaths);
+            clonedLayer.setWmsCapabilities(wmsCapabilities);
         } else if (originalElement != null) {
             clonedLayer = new SlidableWMSServiceLayerGroup(originalElement, orginalCapabilities);
         } else {
@@ -935,7 +936,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         clonedLayer.setEnabled(enabled);
         clonedLayer.setLayerPosition(layerPosition);
         clonedLayer.setLayerQuerySelected(layerQuerySelected);
-        clonedLayer.setLocked(locked);
+        clonedLayer.setLocked(true);
         clonedLayer.setName(name);
         // The cloned service layer and the origin service layer should not use the same pnode,
         // because this would lead to problems, if the cloned layer and the origin layer are
@@ -943,7 +944,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         // This has to be set afterwards.
         clonedLayer.setPNode(null);
         clonedLayer.setTranslucency(this.getTranslucency());
-        clonedLayer.setWmsCapabilities(wmsCapabilities);
 
         return clonedLayer;
     }
