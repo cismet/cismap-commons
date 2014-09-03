@@ -130,6 +130,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     SlidableWMSServiceLayerGroupInternalFrame internalFrame;
 
+    private boolean printMode = false;
+
     private boolean resourceConserving;
 
     private final List<WMSServiceLayer> layers = new ArrayList<WMSServiceLayer>();
@@ -347,15 +349,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         }
 
         try {
-            final Element capElement = element.getChild("capabilities");
-            final CapabilityLink cp = new CapabilityLink(capElement);
-            setWmsCapabilities(capabilities.get(cp.getLink()));
-            capabilitiesUrl = cp.getLink();
-        } catch (final NullPointerException e) {
-            LOG.warn("Child element capabilities not found.", e);
-        }
-
-        try {
             boundingBox = new XBoundingBox(element);
         } catch (final Exception ex) {
             LOG.warn("Child element BoundingBox not found.", ex);
@@ -372,6 +365,15 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         for (final Object o : layersList) {
             final WMSServiceLayer l = new WMSServiceLayer((Element)o, capabilities);
             layers.add(l);
+        }
+
+        try {
+            final Element capElement = element.getChild("capabilities");
+            final CapabilityLink cp = new CapabilityLink(capElement);
+            setWmsCapabilities(capabilities.get(cp.getLink()));
+            capabilitiesUrl = cp.getLink();
+        } catch (final NullPointerException e) {
+            LOG.warn("Child element capabilities not found.", e);
         }
 
         int sliderValue = 0;
@@ -407,7 +409,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         setName(name);
         this.completePath = completePath;
-        this.wmsCapabilities = wmsCapabilities;
+        setWmsCapabilities(wmsCapabilities);
 
         double maxx = Double.NaN;
         double minx = Double.NaN;
@@ -455,6 +457,26 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * Print Mode has to be set true, if this class is used with the headlessMapProvider. If it is not set, the needed
+     * retrievalCompleteEvent will not be fired. On the other side if the retrievalCompleteEvent is fired, the sliding
+     * functionality will be destroyed, for some reason. Therefore the print mode has to be considered as a hack.
+     *
+     * @param  printMode  DOCUMENT ME!
+     */
+    public void setPrintMode(final boolean printMode) {
+        this.printMode = printMode;
+    }
+
+    /**
+     * See setPrintMode().
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isPrintMode() {
+        return printMode;
+    }
 
     /**
      * DOCUMENT ME!
@@ -550,6 +572,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                         progressTable.clear();
                                     } else if (wsl == getSelectedLayer()) {
                                         CismapBroker.getInstance().getMappingComponent().repaint();
+                                    }
+                                    if (isPrintMode()) {
+                                        fireRetrievalComplete(e);
                                     }
                                 }
                             }.start();
@@ -773,6 +798,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void stateChanged(final ChangeEvent e) {
+        if (getPNode() == null) {
+            return;
+        }
+
         final int i = (internalFrame.getSliderValue() / 100);
         final int rest = internalFrame.getSliderValue() % 100;
 
@@ -907,6 +936,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     public void setName(final String name) {
         this.name = name;
     }
+
     @Override
     public float getTranslucency() {
         return translucency;
@@ -922,6 +952,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         SlidableWMSServiceLayerGroup clonedLayer;
         if (originalTreePaths != null) {
             clonedLayer = new SlidableWMSServiceLayerGroup(originalTreePaths);
+            clonedLayer.setWmsCapabilities(wmsCapabilities);
         } else if (originalElement != null) {
             clonedLayer = new SlidableWMSServiceLayerGroup(originalElement, orginalCapabilities);
         } else {
@@ -935,7 +966,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         clonedLayer.setEnabled(enabled);
         clonedLayer.setLayerPosition(layerPosition);
         clonedLayer.setLayerQuerySelected(layerQuerySelected);
-        clonedLayer.setLocked(locked);
+        clonedLayer.setLocked(true);
         clonedLayer.setName(name);
         // The cloned service layer and the origin service layer should not use the same pnode,
         // because this would lead to problems, if the cloned layer and the origin layer are
@@ -943,7 +974,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         // This has to be set afterwards.
         clonedLayer.setPNode(null);
         clonedLayer.setTranslucency(this.getTranslucency());
-        clonedLayer.setWmsCapabilities(wmsCapabilities);
+        clonedLayer.setSliderValue(internalFrame.getSliderValue());
 
         return clonedLayer;
     }
@@ -1329,6 +1360,15 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         } else {
             return layers.get(layers.size() - 1);
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  value  DOCUMENT ME!
+     */
+    private void setSliderValue(final int value) {
+        internalFrame.setSliderValue(value);
     }
 
     /**

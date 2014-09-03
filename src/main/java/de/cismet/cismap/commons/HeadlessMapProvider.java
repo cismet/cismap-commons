@@ -41,6 +41,7 @@ import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.raster.wms.AbstractWMS;
 import de.cismet.cismap.commons.raster.wms.AbstractWMSServiceLayer;
+import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
@@ -353,6 +354,10 @@ public class HeadlessMapProvider {
     public void addLayer(final RetrievalServiceLayer layer) {
         if (layer instanceof AbstractRetrievalService) {
             final AbstractRetrievalService l = ((AbstractRetrievalService)layer).cloneWithoutRetrievalListeners();
+            // TODO remove this hack
+            if (l instanceof SlidableWMSServiceLayerGroup) {
+                ((SlidableWMSServiceLayerGroup)l).setPrintMode(true);
+            }
             mappingModel.addLayer((RetrievalServiceLayer)l);
         } else {
             mappingModel.addLayer(layer);
