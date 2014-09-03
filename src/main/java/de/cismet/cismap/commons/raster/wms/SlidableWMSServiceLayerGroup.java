@@ -178,6 +178,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private HashMap<WMSServiceLayer, RetrievalListener> layerRetrievalListeners =
         new HashMap<WMSServiceLayer, RetrievalListener>();
 
+    private boolean enabled = true;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -794,24 +796,28 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void retrieve(final boolean forced) {
-        // these fields are needed to determine the progress of the retrieval
-        progress = -1;
-        layerComplete.set(0);
-        progressTable.clear();
+        if (enabled || forced) {
+            // these fields are needed to determine the progress of the retrieval
+            progress = -1;
+            layerComplete.set(0);
+            progressTable.clear();
 
-        // the slider is always disabled during the retrieval of the layers and might be enabled later on when all the
-        // layers are completely loaded
-        internalFrame.enableSlider(false);
+            // the slider is always disabled during the retrieval of the layers and might be enabled later on when all
+            // the layers are completely loaded
+            internalFrame.enableSlider(false);
 
-        // stop the timer, otherwise it can happen that SlidableWMSServiceLayerGroup gets locked during the retrieval.
-        lockTimer.stop();
+            // stop the timer, otherwise it can happen that SlidableWMSServiceLayerGroup gets locked during the
+            // retrieval.
+            lockTimer.stop();
 
-        if (isLocked()) {
-            getSelectedLayer().retrieve(forced);
-        } else {
-            for (final WMSServiceLayer layer : layers) {
-                layer.retrieve(forced);
+            if (isLocked()) {
+                getSelectedLayer().retrieve(forced);
+            } else {
+                for (final WMSServiceLayer layer : layers) {
+                    layer.retrieve(forced);
+                }
             }
+            setRefreshNeeded(false);
         }
     }
 
@@ -878,12 +884,15 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 
     @Override
     public void setEnabled(final boolean enabled) {
-        // won't do anything
+        this.enabled = enabled;
+        for (final WMSServiceLayer layer : layers) {
+            layer.setEnabled(enabled);
+        }
     }
 
     @Override
