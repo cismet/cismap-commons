@@ -130,6 +130,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     SlidableWMSServiceLayerGroupInternalFrame internalFrame;
 
+    private boolean printMode = false;
+
     private boolean resourceConserving;
 
     private final List<WMSServiceLayer> layers = new ArrayList<WMSServiceLayer>();
@@ -457,6 +459,26 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     //~ Methods ----------------------------------------------------------------
 
     /**
+     * Print Mode has to be set true, if this class is used with the headlessMapProvider. If it is not set, the needed
+     * retrievalCompleteEvent will not be fired. On the other side if the retrievalCompleteEvent is fired, the sliding
+     * functionality will be destroyed, for some reason. Therefore the print mode has to be considered as a hack.
+     *
+     * @param  printMode  DOCUMENT ME!
+     */
+    public void setPrintMode(final boolean printMode) {
+        this.printMode = printMode;
+    }
+
+    /**
+     * See setPrintMode().
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isPrintMode() {
+        return printMode;
+    }
+
+    /**
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -550,6 +572,9 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                         progressTable.clear();
                                     } else if (wsl == getSelectedLayer()) {
                                         CismapBroker.getInstance().getMappingComponent().repaint();
+                                    }
+                                    if (isPrintMode()) {
+                                        fireRetrievalComplete(e);
                                     }
                                 }
                             }.start();
@@ -911,6 +936,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     public void setName(final String name) {
         this.name = name;
     }
+
     @Override
     public float getTranslucency() {
         return translucency;
