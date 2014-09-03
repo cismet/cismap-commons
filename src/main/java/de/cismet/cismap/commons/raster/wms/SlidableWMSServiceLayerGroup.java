@@ -179,6 +179,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         new HashMap<WMSServiceLayer, RetrievalListener>();
 
     private boolean enabled = true;
+    private float translucency = 1.0f;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -836,11 +837,6 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         return name;
     }
 
-    @Override
-    public float getTranslucency() {
-        return pnode.getTransparency();
-    }
-
     /**
      * Provides the bounding box of this layer. The bounding box represents the extent of the children's bounding boxes.
      *
@@ -904,10 +900,14 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     public void setName(final String name) {
         this.name = name;
     }
+    @Override
+    public float getTranslucency() {
+        return translucency;
+    }
 
     @Override
     public void setTranslucency(final float t) {
-        pnode.setTransparency(t);
+        translucency = t;
     }
 
     @Override
