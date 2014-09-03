@@ -550,8 +550,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                                         progressTable.clear();
                                     } else if (wsl == getSelectedLayer()) {
                                         CismapBroker.getInstance().getMappingComponent().repaint();
-                                        }
                                     }
+                                }
                             }.start();
                     }
 
@@ -773,6 +773,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public void stateChanged(final ChangeEvent e) {
+        if (getPNode() == null) {
+            return;
+        }
+
         final int i = (internalFrame.getSliderValue() / 100);
         final int rest = internalFrame.getSliderValue() % 100;
 
@@ -944,6 +948,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         // This has to be set afterwards.
         clonedLayer.setPNode(null);
         clonedLayer.setTranslucency(this.getTranslucency());
+        clonedLayer.setSliderValue(internalFrame.getSliderValue());
 
         return clonedLayer;
     }
@@ -1329,6 +1334,15 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         } else {
             return layers.get(layers.size() - 1);
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  value  DOCUMENT ME!
+     */
+    private void setSliderValue(final int value) {
+        internalFrame.setSliderValue(value);
     }
 
     /**

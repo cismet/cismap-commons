@@ -242,6 +242,15 @@ public class SlidableWMSServiceLayerGroupInternalFrame extends JInternalFrame {
         return layerTitle;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  value  DOCUMENT ME!
+     */
+    void setSliderValue(final int value) {
+        slider.setValue(value);
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
