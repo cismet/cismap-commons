@@ -349,7 +349,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         try {
             final Element capElement = element.getChild("capabilities");
             final CapabilityLink cp = new CapabilityLink(capElement);
-            wmsCapabilities = capabilities.get(cp.getLink());
+            setWmsCapabilities(capabilities.get(cp.getLink()));
             capabilitiesUrl = cp.getLink();
         } catch (final NullPointerException e) {
             LOG.warn("Child element capabilities not found.", e);
