@@ -178,6 +178,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private HashMap<WMSServiceLayer, RetrievalListener> layerRetrievalListeners =
         new HashMap<WMSServiceLayer, RetrievalListener>();
 
+    private boolean enabled = true;
+
     //~ Constructors -----------------------------------------------------------
 
     /**
@@ -878,12 +880,15 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 
     @Override
     public void setEnabled(final boolean enabled) {
-        // won't do anything
+        this.enabled = enabled;
+        for (final WMSServiceLayer layer : layers) {
+            layer.setEnabled(enabled);
+        }
     }
 
     @Override
