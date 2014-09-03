@@ -179,6 +179,10 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         new HashMap<WMSServiceLayer, RetrievalListener>();
 
     private boolean enabled = true;
+    private List originalTreePaths;
+    private Element originalElement;
+    private HashMap<String, WMSCapabilities> orginalCapabilities;
+
     private float translucency = 1.0f;
 
     //~ Constructors -----------------------------------------------------------
@@ -189,6 +193,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * @param  treePaths  DOCUMENT ME!
      */
     public SlidableWMSServiceLayerGroup(final List treePaths) {
+        originalTreePaths = treePaths;
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         final TreePath tp = ((TreePath)treePaths.get(0));
         final Layer selectedLayer = (de.cismet.cismap.commons.wms.capabilities.Layer)tp.getLastPathComponent();
@@ -303,6 +308,8 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
      * @param  capabilities  DOCUMENT ME!
      */
     public SlidableWMSServiceLayerGroup(final Element element, final HashMap<String, WMSCapabilities> capabilities) {
+        orginalCapabilities = capabilities;
+        originalElement = element;
         sliderName = SLIDER_PREFIX + getUniqueRandomNumber();
         setName(element.getAttributeValue("name"));
 
@@ -912,7 +919,29 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public Object clone() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        SlidableWMSServiceLayerGroup clonedLayer;
+        if (originalTreePaths != null) {
+            clonedLayer = new SlidableWMSServiceLayerGroup(originalTreePaths);
+        } else if (originalElement != null) {
+            clonedLayer = new SlidableWMSServiceLayerGroup(originalElement, orginalCapabilities);
+        } else {
+            LOG.error("Could not clone SlidableWMSServiceLayerGroup.", new Exception());
+            return null;
+        }
+
+        clonedLayer.setBoundingBox(boundingBox);
+        clonedLayer.setCapabilitiesUrl(capabilitiesUrl);
+        clonedLayer.setCustomSLD(customSLD);
+        clonedLayer.setEnabled(enabled);
+        clonedLayer.setLayerPosition(layerPosition);
+        clonedLayer.setLayerQuerySelected(layerQuerySelected);
+        clonedLayer.setLocked(locked);
+        clonedLayer.setName(name);
+        clonedLayer.setPNode(null);
+        clonedLayer.setTranslucency(this.getTranslucency());
+        clonedLayer.setWmsCapabilities(wmsCapabilities);
+
+        return clonedLayer;
     }
 
     @Override
