@@ -35,4 +35,11 @@ public interface FeatureCreator {
      * @param  feature  DOCUMENT ME!
      */
     void createFeature(MappingComponent mc, FeatureServiceFeature feature);
+
+    /**
+     * Provides the name of the geometry that will be created.
+     *
+     * @return  The name of the geometry, that will be created by this FeatureCreator
+     */
+    String getTypeName();
 }
