@@ -28,12 +28,9 @@ import net.sf.jasperreports.view.JRViewer;
 
 import org.apache.log4j.Logger;
 
-import org.deegree.datatypes.Types;
 import org.deegree.io.shpapi.shape_new.ShapeFile;
 import org.deegree.io.shpapi.shape_new.ShapeFileWriter;
 import org.deegree.model.feature.FeatureCollection;
-import org.deegree.model.spatialschema.GeometryException;
-import org.deegree.model.spatialschema.JTSAdapter;
 
 import org.jdesktop.swingx.JXBusyLabel;
 import org.jdesktop.swingx.JXTable;
@@ -98,6 +95,7 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureWithId;
 import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.features.ModifiableFeature;
+import de.cismet.cismap.commons.features.PermissionProvider;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
@@ -114,7 +112,6 @@ import de.cismet.cismap.commons.tools.ExportDbfDownload;
 import de.cismet.cismap.commons.tools.ExportDownload;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.tools.ExportTxtDownload;
-import de.cismet.cismap.commons.tools.FeatureTools;
 import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
@@ -463,11 +460,48 @@ public class AttributeTable extends javax.swing.JPanel {
     //~ Methods ----------------------------------------------------------------
 
     /**
+     * Should be invoked, before the window wit the AttributeTable is closed. This method checks, if there are unsaved
+     * changes
+     */
+    public void dispose() {
+        if (tbProcessing.isSelected()) {
+            final int ans = JOptionPane.showConfirmDialog(
+                    AttributeTable.this,
+                    NbBundle.getMessage(
+                        AttributeTable.class,
+                        "AttributeTable.addWindowListener().text",
+                        featureService.getName()),
+                    NbBundle.getMessage(AttributeTable.class, "AttributeTable.addWindowListener().title"),
+                    JOptionPane.YES_NO_OPTION);
+
+            if (ans == JOptionPane.YES_OPTION) {
+                tbProcessingActionPerformed(null);
+            } else {
+                unlockAll();
+            }
+        }
+    }
+
+    /**
      * Locks the given feature, if a corresponding locker exists and make the feature editable.
      *
      * @param  feature  the feature to make editable
      */
     private void makeFeatureEditable(final FeatureServiceFeature feature) {
+        if (feature instanceof PermissionProvider) {
+            final PermissionProvider pp = (PermissionProvider)feature;
+
+            if (!pp.hasWritePermissions()) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    NbBundle.getMessage(AttributeTable.class, "AttributeTable.makeFeatureEditable.noPermissions.text"),
+                    "AttributeTable.makeFeatureEditable.noPermissions.title",
+                    JOptionPane.ERROR_MESSAGE);
+
+                return;
+            }
+        }
+
         if ((feature != null) && !feature.isEditable()) {
             try {
                 if (locker != null) {
@@ -512,6 +546,11 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  page  the page to show. At the moment, all data will be displayed on one page
      */
     private void loadModel(final int page) {
+        if (!lockingObjects.isEmpty()) {
+            LOG.warn("Cannot reload the model of the AttributeTable, because there are unsaved objects.");
+            return;
+        }
+
         panWaiting.setVisible(true);
         ((JXBusyLabel)labWaitingImage).setBusy(true);
 
@@ -597,9 +636,9 @@ public class AttributeTable extends javax.swing.JPanel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Set a restriction for the displayed rows.
      *
-     * @param  query  DOCUMENT ME!
+     * @param  query  the query that should be used for the feature service
      */
     public void setQuery(final Object query) {
         this.query = query;
@@ -2020,6 +2059,19 @@ public class AttributeTable extends javax.swing.JPanel {
         final int[] selectedRows = table.getSelectedRows();
         final List<ModifiableFeature> featuresToDelete = new ArrayList<ModifiableFeature>();
 
+        final int ans = JOptionPane.showConfirmDialog(
+                AttributeTable.this,
+                NbBundle.getMessage(
+                    AttributeTable.class,
+                    "AttributeTable.butDeleteActionPerformed().text",
+                    selectedRows.length),
+                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butDeleteActionPerformed().title"),
+                JOptionPane.YES_NO_OPTION);
+
+        if (ans != JOptionPane.YES_OPTION) {
+            return;
+        }
+
         for (final int row : selectedRows) {
             final FeatureServiceFeature featureToDelete = model.getFeatureServiceFeature(table.convertRowIndexToModel(
                         row));
@@ -2087,7 +2139,14 @@ public class AttributeTable extends javax.swing.JPanel {
     } //GEN-LAST:event_butDeleteActionPerformed
 
     /**
-     * DOCUMENT ME!
+     * Reloads the model.
+     */
+    public void reload() {
+        loadModel(currentPage);
+    }
+
+    /**
+     * Saves all changed rows.
      */
     private void saveChangedRows() {
         if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(model)) {
@@ -2178,6 +2237,12 @@ public class AttributeTable extends javax.swing.JPanel {
                                 model.fireContentsChanged();
                             }
                         });
+
+                    // reload the layer
+                    if (featureService != null) {
+                        featureService.retrieve(true);
+                    }
+
                     return null;
                 }
             };
@@ -2186,9 +2251,10 @@ public class AttributeTable extends javax.swing.JPanel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Provides a list with the alias names of all attributes.
      *
-     * @return  DOCUMENT ME!
+     * @return  the list contains string arrays. Every array has 2 strings. The first string is the alias name and the
+     *          second string is the original name
      */
     private List<String[]> getAliasAttributeList() {
         final List<String[]> attrNames = new ArrayList<String[]>();
@@ -2207,17 +2273,17 @@ public class AttributeTable extends javax.swing.JPanel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Removes all trailing zeros.
      *
-     * @param   val  DOCUMENT ME!
+     * @param   val  the string to trim
      *
-     * @return  DOCUMENT ME!
+     * @return  a new string without trailing zeros
      */
     private String trimNumberString(final String val) {
         String res = String.valueOf(val);
 
         if (res.indexOf(".") != -1) {
-            // remove all leading points and zeros
+            // remove all ending points and zeros
             for (int i = res.length() - 1; i > 0; --i) {
                 final char c = res.charAt(i);
 
@@ -2369,6 +2435,36 @@ public class AttributeTable extends javax.swing.JPanel {
         return model.getColumnAttributeName(col);
     }
 
+    /**
+     * unlocks all locked objects.
+     */
+    private void unlockAll() {
+        boolean allLocksRemoved = true;
+
+        for (final Object tmp : lockingObjects) {
+            try {
+                locker.unlock(tmp);
+            } catch (Exception e) {
+                LOG.error("Locking object can't be removed.", e);
+                allLocksRemoved = false;
+            }
+        }
+
+        if (!allLocksRemoved) {
+            JOptionPane.showMessageDialog(
+                AttributeTable.this,
+                NbBundle.getMessage(
+                    AttributeTable.class,
+                    "AttributeTable.CustomTableModel.setEditable.message"),
+                NbBundle.getMessage(
+                    AttributeTable.class,
+                    "AttributeTable.CustomTableModel.setEditable.title"),
+                JOptionPane.ERROR_MESSAGE);
+        }
+
+        lockingObjects.clear();
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -2416,36 +2512,13 @@ public class AttributeTable extends javax.swing.JPanel {
          * @param  editable  DOCUMENT ME!
          */
         public void setEditable(final boolean editable) {
-            boolean allLocksRemoved = true;
-
             if (this.editable && !editable) {
                 // set all feature to editable = false
                 for (final FeatureServiceFeature fsf : featureList) {
                     fsf.setEditable(false);
                 }
 
-                for (final Object tmp : lockingObjects) {
-                    try {
-                        locker.unlock(tmp);
-                    } catch (Exception e) {
-                        LOG.error("Locking object can't be removed.", e);
-                        allLocksRemoved = false;
-                    }
-                }
-
-                if (!allLocksRemoved) {
-                    JOptionPane.showMessageDialog(
-                        AttributeTable.this,
-                        NbBundle.getMessage(
-                            CustomTableModel.class,
-                            "AttributeTable.CustomTableModel.setEditable.message"),
-                        NbBundle.getMessage(
-                            CustomTableModel.class,
-                            "AttributeTable.CustomTableModel.setEditable.message"),
-                        JOptionPane.ERROR_MESSAGE);
-                }
-
-                lockingObjects.clear();
+                unlockAll();
             }
 
             this.editable = editable;

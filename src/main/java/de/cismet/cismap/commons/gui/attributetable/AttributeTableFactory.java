@@ -11,25 +11,12 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
-import com.vividsolutions.jts.geom.Geometry;
-
 import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
 
-import java.util.List;
-import java.util.Map;
-
-import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.PropertyContainer;
-import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
-import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!

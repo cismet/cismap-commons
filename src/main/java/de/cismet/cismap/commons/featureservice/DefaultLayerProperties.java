@@ -379,13 +379,19 @@ public class DefaultLayerProperties implements LayerProperties {
         if (attributeTableRuleSet != null) {
             return attributeTableRuleSet;
         }
+        if (featureService == null) {
+            return null;
+        }
+
         final String ruleSetName = camelize(featureService.getName()) + "RuleSet";
 
         try {
             final Class ruleSetClass = Class.forName("de.cismet.cismap.custom.attributerule." + ruleSetName);
             final Object o = ruleSetClass.newInstance();
             if (o instanceof DefaultAttributeTableRuleSet) {
-                return (DefaultAttributeTableRuleSet)o;
+                attributeTableRuleSet = (DefaultAttributeTableRuleSet)o;
+
+                return attributeTableRuleSet;
             }
         } catch (Exception e) {
             // nothing to do

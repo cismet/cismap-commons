@@ -71,6 +71,7 @@ public class SimpleAttributeTableModel implements TableModel {
         this.featureServiceAttributes = featureServiceAttributes;
         this.orderedFeatureServiceAttributes = orderedFeatureServiceAttributes;
         this.featureList = propertyContainer;
+        this.tableRuleSet = tableRuleSet;
 
         fillHeaderArrays();
     }

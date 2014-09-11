@@ -202,10 +202,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private void importFile(final SwingWorker workerThread, final File file) {
         try {
             final StatementWrapper st = createStatement();
-            initConnection();
+            initDatabase();
             ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null);
 
             if (!rs.next()) {
+                rs.close();
                 if (workerThread != null) {
                     workerThread.firePropertyChange("progress", 5, -1);
                 }
