@@ -114,7 +114,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     private List treePaths;
     private Element wmsServiceLayerElement;
     private HashMap<String, WMSCapabilities> capabilities;
-    private WMSLayer dummyLayer = null;
+    private List<WMSLayer> dummyLayer = new ArrayList<WMSLayer>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -370,7 +370,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         wmsLayer.setEnabled(enabled);
         wmsLayer.setParentServiceLayer(this);
         wmsLayer.setQuerySelected(false);
-        dummyLayer = wmsLayer;
+        dummyLayer.add(wmsLayer);
     }
 
     /**
@@ -476,9 +476,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      */
     public List getWMSLayers() {
         if (isDummy()) {
-            final List list = new ArrayList();
-            list.add(dummyLayer);
-            return list;
+            return dummyLayer;
         } else {
             return wmsLayers;
         }
@@ -491,7 +489,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
             if (!isDummy()) {
                 setEnabled(true);
-                dummyLayer = null;
+                dummyLayer.clear();
 
                 final StatusEvent se = new StatusEvent(StatusEvent.AWAKED_FROM_DUMMY, this);
                 CismapBroker.getInstance().fireStatusValueChanged(se);
@@ -907,27 +905,23 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  DOCUMENT ME!
      */
     private String getLayersString(final List wmsLayers) {
-        if (!isDummy()) {
-            final StringBuilder layerString = new StringBuilder("");                                              // NOI18N
-            int counter = 0;
-            final Iterator it = wmsLayers.iterator();
-            while (it.hasNext()) {
-                final Object o = it.next();
-                if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
-                    counter++;
-                    if (counter > 1) {
-                        layerString.append(",");                                                                  // NOI18N
-                    }
-                    layerString.append(((WMSLayer)o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20")); // NOI18N
+        final StringBuilder layerString = new StringBuilder("");                                              // NOI18N
+        int counter = 0;
+        final Iterator it = getWMSLayers().iterator();
+        while (it.hasNext()) {
+            final Object o = it.next();
+            if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
+                counter++;
+                if (counter > 1) {
+                    layerString.append(",");                                                                  // NOI18N
                 }
+                layerString.append(((WMSLayer)o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20")); // NOI18N
             }
-            if (counter > 0) {
-                return "&LAYERS=" + layerString.toString();                                                       // NOI18N
-            } else {
-                return "";                                                                                        // NOI18N
-            }
+        }
+        if (counter > 0) {
+            return "&LAYERS=" + layerString.toString();                                                       // NOI18N
         } else {
-            return "&LAYERS=" + dummyLayer.toString().replaceAll(" ", "%20");
+            return "";                                                                                        // NOI18N
         }
     }
 
@@ -939,26 +933,22 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  DOCUMENT ME!
      */
     private String getStylesString(final List wmsLayers) {
-        if (!isDummy()) {
-            final StringBuilder stylesString = new StringBuilder("");                                       // NOI18N
-            int counter = 0;
-            final Iterator it = wmsLayers.iterator();
-            while (it.hasNext()) {
-                final Object o = it.next();
-                if ((o instanceof WMSLayer) && (((WMSLayer)o).getSelectedStyle() != null)
-                            && ((WMSLayer)o).isEnabled()) {
-                    counter++;
-                    if (counter > 1) {
-                        stylesString.append(",");                                                           // NOI18N
-                    }
-                    stylesString.append(((WMSLayer)o).getSelectedStyle().getName().replaceAll(" ", "%20")); // NOI18N
+        final StringBuilder stylesString = new StringBuilder("");                                       // NOI18N
+        int counter = 0;
+        final Iterator it = getWMSLayers().iterator();
+        while (it.hasNext()) {
+            final Object o = it.next();
+            if ((o instanceof WMSLayer) && (((WMSLayer)o).getSelectedStyle() != null)
+                        && ((WMSLayer)o).isEnabled()) {
+                counter++;
+                if (counter > 1) {
+                    stylesString.append(",");                                                           // NOI18N
                 }
+                stylesString.append(((WMSLayer)o).getSelectedStyle().getName().replaceAll(" ", "%20")); // NOI18N
             }
-
-            return "&STYLES=" + stylesString.toString(); // LDS Bugfix//NOI18N
-        } else {
-            return "&STYLES=" + dummyLayer.getStyleName();
         }
+
+        return "&STYLES=" + stylesString.toString(); // LDS Bugfix//NOI18N
     }
 
     /**
@@ -969,23 +959,19 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  true, if every of the given layer has a selected style
      */
     private boolean hasEveryLayerAStyle(final List wmsLayers) {
-        if (!isDummy()) {
-            final Iterator it = wmsLayers.iterator();
+        final Iterator it = getWMSLayers().iterator();
 
-            while (it.hasNext()) {
-                final Object o = it.next();
+        while (it.hasNext()) {
+            final Object o = it.next();
 
-                if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
-                    if (((WMSLayer)o).getSelectedStyle() == null) {
-                        return false;
-                    }
+            if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
+                if (((WMSLayer)o).getSelectedStyle() == null) {
+                    return false;
                 }
             }
-
-            return true;
-        } else {
-            return dummyLayer.getStyleName() != null;
         }
+
+        return true;
     }
 
     /**
@@ -1052,49 +1038,43 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      */
     public Element getElement() {
         try {
-            final Element layerConf = new Element("WMSServiceLayer");                                              // NOI18N
-            layerConf.setAttribute("name", getName());                                                             // NOI18N
-            layerConf.setAttribute("title", (title == null) ? "" : title);                                         // NOI18N
-            layerConf.setAttribute("visible", Boolean.valueOf(getPNode().getVisible()).toString());                // NOI18N
-            layerConf.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString());                            // NOI18N
-            layerConf.setAttribute("translucency", new Float(getTranslucency()).toString());                       // NOI18N
-            layerConf.setAttribute("bgColor", getBackgroundColor());                                               // NOI18N
-            layerConf.setAttribute("imageFormat", getImageFormat());                                               // NOI18N
-            layerConf.setAttribute("exceptionFormat", getExceptionsFormat());                                      // NOI18N
+            final Element layerConf = new Element("WMSServiceLayer");                                          // NOI18N
+            layerConf.setAttribute("name", getName());                                                         // NOI18N
+            layerConf.setAttribute("title", (title == null) ? "" : title);                                     // NOI18N
+            layerConf.setAttribute("visible", Boolean.valueOf(getPNode().getVisible()).toString());            // NOI18N
+            layerConf.setAttribute("enabled", Boolean.valueOf(isEnabled()).toString());                        // NOI18N
+            layerConf.setAttribute("translucency", new Float(getTranslucency()).toString());                   // NOI18N
+            layerConf.setAttribute("bgColor", getBackgroundColor());                                           // NOI18N
+            layerConf.setAttribute("imageFormat", getImageFormat());                                           // NOI18N
+            layerConf.setAttribute("exceptionFormat", getExceptionsFormat());                                  // NOI18N
             final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, getCapabilitiesUrl(), false);
             layerConf.addContent(capLink.getElement());
-            if (isDummy()) {
-                final Element wmsLayerConf = new Element("wmsLayer");                                              // NOI18N
-                wmsLayerConf.setAttribute("name", dummyLayer.toString());                                          // NOI18N
-                wmsLayerConf.setAttribute("title", dummyLayer.toString());                                         // NOI18N
-                wmsLayerConf.setAttribute("enabled", Boolean.valueOf(dummyLayer.isEnabled()).toString());          // NOI18N
-                try {
-                    wmsLayerConf.setAttribute("style", dummyLayer.getStyleName());                                 // NOI18N
-                } catch (Exception e) {
-                    // nothing to do. The layer has no style.
-                    // So no style is saved and the default style is used after loading
-                }
-                wmsLayerConf.setAttribute("info", Boolean.valueOf(dummyLayer.isQuerySelected()).toString());       // NOI18N
-                layerConf.addContent(wmsLayerConf);
-            } else {
-                final Iterator lit = getWMSLayers().iterator();
-                while (lit.hasNext()) {
-                    final Object elem = lit.next();
-                    if (elem instanceof WMSLayer) {
-                        final WMSLayer wmsLayer = (WMSLayer)elem;
-                        final Element wmsLayerConf = new Element("wmsLayer");                                      // NOI18N
-                        wmsLayerConf.setAttribute("name", wmsLayer.getOgcCapabilitiesLayer().getName());           // NOI18N
-                        wmsLayerConf.setAttribute("title", wmsLayer.getOgcCapabilitiesLayer().getTitle());         // NOI18N
-                        wmsLayerConf.setAttribute("enabled", Boolean.valueOf(wmsLayer.isEnabled()).toString());    // NOI18N
-                        try {
-                            wmsLayerConf.setAttribute("style", wmsLayer.getSelectedStyle().getName());             // NOI18N
-                        } catch (Exception e) {
-                            // nothing to do. The layer has no style.
-                            // So no style is saved and the default style is used after loading
-                        }
-                        wmsLayerConf.setAttribute("info", Boolean.valueOf(wmsLayer.isQuerySelected()).toString()); // NOI18N
-                        layerConf.addContent(wmsLayerConf);
+            final Iterator lit = getWMSLayers().iterator();
+            while (lit.hasNext()) {
+                final Object elem = lit.next();
+                if (elem instanceof WMSLayer) {
+                    final WMSLayer wmsLayer = (WMSLayer)elem;
+                    final Element wmsLayerConf = new Element("wmsLayer");                                      // NOI18N
+                    if (!isDummy()) {
+                        wmsLayerConf.setAttribute("name", wmsLayer.getOgcCapabilitiesLayer().getName());       // NOI18N
+                        wmsLayerConf.setAttribute("title", wmsLayer.getOgcCapabilitiesLayer().getTitle());     // NOI18N
+                    } else {
+                        wmsLayerConf.setAttribute("name", wmsLayer.toString());                                // NOI18N
+                        wmsLayerConf.setAttribute("title", wmsLayer.toString());                               // NOI18N
                     }
+                    wmsLayerConf.setAttribute("enabled", Boolean.valueOf(wmsLayer.isEnabled()).toString());    // NOI18N
+                    try {
+                        if (!isDummy()) {
+                            wmsLayerConf.setAttribute("style", wmsLayer.getSelectedStyle().getName());         // NOI18N
+                        } else {
+                            wmsLayerConf.setAttribute("style", wmsLayer.getStyleName());                       // NOI18N
+                        }
+                    } catch (Exception e) {
+                        // nothing to do. The layer has no style.
+                        // So no style is saved and the default style is used after loading
+                    }
+                    wmsLayerConf.setAttribute("info", Boolean.valueOf(wmsLayer.isQuerySelected()).toString()); // NOI18N
+                    layerConf.addContent(wmsLayerConf);
                 }
             }
             return layerConf;

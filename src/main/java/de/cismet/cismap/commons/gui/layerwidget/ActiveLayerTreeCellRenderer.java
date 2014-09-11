@@ -331,7 +331,15 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
                 ret.setIcon(getRightIcon(SUPPORTER, layer.getPNode().getVisible(), layer.isEnabled()));
             }
         } else if (value instanceof WMSLayer) {
-            if (((WMSLayer)value).getOgcCapabilitiesLayer().isQueryable()) {
+            boolean queryable;
+
+            if (!((WMSLayer)value).isDummy()) {
+                queryable = ((WMSLayer)value).getOgcCapabilitiesLayer().isQueryable();
+            } else {
+                queryable = ((WMSLayer)value).isQueryable();
+            }
+
+            if (queryable) {
                 ret.setIcon(getRightIcon(SINGLE + INFO, true, ((WMSLayer)value).isEnabled()));
             } else {
                 ret.setIcon(getRightIcon(SINGLE, true, ((WMSLayer)value).isEnabled()));
