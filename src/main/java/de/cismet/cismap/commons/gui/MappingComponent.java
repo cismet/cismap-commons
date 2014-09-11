@@ -63,6 +63,7 @@ import javax.swing.Timer;
 import de.cismet.cismap.commons.*;
 import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
+import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.*;
@@ -1456,6 +1457,41 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             }
                             documentFeatureService.addRetrievalListener(this.documentProgressListener);
                         }
+                    }
+                }
+
+                if (JDBCFeatureService.class.isAssignableFrom(mapService.getClass())) {
+                    if (DEBUG) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("FeatureMapService(" + mapService
+                                        + "): isDocumentFeatureService, checking document size"); // NOI18N
+                        }
+                    }
+                    final JDBCFeatureService documentFeatureService = (JDBCFeatureService)mapService;
+
+                    if (this.documentProgressListener == null) {
+                        if (DEBUG) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("FeatureMapService(" + mapService
+                                            + "): lazy instantiation of documentProgressListener"); // NOI18N
+                            }
+                        }
+                        this.documentProgressListener = new DocumentProgressListener();
+                    }
+
+                    if (this.documentProgressListener.getRequestId() != -1) {
+                        LOG.error("FeatureMapService(" + mapService
+                                    + "): The documentProgressListener is already in use by request '"
+                                    + this.documentProgressListener.getRequestId()
+                                    + ", document progress cannot be tracked");      // NOI18N
+                    } else {
+                        if (DEBUG) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("FeatureMapService(" + mapService
+                                            + "): adding documentProgressListener"); // NOI18N
+                            }
+                        }
+                        documentFeatureService.addRetrievalListener(this.documentProgressListener);
                     }
                 }
 
