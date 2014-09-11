@@ -15,10 +15,11 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.NbBundle;
+
 import java.awt.Cursor;
 import java.awt.EventQueue;
 
-import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
@@ -27,6 +28,8 @@ import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreator;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
+
+import static de.cismet.cismap.commons.gui.attributetable.FeatureCreator.SIMPLE_GEOMETRY_LISTENER_KEY;
 
 /**
  * DOCUMENT ME!
@@ -42,7 +45,7 @@ public class PrimitiveGeometryCreator implements FeatureCreator {
 
     //~ Instance fields --------------------------------------------------------
 
-    private String mode;
+    private final String mode;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -100,5 +103,30 @@ public class PrimitiveGeometryCreator implements FeatureCreator {
                     mc.setInteractionMode(SIMPLE_GEOMETRY_LISTENER_KEY);
                 }
             });
+    }
+
+    @Override
+    public String getTypeName() {
+        if (mode.equals(CreateGeometryListenerInterface.LINESTRING)) {
+            return NbBundle.getMessage(
+                    PrimitiveGeometryCreator.class,
+                    "PrimitiveGeometryCreator.getTypeName().linestring");
+        } else if (mode.equals(CreateGeometryListenerInterface.POLYGON)) {
+            return NbBundle.getMessage(
+                    PrimitiveGeometryCreator.class,
+                    "PrimitiveGeometryCreator.getTypeName().polygon");
+        } else if (mode.equals(CreateGeometryListenerInterface.POINT)) {
+            return NbBundle.getMessage(PrimitiveGeometryCreator.class, "PrimitiveGeometryCreator.getTypeName().point");
+        } else if (mode.equals(CreateGeometryListenerInterface.RECTANGLE)) {
+            return NbBundle.getMessage(
+                    PrimitiveGeometryCreator.class,
+                    "PrimitiveGeometryCreator.getTypeName().rectangle");
+        } else if (mode.equals(CreateGeometryListenerInterface.ELLIPSE)) {
+            return NbBundle.getMessage(
+                    PrimitiveGeometryCreator.class,
+                    "PrimitiveGeometryCreator.getTypeName().ellipse");
+        } else {
+            return NbBundle.getMessage(PrimitiveGeometryCreator.class, "PrimitiveGeometryCreator.getTypeName().other");
+        }
     }
 }
