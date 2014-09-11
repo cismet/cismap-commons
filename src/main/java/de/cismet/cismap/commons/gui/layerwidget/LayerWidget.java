@@ -959,18 +959,17 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         activeLayerModel.addLayer(l);
                     } else {
                         final WMSServiceLayer l = new WMSServiceLayer(v);
-                        if (l.getWMSLayers().size() > 0) {
-                            if ((treeTable.getEditingRow() != -1) && (treeTable.getEditingColumn() != -1)) {
-                                try {
-                                    treeTable.getCellEditor(treeTable.getEditingRow(), treeTable.getEditingColumn())
-                                            .stopCellEditing();
-                                } catch (final Exception e) {
-                                    // stopCellEditing went wrong. I don't care ;-)
-                                }
+
+                        if ((treeTable.getEditingRow() != -1) && (treeTable.getEditingColumn() != -1)) {
+                            try {
+                                treeTable.getCellEditor(treeTable.getEditingRow(), treeTable.getEditingColumn())
+                                        .stopCellEditing();
+                            } catch (final Exception e) {
+                                // stopCellEditing went wrong. I don't care ;-)
                             }
-                            l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
-                            activeLayerModel.addLayer(l);
                         }
+                        l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
+                        activeLayerModel.addLayer(l);
                         l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
                         l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
                         if (log.isDebugEnabled()) {
