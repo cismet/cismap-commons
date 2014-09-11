@@ -250,6 +250,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         this.setInitialized(afs.isInitialized());
         this.setInitialisationError(afs.getInitialisationError());
         this.setInitElement(afs.getInitElement());
+        this.setSelectable(afs.isSelectable());
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -1043,6 +1044,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         element.setAttribute("translucency", new Float(getTranslucency()).toString());              // NOI18N
         element.setAttribute("maxFeatureCount", new Integer(this.getMaxFeatureCount()).toString()); // NOI18N
         element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString());     // NOI18N
+        element.setAttribute("isSelectable", Boolean.toString(this.isSelectable()));                // NOI18N
 
         if ((this.getFeatureServiceAttributes() != null) && (this.getFeatureServiceAttributes().size() > 0)) {
             final Element attrib = new Element("Attributes");                    // NOI18N
@@ -1080,37 +1082,33 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             this.setInitElement((Element)element.clone());
         }
 
-        if (element.getAttributeValue("name") != null)                                                  // NOI18N
+        if (element.getAttributeValue("name") != null)                                      // NOI18N
         {
-            this.setName(element.getAttributeValue("name"));                                            // NOI18N
+            this.setName(element.getAttributeValue("name"));                                // NOI18N
         }
-        if (element.getAttributeValue("visible") != null)                                               // NOI18N
+        if (element.getAttributeValue("visible") != null)                                   // NOI18N
         {
-            this.setVisible(Boolean.valueOf(element.getAttributeValue("visible")));                     // NOI18N
+            this.setVisible(Boolean.valueOf(element.getAttributeValue("visible")));         // NOI18N
         }
-        if (element.getAttributeValue("enabled") != null)                                               // NOI18N
+        if (element.getAttributeValue("enabled") != null)                                   // NOI18N
         {
-            this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));                     // NOI18N
+            this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));         // NOI18N
         }
-        if (element.getAttributeValue("translucency") != null)                                          // NOI18N
+        if (element.getAttributeValue("translucency") != null)                              // NOI18N
         {
-            this.setTranslucency(element.getAttribute("translucency").getFloatValue());                 // NOI18N
+            this.setTranslucency(element.getAttribute("translucency").getFloatValue());     // NOI18N
         }
-        if (element.getAttributeValue("maxFeatureCount") != null)                                       // NOI18N
+        if (element.getAttributeValue("maxFeatureCount") != null)                           // NOI18N
         {
-            this.setMaxFeatureCount(element.getAttribute("maxFeatureCount").getIntValue());             // NOI18N
+            this.setMaxFeatureCount(element.getAttribute("maxFeatureCount").getIntValue()); // NOI18N
         }
-        if (element.getAttributeValue("layerPosition") != null)                                         // NOI18N
+        if (element.getAttributeValue("layerPosition") != null)                             // NOI18N
         {
-            this.setLayerPosition(element.getAttribute("layerPosition").getIntValue());                 // NOI18N
+            this.setLayerPosition(element.getAttribute("layerPosition").getIntValue());     // NOI18N
         }
-        if (element.getAttributeValue("maxFeatureCount") != null)                                       // NOI18N
+        if (element.getAttributeValue("isSelectable") != null)                              // NOI18N
         {
-            element.setAttribute("maxFeatureCount", new Integer(this.getMaxFeatureCount()).toString()); // NOI18N
-        }
-        if (element.getAttributeValue("layerPosition") != null)                                         // NOI18N
-        {
-            element.setAttribute("layerPosition", new Integer(this.getLayerPosition()).toString());     // NOI18N
+            this.setSelectable(element.getAttribute("isSelectable").getBooleanValue());     // NOI18N
         }
 
         final Element xmlAttributes = element.getChild("Attributes"); // NOI18N
@@ -1264,6 +1262,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     public List retrieveFeatures(final BoundingBox boundingBox, final int offset, final int limit, final String orderBy)
             throws Exception {
         if (!initialized) {
+            initAndWait();
             initConcreteInstance();
         }
         return getFeatureFactory().createFeatures(getQuery(), boundingBox, layerInitWorker);
