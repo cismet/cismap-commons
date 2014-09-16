@@ -712,12 +712,12 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         url.append("&BGCOLOR=").append(getBackgroundColor());                                           // NOI18N
         url.append("&EXCEPTIONS=").append(exceptionsFormat);                                            // NOI18N
 
-        url.append(getLayersString(wmsLayers));
-        if (hasEveryLayerAStyle(wmsLayers)) {
+        url.append(getLayersString());
+        if (hasEveryLayerAStyle()) {
             // the styles parameter must contain the same number of values as the layers parameter.
             // If this requirement cannot be fulfilled, the style parameter should be sent without a value due
             // to generate a valid request.
-            url.append(getStylesString(wmsLayers));
+            url.append(getStylesString());
         } else {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(
@@ -824,13 +824,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             url += "&BGCOLOR=" + backgroundColor;                                                             // NOI18N
             url += "&EXCEPTIONS=" + exceptionsFormat;                                                         // exceptionsFormat;
             url += "&FEATURE_COUNT=99";
-            url += getLayersString(wmsLayers);
+            url += getLayersString();
 
-            if (hasEveryLayerAStyle(wmsLayers)) {
+            if (hasEveryLayerAStyle()) {
                 // the styles parameter must have the same number of values as the layers parameter.
                 // If this requirement cannot be fulfilled, the optional style parameter should be omitted due
                 // to generate a valid request.
-                url += getStylesString(wmsLayers);
+                url += getStylesString();
             }
 
             url += "&QUERY_LAYERS=" + l.getOgcCapabilitiesLayer().getName(); // NOI18N
@@ -904,8 +904,8 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      *
      * @return  DOCUMENT ME!
      */
-    private String getLayersString(final List wmsLayers) {
-        final StringBuilder layerString = new StringBuilder("");                                              // NOI18N
+    private String getLayersString() {
+        final StringBuilder layerString = new StringBuilder("");                                                  // NOI18N
         int counter = 0;
         final Iterator it = getWMSLayers().iterator();
         while (it.hasNext()) {
@@ -913,15 +913,19 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
                 counter++;
                 if (counter > 1) {
-                    layerString.append(",");                                                                  // NOI18N
+                    layerString.append(",");                                                                      // NOI18N
                 }
-                layerString.append(((WMSLayer)o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20")); // NOI18N
+                if (!isDummy()) {
+                    layerString.append(((WMSLayer)o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20")); // NOI18N
+                } else {
+                    layerString.append(((WMSLayer)o).toString().replaceAll(" ", "%20"));                          // NOI18N
+                }
             }
         }
         if (counter > 0) {
-            return "&LAYERS=" + layerString.toString();                                                       // NOI18N
+            return "&LAYERS=" + layerString.toString();                                                           // NOI18N
         } else {
-            return "";                                                                                        // NOI18N
+            return "";                                                                                            // NOI18N
         }
     }
 
@@ -932,8 +936,8 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      *
      * @return  DOCUMENT ME!
      */
-    private String getStylesString(final List wmsLayers) {
-        final StringBuilder stylesString = new StringBuilder("");                                       // NOI18N
+    private String getStylesString() {
+        final StringBuilder stylesString = new StringBuilder("");                                           // NOI18N
         int counter = 0;
         final Iterator it = getWMSLayers().iterator();
         while (it.hasNext()) {
@@ -942,9 +946,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                         && ((WMSLayer)o).isEnabled()) {
                 counter++;
                 if (counter > 1) {
-                    stylesString.append(",");                                                           // NOI18N
+                    stylesString.append(",");                                                               // NOI18N
                 }
-                stylesString.append(((WMSLayer)o).getSelectedStyle().getName().replaceAll(" ", "%20")); // NOI18N
+                if (!isDummy()) {
+                    stylesString.append(((WMSLayer)o).getSelectedStyle().getName().replaceAll(" ", "%20")); // NOI18N
+                } else {
+                    stylesString.append(((WMSLayer)o).getStyleName().replaceAll(" ", "%20"));               // NOI18N
+                }
             }
         }
 
@@ -958,7 +966,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      *
      * @return  true, if every of the given layer has a selected style
      */
-    private boolean hasEveryLayerAStyle(final List wmsLayers) {
+    private boolean hasEveryLayerAStyle() {
         final Iterator it = getWMSLayers().iterator();
 
         while (it.hasNext()) {
@@ -1165,8 +1173,8 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             if (getName().equals(tester.getName())
                         && ((getGetMapPrefix() == tester.getGetMapPrefix())
                             || ((getGetMapPrefix() != null) && getGetMapPrefix().equals(tester.getGetMapPrefix())))
-                        && getLayersString(wmsLayers).equals(tester.getLayersString(tester.wmsLayers))
-                        && getStylesString(wmsLayers).equals(tester.getStylesString(tester.wmsLayers))) {
+                        && getLayersString().equals(tester.getLayersString())
+                        && getStylesString().equals(tester.getStylesString())) {
                 return true;
             }
         }
