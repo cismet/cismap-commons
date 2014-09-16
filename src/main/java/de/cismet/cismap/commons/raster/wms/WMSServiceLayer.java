@@ -913,15 +913,19 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
                 counter++;
                 if (counter > 1) {
-                    layerString.append(",");                                                                  // NOI18N
+                    layerString.append(",");                                                                      // NOI18N
                 }
-                layerString.append(((WMSLayer)o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20")); // NOI18N
+                if (!isDummy()) {
+                    layerString.append(((WMSLayer)o).getOgcCapabilitiesLayer().getName().replaceAll(" ", "%20")); // NOI18N
+                } else {
+                    layerString.append(((WMSLayer)o).toString().replaceAll(" ", "%20"));                          // NOI18N
+                }
             }
         }
         if (counter > 0) {
-            return "&LAYERS=" + layerString.toString();                                                       // NOI18N
+            return "&LAYERS=" + layerString.toString();                                                           // NOI18N
         } else {
-            return "";                                                                                        // NOI18N
+            return "";                                                                                            // NOI18N
         }
     }
 
@@ -942,9 +946,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                         && ((WMSLayer)o).isEnabled()) {
                 counter++;
                 if (counter > 1) {
-                    stylesString.append(",");                                                           // NOI18N
+                    stylesString.append(",");                                                               // NOI18N
                 }
-                stylesString.append(((WMSLayer)o).getSelectedStyle().getName().replaceAll(" ", "%20")); // NOI18N
+                if (!isDummy()) {
+                    stylesString.append(((WMSLayer)o).getSelectedStyle().getName().replaceAll(" ", "%20")); // NOI18N
+                } else {
+                    stylesString.append(((WMSLayer)o).getStyleName().replaceAll(" ", "%20"));               // NOI18N
+                }
             }
         }
 
