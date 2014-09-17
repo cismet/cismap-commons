@@ -900,8 +900,6 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     /**
      * DOCUMENT ME!
      *
-     * @param   wmsLayers  DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      */
     private String getLayersString() {
@@ -932,8 +930,6 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     /**
      * DOCUMENT ME!
      *
-     * @param   wmsLayers  DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      */
     private String getStylesString() {
@@ -961,8 +957,6 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
     /**
      * DOCUMENT ME!
-     *
-     * @param   wmsLayers  DOCUMENT ME!
      *
      * @return  true, if every of the given layer has a selected style
      */
