@@ -377,17 +377,17 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_layerCombobox1ItemStateChanged
+    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_layerCombobox1ItemStateChanged
         model.setLayerFilter((LayerFilter)evt.getItem());
         expandAll(new TreePath(model.getRoot()));
-    }//GEN-LAST:event_layerCombobox1ItemStateChanged
+    }                                                                                 //GEN-LAST:event_layerCombobox1ItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_jtFeaturesValueChanged
+    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) { //GEN-FIRST:event_jtFeaturesValueChanged
         final TreePath tp = jtFeatures.getSelectionPath();
 
         createPopupMenu();
@@ -425,14 +425,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             enableAttributeTable(true);
             tabAttributes.setModel(new DefaultTableModel(0, 0));
         }
-    }//GEN-LAST:event_jtFeaturesValueChanged
+    } //GEN-LAST:event_jtFeaturesValueChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miZoomActionPerformed
+    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miZoomActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
         final List<Feature> featureList = new ArrayList<Feature>();
 
@@ -456,14 +456,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         final ZoomToFeaturesWorker worker = new ZoomToFeaturesWorker(featureList.toArray(
                     new Feature[featureList.size()]));
         worker.execute();
-    }//GEN-LAST:event_miZoomActionPerformed
+    } //GEN-LAST:event_miZoomActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miEditActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miEditActionPerformed
+    private void miEditActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miEditActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
 
         for (final TreePath tp : tps) {
@@ -501,14 +501,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         }
 
         createPopupMenu();
-    }//GEN-LAST:event_miEditActionPerformed
+    } //GEN-LAST:event_miEditActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miPrintActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miPrintActionPerformed
+    private void miPrintActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miPrintActionPerformed
         final TreePath tps = jtFeatures.getSelectionPath();
 
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
@@ -552,7 +552,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             };
 
         wdt.start();
-    }//GEN-LAST:event_miPrintActionPerformed
+    } //GEN-LAST:event_miPrintActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -636,8 +636,8 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     }
 
     /**
-     * Checks, if the FeatureInfoPanel contains unsaved changes and let the user decide, 
-     * whether the content should be saved or not.
+     * Checks, if the FeatureInfoPanel contains unsaved changes and let the user decide, whether the content should be
+     * saved or not.
      */
     private void contentChanged() {
         if (!lockMap.isEmpty()) {
@@ -664,7 +664,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     }
 
     /**
-     * Save all changes
+     * Save all changes.
      */
     private void saveAllChanges() {
         for (final Feature f : lockMap.keySet()) {
