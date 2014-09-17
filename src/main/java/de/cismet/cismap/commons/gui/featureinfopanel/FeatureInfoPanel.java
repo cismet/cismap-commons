@@ -636,7 +636,8 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Checks, if the FeatureInfoPanel contains unsaved changes and let the user decide, 
+     * whether the content should be saved or not.
      */
     private void contentChanged() {
         if (!lockMap.isEmpty()) {
@@ -663,7 +664,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Save all changes
      */
     private void saveAllChanges() {
         for (final Feature f : lockMap.keySet()) {
@@ -713,7 +714,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Creates the context menu of the FeatureInfoPanel.
      */
     private void createPopupMenu() {
         final TreePath tp = jtFeatures.getSelectionPath();
