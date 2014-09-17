@@ -65,7 +65,6 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTable;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
-import de.cismet.cismap.commons.gui.attributetable.DefaultAttributeTableRuleSet;
 import de.cismet.cismap.commons.gui.attributetable.FeatureLockerFactory;
 import de.cismet.cismap.commons.gui.attributetable.FeatureLockingInterface;
 import de.cismet.cismap.commons.gui.attributetable.LockAlreadyExistsException;
@@ -176,12 +175,22 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                         lab.setBorder(cl.getBorder());
                         lab.setForeground(cl.getForeground());
 
+                        if (sel) {
+                            lab.setBackground(backgroundSelectionColor);
+                            lab.setOpaque(true);
+                        }
+
                         if ((value instanceof MapService) || value.equals(jtFeatures.getModel().getRoot())) {
                             if (expanded) {
                                 lab.setIcon(openIcon);
                             } else {
                                 lab.setIcon(closedIcon);
                             }
+                        } else if ((value instanceof WMSGetFeatureInfoDescription) || (value instanceof WMSFeature)) {
+                            lab.setIcon(
+                                new ImageIcon(
+                                    getClass().getResource(
+                                        "/de/cismet/cismap/commons/gui/layerwidget/res/layerOverlaywms.png")));
                         } else if (value instanceof DefaultFeatureServiceFeature) {
                             final DefaultFeatureServiceFeature f = (DefaultFeatureServiceFeature)value;
                             lab.setIcon(
@@ -195,14 +204,11 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                                 final Font plainFont = lab.getFont().deriveFont(Font.PLAIN);
                                 lab.setFont(plainFont);
                             }
-                        } else if (value instanceof WMSGetFeatureInfoDescription) {
-                            lab.setIcon(
-                                new ImageIcon(
-                                    getClass().getResource(
-                                        "/de/cismet/cismap/commons/gui/layerwidget/res/layerOverlaywms.png")));
                         }
 
                         return lab;
+                    } else {
+                        c.setBackground(backgroundSelectionColor);
                     }
 
                     return c;
@@ -230,6 +236,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
                 @Override
                 public void getFeatureInfoRequest(final GetFeatureInfoEvent evt) {
+                    contentChanged();
                     model.init(evt.getFeatures());
                     expandAll(new TreePath(model.getRoot()));
                 }
@@ -370,17 +377,17 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_layerCombobox1ItemStateChanged
+    private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_layerCombobox1ItemStateChanged
         model.setLayerFilter((LayerFilter)evt.getItem());
         expandAll(new TreePath(model.getRoot()));
-    }                                                                                 //GEN-LAST:event_layerCombobox1ItemStateChanged
+    }//GEN-LAST:event_layerCombobox1ItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) { //GEN-FIRST:event_jtFeaturesValueChanged
+    private void jtFeaturesValueChanged(final javax.swing.event.TreeSelectionEvent evt) {//GEN-FIRST:event_jtFeaturesValueChanged
         final TreePath tp = jtFeatures.getSelectionPath();
 
         createPopupMenu();
@@ -418,14 +425,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             enableAttributeTable(true);
             tabAttributes.setModel(new DefaultTableModel(0, 0));
         }
-    } //GEN-LAST:event_jtFeaturesValueChanged
+    }//GEN-LAST:event_jtFeaturesValueChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miZoomActionPerformed
+    private void miZoomActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miZoomActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
         final List<Feature> featureList = new ArrayList<Feature>();
 
@@ -449,14 +456,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         final ZoomToFeaturesWorker worker = new ZoomToFeaturesWorker(featureList.toArray(
                     new Feature[featureList.size()]));
         worker.execute();
-    } //GEN-LAST:event_miZoomActionPerformed
+    }//GEN-LAST:event_miZoomActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miEditActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miEditActionPerformed
+    private void miEditActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miEditActionPerformed
         final TreePath[] tps = jtFeatures.getSelectionPaths();
 
         for (final TreePath tp : tps) {
@@ -494,14 +501,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         }
 
         createPopupMenu();
-    } //GEN-LAST:event_miEditActionPerformed
+    }//GEN-LAST:event_miEditActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miPrintActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miPrintActionPerformed
+    private void miPrintActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miPrintActionPerformed
         final TreePath tps = jtFeatures.getSelectionPath();
 
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
@@ -545,7 +552,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             };
 
         wdt.start();
-    } //GEN-LAST:event_miPrintActionPerformed
+    }//GEN-LAST:event_miPrintActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -569,12 +576,12 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(
                     FeatureInfoPanel.this,
                     NbBundle.getMessage(
-                        AttributeTable.class,
+                        FeatureInfoPanel.class,
                         "FeatureInfoPanel.miEditActionPerformed().lockexists.message",
                         fsf.getId(),
                         ex.getLockMessage()),
                     NbBundle.getMessage(
-                        AttributeTable.class,
+                        FeatureInfoPanel.class,
                         "FeatureInfoPanel.miEditActionPerformed().lockexists.title"),
                     JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
@@ -582,11 +589,11 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(
                     FeatureInfoPanel.this,
                     NbBundle.getMessage(
-                        AttributeTable.class,
+                        FeatureInfoPanel.class,
                         "FeatureInfoPanel.miEditActionPerformed().exception.message",
                         ex.getMessage()),
                     NbBundle.getMessage(
-                        AttributeTable.class,
+                        FeatureInfoPanel.class,
                         "FeatureInfoPanel.miEditActionPerformed().exception.title"),
                     JOptionPane.ERROR_MESSAGE);
             }
@@ -631,6 +638,83 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     /**
      * DOCUMENT ME!
      */
+    private void contentChanged() {
+        if (!lockMap.isEmpty()) {
+            final int ans = JOptionPane.showConfirmDialog(
+                    FeatureInfoPanel.this,
+                    NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.contentChanged().text"),
+                    NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.contentChanged().title"),
+                    JOptionPane.YES_NO_OPTION);
+
+            if (ans == JOptionPane.YES_OPTION) {
+                saveAllChanges();
+            } else {
+                unlockAll();
+            }
+        }
+    }
+
+    /**
+     * Should be invoked, before the FeatureInfoPanel is closed. It checks, if there are unsaved changes.
+     */
+    public void dispose() {
+        contentChanged();
+        model.init(new ArrayList<Feature>());
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void saveAllChanges() {
+        for (final Feature f : lockMap.keySet()) {
+            stopEditMode((DefaultFeatureServiceFeature)f);
+        }
+
+        lockMap.clear();
+    }
+
+    /**
+     * unlocks all locked objects.
+     */
+    private void unlockAll() {
+        boolean allLocksRemoved = true;
+
+        for (final Feature f : lockMap.keySet()) {
+            final FeatureLockingInterface locker = FeatureLockerFactory.getInstance()
+                        .getLockerForFeatureService(((DefaultFeatureServiceFeature)f).getLayerProperties()
+                            .getFeatureService());
+
+            if (locker != null) {
+                try {
+                    locker.unlock(lockMap.get(f));
+                } catch (Exception e) {
+                    LOG.error("Locking object can't be removed.", e);
+                    allLocksRemoved = false;
+                }
+            } else {
+                LOG.error("No suitable locker object found");
+                allLocksRemoved = false;
+            }
+        }
+
+        if (!allLocksRemoved) {
+            JOptionPane.showMessageDialog(
+                FeatureInfoPanel.this,
+                NbBundle.getMessage(
+                    FeatureInfoPanel.class,
+                    "FeatureInfoPanel.unlockAll().message"),
+                NbBundle.getMessage(
+                    FeatureInfoPanel.class,
+                    "FeatureInfoPanel.unlockAll().title"),
+                JOptionPane.ERROR_MESSAGE);
+        }
+
+        lockMap.clear();
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
     private void createPopupMenu() {
         final TreePath tp = jtFeatures.getSelectionPath();
         if (tp == null) {
@@ -645,7 +729,8 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         popupMenu.add(miPrint);
 
         if (c instanceof DefaultFeatureServiceFeature) {
-            if (((DefaultFeatureServiceFeature)c).getLayerProperties().getFeatureService().isEditable()) {
+            if ((((DefaultFeatureServiceFeature)c).getLayerProperties().getFeatureService() != null)
+                        && ((DefaultFeatureServiceFeature)c).getLayerProperties().getFeatureService().isEditable()) {
                 popupMenu.add(miEdit);
                 if (((DefaultFeatureServiceFeature)c).isEditable()) {
                     miEdit.setText(NbBundle.getMessage(
@@ -727,13 +812,13 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         //~ Instance fields ----------------------------------------------------
 
         List<Feature> lastFeatures;
-        private MappingComponent mappingComponent;
-        private ActiveLayerModel layerModel;
+        private final MappingComponent mappingComponent;
+        private final ActiveLayerModel layerModel;
         private LayerFilter filter;
-        private String root = "Features";
-        private Map<MapService, List<Feature>> data = new HashMap<MapService, List<Feature>>();
-        private List<MapService> orderedDataKeys = new ArrayList<MapService>();
-        private List<TreeModelListener> listener = new ArrayList<TreeModelListener>();
+        private final String root = "Features";
+        private final Map<MapService, List<Feature>> data = new HashMap<MapService, List<Feature>>();
+        private final List<MapService> orderedDataKeys = new ArrayList<MapService>();
+        private final List<TreeModelListener> listener = new ArrayList<TreeModelListener>();
 
         //~ Constructors -------------------------------------------------------
 
@@ -785,6 +870,17 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                         allowedFeatureServices.add((AbstractFeatureService)service);
                     } else {
                         allowedMapServices.add(service);
+                    }
+                }
+            }
+
+            if ((features.size() == 1) && !(features.get(0) instanceof WMSFeature)) {
+                final Feature f = features.get(0);
+                final AbstractFeatureService service = ((FeatureServiceFeature)f).getLayerProperties()
+                            .getFeatureService();
+                if ((f instanceof FeatureServiceFeature) && !allowedMapServices.contains(service)) {
+                    if (filter.isLayerAllowed(service)) {
+                        allowedFeatureServices.add(service);
                     }
                 }
             }
@@ -946,14 +1042,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
         //~ Instance fields ----------------------------------------------------
 
-        private DefaultFeatureServiceFeature feature;
-        private AttributeTableRuleSet tableRuleSet;
+        private final DefaultFeatureServiceFeature feature;
+        private final AttributeTableRuleSet tableRuleSet;
         private String[] attributeAlias;
         private String[] attributeNames;
         private Map<String, FeatureServiceAttribute> featureServiceAttributes;
         private String[] additionalAttributes = new String[0];
         private List<String> orderedFeatureServiceAttributes;
-        private List<TableModelListener> listener = new ArrayList<TableModelListener>();
+        private final List<TableModelListener> listener = new ArrayList<TableModelListener>();
 
         //~ Constructors -------------------------------------------------------
 
@@ -975,9 +1071,21 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
          * DOCUMENT ME!
          */
         private void initModel() {
-            final AbstractFeatureService service = feature.getLayerProperties().getFeatureService();
-            orderedFeatureServiceAttributes = service.getOrderedFeatureServiceAttributes();
-            featureServiceAttributes = service.getFeatureServiceAttributes();
+            if (feature instanceof WMSFeature) {
+                final HashMap<String, Object> props = feature.getProperties();
+
+                orderedFeatureServiceAttributes = new ArrayList<String>(props.keySet());
+                featureServiceAttributes = new HashMap<String, FeatureServiceAttribute>();
+
+                for (final String key : props.keySet()) {
+                    final FeatureServiceAttribute attr = new FeatureServiceAttribute(key, "String", false);
+                    featureServiceAttributes.put(key, attr);
+                }
+            } else {
+                final AbstractFeatureService service = feature.getLayerProperties().getFeatureService();
+                orderedFeatureServiceAttributes = service.getOrderedFeatureServiceAttributes();
+                featureServiceAttributes = service.getFeatureServiceAttributes();
+            }
             fillHeaderArrays();
         }
 
