@@ -99,12 +99,14 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
+import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
 import de.cismet.cismap.commons.internaldb.DBEntry;
 import de.cismet.cismap.commons.internaldb.DBFolder;
+import de.cismet.cismap.commons.internaldb.DBTableInformation;
 import de.cismet.cismap.commons.internaldb.InternalDbTree;
 import de.cismet.cismap.commons.preferences.CapabilitiesListTreeNode;
 import de.cismet.cismap.commons.preferences.CapabilitiesPreferences;
@@ -224,10 +226,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     if (tree == null) {
                         tree = wfsCapabilitiesTrees.get(tbpCapabilities.getSelectedComponent());
                     }
+                    if (tree == null) {
+                        tree = jdbcTrees.get(tbpCapabilities.getSelectedComponent());
+                    }
+                    if (tree == null) {
+                        tree = cidsTrees.get(tbpCapabilities.getSelectedComponent());
+                    }
                     if (tree instanceof DragTree) {
                         zoomToExtent((DragTree)tree);
                     } else if (tree instanceof InternalDbTree) {
-                        // toDo: HER extend
+                        zoomToExtent((InternalDbTree)tree);
                     }
                 }
             });
@@ -257,6 +265,40 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * Zooms the map to the extent of the selected elements of the given InternalDbTree,
+     *
+     * @param  iTree  DOCUMENT ME!
+     */
+    private void zoomToExtent(final InternalDbTree iTree) {
+        final DBTableInformation[] infos = iTree.getDBTableInformationOfSelectionPath();
+        Geometry geom = null;
+
+        for (final DBTableInformation dbInfo : infos) {
+            try {
+                final H2FeatureService layer = new H2FeatureService(dbInfo.getName(),
+                        dbInfo.getDatabasePath(),
+                        dbInfo.getDatabaseTable(),
+                        null);
+                final Geometry envelope = ((H2FeatureServiceFactory)layer.getFeatureFactory()).getEnvelope();
+
+                if (envelope != null) {
+                    if (geom == null) {
+                        geom = envelope;
+                    } else {
+                        geom = geom.union(envelope);
+                    }
+                }
+            } catch (Exception ex) {
+                log.error("Error while creating H2FeatureService", ex);
+            }
+        }
+
+        if (geom != null) {
+            CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(new XBoundingBox(geom));
+        }
+    }
 
     /**
      * DOCUMENT ME!
@@ -638,30 +680,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
+    }//GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
+    }//GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
@@ -674,16 +716,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
+    }//GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
+    }//GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -742,7 +784,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -751,16 +793,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
+    }//GEN-LAST:event_cmdCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpCapabilitiesStateChanged
+    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpCapabilitiesStateChanged
         addFilterToActiveTree();
-    }                                                                                   //GEN-LAST:event_tbpCapabilitiesStateChanged
+    }//GEN-LAST:event_tbpCapabilitiesStateChanged
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
