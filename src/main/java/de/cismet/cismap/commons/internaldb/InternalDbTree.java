@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 
 import java.util.ArrayList;
+import java.util.EventObject;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -38,6 +39,7 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
+import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -85,7 +87,7 @@ public class InternalDbTree extends JTree {
         setDropMode(DropMode.ON_OR_INSERT);
         setTransferHandler(new DBTransferHandler());
         getSelectionModel().setSelectionMode(TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
-        setCellRenderer(new DefaultTreeCellRenderer() {
+        final DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
 
                 @Override
                 public Component getTreeCellRendererComponent(final JTree tree,
@@ -123,6 +125,50 @@ public class InternalDbTree extends JTree {
                     }
 
                     return c;
+                }
+            };
+        setCellRenderer(renderer);
+        setCellEditor(new DefaultTreeCellEditor(this, renderer) {
+
+                @Override
+                protected void determineOffset(final JTree tree,
+                        final Object value,
+                        final boolean isSelected,
+                        final boolean expanded,
+                        final boolean leaf,
+                        final int row) {
+                    if (renderer != null) {
+                        if ((value instanceof DBEntry) && !(value instanceof DBFolder)) {
+                            editingIcon = shapeIcon;
+                        } else if (value instanceof DBEntry) {
+                            if (expanded) {
+                                editingIcon = renderer.getOpenIcon();
+                            } else {
+                                editingIcon = renderer.getClosedIcon();
+                            }
+                        } else if (value.equals(getModel().getRoot())) {
+                            if (expanded) {
+                                editingIcon = renderer.getOpenIcon();
+                            } else {
+                                editingIcon = renderer.getClosedIcon();
+                            }
+                        }
+
+                        if (editingIcon != null) {
+                            offset = renderer.getIconTextGap()
+                                        + editingIcon.getIconWidth();
+                        } else {
+                            offset = renderer.getIconTextGap();
+                        }
+                    } else {
+                        editingIcon = null;
+                        offset = 0;
+                    }
+                }
+
+                @Override
+                protected boolean canEditImmediately(final EventObject event) {
+                    return true;
                 }
             });
 //        transferHandler = new TreeTransferHandler();
@@ -227,6 +273,55 @@ public class InternalDbTree extends JTree {
         a.split("->");
     }
 
+    /**
+     * Provides the table information of the selected paths.
+     *
+     * @return  the DBTableInformation of the selected paths
+     */
+    public DBTableInformation[] getDBTableInformationOfSelectionPath() {
+        final List<DBEntry> entries = new ArrayList<DBEntry>();
+
+        final TreePath[] paths = getSelectionPaths();
+
+        for (final TreePath path : paths) {
+            final Object o = path.getLastPathComponent();
+
+            if (o instanceof DBFolder) {
+                addEntriesToList(entries, (DBFolder)o);
+            } else if (o instanceof DBEntry) {
+                entries.add((DBEntry)o);
+            }
+        }
+
+        final DBTableInformation[] databaseTables = new DBTableInformation[entries.size()];
+
+        for (int i = 0; i < entries.size(); ++i) {
+            final DBEntry e = entries.get(i);
+            databaseTables[i] = new DBTableInformation(e.toString(),
+                    databasePath,
+                    e.getName(),
+                    (e instanceof DBFolder));
+        }
+
+        return databaseTables;
+    }
+
+    /**
+     * Add all DBEntries of the given folder to the list.
+     *
+     * @param  entries  the list, the entries should be added in
+     * @param  folder   the DBFolder
+     */
+    private void addEntriesToList(final List<DBEntry> entries, final DBFolder folder) {
+        for (final DBEntry entry : folder.getChildren()) {
+            if (entry instanceof DBFolder) {
+                addEntriesToList(entries, (DBFolder)entry);
+            } else {
+                entries.add(entry);
+            }
+        }
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -254,48 +349,10 @@ public class InternalDbTree extends JTree {
 
         @Override
         protected Transferable createTransferable(final JComponent c) {
-            final JTree tree = (JTree)c;
-            final List<DBEntry> entries = new ArrayList<DBEntry>();
-
-            final TreePath[] paths = tree.getSelectionPaths();
-
-            for (final TreePath path : paths) {
-                final Object o = path.getLastPathComponent();
-
-                if (o instanceof DBFolder) {
-                    addEntriesToList(entries, (DBFolder)o);
-                } else if (o instanceof DBEntry) {
-                    entries.add((DBEntry)o);
-                }
-            }
-
-            final DBTableInformation[] databaseTables = new DBTableInformation[entries.size()];
-
-            for (int i = 0; i < entries.size(); ++i) {
-                final DBEntry e = entries.get(i);
-                databaseTables[i] = new DBTableInformation(e.toString(),
-                        databasePath,
-                        e.getName(),
-                        (e instanceof DBFolder));
-            }
+            final InternalDbTree tree = (InternalDbTree)c;
+            final DBTableInformation[] databaseTables = tree.getDBTableInformationOfSelectionPath();
 
             return new DBTransferable(databaseTables);
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  entries  DOCUMENT ME!
-         * @param  folder   DOCUMENT ME!
-         */
-        private void addEntriesToList(final List<DBEntry> entries, final DBFolder folder) {
-            for (final DBEntry entry : folder.getChildren()) {
-                if (entry instanceof DBFolder) {
-                    addEntriesToList(entries, (DBFolder)entry);
-                } else {
-                    entries.add(entry);
-                }
-            }
         }
 
         @Override
