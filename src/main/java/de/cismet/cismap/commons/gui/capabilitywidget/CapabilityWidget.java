@@ -281,6 +281,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         dbInfo.getDatabasePath(),
                         dbInfo.getDatabaseTable(),
                         null);
+                layer.initAndWait();
                 final Geometry envelope = ((H2FeatureServiceFactory)layer.getFeatureFactory()).getEnvelope();
 
                 if (envelope != null) {

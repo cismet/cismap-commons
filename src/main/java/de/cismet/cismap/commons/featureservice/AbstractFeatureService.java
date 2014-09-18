@@ -459,15 +459,6 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      * @return  the value of featureFactory
      */
     public FeatureFactory getFeatureFactory() {
-        if ((featureFactory == null) && !initialized) {
-            LOG.info("getFeatureFactory was invoked on a not initialized feature service => invoke the init method");
-
-            try {
-                initAndWait();
-            } catch (Exception ex) {
-                LOG.error("Error while initialising service.", ex);
-            }
-        }
         return featureFactory;
     }
 
