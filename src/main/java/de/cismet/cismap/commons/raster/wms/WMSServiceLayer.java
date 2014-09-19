@@ -261,6 +261,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         final Iterator<Element> it = layerList.iterator();
         wmsLayers.clear();
         ogcLayers.clear();
+        dummyLayer.clear();
 
         while (it.hasNext()) {
             final Element elem = it.next();

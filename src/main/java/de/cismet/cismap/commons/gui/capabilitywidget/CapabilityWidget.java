@@ -681,30 +681,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }//GEN-LAST:event_cmdAddFromListActionPerformed
+    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }//GEN-LAST:event_cmdRefreshActionPerformed
+    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
@@ -717,16 +717,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }//GEN-LAST:event_cmdAddByUrlActionPerformed
+    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }//GEN-LAST:event_cmdRemoveActionPerformed
+    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -785,7 +785,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -794,16 +794,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }//GEN-LAST:event_cmdCollapseActionPerformed
+    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpCapabilitiesStateChanged
+    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpCapabilitiesStateChanged
         addFilterToActiveTree();
-    }//GEN-LAST:event_tbpCapabilitiesStateChanged
+    }                                                                                   //GEN-LAST:event_tbpCapabilitiesStateChanged
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
