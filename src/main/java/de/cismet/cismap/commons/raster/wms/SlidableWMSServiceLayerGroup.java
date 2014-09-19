@@ -319,7 +319,16 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         lockTimer.setRepeats(false);
 
         try {
-            pnode.setVisible(element.getAttribute("visible").getBooleanValue());
+            this.setEnabled(element.getAttribute("enabled").getBooleanValue());
+        } catch (DataConversionException ex) {
+            LOG.warn("Attribute enabled has wrong data type.", ex);
+        } catch (final NullPointerException ex) {
+            LOG.warn("Attribute enabled not found.", ex);
+        }
+
+        try {
+            final boolean visible = element.getAttribute("visible").getBooleanValue();
+            pnode.setVisible(visible);
         } catch (final DataConversionException e) {
             LOG.warn("Attribute visible has wrong data type.", e);
         } catch (final NullPointerException e) {
@@ -981,7 +990,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
 
     @Override
     public boolean isVisible() {
-        return true;
+        return pnode.getVisible();
     }
 
     @Override
