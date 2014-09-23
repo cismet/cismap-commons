@@ -13,6 +13,8 @@ package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import org.deegree.feature.Feature;
+import org.deegree.feature.types.FeatureType;
 import org.deegree.model.feature.FeatureProperty;
 import org.deegree.model.spatialschema.JTSAdapter;
 
@@ -20,6 +22,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.namespace.QName;
 
 /**
  * Features read from a SHP File.
@@ -45,8 +49,18 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      *
      * @param  shapeInfo  typename DOCUMENT ME!
      */
-
     public ShapeFeature(final ShapeInfo shapeInfo) {
+        this.shapeInfo = shapeInfo;
+    }
+
+    /**
+     * Creates a new ShapeFeature object.
+     *
+     * @param  shapeInfo  typename DOCUMENT ME!
+     * @param  styles     DOCUMENT ME!
+     */
+    public ShapeFeature(final ShapeInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
+        setSLDStyles(styles); // super.style = styles;
         this.shapeInfo = shapeInfo;
     }
 
@@ -168,12 +182,6 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
         super.getProperties().clear();
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  propertyName  DOCUMENT ME!
-     * @param  property      DOCUMENT ME!
-     */
     @Override
     public void addProperty(final String propertyName, final Object property) {
         // nothing to do
@@ -184,6 +192,7 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      *
      * @param  map  DOCUMENT ME!
      */
+    @Override
     public void addProperties(final Map<String, Object> map) {
         // nothing to do
     }
@@ -231,5 +240,33 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     @Override
     public void setGeometry(final Geometry geom) {
         // do nothing
+    }
+
+    @Override
+    protected Feature getDeegreeFeature() {
+        return new ShapeFileLayerDeegreeFeature();
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected class ShapeFileLayerDeegreeFeature extends DefaultFeatureServiceFeature.DeegreeFeature {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public FeatureType getType() {
+            return new DefaultFeatureServiceFeature.DeegreeFeatureType() {
+
+                    @Override
+                    public QName getName() {
+                        return new QName("Feature"); // for demo only
+                    }
+                };
+        }
     }
 }

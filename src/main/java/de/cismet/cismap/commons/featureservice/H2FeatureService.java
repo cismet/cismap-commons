@@ -191,14 +191,16 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     databasePath,
                     tableName,
                     features,
-                    layerInitWorker);
+                    layerInitWorker,
+                    parseSLD(getSLDDefiniton()));
         } else {
             return new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
                     shapeFile,
-                    layerInitWorker);
+                    layerInitWorker,
+                    parseSLD(getSLDDefiniton()));
         }
     }
 

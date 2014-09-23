@@ -24,6 +24,7 @@ import org.deegree.model.feature.FeatureCollection;
 import org.deegree.model.feature.schema.FeatureType;
 import org.deegree.model.feature.schema.PropertyType;
 import org.deegree.model.spatialschema.JTSAdapter;
+import org.deegree.style.se.unevaluated.Style;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,7 +36,9 @@ import java.net.URI;
 import java.nio.charset.Charset;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -49,6 +52,8 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+
+import static de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory.DEBUG;
 
 /**
  * DOCUMENT ME!
@@ -72,7 +77,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     private boolean noGeometryRecognised = false;
     private boolean errorInGeometryFound = false;
     private Crs shapeCrs = null;
-    private int shapeSrid = 0;
     private Crs crs = CismapBroker.getInstance().getSrs();
     private org.deegree.model.spatialschema.Envelope envelope;
     private FeatureCollection fc = null;
@@ -87,16 +91,19 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      * @param   documentURL            DOCUMENT ME!
      * @param   maxCachedFeatureCount  DOCUMENT ME!
      * @param   workerThread           DOCUMENT ME!
+     * @param   styles                 DOCUMENT ME!
      *
      * @throws  Exception  DOCUMENT ME!
      */
     public ShapeFeatureFactory(final LayerProperties layerProperties,
             final URI documentURL,
             final int maxCachedFeatureCount,
-            final SwingWorker workerThread) throws Exception {
+            final SwingWorker workerThread,
+            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) throws Exception {
         this.layerProperties = layerProperties;
         this.documentURI = documentURL;
         this.maxCachedFeatureCount = maxCachedFeatureCount;
+        this.styles = styles;
 
         try {
             this.parseShapeFile(workerThread);
@@ -126,7 +133,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         this.initialised = shpff.initialised;
         this.crs = shpff.crs;
         this.shapeCrs = shpff.shapeCrs;
-        this.shapeSrid = shpff.shapeSrid;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -151,7 +157,8 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     protected ShapeFeature createFeatureInstance(final Feature degreeFeature,
             final ShapeInfo shapeInfo,
             final int index) throws Exception {
-        final ShapeFeature shapeFeature = new ShapeFeature(shapeInfo);
+        layerName = filename;
+        final ShapeFeature shapeFeature = new ShapeFeature(shapeInfo, getStyle(filename));
 
         // auto generate Ids!
         shapeFeature.setId(index);
@@ -244,7 +251,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     protected synchronized void parseShapeFile(final SwingWorker workerThread) throws Exception {
         if (shapeCrs == null) {
             shapeCrs = CismapBroker.getInstance().getSrs();
-            shapeSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
+            featureSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
         }
         filename = new File(documentURI).getName();
 
@@ -515,7 +522,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             polyCords[4] = new Coordinate(envelope.getMin().getX(), envelope.getMin().getY());
             // The GeometryFactory must use the same srid as the elements in the deegreeFeaturesTree
             final GeometryFactory geomFactory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                    shapeSrid);
+                    featureSrid);
             final Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
             return boundingPolygon.getEnvelope();
@@ -637,7 +644,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                 }
 
                 selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
-                final ShapeInfo info = new ShapeInfo(filename, persShapeFile, shapeSrid, fc);
+                final ShapeInfo info = new ShapeInfo(filename, persShapeFile, featureSrid, fc);
                 int count = 0;
 
 //                if (!saveAsLastCreated || recordNumbers.length < 60000) {
@@ -700,6 +707,14 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 
             if (saveAsLastCreated) {
                 this.updateLastCreatedFeatures(selectedFeatures, boundingPolygon, query);
+            }
+            // set the SLDs for features
+            final List<Style> style = getStyle(layerName);
+
+            if ((style != null) && (selectedFeatures != null)) {
+                for (final ShapeFeature f : selectedFeatures) {
+                    f.setSLDStyles(style);
+                }
             }
             return new Vector<ShapeFeature>(selectedFeatures);
         } finally {

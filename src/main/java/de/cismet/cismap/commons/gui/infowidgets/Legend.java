@@ -7,11 +7,14 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.infowidgets;
 
+import org.deegree.commons.utils.Pair;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 import java.net.URL;
 
@@ -30,6 +33,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
+import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.featureservice.SLDStyledLayer;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
@@ -100,6 +105,30 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         tableModel.addLegend(url, layername);
     }
 
+    /*public void addLegend(final BufferedImage img, final String layername) {
+     *  tableModel.addLegend(img, layername);}*/
+
+    /*public void addLegend(final BufferedImage img, final String layername) {
+     *  tableModel.addLegend(img, layername);}*/
+
+    /*public void addLegend(final BufferedImage img, final String layername) {
+     *  tableModel.addLegend(img, layername);}*/
+
+    /*public void addLegend(final BufferedImage img, final String layername) {
+     *  tableModel.addLegend(img, layername);}*/
+
+    /*public void addLegend(final BufferedImage img, final String layername) {
+     *  tableModel.addLegend(img, layername);}*/
+
+    /*public void addLegend(final BufferedImage img, final String layername) {
+     *  tableModel.addLegend(img, layername);}*/
+
+    /*public void addLegend(final BufferedImage img, final String layername) {
+     *  tableModel.addLegend(img, layername);}*/
+
+    /*public void addLegend(final BufferedImage img, final String layername) {
+     *  tableModel.addLegend(img, layername);}*/
+
     /**
      * DOCUMENT ME!
      *
@@ -159,7 +188,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                     removeWmsServiceLayer((WMSServiceLayer)elem);
                 }
             }
-        } else {
+        }                                                                        /*else if(e.getLayer() instanceof
+                                                                                  * ServiceLayer) {
+                                                                                  * removeLegendByName(((ServiceLayer)e.getLayer()).getName());}*/
+        else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
         }
     }
@@ -274,7 +306,23 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                     addWmsServiceLayer((WMSServiceLayer)elem);
                 }
             }
-        } else {
+        }                                                                        /*else if (e.getLayer() instanceof
+                                                                                  * SLDStyledLayer) { final
+                                                                                  * SLDStyledLayer sldLayer =
+                                                                                  * (SLDStyledLayer) e.getLayer();
+                                                                                  * Pair<Integer, Integer> size =
+                                                                                  * sldLayer.getLegendSize();
+                                                                                  * BufferedImage legendImage = new
+                                                                                  * BufferedImage(size.first,
+                                                                                  * size.second,
+                                                                                  * BufferedImage.TYPE_4BYTE_ABGR);
+                                                                                  * sldLayer.getLegend(legendImage.getWidth(),
+                                                                                  * legendImage.getHeight(),
+                                                                                  * legendImage.createGraphics());
+                                                                                  * addLegend(legendImage,
+                                                                                  * ((ServiceLayer)e.getLayer()).getName());}
+                                                                                  */
+        else {
             log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
         }
     }
@@ -440,6 +488,12 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             this.url = url;
             refresh();
         }
+
+        /*public LegendPanel(final BufferedImage img) {
+         *  this(); lblImage.setText(""); // NOI18N lblImage.setIcon(new ImageIcon(img));
+         * tableModel.fireTableDataChanged(); int newWidth = img.getWidth(null); if (newWidth <
+         * tblLegends.getPreferredSize().width) {     newWidth = tblLegends.getPreferredSize().width; } else {
+         * maxWidth = newWidth; } tblLegends.getColumnModel().getColumn(0).setPreferredWidth(newWidth);}*/
 
         //~ Methods ------------------------------------------------------------
 
@@ -677,6 +731,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             }
             super.fireTableStructureChanged();
         }
+        /*
+         * public void addLegend(final BufferedImage img, final String name) { final LegendPanel lp = new
+         * LegendPanel(img); if(!panels.contains(lp)){     panels.add(lp);     panelsByName.put(name, lp); }
+         * super.fireTableStructureChanged();}*/
 
         /**
          * DOCUMENT ME!

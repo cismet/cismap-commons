@@ -11,7 +11,11 @@
  */
 package de.cismet.cismap.commons.featureservice.factory;
 
+import org.deegree.style.se.unevaluated.Style;
+
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.SwingWorker;
 
@@ -169,6 +173,20 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
      * @return  DOCUMENT ME!
      */
     int getFeatureCount(BoundingBox bb);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  styles  DOCUMENT ME!
+     */
+    void setSLDStyle(Map<String, LinkedList<Style>> styles);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  layerName  DOCUMENT ME!
+     */
+    void setLayerName(final String layerName);
 
     //~ Inner Classes ----------------------------------------------------------
 

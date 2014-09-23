@@ -15,23 +15,40 @@ import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.commons.utils.Pair;
+import org.deegree.rendering.r2d.legends.Legends;
+import org.deegree.style.persistence.sld.SLDParser;
+
+import org.jdom.Document;
 import org.jdom.Element;
+import org.jdom.JDOMException;
+import org.jdom.Namespace;
+
+import org.openide.util.Exceptions;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import javax.swing.Icon;
 import javax.swing.SwingWorker;
+
+import javax.xml.stream.XMLInputFactory;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.ConvertableToXML;
@@ -64,7 +81,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             RetrievalServiceLayer,
             FeatureMapService,
             ConvertableToXML,
-            Cloneable {
+            Cloneable,
+            SLDStyledLayer {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -117,7 +135,6 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     //~ Instance fields --------------------------------------------------------
 
     /* determines either the layer is enabled or not */
-
     // NOI18N
 
     /* determines either the layer is enabled or not */
@@ -151,6 +168,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     /* the list that holds the names of the featureServiceAttributes of the FeatureService in the specified order */
     protected List<String> orderedFeatureServiceAttributes;
     protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
+    String sldDefinition;
+    final XMLInputFactory factory = XMLInputFactory.newInstance();
+    Legends legends = new Legends();
     private boolean initialisationError = false;
     private Element initElement = null;
     private boolean selectable = true;
@@ -759,11 +779,21 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
-     * Sets the new layer properties of the service and.
+     * DOCUMENT ME!
      *
      * @param  layerProperties  DOCUMENT ME!
      */
     public void setLayerProperties(final LayerProperties layerProperties) {
+        setLayerProperties(layerProperties, true);
+    }
+
+    /**
+     * Sets the new layer properties of the service and.
+     *
+     * @param  layerProperties  DOCUMENT ME!
+     * @param  refreshFeatures  DOCUMENT ME!
+     */
+    public void setLayerProperties(final LayerProperties layerProperties, final boolean refreshFeatures) {
         this.layerProperties = layerProperties;
 
         if (this.featureFactory != null) {
@@ -788,30 +818,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
 
             this.featureFactory.setLayerProperties(layerProperties);
-            final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
-            if (lastCreatedFeatures.size() > 0) {
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(lastCreatedFeatures.size()
-                                    + " last created features refreshed, fiering retrival event"); // NOI18N
-                    }
-                }
-                EventQueue.invokeLater(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            final RetrievalEvent re = new RetrievalEvent();
-                            re.setIsComplete(true);
-                            re.setHasErrors(false);
-                            re.setRefreshExisting(true);
-                            re.setRetrievedObject(lastCreatedFeatures);
-                            re.setRequestIdentifier(System.currentTimeMillis());
-                            fireRetrievalStarted(re);
-                            fireRetrievalComplete(re);
-                        }
-                    });
-            } else {
-                LOG.warn("no last created features that could be refreshed found"); // NOI18N
+            if (refreshFeatures) {
+                refreshFeatures();
             }
         }
     }
@@ -842,31 +850,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
 
             this.featureFactory.setLayerProperties(layerProperties);
-            final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
-            if (lastCreatedFeatures.size() > 0) {
-                if (DEBUG) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(lastCreatedFeatures.size()
-                                    + " last created features refreshed, fiering retrival event"); // NOI18N
-                    }
-                }
-                EventQueue.invokeLater(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            final RetrievalEvent re = new RetrievalEvent();
-                            re.setIsComplete(true);
-                            re.setHasErrors(false);
-                            re.setRefreshExisting(true);
-                            re.setRetrievedObject(lastCreatedFeatures);
-                            re.setRequestIdentifier(System.currentTimeMillis());
-                            fireRetrievalStarted(re);
-                            fireRetrievalComplete(re);
-                        }
-                    });
-            } else {
-                LOG.warn("no last created features that could be refreshed found"); // NOI18N
-            }
+            refreshFeatures();
         }
     }
 
@@ -898,6 +882,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     @Override
     public void setName(final String name) {
         this.name = name;
+        if (featureFactory != null) {
+            featureFactory.setLayerName(name);
+        }
     }
 
     /**
@@ -1063,7 +1050,16 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         } else {
             LOG.warn("Layer Properties are null and will not be saved"); // NOI18N
         }
-
+        try {
+            if (getSLDDefiniton() != null) {
+                final Document sldDoc = new org.jdom.input.SAXBuilder().build(getSLDDefiniton());
+                element.addContent(sldDoc.detachRootElement());
+            }
+        } catch (JDOMException ex) {
+            Exceptions.printStackTrace(ex);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
         return element;
     }
 
@@ -1142,6 +1138,12 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             this.layerProperties = restoredLayerProperties;
         } else {
             LOG.warn("no layer properties ");                                                   // NOI18N
+        }
+        final Element sldStyle = element.getChild(
+                "StyledLayerDescriptor",
+                Namespace.getNamespace("http://www.opengis.net/sld"));
+        if (sldStyle != null) {
+            sldDefinition = new org.jdom.output.XMLOutputter().outputString(sldStyle);
         }
     }
 
@@ -1382,6 +1384,158 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      */
     public boolean isEditable() {
         return false;
+    }
+
+    @Override
+    public Reader getSLDDefiniton() {
+        return (sldDefinition == null) ? null // new InputStreamReader(getClass().getResourceAsStream("/testSLD.xml"))
+                                       : new StringReader(sldDefinition);
+    }
+
+    @Override
+    public void setSLDInputStream(final String inputStream) {
+        if ((inputStream == null) || inputStream.isEmpty()) {
+            sldDefinition = null;
+            featureFactory.setSLDStyle(null);
+            return;
+        }
+        sldDefinition = inputStream;
+        final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = parseSLD(new StringReader(
+                    inputStream));
+        if ((styles == null) || styles.isEmpty()) {
+            return;
+        }
+        featureFactory.setSLDStyle(styles);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   input  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> parseSLD(final Reader input) {
+        Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = null;
+        try {
+            styles = SLDParser.getStyles(factory.createXMLStreamReader(input));
+        } catch (Exception ex) {
+            LOG.error("Fehler in der SLD", ex);
+        }
+        if (styles == null) {
+            LOG.info("SLD Parser funtkioniert nicht");
+        }
+        return styles;
+    }
+
+    @Override
+    public Pair<Integer, Integer> getLegendSize(final int nr) {
+        if (featureFactory instanceof AbstractFeatureFactory) {
+            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+            return getLegendSize((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0));
+        }
+        return null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   style  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Pair<Integer, Integer> getLegendSize(final org.deegree.style.se.unevaluated.Style style) {
+        return legends.getLegendSize(style);
+    }
+
+    @Override
+    public Pair<Integer, Integer> getLegendSize() {
+        return getLegendSize(0);
+    }
+
+    @Override
+    public List<Pair<Integer, Integer>> getLegendSizes() {
+        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
+        final List<Pair<Integer, Integer>> sizes = new LinkedList<Pair<Integer, Integer>>();
+        for (final org.deegree.style.se.unevaluated.Style style : styles) {
+            sizes.add(getLegendSize(style));
+        }
+        return sizes;
+    }
+
+    @Override
+    public void getLegend(final int width, final int height, final Graphics2D g2d) {
+        getLegend(0, width, height, g2d);
+    }
+
+    @Override
+    public void getLegend(final int nr, final int width, final int height, final Graphics2D g2d) {
+        if (featureFactory instanceof AbstractFeatureFactory) {
+            final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+            getLegend((org.deegree.style.se.unevaluated.Style)aff.getStyle(aff.layerName).get(0),
+                width,
+                height,
+                g2d);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  style   DOCUMENT ME!
+     * @param  width   DOCUMENT ME!
+     * @param  height  DOCUMENT ME!
+     * @param  g2d     DOCUMENT ME!
+     */
+    private void getLegend(final org.deegree.style.se.unevaluated.Style style,
+            final int width,
+            final int height,
+            final Graphics2D g2d) {
+        legends.paintLegend(style,
+            width,
+            height,
+            g2d);
+    }
+
+    @Override
+    public void getLegends(final List<Pair<Integer, Integer>> sizes, final Graphics2D[] g2d) {
+        final AbstractFeatureFactory aff = ((AbstractFeatureFactory)featureFactory);
+        final List<org.deegree.style.se.unevaluated.Style> styles = aff.getStyle(aff.layerName);
+        for (int i = 0; i < styles.size(); i++) {
+            legends.paintLegend(styles.get(i), sizes.get(i).first, sizes.get(i).second, g2d[i]);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void refreshFeatures() {
+        final List<FT> lastCreatedFeatures = this.featureFactory.getLastCreatedFeatures();
+        if (lastCreatedFeatures.size() > 0) {
+            if (DEBUG) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(lastCreatedFeatures.size()
+                                + " last created features refreshed, fiering retrival event"); // NOI18N
+                }
+            }
+            EventQueue.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        final RetrievalEvent re = new RetrievalEvent();
+                        re.setIsComplete(true);
+                        re.setHasErrors(false);
+                        re.setRefreshExisting(true);
+                        re.setRetrievedObject(lastCreatedFeatures);
+                        re.setRequestIdentifier(System.currentTimeMillis());
+                        fireRetrievalStarted(re);
+                        fireRetrievalComplete(re);
+                    }
+                });
+        } else {
+            LOG.warn("no last created features that could be refreshed found"); // NOI18N
+        }
     }
 
     //~ Inner Classes ----------------------------------------------------------

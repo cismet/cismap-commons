@@ -5,17 +5,21 @@
 *              ... and it just works.
 *
 ****************************************************/
-package de.cismet.cismap.commons.gui.piccolo;
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package de.cismet.cismap.commons;
 
-import edu.umd.cs.piccolo.PNode;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 
 /**
  * DOCUMENT ME!
  *
- * @author   thorsten.hell@cismet.de
+ * @author   mroncoroni
  * @version  $Revision$, $Date$
  */
-public interface PSticky {
+public interface LayerConfig {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -24,17 +28,12 @@ public interface PSticky {
      *
      * @return  DOCUMENT ME!
      */
-    boolean getVisible();
+    AbstractFeatureService createConfiguredLayer();
+
     /**
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    PNode getParent();
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  scale  DOCUMENT ME!
-     */
-    void setScale(final double scale);
+    String getTitle();
 }

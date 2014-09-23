@@ -14,6 +14,8 @@ package de.cismet.cismap.commons.featureservice.style;
 
 import com.jgoodies.looks.plastic.Plastic3DLookAndFeel;
 
+import org.apache.commons.io.IOUtils;
+
 import org.bounce.text.LineNumberMargin;
 import org.bounce.text.ScrollableEditorPanel;
 import org.bounce.text.xml.XMLDocument;
@@ -27,7 +29,6 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
@@ -41,17 +42,16 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 
 import java.text.ParseException;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
@@ -76,6 +76,8 @@ import javax.swing.text.PlainDocument;
 import de.cismet.cismap.commons.RestrictedFileSystemView;
 import de.cismet.cismap.commons.featureservice.*;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+
+import de.cismet.lookupoptions.gui.OptionsDialog;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -102,7 +104,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
             StyleDialog.class,
             "StyleDialog.FONTCHOOSER_TITLE");                                                                      // NOI18N
     private static final String POINTSYMBOL_FOLDER = "/de/cismet/cismap/commons/featureservice/res/pointsymbols/"; // NOI18N
-
     // constants: popup
     // FIXME: I18N
     private static final String POPUP_SAVE = org.openide.util.NbBundle.getMessage(
@@ -195,7 +196,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      * @param  evt  DOCUMENT ME!
      */
     private void chkFillPatternItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_chkFillPatternItemStateChanged
-
         // not supported or shown
 // cbbFillPattern.setEnabled((evt.getStateChange() == ItemEvent.SELECTED));
 // updatePreview();
@@ -635,7 +635,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      * @param  evt  DOCUMENT ME!
      */
     private void cmdAddActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddActionPerformed
-
         // TODO add your handling code here:
     } //GEN-LAST:event_cmdAddActionPerformed
 
@@ -645,7 +644,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
      * @param  evt  DOCUMENT ME!
      */
     private void chkUseQueryStringActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkUseQueryStringActionPerformed
-
         // TODO add your handling code here:
     } //GEN-LAST:event_chkUseQueryStringActionPerformed
 
@@ -748,7 +746,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
     private LayerProperties layerProperties;
     private boolean accepted = false;
     private boolean ignoreSelectionEvent = true;
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup btgAlignment;
     private javax.swing.ButtonGroup btgGeom;
@@ -759,6 +756,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
     private javax.swing.JComboBox cbbPointSymbol;
     private javax.swing.JCheckBox chkActivateLabels;
     private javax.swing.JCheckBox chkAutoscale;
+    private javax.swing.JCheckBox chkCustomSLD;
     private javax.swing.JCheckBox chkFill;
     private javax.swing.JCheckBox chkFillPattern;
     private javax.swing.JCheckBox chkHighlightable;
@@ -775,15 +773,18 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
     private javax.swing.JButton cmdLine;
     private javax.swing.JButton cmdOK;
     private javax.swing.JButton cmdRemove;
+    private javax.swing.JEditorPane jEditorPane1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JLabel lblAlignment;
     private javax.swing.JLabel lblAlpha;
@@ -818,6 +819,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
     private javax.swing.JPanel panRules;
     private javax.swing.JPanel panRulesButtons;
     private javax.swing.JPanel panRulesScroll;
+    private javax.swing.JPanel panSLDDefinition;
     private javax.swing.JPanel panScale;
     private javax.swing.JPanel panScrollpane;
     private javax.swing.JPanel panTabAttrib;
@@ -843,6 +845,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
     private javax.swing.JFormattedTextField txtMultiplier;
     private javax.swing.JTextField txtPointSymbolSize;
     private javax.swing.JTextField txtTransparency;
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     /**
@@ -1012,6 +1015,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         panTabRules = new javax.swing.JPanel();
         panRulesButtons = new javax.swing.JPanel();
@@ -1104,6 +1108,11 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panAttribNorm = new javax.swing.JPanel();
         lblIdExpression = new javax.swing.JLabel();
         cbbIdExpression = new javax.swing.JComboBox();
+        panSLDDefinition = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jEditorPane1 = new javax.swing.JEditorPane();
+        chkCustomSLD = new javax.swing.JCheckBox();
         panDialogButtons = new javax.swing.JPanel();
         cmdOK = new javax.swing.JButton();
         cmdCancel = new javax.swing.JButton();
@@ -1111,7 +1120,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panTabRules.setLayout(new java.awt.BorderLayout());
 
         panRulesButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 5, 5, 5));
-        panRulesButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+        panRulesButtons.setLayout(new java.awt.FlowLayout(0));
 
         cmdAdd.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cismap/commons/featureservice/res/rule_add.png")));      // NOI18N
@@ -1130,7 +1139,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panRulesScroll.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 0, 10));
         panRulesScroll.setLayout(new java.awt.BorderLayout());
 
-        jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(1));
 
         panRules.setBackground(new java.awt.Color(255, 255, 255));
         panRules.setLayout(new java.awt.GridLayout(1, 0));
@@ -1223,7 +1232,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         jPanel3.setPreferredSize(new java.awt.Dimension(150, 220));
         jPanel3.setLayout(new java.awt.GridBagLayout());
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED));
+        jPanel1.setBorder(javax.swing.BorderFactory.createBevelBorder(1));
         jPanel1.setMinimumSize(new java.awt.Dimension(150, 200));
         jPanel1.setPreferredSize(new java.awt.Dimension(150, 150));
         jPanel1.setLayout(new java.awt.BorderLayout());
@@ -1240,7 +1249,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         panPreviewLayout.setVerticalGroup(
             panPreviewLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING).addGap(
                 0,
-                185,
+                184,
                 Short.MAX_VALUE));
 
         jPanel1.add(panPreview, java.awt.BorderLayout.CENTER);
@@ -1268,6 +1277,8 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         panTabs.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 0, 5, 5));
         panTabs.setLayout(new java.awt.BorderLayout());
+
+        tbpTabs.setToolTipText("");
 
         panTabFill.setLayout(new java.awt.BorderLayout());
 
@@ -1316,7 +1327,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cbbFillPattern.setModel(new javax.swing.DefaultComboBoxModel(
                 new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbbFillPattern.setEnabled(false);
-        cbbFillPattern.setMinimumSize(new java.awt.Dimension(56, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -1331,6 +1341,13 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 @Override
                 public void itemStateChanged(final java.awt.event.ItemEvent evt) {
                     chkLineItemStateChanged(evt);
+                }
+            });
+        chkLine.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    chkLineActionPerformed(evt);
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1361,7 +1378,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         cbbLinePattern.setModel(new javax.swing.DefaultComboBoxModel(
                 new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbbLinePattern.setEnabled(false);
-        cbbLinePattern.setMinimumSize(new java.awt.Dimension(56, 20));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -1491,7 +1507,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         panFill.add(txtTransparency, gridBagConstraints);
 
-        jPanel7.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 0));
+        jPanel7.setLayout(new java.awt.FlowLayout(1, 2, 0));
 
         panTransWhite.setBackground(new java.awt.Color(255, 255, 255));
         panTransWhite.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
@@ -1565,7 +1581,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
         panFill.add(jPanel7, gridBagConstraints);
 
-        jPanel8.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+        jPanel8.setLayout(new java.awt.FlowLayout(0, 5, 0));
 
         panFillColor.setBackground(new java.awt.Color(0, 180, 0));
         panFillColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
@@ -1608,7 +1624,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 10);
         panFill.add(jPanel8, gridBagConstraints);
 
-        jPanel9.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+        jPanel9.setLayout(new java.awt.FlowLayout(0, 5, 0));
 
         panLineColor.setBackground(new java.awt.Color(0, 125, 0));
         panLineColor.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 102, 102)));
@@ -1667,7 +1683,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 30, 0, 30);
         panFill.add(scrHistory, gridBagConstraints);
 
-        lblHistory.setFont(new java.awt.Font("Tahoma", 0, 9));
+        lblHistory.setFont(new java.awt.Font("Tahoma", 0, 9)); // NOI18N
         lblHistory.setLabelFor(lstHistory);
         lblHistory.setText("history.xml");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1777,7 +1793,15 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 getClass().getResource("/de/cismet/cismap/commons/featureservice/res/style_color.png")),
             panTabFill); // NOI18N
 
-        panTabLabeling.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 20, 20));
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                chkCustomSLD,
+                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
+                panTabLabeling,
+                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
+        bindingGroup.addBinding(binding);
+
+        panTabLabeling.setLayout(new java.awt.FlowLayout(0, 20, 20));
 
         panLabeling.setLayout(new java.awt.GridBagLayout());
 
@@ -1907,7 +1931,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(15, 0, 0, 0);
         panLabeling.add(panLabelButtons, gridBagConstraints);
 
-        panScale.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
+        panScale.setLayout(new java.awt.FlowLayout(1, 5, 0));
 
         lblMin.setLabelFor(txtMin);
         lblMin.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.lblMin.text")); // NOI18N
@@ -1956,7 +1980,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 0);
         panLabeling.add(chkAutoscale, gridBagConstraints);
 
-        panAlignment.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 5, 0));
+        panAlignment.setLayout(new java.awt.FlowLayout(0, 5, 0));
 
         btgAlignment.add(radLeft);
         radLeft.setSelected(true);
@@ -2042,7 +2066,42 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
                 javax.swing.BorderFactory.createTitledBorder(
                     org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panTabAttrib.border.title")))); // NOI18N
-        panTabAttrib.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 5, 0));
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                chkCustomSLD,
+                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
+                panTabAttrib,
+                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
+        bindingGroup.addBinding(binding);
+
+        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
+                javax.swing.BorderFactory.createTitledBorder(
+                    org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panTabAttrib.border.title")))); // NOI18N
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                chkCustomSLD,
+                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
+                panTabAttrib,
+                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
+        bindingGroup.addBinding(binding);
+
+        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
+                javax.swing.BorderFactory.createTitledBorder(
+                    org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panTabAttrib.border.title")))); // NOI18N
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                chkCustomSLD,
+                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
+                panTabAttrib,
+                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
+        bindingGroup.addBinding(binding);
+
+        panTabAttrib.setLayout(new java.awt.FlowLayout(1, 5, 0));
 
         jPanel2.setLayout(new java.awt.GridBagLayout());
 
@@ -2106,6 +2165,59 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
             panTabAttrib); // NOI18N
         panTabAttrib.getAccessibleContext().setAccessibleName(null);
 
+        panSLDDefinition.setBorder(javax.swing.BorderFactory.createCompoundBorder(
+                javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
+                javax.swing.BorderFactory.createTitledBorder("SLD Definition")));
+        panSLDDefinition.setLayout(new java.awt.BorderLayout());
+
+        jPanel4.setLayout(new java.awt.GridBagLayout());
+
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
+                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
+                chkCustomSLD,
+                org.jdesktop.beansbinding.ELProperty.create("${!selected}"),
+                jEditorPane1,
+                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
+        bindingGroup.addBinding(binding);
+
+        jScrollPane2.setViewportView(jEditorPane1);
+        jEditorPane1.getAccessibleContext().setAccessibleName("");
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        jPanel4.add(jScrollPane2, gridBagConstraints);
+
+        chkCustomSLD.setSelected(true);
+        chkCustomSLD.setText("Expertenmodus");
+        chkCustomSLD.setToolTipText("");
+        chkCustomSLD.setDisabledSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/icon-unlock.png"))); // NOI18N
+        chkCustomSLD.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon-unlock.png")));                 // NOI18N
+        chkCustomSLD.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/icon-lock.png")));           // NOI18N
+        chkCustomSLD.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    chkCustomSLDActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 10, 10, 10);
+        jPanel4.add(chkCustomSLD, gridBagConstraints);
+
+        panSLDDefinition.add(jPanel4, java.awt.BorderLayout.CENTER);
+
+        tbpTabs.addTab("SLD Definition", panSLDDefinition);
+
         panTabs.add(tbpTabs, java.awt.BorderLayout.CENTER);
         tbpTabs.getAccessibleContext()
                 .setAccessibleName(org.openide.util.NbBundle.getMessage(
@@ -2117,7 +2229,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
         getContentPane().add(panMain, java.awt.BorderLayout.CENTER);
 
         panDialogButtons.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, -5));
-        panDialogButtons.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 10, 0));
+        panDialogButtons.setLayout(new java.awt.FlowLayout(2, 10, 0));
 
         cmdOK.setText(org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.cmdIOK.text")); // NOI18N
         cmdOK.setMaximumSize(new java.awt.Dimension(88, 23));
@@ -2147,10 +2259,50 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 
         getContentPane().add(panDialogButtons, java.awt.BorderLayout.SOUTH);
 
+        bindingGroup.bind();
+
         pack();
     } // </editor-fold>//GEN-END:initComponents
 
+    //~ Instance fields --------------------------------------------------------
+
+    private String layerName;
+
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkLineActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkLineActionPerformed
+        // TODO add your handling code here:
+    } //GEN-LAST:event_chkLineActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void chkCustomSLDActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_chkCustomSLDActionPerformed
+        if (!chkCustomSLD.isSelected()) {
+            final int i = JOptionPane.showConfirmDialog(
+                    this,
+                    "Das aktivieren des Expertenmodus übernimmt die Füllfarbe,\nLinienfarbe und Linienstaerke aus dem einfachen Stil",
+                    "Sind Sie sicher?",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+            if (i == JOptionPane.YES_OPTION) {
+                jEditorPane1.setText(getSLDStyle(true));
+            } else {
+                chkCustomSLD.setSelected(true);
+                return;
+            }
+        }
+        tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabFill), chkCustomSLD.isSelected());
+        tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabLabeling), chkCustomSLD.isSelected());
+        tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabAttrib), chkCustomSLD.isSelected());
+    }                                                                                //GEN-LAST:event_chkCustomSLDActionPerformed
 
     /**
      * Returns a modified CloneableFeature.
@@ -2161,6 +2313,94 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 // {
 // return feature;
 // }
+
+    public String getSLDStyle() {
+        return chkCustomSLD.isSelected() ? "" : getSLDStyle(false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   simpleStyle  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getSLDStyle(final boolean simpleStyle) {
+        if (simpleStyle) {
+            String sld =
+                "<sld:StyledLayerDescriptor xmlns:sld=\"http://www.opengis.net/sld\" xmlns:se=\"http://www.opengis.net/se\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n"
+                        + "  xmlns:wfs=\"http://www.opengis.net/wfs\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:fo=\"http://www.w3.org/1999/XSL/Format\"\n"
+                        + "  xmlns:gml=\"http://www.opengis.net/gml\" xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns=\"http://www.opengis.net/sld\" version=\"1.1.0\"\n"
+                        + "  xsi:schemaLocation=\"http://www.opengis.net/sld http://schemas.opengis.net/sld/1.1.0/StyledLayerDescriptor.xsd\">\n"
+                        + "  <sld:NamedLayer>\n"
+                        + "    <!--  This styling file shows the use of SLD styling -->\n"
+                        + "    <sld:Name>"
+                        + layerName
+                        + "</sld:Name>\n" // todo correct layer name
+                        + "        <sld:UserStyle>\n"
+                        + "            <sld:Name>"
+                        + layerName
+                        + "</sld:Name>\n"
+                        + "    <sld:Title>"
+                        + layerName
+                        + "</sld:Title>\n"
+                        + "            <sld:FeatureTypeStyle>\n"
+                        + "                <sld:Name>"
+                        + layerName
+                        + "</sld:Name>\n"
+                        + "                <sld:Rule>\n"
+                        + "                    <sld:Name>"
+                        + layerName
+                        + "</sld:Name>\n";
+            sld += "                    <sld:PolygonSymbolizer uom=\"http://www.opengeospatial/se/units/pixel\">\n";
+
+            if (chkFill.isSelected()) {
+                sld += "                        <sld:Fill>\n";
+                sld += "                            <sld:CssParameter name=\"fill\">";
+                sld += "#"
+                            + Integer.toHexString(panFillColor.getBackground().getRGB()).substring(2).toUpperCase();
+                sld += "</sld:CssParameter>\n";
+
+                if (panFillColor.getBackground().getAlpha() != 255) {
+                    sld += "                            <sld:CssParameter name=\"fill-opacity\">";
+                    sld += (float)((panFillColor.getBackground().getAlpha() * 100) / 255)
+                                * 0.01f;
+                    sld += "</sld:CssParameter>\n";
+                }
+                sld += "                        </sld:Fill>\n";
+            }
+            if (chkLine.isSelected()) {
+                sld += "                        <sld:Stroke>\n";
+                sld += "                            <sld:CssParameter name=\"stroke\">";
+                sld += "#"
+                            + Integer.toHexString(panLineColor.getBackground().getRGB()).substring(2).toUpperCase();
+                sld += "</sld:CssParameter>\n";
+                if (panLineColor.getBackground().getAlpha() != 255) {
+                    sld += "                            <sld:CssParameter name=\"stroke-opacity\">";
+                    sld += (float)((panLineColor.getBackground().getAlpha() * 100) / 255)
+                                * 0.01f;
+                    sld += "</sld:CssParameter>\n";
+                }
+                sld += "                            <sld:CssParameter name=\"stroke-width\">";
+                sld += sldLineWidth.getValue();
+                sld += "</sld:CssParameter>\n";
+//"                            <!--<se:SvgParameter name=\"stroke-dasharray\">5,7.5,10,2.5</se:SvgParameter>-->\n" +
+//"                            <se:SvgParameter name=\"stroke-linecap\">butt</se:SvgParameter>\n" +
+                sld += "                        </sld:Stroke>\n";
+            }
+
+            sld += "                    </sld:PolygonSymbolizer>\n";
+            sld += ("                </sld:Rule>\n"
+                            + "            </sld:FeatureTypeStyle>\n"
+                            + "        </sld:UserStyle>\n"
+                            + "    </sld:NamedLayer>\n"
+                            + "</sld:StyledLayerDescriptor>");
+            return sld;                    // new StringReader(sld);
+        } else {
+            return jEditorPane1.getText(); // new StringReader(jEditorPane1.getText());
+        }
+    }
+
     /**
      * Get the value of layerProperties.
      *
@@ -2663,16 +2903,54 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
     }
 
     /**
-     * Configures the dialog based on the delivered AbstractfeatureService.
+     * DOCUMENT ME!
      *
      * @param  layerProperties           DOCUMENT ME!
-     * @param  featureServiceAttributes  featureservice to get attributes from
+     * @param  featureServiceAttributes  DOCUMENT ME!
      * @param  query                     DOCUMENT ME!
      */
     public void configureDialog(final LayerProperties layerProperties,
             final Map<String, FeatureServiceAttribute> featureServiceAttributes,
             final Object query) {
+        configureDialog(null, "default", layerProperties, featureServiceAttributes, query);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  sldDefinition   DOCUMENT ME!
+     * @param  featureService  DOCUMENT ME!
+     */
+    public void configureDialog(final Reader sldDefinition, final AbstractFeatureService featureService) {
+        configureDialog(
+            sldDefinition,
+            featureService.getName(),
+            featureService.getLayerProperties(),
+            featureService.getFeatureServiceAttributes(),
+            featureService.getQuery());
+    }
+
+    /**
+     * Configures the dialog based on the delivered AbstractfeatureService.
+     *
+     * @param  sldDefinition             DOCUMENT ME!
+     * @param  layerName                 DOCUMENT ME!
+     * @param  layerProperties           DOCUMENT ME!
+     * @param  featureServiceAttributes  featureservice to get attributes from
+     * @param  query                     DOCUMENT ME!
+     */
+    public void configureDialog(final Reader sldDefinition,
+            final String layerName,
+            final LayerProperties layerProperties,
+            final Map<String, FeatureServiceAttribute> featureServiceAttributes,
+            final Object query) {
         try {
+            this.layerName = layerName;
+            chkCustomSLD.setSelected(sldDefinition == null);
+            tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabFill), chkCustomSLD.isSelected());
+            tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabLabeling), chkCustomSLD.isSelected());
+            tbpTabs.setEnabledAt(tbpTabs.indexOfComponent(panTabAttrib), chkCustomSLD.isSelected());
+
             this.setAccepted(false);
             this.setFeatureServiceAttributes(featureServiceAttributes);
             this.setLayerProperties(layerProperties);
@@ -2695,6 +2973,11 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     logger.debug("Layer does not support query, removing query dialog"); // NOI18N
                 }
                 tbpTabs.remove(panTabQuery);
+            }
+
+            if (sldDefinition != null) {
+                // jEditorPane1.setDocument();
+                jEditorPane1.setText(IOUtils.toString(sldDefinition));
             }
 
             this.updateDialog();
@@ -3137,7 +3420,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
 // {
 // return pointSymbolHM.get(getStyle().getPointSymbolFilename());
 // }
-
     /**
      * Changes the size of the pointsymbol (if "no pointsymbol" is selected).
      *
@@ -3391,7 +3673,11 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
     public void setVisible(final boolean visible) {
         if (visible) {
             lstHistory.updateUI();
-            tbpTabs.setSelectedComponent(panTabFill);
+            if (chkCustomSLD.isSelected()) {
+                tbpTabs.setSelectedComponent(panTabFill);
+            } else {
+                tbpTabs.setSelectedComponent(panSLDDefinition);
+            }
         }
 
         super.setVisible(visible);

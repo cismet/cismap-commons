@@ -13,6 +13,9 @@ package de.cismet.cismap.commons.featureservice;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.commons.utils.Pair;
+import org.deegree.rendering.r2d.legends.Legends;
+
 import org.jdom.Element;
 
 import java.awt.Graphics2D;
@@ -155,7 +158,8 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
         final ShapeFeatureFactory sff = new ShapeFeatureFactory(this.getLayerProperties(),
                 this.getDocumentURI(),
                 this.maxSupportedFeatureCount,
-                this.layerInitWorker);
+                this.layerInitWorker,
+                parseSLD(getSLDDefiniton()));
         noGeometryRecognised = sff.isNoGeometryRecognised();
         errorInGeometryFound = sff.isErrorInGeometryFound();
 
@@ -240,4 +244,5 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
 //  {
 //    return SHAPE_FEATURELAYER_TYPE;
 //  }
+
 }

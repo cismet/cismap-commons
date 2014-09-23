@@ -52,7 +52,49 @@ public class CustomFixedWidthStroke extends BasicStroke {
      * @param  mc         DOCUMENT ME!
      */
     public CustomFixedWidthStroke(final float thickness, final MappingComponent mc) {
+        super(1.0f, CAP_ROUND, JOIN_ROUND);
         setMultiplyer(thickness);
+        this.mc = mc;
+    }
+
+    /**
+     * Creates a new CustomFixedWidthStroke object.
+     *
+     * @param  width       DOCUMENT ME!
+     * @param  lineCap     DOCUMENT ME!
+     * @param  lineJoin    DOCUMENT ME!
+     * @param  miterlimit  DOCUMENT ME!
+     * @param  dash        DOCUMENT ME!
+     * @param  dash_phase  DOCUMENT ME!
+     */
+    public CustomFixedWidthStroke(final float width,
+            final int lineCap,
+            final int lineJoin,
+            final float miterlimit,
+            final float[] dash,
+            final float dash_phase) {
+        this(width, lineCap, lineJoin, miterlimit, dash, dash_phase, null);
+    }
+
+    /**
+     * Creates a new CustomFixedWidthStroke object.
+     *
+     * @param  width       DOCUMENT ME!
+     * @param  lineCap     DOCUMENT ME!
+     * @param  lineJoin    DOCUMENT ME!
+     * @param  miterlimit  DOCUMENT ME!
+     * @param  dash        DOCUMENT ME!
+     * @param  dash_phase  DOCUMENT ME!
+     * @param  mc          DOCUMENT ME!
+     */
+    public CustomFixedWidthStroke(final float width,
+            final int lineCap,
+            final int lineJoin,
+            final float miterlimit,
+            final float[] dash,
+            final float dash_phase,
+            final MappingComponent mc) {
+        super(width, lineCap, lineJoin, miterlimit, dash, dash_phase);
         this.mc = mc;
     }
 
@@ -80,6 +122,65 @@ public class CustomFixedWidthStroke extends BasicStroke {
         }
     }
 
+    @Override
+    public float getMiterLimit() {
+        if (PPaintContext.CURRENT_PAINT_CONTEXT != null) {
+            float ml;
+
+            if (mc != null) {
+                ml = super.getMiterLimit() / (float)mc.getCamera().getViewScale();
+            } else {
+                ml = super.getMiterLimit() / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+            }
+
+            if (ml < 1.0f) {
+                return 1.0f;
+            } else {
+                return ml;
+            }
+        } else {
+            return 1.0f;
+        }
+    }
+
+    @Override
+    public float[] getDashArray() {
+        if (PPaintContext.CURRENT_PAINT_CONTEXT != null) {
+            final float[] dash = super.getDashArray();
+            if ((dash == null) || (dash.length == 0)) {
+                return null;
+            }
+            float scale;
+
+            if (mc != null) {
+                scale = (float)mc.getCamera().getViewScale();
+            } else {
+                scale = (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+            }
+
+            final float[] temp = new float[dash.length];
+            for (int i = dash.length - 1; i >= 0; i--) {
+                temp[i] = dash[i] / scale;
+            }
+            return temp;
+        } else {
+            return super.getDashArray();
+        }
+    }
+
+    @Override
+    public float getDashPhase() {
+        if (PPaintContext.CURRENT_PAINT_CONTEXT != null) {
+            if (mc != null) {
+                return super.getDashPhase() / (float)mc.getCamera().getViewScale();
+            } else {
+                return super.getDashPhase() / (float)PPaintContext.CURRENT_PAINT_CONTEXT.getScale();
+            }
+        } else {
+            return super.getDashPhase(); // To change body of generated methods, choose Tools | Templates.
+        }
+    }
+
     /**
      * DOCUMENT ME!
      *
@@ -89,13 +190,8 @@ public class CustomFixedWidthStroke extends BasicStroke {
         this.multiplyer = multiplyer;
     }
 
-    @Override
-    public int getEndCap() {
-        return this.CAP_ROUND;
-    }
-
-    @Override
-    public int getLineJoin() {
-        return this.JOIN_ROUND;
-    }
+    /*@Override
+     * public int getEndCap() { return this.CAP_ROUND; }
+     *
+     * @Override public int getLineJoin() { return this.JOIN_ROUND;}*/
 }

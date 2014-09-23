@@ -17,10 +17,14 @@ import groovy.lang.GroovyShell;
 
 import org.apache.log4j.Logger;
 
+import org.deegree.style.se.unevaluated.Style;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -55,6 +59,10 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // protected boolean primaryAnnotationExpressionChanged = true;
     // protected boolean secondaryAnnotationExpressionChanged = true;
     protected Vector<FT> lastCreatedfeatureVector = new Vector();
+    // private BoundingBox lastBB = null;
+    // private BoundingBox diff = null;
+    // private final WKTReader reader;
+    protected Map<String, LinkedList<Style>> styles;
     private volatile boolean isInterruptedAllowed = true;
     private Geometry lastGeom = null;
     private QT lastQuery;
@@ -108,6 +116,19 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      */
     protected synchronized void setInterruptedNotAllowed() {
         isInterruptedAllowed = false;
+    }
+
+    @Override
+    public void setLayerName(final String layerName) {
+        this.layerName = layerName;
+    }
+
+    @Override
+    public void setSLDStyle(final Map<String, LinkedList<Style>> styles) {
+        this.styles = styles;
+        for (final FT feature : lastCreatedfeatureVector) {
+            feature.setSLDStyles(getStyle(layerName));
+        }
     }
 
     @Override
@@ -584,11 +605,11 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      *
      * @return  DOCUMENT ME!
      *
-     * @throws  TooManyFeaturesException  DOCUMENT ME!
-     * @throws  Exception                 DOCUMENT ME!
+     * @throws  FeatureFactory.TooManyFeaturesException  DOCUMENT ME!
+     * @throws  Exception                                DOCUMENT ME!
      */
     protected Vector<FT> createFeaturesFromMemory(final QT query,
-            final Geometry geom) throws TooManyFeaturesException, Exception {
+            final Geometry geom) throws FeatureFactory.TooManyFeaturesException, Exception {
         if (!featuresAlreadyInMemory(geom, query)) {
             return null;
         }
@@ -606,4 +627,34 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
 
     @Override
     public abstract AbstractFeatureFactory clone();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected List<Style> getStyle() {
+        if (styles != null) {
+            return styles.get("default");
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   layerName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List<Style> getStyle(final String layerName) {
+        if (layerName == null) {
+            return getStyle();
+        } else if ((styles != null) && styles.containsKey(layerName)) {
+            return styles.get(layerName);
+        } else {
+            return null;
+        }
+    }
 }

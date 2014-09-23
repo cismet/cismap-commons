@@ -12,28 +12,99 @@
 package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+
+import edu.umd.cs.piccolo.PCamera;
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.nodes.PImage;
+import edu.umd.cs.piccolo.nodes.PPath;
 
 import org.apache.log4j.Logger;
+import org.apache.xerces.xs.XSElementDeclaration;
 
+import org.deegree.commons.tom.TypedObjectNode;
+import org.deegree.commons.tom.gml.GMLObjectCategory;
+import org.deegree.commons.tom.gml.property.Property;
+import org.deegree.commons.tom.gml.property.PropertyType;
+import org.deegree.commons.tom.primitive.PrimitiveValue;
+import org.deegree.commons.utils.Triple;
+import org.deegree.feature.Feature;
+import org.deegree.feature.property.ExtraProps;
+import org.deegree.feature.types.AppSchema;
+import org.deegree.feature.types.FeatureType;
+import org.deegree.feature.types.property.GeometryPropertyType;
+import org.deegree.filter.FilterEvaluationException;
+import org.deegree.filter.XPathEvaluator;
+import org.deegree.filter.expression.ValueReference;
+import org.deegree.geometry.Envelope;
+import org.deegree.geometry.standard.AbstractDefaultGeometry;
+import org.deegree.geometry.standard.primitive.DefaultPoint;
+import org.deegree.model.spatialschema.JTSAdapter;
+import org.deegree.style.styling.LineStyling;
+import org.deegree.style.styling.PointStyling;
+import org.deegree.style.styling.PolygonStyling;
+import org.deegree.style.styling.Styling;
+import org.deegree.style.styling.TextStyling;
+import org.deegree.style.styling.components.Fill;
+import org.deegree.style.styling.components.Graphic;
+import org.deegree.style.styling.components.Mark;
+import org.deegree.style.styling.components.Stroke;
+
+import org.jfree.util.Log;
+
+import sun.awt.image.ToolkitImage;
+
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Paint;
+import java.awt.TexturePaint;
+import java.awt.Toolkit;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.RGBImageFilter;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+
+import java.net.URL;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
+
+import javax.xml.namespace.QName;
+
+import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.style.Style;
+import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
+import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.PFixedTexturePaint;
+import de.cismet.cismap.commons.gui.piccolo.PSticky;
 
 /**
  * Default implementation of a FeatureServiceFeature.
@@ -43,10 +114,20 @@ import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
  */
 public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    protected static final String CLASS_ID = "class_id";
+    protected static final String GEOMETRIE = "geo_field";
+    protected static final String OBJECT_ID = "object_id";
+    protected static Map<BufferedImage, BufferedImage> selectedImage = new HashMap<BufferedImage, BufferedImage>();
+    private static AbstractDefaultGeometry defaultGeom = new DefaultPoint(null, null, null, new double[] { 0.0, 0.0 });
+
     //~ Instance fields --------------------------------------------------------
 
     protected Logger logger = Logger.getLogger(this.getClass());
-
+    protected XPathEvaluator<Feature> evaluator = new DeegreeEvaluator();
+    protected List<org.deegree.style.se.unevaluated.Style> styles;
+    protected LinkedList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> stylings;
     // private final static org.apache.log4j.Logger logger =
     // org.apache.log4j.Logger.getLogger(DefaultFeatureServiceFeature.class);
     private int id = -1;
@@ -59,6 +140,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     private Geometry geometry = null;
     private LayerProperties layerProperties;
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+    private Paint customFillingStyle;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -84,6 +166,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         this.hide(feature.isHidden());
         this.setEditable(feature.isEditable());
         this.setCanBeSelected(feature.canBeSelected());
+        if (feature instanceof DefaultFeatureServiceFeature) {
+            styles = ((DefaultFeatureServiceFeature)feature).styles;
+        }
 
         if ((feature.getProperties() != null) && (feature.getProperties().size() > 0)) {
             // TODO: deep cloning of hashmap?
@@ -113,6 +198,22 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         this.setLayerProperties(layerProperties);
     }
 
+    /**
+     * Creates a new DefaultFeatureServiceFeature object.
+     *
+     * @param  id               DOCUMENT ME!
+     * @param  geometry         DOCUMENT ME!
+     * @param  layerProperties  DOCUMENT ME!
+     * @param  styles           DOCUMENT ME!
+     */
+    public DefaultFeatureServiceFeature(final int id,
+            final Geometry geometry,
+            final LayerProperties layerProperties,
+            final List<org.deegree.style.se.unevaluated.Style> styles) {
+        this(id, geometry, layerProperties);
+        this.styles = styles;
+    }
+
     //~ Methods ----------------------------------------------------------------
 
     /**
@@ -134,6 +235,15 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     @Override
     public void addProperty(final String propertyName, final Object property) {
         container.put(propertyName, property);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  map  DOCUMENT ME!
+     */
+    public void addProperties(final Map<String, Object> map) {
+        container.putAll(map);
     }
 
     /**
@@ -245,7 +355,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public Paint getLinePaint() {
-        return this.getStyle().isDrawLine() ? this.getStyle().getLineColor() : null;
+        if ((styles == null) || styles.isEmpty()) {
+            return this.getStyle().isDrawLine() ? this.getStyle().getLineColor() : null;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -266,7 +380,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public int getLineWidth() {
-        return this.getStyle().getLineWidth();
+        if ((styles == null) || styles.isEmpty()) {
+            return this.getStyle().getLineWidth();
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -286,7 +404,15 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public Paint getFillingPaint() {
-        return this.getStyle().isDrawFill() ? this.getStyle().getFillColor() : null;
+        if (customFillingStyle != null) {
+            return customFillingStyle;
+        } else {
+            if ((styles == null) || styles.isEmpty()) {
+                return this.getStyle().isDrawFill() ? this.getStyle().getFillColor() : null;
+            } else {
+                return null;
+            }
+        }
     }
 
     /**
@@ -296,8 +422,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setFillingPaint(final Paint fillingStyle) {
-        this.getStyle().setFillColor((Color)fillingStyle);
-        this.getStyle().setDrawFill(true);
+        customFillingStyle = fillingStyle;
+//        this.getStyle().setFillColor((Color)fillingStyle);
+//        this.getStyle().setDrawFill(true);
     }
 
     /**
@@ -307,7 +434,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public float getTransparency() {
-        return this.getStyle().getAlpha();
+        if ((styles == null) || styles.isEmpty()) {
+            return this.getStyle().getAlpha();
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -327,7 +458,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public FeatureAnnotationSymbol getPointAnnotationSymbol() {
-        return this.getStyle().getPointSymbol();
+        if ((styles == null) || styles.isEmpty()) {
+            return this.getStyle().getPointSymbol();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -347,7 +482,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public boolean isHighlightingEnabled() {
-        return this.getStyle().isHighlightFeature();
+        if ((styles == null) || styles.isEmpty()) {
+            return this.getStyle().isHighlightFeature();
+        } else {
+            return true;
+        }
     }
 
     /**
@@ -445,7 +584,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public String getPrimaryAnnotation() {
-        return this.primaryAnnotation;
+        if ((styles == null) || styles.isEmpty()) {
+            return this.primaryAnnotation;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -455,7 +598,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public boolean isPrimaryAnnotationVisible() {
-        return this.getStyle().isDrawLabel();
+        if ((styles == null) || styles.isEmpty()) {
+            return this.getStyle().isDrawLabel();
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -711,6 +858,720 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  uom       DOCUMENT ME!
+     * @param  fill      DOCUMENT ME!
+     * @param  pfeature  DOCUMENT ME!
+     * @param  map       DOCUMENT ME!
+     */
+    protected void applyFill(final org.deegree.style.styling.components.UOM uom,
+            final Fill fill,
+            final PPath pfeature,
+            final MappingComponent map) {
+        pfeature.setPaint(getPaintFromDeegree(fill.graphic, fill.color, uom, pfeature, map));
+        // applyGraphic(fill.graphic, pfeature);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pfeature  DOCUMENT ME!
+     * @param  styling   DOCUMENT ME!
+     * @param  map       DOCUMENT ME!
+     */
+    protected void applyLineStyling(final PPath pfeature, final LineStyling styling, final MappingComponent map) {
+        if (styling.stroke != null) {
+            applyStroke(styling.uom, styling.stroke, pfeature, map);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  image     DOCUMENT ME!
+     * @param  styling   DOCUMENT ME!
+     * @param  wtst      DOCUMENT ME!
+     * @param  x         DOCUMENT ME!
+     * @param  y         DOCUMENT ME!
+     * @param  camera    DOCUMENT ME!
+     * @param  selected  DOCUMENT ME!
+     */
+    protected void applyPointStyling(final PImage image,
+            final PointStyling styling,
+            final WorldToScreenTransform wtst,
+            final double x,
+            final double y,
+            final PCamera camera,
+            final boolean selected) {
+        final BufferedImage buffImage = getImageFromDeegree(styling.graphic, selected);
+
+        image.setImage(buffImage);
+        if (getUOMFromDeegree(styling.uom) == UOM.pixel) {
+            ((FixedPImage)image).setMultiplier(1 / (buffImage.getHeight() / styling.graphic.size));
+            image.setOffset(wtst.getScreenX(x), wtst.getScreenY(y));
+            ((FixedPImage)image).setSweetSpotX(styling.graphic.anchorPointX);
+            ((FixedPImage)image).setSweetSpotY(styling.graphic.anchorPointY);
+        } else {
+            // ((PImageWithDisplacement)image).setUOM(getUOMFromDeegree(styling.uom));
+            final double multiplier = getMultiplierFromDeegreeUOM(styling.uom);
+            final double sizeMulti = styling.graphic.size / (double)(buffImage.getHeight());
+            image.setScale(multiplier * sizeMulti);
+            image.setOffset(wtst.getScreenX(
+                    x
+                            + ((styling.graphic.displacementX
+                                    + ((-styling.graphic.anchorPointX) * buffImage.getWidth() * sizeMulti))
+                                * multiplier)),
+                wtst.getScreenY(
+                    y
+                            + ((styling.graphic.displacementY
+                                    + ((styling.graphic.anchorPointY) * styling.graphic.size)) * multiplier)));
+        }
+        // image.setRotation(Math.toRadians(styling.graphic.rotation)); For Demo only
+        image.setTransparency((float)styling.graphic.opacity);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pfeature  DOCUMENT ME!
+     * @param  styling   DOCUMENT ME!
+     * @param  map       DOCUMENT ME!
+     */
+    protected void applyPolygonStyling(final PPath pfeature, final PolygonStyling styling, final MappingComponent map) {
+        if (styling.fill != null) {
+            applyFill(styling.uom, styling.fill, pfeature, map);
+        }
+        if (styling.stroke != null) {
+            applyStroke(styling.uom, styling.stroke, pfeature, map);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  uom       DOCUMENT ME!
+     * @param  stroke    DOCUMENT ME!
+     * @param  pfeature  DOCUMENT ME!
+     * @param  map       DOCUMENT ME!
+     */
+    protected void applyStroke(final org.deegree.style.styling.components.UOM uom,
+            final Stroke stroke,
+            final PPath pfeature,
+            final MappingComponent map) {
+        /*double scale = 1.0d;
+         * if(PDebug.getProcessingOutput()) { if(PPaintContext.CURRENT_PAINT_CONTEXT != null)     scale =
+         * PPaintContext.CURRENT_PAINT_CONTEXT.getScale(); } else { if(PPickPath.CURRENT_PICK_PATH != null)     scale =
+         * PPickPath.CURRENT_PICK_PATH.getScale();}*/
+        final double multiplier = getMultiplierFromDeegreeUOM(uom);
+        int linecap = BasicStroke.CAP_ROUND;
+        if (stroke.linecap == Stroke.LineCap.BUTT) {
+            linecap = BasicStroke.CAP_BUTT;
+        } else if (stroke.linecap == Stroke.LineCap.ROUND) {
+            linecap = BasicStroke.CAP_ROUND;
+        } else if (stroke.linecap == Stroke.LineCap.SQUARE) {
+            linecap = BasicStroke.CAP_SQUARE;
+        }
+        int lineJoin = BasicStroke.JOIN_ROUND;
+        if (stroke.linejoin == Stroke.LineJoin.BEVEL) {
+            lineJoin = BasicStroke.JOIN_BEVEL;
+        } else if (stroke.linejoin == Stroke.LineJoin.MITRE) {
+            lineJoin = BasicStroke.JOIN_MITER;
+        } else if (stroke.linejoin == Stroke.LineJoin.ROUND) {
+            lineJoin = BasicStroke.JOIN_ROUND;
+        }
+        float[] dash_array = null;
+        if ((stroke.dasharray != null) && (stroke.dasharray.length != 0)) {
+            dash_array = new float[stroke.dasharray.length];
+            for (int i = 0; i < stroke.dasharray.length; i++) {
+                dash_array[i] = (float)(stroke.dasharray[i] * multiplier);
+            }
+        }
+        java.awt.Stroke newStroke;
+        if (uom == org.deegree.style.styling.components.UOM.Pixel) {
+            newStroke = new CustomFixedWidthStroke((float)(stroke.width),
+                    linecap,
+                    lineJoin,
+                    1.0F,
+                    dash_array,
+                    (float)(stroke.dashoffset),
+                    map);
+        } else {
+            newStroke = new BasicStroke((float)(stroke.width * multiplier),
+                    linecap,
+                    lineJoin,
+                    1.0F,
+                    dash_array,
+                    (float)(stroke.dashoffset * multiplier));
+        }
+        pfeature.setStroke(newStroke);
+        pfeature.setStrokePaint(getPaintFromDeegree(stroke.fill, stroke.color, uom, pfeature, map));
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected org.deegree.feature.Feature getDeegreeFeature() {
+        return new DeegreeFeature();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pfeature  DOCUMENT ME!
+     * @param  wtst      DOCUMENT ME!
+     */
+    @Override
+    public void applyStyle(final PFeature pfeature, final WorldToScreenTransform wtst) {
+        if (styles == null) {
+            return;
+        }
+        stylings = null;
+        pfeature.setStrokePaint(null);
+        pfeature.setStroke(null);
+        pfeature.setPaintOnAllFeatures(null);
+        pfeature.setPaint(null);
+        for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
+            final org.deegree.style.se.unevaluated.Style filteredStyle = tempStyle.filter(
+                    pfeature.getMappingComponent().getScaleDenominator());
+            final LinkedList<Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String>> tempStylings =
+                filteredStyle.evaluate(getDeegreeFeature(), evaluator);
+            if (stylings == null) {
+                stylings = tempStylings;
+            } else {
+                stylings.addAll(tempStylings);
+            }
+        }
+
+        /*
+         * if (stylings == null) { if (style == null) {     return; } this.stylings =
+         * style.evaluate(getDeegreeFeature(), evaluator);}*/
+        if ((stylings == null) || (stylings.size() == 0)) {
+            return;
+        }
+
+        final ListIterator it = pfeature.getChildrenIterator();
+        while (it.hasNext()) {
+            final Object child = it.next();
+            if (child instanceof PSticky) {
+                pfeature.getMappingComponent().removeStickyNode((PSticky)child);
+            }
+        }
+        pfeature.removeAllChildren();
+        pfeature.sldStyledPolygon.clear();
+
+        for (final PImage image : pfeature.sldStyledImage) {
+            if (image instanceof PSticky) {
+                pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+            }
+        }
+        pfeature.sldStyledImage.clear();
+
+        for (final PFeature.PTextWithDisplacement text : pfeature.sldStyledText) {
+            pfeature.getMappingComponent().removeStickyNode(text);
+        }
+        pfeature.sldStyledText.clear();
+
+        final Geometry geom = pfeature.getFeature().getGeometry();
+        int polygonNr = -1;
+        int textNr = 0;
+        int imageNr = 0;
+        for (final Triple<Styling, LinkedList<org.deegree.geometry.Geometry>, String> styling : stylings) {
+            if ((styling.first instanceof PolygonStyling)
+                        && ((geom instanceof Polygon) || (geom instanceof MultiPolygon))) {
+                PPath path;
+                if (polygonNr < 0) {
+                    path = pfeature;
+                } else {
+                    try {
+                        path = pfeature.sldStyledPolygon.get(polygonNr);
+                    } catch (IndexOutOfBoundsException ex) {
+                        path = new PPath();
+                        pfeature.sldStyledPolygon.add(path);
+                        pfeature.addChild(path);
+                    }
+                    path.setPathTo(pfeature.getPathReference());
+                }
+                applyPolygonStyling(path, (PolygonStyling)styling.first, pfeature.getMappingComponent());
+                polygonNr++;
+            } else if ((styling.first instanceof LineStyling)
+                        && ((geom instanceof LineString) || (geom instanceof MultiLineString))) {
+                PPath path;
+                if (polygonNr < 0) {
+                    path = pfeature;
+                } else {
+                    try {
+                        path = pfeature.sldStyledPolygon.get(polygonNr);
+                    } catch (IndexOutOfBoundsException ex) {
+                        path = new PPath();
+                        pfeature.sldStyledPolygon.add(path);
+                        pfeature.addChild(path);
+                    }
+                    path.setPathTo(pfeature.getPathReference());
+                }
+                applyLineStyling(path, (LineStyling)styling.first, pfeature.getMappingComponent());
+                polygonNr++;
+            } else if (styling.first instanceof TextStyling) {
+                PFeature.PTextWithDisplacement text;
+                try {
+                    text = pfeature.sldStyledText.get(textNr++);
+                } catch (IndexOutOfBoundsException ex) {
+                    text = pfeature.new PTextWithDisplacement();
+                    pfeature.sldStyledText.add(text);
+                    pfeature.addChild(text);
+                    pfeature.getMappingComponent().addStickyNode(text);
+                }
+                final Point intPoint = CrsTransformer.transformToGivenCrs(
+                            getGeometry(),
+                            pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
+                            .getInteriorPoint();
+                applyTextStyling(
+                    text,
+                    styling.third,
+                    (TextStyling)styling.first,
+                    wtst,
+                    intPoint.getX(),
+                    intPoint.getY());
+                rescaleStickyNode(pfeature, text);
+            } else if ((styling.first instanceof PointStyling)
+                        && ((geom instanceof Point) || (geom instanceof MultiPoint))) {
+                PImage image;
+                PImage selectedImage;
+                try {
+                    image = pfeature.sldStyledImage.get(imageNr);
+                    selectedImage = pfeature.sldStyledSelectedImage.get(imageNr++);
+                } catch (IndexOutOfBoundsException ex) {
+                    if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                        image = new FixedPImage();
+                        pfeature.getMappingComponent().addStickyNode((PSticky)image);
+                        selectedImage = new FixedPImage();
+                        pfeature.getMappingComponent().addStickyNode((PSticky)selectedImage);
+                    } else {
+                        image = new PImage();
+                        selectedImage = new PImage();
+                    }
+                    // image = new PImageWithDisplacement();
+                    pfeature.sldStyledImage.add(image);
+                    pfeature.sldStyledSelectedImage.add(selectedImage);
+                    pfeature.addChild(image);
+                }
+                if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                    if (!(image instanceof FixedPImage)) {
+                        pfeature.removeChild(image);
+                        pfeature.sldStyledImage.remove(image);
+                        pfeature.sldStyledSelectedImage.remove(selectedImage);
+                        image = new FixedPImage();
+                        pfeature.sldStyledImage.add(image);
+                        pfeature.sldStyledSelectedImage.add(selectedImage);
+                        pfeature.addChild(image);
+                        pfeature.addChild(selectedImage);
+                        pfeature.getMappingComponent().addStickyNode((PSticky)image);
+                        pfeature.getMappingComponent().addStickyNode((PSticky)selectedImage);
+                    }
+                } else {
+                    if (image instanceof FixedPImage) {
+                        pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+                        pfeature.sldStyledImage.remove(image);
+                        pfeature.sldStyledSelectedImage.remove(selectedImage);
+                        pfeature.removeChild(image);
+                        image = new PImage();
+                        pfeature.sldStyledImage.add(image);
+                        pfeature.sldStyledSelectedImage.add(selectedImage);
+                        pfeature.addChild(image);
+                    }
+                }
+                final Point intPoint = CrsTransformer.transformToGivenCrs(
+                            getGeometry(),
+                            pfeature.getMappingComponent().getMappingModel().getSrs().getCode())
+                            .getInteriorPoint();
+                applyPointStyling(
+                    image,
+                    (PointStyling)styling.first,
+                    wtst,
+                    intPoint.getX(),
+                    intPoint.getY(),
+                    pfeature.getMappingComponent().getCamera(),
+                    false);
+                applyPointStyling(
+                    selectedImage,
+                    (PointStyling)styling.first,
+                    wtst,
+                    intPoint.getX(),
+                    intPoint.getY(),
+                    pfeature.getMappingComponent().getCamera(),
+                    true);
+                if (((PointStyling)styling.first).uom == org.deegree.style.styling.components.UOM.Pixel) {
+                    rescaleStickyNode(pfeature, (PSticky)image);
+                    rescaleStickyNode(pfeature, (PSticky)selectedImage);
+                }
+            }
+        }
+        if ((polygonNr == -1) && (imageNr == 0) && (textNr == 0)) {
+            Log.warn("Es wurde kein passender Symbolizer für das Feature gefunden, Darstellung unmöglich.");
+        }
+        /*
+         * //if (stylings.getFirst().first instanceof PolygonStyling) { applyStyling(pfeature,
+         * stylings.getFirst().first); //}
+         *
+         * while (pfeature.sldStyledPolygon.size() < (stylings.size() - 1)) { final PPath child = new PPath();
+         * pfeature.sldStyledPolygon.add(child); pfeature.addChild(child); }
+         *
+         * for (int i = 0; i < pfeature.sldStyledPolygon.size(); i++) { //
+         * pfeature.sldStyled.get(i).getPathReference().reset();
+         * pfeature.sldStyledPolygon.get(i).setPathTo(pfeature.getPathReference());
+         * applyStyling(pfeature.sldStyledPolygon.get(i), stylings.get(i + 1).first);}*/
+    }
+
+    /**
+     * does not have the limitations from the rescaleStickyNode(PSticky) method of the MappingsComponent.
+     *
+     * @param  pfeature  DOCUMENT ME!
+     * @param  sticky    DOCUMENT ME!
+     */
+    private void rescaleStickyNode(final PFeature pfeature, final PSticky sticky) {
+        final double s = pfeature.getMappingComponent().getCamera().getViewScale();
+        sticky.setScale(1 / s);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ptext        DOCUMENT ME!
+     * @param  value        DOCUMENT ME!
+     * @param  textStyling  DOCUMENT ME!
+     * @param  wtst         DOCUMENT ME!
+     * @param  x            DOCUMENT ME!
+     * @param  y            DOCUMENT ME!
+     */
+    protected void applyTextStyling(final PFeature.PTextWithDisplacement ptext,
+            final String value,
+            final TextStyling textStyling,
+            final WorldToScreenTransform wtst,
+            final double x,
+            final double y) {
+        ptext.setText(value);
+        ptext.setOffset(wtst.getScreenX(x), wtst.getScreenY(y));
+        /*ptext.setDisplacement(getUOMFromDeegree(textStyling.uom),
+         *  textStyling.displacementX, textStyling.displacementY, textStyling.anchorPointX, textStyling.anchorPointY,
+         * wtst);*/
+        /*double multiplier = getMultiplierFromDeegreeUOM(textStyling.uom);
+         * ptext.setOffset(wtst.getScreenX(x + ((textStyling.displacementX)*multiplier)), wtst.getScreenY(y +
+         * ((textStyling.displacementY)*multiplier)));*/
+        /*ptext.setOffset(wtst.getScreenX(x + ((styling.graphic.displacementX + (1.0d - styling.graphic.anchorPointX) *
+         * styling.graphic.image.getWidth() * sizeMulti)* multiplier)),         wtst.getScreenY(y +
+         * ((styling.graphic.displacementY + (1.0d - styling.graphic.anchorPointY) *
+         * styling.graphic.size)*multiplier)));
+         */
+        ptext.setTextPaint(textStyling.fill.color);
+        Font font = null;
+        try {
+            for (final String fontName : textStyling.font.fontFamily) {
+                font = new Font(fontName, getFontStyling(textStyling.font), (int)textStyling.font.fontSize);
+            }
+        } catch (Exception ex) {
+        }
+        ptext.setFont(font);
+        ptext.setRotation(Math.toRadians(textStyling.rotation));
+        // ptext.setVisible(true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   font  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected int getFontStyling(final org.deegree.style.styling.components.Font font) {
+        final int bolt = font.bold ? 1 : 0;
+        switch (font.fontStyle) {
+            case OBLIQUE:
+            case ITALIC: {
+                return bolt + 2;
+            }
+            case NORMAL: {
+                return bolt;
+            }
+        }
+        return bolt;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   graphic   DOCUMENT ME!
+     * @param   selected  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected BufferedImage getImageFromDeegree(final Graphic graphic, final boolean selected) {
+        if (graphic.image != null) {
+            if (selected) {
+                return getSelectedImageFromImage(graphic.image);
+            } else {
+                return graphic.image;
+            }
+        } else {
+            BufferedImage temp = getImageFromWellKnownName(graphic.mark.wellKnown);
+            if ((graphic.mark.fill != null) && (graphic.mark.fill.color != null)) {
+                final BufferedImage coloredVerion = new BufferedImage(temp.getWidth(),
+                        temp.getHeight(),
+                        BufferedImage.TYPE_INT_ARGB);
+                final Graphics2D g = (Graphics2D)coloredVerion.getGraphics();
+                if (selected) {
+                    g.setColor(PFeature.getHighlightingColorFromColor(graphic.mark.fill.color));
+                } else {
+                    g.setColor(graphic.mark.fill.color);
+                }
+                g.fillRect(0, 0, temp.getWidth(), temp.getHeight());
+                g.setComposite(AlphaComposite.DstIn);
+                g.drawImage(
+                    temp,
+                    0,
+                    0,
+                    temp.getWidth(),
+                    temp.getHeight(),
+                    0,
+                    0,
+                    temp.getWidth(),
+                    temp.getHeight(),
+                    null);
+                temp = coloredVerion;
+            }
+            return temp;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   mark  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  RuntimeException  DOCUMENT ME!
+     */
+    protected BufferedImage getImageFromWellKnownName(final Mark.SimpleMark mark) {
+        URL url = null;
+        switch (mark) {
+            case CIRCLE: {
+                url = getClass().getResource("/icon-circlerecord.png");
+                break;
+            }
+            case CROSS: {
+                url = getClass().getResource("/icon-plus.png");
+                break;
+            }
+            case SQUARE: {
+                url = getClass().getResource("/icon-squareapp.png");
+                break;
+            }
+            case STAR: {
+                url = getClass().getResource("/icon-star.png");
+                break;
+            }
+            case TRIANGLE: {
+                url = getClass().getResource("/icon-play.png");
+                break;
+            }
+            case X: {
+                url = getClass().getResource("/icon-remove.png");
+                break;
+            }
+        }
+        if (url == null) {
+            throw new RuntimeException("could not load Resource" + mark);
+        }
+        final ImageIcon icon = new ImageIcon(url);
+        final Image image = icon.getImage();
+        if (image instanceof BufferedImage) {
+            return (BufferedImage)image;
+        } else if (image instanceof ToolkitImage) {
+            return ((ToolkitImage)image).getBufferedImage();
+        } else {
+            throw new RuntimeException("No BufferedImage" + mark);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   uom  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  RuntimeException  DOCUMENT ME!
+     */
+    protected double getMultiplierFromDeegreeUOM(final org.deegree.style.styling.components.UOM uom) {
+        switch (uom) {
+            case Foot: {
+                return 0.3048;
+            }
+            case Metre: {
+                return 1.0;
+            }
+            case Pixel: {
+                return 1.0;
+            }
+            case mm: {
+                return 0.001;
+            }
+        }
+        throw new RuntimeException("unknown UOM" + uom.toString());
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   graphic  DOCUMENT ME!
+     * @param   color    DOCUMENT ME!
+     * @param   uom      DOCUMENT ME!
+     * @param   parent   DOCUMENT ME!
+     * @param   map      DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected Paint getPaintFromDeegree(final Graphic graphic,
+            final Color color,
+            final org.deegree.style.styling.components.UOM uom,
+            final PNode parent,
+            final MappingComponent map) {
+        if (graphic == null) {
+            return color;
+        } else {
+            final double multiplier = getMultiplierFromDeegreeUOM(uom);
+            final BufferedImage image = getImageFromDeegree(graphic, false);
+            Paint texture;
+            if (uom != org.deegree.style.styling.components.UOM.Pixel) {
+                texture = new TexturePaint(
+                        image,
+                        new Rectangle2D.Double(
+                            0,
+                            0,
+                            multiplier
+                                    * graphic.size
+                                    * image.getWidth()
+                                    / image.getHeight(),
+                            graphic.size
+                                    * multiplier));
+            } else {
+                texture = new PFixedTexturePaint(
+                        image,
+                        new Rectangle2D.Double(
+                            0,
+                            0,
+                            multiplier
+                                    * graphic.size
+                                    * image.getWidth()
+                                    / image.getHeight(),
+                            graphic.size
+                                    * multiplier),
+                        parent);
+                map.addStickyNode((PFixedTexturePaint)texture);
+            }
+            return texture;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   uom  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  RuntimeException  DOCUMENT ME!
+     */
+    protected UOM getUOMFromDeegree(final org.deegree.style.styling.components.UOM uom) {
+        switch (uom) {
+            case Foot: {
+                return UOM.foot;
+            }
+            case Metre: {
+                return UOM.metre;
+            }
+            case Pixel: {
+                return UOM.pixel;
+            }
+            case mm: {
+                return UOM.mm;
+            }
+        }
+        throw new RuntimeException("unknown UOM" + uom.toString());
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureStyles  DOCUMENT ME!
+     */
+    @Override
+    public void setSLDStyles(final List<org.deegree.style.se.unevaluated.Style> featureStyles) {
+        if ((styles == null) || !styles.equals(featureStyles)) {
+            this.styles = featureStyles;
+            stylings = null;
+            resetCustomStylesAdjustments();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void resetCustomStylesAdjustments() {
+        customFillingStyle = null;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   unselectedImage  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private BufferedImage getSelectedImageFromImage(final BufferedImage unselectedImage) {
+        BufferedImage bImage = selectedImage.get(unselectedImage);
+
+        if (bImage == null) {
+            Image image = ensureRGBAImage(unselectedImage);
+            image = Toolkit.getDefaultToolkit()
+                        .createImage(new FilteredImageSource(image.getSource(),
+                                    new SelectedFilter()));
+            final int width = image.getWidth(null);
+            final int height = image.getHeight(null);
+            bImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+            bImage.getGraphics().drawImage(image, 0, 0, null);
+
+            selectedImage.put(unselectedImage, bImage);
+        }
+
+        return bImage;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   image  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private BufferedImage ensureRGBAImage(BufferedImage image) {
+        if ((image != null) && (image.getType() != BufferedImage.TYPE_INT_ARGB)) {
+            final BufferedImage tmpImg = new BufferedImage(image.getWidth(),
+                    image.getHeight(),
+                    BufferedImage.TYPE_INT_ARGB);
+            final Graphics g = tmpImg.getGraphics();
+            g.drawImage(image, 0, 0, null);
+            g.dispose();
+            image = tmpImg;
+        }
+
+        return image;
+    }
+
+    /**
      * Ändert das dem Namen zugeordnete Property.
      *
      * @param  propertyName   Name des gesuchten Objekts
@@ -718,10 +1579,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      */
     @Override
     public void setProperty(final String propertyName, final Object propertyValue) {
-        final Object oldValue = container.get(propertyName);
         container.put(propertyName, propertyValue);
-
-        propertyChangeSupport.firePropertyChange(propertyName, oldValue, propertyValue);
     }
 
     /**
@@ -825,6 +1683,529 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             } else {
                 return super.toString();
             }
+        }
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected class DeegreeEvaluator implements org.deegree.filter.XPathEvaluator<org.deegree.feature.Feature> {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public TypedObjectNode[] eval(final Feature t, final ValueReference vr) throws FilterEvaluationException {
+            final List<org.deegree.commons.tom.gml.property.Property> properties = t.getProperties(vr.getAsQName());
+            final TypedObjectNode[] ret = properties.toArray(new TypedObjectNode[properties.size()]);
+            return ret;
+        }
+
+        @Override
+        public String getId(final Feature t) {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected class DeegreeFeature implements Feature {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public List<org.deegree.commons.tom.gml.property.Property> getGeometryProperties() {
+            return new ArrayList<org.deegree.commons.tom.gml.property.Property>();
+        }
+
+        @Override
+        public org.deegree.feature.types.FeatureType getType() {
+            return new DeegreeFeatureType();
+        }
+
+        @Override
+        public List<org.deegree.commons.tom.gml.property.Property> getProperties(final QName qname) {
+            final List<Property> deegreeProperties = new LinkedList();
+            if (qname == null) {
+                return deegreeProperties;
+            }
+            final Object value;
+            String key;
+            if ((qname.getPrefix() != null) && !qname.getPrefix().isEmpty()) {
+                key = qname.getPrefix() + ":" + qname.getLocalPart();
+            } else {
+                key = qname.getLocalPart();
+            }
+            if (DefaultFeatureServiceFeature.this.getProperties().containsKey(key)) {
+                value = DefaultFeatureServiceFeature.this.getProperty(key);
+                if (value == null) {
+                    deegreeProperties.add(null);
+                } else {
+                    deegreeProperties.add(new DeegreeProperty(qname, value));
+                }
+            } else if (DefaultFeatureServiceFeature.this.getProperties().containsKey("app:" + qname.getLocalPart())) {
+                value = DefaultFeatureServiceFeature.this.getProperty("app:" + qname.getLocalPart());
+                if (value == null) {
+                    deegreeProperties.add(null);
+                } else {
+                    deegreeProperties.add(new DeegreeProperty(qname, value));
+                }
+            }
+            return deegreeProperties;
+        }
+
+        @Override
+        public void setId(final String string) {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public QName getName() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public Envelope getEnvelope() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public void setEnvelope(final Envelope envlp) {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public Envelope calcEnvelope() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public void setPropertyValue(final QName qname, final int i, final TypedObjectNode ton) {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public void setProperties(final List<Property> list) throws IllegalArgumentException {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public ExtraProps getExtraProperties() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public void setExtraProperties(final ExtraProps ep) {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public String getId() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public List<Property> getProperties() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected class DeegreeFeatureType implements FeatureType {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new DeegreeFeatureType object.
+         */
+        public DeegreeFeatureType() {
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public GeometryPropertyType getDefaultGeometryPropertyDeclaration() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public Feature newFeature(final String string, final List<Property> list, final ExtraProps ep) {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public AppSchema getSchema() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public GMLObjectCategory getCategory() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public QName getName() {
+            return new QName("");
+        }
+
+        @Override
+        public boolean isAbstract() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public PropertyType getPropertyDeclaration(final QName qname) {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public List<PropertyType> getPropertyDeclarations() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    protected class DeegreeProperty implements Property {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private QName name;
+        private Object value;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new DeegreeProperty object.
+         *
+         * @param  name   DOCUMENT ME!
+         * @param  value  DOCUMENT ME!
+         */
+        public DeegreeProperty(final QName name, final Object value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public QName getName() {
+            return name;
+        }
+
+        @Override
+        public TypedObjectNode getValue() {
+            if (value == null) {
+                return new org.deegree.commons.tom.primitive.PrimitiveValue("null");
+            } else if (value instanceof String) {
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((String)value,
+                        new org.deegree.commons.tom.primitive.PrimitiveType(
+                            org.deegree.commons.tom.primitive.BaseType.STRING));
+            } else if (value instanceof Float) {
+                return new org.deegree.commons.tom.primitive.PrimitiveValue(new Double((Float)value),
+                        new org.deegree.commons.tom.primitive.PrimitiveType(
+                            org.deegree.commons.tom.primitive.BaseType.DOUBLE));
+            } else if (value instanceof Boolean) {
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((Boolean)value,
+                        new org.deegree.commons.tom.primitive.PrimitiveType(
+                            org.deegree.commons.tom.primitive.BaseType.BOOLEAN));
+            } else if (value instanceof Double) {
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((Double)value,
+                        new org.deegree.commons.tom.primitive.PrimitiveType(
+                            org.deegree.commons.tom.primitive.BaseType.DOUBLE));
+            } else if (value instanceof Integer) {
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((Integer)value,
+                        new org.deegree.commons.tom.primitive.PrimitiveType(
+                            org.deegree.commons.tom.primitive.BaseType.INTEGER));
+            } else if (value instanceof Long) {
+                return new org.deegree.commons.tom.primitive.PrimitiveValue((Long)value,
+                        new org.deegree.commons.tom.primitive.PrimitiveType(
+                            org.deegree.commons.tom.primitive.BaseType.INTEGER));
+            } else if (value instanceof org.deegree.geometry.Geometry) {
+                return ((org.deegree.geometry.Geometry)value);
+            } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
+                try {
+                    final org.deegree.model.spatialschema.Geometry geo = ((org.deegree.model.spatialschema.Geometry)
+                            value);
+                    final Geometry g = JTSAdapter.export(geo);
+                    if (geo.getCoordinateSystem() != null) {
+                        final int srid = CrsTransformer.extractSridFromCrs(geo.getCoordinateSystem().getIdentifier());
+                        g.setSRID(srid);
+                    }
+                    return defaultGeom.createFromJTS(g, null);
+                } catch (final Exception e) {
+                    logger.error("Cannot create deegree3 from deegree3 geometry.", e);
+                    return new org.deegree.commons.tom.primitive.PrimitiveValue("null");
+                }
+            } else if (value instanceof Geometry) {
+                return defaultGeom.createFromJTS((Geometry)value, null);
+//                return new org.deegree.geometry.Geometry() {
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry.GeometryType getGeometryType() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public void setId(final String string) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public void setType(final org.deegree.commons.tom.gml.GMLObjectType gmlot) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.precision.PrecisionModel getPrecision() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public void setPrecision(final org.deegree.geometry.precision.PrecisionModel pm) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.cs.coordinatesystems.ICRS getCoordinateSystem() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public void setCoordinateSystem(final org.deegree.cs.coordinatesystems.ICRS icrs) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public void setProperties(final List<Property> list) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean isSFSCompliant() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public int getCoordinateDimension() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean contains(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean crosses(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean equals(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean intersects(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean isBeyond(final org.deegree.geometry.Geometry gmtr,
+//                                final org.deegree.commons.uom.Measure msr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean isDisjoint(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean isWithin(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean isWithinDistance(final org.deegree.geometry.Geometry gmtr,
+//                                final org.deegree.commons.uom.Measure msr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean overlaps(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public boolean touches(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry getBuffer(final org.deegree.commons.uom.Measure msr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.primitive.Point getCentroid() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public Envelope getEnvelope() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry getDifference(
+//                                final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry getIntersection(
+//                                final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry getUnion(final org.deegree.geometry.Geometry gmtr) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.geometry.Geometry getConvexHull() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.commons.uom.Measure getDistance(final org.deegree.geometry.Geometry gmtr,
+//                                final org.deegree.commons.uom.Unit unit) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public String getId() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public org.deegree.commons.tom.gml.GMLObjectType getType() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public List<Property> getProperties() {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//
+//                        @Override
+//                        public List<Property> getProperties(final QName qname) {
+//                            throw new UnsupportedOperationException("Not supported yet.");
+//                        }
+//                    };
+            } else {
+                return new org.deegree.commons.tom.primitive.PrimitiveValue("null");
+            }
+        }
+
+        @Override
+        public String toString() {
+            return value.toString();
+        }
+
+        @Override
+        public PropertyType getType() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public void setValue(final TypedObjectNode ton) {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public void setChildren(final List<TypedObjectNode> list) {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public Map<QName, PrimitiveValue> getAttributes() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public List<TypedObjectNode> getChildren() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+
+        @Override
+        public XSElementDeclaration getXSType() {
+            throw new UnsupportedOperationException("Not supported yet."); // To change body of generated methods,
+            // choose Tools | Templates.
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class SelectedFilter extends RGBImageFilter {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public int filterRGB(final int x, final int y, final int argb) {
+            final int r = (argb & 0x00ff0000) >> 0x10;
+            final int g = (argb & 0x0000ff00) >> 0x08;
+            final int b = (argb & 0x000000ff);
+
+            final Color c = new Color(r, g, b);
+
+            final Color newColor = PFeature.getHighlightingColorFromColor(c);
+
+            return (argb & 0xff000000) | (newColor.getRed() << 0x10) | (newColor.getGreen() << 0x08)
+                        | (newColor.getBlue());
         }
     }
 }

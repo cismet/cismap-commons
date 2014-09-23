@@ -29,6 +29,7 @@ public class FixedPImage extends PImage implements PSticky {
     private double sweetSpotY = 0d;
     private double originalOffsetX = 0;
     private double originalOffsetY = 0;
+    private double multiplier = 1.0d;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -67,6 +68,15 @@ public class FixedPImage extends PImage implements PSticky {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  multiplier  DOCUMENT ME!
+     */
+    public void setMultiplier(final double multiplier) {
+        this.multiplier = multiplier;
+    }
 
     @Override
     public void setOffset(final double x, final double y) {
@@ -118,7 +128,7 @@ public class FixedPImage extends PImage implements PSticky {
 
     @Override
     public void setScale(final double scale) {
-        super.setScale(scale);
+        super.setScale(scale * multiplier);
         setOffsetWithoutTouchingOriginalOffset(originalOffsetX, originalOffsetY);
     }
 
