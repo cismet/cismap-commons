@@ -696,17 +696,6 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     }
 
     /**
-     * does not have the limitations from the rescaleStickyNode(PSticky) method of the MappingsComponent.
-     *
-     * @param  pfeature  DOCUMENT ME!
-     * @param  sticky    DOCUMENT ME!
-     */
-    private void rescaleStickyNode(final PFeature pfeature, final PSticky sticky) {
-        final double s = pfeature.getMappingComponent().getCamera().getViewScale();
-        sticky.setScale(1 / s);
-    }
-
-    /**
      * DOCUMENT ME!
      *
      * @param  primaryAnnotationPaint  DOCUMENT ME!
@@ -853,10 +842,19 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
         }
 
         return super.equals(obj);
-     * @param  uom       DOCUMENT ME!
-     * @param  fill      DOCUMENT ME!
-     * @param  pfeature  DOCUMENT ME!
-     * @param  map       DOCUMENT ME!
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = (79 * hash) + this.id;
+        hash = (79 * hash) + ((this.getClass().getName() != null) ? this.getClass().getName().hashCode() : 0);
+        return hash;
     }
 
     /**

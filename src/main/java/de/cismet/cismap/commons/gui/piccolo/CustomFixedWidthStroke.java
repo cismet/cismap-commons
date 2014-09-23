@@ -32,7 +32,7 @@ public class CustomFixedWidthStroke extends BasicStroke {
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
-    private MappingComponent mc = null;
+    private final MappingComponent mc;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -95,44 +95,7 @@ public class CustomFixedWidthStroke extends BasicStroke {
             final float dash_phase,
             final MappingComponent mc) {
         super(width, lineCap, lineJoin, miterlimit, dash, dash_phase);
-    }
-
-    /**
-     * Creates a new CustomFixedWidthStroke object.
-     *
-     * @param  width       DOCUMENT ME!
-     * @param  lineCap     DOCUMENT ME!
-     * @param  lineJoin    DOCUMENT ME!
-     * @param  miterlimit  DOCUMENT ME!
-     * @param  dash        DOCUMENT ME!
-     * @param  dash_phase  DOCUMENT ME!
-     */
-    public CustomFixedWidthStroke(final float width,
-            final int lineCap,
-            final int lineJoin,
-            final float miterlimit,
-            final float[] dash,
-            final float dash_phase) {
-        super(width, lineCap, lineJoin, miterlimit, dash, dash_phase);
-    }
-
-    /**
-     * Creates a new CustomFixedWidthStroke object.
-     *
-     * @param  width       DOCUMENT ME!
-     * @param  lineCap     DOCUMENT ME!
-     * @param  lineJoin    DOCUMENT ME!
-     * @param  miterlimit  DOCUMENT ME!
-     * @param  dash        DOCUMENT ME!
-     * @param  dash_phase  DOCUMENT ME!
-     */
-    public CustomFixedWidthStroke(final float width,
-            final int lineCap,
-            final int lineJoin,
-            final float miterlimit,
-            final float[] dash,
-            final float dash_phase) {
-        super(width, lineCap, lineJoin, miterlimit, dash, dash_phase);
+        this.mc = mc;
     }
 
     /**

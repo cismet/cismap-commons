@@ -29,19 +29,9 @@ import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Debug;
-import de.cismet.cismap.commons.XBoundingBox;
-import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
-import de.cismet.cismap.commons.features.ShapeFeature;
-import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.*;
-import de.cismet.cismap.commons.wfs.WFSFacade;
-
-import de.cismet.security.AccessHandler;
-import de.cismet.security.WebAccessManager;
 
 /**
  * Abstract impelementation of a FeatureFactory. Supports re-evaluation of id and annotation expressions.
@@ -659,84 +649,6 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
      * @return  DOCUMENT ME!
      */
     public List<Style> getStyle(final String layerName) {
-        if (layerName == null) {
-            return getStyle();
-        } else if ((styles != null) && styles.containsKey(layerName)) {
-            return styles.get(layerName);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   layerName  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    protected List<Style> getStyle(final String layerName) {
-        if (layerName == null) {
-            return getStyle();
-        } else if ((styles != null) && styles.containsKey(layerName)) {
-            return styles.get(layerName);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   layerName  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    protected List<Style> getStyle(final String layerName) {
-        if (layerName == null) {
-            return getStyle();
-        } else if ((styles != null) && styles.containsKey(layerName)) {
-            return styles.get(layerName);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   layerName  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    protected List<Style> getStyle(final String layerName) {
-        if (layerName == null) {
-            return getStyle();
-        } else if ((styles != null) && styles.containsKey(layerName)) {
-            return styles.get(layerName);
-        } else {
-            return null;
-        }
-    }
-    
-    protected Style getStyle(String layerName) {
-        if(layerName == null)
-            return getStyle();
-        } else if ((styles != null) && styles.containsKey(layerName)) {
-            return styles.get(layerName);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   layerName  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    protected List<Style> getStyle(final String layerName) {
         if (layerName == null) {
             return getStyle();
         } else if ((styles != null) && styles.containsKey(layerName)) {

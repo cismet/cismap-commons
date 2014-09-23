@@ -801,25 +801,6 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     /**
      * DOCUMENT ME!
      *
-     * @param  evt  DOCUMENT ME!
-     */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
-        try {
-            final Class classInfo = ClassLoader.getSystemClassLoader()
-                        .loadClass("de.cismet.cismap.cidslayer.CidsLayer");
-            activeLayerModel.addLayer((RetrievalServiceLayer)classInfo.newInstance());
-        } catch (ClassNotFoundException ex) {
-            log.error("ClassNotFound", ex);
-        } catch (InstantiationException ex) {
-            log.error("InstantiationException", ex);
-        } catch (IllegalAccessException ex) {
-            log.error("IllegalAccessException", ex);
-        }
-    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
-
-    /**
-     * DOCUMENT ME!
-     *
      * @return  DOCUMENT ME!
      */
     public ActiveLayerModel getMappingModel() {

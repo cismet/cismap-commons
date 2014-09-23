@@ -1801,54 +1801,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                 org.jdesktop.beansbinding.BeanProperty.create("enabled"));
         bindingGroup.addBinding(binding);
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabLabeling,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabLabeling,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabLabeling,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabLabeling,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabLabeling,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabLabeling,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
         panTabLabeling.setLayout(new java.awt.FlowLayout(0, 20, 20));
 
         panLabeling.setLayout(new java.awt.GridBagLayout());
@@ -2109,58 +2061,6 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
             new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cismap/commons/featureservice/res/labelling.png")),
             panTabLabeling); // NOI18N
-
-        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
-                javax.swing.BorderFactory.createTitledBorder(
-                    org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panTabAttrib.border.title")))); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabAttrib,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
-                javax.swing.BorderFactory.createTitledBorder(
-                    org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panTabAttrib.border.title")))); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabAttrib,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
-                javax.swing.BorderFactory.createTitledBorder(
-                    org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panTabAttrib.border.title")))); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabAttrib,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
-
-        panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(
-                javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),
-                javax.swing.BorderFactory.createTitledBorder(
-                    org.openide.util.NbBundle.getMessage(StyleDialog.class, "StyleDialog.panTabAttrib.border.title")))); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(
-                org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE,
-                chkCustomSLD,
-                org.jdesktop.beansbinding.ELProperty.create("${selected}"),
-                panTabAttrib,
-                org.jdesktop.beansbinding.BeanProperty.create("enabled"));
-        bindingGroup.addBinding(binding);
 
         panTabAttrib.setBorder(javax.swing.BorderFactory.createCompoundBorder(
                 javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10),

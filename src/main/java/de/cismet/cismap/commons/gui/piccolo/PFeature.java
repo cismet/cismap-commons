@@ -2326,49 +2326,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     }
 
     /**
-     * DOCUMENT ME!
-     *
-     * @param   c  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public static Color getHighlightingColorFromColor(final Color c) {
-        int red = (int)(c.getRed() + 70);
-        int green = (int)(c.getGreen() + 70);
-        int blue = (int)(c.getBlue() + 70);
-        if (red > 255) {
-            red = 255;
-        }
-        if (green > 255) {
-            green = 255;
-        }
-        if (blue > 255) {
-            blue = 255;
-        }
-
-        return new Color(red, green, blue, c.getAlpha());
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  newPaint  DOCUMENT ME!
-     */
-    public void setPaintOnAllFeatures(final Paint newPaint) {
-        if (feature instanceof SLDStyledFeature) {
-            if ((sldStyledPolygon == null) || (sldStyledPolygon.size() == 0)) {
-                super.setPaint(newPaint);
-            } else {
-                for (int i = 0; i < sldStyledPolygon.size(); ++i) {
-                    sldStyledPolygon.get(i).setPaint(newPaint);
-                }
-            }
-        } else {
-            super.setPaint(newPaint);
-        }
-    }
-
-    /**
      * Liefert ein boolean, ob das Pfeature gerade hervorgehoben wird.
      *
      * @return  true, falls hervorgehoben

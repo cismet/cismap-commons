@@ -17,19 +17,13 @@ import org.deegree.feature.Feature;
 import org.deegree.feature.types.FeatureType;
 import org.deegree.model.feature.FeatureProperty;
 import org.deegree.model.spatialschema.JTSAdapter;
-import org.deegree.style.se.unevaluated.Style;
-
-import org.deegree.feature.Feature;
-import org.deegree.feature.types.FeatureType;
-import org.deegree.model.feature.FeatureProperty;
-import org.deegree.model.spatialschema.JTSAdapter;
-import org.deegree.style.se.unevaluated.Style;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
 import javax.xml.namespace.QName;
-import org.deegree.feature.types.FeatureType;
 
 /**
  * Features read from a SHP File.
@@ -47,9 +41,6 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     //~ Instance fields --------------------------------------------------------
 
     private final ShapeInfo shapeInfo;
-    //~ Instance fields --------------------------------------------------------
-
-    private final String typename;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -59,17 +50,6 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
      * @param  shapeInfo  typename DOCUMENT ME!
      */
     public ShapeFeature(final ShapeInfo shapeInfo) {
-        this.shapeInfo = shapeInfo;
-    }
-
-    /**
-     * Creates a new ShapeFeature object.
-     *
-     * @param  shapeInfo  typename DOCUMENT ME!
-     * @param  styles     DOCUMENT ME!
-     */
-    public ShapeFeature(final ShapeInfo shapeInfo, final List<org.deegree.style.se.unevaluated.Style> styles) {
-        setSLDStyles(styles); // super.style = styles;
         this.shapeInfo = shapeInfo;
     }
 
@@ -261,25 +241,26 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     public void setGeometry(final Geometry geom) {
         // do nothing
     }
-    
 
     @Override
-    protected org.deegree.feature.Feature getDeegreeFeature() {
+    protected Feature getDeegreeFeature() {
         return new ShapeFileLayerDeegreeFeature();
     }
+
+    //~ Inner Classes ----------------------------------------------------------
 
     /**
      * DOCUMENT ME!
      *
      * @version  $Revision$, $Date$
      */
-    protected class ShapeFileLayerDeegreeFeature extends DeegreeFeature {
+    protected class ShapeFileLayerDeegreeFeature extends DefaultFeatureServiceFeature.DeegreeFeature {
 
         //~ Methods ------------------------------------------------------------
 
         @Override
         public FeatureType getType() {
-            return new DeegreeFeatureType() {
+            return new DefaultFeatureServiceFeature.DeegreeFeatureType() {
 
                     @Override
                     public QName getName() {
