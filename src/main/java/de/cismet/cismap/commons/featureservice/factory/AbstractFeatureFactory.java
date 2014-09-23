@@ -29,9 +29,19 @@ import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
+import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Debug;
+import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.features.ShapeFeature;
+import de.cismet.cismap.commons.features.WFSFeature;
 import de.cismet.cismap.commons.featureservice.*;
+import de.cismet.cismap.commons.wfs.WFSFacade;
+
+import de.cismet.security.AccessHandler;
+import de.cismet.security.WebAccessManager;
 
 /**
  * Abstract impelementation of a FeatureFactory. Supports re-evaluation of id and annotation expressions.
