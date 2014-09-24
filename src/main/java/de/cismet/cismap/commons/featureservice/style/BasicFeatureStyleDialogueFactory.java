@@ -37,7 +37,7 @@ import de.cismet.cismap.commons.wfs.WFSFacade;
  * @version  $Revision$, $Date$
  */
 @ServiceProvider(service = StyleDialogInterface.class)
-public class CidsStyleDialogFactory implements StyleDialogInterface {
+public class BasicFeatureStyleDialogueFactory implements StyleDialogInterface {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -150,6 +150,6 @@ public class CidsStyleDialogFactory implements StyleDialogInterface {
 
     @Override
     public String getKey() {
-        return "Cids";
+        return "basic";
     }
 }
