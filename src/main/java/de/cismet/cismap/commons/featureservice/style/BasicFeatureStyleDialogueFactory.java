@@ -36,7 +36,10 @@ import de.cismet.cismap.commons.wfs.WFSFacade;
  * @author   mroncoroni
  * @version  $Revision$, $Date$
  */
-@ServiceProvider(service = StyleDialogInterface.class)
+@ServiceProvider(
+    service = StyleDialogInterface.class,
+    position = 1
+)
 public class BasicFeatureStyleDialogueFactory implements StyleDialogInterface {
 
     //~ Static fields/initializers ---------------------------------------------
