@@ -42,7 +42,8 @@ public class BasicFeatureStyleDialogueFactory implements StyleDialogInterface {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final boolean DEBUG = Debug.DEBUG;
-
+    public static final String KEY="basic";
+    
     //~ Instance fields --------------------------------------------------------
 
     private final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(this.getClass());
@@ -150,6 +151,6 @@ public class BasicFeatureStyleDialogueFactory implements StyleDialogInterface {
 
     @Override
     public String getKey() {
-        return "basic";
+        return KEY;
     }
 }
