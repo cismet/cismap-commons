@@ -386,7 +386,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
-        return new WFSFeatureFactory(this.getLayerProperties(), this.getHostname(), this.feature, getCrs());
+        return new WFSFeatureFactory(this.getLayerProperties(), this.getHostname(), this.feature, getCrs(), parseSLD(getSLDDefiniton()));
     }
 
     /**
