@@ -30,7 +30,9 @@ import java.io.StringReader;
 
 import java.net.URL;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -51,8 +53,6 @@ import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.commons.security.AccessHandler.ACCESS_METHODS;
 
 import de.cismet.security.WebAccessManager;
-import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * A FeatureFactory that creates WFSFeatures obtained from a Web Feature Service.<br/>
@@ -81,7 +81,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      * @param  hostname         DOCUMENT ME!
      * @param  featureType      wfsVersion DOCUMENT ME!
      * @param  crs              DOCUMENT ME!
-     * @param styles
+     * @param  styles           DOCUMENT ME!
      */
     public WFSFeatureFactory(final LayerProperties layerProperties,
             final String hostname,
@@ -376,19 +376,19 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      */
     @Override
     protected WFSFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
-        WFSFeature f = new WFSFeature();
+        final WFSFeature f = new WFSFeature();
         String name = null;
-        
-        if (layerProperties != null && layerProperties.getFeatureService() != null) {
+
+        if ((layerProperties != null) && (layerProperties.getFeatureService() != null)) {
             name = layerProperties.getFeatureService().getName();
         }
-        
-        if (name == null && featureType != null && featureType.getName() != null) {
+
+        if ((name == null) && (featureType != null) && (featureType.getName() != null)) {
             name = featureType.getName().getPrefix() + ":" + featureType.getName().getLocalPart();
         }
-        
+
         f.setSLDStyles(getStyle(name));
-        
+
         return f;
     }
 
