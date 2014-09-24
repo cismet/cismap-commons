@@ -330,14 +330,14 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                                     }
                                 }
 
-                                final String lookupkey = "Jump";
+                                final String lookupkey = CismapBroker.getInstance().getFeatureStylingComponentKey();
 
                                 if ((lookupkey != null) && !lookupkey.isEmpty()) {
                                     final Result<StyleDialogInterface> result = Lookup.getDefault()
                                                 .lookupResult(StyleDialogInterface.class);
 
                                     for (final StyleDialogInterface dialog : result.allInstances()) {
-                                        if (lookupkey.equals(dialog.getKey())) {
+                                        if (lookupkey.equalsIgnoreCase(dialog.getKey())) {
                                             styleDialog = dialog;
                                         }
                                     }
