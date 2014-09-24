@@ -40,7 +40,7 @@ import de.cismet.cismap.commons.wfs.WFSFacade;
     service = StyleDialogInterface.class,
     position = 1
 )
-public class BasicFeatureStyleDialogueFactory implements StyleDialogInterface {
+public class BasicFeatureStyleDialogFactory implements StyleDialogInterface {
 
     //~ Static fields/initializers ---------------------------------------------
 
