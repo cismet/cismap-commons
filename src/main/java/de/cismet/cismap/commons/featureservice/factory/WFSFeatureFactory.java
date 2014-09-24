@@ -30,7 +30,9 @@ import java.io.StringReader;
 
 import java.net.URL;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
@@ -79,16 +81,19 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      * @param  hostname         DOCUMENT ME!
      * @param  featureType      wfsVersion DOCUMENT ME!
      * @param  crs              DOCUMENT ME!
+     * @param  styles           DOCUMENT ME!
      */
     public WFSFeatureFactory(final LayerProperties layerProperties,
             final String hostname,
             final FeatureType featureType,
-            final Crs crs) {
+            final Crs crs,
+            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
         logger.info("initialising WFSFeatureFactory with hostname: '" + hostname + "'");
         this.layerProperties = layerProperties;
         this.hostname = hostname;
         this.featureType = featureType;
         this.crs = crs;
+        this.styles = styles;
     }
 
     /**
@@ -371,7 +376,20 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
      */
     @Override
     protected WFSFeature createFeatureInstance(final Feature degreeFeature, final int index) throws Exception {
-        return new WFSFeature();
+        final WFSFeature f = new WFSFeature();
+        String name = null;
+
+        if ((layerProperties != null) && (layerProperties.getFeatureService() != null)) {
+            name = layerProperties.getFeatureService().getName();
+        }
+
+        if ((name == null) && (featureType != null) && (featureType.getName() != null)) {
+            name = featureType.getName().getPrefix() + ":" + featureType.getName().getLocalPart();
+        }
+
+        f.setSLDStyles(getStyle(name));
+
+        return f;
     }
 
     /**
