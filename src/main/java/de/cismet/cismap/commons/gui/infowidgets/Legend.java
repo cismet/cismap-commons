@@ -729,7 +729,14 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 panelsByName.put(name, lp);
                 panelsByUrl.put(url, lp);
             }
-            super.fireTableStructureChanged();
+
+            EventQueue.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        LegendModel.super.fireTableStructureChanged();
+                    }
+                });
         }
         /*
          * public void addLegend(final BufferedImage img, final String name) { final LegendPanel lp = new
