@@ -15,6 +15,8 @@ import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
+import org.openide.util.NbBundle;
+
 import java.beans.PropertyChangeSupport;
 
 import java.util.ArrayList;
@@ -494,6 +496,9 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
                 final StatusEvent se = new StatusEvent(StatusEvent.AWAKED_FROM_DUMMY, this);
                 CismapBroker.getInstance().fireStatusValueChanged(se);
+            } else {
+                retrievalAborted(new RetrievalEvent());
+                return;
             }
         }
 
@@ -505,6 +510,16 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
         setRefreshNeeded(false);
         final String getMapUrl = getGetMapUrl(customSLD != null);
+
+        if (getMapUrl == null) {
+            final RetrievalEvent e = new RetrievalEvent();
+            e.setInitialisationEvent(true);
+            e.setPercentageDone(0);
+            e.setHasErrors(true);
+            e.setRetrievedObject(NbBundle.getMessage(WMSServiceLayer.class, "WMSServiceLayer.retrieve.urlNotFound"));
+            fireRetrievalError(e);
+            return;
+        }
         final String getMapPayload = getGetMapPayload();
 
         if ((ir != null) && ir.isAlive() && ir.getUrl().equals(getMapUrl) && !forced) {
@@ -675,7 +690,13 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  The GetMap request url.
      */
     private String getGetMapUrl(final boolean minimalUrl) {
-        final StringBuilder url = new StringBuilder(getGetMapPrefix());
+        final String mapPrefix = getGetMapPrefix();
+
+        if (mapPrefix == null) {
+            return null;
+        }
+
+        final StringBuilder url = new StringBuilder(mapPrefix);
 
         if ((bb == null) || (url == null) || (url.length() == 0)) {
             return null;
