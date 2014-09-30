@@ -30,6 +30,7 @@ import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.MappingModelListener;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
+import de.cismet.cismap.commons.featureservice.style.BasicFeatureStyleDialogFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.LayerWidget;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -105,6 +106,7 @@ public class CismapBroker {
     private MetaSearchFacade metaSearch;
     private boolean useInternalDb = false;
     private boolean checkForOverlappingGeometriesAfterFeatureRotation = true;
+    private String featureStylingComponentKey = BasicFeatureStyleDialogFactory.KEY;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -1004,5 +1006,23 @@ public class CismapBroker {
     public void setCheckForOverlappingGeometriesAfterFeatureRotation(
             final boolean checkForOverlappingGeometriesAfterFeatureRotation) {
         this.checkForOverlappingGeometriesAfterFeatureRotation = checkForOverlappingGeometriesAfterFeatureRotation;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getFeatureStylingComponentKey() {
+        return featureStylingComponentKey;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureStylingComponentKey  DOCUMENT ME!
+     */
+    public void setFeatureStylingComponentKey(final String featureStylingComponentKey) {
+        this.featureStylingComponentKey = featureStylingComponentKey;
     }
 }
