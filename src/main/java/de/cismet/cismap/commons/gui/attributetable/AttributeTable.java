@@ -460,6 +460,15 @@ public class AttributeTable extends javax.swing.JPanel {
     //~ Methods ----------------------------------------------------------------
 
     /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public AbstractFeatureService getFeatureService() {
+        return this.featureService;
+    }
+
+    /**
      * Should be invoked, before the window wit the AttributeTable is closed. This method checks, if there are unsaved
      * changes
      */
