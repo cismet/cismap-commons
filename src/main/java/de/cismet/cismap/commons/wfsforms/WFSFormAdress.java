@@ -52,19 +52,16 @@ public class WFSFormAdress extends AbstractWFSForm {
     private WFSFormFeature nr = null;
     private final ArrayList<WFSFormAdressListener> listeners = new ArrayList<WFSFormAdressListener>();
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox cboNr;
-    private javax.swing.JComboBox cboStreets;
+    protected javax.swing.JComboBox cboNr;
+    protected javax.swing.JComboBox cboStreets;
     protected javax.swing.JCheckBox chkLockScale;
     protected javax.swing.JCheckBox chkVisualize;
     protected javax.swing.JButton cmdOk;
     protected javax.swing.JLabel jLabel1;
     protected javax.swing.JLabel jLabel2;
-    private javax.swing.JPanel jPanel3;
     protected javax.swing.JPanel panEmpty;
-    protected javax.swing.JPanel panNr;
-    protected javax.swing.JPanel panStr;
-    private javax.swing.JProgressBar prbNr;
-    private javax.swing.JProgressBar prbStreets;
+    protected javax.swing.JProgressBar prbNr;
+    protected javax.swing.JProgressBar prbStreets;
     // End of variables declaration//GEN-END:variables
 
     //~ Constructors -----------------------------------------------------------
@@ -130,9 +127,6 @@ public class WFSFormAdress extends AbstractWFSForm {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jPanel3 = new javax.swing.JPanel();
-        panNr = new javax.swing.JPanel();
-        panStr = new javax.swing.JPanel();
         cmdOk = new javax.swing.JButton();
         chkVisualize = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
@@ -143,27 +137,6 @@ public class WFSFormAdress extends AbstractWFSForm {
         prbNr = new javax.swing.JProgressBar();
         cboStreets = new javax.swing.JComboBox();
         prbStreets = new javax.swing.JProgressBar();
-
-        final org.jdesktop.layout.GroupLayout jPanel3Layout = new org.jdesktop.layout.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
-
-        final org.jdesktop.layout.GroupLayout panNrLayout = new org.jdesktop.layout.GroupLayout(panNr);
-        panNr.setLayout(panNrLayout);
-        panNrLayout.setHorizontalGroup(
-            panNrLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
-        panNrLayout.setVerticalGroup(
-            panNrLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
-
-        final org.jdesktop.layout.GroupLayout panStrLayout = new org.jdesktop.layout.GroupLayout(panStr);
-        panStr.setLayout(panStrLayout);
-        panStrLayout.setHorizontalGroup(
-            panStrLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
-        panStrLayout.setVerticalGroup(
-            panStrLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING).add(0, 100, Short.MAX_VALUE));
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2));
         setMaximumSize(new java.awt.Dimension(498, 35));
