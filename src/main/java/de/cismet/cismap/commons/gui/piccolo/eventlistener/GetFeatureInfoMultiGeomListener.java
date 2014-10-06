@@ -508,7 +508,7 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void fireGetFeatureInfoEvent(final GetFeatureInfoEvent evt) {
+    public void fireGetFeatureInfoEvent(final GetFeatureInfoEvent evt) {
         for (final GetFeatureInfoListener l : listener) {
             l.getFeatureInfoRequest(evt);
         }
