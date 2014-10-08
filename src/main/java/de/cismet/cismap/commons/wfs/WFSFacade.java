@@ -202,18 +202,20 @@ public class WFSFacade {
     /**
      * Set the bounding box and the srs of the given getFeature request and returns the resulting request as string.
      *
-     * @param   query    the getFeature request template.
-     * @param   bbox     the bounding box that should be used in the getFeature request
-     * @param   feature  the type of the feature from the given query
-     * @param   mapCrs   the crs of the map, the features should be shown on
+     * @param   query             the getFeature request template.
+     * @param   bbox              the bounding box that should be used in the getFeature request
+     * @param   feature           the type of the feature from the given query
+     * @param   mapCrs            the crs of the map, the features should be shown on
+     * @param   reverseAxisOrder  if true, the axis order will be lat/lon
      *
      * @return  the new getFeature request
      */
     public String setGetFeatureBoundingBox(final String query,
             final XBoundingBox bbox,
             final FeatureType feature,
-            final String mapCrs) {
-        return setGetFeatureBoundingBox(query, bbox, feature, mapCrs, false);
+            final String mapCrs,
+            final boolean reverseAxisOrder) {
+        return setGetFeatureBoundingBox(query, bbox, feature, mapCrs, reverseAxisOrder, false);
     }
 
     /**
@@ -223,6 +225,7 @@ public class WFSFacade {
      * @param   bbox              the bounding box that should be used in the getFeature request
      * @param   feature           the type of the feature from the given query
      * @param   mapCrs            the crs of the map, the features should be shown on
+     * @param   reverseAxisOrder  if true, the axis order will be lat/lon
      * @param   onlyFeatureCount  the resultType attribute will be set to hits, iif onlyFeatureCount is true
      *
      * @return  the new getFeature request
@@ -231,6 +234,7 @@ public class WFSFacade {
             final XBoundingBox bbox,
             final FeatureType feature,
             final String mapCrs,
+            final boolean reverseAxisOrder,
             final boolean onlyFeatureCount) {
         String request;
         String envelope;
@@ -243,20 +247,32 @@ public class WFSFacade {
             logger.debug("optimal crs: " + crs);
         }
 
-        if ((cap.getVersion() != null) && cap.getVersion().equals("1.0.0")) {                             // NOI18N
-            envelope = "<gml:Box><gml:coord><gml:X>" + tbbox.getX1() + "</gml:X><gml:Y>" + tbbox.getY1()  // NOI18N
-                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + tbbox.getX2()                   // NOI18N
-                        + "</gml:X><gml:Y>" + tbbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";      // NOI18N
-        } else if ((cap.getVersion() != null) && cap.getVersion().equals("1.1.0")) {                      // NOI18N
-            envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
-                        + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
-                        + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+        if ((cap.getVersion() != null) && cap.getVersion().equals("1.0.0")) {                                 // NOI18N
+            envelope = "<gml:Box><gml:coord><gml:X>" + tbbox.getX1() + "</gml:X><gml:Y>" + tbbox.getY1()      // NOI18N
+                        + "</gml:Y></gml:coord>" + "<gml:coord><gml:X>" + tbbox.getX2()                       // NOI18N
+                        + "</gml:X><gml:Y>" + tbbox.getY2() + "</gml:Y></gml:coord>" + "</gml:Box>";          // NOI18N
+        } else if ((cap.getVersion() != null) && cap.getVersion().equals("1.1.0")) {                          // NOI18N
+            if (reverseAxisOrder) {
+                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getY1()                                  // NOI18N
+                            + " " + tbbox.getX1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
+                            + tbbox.getY2() + " " + tbbox.getX2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            } else {
+                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
+                            + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
+                            + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            }
         } else {
-            logger.error("unknown service version used: " + cap.getVersion()                              // NOI18N
-                        + ". Try to use a version 1.1.0 request");                                        // NOI18N
-            envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
-                        + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
-                        + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            logger.error("unknown service version used: " + cap.getVersion()                                  // NOI18N
+                        + ". Try to use a version 1.1.0 request");                                            // NOI18N
+            if (reverseAxisOrder) {
+                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getY1()                                  // NOI18N
+                            + " " + tbbox.getX1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
+                            + tbbox.getY2() + " " + tbbox.getX2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            } else {
+                envelope = "<gml:Envelope><gml:lowerCorner>" + tbbox.getX1()                                  // NOI18N
+                            + " " + tbbox.getY1() + "</gml:lowerCorner>" + "<gml:upperCorner>"                // NOI18N
+                            + tbbox.getX2() + " " + tbbox.getY2() + "</gml:upperCorner>" + "</gml:Envelope>"; // NOI18N
+            }
         }
 
         request = query.toString().replaceAll(CISMAP_BOUNDING_BOX_AS_GML_PLACEHOLDER, envelope);

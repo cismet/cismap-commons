@@ -121,6 +121,12 @@ public class CapabilitiesPreferences {
             try {
                 final String type = elem.getAttribute("type").getValue();                   // NOI18N
                 final String title = elem.getAttribute("titlestring").getValue();           // NOI18N
+                boolean reverseAxisOrder = false;
+                final Attribute reverseAxisOrderElement = elem.getAttribute("reverseAxisOrder");
+
+                if (reverseAxisOrderElement != null) {
+                    reverseAxisOrder = reverseAxisOrderElement.getBooleanValue();
+                }
 
                 if (type.equals(CapabilityLink.MENU)) {
                     // Unterknoten erzeugen
@@ -129,7 +135,8 @@ public class CapabilitiesPreferences {
                     // CapabilitiesList-Eintrag erzeugen
                     final String link = elem.getTextTrim();
                     final String subparent = elem.getAttributeValue("subparent");  // NOI18N
-                    capabilitiesList.put(new Integer(listCounter++), new CapabilityLink(type, link, title, subparent));
+                    capabilitiesList.put(new Integer(listCounter++),
+                        new CapabilityLink(type, link, reverseAxisOrder, title, subparent));
                 }
             } catch (Throwable t) {
                 log.warn("Error while reading the CapabilityListPreferences.", t); // NOI18N
