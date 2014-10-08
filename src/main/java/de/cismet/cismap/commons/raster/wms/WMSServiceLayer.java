@@ -117,6 +117,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     private Element wmsServiceLayerElement;
     private HashMap<String, WMSCapabilities> capabilities;
     private List<WMSLayer> dummyLayer = new ArrayList<WMSLayer>();
+    private boolean reverseAxisOrder = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -226,6 +227,15 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         final Attribute attributeTitle = wmsServiceLayerElement.getAttribute("title"); // NOI18N
         if (attributeTitle != null) {
             setTitle(attributeTitle.getValue());
+        }
+
+        final Attribute attributeReverseAxisOrder = wmsServiceLayerElement.getAttribute("reverseAxisOrder"); // NOI18N
+        if (attributeReverseAxisOrder != null) {
+            try {
+                this.reverseAxisOrder = attributeReverseAxisOrder.getBooleanValue();
+            } catch (DataConversionException e) {
+                LOG.error("Cannot parse the reverse axis order", e);
+            }
         }
 
         try {
@@ -1071,7 +1081,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             layerConf.setAttribute("bgColor", getBackgroundColor());                                           // NOI18N
             layerConf.setAttribute("imageFormat", getImageFormat());                                           // NOI18N
             layerConf.setAttribute("exceptionFormat", getExceptionsFormat());                                  // NOI18N
-            final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, getCapabilitiesUrl(), false);
+            final CapabilityLink capLink = new CapabilityLink(
+                    CapabilityLink.OGC,
+                    getCapabilitiesUrl(),
+                    reverseAxisOrder,
+                    false);
             layerConf.addContent(capLink.getElement());
             final Iterator lit = getWMSLayers().iterator();
             while (lit.hasNext()) {
@@ -1168,6 +1182,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         w.wmsServiceLayerElement = wmsServiceLayerElement;
         w.capabilities = capabilities;
         w.dummyLayer = dummyLayer;
+        w.reverseAxisOrder = reverseAxisOrder;
         final List<WMSLayer> layers = new ArrayList<WMSLayer>(wmsLayers.size());
 
         for (final Object layerObject : wmsLayers) {

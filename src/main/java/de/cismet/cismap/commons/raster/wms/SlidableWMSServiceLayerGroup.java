@@ -186,6 +186,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
     private HashMap<String, WMSCapabilities> orginalCapabilities;
 
     private float translucency = 1.0f;
+    private boolean reverseAxisOrder = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -333,6 +334,14 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
             LOG.warn("Attribute visible has wrong data type.", e);
         } catch (final NullPointerException e) {
             LOG.warn("Attribute visible not found.", e);
+        }
+
+        try {
+            this.reverseAxisOrder = element.getAttribute("reverseAxisOrder").getBooleanValue();
+        } catch (final DataConversionException e) {
+            LOG.warn("Attribute reverseAxisOrder has wrong data type.", e);
+        } catch (final NullPointerException e) {
+            LOG.info("Attribute reverseAxisOrder not found.", e);
         }
 
         try {
@@ -984,6 +993,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         clonedLayer.setPNode(null);
         clonedLayer.setTranslucency(this.getTranslucency());
         clonedLayer.setSliderValue(internalFrame.getSliderValue());
+        clonedLayer.reverseAxisOrder = reverseAxisOrder;
 
         return clonedLayer;
     }
@@ -1240,7 +1250,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
         }
 
         final Element capElement = new Element("capabilities"); // NOI18N
-        final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, capabilitiesUrl, false);
+        final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, capabilitiesUrl, reverseAxisOrder, false);
         capElement.addContent(capLink.getElement());
 
         element.addContent(capElement);
