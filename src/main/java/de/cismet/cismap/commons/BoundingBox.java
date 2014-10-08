@@ -257,7 +257,23 @@ public class BoundingBox implements Cloneable, Serializable {
      * @return  String to assemble URL
      */
     public String getURLString() {
-        return getX1() + "," + getY1() + "," + getX2() + "," + getY2(); // NOI18N
+        return getURLString(false);
+    }
+
+    /**
+     * This Method return the BoundingBox like
+     * -179.99999999999997,-105.48710130136223,176.35443037974682,114.6141645214226.
+     *
+     * @param   reverseOrder  DOCUMENT ME!
+     *
+     * @return  String to assemble URL
+     */
+    public String getURLString(final boolean reverseOrder) {
+        if (reverseOrder) {
+            return getY1() + "," + getX1() + "," + getY2() + "," + getX2(); // NOI18N
+        } else {
+            return getX1() + "," + getY1() + "," + getX2() + "," + getY2(); // NOI18N
+        }
     }
 
     /**
