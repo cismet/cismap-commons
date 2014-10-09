@@ -98,6 +98,8 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
+import de.cismet.cismap.commons.featureservice.ShapeFolderTreeCellRenderer;
+import de.cismet.cismap.commons.featureservice.ShapeFolderTreeModel;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
@@ -136,6 +138,8 @@ import de.cismet.tools.configuration.Configurable;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
+import java.io.File;
+import java.util.List;
 
 /**
  * DOCUMENT ME!
@@ -175,6 +179,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private HashMap<Component, JTree> cidsTrees = new HashMap<Component, JTree>();
     private HashMap<Component, WFSCapabilities> wfsCapabilities = new HashMap<Component, WFSCapabilities>();
     private HashMap<Component, JTree> wfsCapabilitiesTrees = new HashMap<Component, JTree>();
+    private HashMap<Component, JTree> shapeFolderTrees = new HashMap<Component, JTree>();
     private CapabilitiesPreferences preferences = new CapabilitiesPreferences();
     private JPopupMenu capabilityList = new JPopupMenu();
     private CapabilityWidget thisWidget = null;
@@ -383,9 +388,27 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                     + " link: "
                                     + link.toLowerCase());
                     }
+                    File shapeFolder = null;
+
+                    if (link.startsWith("file:")) {
+                        String uri = link;
+
+                        if (uri.endsWith("\r")) {
+                            uri = uri.substring(0, uri.length() - 1);
+                        }
+
+                        final File folderCandidate = new File(link.substring(7).trim());
+
+                        if (folderCandidate.isDirectory()) {
+                            shapeFolder = folderCandidate;
+                        }
+                    }
+
                     // TODO
                     // should be refactored --> coomon parts like capabilities s
-                    if (link.toLowerCase().contains("service=wfs")) {                              // NOI18N
+                    if (shapeFolder != null) {                                                     // NOI18N
+                        addShapeFolderCapabilitiesTree(link, load, interactive, subparent);
+                    } else if (link.toLowerCase().contains("service=wfs")) {                              // NOI18N
                         addOGCWFSCapabilitiesTree(link, load, interactive);
                     } else if (link.toLowerCase().contains("service=wms")) {                       // NOI18N
                         addOGCWMSCapabilitiesTree(link, load, interactive, subparent);
@@ -682,30 +705,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
+    }//GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
+    }//GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
@@ -718,16 +741,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
+    }//GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
+    }//GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -761,6 +784,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 jdbcTrees.remove(tbpCapabilities.getSelectedComponent());
             } else if (cidsTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
                 cidsTrees.remove(tbpCapabilities.getSelectedComponent());
+            } else if (shapeFolderTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
+                shapeFolderTrees.remove(tbpCapabilities.getSelectedComponent());
             } else {
                 log.warn("Keine Component zum entfernen aktiv"); // NOI18N
             }
@@ -786,7 +811,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -795,16 +820,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
+    }//GEN-LAST:event_cmdCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpCapabilitiesStateChanged
+    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpCapabilitiesStateChanged
         addFilterToActiveTree();
-    }                                                                                   //GEN-LAST:event_tbpCapabilitiesStateChanged
+    }//GEN-LAST:event_tbpCapabilitiesStateChanged
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
@@ -820,6 +845,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             return jdbcTrees.get(tbpCapabilities.getSelectedComponent());
         } else if (cidsTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
             return cidsTrees.get(tbpCapabilities.getSelectedComponent());
+        } else if (shapeFolderTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
+            return shapeFolderTrees.get(tbpCapabilities.getSelectedComponent());
         } else {
             return null;
         }
@@ -878,7 +905,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      * @return  true, falls g\u00FCltiges Objekt, sonst false
      */
     private boolean isDropOk(final DropTargetDropEvent e) {
-        if (e.isDataFlavorSupported(DataFlavor.getTextPlainUnicodeFlavor())) {
+        if (e.isDataFlavorSupported(DataFlavor.getTextPlainUnicodeFlavor())
+                    || e.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
             return true;
         } else {
             return false;
@@ -896,48 +924,59 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         String link = null;
         try {
             dtde.acceptDrop(acceptableActions);
-            final Object data = dtde.getTransferable().getTransferData(DataFlavor.getTextPlainUnicodeFlavor());
-            if (data instanceof InputStream) {
-                final InputStream input = (InputStream)data;
-                final InputStreamReader isr = new InputStreamReader(input);
+            if (dtde.isDataFlavorSupported(DataFlavor.getTextPlainUnicodeFlavor())) {
+                final Object data = dtde.getTransferable().getTransferData(DataFlavor.getTextPlainUnicodeFlavor());
+                if (data instanceof InputStream) {
+                    final InputStream input = (InputStream)data;
+                    final InputStreamReader isr = new InputStreamReader(input);
 
-                final StringBuffer str = new StringBuffer();
-                int in = -1;
-                try {
-                    while ((in = isr.read()) >= 0) {
-                        if (in != 0) {
-                            str.append((char)in);
+                    final StringBuffer str = new StringBuffer();
+                    int in = -1;
+                    try {
+                        while ((in = isr.read()) >= 0) {
+                            if (in != 0) {
+                                str.append((char)in);
+                            }
                         }
-                    }
-                    link = str.toString();
-                } catch (IOException ioe) {
-                    /*
-                     * bug #4094987 sun.io.MalformedInputException: Missing byte-order mark e.g. if dragging from MS
-                     * Word 97 to Java still a bug in 1.2 final
-                     */
-                    System.err.println("cannot read" + ioe);                        // NOI18N
-                    dtde.dropComplete(false);
-                    final String message = org.openide.util.NbBundle.getMessage(
-                            CapabilityWidget.class,
-                            "CapabilityWidget.getLink(DropTargetDropEvent).message",
-                            new Object[] { ioe.getMessage() });                     // NOI18N
-                    JOptionPane.showMessageDialog(
-                        StaticSwingTools.getParentFrame(this),
-                        message,
-                        org.openide.util.NbBundle.getMessage(
-                            CapabilityWidget.class,
-                            "CapabilityWidget.getLink(DropTargetDropEvent).title"), // NOI18N
-                        JOptionPane.ERROR_MESSAGE);
+                        link = str.toString();
+                    } catch (IOException ioe) {
+                        /*
+                         * bug #4094987 sun.io.MalformedInputException: Missing byte-order mark e.g. if dragging from MS
+                         * Word 97 to Java still a bug in 1.2 final
+                         */
+                        System.err.println("cannot read" + ioe);                        // NOI18N
+                        dtde.dropComplete(false);
+                        final String message = org.openide.util.NbBundle.getMessage(
+                                CapabilityWidget.class,
+                                "CapabilityWidget.getLink(DropTargetDropEvent).message",
+                                new Object[] { ioe.getMessage() });                     // NOI18N
+                        JOptionPane.showMessageDialog(
+                            StaticSwingTools.getParentFrame(this),
+                            message,
+                            org.openide.util.NbBundle.getMessage(
+                                CapabilityWidget.class,
+                                "CapabilityWidget.getLink(DropTargetDropEvent).title"), // NOI18N
+                            JOptionPane.ERROR_MESSAGE);
 
-                    return null;
+                        return null;
+                    }
                 }
-            }
-            // Wir gehen davon aus, dass der Link Title immer in der 2ten Zeile steht
-            try {
-                link = link.substring(0, link.indexOf("\n")); // NOI18N
-            } catch (Exception e) {
-            }
-            return link;
+                // Wir gehen davon aus, dass der Link Title immer in der 2ten Zeile steht
+                try {
+                    link = link.substring(0, link.indexOf("\n")); // NOI18N
+                } catch (Exception e) {
+                }
+                return link;
+            } else {
+                final Object data = dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+
+                if (data instanceof List) {
+                    if (((List)data).size() > 0) {
+                        final File f = (File)((List)data).get(0);
+                        link = "file://" + f.getAbsolutePath();
+                    }
+                }
+            }        
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1203,6 +1242,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                                                     true,
                                                                     service);
                                                             dialog.setSize(645, 260);
+                                                            dialog.pack();
                                                             StaticSwingTools.showDialog(dialog);
                                                         } catch (Exception ex) {
                                                             log.error(
@@ -1253,6 +1293,116 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 }
             };
         CismetThreadPool.execute(r);
+    }
+
+    /**
+     * Erzeugt den Baum aus der geparsten Capabilities-XML und f\u00FCgt ihn der TabbedPane hinzu.
+     *
+     * @param  link         Capabilites-URL
+     * @param  comp         Component
+     * @param  interactive  true, falls per Drag&Drop, sonst false
+     * @param  subparent    DOCUMENT ME!
+     */
+    private void addShapeFolderCapabilitiesTree(final String link,
+            final JComponent comp,
+            final boolean interactive,
+            final String subparent) {
+        if (log.isDebugEnabled()) {
+            log.debug("addShapeFolderCapabilitiesTree()"); // NOI18N
+        }
+        final Runnable t = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final DragTree trvCap = new DragTree();
+                        final ShapeFolderTreeModel tm = new ShapeFolderTreeModel(link);
+                        final DropTarget dt = new DropTarget(trvCap, acceptableActions, thisWidget);
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    addPopupMenu(trvCap);
+                                    trvCap.setModel(tm);
+                                    trvCap.setBorder(new EmptyBorder(1, 1, 1, 1));
+                                    trvCap.setCellRenderer(new ShapeFolderTreeCellRenderer());
+                                    final JScrollPane sPane = new JScrollPane();
+                                    sPane.setViewportView(trvCap);
+                                    sPane.setBorder(new EmptyBorder(1, 1, 1, 1));
+                                    StaticSwingTools.setNiftyScrollBars(sPane);
+                                    synchronized (this) {
+                                        tbpCapabilities.setComponentAt(tbpCapabilities.indexOfComponent(comp), sPane);
+                                    }
+//                                    wmsCapabilities.put(sPane, cap);
+                                    shapeFolderTrees.put(sPane, trvCap);
+                                    stateChanged(null);
+
+                                    capabilityUrls.put(new LinkWithSubparent(link, subparent), sPane);
+                                    capabilityUrlsReverse.put(sPane, new LinkWithSubparent(link, subparent));
+                                    String title = link.substring(link.lastIndexOf("/"));
+                                    if (subparent != null) {
+                                        title = subparent;
+                                    }
+                                    final String titleOrig = title;
+                                    if (title.length() > 0) {
+                                        if (title.length() > maxServerNameLength) {
+                                            title = title.substring(0, maxServerNameLength - 3) + "..."; // NOI18N
+                                        }
+                                        sPane.putClientProperty("tabTitle", title);                      // NOI18N
+                                        synchronized (this) {
+                                            StaticSwingTools.jTabbedPaneWithVerticalTextSetNewText(
+                                                tbpCapabilities,
+                                                title,
+                                                icoConnected,
+                                                Color.black,
+                                                sPane);
+                                        }
+                                        synchronized (this) {
+                                            tbpCapabilities.setToolTipTextAt(
+                                                tbpCapabilities.indexOfComponent(sPane),
+                                                titleOrig);
+                                        }
+                                        stateChanged(null);
+                                    }
+                                }
+                            });
+                    } catch (Throwable e) {
+                        log.error("Error while creating the ShapeFolder tree", e);                       // NOI18N
+                        String message = "";                                                             // NOI18N
+
+                        tbpCapabilities.setIconAt(tbpCapabilities.indexOfComponent(comp), icoError);
+                        if ((e instanceof RequestFailedException) || (e.getMessage() == null)
+                                    || e.getMessage().equals("null")) { // NOI18N
+                            message = e.getCause().getMessage();
+                        } else {
+                            message = e.getMessage();
+                        }
+
+                        if (interactive) {
+                            final ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(
+                                        CapabilityWidget.class,
+                                        "CapabilityWidget.addShapeFolderTree.JOptionPane.title"),   // NOI18N
+                                    org.openide.util.NbBundle.getMessage(
+                                        CapabilityWidget.class,
+                                        "CapabilityWidget.addShapeFolderTree.JOptionPane.message"), // NOI18N
+                                    null,
+                                    null,
+                                    e,
+                                    Level.SEVERE,
+                                    null);
+                            JXErrorPane.showDialog(thisWidget, ei);
+                        }
+                        // TODO: Error \u00FCber die Statuszeile bekanntgeben
+                        log.error("Error while loading Shape folder: " + message, e); // NOI18N
+                        tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+
+                        final JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
+                        capabilityUrls.remove(new LinkWithSubparent(link, null));
+                        capabilityUrlsReverse.remove(jc);
+                    }
+                }
+            };
+        CismetThreadPool.execute(t);
     }
 
     /**
@@ -1534,6 +1684,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                 wfsCapabilities.remove(comp);
                                 wfsCapabilitiesTrees.remove(comp);
                                 tbpCapabilities.remove(comp);
+                            } else if (shapeFolderTrees.get(comp) != null) {
+                                shapeFolderTrees.remove(comp);
                             } else {
                                 log.warn("Keine Component zum entfernen aktiv");                               // NOI18N
                             }
@@ -2438,7 +2590,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         if ((getSelectionPath() != null)
                                     && ((getSelectionPath().getLastPathComponent() instanceof Layer)
                                         || (getSelectionPath().getLastPathComponent() instanceof Element)
-                                        || (getSelectionPath().getLastPathComponent() instanceof FeatureType))) {
+                                        || (getSelectionPath().getLastPathComponent() instanceof FeatureType)
+                                        || (getSelectionPath().getLastPathComponent() instanceof File))) {
                             CismapBroker.getInstance()
                                     .fireCapabilityLayerChanged(
                                         new CapabilityEvent(getSelectionPath().getLastPathComponent()));
@@ -2506,6 +2659,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
                     trans = new DefaultTransferable(new WFSSelectionAndCapabilities(features));
                 }
+            } else if (this.getModel() instanceof ShapeFolderTreeModel) {
+                final Object o = getSelectionModel().getSelectionPath().getLastPathComponent();
+
+                if (o instanceof File) {
+                    if (((File)o).isDirectory()) {
+                        return;
+                    }
+                }
+
+                trans = new DefaultTransferable(o);
             } else if (this.getModel().getClass().getName().equals("de.cismet.cismap.cidslayer.CidsLayerTreeModel")) {
                 trans = new DefaultTransferable(getSelectionModel().getSelectionPath().getLastPathComponent());
             }

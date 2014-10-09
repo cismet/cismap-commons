@@ -11,14 +11,11 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.jdom.Element;
 
-import org.openide.util.Exceptions;
-import org.openide.util.NbBundle;
 
 import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.SystemFlavorMap;
-import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureListener;
 import java.awt.dnd.DragSource;
@@ -30,14 +27,12 @@ import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import java.io.File;
 
 import java.util.*;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.DefaultListSelectionModel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolTip;
 import javax.swing.SwingWorker;
@@ -46,31 +41,21 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.*;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
-import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
-import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
-import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.JDBCFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
-import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
-import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
-import de.cismet.cismap.commons.internaldb.DBTableInformation;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
-import de.cismet.cismap.commons.util.DnDUtils;
-import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wms.capabilities.*;
 
 import de.cismet.tools.configuration.Configurable;
@@ -438,7 +423,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshSingleLayerActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshSingleLayerActionPerformed
+    private void cmdRefreshSingleLayerActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshSingleLayerActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
         final SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
 
@@ -468,14 +453,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             };
 
         worker.execute();
-    } //GEN-LAST:event_cmdRefreshSingleLayerActionPerformed
+    }//GEN-LAST:event_cmdRefreshSingleLayerActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdDownActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdDownActionPerformed
+    private void cmdDownActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDownActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -506,14 +491,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                 }
             });
-    } //GEN-LAST:event_cmdDownActionPerformed
+    }//GEN-LAST:event_cmdDownActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdUpActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdUpActionPerformed
+    private void cmdUpActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdUpActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -545,14 +530,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     StaticSwingTools.jTableScrollToVisible(treeTable, treeTable.getSelectedRow(), 0);
                 }
             });
-    } //GEN-LAST:event_cmdUpActionPerformed
+    }//GEN-LAST:event_cmdUpActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdMakeInvisibleActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdMakeInvisibleActionPerformed
+    private void cmdMakeInvisibleActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdMakeInvisibleActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -573,14 +558,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     treeTable.getTree().setSelectionPaths(tps);
                 }
             });
-    } //GEN-LAST:event_cmdMakeInvisibleActionPerformed
+    }//GEN-LAST:event_cmdMakeInvisibleActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdDisableActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdDisableActionPerformed
+    private void cmdDisableActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdDisableActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
         if (tps != null) {
@@ -600,14 +585,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                     treeTable.getTree().setSelectionPaths(tps);
                 }
             });
-    } //GEN-LAST:event_cmdDisableActionPerformed
+    }//GEN-LAST:event_cmdDisableActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdTreeCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdTreeCollapseActionPerformed
+    private void cmdTreeCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdTreeCollapseActionPerformed
         // StaticSwingTools.jTreeCollapseAllNodes(treeTable.getTree());
 // int sel = treeTable.getSelectionModel().getMinSelectionIndex();
 // if (treeTable.getRowCount() > 0) {
@@ -622,14 +607,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
 // }
 
         treeTable.getColumnModel().getColumn(3).getCellEditor().stopCellEditing();
-    } //GEN-LAST:event_cmdTreeCollapseActionPerformed
+    }//GEN-LAST:event_cmdTreeCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
         try {
             final TreePath[] tps = treeTable.getTree().getSelectionPaths();
 
@@ -666,14 +651,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         } catch (final Exception e) {
             log.error("Error during removal of layer", e);
         }
-    } //GEN-LAST:event_cmdRemoveActionPerformed
+    }//GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
+    private void cmdZoomToFullExtentActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdZoomToFullExtentActionPerformed
         final TreePath[] tps = treeTable.getTree().getSelectionPaths();
         final SwingWorker<Geometry, Geometry> worker = new SwingWorker<Geometry, Geometry>() {
 
@@ -779,14 +764,14 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
             };
 
         worker.execute();
-    } //GEN-LAST:event_cmdZoomToFullExtentActionPerformed
+    }//GEN-LAST:event_cmdZoomToFullExtentActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         try {
             final Class classInfo = ClassLoader.getSystemClassLoader()
                         .loadClass("de.cismet.cismap.cidslayer.CidsLayer");
@@ -798,7 +783,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         } catch (IllegalAccessException ex) {
             log.error("IllegalAccessException", ex);
         }
-    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -853,222 +838,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
      */
     @Override
     public void drop(final java.awt.dnd.DropTargetDropEvent dtde) {
-        final DataFlavor TREEPATH_FLAVOR = new DataFlavor(
-                DataFlavor.javaJVMLocalObjectMimeType,
-                "SelectionAndCapabilities");                                           // NOI18N
-        if (log.isDebugEnabled()) {
-            log.debug("Drop with this flavors:" + dtde.getCurrentDataFlavorsAsList()); // NOI18N
-        }
-        if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)
-                    || dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
-            dtde.acceptDrop(DnDConstants.ACTION_COPY);
-            try {
-                List<File> data = null;
-                final Transferable transferable = dtde.getTransferable();
-                if (dtde.isDataFlavorSupported(DnDUtils.URI_LIST_FLAVOR)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Drop is unix drop");                                // NOI18N
-                    }
-
-                    try {
-                        if (log.isDebugEnabled()) {
-                            log.debug("Drop is Mac drop xxx"
-                                        + transferable.getTransferData(DataFlavor.javaFileListFlavor)); // NOI18N
-                        }
-
-                        data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                    } catch (Exception e) {
-                        // transferable.getTransferData(DataFlavor.javaFileListFlavor) will throw an
-                        // UnsupportedFlavorException on Linux
-                        if (data == null) {
-                            if (log.isDebugEnabled()) {
-                                log.debug("Drop is Linux drop"); // NOI18N
-                            }
-                            data = DnDUtils.textURIListToFileList((String)transferable.getTransferData(
-                                        DnDUtils.URI_LIST_FLAVOR));
-                        }
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Drop is windows drop");       // NOI18N
-                    }
-                    data = (java.util.List)transferable.getTransferData(DataFlavor.javaFileListFlavor);
-                }
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Drag&Drop File List: " + data); // NOI18N
-                }
-                if (data != null) {
-                    for (final File currentFile : data) {
-                        // NO HARDCODING
-                        try {
-                            log.info("DocumentUri: " + currentFile.toURI()); // NOI18N
-                            if (isGeoImage(currentFile.getName())) {
-                                final ImageRasterService irs = new ImageRasterService(currentFile);
-
-                                activeLayerModel.addLayer(irs);
-                            } else {
-                                final AbstractFeatureService dfs = DocumentFeatureServiceFactory
-                                            .createDocumentFeatureService(currentFile);
-                                activeLayerModel.addLayer(dfs);
-
-                                if (dfs instanceof ShapeFileFeatureService) {
-                                    new Thread(new Runnable() {
-
-                                            @Override
-                                            public void run() {
-                                                do {
-                                                    try {
-                                                        Thread.sleep(500);
-                                                    } catch (final InterruptedException e) {
-                                                        // nothing to do
-                                                    }
-                                                } while (!dfs.isInitialized());
-
-                                                if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
-                                                    JOptionPane.showMessageDialog(
-                                                        StaticSwingTools.getParentFrame(LayerWidget.this),
-                                                        NbBundle.getMessage(
-                                                            LayerWidget.class,
-                                                            "LayerWidget.drop().errorInShapeGeometryFoundMessage"),
-                                                        NbBundle.getMessage(
-                                                            LayerWidget.class,
-                                                            "LayerWidget.drop().errorInShapeGeometryFoundTitle"),
-                                                        JOptionPane.ERROR_MESSAGE);
-                                                } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
-                                                    JOptionPane.showMessageDialog(
-                                                        StaticSwingTools.getParentFrame(LayerWidget.this),
-                                                        NbBundle.getMessage(
-                                                            LayerWidget.class,
-                                                            "LayerWidget.drop().noGeometryFoundInShapeMessage"),
-                                                        NbBundle.getMessage(
-                                                            LayerWidget.class,
-                                                            "LayerWidget.drop().noGeometryFoundInShapeTitle"),
-                                                        JOptionPane.WARNING_MESSAGE);
-                                                }
-                                            }
-                                        }).start();
-                                }
-                            }
-                        } catch (final Exception ex) {
-                            log.error("Error during creation of a FeatureServices", ex); // NOI18N
-                        }
-                    }
-                } else {
-                    log.warn("No files available");                                      // NOI18N
-                }
-            } catch (final Exception ex) {
-                log.error("Failure during drag & drop opertation", ex);                  // NOI18N
-            }
-        } else if (dtde.isDataFlavorSupported(TREEPATH_FLAVOR)) {
-            try {
-                if (log.isDebugEnabled()) {
-                    log.debug("There are " + dtde.getTransferable().getTransferDataFlavors().length + " DataFlavours"); // NOI18N
-                }
-                for (int i = 0; i < dtde.getTransferable().getTransferDataFlavors().length; ++i) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("DataFlavour" + i + ": " + dtde.getTransferable().getTransferDataFlavors()[i]); // NOI18N
-                    }
-                }
-                final Object o = dtde.getTransferable().getTransferData(TREEPATH_FLAVOR);
-                final List<TreePath> v = new ArrayList<TreePath>();
-                dtde.dropComplete(true);
-                if (o instanceof SelectionAndCapabilities) {
-                    final TreePath[] tpa = ((SelectionAndCapabilities)o).getSelection();
-                    for (int i = 0; i < tpa.length; ++i) {
-                        v.add(tpa[i]);
-                    }
-
-                    if (isSlidableWMSServiceLayerGroup(v.get(0).getLastPathComponent())) {
-                        final SlidableWMSServiceLayerGroup l = new SlidableWMSServiceLayerGroup(v);
-                        l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
-                        l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
-                        activeLayerModel.addLayer(l);
-                    } else {
-                        final WMSServiceLayer l = new WMSServiceLayer(v);
-
-                        if ((treeTable.getEditingRow() != -1) && (treeTable.getEditingColumn() != -1)) {
-                            try {
-                                treeTable.getCellEditor(treeTable.getEditingRow(), treeTable.getEditingColumn())
-                                        .stopCellEditing();
-                            } catch (final Exception e) {
-                                // stopCellEditing went wrong. I don't care ;-)
-                            }
-                        }
-                        l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
-                        activeLayerModel.addLayer(l);
-                        l.setWmsCapabilities(((SelectionAndCapabilities)o).getCapabilities());
-                        l.setCapabilitiesUrl(((SelectionAndCapabilities)o).getUrl());
-                        if (log.isDebugEnabled()) {
-                            log.debug("((SelectionAndCapabilities)o).getUrl()"
-                                        + ((SelectionAndCapabilities)o).getUrl()); // NOI18N
-                        }
-                    }
-                }                                                                  // Drop-Objekt war ein WFS-Element
-                else if (o instanceof WFSSelectionAndCapabilities) {
-                    final WFSSelectionAndCapabilities sac = (WFSSelectionAndCapabilities)o;
-
-                    for (final FeatureType feature : sac.getFeatures()) {
-                        try {
-                            final WebFeatureService wfs = new WebFeatureService(feature.getPrefixedNameString(),
-                                    feature.getWFSCapabilities().getURL().toString(),
-                                    feature.getWFSQuery(),
-                                    feature.getFeatureAttributes(),
-                                    feature);
-                            if ((sac.getIdentifier() != null) && (sac.getIdentifier().length() > 0)) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("setting PrimaryAnnotationExpression of WFS Layer to '"
-                                                + sac.getIdentifier()
-                                                + "' (EXPRESSIONTYPE_PROPERTYNAME)");        // NOI18N
-                                }
-                                wfs.getLayerProperties()
-                                        .setPrimaryAnnotationExpression(sac.getIdentifier(),
-                                            LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
-                            } else {
-                                log.warn("could not determine PrimaryAnnotationExpression"); // NOI18N
-                            }
-
-                            activeLayerModel.addLayer(wfs);
-                        } catch (final IllegalArgumentException schonVorhanden) {
-                            JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
-                                org.openide.util.NbBundle.getMessage(
-                                    LayerWidget.class,
-                                    "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
-                                org.openide.util.NbBundle.getMessage(
-                                    LayerWidget.class,
-                                    "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
-                                JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                } else if (o instanceof DBTableInformation[]) {
-                    final DBTableInformation[] infos = (DBTableInformation[])o;
-
-                    for (final DBTableInformation i : infos) {
-                        final H2FeatureService layer = new H2FeatureService(i.getName(),
-                                i.getDatabasePath(),
-                                i.getDatabaseTable(),
-                                null);
-
-                        activeLayerModel.addLayer(layer);
-                    }
-                } else if (o instanceof LayerConfig) {
-                    activeLayerModel.addLayer(((LayerConfig)o).createConfiguredLayer());
-                }
-            } catch (final IllegalArgumentException schonVorhanden) {
-                JOptionPane.showMessageDialog(StaticSwingTools.getParentFrame(this),
-                    org.openide.util.NbBundle.getMessage(
-                        LayerWidget.class,
-                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.message"), // NOI18N
-                    org.openide.util.NbBundle.getMessage(
-                        LayerWidget.class,
-                        "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
-                    JOptionPane.ERROR_MESSAGE);
-            } catch (final Exception e) {
-                log.error(e, e);
-            }
-        } else {
-            log.warn("No Matching dataFlavour: " + dtde.getCurrentDataFlavorsAsList()); // NOI18N
-        }
+        LayerDropUtils.drop(dtde, activeLayerModel, this);
     }
 
     /**

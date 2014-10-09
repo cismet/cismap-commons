@@ -173,17 +173,11 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         cbRouteTargetField = new javax.swing.JComboBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle(org.openide.util.NbBundle.getMessage(
-                LinearReferencingDialog.class,
-                "LinearReferencingDialog.title",
-                new Object[] {})); // NOI18N
+        setTitle(org.openide.util.NbBundle.getMessage(LinearReferencingDialog.class, "LinearReferencingDialog.title", new Object[] {})); // NOI18N
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         lblTitle.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
-        lblTitle.setText(org.openide.util.NbBundle.getMessage(
-                LinearReferencingDialog.class,
-                "LinearReferencingDialog.lblTitle.text",
-                new Object[] {}));                            // NOI18N
+        lblTitle.setText(org.openide.util.NbBundle.getMessage(LinearReferencingDialog.class, "LinearReferencingDialog.lblTitle.text", new Object[] {})); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
@@ -193,14 +187,12 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(lblTitle, gridBagConstraints);
 
         cbKind.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbKind.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbKind.setPreferredSize(new java.awt.Dimension(180, 27));
         cbKind.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    cbKindItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbKindItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
@@ -212,14 +204,12 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
 
         cbRoute.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbRoute.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbRoute.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbRoute.setPreferredSize(new java.awt.Dimension(180, 27));
         cbRoute.addItemListener(new java.awt.event.ItemListener() {
-
-                @Override
-                public void itemStateChanged(final java.awt.event.ItemEvent evt) {
-                    cbRouteItemStateChanged(evt);
-                }
-            });
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                cbRouteItemStateChanged(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 1;
@@ -231,7 +221,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
 
         cbFrom.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbFrom.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbFrom.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbFrom.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -243,7 +233,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
 
         cbTill.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbTill.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbTill.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbTill.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
@@ -254,10 +244,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(cbTill, gridBagConstraints);
 
         lblKind.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
-        lblKind.setText(org.openide.util.NbBundle.getMessage(
-                LinearReferencingDialog.class,
-                "LinearReferencingDialog.lblKind.text",
-                new Object[] {}));                           // NOI18N
+        lblKind.setText(org.openide.util.NbBundle.getMessage(LinearReferencingDialog.class, "LinearReferencingDialog.lblKind.text", new Object[] {})); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
@@ -266,10 +253,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(lblKind, gridBagConstraints);
 
         lblFrom.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
-        lblFrom.setText(org.openide.util.NbBundle.getMessage(
-                LinearReferencingDialog.class,
-                "LinearReferencingDialog.lblFrom.text",
-                new Object[] {}));                           // NOI18N
+        lblFrom.setText(org.openide.util.NbBundle.getMessage(LinearReferencingDialog.class, "LinearReferencingDialog.lblFrom.text", new Object[] {})); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 3;
@@ -278,10 +262,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(lblFrom, gridBagConstraints);
 
         lblTill.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
-        lblTill.setText(org.openide.util.NbBundle.getMessage(
-                LinearReferencingDialog.class,
-                "LinearReferencingDialog.lblTill.text",
-                new Object[] {}));                           // NOI18N
+        lblTill.setText(org.openide.util.NbBundle.getMessage(LinearReferencingDialog.class, "LinearReferencingDialog.lblTill.text", new Object[] {})); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 3;
@@ -290,10 +271,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(lblTill, gridBagConstraints);
 
         lblRoute.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
-        lblRoute.setText(org.openide.util.NbBundle.getMessage(
-                LinearReferencingDialog.class,
-                "LinearReferencingDialog.lblRoute.text",
-                new Object[] {}));                            // NOI18N
+        lblRoute.setText(org.openide.util.NbBundle.getMessage(LinearReferencingDialog.class, "LinearReferencingDialog.lblRoute.text", new Object[] {})); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 1;
@@ -301,17 +279,12 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(15, 5, 10, 5);
         getContentPane().add(lblRoute, gridBagConstraints);
 
-        butApply.setText(org.openide.util.NbBundle.getMessage(
-                LinearReferencingDialog.class,
-                "LinearReferencingDialog.butApply.text",
-                new Object[] {})); // NOI18N
+        butApply.setText(org.openide.util.NbBundle.getMessage(LinearReferencingDialog.class, "LinearReferencingDialog.butApply.text", new Object[] {})); // NOI18N
         butApply.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    butApplyActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                butApplyActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 5;
@@ -321,17 +294,12 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
         getContentPane().add(butApply, gridBagConstraints);
 
-        butCancel.setText(org.openide.util.NbBundle.getMessage(
-                LinearReferencingDialog.class,
-                "LinearReferencingDialog.butCancel.text",
-                new Object[] {})); // NOI18N
+        butCancel.setText(org.openide.util.NbBundle.getMessage(LinearReferencingDialog.class, "LinearReferencingDialog.butCancel.text", new Object[] {})); // NOI18N
         butCancel.addActionListener(new java.awt.event.ActionListener() {
-
-                @Override
-                public void actionPerformed(final java.awt.event.ActionEvent evt) {
-                    butCancelActionPerformed(evt);
-                }
-            });
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                butCancelActionPerformed(evt);
+            }
+        });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 5;
@@ -342,10 +310,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(butCancel, gridBagConstraints);
 
         lblRouteField.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
-        lblRouteField.setText(org.openide.util.NbBundle.getMessage(
-                LinearReferencingDialog.class,
-                "LinearReferencingDialog.lblRouteField.text",
-                new Object[] {}));                                 // NOI18N
+        lblRouteField.setText(org.openide.util.NbBundle.getMessage(LinearReferencingDialog.class, "LinearReferencingDialog.lblRouteField.text", new Object[] {})); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -353,10 +318,9 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 5);
         getContentPane().add(lblRouteField, gridBagConstraints);
 
-        cbRouteField.setModel(new javax.swing.DefaultComboBoxModel(
-                new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbRouteField.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbRouteField.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbRouteField.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbRouteField.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -367,10 +331,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(cbRouteField, gridBagConstraints);
 
         lblRouteTargetField.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
-        lblRouteTargetField.setText(org.openide.util.NbBundle.getMessage(
-                LinearReferencingDialog.class,
-                "LinearReferencingDialog.lblRouteTargetField.text",
-                new Object[] {}));                                       // NOI18N
+        lblRouteTargetField.setText(org.openide.util.NbBundle.getMessage(LinearReferencingDialog.class, "LinearReferencingDialog.lblRouteTargetField.text", new Object[] {})); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
@@ -378,10 +339,9 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         gridBagConstraints.insets = new java.awt.Insets(15, 5, 10, 5);
         getContentPane().add(lblRouteTargetField, gridBagConstraints);
 
-        cbRouteTargetField.setModel(new javax.swing.DefaultComboBoxModel(
-                new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbRouteTargetField.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbRouteTargetField.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbRouteTargetField.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbRouteTargetField.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
@@ -392,24 +352,24 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(cbRouteTargetField, gridBagConstraints);
 
         pack();
-    } // </editor-fold>//GEN-END:initComponents
+    }// </editor-fold>//GEN-END:initComponents
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cbKindItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_cbKindItemStateChanged
+    private void cbKindItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbKindItemStateChanged
         cbTill.setEnabled(evt.getItem().equals(stationLine));
         lblTill.setEnabled(evt.getItem().equals(stationLine));
-    }                                                                         //GEN-LAST:event_cbKindItemStateChanged
+    }//GEN-LAST:event_cbKindItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cbRouteItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_cbRouteItemStateChanged
+    private void cbRouteItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbRouteItemStateChanged
         final AbstractFeatureService routeService = (AbstractFeatureService)cbRoute.getSelectedItem();
         final List<String> allFields = new ArrayList<String>();
 
@@ -426,14 +386,14 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         }
 
         cbRouteTargetField.setModel(new DefaultComboBoxModel(allFields.toArray()));
-    } //GEN-LAST:event_cbRouteItemStateChanged
+    }//GEN-LAST:event_cbRouteItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butApplyActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butApplyActionPerformed
+    private void butApplyActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butApplyActionPerformed
         final String fromField = String.valueOf(cbFrom.getSelectedItem());
         final String tillField = (cbTill.isEnabled() ? String.valueOf(cbTill.getSelectedItem()) : null);
         final String routeField = String.valueOf(cbRouteField.getSelectedItem());
@@ -501,16 +461,16 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
 
         setVisible(false);
         wdt.start();
-    } //GEN-LAST:event_butApplyActionPerformed
+    }//GEN-LAST:event_butApplyActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butCancelActionPerformed
+    private void butCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butCancelActionPerformed
         setVisible(false);
-    }                                                                             //GEN-LAST:event_butCancelActionPerformed
+    }//GEN-LAST:event_butCancelActionPerformed
 
     /**
      * DOCUMENT ME!
