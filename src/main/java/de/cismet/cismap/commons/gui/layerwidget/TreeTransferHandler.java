@@ -17,10 +17,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 
-import java.io.File;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JComponent;
@@ -28,18 +26,6 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
 
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
-import de.cismet.cismap.commons.featureservice.LayerProperties;
-import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
-import de.cismet.cismap.commons.featureservice.WebFeatureService;
-import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
-import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
-import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
-import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
-import de.cismet.cismap.commons.rasterservice.ImageRasterService;
-import de.cismet.cismap.commons.util.DnDUtils;
-import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 
 /**
  * DOCUMENT ME!

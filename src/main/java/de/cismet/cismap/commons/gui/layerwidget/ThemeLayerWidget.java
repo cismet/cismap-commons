@@ -1533,7 +1533,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 };
 
             ret.addMouseListener(lastAdapter);
-            
+
             leafRenderer.addActionListener(new ActionListener() {
 
                     @Override
@@ -1541,7 +1541,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         changeVisibility(value);
                     }
                 });
-
 
             return pan;
         }
