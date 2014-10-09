@@ -13,29 +13,23 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.NbBundle;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTargetDropEvent;
 
 import java.io.File;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
@@ -48,7 +42,6 @@ import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 
-import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
