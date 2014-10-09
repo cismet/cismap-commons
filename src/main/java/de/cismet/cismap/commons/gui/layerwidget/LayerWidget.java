@@ -67,6 +67,7 @@ import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
@@ -92,6 +93,7 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
     //~ Static fields/initializers ---------------------------------------------
 
     private static DataFlavor uriListFlavor;
+    private static final String[] SUPPORTED_IMAGE_FORMATS = { "png", "jpg", "tif", "tiff", "gif" };
 
     static {
         try {
@@ -901,47 +903,52 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
                         // NO HARDCODING
                         try {
                             log.info("DocumentUri: " + currentFile.toURI()); // NOI18N
+                            if (isGeoImage(currentFile.getName())) {
+                                final ImageRasterService irs = new ImageRasterService(currentFile);
 
-                            final AbstractFeatureService dfs = DocumentFeatureServiceFactory
-                                        .createDocumentFeatureService(currentFile);
-                            activeLayerModel.addLayer(dfs);
+                                activeLayerModel.addLayer(irs);
+                            } else {
+                                final AbstractFeatureService dfs = DocumentFeatureServiceFactory
+                                            .createDocumentFeatureService(currentFile);
+                                activeLayerModel.addLayer(dfs);
 
-                            if (dfs instanceof ShapeFileFeatureService) {
-                                new Thread(new Runnable() {
+                                if (dfs instanceof ShapeFileFeatureService) {
+                                    new Thread(new Runnable() {
 
-                                        @Override
-                                        public void run() {
-                                            do {
-                                                try {
-                                                    Thread.sleep(500);
-                                                } catch (final InterruptedException e) {
-                                                    // nothing to do
+                                            @Override
+                                            public void run() {
+                                                do {
+                                                    try {
+                                                        Thread.sleep(500);
+                                                    } catch (final InterruptedException e) {
+                                                        // nothing to do
+                                                    }
+                                                } while (!dfs.isInitialized());
+
+                                                if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
+                                                    JOptionPane.showMessageDialog(
+                                                        StaticSwingTools.getParentFrame(LayerWidget.this),
+                                                        NbBundle.getMessage(
+                                                            LayerWidget.class,
+                                                            "LayerWidget.drop().errorInShapeGeometryFoundMessage"),
+                                                        NbBundle.getMessage(
+                                                            LayerWidget.class,
+                                                            "LayerWidget.drop().errorInShapeGeometryFoundTitle"),
+                                                        JOptionPane.ERROR_MESSAGE);
+                                                } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
+                                                    JOptionPane.showMessageDialog(
+                                                        StaticSwingTools.getParentFrame(LayerWidget.this),
+                                                        NbBundle.getMessage(
+                                                            LayerWidget.class,
+                                                            "LayerWidget.drop().noGeometryFoundInShapeMessage"),
+                                                        NbBundle.getMessage(
+                                                            LayerWidget.class,
+                                                            "LayerWidget.drop().noGeometryFoundInShapeTitle"),
+                                                        JOptionPane.WARNING_MESSAGE);
                                                 }
-                                            } while (!dfs.isInitialized());
-
-                                            if (((ShapeFileFeatureService)dfs).isErrorInGeometryFound()) {
-                                                JOptionPane.showMessageDialog(
-                                                    StaticSwingTools.getParentFrame(LayerWidget.this),
-                                                    NbBundle.getMessage(
-                                                        LayerWidget.class,
-                                                        "LayerWidget.drop().errorInShapeGeometryFoundMessage"),
-                                                    NbBundle.getMessage(
-                                                        LayerWidget.class,
-                                                        "LayerWidget.drop().errorInShapeGeometryFoundTitle"),
-                                                    JOptionPane.ERROR_MESSAGE);
-                                            } else if (((ShapeFileFeatureService)dfs).isNoGeometryRecognised()) {
-                                                JOptionPane.showMessageDialog(
-                                                    StaticSwingTools.getParentFrame(LayerWidget.this),
-                                                    NbBundle.getMessage(
-                                                        LayerWidget.class,
-                                                        "LayerWidget.drop().noGeometryFoundInShapeMessage"),
-                                                    NbBundle.getMessage(
-                                                        LayerWidget.class,
-                                                        "LayerWidget.drop().noGeometryFoundInShapeTitle"),
-                                                    JOptionPane.WARNING_MESSAGE);
                                             }
-                                        }
-                                    }).start();
+                                        }).start();
+                                }
                             }
                         } catch (final Exception ex) {
                             log.error("Error during creation of a FeatureServices", ex); // NOI18N
@@ -1062,6 +1069,23 @@ public class LayerWidget extends JPanel implements DropTargetListener, Configura
         } else {
             log.warn("No Matching dataFlavour: " + dtde.getCurrentDataFlavorsAsList()); // NOI18N
         }
+    }
+
+    /**
+     * Checks, if the given file name is the name of an image file.
+     *
+     * @param   fileName  the name of the file to check
+     *
+     * @return  true, iff the given file name is the name of an image file
+     */
+    private static boolean isGeoImage(final String fileName) {
+        for (final String ending : SUPPORTED_IMAGE_FORMATS) {
+            if (fileName.endsWith(ending)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
