@@ -433,7 +433,7 @@ class TreeTransferHandler extends TransferHandler {
         }
         return false;
     }
-    
+
     /**
      * DOCUMENT ME!
      *
