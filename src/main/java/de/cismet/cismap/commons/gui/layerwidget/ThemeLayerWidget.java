@@ -76,6 +76,7 @@ import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerWidget.CheckBoxNodeRen
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 
@@ -1369,7 +1370,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             leafRenderer.setSelected(isValueSelected(value));
 
-            pan.add(leafRenderer);
+            if (!(value instanceof WMSLayer)) {
+                pan.add(leafRenderer);
+            }
+
             pan.add(lab);
             pan.doLayout();
             pan.repaint();
@@ -1529,6 +1533,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 };
 
             ret.addMouseListener(lastAdapter);
+            
+            leafRenderer.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(final ActionEvent e) {
+                        changeVisibility(value);
+                    }
+                });
+
 
             return pan;
         }
