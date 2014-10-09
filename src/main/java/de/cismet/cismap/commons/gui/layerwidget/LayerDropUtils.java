@@ -418,21 +418,17 @@ public class LayerDropUtils {
      * @return  true, if the given object is a SlidableWMSServiceLayerGroup
      */
     private static boolean isSlidableWMSServiceLayerGroup(final Object lastPathComponent) {
-        de.cismet.cismap.commons.wms.capabilities.Layer layer = null;
+        de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer layer = null;
 
-        if (lastPathComponent instanceof de.cismet.cismap.commons.wms.capabilities.Layer) {
-            layer = (de.cismet.cismap.commons.wms.capabilities.Layer)lastPathComponent;
+        if (lastPathComponent instanceof de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer) {
+            layer = (de.cismet.cismap.commons.wms.capabilities.deegree.DeegreeLayer)lastPathComponent;
         } else {
             return false;
         }
 
-        String titleOrName = layer.getTitle();
+        final List<String> keywords = Arrays.asList(layer.getKeywords());
 
-        if (titleOrName == null) {
-            titleOrName = layer.getName();
-        }
-
-        return (titleOrName != null) && titleOrName.endsWith("[]");
+        return keywords.contains("cismapSlidingLayerGroup");
     }
 
     //~ Inner Classes ----------------------------------------------------------
