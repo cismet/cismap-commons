@@ -170,8 +170,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         menuItems.add(new InvertSelectionTableMenuItem());
         menuItems.add(new ClearSelectionMenuItem());
         menuItems.add(new SelectableMenuItem());
-        menuItems.add(new LabelMenuItem());
-        menuItems.add(new StartProcessingModeMenuItem());
         menuItems.add(new ExportMenuItem());
         menuItems.add(new OptionsMenuItem());
 
@@ -300,6 +298,17 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
      */
     public TreePath[] getSelectionPath() {
         return tree.getSelectionPaths();
+    }
+
+    /**
+     * Adds the given ThemeLayerMenuItem to the context menu.
+     *
+     * @param  index     the position to insert the menu item. This does only work, if the setMappignModel method was
+     *                   invoked earlier.
+     * @param  menuItem  the menu item to insert
+     */
+    public void insertMenuItemIntoContextMenu(final int index, final ThemeLayerMenuItem menuItem) {
+        menuItems.add(index, menuItem);
     }
 
     /**
@@ -983,65 +992,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
      *
      * @version  $Revision$, $Date$
      */
-    private class LabelMenuItem extends ThemeLayerMenuItem {
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new RemoveThemeMenuItem object.
-         */
-        public LabelMenuItem() {
-            super(NbBundle.getMessage(
-                    ThemeLayerWidget.class,
-                    "ThemeLayerWidget.LabelMenuItem.pmenuItem.text"),
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE,
-                0);
-            newSection = true;
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class StartProcessingModeMenuItem extends ThemeLayerMenuItem {
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new RemoveThemeMenuItem object.
-         */
-        public StartProcessingModeMenuItem() {
-            super(NbBundle.getMessage(
-                    ThemeLayerWidget.class,
-                    "ThemeLayerWidget.StartProcessingModeMenuItem.pmenuItem.text"),
-                NODE
-                        | MULTI
-                        | FEATURE_SERVICE,
-                0);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
     private class ExportMenuItem extends ThemeLayerMenuItem {
 
         //~ Constructors -------------------------------------------------------
@@ -1316,97 +1266,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         ThemeLayerWidget.class,
                         "ThemeLayerWidget.NotSelectionMenuItem.pmenuItem.text"));
             }
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private abstract class ThemeLayerMenuItem extends JMenuItem implements ActionListener {
-
-        //~ Static fields/initializers -----------------------------------------
-
-        public static final int ROOT = 1;
-        public static final int NODE = 2;
-        public static final int FOLDER = 4;
-        public static final int MULTI = 8;
-        public static final int FEATURE_SERVICE = 16;
-        public static final int EVER = 255;
-
-        //~ Instance fields ----------------------------------------------------
-
-        protected int selectable = 0;
-        protected boolean newSection = false;
-
-        protected int visibility = 0;
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new ThemeLayerMenuItem object.
-         *
-         * @param  title       DOCUMENT ME!
-         * @param  visibility  DOCUMENT ME!
-         */
-        public ThemeLayerMenuItem(final String title, final int visibility) {
-            this(title, visibility, visibility);
-        }
-
-        /**
-         * Creates a new ThemeLayerMenuItem object.
-         *
-         * @param  title       DOCUMENT ME!
-         * @param  visibility  DOCUMENT ME!
-         * @param  selectable  DOCUMENT ME!
-         */
-        public ThemeLayerMenuItem(final String title, final int visibility, final int selectable) {
-            super(title);
-            this.visibility = visibility;
-            this.selectable = selectable;
-            addActionListener(this);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   mask  DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public boolean isVisible(final int mask) {
-            return (visibility & mask) == mask;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param   mask  DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public boolean isSelectable(final int mask) {
-            return (selectable & mask) == mask;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @return  DOCUMENT ME!
-         */
-        public boolean isNewSection() {
-            return newSection;
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  paths  DOCUMENT ME!
-         */
-        public void refreshText(final TreePath[] paths) {
         }
     }
 

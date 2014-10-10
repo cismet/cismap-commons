@@ -13,7 +13,6 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import org.apache.log4j.Logger;
 
-
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -41,7 +40,6 @@ import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.util.DnDUtils;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
-
 
 /**
  * DOCUMENT ME!
