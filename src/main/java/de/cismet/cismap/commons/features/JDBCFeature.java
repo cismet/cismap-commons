@@ -502,7 +502,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             }
 //                g.setSRID(shapeInfo.getSrid());
         } catch (final Exception e) {
-            logger.error("Cannot read geometry from shape file.", e);
+            logger.error("Cannot read geometry from the database.", e);
         }
 
         featureInfo.addGeometryToCache(getId(), g);
