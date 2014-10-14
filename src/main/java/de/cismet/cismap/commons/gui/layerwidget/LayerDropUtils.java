@@ -223,7 +223,8 @@ public class LayerDropUtils {
                                     feature.getWFSCapabilities().getURL().toString(),
                                     feature.getWFSQuery(),
                                     feature.getFeatureAttributes(),
-                                    feature);
+                                    feature,
+                                    sac.isReverseAxisOrder());
                             if ((sac.getIdentifier() != null) && (sac.getIdentifier().length() > 0)) {
                                 if (LOG.isDebugEnabled()) {
                                     LOG.debug("setting PrimaryAnnotationExpression of WFS Layer to '"
