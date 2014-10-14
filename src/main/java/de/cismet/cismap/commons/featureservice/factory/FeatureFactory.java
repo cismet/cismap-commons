@@ -168,13 +168,6 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
     /**
      * DOCUMENT ME!
      *
-     * @param  styles  DOCUMENT ME!
-     */
-    void setSLDStyle(Map<String, LinkedList<Style>> styles);
-
-    /**
-     * DOCUMENT ME!
-     *
      * @param   bb  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
