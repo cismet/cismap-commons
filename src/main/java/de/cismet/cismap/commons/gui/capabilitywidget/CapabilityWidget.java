@@ -55,6 +55,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import java.util.ArrayList;
@@ -177,6 +179,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private HashMap<Component, JTree> wmsCapabilitiesTrees = new HashMap<Component, JTree>();
     private HashMap<Component, JTree> jdbcTrees = new HashMap<Component, JTree>();
     private HashMap<Component, JTree> cidsTrees = new HashMap<Component, JTree>();
+    private HashMap<Component, JTree> shapeFolderTrees = new HashMap<Component, JTree>();
     private HashMap<Component, WFSCapabilities> wfsCapabilities = new HashMap<Component, WFSCapabilities>();
     private HashMap<Component, JTree> wfsCapabilitiesTrees = new HashMap<Component, JTree>();
     private HashMap<Component, JTree> shapeFolderTrees = new HashMap<Component, JTree>();
@@ -980,6 +983,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return link;
     }
 
@@ -1541,6 +1545,116 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         }
                         // TODO: Error \u00FCber die Statuszeile bekanntgeben
                         log.error("Error while loading server capabilities: " + message, e); // NOI18N
+                        tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
+
+                        final JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
+                        capabilityUrls.remove(new LinkWithSubparent(link, null));
+                        capabilityUrlsReverse.remove(jc);
+                    }
+                }
+            };
+        CismetThreadPool.execute(t);
+    }
+
+    /**
+     * Erzeugt den Baum aus der geparsten Capabilities-XML und f\u00FCgt ihn der TabbedPane hinzu.
+     *
+     * @param  link         Capabilites-URL
+     * @param  comp         Component
+     * @param  interactive  true, falls per Drag&Drop, sonst false
+     * @param  subparent    DOCUMENT ME!
+     */
+    private void addShapeFolderCapabilitiesTree(final String link,
+            final JComponent comp,
+            final boolean interactive,
+            final String subparent) {
+        if (log.isDebugEnabled()) {
+            log.debug("addShapeFolderCapabilitiesTree()"); // NOI18N
+        }
+        final Runnable t = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final DragTree trvCap = new DragTree();
+                        final ShapeFolderTreeModel tm = new ShapeFolderTreeModel(link);
+                        final DropTarget dt = new DropTarget(trvCap, acceptableActions, thisWidget);
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    addPopupMenu(trvCap);
+                                    trvCap.setModel(tm);
+                                    trvCap.setBorder(new EmptyBorder(1, 1, 1, 1));
+                                    trvCap.setCellRenderer(new ShapeFolderTreeCellRenderer());
+                                    final JScrollPane sPane = new JScrollPane();
+                                    sPane.setViewportView(trvCap);
+                                    sPane.setBorder(new EmptyBorder(1, 1, 1, 1));
+                                    StaticSwingTools.setNiftyScrollBars(sPane);
+                                    synchronized (this) {
+                                        tbpCapabilities.setComponentAt(tbpCapabilities.indexOfComponent(comp), sPane);
+                                    }
+//                                    wmsCapabilities.put(sPane, cap);
+                                    shapeFolderTrees.put(sPane, trvCap);
+                                    stateChanged(null);
+
+                                    capabilityUrls.put(new LinkWithSubparent(link, subparent), sPane);
+                                    capabilityUrlsReverse.put(sPane, new LinkWithSubparent(link, subparent));
+                                    String title = link.substring(link.lastIndexOf("/"));
+                                    if (subparent != null) {
+                                        title = subparent;
+                                    }
+                                    final String titleOrig = title;
+                                    if (title.length() > 0) {
+                                        if (title.length() > maxServerNameLength) {
+                                            title = title.substring(0, maxServerNameLength - 3) + "..."; // NOI18N
+                                        }
+                                        sPane.putClientProperty("tabTitle", title);                      // NOI18N
+                                        synchronized (this) {
+                                            StaticSwingTools.jTabbedPaneWithVerticalTextSetNewText(
+                                                tbpCapabilities,
+                                                title,
+                                                icoConnected,
+                                                Color.black,
+                                                sPane);
+                                        }
+                                        synchronized (this) {
+                                            tbpCapabilities.setToolTipTextAt(
+                                                tbpCapabilities.indexOfComponent(sPane),
+                                                titleOrig);
+                                        }
+                                        stateChanged(null);
+                                    }
+                                }
+                            });
+                    } catch (Throwable e) {
+                        log.error("Error while creating the ShapeFolder tree", e);                       // NOI18N
+                        String message = "";                                                             // NOI18N
+
+                        tbpCapabilities.setIconAt(tbpCapabilities.indexOfComponent(comp), icoError);
+                        if ((e instanceof RequestFailedException) || (e.getMessage() == null)
+                                    || e.getMessage().equals("null")) { // NOI18N
+                            message = e.getCause().getMessage();
+                        } else {
+                            message = e.getMessage();
+                        }
+
+                        if (interactive) {
+                            final ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(
+                                        CapabilityWidget.class,
+                                        "CapabilityWidget.addShapeFolderTree.JOptionPane.title"),   // NOI18N
+                                    org.openide.util.NbBundle.getMessage(
+                                        CapabilityWidget.class,
+                                        "CapabilityWidget.addShapeFolderTree.JOptionPane.message"), // NOI18N
+                                    null,
+                                    null,
+                                    e,
+                                    Level.SEVERE,
+                                    null);
+                            JXErrorPane.showDialog(thisWidget, ei);
+                        }
+                        // TODO: Error \u00FCber die Statuszeile bekanntgeben
+                        log.error("Error while loading Shape folder: " + message, e); // NOI18N
                         tbpCapabilities.remove(tbpCapabilities.indexOfComponent(comp));
 
                         final JComponent jc = capabilityUrls.get(new LinkWithSubparent(link, null));
