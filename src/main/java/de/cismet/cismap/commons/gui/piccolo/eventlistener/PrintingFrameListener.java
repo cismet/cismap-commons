@@ -32,8 +32,8 @@ import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
 import de.cismet.cismap.commons.gui.printing.PrintingToolTip;
-import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CismetThreadPool;
 
@@ -75,6 +75,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
     PLayer layer;
     Thread zoomThread;
     long zoomTime;
+    private PPath printingRectangleBorder = new PPath();
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private String bestimmerDimension = WIDTH;
     private String oldInteractionMode = ""; // NOI18N
@@ -85,6 +86,12 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
                 super.paint(paintContext);
                 final PBounds vb = mappingComponent.getCamera().getViewBounds();
                 final PBounds rb = getPrintingRectangle().getBounds();
+
+                final GeneralPath border = new GeneralPath(new Rectangle2D.Double(
+                            rb.getMinX(),
+                            rb.getMinY(),
+                            rb.getWidth(),
+                            rb.getHeight()));
                 final GeneralPath newNorthBounds = new GeneralPath(new Rectangle2D.Double(
                             vb.getMinX(),
                             vb.getMinY(),
@@ -122,6 +129,9 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
                 if (!(west.getPathReference().getBounds2D().equals(newWestBounds.getBounds2D()))) {
                     west.setPathTo(newWestBounds);
                 }
+                if (!(printingRectangleBorder.getPathReference().getBounds2D().equals(border.getBounds2D()))) {
+                    printingRectangleBorder.setPathTo(border);
+                }
             }
         };
 
@@ -147,6 +157,13 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
         west.setStroke(null);
         west.setStrokePaint(null);
 
+        printingRectangleBorder.setStroke(new CustomFixedWidthStroke(2f, mappingComponent));
+        printingRectangleBorder.setStrokePaint(Color.LIGHT_GRAY);
+        printingRectangleBorder.setPaint(new Color(20, 20, 20, 1));
+
+        // if the stroke of printing rectangle is not null, it will grow when the rectangle is moved
+        // Why? Perhaps because the rectangle returns different borders, as expected, when a stroke is set.
+        // This might lead to a  zooming of the mapping component, see init(). But this is only a guess.
         printingRectangle.setStroke(null);
         printingRectangle.setStrokePaint(Color.LIGHT_GRAY);
         printingRectangle.setPaint(new Color(20, 20, 20, 1));
@@ -249,6 +266,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
         layer.addChild(south);
         layer.addChild(east);
         layer.addChild(west);
+        layer.addChild(printingRectangleBorder);
         getPrintingRectangle().moveToFront();
         getPrintingRectangle().repaint();
 
