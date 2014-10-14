@@ -66,6 +66,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
 
 import javax.swing.AbstractAction;
@@ -180,6 +181,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
     private HashMap<Component, WFSCapabilities> wfsCapabilities = new HashMap<Component, WFSCapabilities>();
     private HashMap<Component, JTree> wfsCapabilitiesTrees = new HashMap<Component, JTree>();
     private HashMap<Component, JTree> shapeFolderTrees = new HashMap<Component, JTree>();
+    private TreeSet<String> reverseAxisOrder = new TreeSet<String>();
     private CapabilitiesPreferences preferences = new CapabilitiesPreferences();
     private JPopupMenu capabilityList = new JPopupMenu();
     private CapabilityWidget thisWidget = null;
@@ -1848,6 +1850,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         final WFSCapabilitiesFactory capFact = new WFSCapabilitiesFactory();
                         final WFSCapabilities cap = capFact.createCapabilities(link);
                         trvCap.setWfsCapabilities(cap);
+                        trvCap.setReverseOrder(reverseAxisOrder.contains(link));
                         final String name = FeatureServiceUtilities.getServiceName(cap);
                         if (log.isDebugEnabled()) {
                             // Hashmap mit den FeatureLayer-Attributen erzeugen
@@ -2128,6 +2131,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             if (cl.getType().equals(CapabilityLink.OGC) || cl.getType().equals(CapabilityLink.OGC_DEPRECATED)
                         || cl.getType().equals("cidsLayer") || cl.getType().equals(CapabilityLink.INTERNAL_DB)) {
                 final ListMenuItem lmi = new ListMenuItem("test", cl); // NOI18N
+                if (cl.isReverseAxisOrder()) {
+                    reverseAxisOrder.add(cl.getLink());
+                }
                 lmi.addActionListener(new ActionListener() {
 
                         @Override
@@ -2532,6 +2538,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         private boolean valueChanged = false;
         private WMSCapabilities wmsCapabilities;
         private WFSCapabilities wfsCapabilities;
+        private boolean reverseOrder;
 
         //~ Constructors -------------------------------------------------------
 
@@ -2657,7 +2664,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                         features[i] = (FeatureType)paths[i].getLastPathComponent();
                     }
 
-                    trans = new DefaultTransferable(new WFSSelectionAndCapabilities(features));
+                    trans = new DefaultTransferable(new WFSSelectionAndCapabilities(features, reverseOrder));
                 }
             } else if (this.getModel() instanceof ShapeFolderTreeModel) {
                 final Object o = getSelectionModel().getSelectionPath().getLastPathComponent();
@@ -2776,6 +2783,15 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
          */
         public void setWfsCapabilities(final WFSCapabilities wfsCapabilities) {
             this.wfsCapabilities = wfsCapabilities;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  reverseOrder  the reverseOrder to set
+         */
+        public void setReverseOrder(final boolean reverseOrder) {
+            this.reverseOrder = reverseOrder;
         }
     }
 

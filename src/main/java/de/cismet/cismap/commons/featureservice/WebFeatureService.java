@@ -20,6 +20,7 @@ package de.cismet.cismap.commons.featureservice;
 
 import org.apache.log4j.Logger;
 
+import org.jdom.DataConversionException;
 import org.jdom.Element;
 
 import java.awt.Font;
@@ -97,6 +98,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     /** the version of the wfs. */
     private FeatureType feature;
     private String backupVersion = "";
+    private boolean reverseAxisOrder;
 
     //~ Instance initializers --------------------------------------------------
 
@@ -129,6 +131,14 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
      */
     public WebFeatureService(final Element e) throws Exception {
         super(e);
+
+        if (e.getAttribute("reverseAxisOrder") != null) {
+            try {
+                this.reverseAxisOrder = e.getAttribute("reverseAxisOrder").getBooleanValue(); // NOI18N
+            } catch (DataConversionException ex) {
+                LOG.error("Invalid attribute value", ex);
+            }
+        }
     }
 
     /**
@@ -147,6 +157,28 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
             final Element query,
             final List<FeatureServiceAttribute> attributes,
             final FeatureType feature) throws Exception {
+        this(name, host, query, attributes, feature, false);
+    }
+
+    /**
+     * Create a new <b>uninitialised</b> AbstractFeatureService except for the attributes provided.
+     *
+     * @param   name              the name of this FeatureService
+     * @param   host              hostname of the WFS server
+     * @param   query             the request which will be send to the WFS
+     * @param   attributes        featureServiceAttributes vector with all FeatureServiceAttributes of the
+     *                            FeatureService
+     * @param   feature           version DOCUMENT ME!
+     * @param   reverseAxisOrder  if true, the axis order of the crs will be changed
+     *
+     * @throws  Exception  if something went wrong
+     */
+    public WebFeatureService(final String name,
+            final String host,
+            final Element query,
+            final List<FeatureServiceAttribute> attributes,
+            final FeatureType feature,
+            final boolean reverseAxisOrder) throws Exception {
         super(name, attributes);
         crs = CismapBroker.getInstance().getSrs();
         setFeature(feature);
@@ -155,6 +187,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         // defaults for new services
         this.setTranslucency(0.2f);
         this.setMaxFeatureCount(2900);
+        this.reverseAxisOrder = reverseAxisOrder;
     }
 
     /**
@@ -171,10 +204,11 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
         this.setQueryElement(wfs.getQueryElement());
         // overwrite with customised query if applicable
         this.setQuery(wfs.getQuery());
-        this.maxFeatureCount = 2500;
+        this.maxFeatureCount = Integer.MAX_VALUE;
         this.backupVersion = wfs.backupVersion;
         this.setInitialisationError(wfs.getInitialisationError());
         this.errorObject = wfs.errorObject;
+        this.reverseAxisOrder = wfs.reverseAxisOrder;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -200,7 +234,16 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
     public Element toElement() {
         final Element parentElement = super.toElement();
 
-        final CapabilityLink capLink = new CapabilityLink(CapabilityLink.OGC, hostname, getVersion(), false);
+        final CapabilityLink capLink = new CapabilityLink(
+                CapabilityLink.OGC,
+                hostname,
+                reverseAxisOrder,
+                getVersion(),
+                false);
+
+        if (reverseAxisOrder) {
+            parentElement.setAttribute("reverseAxisOrder", "true");
+        }
 
         try {
             parentElement.addContent(capLink.getElement());
@@ -390,7 +433,8 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
                 this.getHostname(),
                 this.feature,
                 getCrs(),
-                parseSLD(getSLDDefiniton()));
+                parseSLD(getSLDDefiniton()),
+                reverseAxisOrder);
     }
 
     /**

@@ -11,11 +11,17 @@
  */
 package de.cismet.cismap.commons.featureservice.factory;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateFilter;
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.apache.commons.httpclient.methods.PostMethod;
 
 import org.deegree.model.feature.Feature;
 import org.deegree.model.feature.FeatureCollection;
+import org.deegree.model.feature.FeatureProperty;
 import org.deegree.model.feature.GMLFeatureCollectionDocument;
+import org.deegree.model.spatialschema.JTSAdapter;
 
 import org.jdom.Element;
 
@@ -70,6 +76,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     protected String hostname = null;
     protected FeatureType featureType;
     private Crs crs;
+    private boolean reverseAxisOrder = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -88,12 +95,33 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             final FeatureType featureType,
             final Crs crs,
             final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
+        this(layerProperties, hostname, featureType, crs, styles, false);
+    }
+
+    /**
+     * private Vector<WFSFeature> wfsFeatureVector = new Vector(); private PostMethod httppost; private
+     * InputStreamReader reader;
+     *
+     * @param  layerProperties   DOCUMENT ME!
+     * @param  hostname          DOCUMENT ME!
+     * @param  featureType       wfsVersion DOCUMENT ME!
+     * @param  crs               DOCUMENT ME!
+     * @param  styles            DOCUMENT ME!
+     * @param  reverseAxisOrder  DOCUMENT ME!
+     */
+    public WFSFeatureFactory(final LayerProperties layerProperties,
+            final String hostname,
+            final FeatureType featureType,
+            final Crs crs,
+            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles,
+            final boolean reverseAxisOrder) {
         logger.info("initialising WFSFeatureFactory with hostname: '" + hostname + "'");
         this.layerProperties = layerProperties;
         this.hostname = hostname;
         this.featureType = featureType;
         this.crs = crs;
         this.styles = styles;
+        this.reverseAxisOrder = reverseAxisOrder;
     }
 
     /**
@@ -174,7 +202,12 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
             features = createFeaturesFromMemory(query, bbox.getGeometry());
         } else {
             final WFSFacade facade = featureType.getWFSCapabilities().getServiceFacade();
-            final String postString = facade.setGetFeatureBoundingBox(query, bbox, featureType, getCrs().getCode());
+            final String postString = facade.setGetFeatureBoundingBox(
+                    query,
+                    bbox,
+                    featureType,
+                    getCrs().getCode(),
+                    reverseAxisOrder);
             featureSrid = CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(
                         featureType,
                         getCrs().getCode()));
@@ -343,6 +376,72 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                     + "]: WFSFeatureFactory does not support Attributes");
     }
 
+    @Override
+    protected void initialiseFeature(final WFSFeature featureServiceFeature,
+            final Feature degreeFeature,
+            final boolean evaluateExpressions,
+            final int index) throws Exception {
+        // perform standard initialisation
+        featureServiceFeature.setLayerProperties(this.getLayerProperties());
+
+        // creating geometry
+        if (featureServiceFeature.getGeometry() == null) {
+            try {
+                Geometry geom = JTSAdapter.export(
+                        degreeFeature.getGeometryPropertyValues()[geometryIndex]);
+                if (reverseAxisOrder) {
+                    geom = reverseGeometryCoordinates(geom);
+                }
+                featureServiceFeature.setGeometry(geom);
+            } catch (Exception e) {
+                Geometry geom = JTSAdapter.export(
+                        degreeFeature.getGeometryPropertyValues()[geometryIndex]);
+                if (reverseAxisOrder) {
+                    geom = reverseGeometryCoordinates(geom);
+                }
+                featureServiceFeature.setGeometry(geom);
+            }
+        }
+
+        if ((featureServiceFeature.getGeometry() != null) && (featureSrid != null)) {
+            featureServiceFeature.getGeometry().setSRID(featureSrid);
+        }
+
+        // adding properties
+        if ((featureServiceFeature.getProperties() == null) || featureServiceFeature.getProperties().isEmpty()) {
+            // set the properties
+            final FeatureProperty[] featureProperties = degreeFeature.getProperties();
+            for (final FeatureProperty fp : featureProperties) {
+                featureServiceFeature.addProperty(fp.getName().getAsString(), fp.getValue());
+            }
+        }
+
+        if (evaluateExpressions) {
+            this.evaluateExpressions(featureServiceFeature, index);
+        }
+    }
+
+    /**
+     * The axis order of the coordinates of the given geometry will be changed.
+     *
+     * @param   g  the geometry to change the axis order
+     *
+     * @return  the given geometry with a changed axis order.
+     */
+    private Geometry reverseGeometryCoordinates(final Geometry g) {
+        g.apply(new CoordinateFilter() {
+
+                @Override
+                public void filter(final Coordinate crdnt) {
+                    final double newX = crdnt.y;
+                    crdnt.y = crdnt.x;
+                    crdnt.x = newX;
+                }
+            });
+
+        return g;
+    }
+
     /**
      * DOCUMENT ME!
      *
@@ -441,7 +540,13 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         final WFSFacade facade = featureType.getWFSCapabilities().getServiceFacade();
         final Element queryElement = facade.getGetFeatureQuery(featureType);
         final String query = FeatureServiceUtilities.elementToString(queryElement);
-        final String postString = facade.setGetFeatureBoundingBox(query, bbox, featureType, getCrs().getCode(), true);
+        final String postString = facade.setGetFeatureBoundingBox(
+                query,
+                bbox,
+                featureType,
+                getCrs().getCode(),
+                reverseAxisOrder,
+                true);
         featureSrid = CrsTransformer.extractSridFromCrs(WFSFacade.getOptimalCrsForFeature(
                     featureType,
                     getCrs().getCode()));
