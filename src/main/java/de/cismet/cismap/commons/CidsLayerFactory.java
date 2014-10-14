@@ -33,6 +33,8 @@ import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.simple.SimpleWMS;
+import de.cismet.cismap.commons.rasterservice.ImageFileRetrieval;
+import de.cismet.cismap.commons.rasterservice.ImageRasterService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
@@ -142,6 +144,18 @@ public class CidsLayerFactory {
                     LOG.warn(
                         "Layer SimpleWMS '"
                                 + simpleWMS.getName()
+                                + "' already existed. Do not add the Layer. \n"
+                                + schonVorhanden.getMessage());                                   // NOI18N
+                }
+            } else if (element.getName().equals("ImageRasterService")) {                          // NOI18N
+                final ImageRasterService rasterService = new ImageRasterService(element);
+                LOG.info("addLayer image raster service (" + rasterService.getName() + ")");      // NOI18N
+                try {
+                    return rasterService;
+                } catch (IllegalArgumentException schonVorhanden) {
+                    LOG.warn(
+                        "Layer ImageRasterService '"
+                                + rasterService.getName()
                                 + "' already existed. Do not add the Layer. \n"
                                 + schonVorhanden.getMessage());                                   // NOI18N
                 }
@@ -342,6 +356,9 @@ public class CidsLayerFactory {
                 } else if (layer instanceof SlidableWMSServiceLayerGroup) { // NOI18N
                     final SlidableWMSServiceLayerGroup wms = (SlidableWMSServiceLayerGroup)layer;
                     return wms.getName() + "#" + wms.getName();
+                } else if (layer instanceof ImageRasterService) {
+                    final ImageRasterService rs = (ImageRasterService)layer;
+                    return rs.getName() + "#" + rs.getLayerURI();
                 } else {
                     final RetrievalServiceLayer rsl = (RetrievalServiceLayer)layer;
                     return rsl.getName() + "#" + rsl.getClass();
@@ -450,6 +467,8 @@ public class CidsLayerFactory {
             return ((ConvertableToXML)layer).toElement();
         } else if (layer instanceof JDBCFeatureService) {
             return ((JDBCFeatureService)layer).toElement();
+        } else if (layer instanceof ImageRasterService) {
+            return ((ImageRasterService)layer).getElement();
         } else {
             log.warn("saving configuration not supported by service: " + layer); // NOI18N
             return null;

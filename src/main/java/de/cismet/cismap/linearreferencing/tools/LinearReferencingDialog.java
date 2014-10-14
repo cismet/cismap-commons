@@ -193,7 +193,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         getContentPane().add(lblTitle, gridBagConstraints);
 
         cbKind.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbKind.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbKind.setPreferredSize(new java.awt.Dimension(180, 27));
         cbKind.addItemListener(new java.awt.event.ItemListener() {
 
                 @Override
@@ -212,7 +212,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
 
         cbRoute.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbRoute.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbRoute.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbRoute.setPreferredSize(new java.awt.Dimension(180, 27));
         cbRoute.addItemListener(new java.awt.event.ItemListener() {
 
                 @Override
@@ -231,7 +231,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
 
         cbFrom.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbFrom.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbFrom.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbFrom.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 3;
@@ -243,7 +243,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
 
         cbTill.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbTill.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbTill.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbTill.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 3;
@@ -356,7 +356,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         cbRouteField.setModel(new javax.swing.DefaultComboBoxModel(
                 new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbRouteField.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbRouteField.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbRouteField.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
@@ -381,7 +381,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         cbRouteTargetField.setModel(new javax.swing.DefaultComboBoxModel(
                 new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbRouteTargetField.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbRouteTargetField.setPreferredSize(new java.awt.Dimension(80, 27));
+        cbRouteTargetField.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 2;
