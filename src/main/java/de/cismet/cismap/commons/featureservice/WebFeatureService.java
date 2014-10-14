@@ -169,7 +169,7 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
      * @param   attributes        featureServiceAttributes vector with all FeatureServiceAttributes of the
      *                            FeatureService
      * @param   feature           version DOCUMENT ME!
-     * @param   reverseAxisOrder  DOCUMENT ME!
+     * @param   reverseAxisOrder  if true, the axis order of the crs will be changed
      *
      * @throws  Exception  if something went wrong
      */
