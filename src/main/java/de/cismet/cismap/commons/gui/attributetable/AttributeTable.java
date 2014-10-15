@@ -484,7 +484,7 @@ public class AttributeTable extends javax.swing.JPanel {
                     JOptionPane.YES_NO_OPTION);
 
             if (ans == JOptionPane.YES_OPTION) {
-                tbProcessingActionPerformed(null);
+                saveChangedRows(true);
             } else {
                 unlockAll();
             }
@@ -694,10 +694,21 @@ public class AttributeTable extends javax.swing.JPanel {
 
     /**
      * Toggles the processing mode.
+     *
+     * @param  forceSave  true, if the changed data should be saved without confirmation
      */
-    public void changeProcessingMode() {
+    public void changeProcessingMode(final boolean forceSave) {
         tbProcessing.setSelected(!tbProcessing.isSelected());
-        tbProcessingActionPerformed(null);
+        changeProcessingModeIntern(forceSave);
+    }
+
+    /**
+     * Determines, if the processing mode of the given service is active.
+     *
+     * @return  true, if the processing mode is active
+     */
+    public boolean isProcessingModeActive() {
+        return tbProcessing.isSelected();
     }
 
     /**
@@ -707,6 +718,26 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     public boolean isLoading() {
         return panWaiting.isVisible();
+    }
+
+    /**
+     * Toggles the processing mode.
+     *
+     * @param  forceSave  true, if the changed data should be saved without confirmation
+     */
+    private void changeProcessingModeIntern(final boolean forceSave) {
+        if (tbProcessing.isSelected()) {
+            model.setEditable(tbProcessing.isSelected());
+        } else {
+            if ((table.getEditingColumn() != -1) && (table.getEditingRow() != -1)) {
+                table.getCellEditor(table.getEditingRow(), table.getEditingColumn()).stopCellEditing();
+            }
+        }
+
+        if (!tbProcessing.isSelected()) {
+            saveChangedRows(forceSave);
+        }
+        butUndo.setVisible(tbProcessing.isSelected());
     }
 
     /**
@@ -2030,19 +2061,8 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void tbProcessingActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_tbProcessingActionPerformed
-        if (tbProcessing.isSelected()) {
-            model.setEditable(tbProcessing.isSelected());
-        } else {
-            if ((table.getEditingColumn() != -1) && (table.getEditingRow() != -1)) {
-                table.getCellEditor(table.getEditingRow(), table.getEditingColumn()).stopCellEditing();
-            }
-        }
-
-        if (!tbProcessing.isSelected()) {
-            saveChangedRows();
-        }
-        butUndo.setVisible(tbProcessing.isSelected());
-    } //GEN-LAST:event_tbProcessingActionPerformed
+        changeProcessingModeIntern(false);
+    }                                                                                //GEN-LAST:event_tbProcessingActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -2173,8 +2193,10 @@ public class AttributeTable extends javax.swing.JPanel {
 
     /**
      * Saves all changed rows.
+     *
+     * @param  forceSave  true, if the changed data should be saved without confirmation
      */
-    private void saveChangedRows() {
+    private void saveChangedRows(final boolean forceSave) {
         if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(model)) {
             return;
         }

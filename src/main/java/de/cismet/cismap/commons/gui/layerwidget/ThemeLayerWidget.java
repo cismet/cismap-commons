@@ -1167,6 +1167,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 args.add("Thematische Farbgebung");
                 args.add("Beschriftung");
                 args.add("TextEditor");
+                args.add("QueryPanel");
                 // args.add("Begleitsymbole");
 
                 final JDialog dialog = styleDialog.configureDialog(

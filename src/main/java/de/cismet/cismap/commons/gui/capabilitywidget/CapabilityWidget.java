@@ -120,6 +120,7 @@ import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
 import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.tools.PointReferencingDialog;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
@@ -1255,9 +1256,52 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                                 }
                                             }
                                         });
+
+                                    final JMenuItem addPointGeometry = new JMenuItem(
+                                            NbBundle.getMessage(
+                                                CapabilityWidget.class,
+                                                "CapabilityWidget.addInternalDBCapabilitesTree.addPointGeometry"));
+                                    addPointGeometry.addActionListener(new ActionListener() {
+
+                                            @Override
+                                            public void actionPerformed(final ActionEvent e) {
+                                                final TreePath[] tps = tree.getSelectionPaths();
+
+                                                for (final TreePath tp : tps) {
+                                                    if ((tp.getLastPathComponent() instanceof DBEntry)
+                                                                && !(tp.getLastPathComponent() instanceof DBFolder)) {
+                                                        try {
+                                                            final DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                                                            final H2FeatureService service = new H2FeatureService(
+                                                                    entry.getNameWithoutFolder(),
+                                                                    dbPath,
+                                                                    entry.getName(),
+                                                                    null);
+                                                            final PointReferencingDialog dialog =
+                                                                new PointReferencingDialog(
+                                                                    StaticSwingTools.getParentFrame(comp),
+                                                                    true,
+                                                                    service);
+                                                            dialog.setSize(645, 260);
+                                                            dialog.pack();
+                                                            StaticSwingTools.showDialog(dialog);
+                                                        } catch (Exception ex) {
+                                                            log.error(
+                                                                "Error while creating a H2 service instance.",
+                                                                ex);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        });
                                     addPopupMenu(
                                         tree,
-                                        new JMenuItem[] { addFolderItem, removeItem, addLinearReferencing });
+                                        new JMenuItem[] {
+                                            addFolderItem,
+                                            removeItem,
+                                            addLinearReferencing,
+                                            addPointGeometry
+                                        });
 
                                     tree.setBorder(new EmptyBorder(1, 1, 1, 1));
                                     final JScrollPane sPane = new JScrollPane();

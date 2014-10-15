@@ -246,15 +246,15 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     }
 
     /**
-     * DOCUMENT ME!
+     * Adds the geometries for linear referenced values to the service.
      *
-     * @param  fromField       DOCUMENT ME!
-     * @param  tillField       DOCUMENT ME!
-     * @param  routeField      DOCUMENT ME!
-     * @param  routeJoinField  DOCUMENT ME!
-     * @param  routeService    DOCUMENT ME!
-     * @param  layerName       DOCUMENT ME!
-     * @param  domain          DOCUMENT ME!
+     * @param  fromField       The field with the from station
+     * @param  tillField       The field with the till station
+     * @param  routeField      The field with the route name
+     * @param  routeJoinField  the field of the route service, that is used for the join with this service
+     * @param  routeService    The service that conains the routes
+     * @param  layerName       The name of the route layer
+     * @param  domain          the domain of the route layer
      */
     public void setLinearReferencingInformation(final String fromField,
             final String tillField,
@@ -271,6 +271,19 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             routeService,
             layerName,
             domain);
+    }
+
+    /**
+     * Adds point geometries to the service.
+     *
+     * @param  xField  The field with the x value
+     * @param  yField  The field with the y value
+     */
+    public void setPointGeometryInformation(final String xField,
+            final String yField) {
+        ((H2FeatureServiceFactory)getFeatureFactory()).setPointGeometryInformation(
+            xField,
+            yField);
     }
 
     /**
