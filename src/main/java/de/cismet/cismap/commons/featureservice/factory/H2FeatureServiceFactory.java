@@ -509,13 +509,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     /**
      * Adds the geometries for linear referenced values to the service.
      *
-     * @param  fromField       DOCUMENT ME!
-     * @param  tillField       DOCUMENT ME!
-     * @param  routeField      DOCUMENT ME!
-     * @param  routeJoinField  DOCUMENT ME!
-     * @param  routeService    DOCUMENT ME!
-     * @param  layerName       DOCUMENT ME!
-     * @param  domain          DOCUMENT ME!
+     * @param  fromField       The field with the from station
+     * @param  tillField       The field with the till station
+     * @param  routeField      The field with the route name
+     * @param  routeJoinField  the field of the route service, that is used for the join with this service
+     * @param  routeService    The service that conains the routes
+     * @param  layerName       The name of the route layer
+     * @param  domain          the domain of the route layer
      */
     public void setLinearReferencingInformation(final String fromField,
             final String tillField,
@@ -613,6 +613,71 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             st.close();
         } catch (Exception e) {
             LOG.error("Error while joining linear referenced table.", e);
+        }
+    }
+
+    /**
+     * Adds point geometries to the service.
+     *
+     * @param  xField  The field with the x value
+     * @param  yField  The field with the y value
+     */
+    public void setPointGeometryInformation(final String xField, final String yField) {
+        if (geometryField != null) {
+            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
+                NbBundle.getMessage(
+                    H2FeatureServiceFactory.class,
+                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists",
+                    tableName),
+                NbBundle.getMessage(
+                    H2FeatureServiceFactory.class,
+                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists.title"),
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            geometryField = "geo_xy";
+            final StatementWrapper st = createStatement();
+            st.execute("alter table \"" + tableName + "\" add column " + geometryField + " Geometry");
+            final String additionalFields = xField + "," + yField;
+            final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set "
+                            + geometryField + " = ? WHERE id = ?");
+            final ResultSet rs = st.executeQuery("select id," + additionalFields + " from \"" + tableName + "\"");
+            final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                    CrsTransformer.getCurrentSrid());
+
+            while (rs.next()) {
+                final int id = rs.getInt(1);
+                final double x = rs.getDouble(2);
+                final double y = rs.getDouble(3);
+                final Geometry geom = gf.createPoint(new Coordinate(x, y));
+
+                linRefGeomUpdate.setObject(1, geom);
+                linRefGeomUpdate.setInt(2, id);
+                linRefGeomUpdate.execute();
+            }
+
+            rs.close();
+
+//            createMetaLinRefTablesIfNotExist();
+//            final String tillInfo = ((tillField == null) ? "" : tillField);
+//            final int kind = ((tillField == null) ? STATION : STATION_LINE);
+//
+//            st.execute(String.format(
+//                    INSERT_LR_META_DATA,
+//                    tableName,
+//                    layerName,
+//                    domain,
+//                    routeField,
+//                    routeJoinField,
+//                    geometryField,
+//                    new Integer(kind),
+//                    fromField,
+//                    tillInfo));
+            st.close();
+        } catch (Exception e) {
+            LOG.error("Error while adding point geometries.", e);
         }
     }
 
