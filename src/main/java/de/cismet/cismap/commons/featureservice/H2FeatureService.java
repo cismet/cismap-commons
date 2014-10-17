@@ -37,6 +37,7 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import java.net.URI;
 
 /**
  * DOCUMENT ME!
@@ -80,6 +81,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     private List<FeatureServiceFeature> features;
     private File shapeFile;
     private boolean initialised = true;
+    private boolean tableNotFound = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -92,6 +94,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
      */
     public H2FeatureService(final Element e) throws Exception {
         super(e);
+        checkTable();
     }
 
     /**
@@ -179,28 +182,54 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
      */
     protected H2FeatureService(final H2FeatureService hfs) {
         super(hfs);
+        checkTable();
     }
 
     //~ Methods ----------------------------------------------------------------
+    
+    private void checkTable() {
+        tableNotFound = !tableAlreadyExists(tableName);
+    }
+    
+    public void createFromShapeFile(URI shapeFileUri) {
+        this.shapeFile = new File(shapeFileUri);
+        
+        if (this.getFeatureFactory() != null) {
+            ((H2FeatureServiceFactory)this.getFeatureFactory()).setFile(this.shapeFile);
+        } else {
+            try {
+                initAndWait();
+            } catch (Exception e) {
+                LOG.error("Error while initialising the H2FeatureService with a new shape file", e);
+            }
+        }
+        checkTable();
+    }
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
         if (features != null) {
-            return new H2FeatureServiceFactory(
+            FeatureFactory f = new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
                     features,
                     layerInitWorker,
                     parseSLD(getSLDDefiniton()));
+            checkTable();
+            
+            return f;
         } else {
-            return new H2FeatureServiceFactory(
+            FeatureFactory f = new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
                     shapeFile,
                     layerInitWorker,
                     parseSLD(getSLDDefiniton()));
+            checkTable();
+
+            return f;
         }
     }
 
@@ -327,5 +356,19 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         }
 
         return tableExists;
+    }
+
+    /**
+     * @return the tableNotFound
+     */
+    public boolean isTableNotFound() {
+        return tableNotFound;
+    }
+
+    /**
+     * @param tableNotFound the tableNotFound to set
+     */
+    public void setTableNotFound(boolean tableNotFound) {
+        this.tableNotFound = tableNotFound;
     }
 }

@@ -1367,14 +1367,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             if ((value instanceof ShapeFileFeatureService) && ((ShapeFileFeatureService)value).isFileNotFound()) {
                 lab.setForeground(Color.GRAY);
+            } else if ((value instanceof H2FeatureService) && ((H2FeatureService)value).isTableNotFound()) {
+                lab.setForeground(Color.GRAY);
             }
 
             leafRenderer.setSelected(isValueSelected(value));
-
+            
             if (!(value instanceof WMSLayer)) {
                 pan.add(leafRenderer);
             }
-
             pan.add(lab);
             pan.doLayout();
             pan.repaint();
