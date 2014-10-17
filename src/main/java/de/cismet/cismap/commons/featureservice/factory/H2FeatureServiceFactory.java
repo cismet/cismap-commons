@@ -196,8 +196,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     //~ Methods ----------------------------------------------------------------
-    
-    public void setFile(File file) {
+
+    /**
+     * Imports the given file and assign it to the layer
+     *
+     * @param  file  DOCUMENT ME!
+     */
+    public void setFile(final File file) {
         if (file != null) {
             importFile(null, file);
         }
@@ -205,10 +210,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     /**
-     * DOCUMENT ME!
+     * Import the given file into the db
      *
-     * @param  workerThread  DOCUMENT ME!
-     * @param  file          DOCUMENT ME!
+     * @param  workerThread  the thread, that is used to handle the current progress
+     * @param  file          the file to import
      */
     private void importFile(final SwingWorker workerThread, final File file) {
         try {
@@ -308,10 +313,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     /**
-     * DOCUMENT ME!
+     * Imports the given features into the db
      *
-     * @param  workerThread  DOCUMENT ME!
-     * @param  features      file DOCUMENT ME!
+     * @param  workerThread  the thread, that is used to handle the current progress
+     * @param  features      the features to import
      */
     private void importFeatures(final SwingWorker workerThread, final List<FeatureServiceFeature> features) {
         try {

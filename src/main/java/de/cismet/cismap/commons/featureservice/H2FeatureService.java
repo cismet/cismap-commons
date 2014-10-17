@@ -22,6 +22,8 @@ import org.openide.util.Exceptions;
 
 import java.io.File;
 
+import java.net.URI;
+
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,10 +39,9 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
-import java.net.URI;
 
 /**
- * DOCUMENT ME!
+ * A service, that uses the internal db as data source
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -186,14 +187,23 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     }
 
     //~ Methods ----------------------------------------------------------------
-    
+
+    /**
+     * Checks, if the table of the layer exists within the db and writes the result to the 
+     * tableNotFound variable.
+     */
     private void checkTable() {
         tableNotFound = !tableAlreadyExists(tableName);
     }
-    
-    public void createFromShapeFile(URI shapeFileUri) {
+
+    /**
+     * Import the given shape file to the database and assign it to this layer.
+     *
+     * @param  shapeFileUri  the uri to the shape file
+     */
+    public void createFromShapeFile(final URI shapeFileUri) {
         this.shapeFile = new File(shapeFileUri);
-        
+
         if (this.getFeatureFactory() != null) {
             ((H2FeatureServiceFactory)this.getFeatureFactory()).setFile(this.shapeFile);
         } else {
@@ -209,7 +219,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
         if (features != null) {
-            FeatureFactory f = new H2FeatureServiceFactory(
+            final FeatureFactory f = new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
@@ -217,10 +227,10 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     layerInitWorker,
                     parseSLD(getSLDDefiniton()));
             checkTable();
-            
+
             return f;
         } else {
-            FeatureFactory f = new H2FeatureServiceFactory(
+            final FeatureFactory f = new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
@@ -316,11 +326,11 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     }
 
     /**
-     * DOCUMENT ME!
+     * Checks, if the given table exists in the db
      *
-     * @param   tableName  DOCUMENT ME!
+     * @param   tableName  the name of the table to check
      *
-     * @return  DOCUMENT ME!
+     * @return  True, if the given db table exists
      */
     public static boolean tableAlreadyExists(final String tableName) {
         ConnectionWrapper conn = null;
@@ -359,16 +369,20 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     }
 
     /**
-     * @return the tableNotFound
+     * Checks, if the table of the layer does exist
+     *
+     * @return  true, if the table of the layer does not exist
      */
     public boolean isTableNotFound() {
         return tableNotFound;
     }
 
     /**
-     * @param tableNotFound the tableNotFound to set
+     * DOCUMENT ME!
+     *
+     * @param  tableNotFound  the tableNotFound to set
      */
-    public void setTableNotFound(boolean tableNotFound) {
+    public void setTableNotFound(final boolean tableNotFound) {
         this.tableNotFound = tableNotFound;
     }
 }
