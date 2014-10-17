@@ -28,6 +28,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import org.apache.log4j.Logger;
 
 import org.jdom.Attribute;
+import org.jdom.Content;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
@@ -41,6 +42,7 @@ import java.io.StringReader;
 
 import java.net.URL;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -409,11 +411,16 @@ public class WFSFacade {
                         + ". Try to handle this version like version 1.1.0"); // NOI18N
         }
         query.getChild(QUERY, WFS).removeChildren(PROPERTY_NAME, WFS);
+        final Collection<Content> propertyElements = new ArrayList<Content>();
 
         for (final String s : properties) {
             final Element tmp = new Element(PROPERTY_NAME, WFS);
             tmp.setText(s);
-            query.getChild(QUERY, WFS).addContent(tmp);
+            propertyElements.add(tmp);
+        }
+
+        if (!propertyElements.isEmpty()) {
+            query.getChild(QUERY, WFS).addContent(0, propertyElements);
         }
     }
 
@@ -468,12 +475,18 @@ public class WFSFacade {
         // set geometry
         final Element propertyElement = query.getChild(FILTER, OGC).getChild(BBOX, OGC).getChild(PROPERTY_NAME, OGC);
         propertyElement.setText(feature.getNameOfGeometryAtrtibute());
+        final Collection<Content> propertyElements = new ArrayList<Content>();
 
         for (final FeatureServiceAttribute attribute : feature.getFeatureAttributes()) {
             final Element tmp = new Element(PROPERTY_NAME, WFS);
             tmp.setText(attribute.getName());
-            query.addContent(tmp);
+            propertyElements.add(tmp);
         }
+
+        if (!propertyElements.isEmpty()) {
+            query.addContent(0, propertyElements);
+        }
+
         return requestElement;
     }
 
@@ -505,12 +518,18 @@ public class WFSFacade {
         // set geometry
         final Element propertyElement = query.getChild(FILTER, OGC).getChild(BBOX, OGC).getChild(PROPERTY_NAME, OGC);
         propertyElement.setText(feature.getNameOfGeometryAtrtibute());
+        final Collection<Content> propertyElements = new ArrayList<Content>();
 
         for (final FeatureServiceAttribute attribute : feature.getFeatureAttributes()) {
             final Element tmp = new Element(PROPERTY_NAME, WFS);
             tmp.setText(attribute.getName());
-            query.addContent(tmp);
+            propertyElements.add(tmp);
         }
+
+        if (!propertyElements.isEmpty()) {
+            query.addContent(0, propertyElements);
+        }
+
         return requestElement;
     }
 
