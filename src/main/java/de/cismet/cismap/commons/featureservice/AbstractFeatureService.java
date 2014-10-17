@@ -1278,6 +1278,14 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      * @return  DOCUMENT ME!
      */
     public int getFeatureCount(final BoundingBox boundingBox) {
+        if (!initialized) {
+            try {
+                initAndWait();
+                initConcreteInstance();
+            } catch (Exception e) {
+                LOG.error("Error while initialising feature service.", e);
+            }
+        }
         if (boundingBox == null) {
             return getFeatureFactory().getFeatureCount(this.bb);
         } else {

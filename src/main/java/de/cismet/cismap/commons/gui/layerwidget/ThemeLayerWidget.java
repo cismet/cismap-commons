@@ -23,7 +23,6 @@ import org.openide.util.NbBundle;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -38,15 +37,12 @@ import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
 import java.util.EventObject;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.DropMode;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -54,7 +50,6 @@ import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.event.CellEditorListener;
-import javax.swing.event.TableModelEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeCellEditor;
@@ -66,8 +61,8 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.style.StyleDialogInterface;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -1367,6 +1362,8 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
             if ((value instanceof ShapeFileFeatureService) && ((ShapeFileFeatureService)value).isFileNotFound()) {
                 lab.setForeground(Color.GRAY);
+            } else if ((value instanceof H2FeatureService) && ((H2FeatureService)value).isTableNotFound()) {
+                lab.setForeground(Color.GRAY);
             }
 
             leafRenderer.setSelected(isValueSelected(value));
@@ -1374,7 +1371,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             if (!(value instanceof WMSLayer)) {
                 pan.add(leafRenderer);
             }
-
             pan.add(lab);
             pan.doLayout();
             pan.repaint();

@@ -22,6 +22,8 @@ import org.openide.util.Exceptions;
 
 import java.io.File;
 
+import java.net.URI;
+
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,7 +41,7 @@ import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 
 /**
- * DOCUMENT ME!
+ * A service, that uses the internal db as data source
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -80,6 +82,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     private List<FeatureServiceFeature> features;
     private File shapeFile;
     private boolean initialised = true;
+    private boolean tableNotFound = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -92,6 +95,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
      */
     public H2FeatureService(final Element e) throws Exception {
         super(e);
+        checkTable();
     }
 
     /**
@@ -179,28 +183,63 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
      */
     protected H2FeatureService(final H2FeatureService hfs) {
         super(hfs);
+        checkTable();
     }
 
     //~ Methods ----------------------------------------------------------------
 
+    /**
+     * Checks, if the table of the layer exists within the db and writes the result to the 
+     * tableNotFound variable.
+     */
+    private void checkTable() {
+        tableNotFound = !tableAlreadyExists(tableName);
+    }
+
+    /**
+     * Import the given shape file to the database and assign it to this layer.
+     *
+     * @param  shapeFileUri  the uri to the shape file
+     */
+    public void createFromShapeFile(final URI shapeFileUri) {
+        this.shapeFile = new File(shapeFileUri);
+
+        if (this.getFeatureFactory() != null) {
+            ((H2FeatureServiceFactory)this.getFeatureFactory()).setFile(this.shapeFile);
+        } else {
+            try {
+                initAndWait();
+            } catch (Exception e) {
+                LOG.error("Error while initialising the H2FeatureService with a new shape file", e);
+            }
+        }
+        checkTable();
+    }
+
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
         if (features != null) {
-            return new H2FeatureServiceFactory(
+            final FeatureFactory f = new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
                     features,
                     layerInitWorker,
                     parseSLD(getSLDDefiniton()));
+            checkTable();
+
+            return f;
         } else {
-            return new H2FeatureServiceFactory(
+            final FeatureFactory f = new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
                     shapeFile,
                     layerInitWorker,
                     parseSLD(getSLDDefiniton()));
+            checkTable();
+
+            return f;
         }
     }
 
@@ -287,11 +326,11 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     }
 
     /**
-     * DOCUMENT ME!
+     * Checks, if the given table exists in the db
      *
-     * @param   tableName  DOCUMENT ME!
+     * @param   tableName  the name of the table to check
      *
-     * @return  DOCUMENT ME!
+     * @return  True, if the given db table exists
      */
     public static boolean tableAlreadyExists(final String tableName) {
         ConnectionWrapper conn = null;
@@ -327,5 +366,23 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         }
 
         return tableExists;
+    }
+
+    /**
+     * Checks, if the table of the layer does exist
+     *
+     * @return  true, if the table of the layer does not exist
+     */
+    public boolean isTableNotFound() {
+        return tableNotFound;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  tableNotFound  the tableNotFound to set
+     */
+    public void setTableNotFound(final boolean tableNotFound) {
+        this.tableNotFound = tableNotFound;
     }
 }

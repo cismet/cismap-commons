@@ -108,7 +108,7 @@ public class JDBCFeatureInfo {
                 ps = connection.prepareStatement(query);
                 propStats.put(property, ps);
             } catch (Exception e) {
-                LOG.error("Error while creating prepared statement for property" + property, e);
+                LOG.error("Error while creating prepared statement for property " + property, e);
             }
         }
 

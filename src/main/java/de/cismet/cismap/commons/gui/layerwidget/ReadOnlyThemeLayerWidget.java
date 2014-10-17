@@ -37,6 +37,7 @@ import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.MapService;
@@ -322,6 +323,8 @@ public class ReadOnlyThemeLayerWidget extends javax.swing.JPanel { // implements
             }
 
             if ((value instanceof ShapeFileFeatureService) && ((ShapeFileFeatureService)value).isFileNotFound()) {
+                lab.setForeground(Color.GRAY);
+            } else if ((value instanceof H2FeatureService) && ((H2FeatureService)value).isTableNotFound()) {
                 lab.setForeground(Color.GRAY);
             }
 

@@ -107,7 +107,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private static final String SPATIAL_INIT = "CALL SPATIAL_INIT();";
     private static final String CREATE_SPATIAL_INIT_ALIAS =
         "CREATE ALIAS IF NOT EXISTS SPATIAL_INIT FOR  \"org.h2gis.h2spatialext.CreateSpatialExtension.initSpatialExtension\";";
-    private static final String CREATE_SEQUENCE = "CREATE SEQUENCE %s;";
+    private static final String CREATE_SEQUENCE = "CREATE SEQUENCE \"%s\";";
     private static final String ADD_SEQUENCE = "ALTER TABLE \"%s\" ADD COLUMN id int default %s.nextval;";
     private static final String ADD_NOT_NULL_ID = "ALTER TABLE \"%s\" ALTER COLUMN id SET NOT NULL;";
     private static final String CREATE_PRIMARY_KEY = "CREATE PRIMARY KEY %s ON \"%s\"(id);";
@@ -198,10 +198,22 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Imports the given file and assign it to the layer
      *
-     * @param  workerThread  DOCUMENT ME!
-     * @param  file          DOCUMENT ME!
+     * @param  file  DOCUMENT ME!
+     */
+    public void setFile(final File file) {
+        if (file != null) {
+            importFile(null, file);
+        }
+        initFactory();
+    }
+
+    /**
+     * Import the given file into the db
+     *
+     * @param  workerThread  the thread, that is used to handle the current progress
+     * @param  file          the file to import
      */
     private void importFile(final SwingWorker workerThread, final File file) {
         try {
@@ -301,10 +313,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     /**
-     * DOCUMENT ME!
+     * Imports the given features into the db
      *
-     * @param  workerThread  DOCUMENT ME!
-     * @param  features      file DOCUMENT ME!
+     * @param  workerThread  the thread, that is used to handle the current progress
+     * @param  features      the features to import
      */
     private void importFeatures(final SwingWorker workerThread, final List<FeatureServiceFeature> features) {
         try {

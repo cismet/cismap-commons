@@ -177,7 +177,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
 
             featureInfo.addPropertiesToCache(id, container);
         } catch (final Exception e) {
-            logger.error("Cannot read properties from file.", e);
+            logger.error("Cannot read properties from the database.", e);
         }
 
         return container;
@@ -212,7 +212,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
 
                 featureInfo.addPropertyToCache(cacheId, result);
             } catch (final Exception e) {
-                logger.error("Cannot read property from file.", e);
+                logger.error("Cannot read property from the database.", e);
             }
         }
 
