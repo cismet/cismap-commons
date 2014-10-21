@@ -1194,26 +1194,11 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                             @Override
                                             public void actionPerformed(final ActionEvent e) {
                                                 final TreePath[] tps = tree.getSelectionPaths();
-                                                final MappingComponent mc = CismapBroker.getInstance()
-                                                            .getMappingComponent();
-                                                final TreeMap<Integer, MapService> serviceMap = mc.getMappingModel()
-                                                            .getRasterServices();
 
                                                 for (final TreePath tp : tps) {
                                                     final DBEntry entry = (DBEntry)tp.getLastPathComponent();
                                                     if (tp.getLastPathComponent() instanceof DBEntry) {
                                                         tree.removeEntry(entry);
-                                                    }
-
-                                                    // remove service from active mapping model
-                                                    for (final MapService service : serviceMap.values()) {
-                                                        if (service instanceof H2FeatureService) {
-                                                            final H2FeatureService h2Service = (H2FeatureService)
-                                                                service;
-                                                            if (h2Service.getTableName().equals(entry.getName())) {
-                                                                mc.getMappingModel().removeLayer(h2Service);
-                                                            }
-                                                        }
                                                     }
                                                 }
                                             }
