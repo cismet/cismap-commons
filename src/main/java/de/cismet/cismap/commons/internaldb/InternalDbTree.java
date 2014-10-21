@@ -216,6 +216,7 @@ public class InternalDbTree extends JTree {
             final Connection con = model.getConnection();
             final Statement st = con.createStatement();
             st.execute("DROP TABLE \"" + entry.getName() + "\";");
+            st.execute("DROP SEQUENCE IF EXISTS \"" + entry.getName() + "_seq\";");
 
             model.remove(entry.getName());
 
@@ -226,27 +227,20 @@ public class InternalDbTree extends JTree {
     }
 
     /**
-     * DOCUMENT ME!
+     * Removes the given entry from the MappingModel.
      *
-     * @param  entry  DOCUMENT ME!
+     * @param  entry  the entry to remove
      */
     private void removeEntryFromActiveLayerModel(final DBEntry entry) {
         final MappingModel model = CismapBroker.getInstance().getMappingComponent().getMappingModel();
         final TreeMap<Integer, MapService> map = model.getRasterServices();
 
         if (map != null) {
-            for (final Integer key : map.keySet()) {
-                final MapService mapService = map.get(key);
-
-                if (mapService instanceof H2FeatureService) {
-                    final H2FeatureService other = (H2FeatureService)mapService;
-                    if (other.getTableName().equals(entry.getName())) {
-                        try {
-                            other.initAndWait();
-                        } catch (Exception ex) {
-                            LOG.error("Error while reinitialise layer.", ex);
-                        }
-                        other.retrieve(true);
+            for (final MapService service : map.values()) {
+                if (service instanceof H2FeatureService) {
+                    final H2FeatureService h2Service = (H2FeatureService)service;
+                    if (h2Service.getTableName().equals(entry.getName())) {
+                        model.removeLayer(h2Service);
                     }
                 }
             }
