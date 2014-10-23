@@ -36,6 +36,7 @@ import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
+import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -70,8 +71,17 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
     private boolean featureCollectionListenerEnabled = true;
     private boolean initied = false;
 
-    private FeatureCollectionListModel featureCollectionListModel;
-    private ListSelectionListener listSelectionListener;
+    private final FeatureCollectionListModel featureCollectionListModel = new FeatureCollectionListModel();
+    private final ListSelectionListener listSelectionListener = new ListSelectionListener() {
+
+            @Override
+            public void valueChanged(final ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting() && isListSelectionListenerEnabled()) {
+                    applyListSelectionToMap();
+                    doCalculateAngle();
+                }
+            }
+        };
 
     private PPath tempFeature = null;
 
@@ -79,6 +89,8 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;
@@ -86,6 +98,8 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
     private javax.swing.JList jList2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JToggleButton jToggleButton1;
@@ -103,33 +117,10 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
      */
     private AngleMeasurementDialog() {
         super(StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()), false);
+        initComponents();
     }
 
     //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     */
-    private void init() {
-        featureCollectionListModel = new FeatureCollectionListModel();
-        listSelectionListener = new ListSelectionListener() {
-
-                @Override
-                public void valueChanged(final ListSelectionEvent e) {
-                    if (isListSelectionListenerEnabled()) {
-                        applyListSelectionToMap();
-                        doCalculateAngle();
-                    }
-                }
-            };
-
-        initComponents();
-
-        jList1.getSelectionModel().addListSelectionListener(listSelectionListener);
-        jList2.getSelectionModel().addListSelectionListener(listSelectionListener);
-
-        initied = true;
-    }
 
     /**
      * DOCUMENT ME!
@@ -294,8 +285,6 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         java.awt.GridBagConstraints gridBagConstraints;
 
         panParams = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
         panSide = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -306,6 +295,12 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         jToggleButton2 = new javax.swing.JToggleButton();
         jToggleButton1 = new javax.swing.JToggleButton();
         jToggleButton3 = new javax.swing.JToggleButton();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jButton2 = new javax.swing.JButton();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
         panButtons = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         btnCancel = new javax.swing.JButton();
@@ -319,34 +314,6 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
         panParams.setLayout(new java.awt.GridBagLayout());
-
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line.png"))); // NOI18N
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(
-                AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jLabel1.text"));                                                // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panParams.add(jLabel1, gridBagConstraints);
-
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel2.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line.png"))); // NOI18N
-        jLabel2.setText(org.openide.util.NbBundle.getMessage(
-                AngleMeasurementDialog.class,
-                "AngleMeasurementDialog.jLabel2.text"));                                                // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panParams.add(jLabel2, gridBagConstraints);
 
         panSide.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 25, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -368,7 +335,6 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panParams.add(jLabel4, gridBagConstraints);
 
@@ -376,6 +342,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         jList1.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jList1.setCellRenderer(new FeatureCollectionListCellRenderer());
         jScrollPane1.setViewportView(jList1);
+        jList1.getSelectionModel().addListSelectionListener(listSelectionListener);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -383,7 +350,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 2.0;
+        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panParams.add(jScrollPane1, gridBagConstraints);
 
@@ -391,6 +358,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         jList2.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jList2.setCellRenderer(new FeatureCollectionListCellRenderer());
         jScrollPane2.setViewportView(jList2);
+        jList2.getSelectionModel().addListSelectionListener(listSelectionListener);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -398,7 +366,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 2.0;
+        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panParams.add(jScrollPane2, gridBagConstraints);
 
@@ -483,9 +451,106 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
-        gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panParams.add(jPanel2, gridBagConstraints);
+
+        jPanel3.setLayout(new java.awt.GridBagLayout());
+
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText(org.openide.util.NbBundle.getMessage(
+                AngleMeasurementDialog.class,
+                "AngleMeasurementDialog.jLabel1.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
+        jPanel3.add(jLabel1, gridBagConstraints);
+
+        jButton2.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line-crossed.png"))); // NOI18N
+        jButton2.setText(org.openide.util.NbBundle.getMessage(
+                AngleMeasurementDialog.class,
+                "AngleMeasurementDialog.jButton2.text"));                                                       // NOI18N
+        jButton2.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AngleMeasurementDialog.class,
+                "AngleMeasurementDialog.jButton2.toolTipText"));                                                // NOI18N
+        jButton2.setBorderPainted(false);
+        jButton2.setContentAreaFilled(false);
+        jButton2.setDisabledIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line.png")));         // NOI18N
+        jButton2.setEnabled(false);
+        jButton2.setFocusPainted(false);
+        jButton2.setFocusable(false);
+        jButton2.setRequestFocusEnabled(false);
+        jButton2.setRolloverEnabled(false);
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton2ActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        jPanel3.add(jButton2, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        panParams.add(jPanel3, gridBagConstraints);
+
+        jPanel4.setLayout(new java.awt.GridBagLayout());
+
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText(org.openide.util.NbBundle.getMessage(
+                AngleMeasurementDialog.class,
+                "AngleMeasurementDialog.jLabel2.text")); // NOI18N
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(5, 0, 5, 5);
+        jPanel4.add(jLabel2, gridBagConstraints);
+
+        jButton1.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line-crossed.png"))); // NOI18N
+        jButton1.setText(org.openide.util.NbBundle.getMessage(
+                AngleMeasurementDialog.class,
+                "AngleMeasurementDialog.jButton1.text"));                                                       // NOI18N
+        jButton1.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AngleMeasurementDialog.class,
+                "AngleMeasurementDialog.jButton1.toolTipText"));                                                // NOI18N
+        jButton1.setBorderPainted(false);
+        jButton1.setContentAreaFilled(false);
+        jButton1.setDisabledIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/layer-shape-line.png")));         // NOI18N
+        jButton1.setEnabled(false);
+        jButton1.setFocusPainted(false);
+        jButton1.setFocusable(false);
+        jButton1.setRequestFocusEnabled(false);
+        jButton1.setRolloverEnabled(false);
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton1ActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        jPanel4.add(jButton1, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        panParams.add(jPanel4, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
@@ -569,6 +634,26 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         doCalculateAngle();
     }                                                                                  //GEN-LAST:event_jToggleButton3ActionPerformed
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
+        final Feature feature = (Feature)jList1.getSelectedValue();
+        getMappingComponent().getFeatureCollection().removeFeature(feature);
+    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton2ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton2ActionPerformed
+        final Feature feature = (Feature)jList2.getSelectedValue();
+        getMappingComponent().getFeatureCollection().removeFeature(feature);
+    }                                                                            //GEN-LAST:event_jButton2ActionPerformed
+
     @Override
     public void dispose() {
         setFeatureCollectionListenerEnabled(false);
@@ -591,13 +676,12 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
         jToggleButton1.setEnabled(isMirrorAAllowed() && isShowFeature() && (tempFeature != null));
         jToggleButton3.setSelected(isShowFeature() && isMirrorB());
         jToggleButton3.setEnabled(isMirrorBAllowed() && isShowFeature() && (tempFeature != null));
+        jButton1.setEnabled(jList1.getSelectedValue() instanceof PureNewFeature);
+        jButton2.setEnabled(jList2.getSelectedValue() instanceof PureNewFeature);
     }
 
     @Override
     public void setVisible(final boolean b) {
-        if (!initied) {
-            init();
-        }
         initialMcReadonly = getMappingComponent().isReadOnly();
         getMappingComponent().setReadOnly(false);
 
