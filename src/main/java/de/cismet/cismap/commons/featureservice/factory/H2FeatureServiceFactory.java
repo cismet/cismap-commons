@@ -126,6 +126,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private JDBCFeatureInfo info;
     private String name;
     private List<LinearReferencingInfo> linRefList;
+    private int srid = 35833;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -198,7 +199,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * Imports the given file and assign it to the layer
+     * Imports the given file and assign it to the layer.
      *
      * @param  file  DOCUMENT ME!
      */
@@ -210,7 +211,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     /**
-     * Import the given file into the db
+     * Import the given file into the db.
      *
      * @param  workerThread  the thread, that is used to handle the current progress
      * @param  file          the file to import
@@ -313,7 +314,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     /**
-     * Imports the given features into the db
+     * Imports the given features into the db.
      *
      * @param  workerThread  the thread, that is used to handle the current progress
      * @param  features      the features to import
@@ -1028,7 +1029,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final List<JDBCFeature> selectedFeatures = new ArrayList<JDBCFeature>();
 
             if (info == null) {
-                info = new JDBCFeatureInfo(conn, 35833, geometryField, tableName);
+                info = new JDBCFeatureInfo(conn, srid, geometryField, tableName);
             }
             final List style = getStyle(name);
 

@@ -41,7 +41,7 @@ import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 
 /**
- * A service, that uses the internal db as data source
+ * A service, that uses the internal db as data source.
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -189,8 +189,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * Checks, if the table of the layer exists within the db and writes the result to the 
-     * tableNotFound variable.
+     * Checks, if the table of the layer exists within the db and writes the result to the tableNotFound variable.
      */
     private void checkTable() {
         tableNotFound = !tableAlreadyExists(tableName);
@@ -326,7 +325,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     }
 
     /**
-     * Checks, if the given table exists in the db
+     * Checks, if the given table exists in the db.
      *
      * @param   tableName  the name of the table to check
      *
@@ -369,7 +368,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     }
 
     /**
-     * Checks, if the table of the layer does exist
+     * Checks, if the table of the layer does exist.
      *
      * @return  true, if the table of the layer does not exist
      */

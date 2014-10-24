@@ -8,6 +8,7 @@
 package de.cismet.cismap.commons.gui.attributetable;
 
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 
 /**
  * This interface is used to lock and unlock features. See also {@link FeatureLockerFactory}
@@ -30,6 +31,19 @@ public interface FeatureLockingInterface {
      * @throws  Exception                   if the locking failed for some reason
      */
     Object lock(final Feature feature) throws LockAlreadyExistsException, Exception;
+
+    /**
+     * locks the given feature service.
+     *
+     * @param   service  the service that should be locked
+     *
+     * @return  The unlock object for the given service. This can be used with {@link unlock(Object)}
+     *
+     * @throws  LockAlreadyExistsException  if at least one feature of the given service is already locked
+     * @throws  Exception                   if the locking failed for some reason
+     */
+    Object lock(final AbstractFeatureService service) throws LockAlreadyExistsException, Exception;
+
     /**
      * Unlocks the feature, that is associated with the given unlock-object.
      *
@@ -38,6 +52,7 @@ public interface FeatureLockingInterface {
      * @throws  Exception  if the unlock process failed
      */
     void unlock(final Object unlockObject) throws Exception;
+
     /**
      * Returns the supported feature services.
      *

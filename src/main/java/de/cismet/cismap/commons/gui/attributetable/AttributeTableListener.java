@@ -13,6 +13,8 @@ package de.cismet.cismap.commons.gui.attributetable;
 
 import javax.swing.JPanel;
 
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+
 /**
  * DOCUMENT ME!
  *
@@ -40,4 +42,12 @@ public interface AttributeTableListener {
      * @param  name  DOCUMENT ME!
      */
     void changeName(String id, String name);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  service  DOCUMENT ME!
+     * @param  active   DOCUMENT ME!
+     */
+    void processingModeChanged(AbstractFeatureService service, boolean active);
 }
