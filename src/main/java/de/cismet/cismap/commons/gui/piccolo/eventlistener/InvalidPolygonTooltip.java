@@ -105,6 +105,16 @@ public class InvalidPolygonTooltip extends PNode {
             break;
         }
 
+        setCustomText(title, content);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  title    DOCUMENT ME!
+     * @param  content  DOCUMENT ME!
+     */
+    public void setCustomText(final String title, final String[] content) {
         final PText defaultPText = new PText();
 
         final Font defaultFont = defaultPText.getFont();
