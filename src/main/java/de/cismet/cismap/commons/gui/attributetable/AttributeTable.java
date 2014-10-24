@@ -71,6 +71,7 @@ import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.SwingWorker;
@@ -152,6 +153,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private FeatureLockingInterface locker;
     private List<Object> lockingObjects = new ArrayList<Object>();
     private AttributeTableSearchPanel searchPanel;
+    private AttributeTableFieldCalculation calculationDialog;
     private Object query;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -255,6 +257,14 @@ public class AttributeTable extends javax.swing.JPanel {
             butAttrib.setVisible(true);
         }
 
+        final Collection<? extends AttributeTableFieldCalculation> calculatorList = Lookup.getDefault()
+                    .lookupAll(AttributeTableFieldCalculation.class);
+
+        if ((calculatorList != null) && (calculatorList.size() > 0)) {
+            calculationDialog = calculatorList.toArray(new AttributeTableFieldCalculation[calculatorList.size()])[0];
+            miFeldberechnung.setVisible(true);
+        }
+
         jcFeatures.setModel(new DefaultComboBoxModel(
                 new Object[] {
                     new FeatureComboItem(
@@ -300,6 +310,12 @@ public class AttributeTable extends javax.swing.JPanel {
                         popupColumn = table.convertColumnIndexToModel(popupColumn);
 
                         miStatistik.setEnabled(model.isNumeric(popupColumn));
+                        boolean columnEditable = true;
+
+                        if (tableRuleSet != null) {
+                            columnEditable = tableRuleSet.isColumnEditable(model.getColumnAttributeName(popupColumn));
+                        }
+                        miFeldberechnung.setEnabled(tbProcessing.isSelected() && columnEditable);
 
                         jPopupMenu1.show((Component)e.getSource(), e.getX(), e.getY());
                     }
@@ -357,6 +373,8 @@ public class AttributeTable extends javax.swing.JPanel {
                             }
                         }
                     }
+
+                    table.repaint();
                 }
             });
 
@@ -383,9 +401,6 @@ public class AttributeTable extends javax.swing.JPanel {
 
         loadModel(currentPage);
 
-//        final Highlighter alternateRowHighlighter = HighlighterFactory.createAlternateStriping(
-//                new Color(255, 255, 255),
-//                new Color(235, 235, 235));
         final ColorHighlighter base = new CustomColorHighlighter(
                 HighlightPredicate.EVEN,
                 new Color(255, 255, 255),
@@ -471,8 +486,10 @@ public class AttributeTable extends javax.swing.JPanel {
     /**
      * Should be invoked, before the window wit the AttributeTable is closed. This method checks, if there are unsaved
      * changes
+     *
+     * @return  DOCUMENT ME!
      */
-    public void dispose() {
+    public boolean dispose() {
         if (tbProcessing.isSelected()) {
             final int ans = JOptionPane.showConfirmDialog(
                     AttributeTable.this,
@@ -481,14 +498,18 @@ public class AttributeTable extends javax.swing.JPanel {
                         "AttributeTable.addWindowListener().text",
                         featureService.getName()),
                     NbBundle.getMessage(AttributeTable.class, "AttributeTable.addWindowListener().title"),
-                    JOptionPane.YES_NO_OPTION);
+                    JOptionPane.YES_NO_CANCEL_OPTION);
 
             if (ans == JOptionPane.YES_OPTION) {
                 saveChangedRows(true);
-            } else {
+            } else if (ans == JOptionPane.NO_OPTION) {
                 unlockAll();
+            } else {
+                return false;
             }
         }
+
+        return true;
     }
 
     /**
@@ -504,7 +525,7 @@ public class AttributeTable extends javax.swing.JPanel {
                 JOptionPane.showMessageDialog(
                     this,
                     NbBundle.getMessage(AttributeTable.class, "AttributeTable.makeFeatureEditable.noPermissions.text"),
-                    "AttributeTable.makeFeatureEditable.noPermissions.title",
+                    NbBundle.getMessage(AttributeTable.class, "AttributeTable.makeFeatureEditable.noPermissions.title"),
                     JOptionPane.ERROR_MESSAGE);
 
                 return;
@@ -568,9 +589,8 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 @Override
                 protected List<FeatureServiceFeature> doInBackground() throws Exception {
-                    final FeatureFactory factory = featureService.getFeatureFactory();
-
                     setItemCount(featureService.getFeatureCount(bb));
+                    final FeatureFactory factory = featureService.getFeatureFactory();
                     List<FeatureServiceFeature> featureList;
                     final Object serviceQuery = ((query == null) ? featureService.getQuery() : query);
 
@@ -674,7 +694,7 @@ public class AttributeTable extends javax.swing.JPanel {
                 queryString += "...";
             }
             AttributeTableFactory.getInstance()
-                    .ChangeAttributeTableName(
+                    .changeAttributeTableName(
                         featureService,
                         NbBundle.getMessage(
                             AttributeTable.class,
@@ -683,7 +703,7 @@ public class AttributeTable extends javax.swing.JPanel {
                             queryString));
         } else {
             AttributeTableFactory.getInstance()
-                    .ChangeAttributeTableName(
+                    .changeAttributeTableName(
                         featureService,
                         NbBundle.getMessage(
                             AttributeTableFactory.class,
@@ -738,6 +758,7 @@ public class AttributeTable extends javax.swing.JPanel {
             saveChangedRows(forceSave);
         }
         butUndo.setVisible(tbProcessing.isSelected());
+        table.repaint();
     }
 
     /**
@@ -859,6 +880,13 @@ public class AttributeTable extends javax.swing.JPanel {
         miFeldberechnung.setText(org.openide.util.NbBundle.getMessage(
                 AttributeTable.class,
                 "AttributeTable.miFeldberechnung.text")); // NOI18N
+        miFeldberechnung.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    miFeldberechnungActionPerformed(evt);
+                }
+            });
         jPopupMenu1.add(miFeldberechnung);
 
         diaStatistic.setTitle(org.openide.util.NbBundle.getMessage(
@@ -1496,10 +1524,6 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.weighty = 1.0;
         add(panWaiting, gridBagConstraints);
 
-        table.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][] {},
-                new String[] {}));
-        table.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tableScrollPane.setViewportView(table);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -2062,6 +2086,7 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     private void tbProcessingActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_tbProcessingActionPerformed
         changeProcessingModeIntern(false);
+        AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
     }                                                                                //GEN-LAST:event_tbProcessingActionPerformed
 
     /**
@@ -2185,10 +2210,90 @@ public class AttributeTable extends javax.swing.JPanel {
     } //GEN-LAST:event_butDeleteActionPerformed
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void miFeldberechnungActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miFeldberechnungActionPerformed
+        final String attrName = model.getColumnAttributeName(popupColumn);
+        final FeatureServiceAttribute attr = (FeatureServiceAttribute)featureService.getFeatureServiceAttributes()
+                    .get(attrName);
+        List<FeatureServiceFeature> featureList;
+        final int[] selectedRow = table.getSelectedRows();
+
+        if ((selectedRow != null) && (selectedRow.length > 0)) {
+            featureList = new ArrayList<FeatureServiceFeature>();
+
+            for (final int row : selectedRow) {
+                final FeatureServiceFeature f = model.getFeatureServiceFeature(table.convertRowIndexToModel(row));
+                featureList.add(f);
+            }
+        } else {
+            featureList = model.getFeatureServiceFeatures();
+
+            try {
+                if (locker != null) {
+                    locker.lock(featureService);
+                }
+            } catch (LockAlreadyExistsException ex) {
+                featureList = null;
+                JOptionPane.showMessageDialog(
+                    AttributeTable.this,
+                    NbBundle.getMessage(
+                        AttributeTable.class,
+                        "AttributeTable.ListSelectionListener.miFeldberechnungActionPerformed().lockexists.message",
+                        ex.getLockMessage()),
+                    NbBundle.getMessage(
+                        AttributeTable.class,
+                        "AttributeTable.ListSelectionListener.miFeldberechnungActionPerformed().lockexists.title"),
+                    JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                featureList = null;
+                LOG.error("Error while locking feature.", ex);
+                JOptionPane.showMessageDialog(
+                    AttributeTable.this,
+                    NbBundle.getMessage(
+                        AttributeTable.class,
+                        "AttributeTable.ListSelectionListener.valueChanged().exception.message",
+                        ex.getMessage()),
+                    NbBundle.getMessage(
+                        AttributeTable.class,
+                        "AttributeTable.ListSelectionListener.valueChanged().exception.title"),
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        if (featureList != null) {
+            final boolean changes = calculationDialog.openPanel(this, featureService, attr, featureList);
+
+            if (changes) {
+                for (final FeatureServiceFeature feature : featureList) {
+//                    Object newObject = aValue;
+
+//                    if (tableRuleSet != null) {
+//                        newObject = tableRuleSet.afterEdit(attrName, rowIndex, feature.getProperty(attrName), aValue);
+//                    }
+
+                    if (!changedFeatures.contains(feature)) {
+                        changedFeatures.add(feature);
+                    }
+                }
+            }
+        }
+    } //GEN-LAST:event_miFeldberechnungActionPerformed
+
+    /**
      * Reloads the model.
      */
     public void reload() {
         loadModel(currentPage);
+    }
+
+    /**
+     * Refreshs the table. This should be invoked, if features of the model were changed.
+     */
+    public void refresh() {
+        model.fireContentsChanged();
     }
 
     /**
@@ -2486,7 +2591,7 @@ public class AttributeTable extends javax.swing.JPanel {
     /**
      * unlocks all locked objects.
      */
-    private void unlockAll() {
+    public void unlockAll() {
         boolean allLocksRemoved = true;
 
         for (final Object tmp : lockingObjects) {
@@ -2813,6 +2918,21 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 if (backgroundColor != null) {
                     c.setBackground(backgroundColor);
+                }
+            }
+
+            if (tbProcessing.isSelected()) {
+                // edit mode ist active, but the column is not editable
+                if ((tableRuleSet != null)
+                            && !tableRuleSet.isColumnEditable(
+                                model.getColumnAttributeName(table.convertColumnIndexToModel(column)))) {
+                    final JLabel lab = new JLabel(((JLabel)c).getText(),
+                            ((JLabel)c).getIcon(),
+                            ((JLabel)c).getHorizontalAlignment());
+                    lab.setBackground(((JLabel)c).getBackground());
+                    lab.setForeground(Color.LIGHT_GRAY);
+                    lab.setOpaque(true);
+                    return lab;
                 }
             }
 

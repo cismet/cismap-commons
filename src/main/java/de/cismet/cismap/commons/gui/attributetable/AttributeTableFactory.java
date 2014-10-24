@@ -89,11 +89,25 @@ public class AttributeTableFactory {
      * @param  featureService  DOCUMENT ME!
      * @param  newName         DOCUMENT ME!
      */
-    public void ChangeAttributeTableName(final AbstractFeatureService featureService, final String newName) {
+    public void changeAttributeTableName(final AbstractFeatureService featureService, final String newName) {
         try {
             listener.changeName(
                 featureService.getName(),
                 newName);
+        } catch (Exception e) {
+            LOG.error("Error while retrieving all features", e);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureService  DOCUMENT ME!
+     * @param  active          DOCUMENT ME!
+     */
+    public void processingModeChanged(final AbstractFeatureService featureService, final boolean active) {
+        try {
+            listener.processingModeChanged(featureService, active);
         } catch (Exception e) {
             LOG.error("Error while retrieving all features", e);
         }

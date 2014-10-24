@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
 import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
 
@@ -35,6 +34,7 @@ public class DefaultQueryButtonAction implements ActionListener {
     protected String text;
     protected String queryText;
     protected int width;
+    protected boolean startWithSpace = true;
 
     protected int posCorrection = 0;
 
@@ -215,11 +215,11 @@ public class DefaultQueryButtonAction implements ActionListener {
         if ((getQueryTextArea().getText() != null) && !queryTextArea.getText().isEmpty()) {
             try {
                 if (!queryTextArea.getText(queryTextArea.getCaretPosition() - 1, 1).contains("(")) {
-                    str = " " + str;
+                    str = (startWithSpace ? " " : "") + str;
                 }
             } catch (BadLocationException ex) {
-                LOG.fatal("Fatal", ex);
-                str = " " + str;
+                LOG.error("Error ewhile appending string", ex);
+                str = (startWithSpace ? " " : "") + str;
             }
         }
         getQueryTextArea().insert(str, getQueryTextArea().getCaretPosition());
