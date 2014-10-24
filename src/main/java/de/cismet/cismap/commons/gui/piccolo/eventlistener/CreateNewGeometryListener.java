@@ -15,6 +15,8 @@ import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 import org.apache.log4j.Logger;
 
+import org.openide.util.Lookup;
+
 import java.awt.Color;
 import java.awt.geom.Point2D;
 
@@ -41,6 +43,11 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger LOG = Logger.getLogger(CreateNewGeometryListener.class);
+    private static Collection<? extends GeometryCheckInterface> geometryChecks;
+
+    static {
+        geometryChecks = Lookup.getDefault().lookupAll(GeometryCheckInterface.class);
+    }
 
     //~ Instance fields --------------------------------------------------------
 
@@ -106,6 +113,31 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
 
     @Override
     public void mousePressed(final PInputEvent pInputEvent) {
+        final AbstractNewFeature tempFeature = getCurrentNewFeature();
+
+        if ((tempFeature != null) && (pInputEvent.getClickCount() == 1)) {
+            final Geometry tempGeometry = tempFeature.getGeometry();
+
+            if ((geometryChecks != null) && !geometryChecks.isEmpty()) {
+                final Point2D lastPoint = pInputEvent.getPosition();
+                final WorldToScreenTransform wtst = mappingComponent.getWtst();
+                final Coordinate lastCoordinate = new Coordinate(wtst.getSourceX((float)lastPoint.getX()),
+                        wtst.getSourceY((float)lastPoint.getY()));
+                boolean ignoreLastGeometryCoordinate = false;
+
+                if (points.size() < tempGeometry.getCoordinates().length) {
+                    ignoreLastGeometryCoordinate = true;
+                }
+
+                for (final GeometryCheckInterface check : geometryChecks) {
+                    if (!check.check(tempGeometry, lastCoordinate, ignoreLastGeometryCoordinate)) {
+                        return;
+                    }
+                }
+            }
+        }
+        multiPolygonPointerAnnotation.setVisible(false);
+
         if (pInputEvent.isLeftMouseButton()) {
             if (pInputEvent.getClickCount() == 1) {
                 if (!isInProgress()) {
@@ -227,6 +259,27 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
             }
         } else {
             multiPolygonPointerAnnotation.setVisible(false);
+            final AbstractNewFeature tempFeature = getCurrentNewFeature();
+
+            if (tempFeature != null) {
+                final Geometry tempGeometry = tempFeature.getGeometry();
+                boolean errorFound = false;
+
+                if ((geometryChecks != null) && !geometryChecks.isEmpty()) {
+                    final Point2D lastPoint = pInputEvent.getPosition();
+                    final WorldToScreenTransform wtst = mappingComponent.getWtst();
+                    final Coordinate lastCoordinate = new Coordinate(wtst.getSourceX(lastPoint.getX()),
+                            wtst.getSourceY(lastPoint.getY()));
+
+                    for (final GeometryCheckInterface check : geometryChecks) {
+                        if (!check.check(tempGeometry, lastCoordinate, true)) {
+                            multiPolygonPointerAnnotation.setCustomText("Geometrie ungültig", check.getErrorText());
+                            errorFound = true;
+                        }
+                    }
+                }
+                multiPolygonPointerAnnotation.setVisible(errorFound);
+            }
         }
     }
 

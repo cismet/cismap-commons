@@ -65,12 +65,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     protected PInputEvent finishingEvent = null;
     protected String mode = POLYGON;
 
+    protected ArrayList<Point2D> points;
+
     private Point2D startPoint;
     private PPath tempFeature;
     private boolean inProgress;
     private int numOfEllipseEdges = DEFAULT_NUMOF_ELLIPSE_EDGES;
-
-    private ArrayList<Point2D> points;
     private Stack<Point2D> undoPoints;
     private SimpleMoveListener moveListener;
     private Class<? extends AbstractNewFeature> geometryFeatureClass = null;
@@ -550,10 +550,13 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
      *
      * @return  DOCUMENT ME!
      */
-    protected Point2D[] getPoints(final Point2D lastPoint) {
+    protected Point2D[] getPoints(Point2D lastPoint) {
         try {
             final boolean movin;
             int plus;
+            if (lastPoint == points.get(points.size() - 1)) {
+                lastPoint = null;
+            }
             if (lastPoint != null) {
                 plus = 2;
                 movin = true;
