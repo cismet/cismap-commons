@@ -29,6 +29,8 @@ import java.awt.geom.Point2D;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -83,6 +85,7 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
 
     public static final String GET_FEATURE_INFO_MULTI_GEOM_NOTIFICATION = "GET_FEATURE_INFO_MULTI_GEOM_NOTIFICATION"; // NOI18N
     private static final String WMS_GML_FORMAT = "application/vnd.ogc.gml";
+    private static final String ENCODING_ATTR = "encoding=\"";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -297,11 +300,8 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
                                                 .getRequest()
                                                 .getFeatureInfoOperation()
                                                 .getParameter("Format");
-                                    boolean gmlResponsePossible = (p != null) && (p.getAllowedValues() != null)
+                                    final boolean gmlResponsePossible = (p != null) && (p.getAllowedValues() != null)
                                                 && p.getAllowedValues().contains(WMS_GML_FORMAT);
-                                    // test
-                                    gmlResponsePossible = !gmlResponsePossible;
-                                    // test
                                     for (final WMSLayer layer : (List<WMSLayer>)wmsService.getWMSLayers()) {
                                         if (gmlResponsePossible) {
                                             try {
@@ -370,15 +370,20 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
             final WMSServiceLayer wmsServiceLayer,
             final Geometry clickPoint) throws Exception {
         final InputStream respIs = WebAccessManager.getInstance().doRequest(new URL(url));
-        final InputStreamReader reader = new InputStreamReader(new BufferedInputStream(respIs));
         final GMLFeatureCollectionDocument featureCollectionDocument = new GMLFeatureCollectionDocument();
         final FeatureCollection featureCollection;
 
-        String res = "";
-        String tmp;
-        final BufferedReader br = new BufferedReader(reader);
-        while ((tmp = br.readLine()) != null) {
-            res += tmp;
+        String res = readInputStream(respIs, null);
+        String encodingString = null;
+
+        if (res.contains(ENCODING_ATTR)) {
+            encodingString = res.substring(res.indexOf(ENCODING_ATTR) + ENCODING_ATTR.length());
+
+            encodingString = encodingString.substring(0, encodingString.indexOf("\""));
+        }
+
+        if (encodingString != null) {
+            res = readInputStream(new ByteArrayInputStream(res.getBytes()), encodingString);
         }
 
         final StringReader re = new StringReader(res);
@@ -414,6 +419,35 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
         } else {
             return new ArrayList<Feature>();
         }
+    }
+
+    /**
+     * Reads the given input stream.
+     *
+     * @param   respIs   the inputstream to read
+     * @param   charset  the charset to be use. The default charset will be used, if it is null
+     *
+     * @return  The inputstream as string
+     *
+     * @throws  IOException  DOCUMENT ME!
+     */
+    private String readInputStream(final InputStream respIs, final String charset) throws IOException {
+        final InputStreamReader reader;
+
+        if (charset != null) {
+            reader = new InputStreamReader(new BufferedInputStream(respIs), charset);
+        } else {
+            reader = new InputStreamReader(new BufferedInputStream(respIs));
+        }
+        final StringBuilder res = new StringBuilder();
+        String tmp;
+        final BufferedReader br = new BufferedReader(reader);
+
+        while ((tmp = br.readLine()) != null) {
+            res.append(tmp);
+        }
+
+        return res.toString();
     }
 
     /**
