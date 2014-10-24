@@ -11,6 +11,13 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import java.awt.EventQueue;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JTree;
+import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -22,11 +29,12 @@ import javax.swing.tree.TreePath;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class ActiveLayerModelWrapperWithoutProgress implements TreeModel {
+public class ActiveLayerModelWrapperWithoutProgress implements TreeModel, TreeModelListener {
 
     //~ Instance fields --------------------------------------------------------
 
     private ActiveLayerModel model;
+    private final List<JTree> treesToUpdate = new ArrayList<JTree>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -37,6 +45,7 @@ public class ActiveLayerModelWrapperWithoutProgress implements TreeModel {
      */
     public ActiveLayerModelWrapperWithoutProgress(final ActiveLayerModel model) {
         this.model = model;
+        model.addTreeModelWithoutProgressListener(this);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -82,6 +91,30 @@ public class ActiveLayerModelWrapperWithoutProgress implements TreeModel {
     }
 
     /**
+     * Adds a tree to update.
+     *
+     * <p>Invokes the updateUI() method of the given tree after every fireTreeStructureChanged() invocation. This is
+     * required to refresh the path bounds of the tree. Without this refresh, the change of the name of a tree path will
+     * cause a display error.</p>
+     *
+     * @param  tree  the tree to invoke updateUI()
+     */
+    public void addTreeToUpdate(final JTree tree) {
+        treesToUpdate.add(tree);
+    }
+
+    /**
+     * Removes the given tree.
+     *
+     * @param  tree  tree to remove
+     *
+     * @see    addTreeToUpdate(Jtree)
+     */
+    public void removeTreeToUpdate(final JTree tree) {
+        treesToUpdate.remove(tree);
+    }
+
+    /**
      * DOCUMENT ME!
      *
      * @return  the model
@@ -97,5 +130,40 @@ public class ActiveLayerModelWrapperWithoutProgress implements TreeModel {
      */
     public void setModel(final ActiveLayerModel model) {
         this.model = model;
+    }
+
+    @Override
+    public void treeNodesChanged(final TreeModelEvent e) {
+        fireUpdateUI();
+    }
+
+    @Override
+    public void treeNodesInserted(final TreeModelEvent e) {
+        fireUpdateUI();
+    }
+
+    @Override
+    public void treeNodesRemoved(final TreeModelEvent e) {
+        fireUpdateUI();
+    }
+
+    @Override
+    public void treeStructureChanged(final TreeModelEvent e) {
+        fireUpdateUI();
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void fireUpdateUI() {
+        EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    for (final JTree tree : treesToUpdate) {
+                        tree.updateUI();
+                    }
+                }
+            });
     }
 }

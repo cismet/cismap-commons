@@ -59,6 +59,7 @@ import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.features.PermissionProvider;
 import de.cismet.cismap.commons.features.WMSFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
@@ -236,9 +237,12 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
                 @Override
                 public void getFeatureInfoRequest(final GetFeatureInfoEvent evt) {
-                    contentChanged();
-                    model.init(evt.getFeatures());
-                    expandAll(new TreePath(model.getRoot()));
+                    final boolean successful = contentChanged();
+
+                    if (successful) {
+                        model.init(evt.getFeatures());
+                        expandAll(new TreePath(model.getRoot()));
+                    }
                 }
             });
     }
@@ -561,6 +565,21 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      */
     private void startEditMode(final FeatureServiceFeature fsf) {
         if (fsf.getLayerProperties().getFeatureService().isEditable()) {
+            if (fsf instanceof PermissionProvider) {
+                if (!((PermissionProvider)fsf).hasWritePermissions()) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        NbBundle.getMessage(
+                            FeatureInfoPanel.class,
+                            "FeatureInfoPanel.makeFeatureEditable.noPermissions.text"),
+                        NbBundle.getMessage(
+                            FeatureInfoPanel.class,
+                            "FeatureInfoPanel.makeFeatureEditable.noPermissions.title"),
+                        JOptionPane.ERROR_MESSAGE);
+
+                    return;
+                }
+            }
             final FeatureLockingInterface locker = FeatureLockerFactory.getInstance()
                         .getLockerForFeatureService(fsf.getLayerProperties().getFeatureService());
             try {
@@ -638,29 +657,42 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     /**
      * Checks, if the FeatureInfoPanel contains unsaved changes and let the user decide, whether the content should be
      * saved or not.
+     *
+     * @return  false, if the close operation should be aborted
      */
-    private void contentChanged() {
+    private boolean contentChanged() {
         if (!lockMap.isEmpty()) {
             final int ans = JOptionPane.showConfirmDialog(
                     FeatureInfoPanel.this,
                     NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.contentChanged().text"),
                     NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.contentChanged().title"),
-                    JOptionPane.YES_NO_OPTION);
+                    JOptionPane.YES_NO_CANCEL_OPTION);
 
             if (ans == JOptionPane.YES_OPTION) {
                 saveAllChanges();
-            } else {
+            } else if (ans == JOptionPane.NO_OPTION) {
                 unlockAll();
+            } else {
+                return false;
             }
         }
+
+        return true;
     }
 
     /**
      * Should be invoked, before the FeatureInfoPanel is closed. It checks, if there are unsaved changes.
+     *
+     * @return  false, if the close operation should be aborted
      */
-    public void dispose() {
-        contentChanged();
-        model.init(new ArrayList<Feature>());
+    public boolean dispose() {
+        final boolean successful = contentChanged();
+
+        if (successful) {
+            model.init(new ArrayList<Feature>());
+        }
+
+        return successful;
     }
 
     /**
@@ -1098,7 +1130,13 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
             if (tableRuleSet != null) {
                 for (int i = 0; i < getRowCount(); ++i) {
-                    final String columnName = attributeNames[i];
+                    String columnName;
+                    if (i >= attributeNames.length) {
+                        columnName = additionalAttributes[i - attributeNames.length];
+                    } else {
+                        columnName = attributeNames[i];
+                    }
+
                     final TableCellEditor editor = tableRuleSet.getCellEditor(columnName);
                     final TableCellRenderer renderer = tableRuleSet.getCellRenderer(columnName);
 
@@ -1241,7 +1279,11 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                     value = feature.getProperty(attributeNames[rowIndex]);
                 }
             } else {
-                value = additionalAttributes[rowIndex - attributeNames.length];
+                if (columnIndex == 0) {
+                    value = additionalAttributes[rowIndex - attributeNames.length];
+                } else {
+                    value = tableRuleSet.getAdditionalFieldValue(rowIndex, feature);
+                }
             }
 
             if (value instanceof Geometry) {

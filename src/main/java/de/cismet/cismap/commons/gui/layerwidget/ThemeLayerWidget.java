@@ -23,6 +23,7 @@ import org.openide.util.NbBundle;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -36,8 +37,13 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EventObject;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.ExecutorService;
 
 import javax.swing.DropMode;
 import javax.swing.JCheckBox;
@@ -61,6 +67,10 @@ import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureCollectionEvent;
+import de.cismet.cismap.commons.features.FeatureCollectionListener;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.features.PermissionProvider;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
@@ -75,7 +85,7 @@ import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 
-import de.cismet.tools.CismetThreadPool;
+import de.cismet.commons.concurrency.CismetExecutors;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
@@ -88,7 +98,7 @@ import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectionListener { // implements
+public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectionListener, FeatureCollectionListener { // implements
 
     //~ Instance fields --------------------------------------------------------
 
@@ -104,6 +114,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     private DefaultPopupMenuListener popupMenuListener = new DefaultPopupMenuListener(popupMenu);
     private TreeTransferHandler transferHandler;
     private StyleDialogInterface styleDialog;
+    private Map<Object, Integer> selectedFeatures = new HashMap<Object, Integer>();
+    private Map<Object, Integer> modifiableFeatures = new HashMap<Object, Integer>();
+    private UpdateSelectionThread selectionUpdateThread = null;
+    private ExecutorService executor = CismetExecutors.newSingleThreadExecutor();
+    private List<AbstractFeatureService> editableServices = new ArrayList<AbstractFeatureService>();
 
     private AddThemeMenuItem addThemeMenuItem;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -119,6 +134,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     public ThemeLayerWidget() {
         initComponents();
 
+        editableServices = Collections.synchronizedList(editableServices);
         tree.setCellRenderer(new CheckBoxNodeRenderer());
         tree.setCellEditor(new CheckBoxNodeEditor());
         tree.setEditable(true);
@@ -126,17 +142,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         tree.setDropMode(DropMode.ON_OR_INSERT);
         transferHandler = new TreeTransferHandler();
         tree.setTransferHandler(transferHandler);
-//        tree.setCellRenderer(new DefaultTreeCellRenderer() {
-//
-//            @Override
-//            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
-//                Component renderer = super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
-//                //JPanel pan = new JPanel();
-//                //pan.add(new JCheckBox());
-//                set
-//                return renderer;
-//            }
-//        });
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -148,7 +153,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
      */
     public void setMappingModel(final ActiveLayerModel mappingModel) {
         layerModel = mappingModel;
-        tree.setModel(new ActiveLayerModelWrapperWithoutProgress(layerModel));
+        final ActiveLayerModelWrapperWithoutProgress model = new ActiveLayerModelWrapperWithoutProgress(layerModel);
+        tree.setModel(model);
+        model.addTreeToUpdate(tree);
 
         menuItems.add(new AddFolderMenuItem());
         menuItems.add(new RemoveGroupMenuItem());
@@ -197,7 +204,11 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     }
                 }
             });
+
+        final MappingComponent mc = CismapBroker.getInstance().getMappingComponent();
+        mc.getFeatureCollection().addFeatureCollectionListener(this);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -363,6 +374,61 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         gridBagConstraints.weighty = 1.0;
         add(jScrollPane1, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
+
+    @Override
+    public void featuresAdded(final FeatureCollectionEvent fce) {
+    }
+
+    @Override
+    public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
+    }
+
+    @Override
+    public void featuresRemoved(final FeatureCollectionEvent fce) {
+    }
+
+    @Override
+    public void featuresChanged(final FeatureCollectionEvent fce) {
+    }
+
+    @Override
+    public void featureSelectionChanged(final FeatureCollectionEvent fce) {
+        refreshSelectedFeatureCounts();
+    }
+
+    @Override
+    public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
+    }
+
+    @Override
+    public void featureCollectionChanged() {
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private synchronized void refreshSelectedFeatureCounts() {
+        if (selectionUpdateThread != null) {
+            selectionUpdateThread.interrupt();
+        }
+
+        selectionUpdateThread = new UpdateSelectionThread();
+        executor.submit(selectionUpdateThread);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  service  DOCUMENT ME!
+     */
+    public void switchProcessingMode(final AbstractFeatureService service) {
+        if (editableServices.contains(service)) {
+            editableServices.remove(service);
+        } else {
+            editableServices.add(service);
+        }
+        refreshSelectedFeatureCounts();
+    }
 
     //~ Inner Classes ----------------------------------------------------------
 
@@ -1186,7 +1252,21 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             if ((styleDialog != null) && styleDialog.isAccepted()) {
                 final Runnable r = styleDialog.createResultTask();
 
-                CismetThreadPool.execute(r);
+                final ExecutorService es = CismetExecutors.newSingleThreadExecutor();
+                es.submit(r);
+                es.submit(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            EventQueue.invokeLater(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        tree.updateUI();
+                                    }
+                                });
+                        }
+                    });
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Style Dialog canceled"); // NOI18N
@@ -1234,8 +1314,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
 
                     // workaround to avoid visualisation problems without this workaround, the
                     // bounds of the row of the edited path are wrong
-                    tree.startEditingAtPath(path);
-                    tree.stopEditing();
+                    tree.updateUI();
                 }
             }
 
@@ -1310,6 +1389,21 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 final boolean hasFocus) {
             JLabel lab = null;
             synchronized (ThemeLayerWidget.this.getTreeLock()) {
+                String label = "<html>" + value.toString();
+                final Integer selectedFeatureCount = selectedFeatures.get(value);
+
+                if ((selectedFeatureCount != null) && (selectedFeatureCount != 0)) {
+                    label += " | " + selectedFeatureCount;
+                }
+
+                final Integer modifiableFeatureCount = modifiableFeatures.get(value);
+
+                if (modifiableFeatureCount != null) {
+                    label += " | <span color=\"#FF0000\">" + modifiableFeatureCount + "</span>";
+                }
+
+                label += "</html>";
+
                 final Component ret = super.getTreeCellRendererComponent(
                         tree,
                         value,
@@ -1319,7 +1413,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         row,
                         hasFocus);
                 final JLabel retLab = (JLabel)ret;
-                lab = new JLabel(retLab.getText(), retLab.getIcon(), retLab.getHorizontalAlignment());
+                lab = new JLabel(label, retLab.getIcon(), retLab.getHorizontalAlignment());
 
                 if (value instanceof LayerCollection) {
                     if (expanded) {
@@ -1614,6 +1708,74 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 final LayerCollection layer = (LayerCollection)value;
                 layer.setName(name);
             }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class UpdateSelectionThread extends Thread {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void run() {
+            final TreeMap<Integer, MapService> mapTree = layerModel.getMapServices();
+            boolean interrupted = false;
+
+            for (final MapService service : mapTree.values()) {
+                int count = 0;
+                int modCount = 0;
+
+                if (service instanceof AbstractFeatureService) {
+                    final AbstractFeatureService featureService = (AbstractFeatureService)service;
+                    final boolean serviceInEditMode = editableServices.contains(featureService);
+
+                    for (final Object featureObject : featureService.getPNode().getChildrenReference()) {
+                        final PFeature feature = (PFeature)featureObject;
+                        if (interrupted()) {
+                            interrupted = true;
+                            break;
+                        }
+
+                        if (feature.isSelected()) {
+                            ++count;
+
+                            if (serviceInEditMode) {
+                                if (feature.getFeature() instanceof PermissionProvider) {
+                                    if (((PermissionProvider)feature.getFeature()).hasWritePermissions()) {
+                                        ++modCount;
+                                    }
+                                } else {
+                                    ++modCount;
+                                }
+                            }
+                        }
+                    }
+
+                    if (interrupted) {
+                        break;
+                    }
+
+                    selectedFeatures.put(service, count);
+
+                    if (serviceInEditMode && (count > 0)) {
+                        modifiableFeatures.put(service, modCount);
+                    } else {
+                        modifiableFeatures.remove(service);
+                    }
+                }
+            }
+
+            EventQueue.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        tree.updateUI();
+                    }
+                });
         }
     }
 }
