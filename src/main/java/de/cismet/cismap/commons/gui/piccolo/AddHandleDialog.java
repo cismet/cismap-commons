@@ -16,10 +16,19 @@
  */
 package de.cismet.cismap.commons.gui.piccolo;
 
+import java.awt.Graphics;
+import java.awt.Image;
+
+import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.plaf.basic.BasicSliderUI;
+
+import de.cismet.cismap.commons.interaction.CismapBroker;
+
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -37,21 +46,27 @@ public class AddHandleDialog extends javax.swing.JDialog {
 
     private static final double PRECISION = 100; // => "1/PRECISION"
 
-    //~ Instance fields --------------------------------------------------------
+    private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(AddHandleDialog.class);
+    private static final AddHandleDialog INSTANCE = new AddHandleDialog();
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+    //~ Instance fields --------------------------------------------------------
 
     private int returnStatus = STATUS_NONE;
 
+    private boolean allLocked = false;
     private boolean sliderLocked = false;
     private boolean updateLeftLocked = false;
     private boolean updateRightLocked = false;
 
     private double distanceToLeft = 0d;
 
+    private double distanceTotal;
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOK;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JSpinner jSpinner1;
     private javax.swing.JSpinner jSpinner2;
     private javax.swing.JLabel lblDescription;
@@ -59,15 +74,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
     private javax.swing.JLabel lblDistanceLeft;
     private javax.swing.JLabel lblLeftNeighbour;
     private javax.swing.JLabel lblLeftPoint;
-    private javax.swing.JLabel lblLeftSpacer;
-    private javax.swing.JLabel lblNew;
-    private javax.swing.JLabel lblNewPoint;
     private javax.swing.JLabel lblRightDistance;
     private javax.swing.JLabel lblRightNeighbour;
     private javax.swing.JLabel lblRightPoint;
-    private javax.swing.JLabel lblRightSpacer;
-    private javax.swing.JLabel lblTopLeftSpacer;
-    private javax.swing.JLabel lblTopRightSpacer;
     private javax.swing.JPanel panButtons;
     private javax.swing.JPanel panFooter;
     private javax.swing.JSlider sliDistance;
@@ -77,21 +86,28 @@ public class AddHandleDialog extends javax.swing.JDialog {
 
     /**
      * Creates new form AddHandleDialog.
-     *
-     * @param  parent         DOCUMENT ME!
-     * @param  modal          DOCUMENT ME!
-     * @param  distanceTotal  DOCUMENT ME!
      */
-    public AddHandleDialog(final java.awt.Frame parent, final boolean modal, final double distanceTotal) {
-        super(parent, modal);
+    private AddHandleDialog() {
+        super(StaticSwingTools.getParentFrame(CismapBroker.getInstance().getMappingComponent()), true);
 
+        allLocked = true;
         initComponents();
+        sliDistance.setUI(new mySliderUI(sliDistance));
         getRootPane().setDefaultButton(btnOK);
-
-        setDistanceTotal(distanceTotal);
+        pack();
+        allLocked = false;
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static AddHandleDialog getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
@@ -102,7 +118,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        lblNew = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
         sliDistance = new javax.swing.JSlider();
         lblLeftNeighbour = new javax.swing.JLabel();
         lblRightNeighbour = new javax.swing.JLabel();
@@ -110,38 +126,28 @@ public class AddHandleDialog extends javax.swing.JDialog {
         lblRightDistance = new javax.swing.JLabel();
         lblLeftPoint = new javax.swing.JLabel();
         lblRightPoint = new javax.swing.JLabel();
-        lblNewPoint = new javax.swing.JLabel();
         panFooter = new javax.swing.JPanel();
         lblDescriptionImage = new javax.swing.JLabel();
         lblDescription = new javax.swing.JLabel();
+        jSpinner1 = new javax.swing.JSpinner();
+        jSpinner2 = new javax.swing.JSpinner();
+        jButton1 = new javax.swing.JButton();
         panButtons = new javax.swing.JPanel();
         btnOK = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
-        lblLeftSpacer = new javax.swing.JLabel();
-        lblTopLeftSpacer = new javax.swing.JLabel();
-        lblRightSpacer = new javax.swing.JLabel();
-        lblTopRightSpacer = new javax.swing.JLabel();
-        jSpinner1 = new javax.swing.JSpinner();
-        jSpinner2 = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.title")); // NOI18N
         setResizable(false);
         getContentPane().setLayout(new java.awt.GridBagLayout());
 
-        lblNew.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblNew.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.lblNew.text")); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(lblNew, gridBagConstraints);
+        jPanel1.setLayout(new java.awt.GridBagLayout());
 
         sliDistance.setMajorTickSpacing((int)PRECISION);
-        sliDistance.setPaintTicks(true);
         sliDistance.setValue(0);
+        sliDistance.setFocusable(false);
+        sliDistance.setMaximumSize(new java.awt.Dimension(206, 54));
+        sliDistance.setMinimumSize(new java.awt.Dimension(206, 54));
         sliDistance.addChangeListener(new javax.swing.event.ChangeListener() {
 
                 @Override
@@ -151,36 +157,41 @@ public class AddHandleDialog extends javax.swing.JDialog {
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(sliDistance, gridBagConstraints);
+        jPanel1.add(sliDistance, gridBagConstraints);
 
-        lblLeftNeighbour.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblLeftNeighbour.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         lblLeftNeighbour.setText(org.openide.util.NbBundle.getMessage(
                 AddHandleDialog.class,
                 "AddHandleDialog.lblLeftNeighbour.text")); // NOI18N
+        lblLeftNeighbour.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        lblLeftNeighbour.setMaximumSize(new java.awt.Dimension(150, 17));
+        lblLeftNeighbour.setMinimumSize(new java.awt.Dimension(150, 17));
+        lblLeftNeighbour.setPreferredSize(new java.awt.Dimension(150, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(lblLeftNeighbour, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LAST_LINE_START;
+        jPanel1.add(lblLeftNeighbour, gridBagConstraints);
 
-        lblRightNeighbour.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblRightNeighbour.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblRightNeighbour.setText(org.openide.util.NbBundle.getMessage(
                 AddHandleDialog.class,
                 "AddHandleDialog.lblRightNeighbour.text")); // NOI18N
+        lblRightNeighbour.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
+        lblRightNeighbour.setMaximumSize(new java.awt.Dimension(150, 17));
+        lblRightNeighbour.setMinimumSize(new java.awt.Dimension(150, 17));
+        lblRightNeighbour.setPreferredSize(new java.awt.Dimension(150, 17));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(lblRightNeighbour, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LAST_LINE_END;
+        jPanel1.add(lblRightNeighbour, gridBagConstraints);
 
         lblDistanceLeft.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         lblDistanceLeft.setText(org.openide.util.NbBundle.getMessage(
@@ -190,10 +201,8 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(lblDistanceLeft, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        jPanel1.add(lblDistanceLeft, gridBagConstraints);
 
         lblRightDistance.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         lblRightDistance.setText(org.openide.util.NbBundle.getMessage(
@@ -203,10 +212,8 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints.gridx = 4;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(lblRightDistance, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        jPanel1.add(lblRightDistance, gridBagConstraints);
 
         lblLeftPoint.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblLeftPoint.setIcon(new javax.swing.ImageIcon(
@@ -214,32 +221,21 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(lblLeftPoint, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        jPanel1.add(lblLeftPoint, gridBagConstraints);
 
         lblRightPoint.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblRightPoint.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/neighbourPoint.png"))); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridx = 6;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(lblRightPoint, gridBagConstraints);
-
-        lblNewPoint.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblNewPoint.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/newPoint.png"))); // NOI18N
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.ipady = 2;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(lblNewPoint, gridBagConstraints);
+        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.LINE_START;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        jPanel1.add(lblRightPoint, gridBagConstraints);
 
         panFooter.setLayout(new java.awt.GridBagLayout());
 
@@ -251,9 +247,9 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
         panFooter.add(lblDescriptionImage, gridBagConstraints);
 
         lblDescription.setIcon(new javax.swing.ImageIcon(
@@ -261,13 +257,76 @@ public class AddHandleDialog extends javax.swing.JDialog {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
         panFooter.add(lblDescription, gridBagConstraints);
 
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridwidth = 7;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+        jPanel1.add(panFooter, gridBagConstraints);
+
+        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(
+                Double.valueOf(0.0d),
+                Double.valueOf(0.0d),
+                null,
+                Double.valueOf(1.0d)));
+        jSpinner1.setMinimumSize(new java.awt.Dimension(75, 26));
+        jSpinner1.setPreferredSize(new java.awt.Dimension(75, 26));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        jPanel1.add(jSpinner1, gridBagConstraints);
+        ((JSpinner.DefaultEditor)jSpinner1.getEditor()).getTextField()
+                .getDocument()
+                .addDocumentListener(new LeftDocumentListener());
+
+        jSpinner2.setModel(new javax.swing.SpinnerNumberModel(
+                Double.valueOf(0.0d),
+                Double.valueOf(0.0d),
+                null,
+                Double.valueOf(1.0d)));
+        jSpinner2.setMinimumSize(new java.awt.Dimension(75, 26));
+        jSpinner2.setPreferredSize(new java.awt.Dimension(75, 26));
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        jPanel1.add(jSpinner2, gridBagConstraints);
+        ((JSpinner.DefaultEditor)jSpinner2.getEditor()).getTextField()
+                .getDocument()
+                .addDocumentListener(new RightDocumentListener());
+
+        jButton1.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/piccolo/arrow-step.png")));                       // NOI18N
+        jButton1.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.jButton1.text")); // NOI18N
+        jButton1.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AddHandleDialog.class,
+                "AddHandleDialog.jButton1.toolTipText"));                                                               // NOI18N
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    jButton1ActionPerformed(evt);
+                }
+            });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.PAGE_END;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
+        jPanel1.add(jButton1, gridBagConstraints);
+
+        panButtons.setLayout(new java.awt.GridLayout(1, 0, 10, 0));
+
         btnOK.setText(org.openide.util.NbBundle.getMessage(AddHandleDialog.class, "AddHandleDialog.btnOK.text")); // NOI18N
-        btnOK.setPreferredSize(new java.awt.Dimension(80, 29));
         btnOK.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
@@ -280,7 +339,6 @@ public class AddHandleDialog extends javax.swing.JDialog {
         btnCancel.setText(org.openide.util.NbBundle.getMessage(
                 AddHandleDialog.class,
                 "AddHandleDialog.btnCancel.text")); // NOI18N
-        btnCancel.setPreferredSize(new java.awt.Dimension(80, 29));
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
@@ -291,81 +349,18 @@ public class AddHandleDialog extends javax.swing.JDialog {
         panButtons.add(btnCancel);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
-        panFooter.add(panButtons, gridBagConstraints);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
         gridBagConstraints.gridwidth = 7;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(4, 4, 4, 4);
-        getContentPane().add(panFooter, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.38;
-        getContentPane().add(lblLeftSpacer, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.5;
-        gridBagConstraints.weighty = 1.0;
-        getContentPane().add(lblTopLeftSpacer, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 6;
-        gridBagConstraints.gridy = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.38;
-        getContentPane().add(lblRightSpacer, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 5;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 0.5;
-        gridBagConstraints.weighty = 1.0;
-        getContentPane().add(lblTopRightSpacer, gridBagConstraints);
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
+        jPanel1.add(panButtons, gridBagConstraints);
 
-        jSpinner1.setValue(getDistanceToLeft());
-        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(
-                Double.valueOf(0.0d),
-                Double.valueOf(0.0d),
-                null,
-                Double.valueOf(1.0d)));
-        jSpinner1.setMinimumSize(new java.awt.Dimension(75, 26));
-        jSpinner1.setPreferredSize(new java.awt.Dimension(75, 26));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(jSpinner1, gridBagConstraints);
-        ((JSpinner.DefaultEditor)jSpinner1.getEditor()).getTextField()
-                .getDocument()
-                .addDocumentListener(new LeftDocumentListener());
-
-        jSpinner2.setValue(getDistanceToRight());
-        jSpinner2.setModel(new javax.swing.SpinnerNumberModel(
-                Double.valueOf(0.0d),
-                Double.valueOf(0.0d),
-                null,
-                Double.valueOf(1.0d)));
-        jSpinner2.setMinimumSize(new java.awt.Dimension(75, 26));
-        jSpinner2.setPreferredSize(new java.awt.Dimension(75, 26));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 4;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.gridheight = 2;
-        gridBagConstraints.insets = new java.awt.Insets(2, 2, 2, 2);
-        getContentPane().add(jSpinner2, gridBagConstraints);
-        ((JSpinner.DefaultEditor)jSpinner2.getEditor()).getTextField()
-                .getDocument()
-                .addDocumentListener(new RightDocumentListener());
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
+        getContentPane().add(jPanel1, gridBagConstraints);
 
         pack();
     } // </editor-fold>//GEN-END:initComponents
@@ -402,6 +397,15 @@ public class AddHandleDialog extends javax.swing.JDialog {
     /**
      * DOCUMENT ME!
      *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void jButton1ActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_jButton1ActionPerformed
+        setDistanceToLeft(distanceTotal / 2d);
+    }                                                                            //GEN-LAST:event_jButton1ActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   value  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -417,7 +421,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
         // update für den Slider kurzfristig deaktivieren (sonst endlos-Schleife)
         sliderLocked = true;
         try {
-            setDistanceToLeft(sliDistance.getValue() / PRECISION);
+            setDistanceToLeft((sliDistance.getValue() / (double)sliDistance.getMaximum()) * distanceTotal);
         } finally {
             // update für den Slider wieder aktivieren
             sliderLocked = false;
@@ -430,16 +434,25 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * @param  distanceToLeft  DOCUMENT ME!
      */
     public void setDistanceToLeft(final double distanceToLeft) {
-        this.distanceToLeft = cut(distanceToLeft);
-
-        if (!sliderLocked) {      // Endlos-Schleife vermeiden
-            sliDistance.setValue((int)(this.distanceToLeft * PRECISION));
-        }
-        if (!updateLeftLocked) {  // Endlos-Schleife vermeiden
-            jSpinner1.setValue(this.distanceToLeft);
-        }
-        if (!updateRightLocked) { // Endlos-Schleife vermeiden
-            jSpinner2.setValue(cut(getDistanceTotal() - this.distanceToLeft));
+        if (!allLocked) { // Ungenauigkeit durch Rückkopplung vermeiden
+            // (Rückkopplung = setzen auf genauen wert löst das setzen
+            // des gerundeten spinners ein, welches das setzen eines
+            // ungenauen werts durchsetzt.
+            allLocked = true;
+            this.distanceToLeft = distanceToLeft;
+            try {
+                if (!sliderLocked) {      // Endlos-Schleife vermeiden
+                    sliDistance.setValue((int)((this.distanceToLeft / this.distanceTotal) * sliDistance.getMaximum()));
+                }
+                if (!updateLeftLocked) {  // Endlos-Schleife vermeiden
+                    jSpinner1.setValue(cut(this.distanceToLeft));
+                }
+                if (!updateRightLocked) { // Endlos-Schleife vermeiden
+                    jSpinner2.setValue(cut(this.distanceTotal) - cut(this.distanceToLeft));
+                }
+            } finally {
+                allLocked = false;
+            }
         }
     }
 
@@ -449,7 +462,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * @param  distanceToRight  DOCUMENT ME!
      */
     public void setDistanceToRight(final double distanceToRight) {
-        setDistanceToLeft(getDistanceTotal() - distanceToRight);
+        setDistanceToLeft(this.distanceTotal - distanceToRight);
     }
 
     /**
@@ -459,8 +472,11 @@ public class AddHandleDialog extends javax.swing.JDialog {
         // update für das linke Feld kurzfristig deaktivieren (sonst endlos-Schleife)
         updateLeftLocked = true;
         try {
-            // Abstand vom linken Punkt anhand des linken Feldes setzen
-            setDistanceToLeft((Double)jSpinner1.getValue());
+            final double value = (Double)jSpinner1.getValue();
+            if (cut(this.distanceToLeft) != value) {
+                // Abstand vom linken Punkt anhand des linken Feldes setzen
+                setDistanceToLeft(value);
+            }
         } finally {
             // update für das linke Feld wieder aktivieren
             updateLeftLocked = false;
@@ -474,8 +490,11 @@ public class AddHandleDialog extends javax.swing.JDialog {
         // update für das rechte Feld kurzfristig deaktivieren (sonst endlos-Schleife)
         updateRightLocked = true;
         try {
-            // Abstand vom linken Punkt anhand des Wertes im linken Feld berechnen
-            setDistanceToRight((Double)jSpinner2.getValue());
+            final double value = (Double)jSpinner2.getValue();
+            if (cut(getDistanceToRight()) != value) {
+                // Abstand vom linken Punkt anhand des Wertes im linken Feld berechnen
+                setDistanceToRight(value);
+            }
         } finally {
             // update für das rechte Feld wieder aktivieren
             updateRightLocked = false;
@@ -497,7 +516,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * @return  DOCUMENT ME!
      */
     public double getDistanceTotal() {
-        return sliDistance.getMaximum() / PRECISION;
+        return distanceTotal;
     }
 
     /**
@@ -515,7 +534,7 @@ public class AddHandleDialog extends javax.swing.JDialog {
      * @return  DOCUMENT ME!
      */
     public double getDistanceToRight() {
-        return cut(getDistanceTotal() - distanceToLeft);
+        return this.distanceTotal - this.distanceToLeft;
     }
 
     /**
@@ -523,10 +542,18 @@ public class AddHandleDialog extends javax.swing.JDialog {
      *
      * @param  distanceTotal  DOCUMENT ME!
      */
-    private void setDistanceTotal(final double distanceTotal) {
-        sliDistance.setMaximum((int)(distanceTotal * PRECISION));
-        ((SpinnerNumberModel)jSpinner1.getModel()).setMaximum(distanceTotal);
-        ((SpinnerNumberModel)jSpinner2.getModel()).setMaximum(distanceTotal);
+    public void setDistanceTotal(final double distanceTotal) {
+        // sliDistance.setMaximum((int)(distanceTotal * PRECISION));
+        this.distanceTotal = distanceTotal;
+        allLocked = true;
+        try {
+            sliDistance.setMaximum(sliDistance.getWidth());
+            ((SpinnerNumberModel)jSpinner1.getModel()).setMaximum(distanceTotal);
+            ((SpinnerNumberModel)jSpinner2.getModel()).setMaximum(distanceTotal);
+        } finally {
+            allLocked = false;
+        }
+        setDistanceToLeft(distanceTotal / 2d);
     }
 
     /**
@@ -539,7 +566,8 @@ public class AddHandleDialog extends javax.swing.JDialog {
 
                 @Override
                 public void run() {
-                    final AddHandleDialog dialog = new AddHandleDialog(new javax.swing.JFrame(), true, 23d);
+                    final AddHandleDialog dialog = getInstance();
+                    dialog.pack();
                     dialog.addWindowListener(new java.awt.event.WindowAdapter() {
 
                             @Override
@@ -550,6 +578,11 @@ public class AddHandleDialog extends javax.swing.JDialog {
                     dialog.setVisible(true);
                 }
             });
+    }
+
+    @Override
+    public void setVisible(final boolean visible) {
+        super.setVisible(visible);
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -601,6 +634,38 @@ public class AddHandleDialog extends javax.swing.JDialog {
         @Override
         public void changedUpdate(final DocumentEvent e) {
             rightTextChanged();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class mySliderUI extends BasicSliderUI {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final Image newPointImage;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new mySliderUI object.
+         *
+         * @param  aSlider  DOCUMENT ME!
+         */
+        public mySliderUI(final JSlider aSlider) {
+            super(aSlider);
+            this.newPointImage = new javax.swing.ImageIcon(getClass().getResource(
+                        "/de/cismet/cismap/commons/gui/piccolo/newPoint.png")).getImage();
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void paintThumb(final Graphics g) {
+            g.drawImage(this.newPointImage, thumbRect.x, thumbRect.y, 8, 8, null);
         }
     }
 }

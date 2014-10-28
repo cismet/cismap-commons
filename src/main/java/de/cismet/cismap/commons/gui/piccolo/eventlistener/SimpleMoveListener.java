@@ -27,6 +27,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Frame;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 import java.util.Collection;
@@ -141,9 +142,24 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                     final Point2D p0 = neighbours[0];
                                     final Point2D p1 = neighbours[1];
                                     if ((p0 != null) && (p1 != null)) {
-                                        final Point2D erg = StaticGeometryFunctions.createPointOnLine(p0, p1, trigger);
-                                        handleX = (float)erg.getX();
-                                        handleY = (float)erg.getY();
+                                        if (event.isShiftDown()) {
+                                            final Point2D p0i1 = new Point2D.Double(p0.getX(), p1.getY());
+                                            final Point2D p1i0 = new Point2D.Double(p1.getX(), p0.getY());
+                                            final Line2D lOrig = new Line2D.Double(p0, p1);
+                                            final Line2D lInversed = new Line2D.Double(p0i1, p1i0);
+                                            final Point2D erg = StaticGeometryFunctions.createIntersectionPoint(
+                                                    lOrig,
+                                                    lInversed);
+                                            handleX = (float)erg.getX();
+                                            handleY = (float)erg.getY();
+                                        } else {
+                                            final Point2D erg = StaticGeometryFunctions.createPointOnLine(
+                                                    p0,
+                                                    p1,
+                                                    trigger);
+                                            handleX = (float)erg.getX();
+                                            handleY = (float)erg.getY();
+                                        }
                                     }
                                     boolean found = false;
                                     for (final Object o : mappingComponent.getHandleLayer().getChildrenReference()) {
@@ -429,11 +445,9 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                                 LOG.debug("distanceTotal: " + distanceTotal); // NOI18N
                             }
 
-                            // MainFrame holen
-                            final Frame frame = StaticSwingTools.getParentFrame(mappingComponent);
-
                             // Dialog modal aufrufen und Werte übergeben
-                            final AddHandleDialog dialog = new AddHandleDialog(frame, true, distanceTotal);
+                            final AddHandleDialog dialog = AddHandleDialog.getInstance();
+                            dialog.setDistanceTotal(distanceTotal);
                             dialog.setDistanceToLeft(distanceLeft);
 
                             // Dialog zentrieren und sichtbar machen
