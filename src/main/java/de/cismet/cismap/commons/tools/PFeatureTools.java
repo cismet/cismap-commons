@@ -10,6 +10,8 @@ package de.cismet.cismap.commons.tools;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
 import edu.umd.cs.piccolo.PLayer;
@@ -425,7 +427,8 @@ public class PFeatureTools {
                     if ((o != null) && validClasses[i].isAssignableFrom(o.getClass())
                                 && (((PNode)o).getParent() != null) && ((PNode)o).getParent().getVisible()
                                 && ((PNode)o).getVisible()) {
-                        if ((o != null) && (o instanceof PPath) && ((PPath)o).getPathReference().contains(xPos, yPos)) {
+                        if ((o instanceof PPath)
+                                    && (!isPolygon((PPath)o) || ((PPath)o).getPathReference().contains(xPos, yPos))) {
                             rightType = true;
                             break;
                         }
@@ -444,6 +447,25 @@ public class PFeatureTools {
         } while ((o != null) && !rightType);
         return o;
     }
+
+    /**
+     * Checks, if the given geometry contains a polygon.
+     *
+     * @param   o  the Geometry to check
+     *
+     * @return  true, iff the given PPath is an instanec of PPfeature and contains a Polygon or Multipolygon
+     */
+    private static boolean isPolygon(final PPath o) {
+        if ((o instanceof PFeature) && (((PFeature)o).getFeature() != null)) {
+            final PFeature feature = (PFeature)o;
+
+            return (feature.getFeature().getGeometry() instanceof Polygon)
+                        || (feature.getFeature().getGeometry() instanceof MultiPolygon);
+        }
+
+        return false;
+    }
+
     /**
      * DOCUMENT ME!
      *
