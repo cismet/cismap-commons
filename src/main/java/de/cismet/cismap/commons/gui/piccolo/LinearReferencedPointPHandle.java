@@ -138,7 +138,7 @@ public class LinearReferencedPointPHandle extends PHandle {
                         wtst.getSourceX(dragPoint.getX()),
                         wtst.getSourceY(dragPoint.getY()));
 
-                linref.moveTo(coord);
+                linref.moveTo(coord, null);
                 relocateHandle();
             }
         } catch (Throwable t) {
