@@ -93,8 +93,9 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
             dragPoint = pressPoint;
             final Object o = PFeatureTools.getFirstValidObjectUnderPointer(e, new Class[] { PFeature.class });
 
-            if ((o instanceof PFeature) && ((PFeature)o).getFeature().isEditable()
-                        && ((PFeature)o).getFeature().canBeSelected()) {
+            if (((o instanceof PFeature) && ((PFeature)o).getFeature().isEditable()
+                            && ((PFeature)o).getFeature().canBeSelected())
+                        || (((PFeature)o).getFeature() instanceof LinearReferencedLineFeature)) {
                 feature = (PFeature)(o);
                 feature.setStrokePaint(Color.red);
                 if (features.contains(feature)) {
@@ -135,7 +136,8 @@ public class FeatureMoveListener extends PBasicInputEventHandler {
                     final Coordinate coord = new Coordinate(
                             mc.getWtst().getSourceX(dragPoint.getX()),
                             mc.getWtst().getSourceY(dragPoint.getY()));
-                    smFeature.moveTo(coord);
+                    final PDimension delta = e.getDelta();
+                    smFeature.moveTo(coord, delta);
                 } else {
                     // PDimension delta = e.getDeltaRelativeTo(pressPoint);
                     final PDimension delta = e.getCanvasDelta();

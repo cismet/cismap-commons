@@ -25,6 +25,8 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+import edu.umd.cs.piccolo.util.PDimension;
+
 /**
  * DOCUMENT ME!
  *
@@ -39,8 +41,9 @@ public interface SelfManipulatingFeature {
      * DOCUMENT ME!
      *
      * @param  coord  DOCUMENT ME!
+     * @param  delta  DOCUMENT ME!
      */
-    void moveTo(Coordinate coord);
+    void moveTo(Coordinate coord, PDimension delta);
 
     /**
      * DOCUMENT ME!

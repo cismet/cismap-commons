@@ -20,6 +20,8 @@ import com.vividsolutions.jts.linearref.LinearLocation;
 import com.vividsolutions.jts.linearref.LocationIndexedLine;
 import com.vividsolutions.jts.util.GeometricShapeFactory;
 
+import edu.umd.cs.piccolo.util.PDimension;
+
 import java.awt.Stroke;
 import java.awt.geom.Point2D;
 
@@ -229,9 +231,10 @@ public class LinearReferencedPointFeature extends DefaultStyledFeature implement
      * DOCUMENT ME!
      *
      * @param  coordinate  DOCUMENT ME!
+     * @param  delta       DOCUMENT ME!
      */
     @Override
-    public void moveTo(final Coordinate coordinate) {
+    public void moveTo(final Coordinate coordinate, final PDimension delta) {
         if (isMovable()) {
 //        // mauskoordinaten ins selbe coordsys umwandeln wie das der route
 //            coordinate = transformToRouteSrid(coordinate);

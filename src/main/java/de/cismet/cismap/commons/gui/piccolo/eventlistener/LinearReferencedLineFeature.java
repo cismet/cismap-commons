@@ -9,7 +9,10 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.TopologyException;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
+
+import edu.umd.cs.piccolo.util.PDimension;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -32,7 +35,9 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @author   jruiz
  * @version  $Revision$, $Date$
  */
-public class LinearReferencedLineFeature extends DefaultStyledFeature implements DrawSelectionFeature, XStyledFeature {
+public class LinearReferencedLineFeature extends DefaultStyledFeature implements DrawSelectionFeature,
+    XStyledFeature,
+    SelfManipulatingFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -243,6 +248,37 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
     @Override
     public boolean isDrawingSelection() {
         return false;
+    }
+
+    @Override
+    public synchronized void moveTo(final Coordinate coord, final PDimension delta) {
+        final Geometry originFromGeom = fromFeature.getGeometry();
+        final double fromX = fromFeature.getGeometry().getCoordinate().x;
+        final double fromY = fromFeature.getGeometry().getCoordinate().y;
+        final Coordinate fromCoord = new Coordinate(fromX + delta.getWidth(), fromY - delta.getHeight());
+        final Geometry originToGeom = toFeature.getGeometry();
+        final double length = toFeature.getCurrentPosition() - fromFeature.getCurrentPosition();
+
+        try {
+            fromFeature.moveTo(fromCoord, delta);
+            toFeature.moveToPosition(fromFeature.getCurrentPosition() + length);
+        } catch (TopologyException e) {
+            toFeature.moveTo(originToGeom.getCoordinate(), delta);
+            fromFeature.moveTo(originFromGeom.getCoordinate(), delta);
+        }
+
+        final double newLength = toFeature.getCurrentPosition() - fromFeature.getCurrentPosition();
+
+        if (Math.abs(length - newLength) > 0.1) {
+            fromFeature.setGeometry(originFromGeom);
+            toFeature.setGeometry(originToGeom);
+        }
+    }
+
+    @Override
+    public void moveFinished() {
+        fromFeature.moveFinished();
+        toFeature.moveFinished();
     }
 
     //~ Inner Classes ----------------------------------------------------------
