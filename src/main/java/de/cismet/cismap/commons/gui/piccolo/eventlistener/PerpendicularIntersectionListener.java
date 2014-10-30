@@ -786,6 +786,7 @@ public class PerpendicularIntersectionListener extends PBasicInputEventHandler {
         @Override
         public void handleClicked(final PInputEvent pInputEvent) {
             if (pInputEvent.getClickCount() == 2) {
+                setSelected(true);
                 finishAddHandles();
             } else {
                 if (pInputEvent.isLeftMouseButton()) {
