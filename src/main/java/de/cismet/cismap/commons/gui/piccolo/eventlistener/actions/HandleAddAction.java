@@ -30,13 +30,13 @@ public class HandleAddAction implements CustomAction {
 
     //~ Instance fields --------------------------------------------------------
 
-    private MappingComponent mc;
-    private Feature f;
-    private int entityPosition;
-    private int ringPosition;
-    private int coordPosition;
-    private float x;
-    private float y;
+    private final MappingComponent mc;
+    private final Feature feature;
+    private final int entityPosition;
+    private final int ringPosition;
+    private final int coordPosition;
+    private final float x;
+    private final float y;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -60,7 +60,7 @@ public class HandleAddAction implements CustomAction {
             final float x,
             final float y) {
         this.mc = mc;
-        this.f = f;
+        this.feature = f;
         this.entityPosition = entityPosition;
         this.ringPosition = ringPosition;
         this.coordPosition = coordPosition;
@@ -75,8 +75,8 @@ public class HandleAddAction implements CustomAction {
      */
     @Override
     public void doAction() {
-        final PFeature pf = (PFeature)mc.getPFeatureHM().get(f);
-        pf.insertCoordinate(entityPosition, ringPosition, coordPosition, x, y);
+        final PFeature pf = (PFeature)mc.getPFeatureHM().get(feature);
+        pf.insertCoordinate(entityPosition, ringPosition, coordPosition, x, y, false);
     }
 
     /**
@@ -99,11 +99,11 @@ public class HandleAddAction implements CustomAction {
      */
     @Override
     public CustomAction getInverse() {
-        return new HandleDeleteAction(mc, f, entityPosition, ringPosition, coordPosition, x, y);
+        return new HandleDeleteAction(mc, feature, entityPosition, ringPosition, coordPosition, x, y);
     }
 
     @Override
     public boolean featureConcerned(final Feature feature) {
-        return (f != null) && f.equals(feature);
+        return (feature != null) && feature.equals(feature);
     }
 }

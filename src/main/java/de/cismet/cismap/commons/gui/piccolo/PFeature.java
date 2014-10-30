@@ -24,7 +24,6 @@ import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.nodes.PText;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PDimension;
-import edu.umd.cs.piccolo.util.PPaintContext;
 
 import pswing.PSwing;
 
@@ -53,6 +52,8 @@ import de.cismet.cismap.commons.features.*;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.DrawSelectionFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.LinearReferencedPointFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleAddAction;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.CurrentStackTrace;
@@ -1132,6 +1133,104 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             final int coordPosition,
             final float newValueX,
             final float newValueY) {
+        insertCoordinate(entityPosition, ringPosition, coordPosition, newValueX, newValueY, true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   DOCUMENT ME!
+     * @param  newValueX       DOCUMENT ME!
+     * @param  newValueY       DOCUMENT ME!
+     * @param  addUndo         DOCUMENT ME!
+     */
+    public void insertCoordinate(final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
+            final float newValueX,
+            final float newValueY,
+            final boolean addUndo) {
+        insertCoordinateToPosition(entityPosition, ringPosition, coordPosition, newValueX, newValueY, addUndo);
+
+        if (viewer.isSnappingEnabled()
+                    && ((getFeature().getGeometry() instanceof LineString)
+                        || (getFeature().getGeometry() instanceof Polygon)
+                        || (getFeature().getGeometry() instanceof MultiPolygon))) { // Snapping Modus
+
+            // Features suchen bei denen der zukünftige neue
+            // Punkt auf einer identischen Linie sitzt
+            final float[] xp = getXp(entityPosition, ringPosition);
+            final float[] yp = getYp(entityPosition, ringPosition);
+
+            final LineSegment segment;
+            // neuer punkt ist auf coordPosition gelandet, die alte Linie war also
+            // von coordPosition - 1 zu coordPosition + 1
+            if (coordPosition > 0) {
+                segment = new LineSegment(
+                        xp[coordPosition - 1],
+                        yp[coordPosition - 1],
+                        xp[coordPosition + 1],
+                        yp[coordPosition + 1]);
+            } else {
+                segment = new LineSegment(xp[xp.length - 1], yp[yp.length - 1], xp[1], yp[1]);
+            }
+
+            // Alle Objekte durchlaufen
+            for (final Feature otherFeature : viewer.getFeatureCollection().getAllFeatures()) {
+                final PFeature otherPFeature = (PFeature)viewer.getPFeatureHM().get(otherFeature);
+                if ((otherPFeature != null) && otherPFeature.getFeature().isEditable()) {
+                    final Geometry geometry = otherPFeature.getFeature().getGeometry();
+                    if ((geometry instanceof Polygon) || (geometry instanceof LineString)
+                                || (geometry instanceof MultiPolygon)) {
+                        for (int entityIndex = 0; entityIndex < otherPFeature.getNumOfEntities(); entityIndex++) {
+                            for (int ringIndex = 0; ringIndex < otherPFeature.getNumOfRings(entityIndex); ringIndex++) {
+                                final float[] otherXp = otherPFeature.getXp(entityIndex, ringIndex);
+                                final float[] otherYp = otherPFeature.getYp(entityIndex, ringIndex);
+                                for (int coordIndex = otherXp.length - 1; coordIndex > 0; coordIndex--) {
+                                    final LineSegment otherSegment = new LineSegment(
+                                            otherXp[coordIndex - 1],
+                                            otherYp[coordIndex - 1],
+                                            otherXp[coordIndex],
+                                            otherYp[coordIndex]);
+                                    // sind die 2 Nachbarpunkte identisch mit den 2 Nachbarn des neuen Punktes =>
+                                    // identische
+                                    if (otherSegment.equalsTopo(segment)) {
+                                        // Punkt dem jeweiligen Feature hinzufügen
+                                        otherPFeature.insertCoordinateToPosition(
+                                            entityIndex,
+                                            ringIndex,
+                                            coordIndex,
+                                            newValueX,
+                                            newValueY,
+                                            addUndo);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   DOCUMENT ME!
+     * @param  newValueX       DOCUMENT ME!
+     * @param  newValueY       DOCUMENT ME!
+     * @param  addUndo         DOCUMENT ME!
+     */
+    private void insertCoordinateToPosition(final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
+            final float newValueX,
+            final float newValueY,
+            final boolean addUndo) {
         final Coordinate[] originalCoordArr = entityRingCoordArr[entityPosition][ringPosition];
         final float[] originalXArr = entityRingXArr[entityPosition][ringPosition];
         final float[] originalYArr = entityRingYArr[entityPosition][ringPosition];
@@ -1176,6 +1275,17 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
 
             setNewCoordinates(entityPosition, ringPosition, newXArr, newYArr, newCoordArr);
+            if (addUndo) {
+                viewer.getMemUndo()
+                        .addAction(new HandleDeleteAction(
+                                viewer,
+                                feature,
+                                entityPosition,
+                                ringPosition,
+                                coordPosition,
+                                newValueX,
+                                newValueY));
+            }
         }
     }
 
@@ -1187,6 +1297,21 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  coordPosition   Position des zu l\u00F6schenden Punkes im Koordinatenarray
      */
     public void removeCoordinate(final int entityPosition, final int ringPosition, final int coordPosition) {
+        removeCoordinate(entityPosition, ringPosition, coordPosition, true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   DOCUMENT ME!
+     * @param  addUndo         DOCUMENT ME!
+     */
+    public void removeCoordinate(final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
+            final boolean addUndo) {
         final Coordinate[] originalCoordArr = entityRingCoordArr[entityPosition][ringPosition];
         final float[] originalXArr = entityRingXArr[entityPosition][ringPosition];
         final float[] originalYArr = entityRingYArr[entityPosition][ringPosition];
@@ -1209,6 +1334,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             }
             // zu entferndes Element \u00FCberspringen
 
+            final float removedX = originalXArr[coordPosition];
+            final float removedY = originalYArr[coordPosition];
+
             // nachher
             for (int i = coordPosition; i < newCoordArr.length; ++i) {
                 newCoordArr[i] = originalCoordArr[i + 1];
@@ -1230,6 +1358,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // handleLayer.removeChild(this);
             // Das w\u00E4re zwar optimal (Performance) korrigiert allerdings nicht die falschen
             // Locator
+
+            if (addUndo) {
+                viewer.getMemUndo()
+                        .addAction(new HandleAddAction(
+                                viewer,
+                                getFeature(),
+                                entityPosition,
+                                ringPosition,
+                                coordPosition,
+                                removedX,
+                                removedY));
+            }
         }
     }
 

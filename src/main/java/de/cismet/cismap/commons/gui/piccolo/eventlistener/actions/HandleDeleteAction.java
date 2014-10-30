@@ -15,11 +15,6 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener.actions;
 
-import com.vividsolutions.jts.geom.Coordinate;
-
-import java.util.Vector;
-
-import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -35,13 +30,13 @@ public class HandleDeleteAction implements CustomAction {
 
     //~ Instance fields --------------------------------------------------------
 
-    private MappingComponent mc;
-    private Feature f;
-    private int entityPosition;
-    private int ringPosition;
-    private int coordPosition;
-    private float x;
-    private float y; // wird nur f\u00FCr getInverse() ben\u00F6tigt
+    private final MappingComponent mc;
+    private final Feature feature;
+    private final int entityPosition;
+    private final int ringPosition;
+    private final int coordPosition;
+    private final float x;
+    private final float y; // wird nur f\u00FCr getInverse() ben\u00F6tigt
 
     //~ Constructors -----------------------------------------------------------
 
@@ -49,7 +44,7 @@ public class HandleDeleteAction implements CustomAction {
      * Erzeugt eine HandleDeleteAction-Instanz.
      *
      * @param  mc              DOCUMENT ME!
-     * @param  f               DOCUMENT ME!
+     * @param  feature         DOCUMENT ME!
      * @param  entityPosition  DOCUMENT ME!
      * @param  ringPosition    DOCUMENT ME!
      * @param  coordPosition   DOCUMENT ME!
@@ -57,14 +52,14 @@ public class HandleDeleteAction implements CustomAction {
      * @param  y               DOCUMENT ME!
      */
     public HandleDeleteAction(final MappingComponent mc,
-            final Feature f,
+            final Feature feature,
             final int entityPosition,
             final int ringPosition,
             final int coordPosition,
             final float x,
             final float y) {
         this.mc = mc;
-        this.f = f;
+        this.feature = feature;
         this.entityPosition = entityPosition;
         this.ringPosition = ringPosition;
         this.coordPosition = coordPosition;
@@ -79,8 +74,8 @@ public class HandleDeleteAction implements CustomAction {
      */
     @Override
     public void doAction() {
-        final PFeature pf = (PFeature)mc.getPFeatureHM().get(f);
-        pf.removeCoordinate(entityPosition, ringPosition, coordPosition);
+        final PFeature pf = (PFeature)mc.getPFeatureHM().get(feature);
+        pf.removeCoordinate(entityPosition, ringPosition, coordPosition, false);
     }
 
     /**
@@ -103,11 +98,11 @@ public class HandleDeleteAction implements CustomAction {
      */
     @Override
     public CustomAction getInverse() {
-        return new HandleAddAction(mc, f, entityPosition, ringPosition, coordPosition, x, y);
+        return new HandleAddAction(mc, feature, entityPosition, ringPosition, coordPosition, x, y);
     }
 
     @Override
     public boolean featureConcerned(final Feature feature) {
-        return (f != null) && f.equals(feature);
+        return (feature != null) && feature.equals(feature);
     }
 }

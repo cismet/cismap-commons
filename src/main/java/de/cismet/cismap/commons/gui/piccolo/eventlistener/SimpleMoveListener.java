@@ -487,38 +487,7 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
                         }
                     }
 
-                    if (mappingComponent.isSnappingEnabled()) { // Snapping Modus
-                        // Features suchen bei denen der zukünftige neue
-                        // Punkt auf einer identischen Linie sitzt
-
-                        // Alle Objekte durchlaufen
-                        for (final Feature feature : mappingComponent.getFeatureCollection().getAllFeatures()) {
-                            // Collection erzeugen (wird von getNearestNeighbours erwartet)
-                            final Collection<Feature> featureCollection = new LinkedList<Feature>();
-                            // und aktuelles Feature hinzufügen
-                            featureCollection.add(feature);
-
-                            // die 2 Nachbarpunkte ermitteln, dessen Linie dem zukünftigen neuen Punkt am Nächsten ist
-                            final Point2D[] tmpneighbours = getNearestNeighbours(new Point2D.Float(handleX, handleY),
-                                    featureCollection);
-
-                            // sind die 2 Nachbarpunkte identisch mit den 2 Nachbarn des neuen Punktes => identische
-                            // Linie
-                            final Point2D t0 = tmpneighbours[0];
-                            final Point2D t1 = tmpneighbours[1];
-                            if ((t0 != null) && (t1 != null)) {
-                                if ((t0.equals(neighbours[0]) && t1.equals(neighbours[1]))
-                                            || (t0.equals(neighbours[1])
-                                                && t1.equals(neighbours[0]))) {
-                                    // Punkt dem jeweiligen Feature hinzufügen
-                                    addPoint((PFeature)mappingComponent.getPFeatureHM().get(feature), handleX, handleY);
-                                }
-                            }
-                        }
-                    } else { // kein Snapping Modus
-                        // einfach nur den Punkt hinzufügen (wie vorher auch)
-                        addPoint(pFeature, handleX, handleY);
-                    }
+                    pFeature.insertCoordinate(entityPosition, ringPosition, coordPosition, handleX, handleY);
                 } else if (mappingComponent.getHandleInteractionMode().equals(MappingComponent.REFLECT_POLYGON)) {
                     reflectFeature(pFeature, entityPosition, ringPosition, coordPosition - 1, coordPosition);
                 }
@@ -530,27 +499,6 @@ public class SimpleMoveListener extends PBasicInputEventHandler {
             LOG.error("Fehler beim Anlegen von neuer Koordinate und Handle", ex); // NOI18N
         }
         super.mouseClicked(event);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  pf       DOCUMENT ME!
-     * @param  handleX  DOCUMENT ME!
-     * @param  handleY  DOCUMENT ME!
-     */
-    private void addPoint(final PFeature pf, final float handleX, final float handleY) {
-        pf.insertCoordinate(entityPosition, ringPosition, coordPosition, handleX, handleY);
-        pf.getViewer()
-                .getMemUndo()
-                .addAction(new HandleDeleteAction(
-                        pf.getViewer(),
-                        pf.getFeature(),
-                        entityPosition,
-                        ringPosition,
-                        coordPosition,
-                        handleX,
-                        handleY));
     }
 
     /**
