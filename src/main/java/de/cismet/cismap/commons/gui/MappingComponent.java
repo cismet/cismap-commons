@@ -125,6 +125,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private static final boolean DEBUG = Debug.DEBUG;
     public static final String PROPERTY_MAP_INTERACTION_MODE = "INTERACTION_MODE";          // NOI18N
     public static final String MOTION = "MOTION";                                           // NOI18N
+    public static final String PERPENDICULAR_INTERSECTION = "PERPENDICULAR_INTERSECTION";   // NOI18N
     public static final String SELECT = "SELECT";                                           // NOI18N
     public static final String ZOOM = "ZOOM";                                               // NOI18N
     public static final String PAN = "PAN";                                                 // NOI18N
@@ -1052,6 +1053,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void initInputListener() {
         inputEventListener.put(MOTION, new SimpleMoveListener(this));
+        inputEventListener.put(PERPENDICULAR_INTERSECTION, new PerpendicularIntersectionListener(this));
         inputEventListener.put(ZOOM, new RubberBandZoomListener());
         inputEventListener.put(PAN, new PanAndMousewheelZoomListener());
         inputEventListener.put(SELECT, new SelectionListener());
@@ -1090,6 +1092,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public void initCursors() {
         putCursor(SELECT, new Cursor(Cursor.DEFAULT_CURSOR));
+        putCursor(PERPENDICULAR_INTERSECTION, new Cursor(Cursor.DEFAULT_CURSOR));
         putCursor(ZOOM, new Cursor(Cursor.CROSSHAIR_CURSOR));
         putCursor(PAN, new Cursor(Cursor.HAND_CURSOR));
         putCursor(FEATURE_INFO, new Cursor(Cursor.DEFAULT_CURSOR));

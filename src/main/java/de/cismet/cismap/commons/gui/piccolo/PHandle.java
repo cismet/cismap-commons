@@ -110,13 +110,31 @@ public class PHandle extends PPath {
         // setStroke(new FixedWidthStroke());
         // log.fatal("Scale:"+((double)(DEFAULT_HANDLE_SIZE/PPaintContext.CURRENT_PAINT_CONTEXT.getScale())));
         locator = aLocator;
-        setPaint(DEFAULT_COLOR);
+        setPaint(getDefaultColor());
         installHandleEventHandlers();
         startResizeBounds();
         relocateHandle();
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected Color getDefaultColor() {
+        return DEFAULT_COLOR;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected Color getDefaultSelectedColor() {
+        return DEFAULT_SELECTED_COLOR;
+    }
 
     /**
      * zum \u00FCberschreiben.
@@ -373,9 +391,9 @@ public class PHandle extends PPath {
     public void setSelected(final boolean selected) {
         this.selected = selected;
         if (selected) {
-            setPaint(DEFAULT_SELECTED_COLOR);
+            setPaint(getDefaultSelectedColor());
         } else {
-            setPaint(DEFAULT_COLOR);
+            setPaint(getDefaultColor());
         }
         repaint();
     }
