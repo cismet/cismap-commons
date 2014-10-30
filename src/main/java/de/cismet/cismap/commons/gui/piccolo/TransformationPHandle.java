@@ -480,16 +480,6 @@ public class TransformationPHandle extends PHandle {
                 final float[] yp = pfeature.getYp(entityPosition, ringPosition);
 
                 if (pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.REMOVE_HANDLE)) {
-                    pfeature.getViewer()
-                            .getMemUndo()
-                            .addAction(new HandleAddAction(
-                                    pfeature.getViewer(),
-                                    pfeature.getFeature(),
-                                    entityPosition,
-                                    ringPosition,
-                                    coordPosition,
-                                    xp[coordPosition],
-                                    yp[coordPosition]));
                     final Coordinate[] coordArr = pfeature.getCoordArr(entityPosition, ringPosition);
                     final Coordinate[] newCoordArr = new Coordinate[coordArr.length - 1];
                     System.arraycopy(coordArr, 0, newCoordArr, 0, coordPosition);
