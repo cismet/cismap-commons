@@ -40,11 +40,13 @@ import java.sql.Timestamp;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 
 /**
  * DOCUMENT ME!
@@ -210,6 +212,9 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
      */
     private Feature toDeegreeFeature(final FeatureServiceFeature feature) {
         final Map props = feature.getProperties();
+        final Map<String, FeatureServiceAttribute> featureServiceAttributes = feature.getLayerProperties()
+                    .getFeatureService()
+                    .getFeatureServiceAttributes();
         final DefaultFeatureProperty[] propArray = new DefaultFeatureProperty[aliasAttributeList.size()];
         final PropertyType[] propTypeArray = new PropertyType[aliasAttributeList.size()];
         int index = 0;
@@ -226,7 +231,11 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
                 }
             }
             propArray[index] = new DefaultFeatureProperty(name, value);
-            propTypeArray[index++] = getPropertyType(name, value);
+            FeatureServiceAttribute attr = featureServiceAttributes.get(aliasAttr[1]);
+            if (attr == null) {
+                attr = featureServiceAttributes.get(aliasAttr[1].toUpperCase());
+            }
+            propTypeArray[index++] = getPropertyType(name, attr, value);
         }
 
         final FeatureType ft = FeatureFactory.createFeatureType("test", false, propTypeArray);
@@ -237,11 +246,31 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
      * DOCUMENT ME!
      *
      * @param   name   DOCUMENT ME!
+     * @param   attr   DOCUMENT ME!
      * @param   value  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private PropertyType getPropertyType(final QualifiedName name, final Object value) {
+    private PropertyType getPropertyType(final QualifiedName name,
+            final FeatureServiceAttribute attr,
+            final Object value) {
+        if ((attr != null) && !attr.isGeometry()) {
+            final Class cl = FeatureTools.getClass(attr);
+            if (cl.equals(String.class)) {
+                return new SimplePropertyType(name, Types.VARCHAR, 0, 1);
+            } else if (cl.equals(Integer.class)) {
+                return new SimplePropertyType(name, Types.INTEGER, 0, 1);
+            } else if (cl.equals(Long.class)) {
+                return new SimplePropertyType(name, Types.BIGINT, 0, 1);
+            } else if (cl.equals(Double.class)) {
+                return new SimplePropertyType(name, Types.DOUBLE, 0, 1);
+            } else if (cl.equals(Date.class)) {
+                return new SimplePropertyType(name, Types.TIMESTAMP, 0, 1);
+            } else if (cl.equals(Boolean.class)) {
+                return new SimplePropertyType(name, Types.BOOLEAN, 0, 1);
+            }
+        }
+
         if (value instanceof Integer) {
             return new SimplePropertyType(name, Types.INTEGER, 0, 1);
         } else if (value instanceof Double) {

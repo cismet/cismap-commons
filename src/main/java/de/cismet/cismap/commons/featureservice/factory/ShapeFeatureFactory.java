@@ -357,6 +357,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         this.cleanup();
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     private void determineGeometryType() {
         try {
             final ShapeFile persShapeFile = getShapeFile();
@@ -369,7 +372,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             logger.error("Cannot determine the geometry type of a shape file.", e);
         }
     }
-    
+
     /**
      * DOCUMENT ME!
      *
@@ -739,7 +742,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     }
 
     /**
-     * @return the geometryType
+     * DOCUMENT ME!
+     *
+     * @return  the geometryType
      */
     public String getGeometryType() {
         return geometryType;

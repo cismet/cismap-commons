@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
@@ -72,7 +73,6 @@ import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.FeatureTools;
-import java.util.TreeSet;
 
 /**
  * DOCUMENT ME!
@@ -190,16 +190,17 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
         this(name, databasePath, tableName, featureList, null, workerThread, styles);
     }
-    
+
     /**
      * Creates a new H2FeatureServiceFactory object.
      *
-     * @param  name          DOCUMENT ME!
-     * @param  databasePath  DOCUMENT ME!
-     * @param  tableName     DOCUMENT ME!
-     * @param  featureList   DOCUMENT ME!
-     * @param  workerThread  DOCUMENT ME!
-     * @param  styles        DOCUMENT ME!
+     * @param  name                  DOCUMENT ME!
+     * @param  databasePath          DOCUMENT ME!
+     * @param  tableName             DOCUMENT ME!
+     * @param  featureList           DOCUMENT ME!
+     * @param  orderedAttributeList  DOCUMENT ME!
+     * @param  workerThread          DOCUMENT ME!
+     * @param  styles                DOCUMENT ME!
      */
     public H2FeatureServiceFactory(final String name,
             final String databasePath,
@@ -339,10 +340,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     /**
      * Imports the given features into the db.
      *
-     * @param  workerThread  the thread, that is used to handle the current progress
-     * @param  features      the features to import
+     * @param  workerThread          the thread, that is used to handle the current progress
+     * @param  features              the features to import
+     * @param  orderedAttributeList  DOCUMENT ME!
      */
-    private void importFeatures(final SwingWorker workerThread, final List<FeatureServiceFeature> features, final List<String> orderedAttributeList) {
+    private void importFeatures(final SwingWorker workerThread,
+            final List<FeatureServiceFeature> features,
+            final List<String> orderedAttributeList) {
         try {
             final StatementWrapper st = createStatement(conn);
 
@@ -364,7 +368,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 List<String> attributeList;
                 boolean firstAttr = true;
                 boolean hasIdField = false;
-                
+
                 if (orderedAttributeList != null) {
                     attributeList = orderedAttributeList;
                 } else {
@@ -412,12 +416,12 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                             tableAttributesWithoutType,
                             placeholder));
                 int id = 0;
-                String manuallySetId = getManuallyToChangePrimaryKey(attributeList, features);
+                final String manuallySetId = getManuallyToChangePrimaryKey(attributeList, features);
 
                 for (final FeatureServiceFeature f : features) {
                     int index = 0;
                     for (final String attrKey : attributeList) {
-                        if (manuallySetId != null && manuallySetId.equals(attrKey)) {
+                        if ((manuallySetId != null) && manuallySetId.equals(attrKey)) {
                             prepStat.setObject(++index, ++id);
                         } else {
                             prepStat.setObject(++index, f.getProperty(attrKey));
@@ -433,26 +437,35 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             logger.error("Error while creating a new table from existing features", e);
         }
     }
-    
-    private String getManuallyToChangePrimaryKey(List<String> attributeList, List<FeatureServiceFeature> features) {
-        for (String attrName : attributeList) {
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   attributeList  DOCUMENT ME!
+     * @param   features       DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String getManuallyToChangePrimaryKey(final List<String> attributeList,
+            final List<FeatureServiceFeature> features) {
+        for (final String attrName : attributeList) {
             if (attrName.equalsIgnoreCase("id")) {
-                TreeSet idSet = new TreeSet();
-                
-                for (FeatureServiceFeature fsf : features) {
-                    Object idProperty = fsf.getProperty(attrName);
-                    
-                    if (idProperty == null || idSet.contains(idProperty)) {
+                final TreeSet idSet = new TreeSet();
+
+                for (final FeatureServiceFeature fsf : features) {
+                    final Object idProperty = fsf.getProperty(attrName);
+
+                    if ((idProperty == null) || idSet.contains(idProperty)) {
                         return attrName;
                     } else {
                         idSet.add(idProperty);
                     }
                 }
-                
+
                 break;
             }
         }
-        
+
         return null;
     }
 
@@ -821,14 +834,16 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 } else {
                     logger.error("cannot determine H2 layer envelope");
                 }
-                
+
                 final ResultSet geometryTypeRs = st.executeQuery("SELECT distinct st_geometryType(" + geometryField
-                                + "), (select " + geometryField + " from \"" + tableName + "\" where " + geometryField + " is not null limit 1) from \"" + tableName + "\" where " + geometryField + " is not null limit 1;");
-                
+                                + "), (select " + geometryField + " from \"" + tableName + "\" where " + geometryField
+                                + " is not null limit 1) from \"" + tableName + "\" where " + geometryField
+                                + " is not null limit 1;");
+
                 if (geometryTypeRs.next()) {
                     geometryType = geometryTypeRs.getString(1);
-                    Object o = geometryTypeRs.getObject(2);
-                    
+                    final Object o = geometryTypeRs.getObject(2);
+
                     if (geometryTypeRs.next()) {
                         geometryType = AbstractFeatureService.UNKNOWN;
                     } else {
@@ -837,7 +852,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                         }
                     }
                 }
-                
+
                 geometryTypeRs.close();
             }
             st.close();
@@ -1236,7 +1251,9 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     /**
-     * @return the geometryType
+     * DOCUMENT ME!
+     *
+     * @return  the geometryType
      */
     public String getGeometryType() {
         return geometryType;

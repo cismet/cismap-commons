@@ -11,7 +11,6 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
-
 import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;

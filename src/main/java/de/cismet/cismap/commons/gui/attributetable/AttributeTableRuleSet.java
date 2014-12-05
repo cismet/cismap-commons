@@ -28,16 +28,21 @@ public interface AttributeTableRuleSet {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * This method will be invoked, after a cell was edited.
      *
-     * @param   column    DOCUMENT ME!
-     * @param   row       DOCUMENT ME!
-     * @param   oldValue  DOCUMENT ME!
-     * @param   newValue  DOCUMENT ME!
+     * @param   feature   the modified feature
+     * @param   column    the modified attribute name
+     * @param   row       the row of the feature in the model
+     * @param   oldValue  the old attribute value
+     * @param   newValue  the new atribute value
      *
-     * @return  DOCUMENT ME!
+     * @return  the new value of the cell. Usually, the new value, if it was valid.
      */
-    Object afterEdit(final String column, final int row, final Object oldValue, final Object newValue);
+    Object afterEdit(final FeatureServiceFeature feature,
+            final String column,
+            final int row,
+            final Object oldValue,
+            final Object newValue);
 
     /**
      * DOCUMENT ME!
@@ -47,7 +52,7 @@ public interface AttributeTableRuleSet {
     void afterSave(final TableModel model);
 
     /**
-     * DOCUMENT ME!
+     * Will be invoked before a the given feature will be saved.
      *
      * @param  feature  DOCUMENT ME!
      */
@@ -56,14 +61,15 @@ public interface AttributeTableRuleSet {
     /**
      * DOCUMENT ME!
      *
-     * @param   index  DOCUMENT ME!
+     * @param   index  the index of the additional field
      *
-     * @return  DOCUMENT ME!
+     * @return  the class of the additional field with the given index
      */
     Class getAdditionalFieldClass(final int index);
 
     /**
-     * DOCUMENT ME!
+     * The names of the additional fields. Additional fields are fields, which does not exists in the objects, but which
+     * should be automatically added.
      *
      * @return  DOCUMENT ME!
      */
@@ -72,10 +78,19 @@ public interface AttributeTableRuleSet {
     /**
      * DOCUMENT ME!
      *
-     * @param   index    DOCUMENT ME!
-     * @param   feature  DOCUMENT ME!
+     * @param   name  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
+     */
+    int getIndexOfAdditionalFieldName(String name);
+
+    /**
+     * Determines the value of the additional field with the given index for the given feature.
+     *
+     * @param   index    the index of the additional field
+     * @param   feature  the feature, the value should be calculated for
+     *
+     * @return  the value of the additional field with the given index for the given feature.
      */
     Object getAdditionalFieldValue(final int index, final FeatureServiceFeature feature);
 
@@ -98,9 +113,9 @@ public interface AttributeTableRuleSet {
     TableCellRenderer getCellRenderer(final String columnName);
 
     /**
-     * DOCUMENT ME!
+     * Provides a creator to create new objects of the represented service.
      *
-     * @return  DOCUMENT ME!
+     * @return  a creator to create new objects of the represented service
      */
     FeatureCreator getFeatureCreator();
 
@@ -109,16 +124,16 @@ public interface AttributeTableRuleSet {
      *
      * @param   columnName  DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return  true, if the given column should be editable
      */
     boolean isColumnEditable(final String columnName);
 
     /**
-     * DOCUMENT ME!
+     * Will be invoked before the service will be saved.
      *
-     * @param   model  DOCUMENT ME!
+     * @param   model  A model with all features of the represented service
      *
-     * @return  DOCUMENT ME!
+     * @return  true, if the save operation should be executed
      */
     boolean prepareForSave(final TableModel model);
 }

@@ -18,7 +18,6 @@ import org.apache.log4j.Logger;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.CrsTransformer;
-import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -82,8 +81,8 @@ public class ZoomToFeaturesWorker extends SwingWorker<Geometry, Geometry> {
                                 CrsTransformer.createCrsFromSrid(geom.getSRID()));
                     }
                     final Geometry ge = g.getEnvelope();
-                    ge.setSRID(geom.getSRID());
-                    geom = geom.union(g);
+                    g.setSRID(geom.getSRID());
+                    geom = geom.getEnvelope().union(ge);
                 }
             }
         }

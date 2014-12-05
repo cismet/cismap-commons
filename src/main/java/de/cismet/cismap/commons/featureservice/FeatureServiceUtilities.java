@@ -68,7 +68,7 @@ public class FeatureServiceUtilities {
             String.valueOf(Types.POINT),
             String.valueOf(Types.CURVE),
             String.valueOf(Types.SURFACE),
-            String.valueOf(Types.OTHER) //H2 Geometry type
+            String.valueOf(Types.OTHER) // H2 Geometry type
         };
     /** Log4J initialisation. */
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(

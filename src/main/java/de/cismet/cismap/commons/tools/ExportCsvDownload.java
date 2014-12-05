@@ -42,7 +42,9 @@ public class ExportCsvDownload extends ExportTxtDownload {
      * @param  extension       DOCUMENT ME!
      * @param  features        DOCUMENT ME!
      * @param  service         DOCUMENT ME!
-     * @param  attributeNames  DOCUMENT ME!
+     * @param  attributeNames  A list with string arrays. Every array should have 2 elements. The first element is the
+     *                         alias of the column and the second element is the name of the attribute, that should be
+     *                         shown in the column
      */
     public ExportCsvDownload(final String filename,
             final String extension,
