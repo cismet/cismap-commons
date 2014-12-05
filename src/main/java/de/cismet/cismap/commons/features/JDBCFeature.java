@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.cismet.cismap.commons.featureservice.H2AttributeTableRuleSet;
-import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.cismap.linearreferencing.tools.StationEditorInterface;
@@ -54,7 +53,6 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     private Color backgroundColor;
 
     private final JDBCFeatureInfo featureInfo;
-//    private PFeature pfeature = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -79,11 +77,6 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         if (oldEditableStatus != editable) {
             if (!editable && (stations != null)) {
                 for (final String key : stations.keySet()) {
-                    final StationEditorInterface editor = stations.get(key);
-
-//                    if (editor instanceof TableLinearReferencedLineEditor) {
-//                        ((TableLinearReferencedLineEditor)editor).removePropertyChangeListener(propListener);
-//                    }
                     stations.get(key).dispose();
                 }
                 stations.clear();
@@ -96,47 +89,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 final H2AttributeTableRuleSet tableRuleSet = (H2AttributeTableRuleSet)getLayerProperties()
                             .getAttributeTableRuleSet();
 
-                if ((tableRuleSet.getAllLinRefInfos() != null) && !tableRuleSet.getAllLinRefInfos().isEmpty()) {
-//                    try {
-//                        List<LinearReferencingInfo> allLineRefInfos = tableRuleSet.getAllLinRefInfos();
-//                        for (int i = 0; i < allLineRefInfos.size(); ++i) {
-//                            LinearReferencingInfo info = allLineRefInfos.get(i);
-//
-//                            if (info.getTillField() == null) {
-//                                final StationInfo statInfo = layerInfo.getStationInfo(col);
-//
-//                                if (statInfo.isStationLine()) {
-//                                    if (stations == null) {
-//                                        stations = new HashMap<String, DisposableCidsBeanStore>();
-//                                    }
-//                                    TableLinearReferencedLineEditor st = (TableLinearReferencedLineEditor)stations.get(
-//                                            String.valueOf(statInfo.getLineId()));
-//
-//                                    if (st == null) {
-//                                        final CidsBean bean = (CidsBean)getMetaObject().getBean()
-//                                                    .getProperty(layerInfo.getColumnPropertyNames()[i]);
-//                                        st = new TableLinearReferencedLineEditor();
-//                                        st.setCidsBean(bean);
-//                                        st.addPropertyChangeListener(propListener);
-//                                        backgroundColor = st.getLineColor();
-//
-//                                        stations.put(String.valueOf(statInfo.getLineId()), st);
-//                                    }
-//
-//                                    if (statInfo.isFromStation()) {
-//                                        stations.put(col, st.getFromStation());
-//                                    } else {
-//                                        stations.put(col, st.getToStation());
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    } catch (Exception e) {
-//                        LOG.error("Error while retrieving meta object", e);
-//                    }
-                } else {
-//                    backupGeometry = (Geometry)getGeometry().clone();
-//                    backupProperties = (HashMap)super.getProperties().clone();
+                if (!((tableRuleSet.getAllLinRefInfos() != null) && !tableRuleSet.getAllLinRefInfos().isEmpty())) {
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(this);
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(this);
                     setBackgroundColor(new Color(255, 91, 0));
