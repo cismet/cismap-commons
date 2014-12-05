@@ -30,7 +30,7 @@ import de.cismet.cismap.commons.gui.attributetable.DefaultAttributeTableRuleSet;
 import de.cismet.cismap.linearreferencing.tools.StationTableCellEditorInterface;
 
 /**
- * DOCUMENT ME!
+ * This is the default AttributeTableRouleSet for h2 services. This is required to support linear referencing
  *
  * @author   therter
  * @version  $Revision$, $Date$
@@ -39,11 +39,11 @@ public class H2AttributeTableRuleSet extends DefaultAttributeTableRuleSet {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static Logger LOG = Logger.getLogger(H2AttributeTableRuleSet.class);
+    private static final Logger LOG = Logger.getLogger(H2AttributeTableRuleSet.class);
 
     //~ Instance fields --------------------------------------------------------
 
-    private List<LinearReferencingInfo> refInfos;
+    private final List<LinearReferencingInfo> refInfos;
     private Map<String, LinearReferencingInfo> refInfoMap;
 
     //~ Constructors -----------------------------------------------------------

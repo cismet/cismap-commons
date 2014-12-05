@@ -11,6 +11,7 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
+
 import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
@@ -87,6 +88,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     //~ Static fields/initializers ---------------------------------------------
 
     private static final transient Logger LOG = Logger.getLogger(AbstractFeatureService.class);
+    public static String UNKNOWN = "UNKNOWN";
 
     /* defaulttype-constant */
     public static final String DEFAULT_TYPE = "default"; // NOI18N
@@ -1544,6 +1546,16 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         } else {
             LOG.warn("no last created features that could be refreshed found"); // NOI18N
         }
+    }
+
+    /**
+     * Determines the geometry type of the features of this service.
+     *
+     * @return  the name of the geometrys most specific com.vividsolutions.jts.geom interface or
+     *          {@link AbstractFeatureService#UNKNOWN}, if the features can have different geometries
+     */
+    public String getGeometryType() {
+        return UNKNOWN;
     }
 
     //~ Inner Classes ----------------------------------------------------------

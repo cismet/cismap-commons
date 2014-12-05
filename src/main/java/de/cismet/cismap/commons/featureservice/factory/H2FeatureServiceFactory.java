@@ -37,6 +37,7 @@ import java.io.IOException;
 
 import java.nio.charset.Charset;
 
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -71,6 +72,7 @@ import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.FeatureTools;
+import java.util.TreeSet;
 
 /**
  * DOCUMENT ME!
@@ -108,7 +110,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private static final String CREATE_SPATIAL_INIT_ALIAS =
         "CREATE ALIAS IF NOT EXISTS SPATIAL_INIT FOR  \"org.h2gis.h2spatialext.CreateSpatialExtension.initSpatialExtension\";";
     private static final String CREATE_SEQUENCE = "CREATE SEQUENCE \"%s\";";
-    private static final String ADD_SEQUENCE = "ALTER TABLE \"%s\" ADD COLUMN id int default %s.nextval;";
+    private static final String ADD_SEQUENCE = "ALTER TABLE \"%s\" ADD COLUMN id int default \"%s\".nextval;";
     private static final String ADD_NOT_NULL_ID = "ALTER TABLE \"%s\" ALTER COLUMN id SET NOT NULL;";
     private static final String CREATE_PRIMARY_KEY = "CREATE PRIMARY KEY %s ON \"%s\"(id);";
     private static final String CREATE_LR_META_TABLE =
@@ -127,6 +129,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private String name;
     private List<LinearReferencingInfo> linRefList;
     private int srid = 35833;
+    private String geometryType = AbstractFeatureService.UNKNOWN;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -185,13 +188,33 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final List<FeatureServiceFeature> featureList,
             final SwingWorker workerThread,
             final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
+        this(name, databasePath, tableName, featureList, null, workerThread, styles);
+    }
+    
+    /**
+     * Creates a new H2FeatureServiceFactory object.
+     *
+     * @param  name          DOCUMENT ME!
+     * @param  databasePath  DOCUMENT ME!
+     * @param  tableName     DOCUMENT ME!
+     * @param  featureList   DOCUMENT ME!
+     * @param  workerThread  DOCUMENT ME!
+     * @param  styles        DOCUMENT ME!
+     */
+    public H2FeatureServiceFactory(final String name,
+            final String databasePath,
+            final String tableName,
+            final List<FeatureServiceFeature> featureList,
+            final List<String> orderedAttributeList,
+            final SwingWorker workerThread,
+            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) {
         super(databasePath, tableName);
         this.name = name;
         this.styles = styles;
         initConnection();
 
         if (featureList != null) {
-            importFeatures(workerThread, featureList);
+            importFeatures(workerThread, featureList, orderedAttributeList);
         }
         initFactory();
     }
@@ -218,8 +241,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      */
     private void importFile(final SwingWorker workerThread, final File file) {
         try {
-            final StatementWrapper st = createStatement();
-            initDatabase();
+            final StatementWrapper st = createStatement(conn);
+            initDatabase(conn);
             ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null);
 
             if (!rs.next()) {
@@ -319,11 +342,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @param  workerThread  the thread, that is used to handle the current progress
      * @param  features      the features to import
      */
-    private void importFeatures(final SwingWorker workerThread, final List<FeatureServiceFeature> features) {
+    private void importFeatures(final SwingWorker workerThread, final List<FeatureServiceFeature> features, final List<String> orderedAttributeList) {
         try {
-            final StatementWrapper st = createStatement();
+            final StatementWrapper st = createStatement(conn);
 
-            initDatabase();
+            initDatabase(conn);
             ResultSet rs = conn.getMetaData().getTables(null, null, tableName, null);
 
             if (!rs.next()) {
@@ -338,10 +361,17 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 final StringBuilder tableAttributesWithType = new StringBuilder();
                 final StringBuilder tableAttributesWithoutType = new StringBuilder();
                 final StringBuilder placeholder = new StringBuilder();
+                List<String> attributeList;
                 boolean firstAttr = true;
                 boolean hasIdField = false;
+                
+                if (orderedAttributeList != null) {
+                    attributeList = orderedAttributeList;
+                } else {
+                    attributeList = new ArrayList<String>(attributeMap.keySet());
+                }
 
-                for (final String attrKey : attributeMap.keySet()) {
+                for (final String attrKey : attributeList) {
                     if (!firstAttr) {
                         tableAttributesWithType.append(",");
                         tableAttributesWithoutType.append(",");
@@ -381,11 +411,17 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                             tableName,
                             tableAttributesWithoutType,
                             placeholder));
+                int id = 0;
+                String manuallySetId = getManuallyToChangePrimaryKey(attributeList, features);
 
                 for (final FeatureServiceFeature f : features) {
                     int index = 0;
-                    for (final String attrKey : attributeMap.keySet()) {
-                        prepStat.setObject(++index, f.getProperty(attrKey));
+                    for (final String attrKey : attributeList) {
+                        if (manuallySetId != null && manuallySetId.equals(attrKey)) {
+                            prepStat.setObject(++index, ++id);
+                        } else {
+                            prepStat.setObject(++index, f.getProperty(attrKey));
+                        }
                     }
                     prepStat.execute();
                 }
@@ -397,17 +433,41 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             logger.error("Error while creating a new table from existing features", e);
         }
     }
+    
+    private String getManuallyToChangePrimaryKey(List<String> attributeList, List<FeatureServiceFeature> features) {
+        for (String attrName : attributeList) {
+            if (attrName.equalsIgnoreCase("id")) {
+                TreeSet idSet = new TreeSet();
+                
+                for (FeatureServiceFeature fsf : features) {
+                    Object idProperty = fsf.getProperty(attrName);
+                    
+                    if (idProperty == null || idSet.contains(idProperty)) {
+                        return attrName;
+                    } else {
+                        idSet.add(idProperty);
+                    }
+                }
+                
+                break;
+            }
+        }
+        
+        return null;
+    }
 
     /**
      * Initialises the database, if this was not already happen.
      *
+     * @param   conn  the connection to the database
+     *
      * @throws  SQLException  DOCUMENT ME!
      */
-    private void initDatabase() throws SQLException {
+    public static void initDatabase(final ConnectionWrapper conn) throws SQLException {
         final ResultSet rs = conn.getMetaData().getTables(null, null, "GEOMETRY_COLUMNS", null);
 
         if (!rs.next()) {
-            final StatementWrapper st = createStatement();
+            final StatementWrapper st = createStatement(conn);
             st.execute(
                 CREATE_SPATIAL_INIT_ALIAS);
             st.execute(SPATIAL_INIT);
@@ -424,7 +484,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @throws  SQLException  DOCUMENT ME!
      */
     private void createPrimaryKey(final boolean hasIdField) throws SQLException {
-        final StatementWrapper st = createStatement();
+        final StatementWrapper st = createStatement(conn);
 
         if (!hasIdField) {
             final String seqName = tableName + "_seq";
@@ -448,7 +508,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
         if (!rs.next()) {
             // meta table does not exist and should be created
-            final Statement st = createStatement();
+            final Statement st = createStatement(conn);
             st.execute(String.format(CREATE_LR_META_TABLE, LR_META_TABLE_NAME));
             st.close();
         }
@@ -466,7 +526,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
         if (!rs.next()) {
             // meta table does not exist and should be created
-            final Statement st = createStatement();
+            final Statement st = createStatement(conn);
             st.execute(String.format(CREATE_META_TABLE, META_TABLE_NAME));
             st.close();
         }
@@ -568,7 +628,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 geoCol = geoCol.substring(geoCol.lastIndexOf(".") + 1);
             }
             geometryField = "geo_" + geoCol;
-            final StatementWrapper st = createStatement();
+            final StatementWrapper st = createStatement(conn);
             st.execute("alter table \"" + tableName + "\" add column " + geometryField + " Geometry");
             String additionalFields = fromField + "," + routeField;
             final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set "
@@ -651,7 +711,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
         try {
             geometryField = "geo_xy";
-            final StatementWrapper st = createStatement();
+            final StatementWrapper st = createStatement(conn);
             st.execute("alter table \"" + tableName + "\" add column " + geometryField + " Geometry");
             final String additionalFields = xField + "," + yField;
             final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set "
@@ -673,21 +733,6 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
             rs.close();
 
-//            createMetaLinRefTablesIfNotExist();
-//            final String tillInfo = ((tillField == null) ? "" : tillField);
-//            final int kind = ((tillField == null) ? STATION : STATION_LINE);
-//
-//            st.execute(String.format(
-//                    INSERT_LR_META_DATA,
-//                    tableName,
-//                    layerName,
-//                    domain,
-//                    routeField,
-//                    routeJoinField,
-//                    geometryField,
-//                    new Integer(kind),
-//                    fromField,
-//                    tillInfo));
             st.close();
         } catch (Exception e) {
             LOG.error("Error while adding point geometries.", e);
@@ -730,7 +775,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             rs.close();
 
             createMetaLinRefTablesIfNotExist();
-            final StatementWrapper st = createStatement();
+            final StatementWrapper st = createStatement(conn);
             final ResultSet lrMeta = st.executeQuery(
                     "SELECT lin_ref_reference, domain, src_join_field, targ_join_field, lin_ref_geom, kind, from_value, till_value FROM \""
                             + LR_META_TABLE_NAME
@@ -764,14 +809,36 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
                 if (envelopeSet.next()) {
                     final Envelope e = ((Envelope)envelopeSet.getObject(1));
-                    final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
-                            envelopeSet.getInt(2));
-                    envelope = gf.toGeometry(e);
+                    if (e != null) {
+                        final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
+                                envelopeSet.getInt(2));
+                        envelope = gf.toGeometry(e);
+                    } else {
+                        envelope = null;
+                    }
 
                     envelopeSet.close();
                 } else {
                     logger.error("cannot determine H2 layer envelope");
                 }
+                
+                final ResultSet geometryTypeRs = st.executeQuery("SELECT distinct st_geometryType(" + geometryField
+                                + "), (select " + geometryField + " from \"" + tableName + "\" where " + geometryField + " is not null limit 1) from \"" + tableName + "\" where " + geometryField + " is not null limit 1;");
+                
+                if (geometryTypeRs.next()) {
+                    geometryType = geometryTypeRs.getString(1);
+                    Object o = geometryTypeRs.getObject(2);
+                    
+                    if (geometryTypeRs.next()) {
+                        geometryType = AbstractFeatureService.UNKNOWN;
+                    } else {
+                        if (o instanceof Geometry) {
+                            geometryType = ((Geometry)o).getGeometryType();
+                        }
+                    }
+                }
+                
+                geometryTypeRs.close();
             }
             st.close();
         } catch (Exception e) {
@@ -837,24 +904,42 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * DOCUMENT ME!
      */
     private synchronized void initConnection() {
+        conn = getDBConnection(databasePath);
+    }
+
+    /**
+     * Creates a connection to the internal database.
+     *
+     * @param   databasePath  the path to the database. if null, {@link DB_NAME} will be used
+     *
+     * @return  a connection to the internal database
+     */
+    public static ConnectionWrapper getDBConnection(final String databasePath) {
         try {
             Class.forName("org.h2.Driver");
-            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+            final String path = ((databasePath == null) ? DB_NAME : databasePath);
+            return (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
                         "jdbc:h2:"
-                                + databasePath));
-        } catch (Exception e) {
+                                + path));
+        } catch (ClassNotFoundException e) {
             LOG.error("Error while creating database connection.", e);
+            return null;
+        } catch (SQLException e) {
+            LOG.error("Error while creating database connection.", e);
+            return null;
         }
     }
 
     /**
-     * DOCUMENT ME!
+     * Creates a new statement on the givven connection.
      *
-     * @return  DOCUMENT ME!
+     * @param   conn  the connection, the statement should be created on
+     *
+     * @return  the new statement
      *
      * @throws  SQLException  DOCUMENT ME!
      */
-    private synchronized StatementWrapper createStatement() throws SQLException {
+    public static synchronized StatementWrapper createStatement(final ConnectionWrapper conn) throws SQLException {
         return (StatementWrapper)conn.createStatement();
     }
 
@@ -916,7 +1001,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         Statement st = null;
 
         try {
-            st = conn.createStatement();
+            st = createStatement(conn);
             final String maxId = "SELECT max(%1s) from \"%2s\";";
 
             final String query = String.format(maxId, idField, tableName);
@@ -1023,7 +1108,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 LOG.debug("db query: " + select);
             }
             setInterruptedNotAllowed();
-            final StatementWrapper st = createStatement();
+            final StatementWrapper st = createStatement(conn);
             final ResultSet rs = st.executeQuery(select);
             setInterruptedAllowed();
             final List<JDBCFeature> selectedFeatures = new ArrayList<JDBCFeature>();
@@ -1094,7 +1179,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         ResultSet rs = null;
 
         try {
-            st = createStatement();
+            st = createStatement(conn);
             rs = st.executeQuery(query);
             if (rs.next()) {
                 result = rs.getInt(1);
@@ -1131,7 +1216,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     /**
      * DOCUMENT ME!
      */
-    private void closeConnection() {
+    public void closeConnection() {
         try {
             if (conn != null) {
                 conn.close();
@@ -1148,5 +1233,12 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      */
     public List<LinearReferencingInfo> getLinRefList() {
         return linRefList;
+    }
+
+    /**
+     * @return the geometryType
+     */
+    public String getGeometryType() {
+        return geometryType;
     }
 }

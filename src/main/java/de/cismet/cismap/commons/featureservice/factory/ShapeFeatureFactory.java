@@ -48,6 +48,7 @@ import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.features.ShapeInfo;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
@@ -81,6 +82,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     private org.deegree.model.spatialschema.Envelope envelope;
     private FeatureCollection fc = null;
     private String filename;
+    private String geometryType = AbstractFeatureService.UNKNOWN;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -349,11 +351,25 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         } catch (final RTreeException e) {
             logger.error("The index file cannot be created. The corresponding folder is possibly write protected.", e);
         }
+        determineGeometryType();
         initialised = true;
 
         this.cleanup();
     }
 
+    private void determineGeometryType() {
+        try {
+            final ShapeFile persShapeFile = getShapeFile();
+            final ShapeInfo info = new ShapeInfo(filename, persShapeFile, featureSrid, fc);
+
+            final ShapeFeature featureServiceFeature = createFeatureInstance(null, info, 1);
+            this.initialiseFeature(featureServiceFeature, null, false, 1);
+            geometryType = featureServiceFeature.getGeometry().getGeometryType();
+        } catch (Exception e) {
+            logger.error("Cannot determine the geometry type of a shape file.", e);
+        }
+    }
+    
     /**
      * DOCUMENT ME!
      *
@@ -720,5 +736,12 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         } finally {
             cleanup();
         }
+    }
+
+    /**
+     * @return the geometryType
+     */
+    public String getGeometryType() {
+        return geometryType;
     }
 }
