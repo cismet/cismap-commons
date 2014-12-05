@@ -725,7 +725,9 @@ public class HeadlessMapProvider {
         @Override
         public synchronized void repaintStart(final RepaintEvent repaintEvent) {
             final RetrievalEvent e = repaintEvent.getRetrievalEvent();
-            LOG.error("start");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("start");
+            }
             if (LOG.isDebugEnabled()) {
                 LOG.debug("retrievalStarted" + e.getRetrievalService()); // NOI18N
             }

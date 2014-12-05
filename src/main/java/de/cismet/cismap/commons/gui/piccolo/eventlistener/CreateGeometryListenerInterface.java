@@ -25,6 +25,7 @@ public interface CreateGeometryListenerInterface {
     String RECTANGLE = "BOUNDING_BOX";                  // NOI18N
     String RECTANGLE_FROM_LINE = "RECTANGLE_FROM_LINE"; // NOI18N
     String ELLIPSE = "ELLIPSE";                         // NOI18N
+    String TEXT = "TEXT";                               // NOI18N
 
     //~ Methods ----------------------------------------------------------------
 

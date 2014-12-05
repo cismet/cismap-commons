@@ -13,12 +13,15 @@ import com.vividsolutions.jts.geom.Geometry;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PPath;
-import edu.umd.cs.piccolox.event.PNotificationCenter;
 
 import org.apache.log4j.Logger;
 
 import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Frame;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 
 import java.lang.reflect.Constructor;
@@ -38,6 +41,7 @@ import de.cismet.cismap.commons.gui.piccolo.FixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.RectangleFromLineDialog;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.FeatureDeleteAction;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.tools.NewTextDialog;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.tools.gui.StaticSwingTools;
@@ -141,7 +145,7 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
     public void setMode(final String mode) throws IllegalArgumentException {
         if (modeEquals(LINESTRING) || modeEquals(POINT) || modeEquals(POLYGON) || modeEquals(ELLIPSE)
                     || modeEquals(RECTANGLE)
-                    || modeEquals(RECTANGLE_FROM_LINE)) {
+                    || modeEquals(RECTANGLE_FROM_LINE) || modeEquals(TEXT)) {
             if (!modeEquals(mode)) {
                 reset();
                 this.mode = mode;
@@ -199,7 +203,18 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
             ((DefaultFeatureCollection)(mappingComponent.getFeatureCollection())).removeFeaturesByInstance(
                 PureNewFeature.class);
         }
-        if (isInMode(POINT)) {
+
+        if (isInMode(TEXT)) {
+            if (pInputEvent.isLeftMouseButton()) {
+                Point2D point = null;
+                if (point == null) {
+                    point = pInputEvent.getPosition();
+                }
+                points = new ArrayList<Point2D>();
+                points.add(point);
+                readyForFinishing(pInputEvent);
+            }
+        } else if (isInMode(POINT)) {
             if (pInputEvent.isLeftMouseButton()) {
                 Point2D point = null;
                 if (mappingComponent.isSnappingEnabled()) {
@@ -439,24 +454,77 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                 geomType = AbstractNewFeature.geomTypes.POLYGON;
             } else if (isInMode(RECTANGLE_FROM_LINE)) {
                 geomType = AbstractNewFeature.geomTypes.POLYGON;
+            } else if (isInMode(TEXT)) {
+                geomType = AbstractNewFeature.geomTypes.TEXT;
             }
 
             final int currentSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
             final Constructor<? extends AbstractNewFeature> constructor = geometryFeatureClass.getConstructor(
                     Point2D[].class,
                     WorldToScreenTransform.class);
-            final AbstractNewFeature newFeature = constructor.newInstance(finalPoints, mappingComponent.getWtst());
+            AbstractNewFeature newFeature = constructor.newInstance(finalPoints, mappingComponent.getWtst());
             newFeature.setGeometryType(geomType);
             newFeature.getGeometry().setSRID(currentSrid);
             final Geometry geom = CrsTransformer.transformToGivenCrs(newFeature.getGeometry(),
                     mappingComponent.getMappingModel().getSrs().getCode());
             newFeature.setGeometry(geom);
 
+            if (isInMode(TEXT)) {
+                final AbstractNewFeature f = newFeature;
+
+                EventQueue.invokeLater(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            createTextNode(f);
+                        }
+                    });
+
+                newFeature = null;
+            }
+
             currentFeature = newFeature;
         } catch (Throwable throwable) {
             LOG.error("Error during the creation of the geometry", throwable); // NOI18N
             currentFeature = null;
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  newFeature  DOCUMENT ME!
+     */
+    private void createTextNode(final AbstractNewFeature newFeature) {
+        final NewTextDialog dialog = new NewTextDialog(StaticSwingTools.getParentFrame(mappingComponent), false);
+        dialog.setRunWhenFinish(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (dialog.isConfirmed()) {
+                        newFeature.setName(dialog.getText());
+
+                        if (!dialog.isAutoScaleEnabled()) {
+                            final int fontSize = (int)(mappingComponent.getScaleDenominator() / 3700 * 12);
+                            final Font f = new Font("sansserif", Font.PLAIN, fontSize);
+                            newFeature.setPrimaryAnnotationFont(f);
+                        } else {
+                            final Font f = new Font("sansserif", Font.PLAIN, 12);
+                            newFeature.setPrimaryAnnotationFont(f);
+                        }
+                        newFeature.setAutoScale(dialog.isAutoScaleEnabled());
+
+                        if (dialog.isHaloEnabled()) {
+                            newFeature.setPrimaryAnnotationHalo(Color.WHITE);
+                        }
+                        finishGeometry(newFeature);
+                    }
+                }
+            });
+
+        final Point mouseLocation = MouseInfo.getPointerInfo().getLocation();
+        dialog.setLocation((int)(mouseLocation.getX() + 10), (int)mouseLocation.getY());
+        dialog.setVisible(true);
     }
 
     @Override

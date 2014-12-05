@@ -112,7 +112,7 @@ import de.cismet.cismap.commons.gui.piccolo.PSticky;
  * @author   Pascal Dihé
  * @version  $Revision$, $Date$
  */
-public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
+public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comparable<DefaultFeatureServiceFeature> {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -160,9 +160,9 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      * @see    FeatureServiceFeature#clone(Object)
      */
     public DefaultFeatureServiceFeature(final FeatureServiceFeature feature) {
-        this.setId(id);
-        this.setPrimaryAnnotation(new String(feature.getPrimaryAnnotation()));
-        this.setSecondaryAnnotation(new String(feature.getSecondaryAnnotation()));
+        this.setId(feature.getId());
+        this.setPrimaryAnnotation(feature.getPrimaryAnnotation());
+        this.setSecondaryAnnotation(feature.getSecondaryAnnotation());
         this.hide(feature.isHidden());
         this.setEditable(feature.isEditable());
         this.setCanBeSelected(feature.canBeSelected());
@@ -175,12 +175,12 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
             this.container = new LinkedHashMap(feature.getProperties());
         }
 
-        if (feature.getGeometry() != null) {
-            this.setGeometry((Geometry)feature.getGeometry().clone());
-        }
-
         if (feature.getLayerProperties() != null) {
             this.setLayerProperties((LayerProperties)feature.getLayerProperties().clone());
+        }
+
+        if (feature.getGeometry() != null) {
+            this.setGeometry((Geometry)feature.getGeometry().clone());
         }
     }
 
@@ -517,6 +517,30 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
     @Override
     public void setGeometry(final Geometry geom) {
         this.geometry = geom;
+
+        setProperty(getGeometryFieldName(), geom);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String getGeometryFieldName() {
+        if ((getLayerProperties() != null) && (getLayerProperties().getFeatureService() != null)
+                    && (getLayerProperties().getFeatureService().getFeatureServiceAttributes() != null)) {
+            final Map<String, FeatureServiceAttribute> attributes = getLayerProperties().getFeatureService()
+                        .getFeatureServiceAttributes();
+
+            for (final String key : attributes.keySet()) {
+                final FeatureServiceAttribute attr = attributes.get(key);
+
+                if (attr.isGeometry()) {
+                    return attr.getName();
+                }
+            }
+        }
+        return "geom";
     }
 
     /**
@@ -1230,7 +1254,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
      * @param  pfeature  DOCUMENT ME!
      * @param  sticky    DOCUMENT ME!
      */
-    private void rescaleStickyNode(final PFeature pfeature, final PSticky sticky) {
+    protected void rescaleStickyNode(final PFeature pfeature, final PSticky sticky) {
         final double s = pfeature.getMappingComponent().getCamera().getViewScale();
         sticky.setScale(1 / s);
     }
@@ -1684,6 +1708,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature {
                 return super.toString();
             }
         }
+    }
+
+    @Override
+    public int compareTo(final DefaultFeatureServiceFeature o) {
+        return Integer.compare(id, o.id);
     }
 
     //~ Inner Classes ----------------------------------------------------------

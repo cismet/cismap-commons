@@ -168,6 +168,8 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
                                 selectedPFeature = pFeature;
                             }
                         }
+                    } else if (isInMode(TEXT)) {
+                        super.mousePressed(pInputEvent);
                     } else { // es wird ein normales polygon angefangen
                         selectedPFeature = null;
                         super.mousePressed(pInputEvent);
@@ -287,37 +289,42 @@ public class CreateNewGeometryListener extends CreateGeometryListener {
     protected void finishGeometry(final AbstractNewFeature newFeature) {
         super.finishGeometry(newFeature);
 
-        if (selectedPFeature == null) {
-            newFeature.setEditable(true);
-            getMappingComponent().getFeatureCollection().addFeature(newFeature);
-            getMappingComponent().getFeatureCollection().holdFeature(newFeature);
+        if (newFeature != null) {
+            if (selectedPFeature == null) {
+                newFeature.setEditable(true);
+                getMappingComponent().getFeatureCollection().addFeature(newFeature);
+                getMappingComponent().getFeatureCollection().holdFeature(newFeature);
 
-            final PNotificationCenter pn = PNotificationCenter.defaultCenter();
-            pn.postNotification(CreateGeometryListener.GEOMETRY_CREATED_NOTIFICATION, (AbstractNewFeature)newFeature);
+                final PNotificationCenter pn = PNotificationCenter.defaultCenter();
+                pn.postNotification(
+                    CreateGeometryListener.GEOMETRY_CREATED_NOTIFICATION,
+                    (AbstractNewFeature)newFeature);
 
-            getMappingComponent().getMemUndo().addAction(new FeatureDeleteAction(getMappingComponent(), newFeature));
-            getMappingComponent().getMemRedo().clear();
-        } else {
-            final Polygon polygon = (Polygon)newFeature.getGeometry();
-
-            if (creatingHole) {
-                selectedPFeature.addHoleToEntity(selectedEntityPosition, polygon.getExteriorRing());
                 getMappingComponent().getMemUndo()
-                        .addAction(new FeatureRemoveHoleAction(
-                                getMappingComponent(),
-                                selectedPFeature.getFeature(),
-                                selectedEntityPosition,
-                                polygon.getExteriorRing()));
+                        .addAction(new FeatureDeleteAction(getMappingComponent(), newFeature));
+                getMappingComponent().getMemRedo().clear();
             } else {
-                selectedPFeature.addEntity(polygon);
-                getMappingComponent().getMemUndo()
-                        .addAction(new FeatureRemoveEntityAction(
-                                mappingComponent,
-                                selectedPFeature.getFeature(),
-                                polygon));
-            }
+                final Polygon polygon = (Polygon)newFeature.getGeometry();
 
-            getMappingComponent().getMemRedo().clear();
+                if (creatingHole) {
+                    selectedPFeature.addHoleToEntity(selectedEntityPosition, polygon.getExteriorRing());
+                    getMappingComponent().getMemUndo()
+                            .addAction(new FeatureRemoveHoleAction(
+                                    getMappingComponent(),
+                                    selectedPFeature.getFeature(),
+                                    selectedEntityPosition,
+                                    polygon.getExteriorRing()));
+                } else {
+                    selectedPFeature.addEntity(polygon);
+                    getMappingComponent().getMemUndo()
+                            .addAction(new FeatureRemoveEntityAction(
+                                    mappingComponent,
+                                    selectedPFeature.getFeature(),
+                                    polygon));
+                }
+
+                getMappingComponent().getMemRedo().clear();
+            }
         }
     }
 

@@ -25,7 +25,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.geom.RoundRectangle2D;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.Feature;
@@ -48,12 +50,14 @@ public class DeleteFeatureListener extends PBasicInputEventHandler {
 
     private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(DeleteFeatureListener.class);
     public static final String FEATURE_DELETE_REQUEST_NOTIFICATION = "FEATURE_DELETE_REQUEST_NOTIFICATION"; // NOI18N
+    private static final ClassComparator comparator = new ClassComparator();
 
     //~ Instance fields --------------------------------------------------------
 
     private PFeature featureRequestedForDeletion = null;
-    private InvalidPolygonTooltip multiPolygonPointerAnnotation = new InvalidPolygonTooltip();
-    private MappingComponent mc;
+    private final InvalidPolygonTooltip multiPolygonPointerAnnotation = new InvalidPolygonTooltip();
+    private final MappingComponent mc;
+    private Class[] allowedFeatureClassesToDelete = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -97,6 +101,16 @@ public class DeleteFeatureListener extends PBasicInputEventHandler {
             final PFeature clickedPFeature = (PFeature)PFeatureTools.getFirstValidObjectUnderPointer(
                     pInputEvent,
                     new Class[] { PFeature.class });
+
+            if ((clickedPFeature != null) && (clickedPFeature.getFeature() != null)
+                        && (allowedFeatureClassesToDelete != null)
+                        && (Arrays.binarySearch(
+                                allowedFeatureClassesToDelete,
+                                clickedPFeature.getFeature().getClass(),
+                                comparator) < 0)) {
+                return;
+            }
+
             if (pInputEvent.isAltDown()) {                                                             // alt-modifier => speziall-handling für
                                                                                                        // multipolygone
                 final Collection selectedFeatures = mappingComponent.getFeatureCollection().getSelectedFeatures();
@@ -205,6 +219,29 @@ public class DeleteFeatureListener extends PBasicInputEventHandler {
         return featureRequestedForDeletion;
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the allowedFeatrueClassesToDelete
+     */
+    public Class[] getAllowedFeatureClassesToDelete() {
+        return allowedFeatureClassesToDelete;
+    }
+
+    /**
+     * Set the feature types, which are allowed to remove. If null is set, all feature types are allowed to remove. The
+     * given array will be sorted.
+     *
+     * @param  allowedFeatureClassesToDelete  the allowedFeatrueClassesToDelete to set
+     */
+    public void setAllowedFeatureClassesToDelete(final Class[] allowedFeatureClassesToDelete) {
+        this.allowedFeatureClassesToDelete = allowedFeatureClassesToDelete;
+
+        if (allowedFeatureClassesToDelete != null) {
+            Arrays.sort(this.allowedFeatureClassesToDelete, comparator);
+        }
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -251,6 +288,21 @@ public class DeleteFeatureListener extends PBasicInputEventHandler {
 
             setTransparency(0.85f);
             addChild(background);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static class ClassComparator implements Comparator<Class> {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public int compare(final Class o1, final Class o2) {
+            return o1.getName().compareTo(o2.getName());
         }
     }
 }

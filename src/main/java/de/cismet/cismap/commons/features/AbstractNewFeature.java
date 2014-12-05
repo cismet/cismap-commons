@@ -67,7 +67,7 @@ public abstract class AbstractNewFeature extends DefaultStyledFeature implements
 
         //~ Enum constants -----------------------------------------------------
 
-        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON, MULTIPOLYGON, UNKNOWN
+        ELLIPSE, LINESTRING, RECTANGLE, POINT, POLYGON, MULTIPOLYGON, TEXT, UNKNOWN
     }
 
     //~ Instance fields --------------------------------------------------------
