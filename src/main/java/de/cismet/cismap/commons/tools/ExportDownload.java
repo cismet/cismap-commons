@@ -45,9 +45,9 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
      * @param  extension           DOCUMENT ME!
      * @param  features            DOCUMENT ME!
      * @param  service             DOCUMENT ME!
-     * @param  aliasAttributeList  attributeNames A list with string arrays. Every array should have 2 elements. The
-     *                             first element is the alias of the column and the second element is the name of the
-     *                             attribute, that should be shown in the column
+     * @param  aliasAttributeList  A list with string arrays. Every array should have 2 elements. The first element is
+     *                             the alias of the column and the second element is the name of the attribute, that
+     *                             should be shown in the column
      */
     public void init(final String filename,
             final String extension,
@@ -69,7 +69,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
         status = Download.State.WAITING;
         String filenameWithoutExt = filename;
 
-        if (filename.charAt(filename.length() - 4) == '.') {
+        if (filename.contains(".") && (filename.charAt(filename.length() - 4) == '.')) {
             filenameWithoutExt = filename.substring(0, filename.length() - 4);
         }
         determineDestinationFile(filenameWithoutExt, extension);

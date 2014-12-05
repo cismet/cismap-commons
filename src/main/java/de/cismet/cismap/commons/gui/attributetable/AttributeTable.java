@@ -2713,7 +2713,7 @@ public class AttributeTable extends javax.swing.JPanel {
             Object newObject = aValue;
 
             if (tableRuleSet != null) {
-                newObject = tableRuleSet.afterEdit(attrName, rowIndex, feature.getProperty(attrName), aValue);
+                newObject = tableRuleSet.afterEdit(feature, attrName, rowIndex, feature.getProperty(attrName), aValue);
             }
             feature.setProperty(attrName, newObject);
             if (!changedFeatures.contains(feature)) {

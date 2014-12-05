@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.deegree.datatypes.Types;
 
 import java.util.Date;
@@ -65,6 +67,36 @@ public class FeatureTools {
             return Boolean.class;
         } else {
             return String.class;
+        }
+    }
+
+    /**
+     * Converts the given java data type to its corresponding feature data type.
+     *
+     * @param   cl  a java class
+     *
+     * @return  the service data type
+     */
+    public static String getType(final Class cl) {
+        if (Geometry.class.isAssignableFrom(cl)) {
+            return String.valueOf(Types.GEOMETRY);
+        } else if (cl.getName().endsWith("String")) {
+            return String.valueOf(Types.VARCHAR);
+        } else if (cl.getName().endsWith("Integer") || cl.getName().equals("int")) {
+            return String.valueOf(Types.INTEGER);
+        } else if (cl.getName().endsWith("Long") || cl.getName().equals("long")) {
+            return String.valueOf(Types.BIGINT);
+        } else if (cl.getName().endsWith("Double") || cl.getName().equals("double") || cl.getName().endsWith("Float")
+                    || cl.getName().equals("float")) {
+            return String.valueOf(Types.DOUBLE);
+        } else if (cl.getName().endsWith("Date")) {
+            return String.valueOf(Types.DATE);
+        } else if (cl.getName().endsWith("Timestamp")) {
+            return String.valueOf(Types.TIMESTAMP);
+        } else if (cl.getName().endsWith("Boolean") || cl.getName().equals("boolean")) {
+            return String.valueOf(Types.BOOLEAN);
+        } else {
+            return String.valueOf(Types.VARCHAR);
         }
     }
 

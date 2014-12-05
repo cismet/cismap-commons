@@ -99,6 +99,7 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.style.Style;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.attributetable.AttributeTableRuleSet;
 import de.cismet.cismap.commons.gui.piccolo.CustomFixedWidthStroke;
 import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
@@ -253,6 +254,17 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      */
     @Override
     public HashMap getProperties() {
+        if (hasAdditionalProperties()) {
+            final AttributeTableRuleSet ruleSet = layerProperties.getAttributeTableRuleSet();
+            final String[] names = ruleSet.getAdditionalFieldNames();
+
+            for (final String tmpName : names) {
+                final Object value = ruleSet.getAdditionalFieldValue(ruleSet.getIndexOfAdditionalFieldName(tmpName),
+                        this);
+                container.put(tmpName, value);
+            }
+        }
+
         return container;
     }
 
@@ -275,7 +287,17 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      */
     @Override
     public Object getProperty(final String propertyName) {
-        return container.get(propertyName);
+        Object o = container.get(propertyName);
+
+        if (o == null) {
+            final int index = layerProperties.getAttributeTableRuleSet().getIndexOfAdditionalFieldName(propertyName);
+
+            if (index != -1) {
+                o = layerProperties.getAttributeTableRuleSet().getAdditionalFieldValue(index, this);
+            }
+        }
+
+        return o;
     }
 
     /**
@@ -286,6 +308,23 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     @Override
     public void removeProperty(final String propertyName) {
         container.remove(propertyName);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  true, iff the service of this feature has additional properties, which are defined by a
+     *          AttributeTableRuleSet
+     */
+    protected boolean hasAdditionalProperties() {
+        final AttributeTableRuleSet ruleSet = layerProperties.getAttributeTableRuleSet();
+
+        if (ruleSet == null) {
+            return false;
+        } else {
+            final String[] fieldNames = ruleSet.getAdditionalFieldNames();
+            return (fieldNames != null) && (fieldNames.length > 0);
+        }
     }
 
     /**

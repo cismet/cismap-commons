@@ -48,7 +48,6 @@ public class SimpleAttributeTableModel implements TableModel {
     protected String[] attributeAlias;
     protected String[] attributeNames;
     protected Map<String, FeatureServiceAttribute> featureServiceAttributes;
-    protected String[] additionalAttributes = new String[0];
     protected List<String> orderedFeatureServiceAttributes;
     protected List<FeatureServiceFeature> featureList;
     protected List<TableModelListener> listener = new ArrayList<TableModelListener>();
@@ -109,14 +108,6 @@ public class SimpleAttributeTableModel implements TableModel {
             }
         }
 
-        if (tableRuleSet != null) {
-            final String[] fields = tableRuleSet.getAdditionalFieldNames();
-
-            if (fields != null) {
-                additionalAttributes = fields;
-            }
-        }
-
         fireContentsChanged();
     }
 
@@ -172,7 +163,7 @@ public class SimpleAttributeTableModel implements TableModel {
         if (attributeAlias == null) {
             return 0;
         } else {
-            return attributeAlias.length + additionalAttributes.length;
+            return attributeAlias.length;
         }
     }
 
@@ -227,32 +218,28 @@ public class SimpleAttributeTableModel implements TableModel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Checks, if the given column has a numeric type.
      *
-     * @param   col  row DOCUMENT ME!
+     * @param   col  the column to check
      *
-     * @return  DOCUMENT ME!
+     * @return  True, if the given column has a numeric type
      */
     public boolean isNumeric(final int col) {
         final String key = attributeNames[col];
         final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
 
-        if ((attr != null)
-                    && (attr.getType().equals(String.valueOf(Types.INTEGER))
-                        || attr.getType().equals(String.valueOf(Types.BIGINT))
-                        || attr.getType().equals(String.valueOf(Types.SMALLINT))
-                        || attr.getType().equals(String.valueOf(Types.TINYINT))
-                        || attr.getType().equals(String.valueOf(Types.DOUBLE))
-                        || attr.getType().equals(String.valueOf(Types.FLOAT))
-                        || attr.getType().equals(String.valueOf(Types.DECIMAL))
-                        || attr.getType().equals("xsd:float")
-                        || attr.getType().equals("xsd:decimal")
-                        || attr.getType().equals("xsd:double")
-                        || attr.getType().equals("xsd:integer"))) {
-            return true;
-        } else {
-            return false;
-        }
+        return ((attr != null)
+                        && (attr.getType().equals(String.valueOf(Types.INTEGER))
+                            || attr.getType().equals(String.valueOf(Types.BIGINT))
+                            || attr.getType().equals(String.valueOf(Types.SMALLINT))
+                            || attr.getType().equals(String.valueOf(Types.TINYINT))
+                            || attr.getType().equals(String.valueOf(Types.DOUBLE))
+                            || attr.getType().equals(String.valueOf(Types.FLOAT))
+                            || attr.getType().equals(String.valueOf(Types.DECIMAL))
+                            || attr.getType().equals("xsd:float")
+                            || attr.getType().equals("xsd:decimal")
+                            || attr.getType().equals("xsd:double")
+                            || attr.getType().equals("xsd:integer")));
     }
 
     /**
@@ -260,16 +247,16 @@ public class SimpleAttributeTableModel implements TableModel {
      *
      * @param   row  DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return  The feature that is represented by the given row
      */
     public FeatureServiceFeature getFeatureServiceFeature(final int row) {
         return featureList.get(row);
     }
 
     /**
-     * DOCUMENT ME!
+     * Removes the given feature from the model.
      *
-     * @param  feature  row DOCUMENT ME!
+     * @param  feature  the feature to remove
      */
     public void removeFeatureServiceFeature(final FeatureServiceFeature feature) {
         featureList.remove(feature);
@@ -277,145 +264,82 @@ public class SimpleAttributeTableModel implements TableModel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns all features of this model.
      *
-     * @return  DOCUMENT ME!
+     * @return  A list with all features, which are contained in this model
      */
     public List<FeatureServiceFeature> getFeatureServiceFeatures() {
         return featureList;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   columnIndex  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
     @Override
     public String getColumnName(final int columnIndex) {
-        if (columnIndex < attributeAlias.length) {
-            return attributeAlias[columnIndex];
-        } else {
-            return additionalAttributes[columnIndex - attributeAlias.length];
-        }
+        return attributeAlias[columnIndex];
     }
 
     /**
-     * DOCUMENT ME!
+     * Returns the attribute name of the given column. This is not the name of the column. The name of the column is the
+     * alias name of the attribute.
      *
-     * @param   columnIndex  DOCUMENT ME!
+     * @param   columnIndex  the attribute name of this column will be returned
      *
-     * @return  DOCUMENT ME!
+     * @return  The attribute name of the given column
      */
     public String getColumnAttributeName(final int columnIndex) {
-        if (columnIndex < attributeAlias.length) {
-            return attributeNames[columnIndex];
-        } else {
-            return additionalAttributes[columnIndex - attributeAlias.length];
-        }
+        return attributeNames[columnIndex];
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   columnIndex  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
     @Override
     public Class<?> getColumnClass(final int columnIndex) {
-        if (columnIndex < attributeAlias.length) {
-            final String key = attributeNames[columnIndex];
-            final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
+        final String key = attributeNames[columnIndex];
+        final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
 
-            return FeatureTools.getClass(attr);
-        } else {
-            return tableRuleSet.getAdditionalFieldClass(columnIndex - attributeAlias.length);
-        }
+        return FeatureTools.getClass(attr);
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   rowIndex     DOCUMENT ME!
-     * @param   columnIndex  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
     @Override
     public boolean isCellEditable(final int rowIndex, final int columnIndex) {
         return false;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   rowIndex     DOCUMENT ME!
-     * @param   columnIndex  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
     @Override
     public Object getValueAt(final int rowIndex, final int columnIndex) {
-        if (columnIndex < attributeAlias.length) {
-            Object value = featureList.get(rowIndex).getProperty(attributeNames[columnIndex]);
+        Object value = featureList.get(rowIndex).getProperty(attributeNames[columnIndex]);
 
-            if (value instanceof Geometry) {
-                value = ((Geometry)value).getGeometryType();
-            } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
-                final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)value);
-                try {
-                    value = JTSAdapter.export(geom).getGeometryType();
-                } catch (GeometryException e) {
-                    LOG.error("Error while transforming deegree geometry to jts geometry.", e);
-                }
+        if (value instanceof Geometry) {
+            value = ((Geometry)value).getGeometryType();
+        } else if (value instanceof org.deegree.model.spatialschema.Geometry) {
+            final org.deegree.model.spatialschema.Geometry geom = ((org.deegree.model.spatialschema.Geometry)value);
+            try {
+                value = JTSAdapter.export(geom).getGeometryType();
+            } catch (GeometryException e) {
+                LOG.error("Error while transforming deegree geometry to jts geometry.", e);
             }
-
-            return value;
-        } else {
-            return tableRuleSet.getAdditionalFieldValue(columnIndex - attributeAlias.length,
-                    featureList.get(rowIndex));
         }
+
+        return value;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  aValue       DOCUMENT ME!
-     * @param  rowIndex     DOCUMENT ME!
-     * @param  columnIndex  DOCUMENT ME!
-     */
     @Override
     public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
         // do nothing, because isCellEditable returns always false If the table should be writable, this model should be
         // extended
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  l  DOCUMENT ME!
-     */
     @Override
     public void addTableModelListener(final TableModelListener l) {
         listener.add(l);
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  l  DOCUMENT ME!
-     */
     @Override
     public void removeTableModelListener(final TableModelListener l) {
         listener.remove(l);
     }
 
     /**
-     * DOCUMENT ME!
+     * Hides the given column.
      *
-     * @param  col  DOCUMENT ME!
+     * @param  col  the column to hide
      */
     public void hideColumn(final int col) {
         // todo fuer virtuelle Spalten
@@ -425,7 +349,7 @@ public class SimpleAttributeTableModel implements TableModel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Shows all column. After an invocation of this method, there are no hidden column anymore.
      */
     public void showColumns() {
         fillHeaderArrays();
@@ -433,17 +357,15 @@ public class SimpleAttributeTableModel implements TableModel {
     }
 
     /**
-     * DOCUMENT ME!
+     * Set the name of the given column.
      *
-     * @param  row   DOCUMENT ME!
-     * @param  name  DOCUMENT ME!
+     * @param  col   the column number
+     * @param  name  the new name to set
      */
-    public void setColumnName(final int row, final String name) {
-        if ((row >= 0) && (row < attributeAlias.length)) {
-            attributeAlias[row] = name;
+    public void setColumnName(final int col, final String name) {
+        if ((col >= 0) && (col < attributeAlias.length)) {
+            attributeAlias[col] = name;
             fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
-        } else if ((row - attributeAlias.length) >= 0) {
-            additionalAttributes[row - attributeAlias.length] = name;
         }
     }
 

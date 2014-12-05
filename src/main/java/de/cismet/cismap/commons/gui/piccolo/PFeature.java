@@ -73,6 +73,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(PFeature.class);
     private static final Color TRANSPARENT = new Color(255, 255, 255, 0);
     private static final Stroke FIXED_WIDTH_STROKE = new FixedWidthStroke();
+    private static ImageIcon pushpinIco = new javax.swing.ImageIcon(PFeature.class.getResource(
+                "/de/cismet/cismap/commons/gui/res/pushpin.png"));         // NOI18N
+    private static ImageIcon pushpinSelectedIco = new javax.swing.ImageIcon(PFeature.class.getResource(
+                "/de/cismet/cismap/commons/gui/res/pushpinSelected.png")); // NOI18N
 
     //~ Instance fields --------------------------------------------------------
 
@@ -88,10 +92,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     PPath splitPolygonLine;
     List<Point2D> splitPoints = new ArrayList<Point2D>();
     Image origin = null;
-    private ImageIcon pushpinIco = new javax.swing.ImageIcon(PFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/pushpin.png"));         // NOI18N
-    private ImageIcon pushpinSelectedIco = new javax.swing.ImageIcon(PFeature.class.getResource(
-                "/de/cismet/cismap/commons/gui/res/pushpinSelected.png")); // NOI18N
     private Feature feature;
     private WorldToScreenTransform wtst;
     private double x_offset = 0.0d;
@@ -803,6 +803,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     otherCoords[entityIndex][ringIndex] = polygon.getInteriorRingN(ringIndex - 1).getCoordinates();
                 }
             }
+        } else if (geom instanceof GeometryCollection) {
+            final GeometryCollection gc = (GeometryCollection)geom;
+            final int numOfGeoms = gc.getNumGeometries();
+            otherCoords = new Coordinate[numOfGeoms][][];
+            for (int entityIndex = 0; entityIndex < numOfGeoms; ++entityIndex) {
+                final Coordinate[][][] coordSubArr = getCoordinateArray(gc.getGeometryN(entityIndex));
+                otherCoords[entityIndex] = coordSubArr[0];
+            }
         }
 
         return otherCoords;
@@ -1096,10 +1104,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (autoScale) {
                 primaryAnnotation.setScale(source.getScale());
             }
-            primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2),
-//                        + (bounds.getWidth() / 4),
-                wtst.getScreenY(intPoint.getY())
-                        - (bounds.getHeight() / 2));
+
+            if (feature instanceof DrawingFeature) {
+                primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()), wtst.getScreenY(intPoint.getY()));
+            } else {
+                primaryAnnotation.setOffset(wtst.getScreenX(intPoint.getX()) + (bounds.getWidth() / 2),
+                    // + (bounds.getWidth() / 4),
+                    wtst.getScreenY(intPoint.getY())
+                            - (bounds.getHeight() / 2));
+            }
         }
     }
 

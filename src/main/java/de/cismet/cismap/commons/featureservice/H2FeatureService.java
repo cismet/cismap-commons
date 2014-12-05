@@ -175,17 +175,18 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             final List<FeatureServiceFeature> features) throws Exception {
         this(name, databasePath, tableName, attributes, shapeFile, features, null);
     }
-    
+
     /**
      * Creates a new H2FeatureService object.
      *
-     * @param   name          The name of the service
-     * @param   databasePath  the database path of the service
-     * @param   tableName     the name of the service table
-     * @param   attributes    the feature service attributes of the service
-     * @param   shapeFile     the shape file to import
-     * @param   features      the features to import
-     * @param   orderedAttributeNames the order of the service attributes. Can be null for an arbitrary attribute order.
+     * @param   name                   The name of the service
+     * @param   databasePath           the database path of the service
+     * @param   tableName              the name of the service table
+     * @param   attributes             the feature service attributes of the service
+     * @param   shapeFile              the shape file to import
+     * @param   features               the features to import
+     * @param   orderedAttributeNames  the order of the service attributes. Can be null for an arbitrary attribute
+     *                                 order.
      *
      * @throws  Exception  DOCUMENT ME!
      */
@@ -307,7 +308,6 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     public String getGeometryType() {
         return geometryType;
     }
-    
 
     /**
      * DOCUMENT ME!

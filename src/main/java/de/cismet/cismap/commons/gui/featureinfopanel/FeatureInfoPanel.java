@@ -1080,7 +1080,6 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         private String[] attributeAlias;
         private String[] attributeNames;
         private Map<String, FeatureServiceAttribute> featureServiceAttributes;
-        private String[] additionalAttributes = new String[0];
         private List<String> orderedFeatureServiceAttributes;
         private final List<TableModelListener> listener = new ArrayList<TableModelListener>();
 
@@ -1130,12 +1129,8 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
             if (tableRuleSet != null) {
                 for (int i = 0; i < getRowCount(); ++i) {
-                    String columnName;
-                    if (i >= attributeNames.length) {
-                        columnName = additionalAttributes[i - attributeNames.length];
-                    } else {
-                        columnName = attributeNames[i];
-                    }
+                    final String columnName;
+                    columnName = attributeNames[i];
 
                     final TableCellEditor editor = tableRuleSet.getCellEditor(columnName);
                     final TableCellRenderer renderer = tableRuleSet.getCellRenderer(columnName);
@@ -1190,14 +1185,6 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                     }
                 }
             }
-
-            if (tableRuleSet != null) {
-                final String[] fields = tableRuleSet.getAdditionalFieldNames();
-
-                if (fields != null) {
-                    additionalAttributes = fields;
-                }
-            }
         }
 
         /**
@@ -1236,7 +1223,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
         @Override
         public int getRowCount() {
-            return attributeNames.length + additionalAttributes.length;
+            return attributeNames.length;
         }
 
         @Override
@@ -1272,18 +1259,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         public Object getValueAt(final int rowIndex, final int columnIndex) {
             Object value;
 
-            if (rowIndex < attributeNames.length) {
-                if (columnIndex == 0) {
-                    value = attributeAlias[rowIndex];
-                } else {
-                    value = feature.getProperty(attributeNames[rowIndex]);
-                }
+            if (columnIndex == 0) {
+                value = attributeAlias[rowIndex];
             } else {
-                if (columnIndex == 0) {
-                    value = additionalAttributes[rowIndex - attributeNames.length];
-                } else {
-                    value = tableRuleSet.getAdditionalFieldValue(rowIndex, feature);
-                }
+                value = feature.getProperty(attributeNames[rowIndex]);
             }
 
             if (value instanceof Geometry) {
@@ -1306,7 +1285,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             Object newObject = aValue;
 
             if (tableRuleSet != null) {
-                newObject = tableRuleSet.afterEdit(attrName, -1, feature.getProperty(attrName), aValue);
+                newObject = tableRuleSet.afterEdit(feature, attrName, -1, feature.getProperty(attrName), aValue);
             }
             feature.setProperty(attrName, newObject);
             if (!changedFeatures.contains(feature)) {

@@ -9,6 +9,7 @@ package de.cismet.cismap.commons.tools;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
@@ -270,12 +271,61 @@ public class PFeatureTools {
                     featureGeometry = CrsTransformer.transformToGivenCrs(featureGeometry, srs);
                 }
 
-                if (featureGeometry.intersects(geometry)) {
+                if (intersects(featureGeometry, geometry)) {
                     al.add(entry);
                 }
             } else {
                 findIntersectingPFeatures(entry, geometry, al);
             }
+        }
+    }
+
+    /**
+     * Determines whether g1 and g2 intersects. Contrary to the intersects method of the Geometry class, this method
+     * does also support GeometryCollections.
+     *
+     * @param   g1  DOCUMENT ME!
+     * @param   g2  DOCUMENT ME!
+     *
+     * @return  true, iff g1 intersects g2
+     */
+    private static boolean intersects(Geometry g1, Geometry g2) {
+        if (g2 instanceof GeometryCollection) {
+            final Geometry tmp = g1;
+            g1 = g2;
+            g2 = tmp;
+        }
+
+        if ((g1 instanceof GeometryCollection) && (g2 instanceof GeometryCollection)) {
+            final GeometryCollection gc1 = (GeometryCollection)g1;
+            final GeometryCollection gc2 = (GeometryCollection)g2;
+
+            for (int i = 0; i < gc1.getNumGeometries(); ++i) {
+                for (int n = 0; n < gc2.getNumGeometries(); ++n) {
+                    final Geometry geomEntry1 = gc1.getGeometryN(i);
+                    final Geometry geomEntry2 = gc2.getGeometryN(n);
+
+                    if (intersects(geomEntry1, geomEntry2)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        } else if (g1 instanceof GeometryCollection) {
+            final GeometryCollection gc = (GeometryCollection)g1;
+
+            for (int i = 0; i < gc.getNumGeometries(); ++i) {
+                final Geometry geomEntry = gc.getGeometryN(i);
+
+                if (intersects(geomEntry, g2)) {
+                    return true;
+                }
+            }
+
+            return false;
+        } else {
+            return g1.intersects(g2);
         }
     }
 
