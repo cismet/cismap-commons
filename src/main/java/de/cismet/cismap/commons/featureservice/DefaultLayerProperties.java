@@ -342,6 +342,8 @@ public class DefaultLayerProperties implements LayerProperties {
                 ex);
             this.setStyle(new BasicStyle());
         }
+
+        this.setFeatureService((AbstractFeatureService)layerProperties.getFeatureService());
     }
 
     @Override

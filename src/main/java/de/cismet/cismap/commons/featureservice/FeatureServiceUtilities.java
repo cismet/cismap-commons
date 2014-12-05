@@ -59,6 +59,7 @@ public class FeatureServiceUtilities {
             "MultiSolidPropertyType",
             "MultiGeometryPropertyType",
             "MultiLineStringPropertyType",
+            "GEOMETRY",
             String.valueOf(Types.GEOMETRY),
             String.valueOf(Types.MULTICURVE),
             String.valueOf(Types.MULTIGEOMETRY),
@@ -67,6 +68,7 @@ public class FeatureServiceUtilities {
             String.valueOf(Types.POINT),
             String.valueOf(Types.CURVE),
             String.valueOf(Types.SURFACE),
+            String.valueOf(Types.OTHER) //H2 Geometry type
         };
     /** Log4J initialisation. */
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(

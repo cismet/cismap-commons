@@ -79,6 +79,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
     private boolean noGeometryRecognised = false;
     private boolean errorInGeometryFound = false;
     private boolean fileNotFound = false;
+    private String geometryType = UNKNOWN;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -162,6 +163,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
                 parseSLD(getSLDDefiniton()));
         noGeometryRecognised = sff.isNoGeometryRecognised();
         errorInGeometryFound = sff.isErrorInGeometryFound();
+        geometryType = sff.getGeometryType();
 
         return sff;
     }
@@ -245,4 +247,8 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
 //    return SHAPE_FEATURELAYER_TYPE;
 //  }
 
+    @Override
+    public String getGeometryType() {
+        return geometryType; // To change body of generated methods, choose Tools | Templates.
+    }
 }

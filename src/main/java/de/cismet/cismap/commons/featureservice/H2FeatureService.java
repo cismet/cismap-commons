@@ -83,6 +83,8 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     private File shapeFile;
     private boolean initialised = true;
     private boolean tableNotFound = false;
+    private List<String> orderedAttributeNames = null;
+    private String geometryType = UNKNOWN;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -156,12 +158,12 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     /**
      * Creates a new H2FeatureService object.
      *
-     * @param   name          DOCUMENT ME!
-     * @param   databasePath  DOCUMENT ME!
-     * @param   tableName     DOCUMENT ME!
-     * @param   attributes    DOCUMENT ME!
-     * @param   shapeFile     DOCUMENT ME!
-     * @param   features      DOCUMENT ME!
+     * @param   name          The name of the service
+     * @param   databasePath  the database path of the service
+     * @param   tableName     the name of the service table
+     * @param   attributes    the feature service attributes of the service
+     * @param   shapeFile     the shape file to import
+     * @param   features      the features to import
      *
      * @throws  Exception  DOCUMENT ME!
      */
@@ -171,9 +173,33 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             final List<FeatureServiceAttribute> attributes,
             final File shapeFile,
             final List<FeatureServiceFeature> features) throws Exception {
+        this(name, databasePath, tableName, attributes, shapeFile, features, null);
+    }
+    
+    /**
+     * Creates a new H2FeatureService object.
+     *
+     * @param   name          The name of the service
+     * @param   databasePath  the database path of the service
+     * @param   tableName     the name of the service table
+     * @param   attributes    the feature service attributes of the service
+     * @param   shapeFile     the shape file to import
+     * @param   features      the features to import
+     * @param   orderedAttributeNames the order of the service attributes. Can be null for an arbitrary attribute order.
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public H2FeatureService(final String name,
+            final String databasePath,
+            final String tableName,
+            final List<FeatureServiceAttribute> attributes,
+            final File shapeFile,
+            final List<FeatureServiceFeature> features,
+            final List<String> orderedAttributeNames) throws Exception {
         super(name, databasePath, tableName, attributes);
         this.shapeFile = shapeFile;
         this.features = features;
+        this.orderedAttributeNames = orderedAttributeNames;
     }
 
     /**
@@ -218,18 +244,20 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
         if (features != null) {
-            final FeatureFactory f = new H2FeatureServiceFactory(
+            final H2FeatureServiceFactory f = new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
                     features,
+                    orderedAttributeNames,
                     layerInitWorker,
                     parseSLD(getSLDDefiniton()));
             checkTable();
+            geometryType = f.getGeometryType();
 
             return f;
         } else {
-            final FeatureFactory f = new H2FeatureServiceFactory(
+            final H2FeatureServiceFactory f = new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
@@ -237,6 +265,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     layerInitWorker,
                     parseSLD(getSLDDefiniton()));
             checkTable();
+            geometryType = f.getGeometryType();
 
             return f;
         }
@@ -273,6 +302,12 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     public Object clone() {
         return new H2FeatureService(this);
     }
+
+    @Override
+    public String getGeometryType() {
+        return geometryType;
+    }
+    
 
     /**
      * DOCUMENT ME!
