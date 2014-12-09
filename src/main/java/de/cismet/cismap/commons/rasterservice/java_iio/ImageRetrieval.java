@@ -53,6 +53,7 @@ public class ImageRetrieval extends Thread implements IIOReadProgressListener {
      * @param  listener  DOCUMENT ME!
      */
     public ImageRetrieval(final RetrievalListener listener) {
+        super("ImageRetrieval");
         this.listener = listener;
     }
 

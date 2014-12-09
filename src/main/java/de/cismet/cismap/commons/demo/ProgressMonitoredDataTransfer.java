@@ -74,7 +74,7 @@ public class ProgressMonitoredDataTransfer extends Observable implements Runnabl
         max = maxtransfer;
         monitor = new ProgressMonitor(par, message, null, 0, max);
         monitor.setMillisToPopup(2 * DELAY);
-        mythread = new Thread(this);
+        mythread = new Thread(this, "ProgressMonitoredDataTransfer");
         mytimer = new Timer(DELAY, this);
         done = false;
         closeWhenDone = close;

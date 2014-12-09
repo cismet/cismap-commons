@@ -57,6 +57,7 @@ public class ImageRetrieval extends Thread {
      * @param  listener  DOCUMENT ME!
      */
     public ImageRetrieval(final RetrievalListener listener) {
+        super("ImageRetrieval");
         this.listener = listener;
     }
 

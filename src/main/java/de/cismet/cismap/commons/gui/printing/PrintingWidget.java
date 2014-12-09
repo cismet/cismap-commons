@@ -137,14 +137,14 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      */
     public PrintingWidget(final boolean modal, final MappingComponent mappingComponent) {
         super(StaticSwingTools.getParentFrame(mappingComponent), modal);
-        final Runnable r = new Runnable() {
+        final Runnable t = new Thread("PrintingWidget PDFCreatingWaitDialog()") {
 
                 @Override
                 public void run() {
                     pdfWait = new PDFCreatingWaitDialog(StaticSwingTools.getParentFrame(mappingComponent), true);
                 }
             };
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(t);
         this.mappingComponent = mappingComponent;
         initComponents();
         panDesc.setBackground(new Color(216, 228, 248));
@@ -568,7 +568,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      * @param  evt  DOCUMENT ME!
      */
     private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
-        final Runnable r = new Runnable() {
+        final Runnable t = new Thread("PrintingWidget actionPerformed") {
 
                 @Override
                 public void run() {
@@ -681,7 +681,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                     }
                 }
             };
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(t);
         dispose();
     } //GEN-LAST:event_cmdOkActionPerformed
 

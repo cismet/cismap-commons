@@ -454,7 +454,7 @@ public class PrintingFrameListener extends PBasicInputEventHandler {
         final int delayTime = 800;
         zoomTime = System.currentTimeMillis() + delayTime;
         if ((zoomThread == null) || !zoomThread.isAlive()) {
-            zoomThread = new Thread() {
+            zoomThread = new Thread("PrintFrameListener adjustMap()") {
 
                     @Override
                     public void run() {

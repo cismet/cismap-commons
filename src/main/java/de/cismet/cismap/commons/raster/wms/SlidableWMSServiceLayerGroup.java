@@ -559,7 +559,7 @@ public final class SlidableWMSServiceLayerGroup extends AbstractRetrievalService
                     public void retrievalComplete(final RetrievalEvent e) {
                         final Image i = (Image)e.getRetrievedObject();
                         ((XPImage)wsl.getPNode()).setImage(i);
-                        new Thread() {
+                        new Thread("SlidableWMSServiceLayerGroup retrievalComplete()") {
 
                                 @Override
                                 public void run() {

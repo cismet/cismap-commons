@@ -589,6 +589,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 @Override
                 protected List<FeatureServiceFeature> doInBackground() throws Exception {
+                    Thread.currentThread().setName("AttributeTable loadModel");
                     setItemCount(featureService.getFeatureCount(bb));
                     final FeatureFactory factory = featureService.getFeatureFactory();
                     List<FeatureServiceFeature> featureList;

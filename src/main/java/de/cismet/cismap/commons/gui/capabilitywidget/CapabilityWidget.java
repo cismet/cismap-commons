@@ -1119,7 +1119,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     }
                 }
             };
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(new Thread(r, "CapabilityWidget addCidsCapabilitesTree()"));
         /*try {
          *  treeModelClass =
          * ClassLoader.getSystemClassLoader().loadClass("de.cismet.cismap.cidslayer.CidsLayerTreeModel"); final
@@ -1323,7 +1323,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     }
                 }
             };
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(new Thread(r, "CapabilityWidget addInternalDBCapabilitesTree()"));
     }
 
     /**
@@ -1341,7 +1341,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (log.isDebugEnabled()) {
             log.debug("addShapeFolderCapabilitiesTree()"); // NOI18N
         }
-        final Runnable t = new Runnable() {
+        final Runnable r = new Runnable() {
 
                 @Override
                 public void run() {
@@ -1433,7 +1433,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     }
                 }
             };
-        CismetThreadPool.execute(t);
+        CismetThreadPool.execute(new Thread(r, "CapabilityWidget addShapeFolderCapabilitiesTree()"));
     }
 
     /**
@@ -1471,7 +1471,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (log.isDebugEnabled()) {
             log.debug("addOGCWMSCapabilitiesTree()"); // NOI18N
         }
-        final Runnable t = new Runnable() {
+        final Runnable r = new Runnable() {
 
                 @Override
                 public void run() {
@@ -1580,7 +1580,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     }
                 }
             };
-        CismetThreadPool.execute(t);
+        CismetThreadPool.execute(new Thread(r, "CapabilityWidget addOGCWMSCapabilitiesTree()"));
     }
 
     /**
@@ -1840,7 +1840,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 }
             };
 
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(new Thread(r, "CapabilityWidget addOGCCapabilitiesTree()"));
     }
 
     /**
@@ -1856,7 +1856,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (log.isDebugEnabled()) {
             log.debug("addOGCWFSCapabilitiesTree()"); // NOI18N
         }
-        final Runnable t = new Runnable() {
+        final Runnable r = new Runnable() {
 
                 @Override
                 public void run() {
@@ -1972,7 +1972,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     }
                 }
             };
-        CismetThreadPool.execute(t);
+        CismetThreadPool.execute(new Thread(r, "CapabilityWidget addOGCWFSCapabilitiesTree()"));
     }
 
     /**

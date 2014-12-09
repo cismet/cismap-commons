@@ -89,6 +89,7 @@ public class ImageFileRetrieval extends Thread {
      * @param  listener   DOCUMENT ME!
      */
     public ImageFileRetrieval(final File imageFile, final RetrievalListener listener) {
+        super("ImageFileRetrieval");
         this.imageFile = imageFile;
         this.listener = listener;
     }

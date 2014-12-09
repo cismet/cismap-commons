@@ -131,6 +131,7 @@ public final class AddGeometriesToMapEnterDataWizardPanel extends AbstractWizard
 
                 @Override
                 protected String doInBackground() throws Exception {
+                    Thread.currentThread().setName("AddGeometriesToMapEnterDataWizardPanel processInputFile()");
                     if (inputFile != null) {
                         if (inputFile.isFile() && inputFile.canRead()) {
                             BufferedReader fileReader = null;

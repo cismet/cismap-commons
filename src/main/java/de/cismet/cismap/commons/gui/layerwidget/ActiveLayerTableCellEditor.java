@@ -447,7 +447,7 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                                                                                 * catch (Throwable t) {
                                                                                 * logger.error(t.getMessage(), t); }
                                                                                 * }};*/
-                            CismetThreadPool.execute(r);
+                            CismetThreadPool.execute(new Thread(r, "ActiveLayerTableCellEditor mouseClicked()"));
                         } else {
                             if (DEBUG) {
                                 if (logger.isDebugEnabled()) {

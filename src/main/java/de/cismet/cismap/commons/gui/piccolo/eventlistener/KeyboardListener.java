@@ -118,7 +118,7 @@ public class KeyboardListener extends PBasicInputEventHandler {
         try {
             refreshTime = System.currentTimeMillis() + delayTime;
             if ((refreshThread == null) || !refreshThread.isAlive()) {
-                refreshThread = new Thread() {
+                refreshThread = new Thread("KeyboardListener pan()") {
 
                         @Override
                         public void run() {
@@ -188,7 +188,7 @@ public class KeyboardListener extends PBasicInputEventHandler {
 //        }
             refreshTime = System.currentTimeMillis() + delayTime;
             if ((refreshThread == null) || !refreshThread.isAlive()) {
-                refreshThread = new Thread() {
+                refreshThread = new Thread("MappingComponent KeyListener-Timeout") {
 
                         @Override
                         public void run() {

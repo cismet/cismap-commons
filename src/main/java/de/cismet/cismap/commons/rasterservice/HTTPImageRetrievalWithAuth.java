@@ -73,6 +73,7 @@ public class HTTPImageRetrievalWithAuth extends Thread {
      * @param  listener  DOCUMENT ME!
      */
     public HTTPImageRetrievalWithAuth(final RetrievalListener listener) {
+        super("HTTPImageRetrievalWithAuth");
         this.listener = listener;
         client = new HttpClient();
         // client.getHostConfiguration().setProxy(System.getProperty("proxyHost"),

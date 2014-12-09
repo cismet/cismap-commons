@@ -121,6 +121,8 @@ public class DuplicateGeometryFeatureAction extends AbstractAction implements Co
 
                 @Override
                 protected Void doInBackground() throws Exception {
+                    Thread.currentThread().setName("DuplicateGeometryFeatureAction");
+
                     final Geometry geom = (Geometry)f.getGeometry().clone();
                     final PureNewFeature pnf = new PureNewFeature(geom);
 
