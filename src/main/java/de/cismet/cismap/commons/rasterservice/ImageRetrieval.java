@@ -9,17 +9,16 @@ package de.cismet.cismap.commons.rasterservice;
 
 import org.apache.commons.httpclient.HttpClient;
 
+import org.openide.util.Exceptions;
+
 import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.image.ImageObserver;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import java.net.URL;
 
-import javax.swing.JComponent;
+import javax.imageio.ImageIO;
 
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalListener;
@@ -40,16 +39,14 @@ public class ImageRetrieval extends Thread {
     //~ Instance fields --------------------------------------------------------
 
     Image image = null;
+    BufferedInputStream in = null;
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private String url;
-    private ImageObserverInterceptor observer;
     private RetrievalListener listener = null;
-    private ByteArrayOutputStream byteArrayOut = null;
     private WMSCapabilities cap;
     private HttpClient preferredHttpClient;
     private volatile boolean youngerCall = false;
-
     private String payload;
 
     //~ Constructors -----------------------------------------------------------
@@ -76,13 +73,22 @@ public class ImageRetrieval extends Thread {
     public void interrupt() {
         super.interrupt();
         if (log.isDebugEnabled()) {
-            log.debug("interrupt())"); // NOI18N
+            log.debug("interrupt()", new Exception("interrupt")); // NOI18N
+        }
+        if (in != null) {
+            if (log.isDebugEnabled()) {
+                log.info("in!=null");                             // NOI18N
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
         }
     }
 
     @Override
     public void run() {
-        BufferedInputStream in = null;
         try {
             if (log.isDebugEnabled()) {
                 log.debug("start of ImageRetrieval: " + url); // NOI18N
@@ -135,40 +141,10 @@ public class ImageRetrieval extends Thread {
                         requestParameter,
                         method));
 
-            byteArrayOut = new ByteArrayOutputStream();
-
-            int c;
-            // ToDo performanz
-            while ((c = in.read()) != -1) {
-                byteArrayOut.write(c);
-                if (youngerCall || isInterrupted()) {
-                    fireLoadingAborted();
-                    if (log.isDebugEnabled()) {
-                        log.debug("interrupt during retrieval"); // NOI18N
-                    }
-
-                    return;
-                }
+            if (!youngerCall && !isInterrupted()) {
+                image = ImageIO.read(in);
             }
 
-            observer = new ImageObserverInterceptor();
-            image = Toolkit.getDefaultToolkit().createImage(byteArrayOut.toByteArray());
-            observer.prepareImage(image, observer);
-            while ((observer.checkImage(image, observer) & ImageObserver.ALLBITS) != ImageObserver.ALLBITS) {
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                if (youngerCall || isInterrupted()) {
-                    fireLoadingAborted();
-                    if (log.isDebugEnabled()) {
-                        log.debug("interrupt during assembling"); // NOI18N
-                    }
-
-                    return;
-                }
-            }
             final RetrievalEvent e = new RetrievalEvent();
             e.setIsComplete(true);
             e.setRetrievedObject(image);
@@ -181,8 +157,7 @@ public class ImageRetrieval extends Thread {
                 fireLoadingAborted();
             }
         } catch (Exception e) {
-            log.error("Error in ImageRetrieval output has " + ((byteArrayOut != null) ? byteArrayOut.size() : "")
-                        + " bytes.");                                              // NOI18N
+            log.error("Error in ImageRetrieval", e);                               // NOI18N
             final RetrievalEvent re = new RetrievalEvent();
             re.setIsComplete(false);
             if ((e.getMessage() == null) || e.getMessage().equals("null")) {       // NOI18N
@@ -216,7 +191,11 @@ public class ImageRetrieval extends Thread {
         // TODO nochmal anschauen
         log.info("Retrieval interrupted"); // NOI18N
         image = null;
-        observer = null;
+        if (listener != null) {
+            final RetrievalEvent e = new RetrievalEvent();
+            e.setIsComplete(false);
+            listener.retrievalAborted(e);
+        }
     }
 
     /**
@@ -280,43 +259,5 @@ public class ImageRetrieval extends Thread {
      */
     public void setPreferredHttpClient(final HttpClient preferredHttpClient) {
         this.preferredHttpClient = preferredHttpClient;
-    }
-
-    //~ Inner Classes ----------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class ImageObserverInterceptor extends JComponent {
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public boolean imageUpdate(final Image img,
-                final int infoflags,
-                final int x,
-                final int y,
-                final int width,
-                final int height) {
-            final boolean ret = super.imageUpdate(img, infoflags, x, y, width, height);
-
-            if ((infoflags & ImageObserver.SOMEBITS) != 0) {
-                final RetrievalEvent e = new RetrievalEvent();
-                e.setPercentageDone((int)(y / (img.getHeight(this) - 1.0) * 100));
-                listener.retrievalProgress(e);
-            } else if ((infoflags & ImageObserver.ABORT) != 0) {
-            } else if ((infoflags & ImageObserver.ERROR) != 0) {
-                final RetrievalEvent e = new RetrievalEvent();
-                e.setHasErrors(true);
-                final String error = new String(byteArrayOut.toByteArray());
-                log.error("error during image retrieval: '" + error + "'"); // NOI18N
-                e.setRetrievedObject(error);
-                e.setErrorType(RetrievalEvent.SERVERERROR);
-                listener.retrievalError(e);
-            }
-            return ret;
-        }
     }
 }
