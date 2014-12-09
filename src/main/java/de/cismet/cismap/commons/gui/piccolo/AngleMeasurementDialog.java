@@ -963,7 +963,7 @@ public class AngleMeasurementDialog extends javax.swing.JDialog {
                                 }
                             }
                             if (changed) {
-                                SwingUtilities.invokeLater(new Thread() {
+                                SwingUtilities.invokeLater(new Thread("AngleMeasurementDialog featuresChanged()") {
 
                                         @Override
                                         public void run() {

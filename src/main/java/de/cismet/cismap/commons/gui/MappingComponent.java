@@ -745,7 +745,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             if (p instanceof PFeature) {
                 final PFeature original = ((PFeature)p);
                 try {
-                    EventQueue.invokeAndWait(new Runnable() {
+                    EventQueue.invokeAndWait(new Thread("MappingComponent getFeatureImage()") {
 
                             @Override
                             public void run() {
@@ -843,7 +843,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void rescaleStickyNode(final PSticky n) {
         if (rescaleStickyNodesEnabled && (n != null)) {
             if (!EventQueue.isDispatchThread()) {
-                EventQueue.invokeLater(new Runnable() {
+                EventQueue.invokeLater(new Thread("MappingComponent rescaleStickyNode()") {
 
                         @Override
                         public void run() {
@@ -864,7 +864,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void rescaleStickyNodes(final List<PSticky> nodes) {
         if ((nodes != null) && !nodes.isEmpty()) {
             if (!EventQueue.isDispatchThread()) {
-                EventQueue.invokeLater(new Runnable() {
+                EventQueue.invokeLater(new Thread("MappingComponent rescaleStickyNodes()") {
 
                         @Override
                         public void run() {
@@ -1544,7 +1544,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
         mappingModel = mm;
 //        currentBoundingBox = mm.getInitialBoundingBox();
-        final Runnable r = new Runnable() {
+        final Runnable r = new Thread("MappingComponent setMappingModel()") {
 
                 @Override
                 public void run() {
@@ -1572,7 +1572,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     }
                 }
             };
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(new Thread(r, "MappingComponent adjustLayers()"));
     }
 
     /**
@@ -1637,7 +1637,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 + toX + ", toY=" + toY); // NOI18N
                 }
             }
-            final Thread timer = new Thread() {
+            final Thread timer = new Thread("MappingComponent timer") {
 
                     @Override
                     public void run() {
@@ -1646,7 +1646,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 sleep(sleepy);
                             } catch (final Exception iex) {
                             }
-                            EventQueue.invokeLater(new Runnable() {
+                            EventQueue.invokeLater(new Thread("MappingComponent updateBounds") {
 
                                     @Override
                                     public void run() {
@@ -1664,7 +1664,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                             if ((c.getBounds().getY() == toY) && (c.getBounds().getX() == toX)) {
                                 if (hideAfterAnimation) {
-                                    EventQueue.invokeLater(new Runnable() {
+                                    EventQueue.invokeLater(new Thread("MappingComponent hide") {
 
                                             @Override
                                             public void run() {
@@ -1963,7 +1963,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             CismapBroker.getInstance().fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_RESET, this));
         }
         if (!locked) {
-            final Runnable r = new Runnable() {
+            final Runnable r = new Thread("MappingComponent queryServicesWithoutHistory()") {
 
                     @Override
                     public void run() {
@@ -2013,7 +2013,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         }
                     }
                 };
-            CismetThreadPool.execute(r);
+            CismetThreadPool.execute(new Thread(r, "MappingComponent queryServicesWithoutHistory()"));
         }
     }
 
@@ -2034,7 +2034,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 LOG.debug("queryServicesIndependentFromMap (" + width + "x" + height + ")"); // NOI18N
             }
         }
-        final Runnable r = new Runnable() {
+        final Runnable t = new Thread("Mappingcompoenent queryServicesIndependentFromMap()") {
 
                 @Override
                 public void run() {
@@ -2111,7 +2111,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     }
                 }
             };
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(t);
     }
 
     /**
@@ -2187,7 +2187,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             synchronized (serviceFuturesMap) {
                 final Future<?> sf = serviceFuturesMap.get(rs);
                 if ((sf == null) || sf.isDone()) {
-                    final Runnable serviceCall = new Runnable() {
+                    final Runnable serviceCall = new Thread("handleMapService") {
 
                             @Override
                             public void run() {
@@ -2527,7 +2527,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         removeFeatures(fce.getEventFeatures());
         checkFeatureSupportingRasterServiceAfterFeatureRemoval(fce);
         showHandles(false);
-        EventQueue.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Thread("MappingComponent featuresRemoved()") {
 
                 @Override
                 public void run() {
@@ -2719,7 +2719,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     p.setTransparency(cismapPrefs.getLayersPrefs().getAppFeatureLayerTranslucency());
                 }
 
-                EventQueue.invokeLater(new Runnable() {
+                EventQueue.invokeLater(new Thread("MappingCompoenent addFeaturesToMap()") {
 
                         @Override
                         public void run() {
@@ -2759,7 +2759,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 if (feature.getGeometry() != null) {
                     pFeatureHM.put(p.getFeature(), p);
                     final int ii = i;
-                    EventQueue.invokeLater(new Runnable() {
+                    EventQueue.invokeLater(new Thread("MappingComponent moveToFront after adding") {
 
                             @Override
                             public void run() {
@@ -2774,7 +2774,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
         }
 
-        EventQueue.invokeLater(new Runnable() {
+        EventQueue.invokeLater(new Thread("MappingComponent movetofront search feature") {
 
                 @Override
                 public void run() {
@@ -3188,12 +3188,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         // are there features selected?
         if (featureCollection.getSelectedFeatures().size() > 0) {
             // DANGER Mehrfachzeichnen von Handles durch parallelen Aufruf
-            final Runnable handle = new Runnable() {
+            final Runnable handle = new Thread("MappingComponent showHandles()") {
 
                     @Override
                     public void run() {
                         // alle bisherigen Handles entfernen
-                        EventQueue.invokeLater(new Runnable() {
+                        EventQueue.invokeLater(new Thread("MappingComponent showHandles(animated)") {
 
                                 @Override
                                 public void run() {
@@ -3226,7 +3226,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 for (final Feature selectedFeature : copy) {
                                     if ((selectedFeature instanceof Feature) && selectedFeature.isEditable()) {
                                         // manipulates gui -> edt
-                                        EventQueue.invokeLater(new Runnable() {
+                                        EventQueue.invokeLater(new Thread("MappingComponent addRotationHandles") {
 
                                                 @Override
                                                 public void run() {
@@ -3248,7 +3248,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         if ((pFeatureHM.get(selectedFeature) != null)
                                                     && pFeatureHM.get(selectedFeature).getVisible()) {
                                             // manipulates gui -> edt
-                                            EventQueue.invokeLater(new Runnable() {
+                                            EventQueue.invokeLater(new Thread("MappingComponent addHandles") {
 
                                                     @Override
                                                     public void run() {
@@ -3276,10 +3276,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     LOG.debug("showHandles", new CurrentStackTrace()); // NOI18N
                 }
             }
-            CismetThreadPool.execute(handle);
+            CismetThreadPool.execute(new Thread(handle, "MappingCompoenent showHandles()"));
         } else {
             // alle bisherigen Handles entfernen
-            EventQueue.invokeLater(new Runnable() {
+            EventQueue.invokeLater(new Thread("MappingComponent removeAllChildren") {
 
                     @Override
                     public void run() {
@@ -4625,7 +4625,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 LOG.warn("gotoBoundingBox: Problem :-( mit getViewTransform"); // NOI18N
             }
             showHandles(true);
-            final Runnable handle = new Runnable() {
+            final Runnable handle = new Thread("MappingComponent gotoBoundingBox()") {
 
                     @Override
                     public void run() {
@@ -5227,7 +5227,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             "MappingComponent.crsChanged(CrsChangedEvent).wait"),
                         null);
             }
-            final Runnable r = new Runnable() {
+            final Runnable r = new Thread("MappingComponent crsChanged()") {
 
                     @Override
                     public void run() {
@@ -5554,7 +5554,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     this.log.debug(rasterService + ": TaskCounter:" + taskCounter); // NOI18N
                 }
             }
-            final Runnable paintImageOnMap = new Runnable() {
+            final Runnable paintImageOnMap = new Thread("Mappingcompopnent retrievalComplete()") {
 
                     @Override
                     public void run() {
@@ -5935,7 +5935,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
 
             final List newFeatures = new ArrayList(initialCapacity);
-            EventQueue.invokeLater(new Runnable() {
+            EventQueue.invokeLater(new Thread("MappingComponent setParentVisible") {
 
                     @Override
                     public void run() {
@@ -5960,7 +5960,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
             // only start parsing the features if there are no errors and a correct collection
             if ((e.isHasErrors() == false) && (e.getRetrievedObject() instanceof Collection)) {
-                completionThread = new Thread() {
+                completionThread = new Thread("completition") {
 
                         @Override
                         public void run() {
@@ -6037,7 +6037,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             decreaseRetrievalCompleteInProgressCount();
                             if ((requestIdentifier == e.getRequestIdentifier()) && !isInterrupted()) {
                                 // after all features are computed do stuff on the EDT
-                                EventQueue.invokeLater(new Runnable() {
+                                EventQueue.invokeLater(new Thread("MappingComponent retrievalComplete") {
 
                                         @Override
                                         public void run() {

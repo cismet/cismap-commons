@@ -122,7 +122,7 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
         this.comp = comp;
         this.query = query;
 
-        final Runnable t = new Runnable() {
+        final Runnable t = new Thread("WFSFormsListAndComboBoxModel()") {
 
                 @Override
                 public void run() {
@@ -338,7 +338,8 @@ public class WFSFormsListAndComboBoxModel extends AbstractListModel implements C
                                     if (e.getClickCount() > 1) {
                                         comp.removeMouseListener(this);
                                         progressBar.setForeground(oldForeground);
-                                        final Runnable t = new Runnable() {
+                                        final Runnable t = new Thread(
+                                                "WFSFormsListAndComboBoxModel reportRetrievalError()") {
 
                                                 @Override
                                                 public void run() {

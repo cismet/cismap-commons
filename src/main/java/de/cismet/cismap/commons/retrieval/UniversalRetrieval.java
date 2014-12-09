@@ -128,6 +128,7 @@ public class UniversalRetrieval extends AbstractRetrievalService implements Retr
          * Creates a new RetrievalThread object.
          */
         public RetrievalThread() {
+            super("RetrievalThread");
             listener = UniversalRetrieval.this;
         }
 

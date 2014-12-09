@@ -1718,6 +1718,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
      */
     private class UpdateSelectionThread extends Thread {
 
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new UpdateSelectionThread object.
+         */
+        public UpdateSelectionThread() {
+            super("UpdateSelectionThread");
+        }
+
         //~ Methods ------------------------------------------------------------
 
         @Override

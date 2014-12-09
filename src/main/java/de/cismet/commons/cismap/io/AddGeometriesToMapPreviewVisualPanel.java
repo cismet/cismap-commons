@@ -109,6 +109,7 @@ public class AddGeometriesToMapPreviewVisualPanel extends JPanel {
 
                 @Override
                 protected XBoundingBox doInBackground() throws Exception {
+                    Thread.currentThread().setName("AddGeometriesToMapPreviewVisualPanel initMap()");
                     try {
                         // home bbox for the current crs
                         final XBoundingBox box = new XBoundingBox(

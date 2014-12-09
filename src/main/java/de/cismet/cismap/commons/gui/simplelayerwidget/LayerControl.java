@@ -426,7 +426,7 @@ public class LayerControl extends javax.swing.JPanel implements RetrievalListene
 
     @Override
     public void retrievalError(final de.cismet.cismap.commons.retrieval.RetrievalEvent e) {
-        final Runnable t = new Runnable() {
+        final Runnable t = new Thread("LayerControl retrievalError()") {
 
                 @Override
                 public void run() {

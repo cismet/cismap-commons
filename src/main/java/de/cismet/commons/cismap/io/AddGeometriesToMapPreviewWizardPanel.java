@@ -205,7 +205,7 @@ public final class AddGeometriesToMapPreviewWizardPanel extends AbstractWizardPa
         // TODO: user proper executor
         final ExecutorService executor = CismetConcurrency.getInstance("cismap-commons").getDefaultExecutor(); // NOI18N
 
-        executor.execute(new Runnable() {
+        executor.execute(new Thread("AddGeometriesToMapPreviewWizardPanel read()") {
 
                 @Override
                 public void run() {

@@ -131,7 +131,7 @@ public class FontChooserDialog extends JDialog {
                         });
                 }
             };
-        CismetThreadPool.execute(r);
+        CismetThreadPool.execute(new Thread(r, "FontChooserDialog previewFont()"));
     }
 
     /**

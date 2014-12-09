@@ -2718,7 +2718,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     }
                 }
             };
-        CismetThreadPool.execute(writeHistoryRunnable);
+        CismetThreadPool.execute(new Thread(writeHistoryRunnable, "StyleDialog writeHistory()"));
     }
 
     /**
@@ -2764,7 +2764,7 @@ public class StyleDialog extends JDialog implements ListSelectionListener {
                     }
                 }
             };
-        CismetThreadPool.execute(loadHistoryRunnable);
+        CismetThreadPool.execute(new Thread(loadHistoryRunnable, "StyleDialog loadHistory()"));
     }
 
     /**

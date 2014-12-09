@@ -93,7 +93,7 @@ public class InfoPanel extends JPanel {
                         @Override
                         public void componentResized(final ComponentEvent e) {
                             // TODO: calling revalidate outside the EDT looks like an error!
-                            final Runnable t = new Runnable() {
+                            final Runnable t = new Thread("InfoPanel componentResized()") {
 
                                     @Override
                                     public void run() {
