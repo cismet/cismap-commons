@@ -111,18 +111,19 @@ public class DeleteFeatureListener extends PBasicInputEventHandler {
                 return;
             }
 
-            if (pInputEvent.isAltDown()) {                                                             // alt-modifier => speziall-handling für
-                                                                                                       // multipolygone
+            if (pInputEvent.isAltDown()) {                                                                              // alt-modifier => speziall-handling für
+                                                                                                                        // multipolygone
                 final Collection selectedFeatures = mappingComponent.getFeatureCollection().getSelectedFeatures();
-                if (selectedFeatures.size() == 1) {                                                    // es ist genau ein feature selektiert
+                if (selectedFeatures.size() == 1) {                                                                     // es ist genau ein feature selektiert
                     final PFeature selectedPFeature = mappingComponent.getPFeatureHM()
                                 .get((Feature)selectedFeatures.toArray()[0]);
-                    if ((selectedPFeature != null)
+                    if ((selectedPFeature != null) && selectedPFeature.getFeature().canBeSelected()
+                                && selectedPFeature.getFeature().isEditable()
                                 && ((selectedPFeature.getFeature().getGeometry() instanceof MultiPolygon)
                                     || (selectedPFeature.getFeature().getGeometry() instanceof Polygon))) {
-                        if ((selectedPFeature.getNumOfEntities() == 1) && (clickedPFeature != null)) { // hat nur ein teil-polygon
+                        if ((selectedPFeature.getNumOfEntities() == 1) && (selectedPFeature.equals(clickedPFeature))) { // hat nur ein teil-polygon
                             // "normales" löschen des geklickten features
-                            deletePFeature(clickedPFeature, mappingComponent);
+                            deletePFeature(selectedPFeature, mappingComponent);
                         } else { // hat mehrere teil-polygone
                             // koordinate der maus berechnen
                             final Coordinate mouseCoord = new Coordinate(
