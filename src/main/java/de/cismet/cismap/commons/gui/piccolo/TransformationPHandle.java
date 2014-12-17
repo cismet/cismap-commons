@@ -64,10 +64,10 @@ public class TransformationPHandle extends PHandle {
     private PText leftInfo;
     private PText rightInfo;
     private MultiMap glueCoordinates = new MultiMap();
-    private final PFeature pfeature;
-    private final int entityPosition;
-    private final int ringPosition;
-    private final int coordPosition;
+    private PFeature pfeature;
+    private int entityPosition;
+    private int ringPosition;
+    private int coordPosition;
     private float startX;
     private float startY;
 
@@ -140,33 +140,6 @@ public class TransformationPHandle extends PHandle {
         } else {
             return index - 1;
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public int getEntityPosition() {
-        return entityPosition;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public int getRingPosition() {
-        return ringPosition;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public int getCoordPosition() {
-        return coordPosition;
     }
 
     /**
@@ -273,7 +246,7 @@ public class TransformationPHandle extends PHandle {
                     if (pfeature.getViewer().isInGlueIdenticalPointsMode()) {
                         final Set<PFeature> pFeatureSet = glueCoordinates.keySet();
                         for (final PFeature gluePFeature : pFeatureSet) {
-                            if (gluePFeature.getFeature().canBeSelected() && gluePFeature.getFeature().isEditable()) {
+                            if (gluePFeature.getFeature().isEditable()) {
                                 final Collection coordinates = (Collection)glueCoordinates.get(gluePFeature);
                                 if (coordinates != null) {
                                     for (final Object o : coordinates) {
@@ -451,8 +424,7 @@ public class TransformationPHandle extends PHandle {
                         if (pfeature.getViewer().isInGlueIdenticalPointsMode()) {
                             final Set<PFeature> pFeatureSet = glueCoordinates.keySet();
                             for (final PFeature gluePFeature : pFeatureSet) {
-                                if (gluePFeature.getFeature().canBeSelected()
-                                            && gluePFeature.getFeature().isEditable()) {
+                                if (gluePFeature.getFeature().isEditable()) {
                                     features.add(gluePFeature.getFeature());
                                     final Collection coordinates = (Collection)glueCoordinates.get(gluePFeature);
                                     if (coordinates != null) {
@@ -612,7 +584,6 @@ public class TransformationPHandle extends PHandle {
             switch (geomType) {
                 case RECTANGLE: {
                     // letzter Punkt ist gleich erster Punkt. Wir arbeiten lieber mit dem ersten
-                    int coordPosition = this.coordPosition;
                     if (coordPosition == 4) {
                         coordPosition = 0;
                     }

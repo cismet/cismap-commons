@@ -92,7 +92,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     PPath splitPolygonLine;
     List<Point2D> splitPoints = new ArrayList<Point2D>();
     Image origin = null;
-    private int firstEntityIndex = -1;
     private Feature feature;
     private WorldToScreenTransform wtst;
     private double x_offset = 0.0d;
@@ -1835,59 +1834,52 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     public void addSplitHandle(final PHandle p) {
         if (viewer.isFeatureDebugging()) {
             if (log.isDebugEnabled()) {
-                log.debug("addSplitHandle()"); // NOI18N
+                log.debug("addSplitHandle()");                                                           // NOI18N
             }
         }
-
-        if (p instanceof TransformationPHandle) {
-            final TransformationPHandle tp = (TransformationPHandle)p;
-
-            if ((tp.getRingPosition() == 0)                                                                      // is not a hole-handle
-                        && ((firstEntityIndex < 0) || (firstEntityIndex == tp.getEntityPosition()))              // if firstEntityIndex is set, it has to be the same entityIndex
-                        && (entityRingCoordArr[tp.getEntityPosition()].length == 1)) {                           // the polygon dont have holes
-                if (splitPolygonFromHandle == p) {
-                    splitPolygonFromHandle = null;
-                    p.setSelected(false);
-                } else if (splitPolygonToHandle == p) {
-                    splitPolygonToHandle = null;
-                    p.setSelected(false);
-                } else if (splitPolygonFromHandle == null) {
-                    splitPolygonFromHandle = p;
-                    firstEntityIndex = tp.getEntityPosition();
-                    p.setSelected(true);
-                    resetSplitLine();
-                    if (viewer.isFeatureDebugging()) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("after addSplitHandle: splitPolygonFromHandle=" + splitPolygonFromHandle); // NOI18N
-                        }
-                    }
-                    if (viewer.isFeatureDebugging()) {
-                        if (log.isDebugEnabled()) {
-                            log.debug("in addSplitHandle this=" + this);                                         // NOI18N
-                        }
-                    }
-                } else if (splitPolygonToHandle == null) {
-                    splitPolygonToHandle = p;
-                    p.setSelected(true);
-                    splitPoints.add(new Point2D.Double(
-                            splitPolygonToHandle.getLocator().locateX(),
-                            splitPolygonToHandle.getLocator().locateY()));
-                } else {
-                    p.setSelected(false);
-                }
-                // LineString()
-                if ((splitPolygonFromHandle != null) && (splitPolygonToHandle != null)) {
-                    final Coordinate[] ca = new Coordinate[splitPoints.size() + 2];
-                    // ca[0]=(Coordinate)splitPolygonFromHandle.getClientProperty("coordinate");
-                    // ca[1]=(Coordinate)splitPolygonToHandle.getClientProperty("coordinate"); GeometryFactory gf=new
-                    // GeometryFactory(); LineString ls=gf.createLineString(ca); Geometry geom=feature.getGeometry(); if
-                    // ((geom.overlaps(ls))) {
-                    // splitPolygonLine=PPath.createLine((float)splitPolygonFromHandle.getLocator().locateX(),(float)splitPolygonFromHandle.getLocator().locateY(),
-                    // (
-                    // float)splitPolygonToHandle.getLocator().locateX(),(float)splitPolygonToHandle.getLocator().locateY());
-                    // splitPolygonLine.setStroke(new FixedWidthStroke()); this.addChild(splitPolygonLine); }
+        if (splitPolygonFromHandle == p) {
+            splitPolygonFromHandle = null;
+            p.setSelected(false);
+        } else if (splitPolygonToHandle == p) {
+            splitPolygonToHandle = null;
+            p.setSelected(false);
+        } else if (splitPolygonFromHandle == null) {
+            splitPolygonFromHandle = p;
+            p.setSelected(true);
+            resetSplitLine();
+            if (viewer.isFeatureDebugging()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("after addSplitHandle: splitPolygonFromHandle=" + splitPolygonFromHandle); // NOI18N
                 }
             }
+            if (viewer.isFeatureDebugging()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("in addSplitHandle this=" + this);                                         // NOI18N
+                }
+            }
+        } else if (splitPolygonToHandle == null) {
+            splitPolygonToHandle = p;
+            p.setSelected(true);
+            splitPoints.add(new Point2D.Double(
+                    splitPolygonToHandle.getLocator().locateX(),
+                    splitPolygonToHandle.getLocator().locateY()));
+        } else {
+            p.setSelected(false);
+        }
+//LineString()
+        if ((splitPolygonFromHandle != null) && (splitPolygonToHandle != null)) {
+            final Coordinate[] ca = new Coordinate[splitPoints.size() + 2];
+//            ca[0]=(Coordinate)splitPolygonFromHandle.getClientProperty("coordinate");
+//            ca[1]=(Coordinate)splitPolygonToHandle.getClientProperty("coordinate");
+//            GeometryFactory gf=new GeometryFactory();
+//            LineString ls=gf.createLineString(ca);
+            // Geometry geom=feature.getGeometry();
+//            if ((geom.overlaps(ls))) {
+//                splitPolygonLine=PPath.createLine((float)splitPolygonFromHandle.getLocator().locateX(),(float)splitPolygonFromHandle.getLocator().locateY(),
+//                        (float)splitPolygonToHandle.getLocator().locateX(),(float)splitPolygonToHandle.getLocator().locateY());
+//                splitPolygonLine.setStroke(new FixedWidthStroke());
+//                this.addChild(splitPolygonLine);
+//            }
         }
     }
 
@@ -1944,7 +1936,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  Feature-Array mit den Teilfeatures
      */
-    public Feature split() {
+    public Feature[] split() {
         if (isSplittable()) {
             final PureNewFeature[] ret = new PureNewFeature[2];
             int from = ((Integer)(splitPolygonFromHandle.getClientProperty("coordinate_position_coord"))).intValue(); // NOI18N
@@ -1965,15 +1957,26 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 wasSwapped = true;
             }
             // Erstes Polygon
+            if (viewer.isFeatureDebugging()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("ErstesPolygon" + (to - from + splitPoints.size())); // NOI18N
+                }
+            }
             final Coordinate[] c1 = new Coordinate[to - from + splitPoints.size()];
             int counter = 0;
 
-            final Coordinate[] coordArr = entityRingCoordArr[firstEntityIndex][0];
+            // TODO multipolygon / multilinestring
+            final Coordinate[] coordArr = entityRingCoordArr[0][0];
             for (int i = from; i <= to; ++i) {
                 c1[counter] = (Coordinate)coordArr[i].clone();
                 counter++;
             }
             if (wasSwapped) {
+                if (viewer.isFeatureDebugging()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("SWAPPED"); // NOI18N
+                    }
+                }
                 for (int i = 1; i < (splitPoints.size() - 1); ++i) {
                     final Point2D splitPoint = (Point2D)splitPoints.get(i);
                     final Coordinate splitCoord = new Coordinate(wtst.getSourceX(splitPoint.getX()),
@@ -1982,6 +1985,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     counter++;
                 }
             } else {
+                if (viewer.isFeatureDebugging()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("NOT_SWAPPED"); // NOI18N
+                    }
+                }
                 for (int i = splitPoints.size() - 2; i > 0; --i) {
                     final Point2D splitPoint = (Point2D)splitPoints.get(i);
                     final Coordinate splitCoord = new Coordinate(wtst.getSourceX(splitPoint.getX()),
@@ -1991,9 +1999,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             }
             c1[counter] = (Coordinate)coordArr[from].clone();
-
-            setCoordArr(firstEntityIndex, 0, c1);
-            syncGeometry();
+            ret[0] = new PureNewFeature(c1, wtst);
+            ret[0].setEditable(true);
 
             // Zweites Polygon
             // Größe Array= (Anzahl vorh. Coords) - (anzahl vorh. Handles des ersten Polygons) + (SplitLinie )
@@ -2004,6 +2011,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 counter++;
             }
             if (wasSwapped) {
+                if (viewer.isFeatureDebugging()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("SWAPPED"); // NOI18N
+                    }
+                }
                 for (int i = splitPoints.size() - 2; i > 0; --i) {
                     final Point2D splitPoint = (Point2D)splitPoints.get(i);
                     final Coordinate splitCoord = new Coordinate(wtst.getSourceX(splitPoint.getX()),
@@ -2012,6 +2024,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     counter++;
                 }
             } else {
+                if (viewer.isFeatureDebugging()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("NOT_SWAPPED"); // NOI18N
+                    }
+                }
                 for (int i = 1; i < (splitPoints.size() - 1); ++i) {
                     final Point2D splitPoint = (Point2D)splitPoints.get(i);
                     final Coordinate splitCoord = new Coordinate(wtst.getSourceX(splitPoint.getX()),
@@ -2025,9 +2042,24 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 c2[counter] = (Coordinate)coordArr[i].clone();
                 counter++;
             }
-            final PureNewFeature pnf = new PureNewFeature(c2, wtst);
-            pnf.setEditable(true);
-            return pnf;
+//            c1[counter]=(Coordinate)coordArr[0].clone();
+            for (int i = 0; i < c2.length; ++i) {
+                if (viewer.isFeatureDebugging()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("c2[" + i + "]=" + c2[i]); // NOI18N
+                    }
+                }
+            }
+//            ret[1]=new PFeature(c2,wtst,x_offset,y_offset,viewer);
+            ret[1] = new PureNewFeature(c2, wtst);
+            ret[1].setEditable(true);
+//            ret[0].setViewer(viewer);
+//            ret[1].setViewer(viewer);
+            return ret;
+//            ret[1]=new PFeature(c1,wtst,x_offset,y_offset);
+//            ret[0].setViewer(viewer);
+//            ret[1].setViewer(viewer);
+//            return ret;
         } else {
             return null;
         }
