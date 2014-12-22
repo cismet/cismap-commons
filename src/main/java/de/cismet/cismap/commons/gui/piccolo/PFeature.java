@@ -1944,7 +1944,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      *
      * @return  Feature-Array mit den Teilfeatures
      */
-    public Feature split() {
+    public Feature[] split() {
         if (isSplittable()) {
             final PureNewFeature[] ret = new PureNewFeature[2];
             int from = ((Integer)(splitPolygonFromHandle.getClientProperty("coordinate_position_coord"))).intValue(); // NOI18N
@@ -1991,9 +1991,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 }
             }
             c1[counter] = (Coordinate)coordArr[from].clone();
-
-            setCoordArr(firstEntityIndex, 0, c1);
-            syncGeometry();
+            ret[0] = new PureNewFeature(c1, wtst);
+            ret[0].setEditable(true);
 
             // Zweites Polygon
             // Größe Array= (Anzahl vorh. Coords) - (anzahl vorh. Handles des ersten Polygons) + (SplitLinie )
@@ -2025,9 +2024,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 c2[counter] = (Coordinate)coordArr[i].clone();
                 counter++;
             }
-            final PureNewFeature pnf = new PureNewFeature(c2, wtst);
-            pnf.setEditable(true);
-            return pnf;
+//            ret[1]=new PFeature(c2,wtst,x_offset,y_offset,viewer);
+            ret[1] = new PureNewFeature(c2, wtst);
+            ret[1].setEditable(true);
+            return ret;
         } else {
             return null;
         }
