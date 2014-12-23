@@ -2042,24 +2042,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 c2[counter] = (Coordinate)coordArr[i].clone();
                 counter++;
             }
-//            c1[counter]=(Coordinate)coordArr[0].clone();
-            for (int i = 0; i < c2.length; ++i) {
-                if (viewer.isFeatureDebugging()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("c2[" + i + "]=" + c2[i]); // NOI18N
-                    }
-                }
-            }
 //            ret[1]=new PFeature(c2,wtst,x_offset,y_offset,viewer);
             ret[1] = new PureNewFeature(c2, wtst);
             ret[1].setEditable(true);
-//            ret[0].setViewer(viewer);
-//            ret[1].setViewer(viewer);
             return ret;
-//            ret[1]=new PFeature(c1,wtst,x_offset,y_offset);
-//            ret[0].setViewer(viewer);
-//            ret[1].setViewer(viewer);
-//            return ret;
         } else {
             return null;
         }
