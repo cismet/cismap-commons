@@ -157,8 +157,10 @@ public class NewTextDialog extends javax.swing.JDialog {
 
         org.openide.awt.Mnemonics.setLocalizedText(
             jbCancel,
-            org.openide.util.NbBundle.getMessage(NewTextDialog.class, "NewTextDialog.jbCancel.text", new Object[] {
-                })); // NOI18N
+            org.openide.util.NbBundle.getMessage(
+                NewTextDialog.class,
+                "NewTextDialog.jbCancel.text",
+                new Object[] {})); // NOI18N
         jbCancel.addActionListener(new java.awt.event.ActionListener() {
 
                 @Override
