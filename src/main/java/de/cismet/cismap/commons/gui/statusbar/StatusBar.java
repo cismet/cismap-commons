@@ -179,8 +179,21 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                 public void run() {
                     if (e.getName().equals(StatusEvent.COORDINATE_STRING)) {
                         Coordinate c = (Coordinate)e.getValue();
-                        lblCoordinates.setText(MappingComponent.getCoordinateString(c.x, c.y));
-                        lblWgs84Coordinates.setText(transformToWGS84Coords(c));
+                        Crs crs = CismapBroker.getInstance().getSrs();
+                        boolean showAdditionalWSG84Coords = !crs.getCode().equalsIgnoreCase("epsg:4326");
+                        
+                        if (crs.isMetric()) {
+                            lblCoordinates.setText(MappingComponent.getCoordinateString(c.x, c.y));
+                        } else {
+                            lblCoordinates.setText(transformToWGS84Coords(c));
+                        }
+                        
+                        if (showAdditionalWSG84Coords) {
+                            lblWgs84Coordinates.setText(transformToWGS84Coords(c));
+                        }
+                        
+                        lblWgs84Coordinates.setVisible(showAdditionalWSG84Coords);
+                        sepCoordinates.setVisible(showAdditionalWSG84Coords);
                     } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
                         lblStatus.setText(e.getValue().toString());
                     } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
