@@ -7,6 +7,10 @@
 ****************************************************/
 package de.cismet.cismap.commons.interaction;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
 
@@ -28,6 +32,7 @@ import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.MappingModelListener;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.featureservice.style.BasicFeatureStyleDialogFactory;
@@ -678,9 +683,10 @@ public class CismapBroker {
         if (o instanceof SimpleMoveListener) {
             final double x = ((SimpleMoveListener)o).getXCoord();
             final double y = ((SimpleMoveListener)o).getYCoord();
+
             fireStatusValueChanged(new StatusEvent(
                     StatusEvent.COORDINATE_STRING,
-                    MappingComponent.getCoordinateString(x, y)));
+                    new Coordinate(x, y)));
             final PFeature pf = ((SimpleMoveListener)o).getUnderlyingPFeature();
             if (pf != oldPfeature) {
                 fireStatusValueChanged(new StatusEvent(StatusEvent.OBJECT_INFOS, pf));
