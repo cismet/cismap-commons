@@ -970,23 +970,25 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         final Iterator it = getWMSLayers().iterator();
         while (it.hasNext()) {
             final Object o = it.next();
-            if ((o instanceof WMSLayer) && (((WMSLayer)o).getSelectedStyle() != null)
-                        && ((WMSLayer)o).isEnabled()) {
-                counter++;
-                if (counter > 1) {
-                    stylesString.append(",");                                                               // NOI18N
-                }
-                if (!isDummy()) {
-                    stylesString.append(((WMSLayer)o).getSelectedStyle().getName().replaceAll(" ", "%20")); // NOI18N
-                } else {
-                    stylesString.append(((WMSLayer)o).getStyleName().replaceAll(" ", "%20"));               // NOI18N
+            if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
+                if ((!isDummy() && (((WMSLayer)o).getSelectedStyle() != null)) 
+                        || (isDummy() && (((WMSLayer)o).getStyleName()!= null)) ) {
+                    counter++;
+                    if (counter > 1) {
+                        stylesString.append(",");                                                               // NOI18N
+                    }
+                    if (!isDummy()) {
+                        stylesString.append(((WMSLayer)o).getSelectedStyle().getName().replaceAll(" ", "%20")); // NOI18N
+                    } else {
+                        stylesString.append(((WMSLayer)o).getStyleName().replaceAll(" ", "%20"));               // NOI18N
+                    }
                 }
             }
         }
 
         return "&STYLES=" + stylesString.toString(); // LDS Bugfix//NOI18N
     }
-
+    
     /**
      * DOCUMENT ME!
      *

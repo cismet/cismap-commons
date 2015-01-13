@@ -12,12 +12,8 @@
  */
 package de.cismet.cismap.commons.gui.statusbar;
 
-import org.deegree.model.crs.CRSFactory;
-import org.deegree.model.crs.CoordinateSystem;
-import org.deegree.model.crs.GeoTransformer;
-import org.deegree.model.spatialschema.GeometryFactory;
-import org.deegree.model.spatialschema.Point;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Graphics;
@@ -37,6 +33,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
 import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
@@ -57,7 +54,6 @@ import de.cismet.tools.StaticDecimalTools;
 
 import de.cismet.tools.gui.Static2DTools;
 import de.cismet.tools.gui.exceptionnotification.DefaultExceptionHandlerListener;
-import de.cismet.tools.gui.exceptionnotification.ExceptionNotificationStatusPanel;
 
 /**
  * DOCUMENT ME!
@@ -76,8 +72,8 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                 "/de/cismet/cismap/commons/gui/res/map.png")); // NOI18N
     MappingComponent mappingComponent;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private GeoTransformer transformer = null;
-    private DecimalFormat df = new DecimalFormat("0.000");     // NOI18N
+    private CrsTransformer transformer = null;
+    private DecimalFormat df = new DecimalFormat("0.000000");     // NOI18N
     private int servicesCounter = 0;
     private int servicesErroneousCounter = 0;
     private Collection<ServiceLayer> services = new HashSet<ServiceLayer>();
@@ -140,7 +136,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         try {
             // initialises the geo transformer that transforms the coordinates from the current
             // coordinate system to EPSG:4326
-            this.transformer = new GeoTransformer("EPSG:4326");
+            this.transformer = new CrsTransformer("EPSG:4326");
         } catch (Exception e) {
             log.error("cannot create a transformer for EPSG:4326.", e);
         }
@@ -182,8 +178,22 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                 @Override
                 public void run() {
                     if (e.getName().equals(StatusEvent.COORDINATE_STRING)) {
-                        lblCoordinates.setText(e.getValue().toString());
-                        lblWgs84Coordinates.setText(transformToWGS84Coords(e.getValue().toString()));
+                        Coordinate c = (Coordinate)e.getValue();
+                        Crs crs = CismapBroker.getInstance().getSrs();
+                        boolean showAdditionalWSG84Coords = !crs.getCode().equalsIgnoreCase("epsg:4326");
+                        
+                        if (crs.isMetric()) {
+                            lblCoordinates.setText(MappingComponent.getCoordinateString(c.x, c.y));
+                        } else {
+                            lblCoordinates.setText(transformToWGS84Coords(c));
+                        }
+                        
+                        if (showAdditionalWSG84Coords) {
+                            lblWgs84Coordinates.setText(transformToWGS84Coords(c));
+                        }
+                        
+                        lblWgs84Coordinates.setVisible(showAdditionalWSG84Coords);
+                        sepCoordinates.setVisible(showAdditionalWSG84Coords);
                     } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
                         lblStatus.setText(e.getValue().toString());
                     } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
@@ -620,22 +630,22 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblScaleMousePressed
+    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblScaleMousePressed
         if (evt.isPopupTrigger()) {
             pomScale.setVisible(true);
         }
-    }                                                                        //GEN-LAST:event_lblScaleMousePressed
+    }//GEN-LAST:event_lblScaleMousePressed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblCrsMousePressed
+    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCrsMousePressed
         if (evt.isPopupTrigger()) {
             pomCrs.setVisible(true);
         }
-    }                                                                      //GEN-LAST:event_lblCrsMousePressed
+    }//GEN-LAST:event_lblCrsMousePressed
 
     /**
      * DOCUMENT ME!
@@ -797,26 +807,18 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      *
      * @return  DOCUMENT ME!
      */
-    private String transformToWGS84Coords(final String coords) {
+    private String transformToWGS84Coords(final Coordinate p) {
         String result = "";
 
         try {
-            final String tmp = coords.substring(1, coords.length() - 1);
-            final int commaPosition = tmp.indexOf(",");
-
-            if ((commaPosition != -1) && (transformer != null)) {
-                final double xCoord = Double.parseDouble(tmp.substring(0, commaPosition));
-                final double yCoord = Double.parseDouble(tmp.substring(commaPosition + 1));
-
-                final CoordinateSystem coordSystem = CRSFactory.create(CismapBroker.getInstance().getSrs().getCode());
-                Point currentPoint = GeometryFactory.createPoint(xCoord, yCoord, coordSystem);
-                currentPoint = (Point)transformer.transform(currentPoint);
-                result = "(" + df.format(currentPoint.getX()) + "," + df.format(currentPoint.getY()) + ")"; // NOI18N
+            if (transformer != null) {
+                Coordinate[] wgs84Coord = transformer.transformGeometry(CismapBroker.getInstance().getSrs().getCode(), p);
+                result = "(" + df.format(wgs84Coord[0].x) + "," + df.format(wgs84Coord[0].y) + ")"; // NOI18N
             } else {
-                log.error("Cannot transform the current coordinates: " + coords);
+                log.error("Cannot transform the current coordinates: " + p);
             }
         } catch (Exception e) {
-            log.error("Cannot transform the current coordinates: " + coords, e);
+            log.error("Cannot transform the current coordinates: " + p, e);
         }
 
         return result;
