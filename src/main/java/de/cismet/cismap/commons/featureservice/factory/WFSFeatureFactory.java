@@ -408,10 +408,9 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
         }
 
         // adding properties
-        if ((featureServiceFeature.getProperties() == null) || featureServiceFeature.getProperties().isEmpty()) {
-            // set the properties
-            final FeatureProperty[] featureProperties = degreeFeature.getProperties();
-            for (final FeatureProperty fp : featureProperties) {
+        final FeatureProperty[] featureProperties = degreeFeature.getProperties();
+        for (final FeatureProperty fp : featureProperties) {
+            if (featureServiceFeature.getProperty(fp.getName().getAsString()) == null) {
                 featureServiceFeature.addProperty(fp.getName().getAsString(), fp.getValue());
             }
         }
