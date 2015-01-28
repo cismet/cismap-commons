@@ -78,6 +78,16 @@ public class SimpleAttributeTableModel implements TableModel {
     //~ Methods ----------------------------------------------------------------
 
     /**
+     * The feature must be of the same type as the other features in the model.
+     *
+     * @param  feature  DOCUMENT ME!
+     */
+    public void addFeature(final FeatureServiceFeature feature) {
+        featureList.add(feature);
+        fireContentsChanged();
+    }
+
+    /**
      * DOCUMENT ME!
      */
     private void fillHeaderArrays() {

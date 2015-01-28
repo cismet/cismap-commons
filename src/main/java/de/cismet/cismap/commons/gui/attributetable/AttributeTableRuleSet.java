@@ -11,6 +11,9 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
+import java.util.List;
+
+import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
@@ -87,12 +90,12 @@ public interface AttributeTableRuleSet {
     /**
      * Determines the value of the additional field with the given index for the given feature.
      *
-     * @param   index    the index of the additional field
-     * @param   feature  the feature, the value should be calculated for
+     * @param   propertyName  the index of the additional field
+     * @param   feature       the feature, the value should be calculated for
      *
-     * @return  the value of the additional field with the given index for the given feature.
+     * @return  the java.lang.Object
      */
-    Object getAdditionalFieldValue(final int index, final FeatureServiceFeature feature);
+    Object getAdditionalFieldValue(final String propertyName, final FeatureServiceFeature feature);
 
     /**
      * DOCUMENT ME!
@@ -131,9 +134,27 @@ public interface AttributeTableRuleSet {
     /**
      * Will be invoked before the service will be saved.
      *
-     * @param   model  A model with all features of the represented service
+     * @param   features  the modified features
+     * @param   model     A model with all features of the represented service
      *
      * @return  true, if the save operation should be executed
      */
-    boolean prepareForSave(final TableModel model);
+    boolean prepareForSave(final List<FeatureServiceFeature> features, final TableModel model);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  table       DOCUMENT ME!
+     * @param  columnName  DOCUMENT ME!
+     * @param  value       DOCUMENT ME!
+     * @param  clickCount  DOCUMENT ME!
+     */
+    void mouseClicked(JTable table, String columnName, Object value, int clickCount);
+
+    /**
+     * todo: change method name
+     *
+     * @return  DOCUMENT ME!
+     */
+    boolean isCatThree();
 }

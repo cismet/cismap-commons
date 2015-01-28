@@ -11,11 +11,13 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
+import java.util.List;
+
+import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
-import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 
 /**
@@ -53,7 +55,7 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     }
 
     @Override
-    public boolean prepareForSave(final TableModel model) {
+    public boolean prepareForSave(final List<FeatureServiceFeature> features, final TableModel model) {
         return true;
     }
 
@@ -71,7 +73,7 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     }
 
     @Override
-    public Object getAdditionalFieldValue(final int index, final FeatureServiceFeature feature) {
+    public Object getAdditionalFieldValue(final java.lang.String propertyName, final FeatureServiceFeature feature) {
         return null;
     }
 
@@ -83,6 +85,10 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     @Override
     public FeatureCreator getFeatureCreator() {
         return null;
+    }
+
+    @Override
+    public void mouseClicked(final JTable table, final String columnName, final Object value, final int clickCount) {
     }
 
     @Override
@@ -98,5 +104,10 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
         }
 
         return -1;
+    }
+
+    @Override
+    public boolean isCatThree() {
+        return false;
     }
 }

@@ -1557,6 +1557,24 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         return UNKNOWN;
     }
 
+    /**
+     * The number of features that should be shown on one page. (is used in the attribute table)
+     *
+     * @return  the numbe rof eatures per page. Less than 1 shows all features on one page
+     */
+    public int getMaxFeaturesPerPage() {
+        return -1;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String[] getCalculatedAttributes() {
+        return new String[0];
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
