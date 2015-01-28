@@ -137,7 +137,12 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
         if (inProgress) { // && (!isInMode(POINT))) {
             Point2D point = null;
             if (mc.isSnappingEnabled()) {
-                point = PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition());
+                final boolean vertexRequired = mc.isSnappingOnLineEnabled();
+                point = PFeatureTools.getNearestPointInArea(
+                        mc,
+                        pInputEvent.getCanvasPosition(),
+                        vertexRequired,
+                        true);
             }
             if (point == null) {
                 point = pInputEvent.getPosition();
@@ -161,7 +166,12 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
             if (pInputEvent.isLeftMouseButton()) {
                 Point2D point = null;
                 if (mc.isSnappingEnabled()) {
-                    point = PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition());
+                    final boolean vertexRequired = mc.isSnappingOnLineEnabled();
+                    point = PFeatureTools.getNearestPointInArea(
+                            mc,
+                            pInputEvent.getCanvasPosition(),
+                            vertexRequired,
+                            true);
                 }
                 if (point == null) {
                     point = pInputEvent.getPosition();
@@ -197,7 +207,12 @@ public class MessenGeometryListener extends PBasicInputEventHandler implements F
                 Point2D point = null;
                 undoPoints.clear();
                 if (mc.isSnappingEnabled()) {
-                    point = PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition());
+                    final boolean vertexRequired = mc.isSnappingOnLineEnabled();
+                    point = PFeatureTools.getNearestPointInArea(
+                            mc,
+                            pInputEvent.getCanvasPosition(),
+                            vertexRequired,
+                            true);
                 }
                 if (point == null) {
                     point = pInputEvent.getPosition();

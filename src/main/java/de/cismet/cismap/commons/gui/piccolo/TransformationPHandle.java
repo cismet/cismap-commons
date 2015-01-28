@@ -22,6 +22,7 @@ import edu.umd.cs.piccolo.util.PDimension;
 import edu.umd.cs.piccolox.util.PLocator;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.geom.Point2D;
 
 import java.util.ArrayList;
@@ -39,6 +40,7 @@ import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleAddAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleDeleteAction;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.actions.HandleMoveAction;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.math.geometry.StaticGeometryFunctions;
@@ -209,8 +211,12 @@ public class TransformationPHandle extends PHandle {
 
                         // snapping ?
                         if (pfeature.getViewer().isSnappingEnabled()) {
-                            final Point2D snapPoint = PFeatureTools.getNearestPointInArea(pfeature.getViewer(),
-                                    pInputEvent.getCanvasPosition());
+                            final boolean vertexRequired = pfeature.getViewer().isSnappingOnLineEnabled();
+                            final Point2D snapPoint = PFeatureTools.getNearestPointInArea(
+                                    pfeature.getViewer(),
+                                    pInputEvent.getCanvasPosition(),
+                                    vertexRequired,
+                                    true);
                             if (snapPoint != null) {
                                 currentX = (float)snapPoint.getX();
                                 currentY = (float)snapPoint.getY();
@@ -218,6 +224,17 @@ public class TransformationPHandle extends PHandle {
                         }
                     }
 
+                    final float newX = (float)currentX;
+                    final float newY = (float)currentY;
+                    EventQueue.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                Thread.currentThread().setName("SetVetoPoint thread");
+                                CismapBroker.getInstance().setSnappingVetoPoint(new Point2D.Float(newX, newY));
+                                CismapBroker.getInstance().setSnappingVetoFeature(pfeature);
+                            }
+                        });
                     updateGeometryPoints(currentX, currentY);
                     // pfeature.syncGeometry();
                     relocateHandle();
@@ -407,6 +424,10 @@ public class TransformationPHandle extends PHandle {
                 } else {
                     pfeature.getViewer().getFeatureCollection().reconsiderFeature(pfeature.getFeature());
                 }
+
+                // remove the veto objects
+                CismapBroker.getInstance().setSnappingVetoFeature(null);
+                CismapBroker.getInstance().setSnappingVetoPoint(null);
 
                 // linke und rechte info entfernen
                 removeChild(leftInfo);
