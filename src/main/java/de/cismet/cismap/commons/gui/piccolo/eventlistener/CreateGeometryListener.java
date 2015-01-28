@@ -187,7 +187,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
         if (inProgress) {                                                           // && (!isInMode(POINT))) {
             Point2D point = null;
             if (mappingComponent.isSnappingEnabled()) {
-                point = PFeatureTools.getNearestPointInArea(mappingComponent, pInputEvent.getCanvasPosition());
+                final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
+                point = PFeatureTools.getNearestPointInArea(
+                        mappingComponent,
+                        pInputEvent.getCanvasPosition(),
+                        vertexRequired,
+                        true);
             }
             if (point == null) {
                 point = pInputEvent.getPosition();
@@ -218,7 +223,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
             if (pInputEvent.isLeftMouseButton()) {
                 Point2D point = null;
                 if (mappingComponent.isSnappingEnabled()) {
-                    point = PFeatureTools.getNearestPointInArea(mappingComponent, pInputEvent.getCanvasPosition());
+                    final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
+                    point = PFeatureTools.getNearestPointInArea(
+                            mappingComponent,
+                            pInputEvent.getCanvasPosition(),
+                            vertexRequired,
+                            true);
                 }
                 if (point == null) {
                     point = pInputEvent.getPosition();
@@ -320,7 +330,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                     Point2D point = null;
                     undoPoints.clear();
                     if (mappingComponent.isSnappingEnabled()) {
-                        point = PFeatureTools.getNearestPointInArea(mappingComponent, pInputEvent.getCanvasPosition());
+                        final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
+                        point = PFeatureTools.getNearestPointInArea(
+                                mappingComponent,
+                                pInputEvent.getCanvasPosition(),
+                                vertexRequired,
+                                true);
                     }
                     if (point == null) {
                         point = pInputEvent.getPosition();
@@ -388,9 +403,12 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                         points.remove(points.size() - 1);
                         Point2D point = null;
                         if (mappingComponent.isSnappingEnabled()) {
+                            final boolean vertexRequired = mappingComponent.isSnappingOnLineEnabled();
                             point = PFeatureTools.getNearestPointInArea(
                                     mappingComponent,
-                                    pInputEvent.getCanvasPosition());
+                                    pInputEvent.getCanvasPosition(),
+                                    vertexRequired,
+                                    true);
                         }
                         if (point == null) {
                             point = pInputEvent.getPosition();

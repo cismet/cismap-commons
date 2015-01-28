@@ -661,7 +661,7 @@ public class CreateLinearReferencedMarksListener extends PBasicInputEventHandler
      *
      * @return  DOCUMENT ME!
      */
-    private double getCurrentPosition() {
+    protected double getCurrentPosition() {
         if (getSelectedLinePFeature() != null) {
             return LinearReferencedPointFeature.getPositionOnLine(new Coordinate(
                         mc.getWtst().getSourceX(cursorX),

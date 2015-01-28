@@ -198,6 +198,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private PLayer dragPerformanceImproverLayer = new PLayer();
     private boolean readOnly = true;
     private boolean snappingEnabled = true;
+    private boolean snappingOnLineEnabled = false;
     private boolean visualizeSnappingEnabled = true;
     private boolean visualizeSnappingRectEnabled = false;
     private int snappingRectSize = 20;
@@ -2783,7 +2784,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     fireFeaturesAddedToMap(Arrays.asList(features));
 
                     // SuchFeatures in den Vordergrund stellen
-                    for (final Feature feature : featureCollection.getAllFeatures()) {
+                    for (final Feature feature : new ArrayList<Feature>(featureCollection.getAllFeatures())) {
                         if (feature instanceof SearchFeature) {
                             final PFeature pFeature = pFeatureHM.get(feature);
                             pFeature.moveToFront();
@@ -3493,6 +3494,24 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     public void setSnappingEnabled(final boolean snappingEnabled) {
         this.snappingEnabled = snappingEnabled;
         setVisualizeSnappingEnabled(snappingEnabled);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isSnappingOnLineEnabled() {
+        return snappingOnLineEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  snappingOnLineEnabled  DOCUMENT ME!
+     */
+    public void setSnappingOnLineEnabled(final boolean snappingOnLineEnabled) {
+        this.snappingOnLineEnabled = snappingOnLineEnabled;
     }
 
     /**

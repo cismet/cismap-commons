@@ -11,6 +11,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineSegment;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -22,6 +24,7 @@ import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPickPath;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -30,9 +33,11 @@ import java.util.*;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.ParentNodeIsAPFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -404,6 +409,144 @@ public class PFeatureTools {
     /**
      * DOCUMENT ME!
      *
+     * @param   mc                   DOCUMENT ME!
+     * @param   canvasPosition       DOCUMENT ME!
+     * @param   vertexRequired       DOCUMENT ME!
+     * @param   considerVetoObjects  veto objects are objects, which should be ignored from the snapping mechanism. This
+     *                               can be the currently modifying feature.
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Point2D getNearestPointInArea(final MappingComponent mc,
+            final Point2D canvasPosition,
+            final boolean vertexRequired,
+            final boolean considerVetoObjects) {
+        final Point2D vetoPoint = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoPoint() : null);
+
+        if (!vertexRequired) {
+            return getNearestPointInArea(mc, canvasPosition, vetoPoint);
+        } else {
+            final PFeature vetoFeature = (considerVetoObjects ? CismapBroker.getInstance().getSnappingVetoFeature()
+                                                              : null);
+
+            return getNearestPointInAreaNoVertexRequired(
+                    mc,
+                    canvasPosition,
+                    vetoPoint,
+                    vetoFeature);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   mc              DOCUMENT ME!
+     * @param   canvasPosition  DOCUMENT ME!
+     * @param   vetoPoint       DOCUMENT ME!
+     * @param   vetoFeature     DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Point2D getNearestPointInAreaNoVertexRequired(final MappingComponent mc,
+            final Point2D canvasPosition,
+            final Point2D vetoPoint,
+            final PFeature vetoFeature) {
+        final Rectangle2D area = new Rectangle((int)canvasPosition.getX() - (mc.getSnappingRectSize() / 2),
+                (int)canvasPosition.getY()
+                        - (mc.getSnappingRectSize() / 2),
+                mc.getSnappingRectSize(),
+                mc.getSnappingRectSize());
+        final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
+        final Point2D myPosition = mc.getCamera().localToView(canvasPosition);
+        final PBounds bounds = new PBounds(d2d);
+
+        final Point2D[] points = getPointsInAreaNoVertexRequired(mc, bounds, myPosition, vetoFeature);
+        double distance = -1;
+        Point2D nearestPoint = null;
+        for (int i = 0; i < points.length; ++i) {
+            final double distanceCheck = myPosition.distanceSq(points[i]);
+            if (((vetoPoint == null) || !vetoPoint.equals(points[i]))
+                        && ((distance < 0) || (distanceCheck < distance))) {
+                nearestPoint = points[i];
+                distance = distanceCheck;
+            }
+        }
+        return nearestPoint;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   mc               DOCUMENT ME!
+     * @param   bounds           DOCUMENT ME!
+     * @param   currentPosition  DOCUMENT ME!
+     * @param   vetoFeature      DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Point2D[] getPointsInAreaNoVertexRequired(final MappingComponent mc,
+            final PBounds bounds,
+            final Point2D currentPosition,
+            final PFeature vetoFeature) {
+        final PFeature[] features = getPFeaturesInArea(mc, bounds);
+        final Collection<Point2D> points = new ArrayList<Point2D>();
+        if (features == null) {
+            return null;
+        }
+        final Coordinate c = new Coordinate(currentPosition.getX(), currentPosition.getY());
+        for (final PFeature pfeature : features) {
+            if (!pfeature.equals(vetoFeature)) {
+                final LineSegment seg = getNearestSegment(c, pfeature);
+                final Coordinate point = seg.closestPoint(c);
+                if (bounds.contains(point.x, point.y)) {
+                    points.add(new Point2D.Float((float)point.x, (float)point.y));
+                }
+            }
+        }
+        return points.toArray(new Point2D[0]);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   trigger   DOCUMENT ME!
+     * @param   pfeature  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static LineSegment getNearestSegment(final Coordinate trigger, final PFeature pfeature) {
+        LineSegment segment = null;
+        double dist = Double.POSITIVE_INFINITY;
+        if (pfeature != null) {
+            final Geometry geometry = pfeature.getFeature().getGeometry();
+            if ((geometry instanceof Polygon) || (geometry instanceof LineString)
+                        || (geometry instanceof MultiPolygon)) {
+                for (int entityIndex = 0; entityIndex < pfeature.getNumOfEntities(); entityIndex++) {
+                    for (int ringIndex = 0; ringIndex < pfeature.getNumOfRings(entityIndex); ringIndex++) {
+                        final float[] xp = pfeature.getXp(entityIndex, ringIndex);
+                        final float[] yp = pfeature.getYp(entityIndex, ringIndex);
+                        for (int coordIndex = xp.length - 1; coordIndex > 0; coordIndex--) {
+                            final LineSegment tmpSegment = new LineSegment(
+                                    xp[coordIndex - 1],
+                                    yp[coordIndex - 1],
+                                    xp[coordIndex],
+                                    yp[coordIndex]);
+                            final double tmpDist = tmpSegment.distance(trigger);
+                            if (tmpDist < dist) {
+                                dist = tmpDist;
+                                segment = tmpSegment;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return segment;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   mc              DOCUMENT ME!
      * @param   canvasPosition  DOCUMENT ME!
      * @param   vetoPoint       DOCUMENT ME!
@@ -419,7 +562,7 @@ public class PFeatureTools {
                 mc.getSnappingRectSize(),
                 mc.getSnappingRectSize());
         final Rectangle2D d2d = mc.getCamera().localToView(new PBounds(area));
-        final Point2D myPosition = mc.getCamera().viewToLocal(canvasPosition);
+        final Point2D myPosition = mc.getCamera().localToView(canvasPosition);
         return getNearestPointInArea(mc, new PBounds(d2d), myPosition, vetoPoint);
     }
     /**
