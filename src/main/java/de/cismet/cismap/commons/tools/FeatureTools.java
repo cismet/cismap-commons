@@ -15,6 +15,8 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.deegree.datatypes.Types;
 
+import java.math.BigDecimal;
+
 import java.util.Date;
 
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
@@ -58,6 +60,8 @@ public class FeatureTools {
                     || attr.getType().equals("xsd:decimal")
                     || attr.getType().equals("xsd:double")) {
             return Double.class;
+        } else if (attr.getType().equals(String.valueOf(Types.NUMERIC))) {
+            return BigDecimal.class;
         } else if (attr.getType().equals(String.valueOf(Types.DATE))
                     || attr.getType().equals(String.valueOf(Types.TIME))
                     || attr.getType().equals(String.valueOf(Types.TIMESTAMP))) {

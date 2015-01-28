@@ -64,19 +64,25 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultRowSorter;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.RowSorterEvent;
+import javax.swing.event.RowSorterListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -84,6 +90,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
@@ -99,6 +106,7 @@ import de.cismet.cismap.commons.features.ModifiableFeature;
 import de.cismet.cismap.commons.features.PermissionProvider;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
@@ -246,6 +254,10 @@ public class AttributeTable extends javax.swing.JPanel {
         locker = FeatureLockerFactory.getInstance().getLockerForFeatureService(featureService);
         table.setTransferHandler(new AttributeTableTransferHandler(this));
         table.setDragEnabled(true);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        // to consume the mouse events. Otherwise, the table behind it will handle the events
+        panWaiting.addMouseListener(new MouseAdapter() {
+            });
 
         tableRuleSet = featureService.getLayerProperties().getAttributeTableRuleSet();
 
@@ -282,10 +294,12 @@ public class AttributeTable extends javax.swing.JPanel {
                     new ExportDbfDownload()
                 }));
 
-//        if ((featureService instanceof ShapeFileFeatureService) || (featureService instanceof H2FeatureService)) {
-        pageSize = -1;
-        jpControl.setVisible(false);
-//        }
+        if (featureService.getMaxFeaturesPerPage() <= 0) {
+            pageSize = -1;
+            jpControl.setVisible(false);
+        } else {
+            pageSize = featureService.getMaxFeaturesPerPage();
+        }
 
         table.getTableHeader().addMouseListener(new MouseAdapter() {
 
@@ -363,7 +377,7 @@ public class AttributeTable extends javax.swing.JPanel {
                             }
                         }
 
-                        if (tbProcessing.isSelected() && !selectionChangeFromMap) {
+                        if (tbProcessing.isSelected()) { // && !selectionChangeFromMap) {
                             final int[] rows = table.getSelectedRows();
 
                             for (final int row : rows) {
@@ -433,6 +447,9 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 @Override
                 public void featureSelectionChanged(final FeatureCollectionEvent fce) {
+                    if (model == null) {
+                        return;
+                    }
                     final Collection<Feature> features = fce.getFeatureCollection().getSelectedFeatures();
                     final List<FeatureServiceFeature> selectedFeatures = new ArrayList<FeatureServiceFeature>();
                     final List<FeatureServiceFeature> tableFeatures = model.getFeatureServiceFeatures();
@@ -470,6 +487,23 @@ public class AttributeTable extends javax.swing.JPanel {
                 public void featureCollectionChanged() {
                 }
             };
+
+        table.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final MouseEvent e) {
+                    if ((tableRuleSet != null) && !tbProcessing.isSelected()) {
+                        int col = table.getTableHeader().getColumnModel().getColumnIndexAtX(e.getX());
+                        col = table.convertColumnIndexToModel(col);
+                        final String columnName = model.getColumnAttributeName(col);
+                        int row = table.rowAtPoint(e.getPoint());
+                        row = table.convertRowIndexToModel(row);
+                        final Object value = model.getValueAt(row, col);
+
+                        tableRuleSet.mouseClicked(table, columnName, value, e.getClickCount());
+                    }
+                }
+            });
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -504,11 +538,13 @@ public class AttributeTable extends javax.swing.JPanel {
                 saveChangedRows(true);
             } else if (ans == JOptionPane.NO_OPTION) {
                 unlockAll();
+                model.setEditable(false);
             } else {
                 return false;
             }
         }
 
+        mappingComponent.getFeatureCollection().removeFeatureCollectionListener(featureCollectionListener);
         return true;
     }
 
@@ -571,6 +607,20 @@ public class AttributeTable extends javax.swing.JPanel {
     }
 
     /**
+     * Adds the given feature to the attribute table. The feature must be of the same type as the other features in the
+     * model
+     *
+     * @param  feature  FeatureServiceFeature the feature to add
+     */
+    public void addFeature(final FeatureServiceFeature feature) {
+        if (model != null) {
+            model.addFeature(feature);
+            final int index = model.getRowCount() - 1;
+            table.getSelectionModel().addSelectionInterval(index, index);
+        }
+    }
+
+    /**
      * Load the model to show into the table.
      *
      * @param  page  the page to show. At the moment, all data will be displayed on one page
@@ -590,12 +640,37 @@ public class AttributeTable extends javax.swing.JPanel {
                 @Override
                 protected List<FeatureServiceFeature> doInBackground() throws Exception {
                     Thread.currentThread().setName("AttributeTable loadModel");
-                    setItemCount(featureService.getFeatureCount(bb));
+                    if ((pageSize != -1) && (itemCount == 0)) {
+                        setItemCount(featureService.getFeatureCount(bb));
+                    }
                     final FeatureFactory factory = featureService.getFeatureFactory();
                     List<FeatureServiceFeature> featureList;
                     final Object serviceQuery = ((query == null) ? featureService.getQuery() : query);
 
                     if (pageSize != -1) {
+                        List<FeatureServiceAttribute> orderBy = null;
+
+                        List<? extends RowSorter.SortKey> keys = null;
+
+                        if ((table != null) && (table.getRowSorter() != null)) {
+                            keys = table.getRowSorter().getSortKeys();
+                        }
+
+                        if ((keys != null) && !keys.isEmpty()) {
+                            orderBy = new ArrayList<FeatureServiceAttribute>();
+                            for (final RowSorter.SortKey key : keys) {
+                                final SortOrder order = key.getSortOrder();
+                                final int colIndex = key.getColumn();
+
+                                final String attributeName = model.getColumnAttributeName(
+                                        table.convertColumnIndexToModel(colIndex));
+                                final FeatureServiceAttribute attr = (FeatureServiceAttribute)
+                                    featureService.getFeatureServiceAttributes().get(attributeName);
+                                attr.setAscOrder(SortOrder.ASCENDING.equals(order));
+                                orderBy.add(attr);
+                            }
+                        }
+
                         featureList = factory.createFeatures(
                                 serviceQuery,
                                 bb,
@@ -603,7 +678,8 @@ public class AttributeTable extends javax.swing.JPanel {
                                 (page - 1)
                                         * pageSize,
                                 pageSize,
-                                null);
+                                ((orderBy == null) ? null
+                                                   : orderBy.toArray(new FeatureServiceAttribute[orderBy.size()])));
                     } else {
                         featureList = factory.createFeatures(serviceQuery,
                                 bb,
@@ -629,12 +705,15 @@ public class AttributeTable extends javax.swing.JPanel {
                                     (List<FeatureServiceFeature>)featureList,
                                     tableRuleSet);
                             table.setModel(model);
+                            if (pageSize != -1) {
+                                table.setRowSorter(new CustomRowSorter(model));
+                            }
+                            setTableSize();
                         } else {
                             model.setNewFeatureList(featureList);
                         }
 
                         applySelection();
-                        setTableSize();
                         // add custom renderer and editors
                         if (tableRuleSet != null) {
                             for (int i = 0; i < table.getColumnCount(); ++i) {
@@ -674,6 +753,7 @@ public class AttributeTable extends javax.swing.JPanel {
         this.query = query;
 
         currentPage = 1;
+        itemCount = 0;
         loadModel(currentPage);
 
         if (query instanceof String) {
@@ -2303,7 +2383,7 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  forceSave  true, if the changed data should be saved without confirmation
      */
     private void saveChangedRows(final boolean forceSave) {
-        if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(model)) {
+        if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(changedFeatures, model)) {
             return;
         }
 
@@ -2486,6 +2566,8 @@ public class AttributeTable extends javax.swing.JPanel {
 
                 if ((tmpSize > size) && (tmpSize < MAX_COLUMN_SIZE)) {
                     size = tmpSize;
+                } else if ((tmpSize > size) && (tmpSize >= MAX_COLUMN_SIZE)) {
+                    size = MAX_COLUMN_SIZE;
                 }
             }
 
@@ -3064,6 +3146,202 @@ public class AttributeTable extends javax.swing.JPanel {
             } else {
                 return null;
             }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class CustomRowSorter extends RowSorter<CustomTableModel> {
+
+        //~ Static fields/initializers -----------------------------------------
+
+        private static final int MAX_SORT_KEYS = 3;
+
+        //~ Instance fields ----------------------------------------------------
+
+        private CustomTableModel tableModel;
+        private List<RowSorter.SortKey> sortKeys;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new CustomRowSorter object.
+         *
+         * @param  model  DOCUMENT ME!
+         */
+        public CustomRowSorter(final CustomTableModel model) {
+            sortKeys = Collections.emptyList();
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public CustomTableModel getModel() {
+            LOG.error("getModel");
+            return model;
+        }
+
+        @Override
+        public void toggleSortOrder(final int column) {
+            checkColumn(column);
+            if (isSortable(column)) {
+                List<RowSorter.SortKey> keys = new ArrayList<RowSorter.SortKey>(getSortKeys());
+                final RowSorter.SortKey sortKey;
+                int sortIndex;
+                for (sortIndex = keys.size() - 1; sortIndex >= 0; sortIndex--) {
+                    if (keys.get(sortIndex).getColumn() == column) {
+                        break;
+                    }
+                }
+                if (sortIndex == -1) {
+                    // Key doesn't exist
+                    sortKey = new RowSorter.SortKey(column, SortOrder.ASCENDING);
+                    keys.add(0, sortKey);
+                } else if (sortIndex == 0) {
+                    // It's the primary sorting key, toggle it
+                    keys.set(0, toggle(keys.get(0)));
+                } else {
+                    // It's not the first, but was sorted on, remove old
+                    // entry, insert as first with ascending.
+                    keys.remove(sortIndex);
+                    keys.add(0, new RowSorter.SortKey(column, SortOrder.ASCENDING));
+                }
+                if (keys.size() > MAX_SORT_KEYS) {
+                    keys = keys.subList(0, MAX_SORT_KEYS);
+                }
+                setSortKeys(keys);
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   column  DOCUMENT ME!
+         *
+         * @throws  IndexOutOfBoundsException  DOCUMENT ME!
+         */
+        private void checkColumn(final int column) {
+            if ((column < 0) || (column >= model.getColumnCount())) {
+                throw new IndexOutOfBoundsException(
+                    "column beyond range of TableModel");
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   key  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private RowSorter.SortKey toggle(final RowSorter.SortKey key) {
+            if (key.getSortOrder() == SortOrder.ASCENDING) {
+                return new RowSorter.SortKey(key.getColumn(), SortOrder.DESCENDING);
+            }
+            return new RowSorter.SortKey(key.getColumn(), SortOrder.ASCENDING);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   column  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private boolean isSortable(final int column) {
+            return true;
+        }
+
+        @Override
+        public int convertRowIndexToModel(final int index) {
+            return index;
+        }
+
+        @Override
+        public int convertRowIndexToView(final int index) {
+            return index;
+        }
+
+        @Override
+        public void setSortKeys(final List<? extends RowSorter.SortKey> sortKeys) {
+            LOG.error("setSortKeys");
+            final List<SortKey> old = this.sortKeys;
+            if ((sortKeys != null) && (sortKeys.size() > 0)) {
+                final int max = ((model != null) ? model.getColumnCount() : 0);
+                for (final SortKey key : sortKeys) {
+                    if ((key == null) || (key.getColumn() < 0)
+                                || (key.getColumn() >= max)) {
+                        throw new IllegalArgumentException("Invalid SortKey");
+                    }
+                }
+                this.sortKeys = Collections.unmodifiableList(
+                        new ArrayList<SortKey>(sortKeys));
+            } else {
+                this.sortKeys = Collections.emptyList();
+            }
+            if (!this.sortKeys.equals(old)) {
+                fireSortOrderChanged();
+                loadModel(currentPage);
+            }
+        }
+
+        @Override
+        public List<? extends RowSorter.SortKey> getSortKeys() {
+            LOG.error("getSortKeys");
+
+            return sortKeys;
+        }
+
+        @Override
+        public int getViewRowCount() {
+            if (model != null) {
+                return model.getRowCount();
+            } else {
+                return 0;
+            }
+        }
+
+        @Override
+        public int getModelRowCount() {
+            if (model != null) {
+                return model.getRowCount();
+            } else {
+                return 0;
+            }
+        }
+
+        @Override
+        public void modelStructureChanged() {
+            LOG.error("modelStructureChanged");
+        }
+
+        @Override
+        public void allRowsChanged() {
+            LOG.error("allRowsChanged");
+//            setSortKeys(null);
+        }
+
+        @Override
+        public void rowsInserted(final int firstRow, final int endRow) {
+            LOG.error("rowsInserted");
+        }
+
+        @Override
+        public void rowsDeleted(final int firstRow, final int endRow) {
+            LOG.error("rowsDeleted");
+        }
+
+        @Override
+        public void rowsUpdated(final int firstRow, final int endRow) {
+            LOG.error("rowsUpdated");
+        }
+
+        @Override
+        public void rowsUpdated(final int firstRow, final int endRow, final int column) {
+            LOG.error("rowsUpdated(int,int,int)");
         }
     }
 }

@@ -43,6 +43,7 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
     private boolean visible = true;
     private boolean nameElement = false;
     private String alias;
+    private boolean ascOrder = true;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -304,5 +305,23 @@ public class FeatureServiceAttribute implements ConvertableToXML, Cloneable {
     @Override
     public FeatureServiceAttribute clone() {
         return new FeatureServiceAttribute(this);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the ascOrder
+     */
+    public boolean isAscOrder() {
+        return ascOrder;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  ascOrder  the ascOrder to set
+     */
+    public void setAscOrder(final boolean ascOrder) {
+        this.ascOrder = ascOrder;
     }
 }

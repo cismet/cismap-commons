@@ -18,6 +18,7 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 
 import edu.umd.cs.piccolo.PCamera;
 import edu.umd.cs.piccolo.PNode;
@@ -106,6 +107,7 @@ import de.cismet.cismap.commons.gui.piccolo.FixedPImage;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.PFixedTexturePaint;
 import de.cismet.cismap.commons.gui.piccolo.PSticky;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * Default implementation of a FeatureServiceFeature.
@@ -142,6 +144,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     private LayerProperties layerProperties;
     private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     private Paint customFillingStyle;
+    private Geometry simplifiedGeometry;
+    private boolean simplifiedGeometryAllowed = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -259,7 +263,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
             final String[] names = ruleSet.getAdditionalFieldNames();
 
             for (final String tmpName : names) {
-                final Object value = ruleSet.getAdditionalFieldValue(ruleSet.getIndexOfAdditionalFieldName(tmpName),
+                final Object value = ruleSet.getAdditionalFieldValue(tmpName,
                         this);
                 container.put(tmpName, value);
             }
@@ -293,7 +297,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
             final int index = layerProperties.getAttributeTableRuleSet().getIndexOfAdditionalFieldName(propertyName);
 
             if (index != -1) {
-                o = layerProperties.getAttributeTableRuleSet().getAdditionalFieldValue(index, this);
+                o = layerProperties.getAttributeTableRuleSet().getAdditionalFieldValue(propertyName, this);
             }
         }
 
@@ -545,6 +549,22 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      */
     @Override
     public Geometry getGeometry() {
+        if (simplifiedGeometryAllowed
+                    && ((this.geometry instanceof Polygon) || (this.geometry instanceof MultiPolygon)
+                        || (this.geometry instanceof LineString)
+                        || (this.geometry instanceof MultiLineString))
+                    && (geometry.getCoordinates().length > 1000)
+                    && (CismapBroker.getInstance().getMappingComponent().getScaleDenominator() > 50000)) {
+            if (simplifiedGeometry == null) {
+                simplifiedGeometry = TopologyPreservingSimplifier.simplify(geometry, 30);
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("length of the geometry: " + geometry.getCoordinates().length + " "
+                            + " Geometry will be simplified to a length of: "
+                            + simplifiedGeometry.getCoordinates().length);
+            }
+            return simplifiedGeometry;
+        }
         return this.geometry;
     }
 
@@ -1752,6 +1772,24 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     @Override
     public int compareTo(final DefaultFeatureServiceFeature o) {
         return Integer.compare(id, o.id);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the simplifiedGeometryAllowed
+     */
+    public boolean isSimplifiedGeometryAllowed() {
+        return simplifiedGeometryAllowed;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  simplifiedGeometryAllowed  the simplifiedGeometryAllowed to set
+     */
+    public void setSimplifiedGeometryAllowed(final boolean simplifiedGeometryAllowed) {
+        this.simplifiedGeometryAllowed = simplifiedGeometryAllowed;
     }
 
     //~ Inner Classes ----------------------------------------------------------

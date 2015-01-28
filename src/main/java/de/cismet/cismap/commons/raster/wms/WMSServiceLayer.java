@@ -965,14 +965,14 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @return  DOCUMENT ME!
      */
     private String getStylesString() {
-        final StringBuilder stylesString = new StringBuilder("");                                           // NOI18N
+        final StringBuilder stylesString = new StringBuilder("");                                               // NOI18N
         int counter = 0;
         final Iterator it = getWMSLayers().iterator();
         while (it.hasNext()) {
             final Object o = it.next();
             if ((o instanceof WMSLayer) && ((WMSLayer)o).isEnabled()) {
-                if ((!isDummy() && (((WMSLayer)o).getSelectedStyle() != null)) 
-                        || (isDummy() && (((WMSLayer)o).getStyleName()!= null)) ) {
+                if ((!isDummy() && (((WMSLayer)o).getSelectedStyle() != null))
+                            || (isDummy() && (((WMSLayer)o).getStyleName() != null))) {
                     counter++;
                     if (counter > 1) {
                         stylesString.append(",");                                                               // NOI18N
@@ -988,7 +988,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
 
         return "&STYLES=" + stylesString.toString(); // LDS Bugfix//NOI18N
     }
-    
+
     /**
      * DOCUMENT ME!
      *
