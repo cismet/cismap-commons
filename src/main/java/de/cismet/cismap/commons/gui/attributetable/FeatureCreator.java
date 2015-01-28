@@ -37,6 +37,13 @@ public interface FeatureCreator {
     void createFeature(MappingComponent mc, FeatureServiceFeature feature);
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  listener  DOCUMENT ME!
+     */
+    void addFeatureCreatedListener(FeatureCreatedListener listener);
+
+    /**
      * Provides the name of the geometry that will be created.
      *
      * @return  The name of the geometry, that will be created by this FeatureCreator

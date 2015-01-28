@@ -20,11 +20,18 @@ import org.openide.util.NbBundle;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.attributetable.FeatureCreatedEvent;
+import de.cismet.cismap.commons.gui.attributetable.FeatureCreatedListener;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreator;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
@@ -45,7 +52,10 @@ public class PrimitiveGeometryCreator implements FeatureCreator {
 
     //~ Instance fields --------------------------------------------------------
 
+    protected List<FeatureCreatedListener> listener = new ArrayList<FeatureCreatedListener>();
+
     private final String mode;
+    private Map<String, Object> properties;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -55,13 +65,25 @@ public class PrimitiveGeometryCreator implements FeatureCreator {
      * @param  mode  DOCUMENT ME!
      */
     public PrimitiveGeometryCreator(final String mode) {
+        this(mode, null);
+    }
+
+    /**
+     * Creates a new PrimitiveGeometryCreator object.
+     *
+     * @param  mode        DOCUMENT ME!
+     * @param  properties  DOCUMENT ME!
+     */
+    public PrimitiveGeometryCreator(final String mode, final Map<String, Object> properties) {
         this.mode = mode;
+        this.properties = properties;
     }
 
     //~ Methods ----------------------------------------------------------------
 
     @Override
-    public void createFeature(final MappingComponent mc, final FeatureServiceFeature feature) {
+    public void createFeature(final MappingComponent mc,
+            final FeatureServiceFeature feature) {
         EventQueue.invokeLater(new Runnable() {
 
                 @Override
@@ -79,17 +101,30 @@ public class PrimitiveGeometryCreator implements FeatureCreator {
 
                                     if (feature instanceof DefaultFeatureServiceFeature) {
                                         try {
+                                            if (properties != null) {
+                                                for (final String propName : properties.keySet()) {
+                                                    final Object o = properties.get(propName);
+
+                                                    if ((o instanceof String) && ((String)o).startsWith("@")) {
+                                                        final String referencedProperty = ((String)o).substring(1);
+                                                        final Object value = ((DefaultFeatureServiceFeature)feature)
+                                                                        .getProperty(referencedProperty);
+                                                        ((DefaultFeatureServiceFeature)feature).setProperty(
+                                                            propName,
+                                                            value);
+                                                    } else {
+                                                        ((DefaultFeatureServiceFeature)feature).setProperty(
+                                                            propName,
+                                                            o);
+                                                    }
+                                                }
+                                            }
                                             ((DefaultFeatureServiceFeature)feature).saveChanges();
 
-                                            // reload layer
-                                            final LayerProperties props = feature.getLayerProperties();
-
-                                            if (props != null) {
-                                                final AbstractFeatureService service = props.getFeatureService();
-
-                                                if (service != null) {
-                                                    service.retrieve(true);
-                                                }
+                                            for (final FeatureCreatedListener featureCreatedListener
+                                                        : PrimitiveGeometryCreator.this.listener) {
+                                                featureCreatedListener.featureCreated(
+                                                    new FeatureCreatedEvent(PrimitiveGeometryCreator.this, feature));
                                             }
                                         } catch (Exception e) {
                                             LOG.error("Cannot save new feature", e);
@@ -103,6 +138,11 @@ public class PrimitiveGeometryCreator implements FeatureCreator {
                     mc.setInteractionMode(SIMPLE_GEOMETRY_LISTENER_KEY);
                 }
             });
+    }
+
+    @Override
+    public void addFeatureCreatedListener(final FeatureCreatedListener listener) {
+        this.listener.add(listener);
     }
 
     @Override
