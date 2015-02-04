@@ -108,7 +108,11 @@ public class InternalDbTree extends JTree {
 
                     if (c instanceof JLabel) {
                         if ((value instanceof DBEntry) && !(value instanceof DBFolder)) {
-                            ((JLabel)c).setIcon(shapeIcon);
+                            final Icon serviceIcon = H2FeatureService.getLayerIcon(
+                                    H2FeatureService.LAYER_ENABLED_VISIBLE,
+                                    ((DBEntry)value).getName(),
+                                    databasePath);
+                            ((JLabel)c).setIcon(serviceIcon);
                         } else if (value instanceof DBEntry) {
                             if (expanded) {
                                 ((JLabel)c).setIcon(getOpenIcon());
@@ -139,7 +143,11 @@ public class InternalDbTree extends JTree {
                         final int row) {
                     if (renderer != null) {
                         if ((value instanceof DBEntry) && !(value instanceof DBFolder)) {
-                            editingIcon = shapeIcon;
+                            editingIcon = H2FeatureService.getLayerIcon(
+                                    H2FeatureService.LAYER_ENABLED_VISIBLE,
+                                    ((DBEntry)value).getName(),
+                                    databasePath);
+//                            editingIcon = shapeIcon;
                         } else if (value instanceof DBEntry) {
                             if (expanded) {
                                 editingIcon = renderer.getOpenIcon();
