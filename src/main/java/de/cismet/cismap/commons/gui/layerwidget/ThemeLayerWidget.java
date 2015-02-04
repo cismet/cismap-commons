@@ -413,7 +413,15 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         }
 
         selectionUpdateThread = new UpdateSelectionThread();
-        executor.submit(selectionUpdateThread);
+        // The selection of the features has not changed, yet. Wait until
+        // all other selection listeners were notified.
+        EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    executor.submit(selectionUpdateThread);
+                }
+            });
     }
 
     /**
@@ -1576,7 +1584,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                             return;
                         }
                         if (ret instanceof JLabel) {
-                            final String text = ((JLabel)ret).getText();
+                            final String text = value.toString();
                             ((JLabel)ret).setText("");
                             treeEditorTextField = new JTextField(text);
                             treeEditorTextField.addKeyListener(new KeyAdapter() {

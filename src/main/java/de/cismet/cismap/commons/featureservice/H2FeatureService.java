@@ -18,8 +18,6 @@ import org.h2gis.utilities.wrapper.ConnectionWrapper;
 
 import org.jdom.Element;
 
-import org.openide.util.Exceptions;
-
 import java.io.File;
 
 import java.net.URI;
@@ -27,6 +25,7 @@ import java.net.URI;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,30 +50,80 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger LOG = Logger.getLogger(H2FeatureService.class);
-    public static final Map<Integer, Icon> layerIcons = new HashMap<Integer, Icon>();
+    public static final Map<String, Icon> layerIcons = new HashMap<String, Icon>();
     public static final String H2_FEATURELAYER_TYPE = "H2FeatureServiceLayer"; // NOI18N
 
     static {
         layerIcons.put(
-            LAYER_ENABLED_VISIBLE,
+            String.valueOf(LAYER_ENABLED_VISIBLE),
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
                     "/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png")));                   // NOI18N
         layerIcons.put(
-            LAYER_ENABLED_INVISIBLE,
+            String.valueOf(LAYER_ENABLED_INVISIBLE),
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
                     "/de/cismet/cismap/commons/gui/layerwidget/res/layerShapeInvisible.png")));          // NOI18N
         layerIcons.put(
-            LAYER_DISABLED_VISIBLE,
+            String.valueOf(LAYER_DISABLED_VISIBLE),
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
                     "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShape.png")));          // NOI18N
         layerIcons.put(
-            LAYER_DISABLED_INVISIBLE,
+            String.valueOf(LAYER_DISABLED_INVISIBLE),
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
                     "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png"))); // NOI18N
+
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_VISIBLE)
+                    + ";shp",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png")));                   // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_INVISIBLE)
+                    + ";shp",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerShapeInvisible.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_VISIBLE)
+                    + ";shp",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShape.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_INVISIBLE)
+                    + ";shp",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png"))); // NOI18N
+
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_VISIBLE)
+                    + ";dbf",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerDbf.png")));                   // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_INVISIBLE)
+                    + ";dbf",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerDbfInvisible.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_VISIBLE)
+                    + ";dbf",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerDbf.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_INVISIBLE)
+                    + ";dbf",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerDbfInvisible.png"))); // NOI18N
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -85,6 +134,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     private boolean tableNotFound = false;
     private List<String> orderedAttributeNames = null;
     private String geometryType = UNKNOWN;
+    private String tableFormat = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -296,7 +346,45 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
 
     @Override
     public Icon getLayerIcon(final int type) {
-        return layerIcons.get(type);
+        if (tableFormat == null) {
+            tableFormat = getTableFormat(tableName, H2FeatureServiceFactory.DB_NAME);
+        }
+
+        if (tableFormat == null) {
+            if (shapeFile != null) {
+                tableFormat = shapeFile.getAbsolutePath().toLowerCase()
+                            .substring(shapeFile.getAbsolutePath().length() - 3);
+            }
+        }
+
+        final Icon layerIcon = layerIcons.get(type + ";" + tableFormat);
+
+        if (layerIcon != null) {
+            return layerIcon;
+        } else {
+            return layerIcons.get(String.valueOf(type));
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   type       DOCUMENT ME!
+     * @param   tableName  DOCUMENT ME!
+     * @param   dbName     DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static Icon getLayerIcon(final int type, final String tableName, final String dbName) {
+        final String format = getTableFormat(tableName, dbName);
+
+        final Icon layerIcon = layerIcons.get(type + ";" + format);
+
+        if (layerIcon != null) {
+            return layerIcon;
+        } else {
+            return layerIcons.get(String.valueOf(type));
+        }
     }
 
     @Override
@@ -377,8 +465,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                                 + H2FeatureServiceFactory.DB_NAME));
             rs = conn.getMetaData().getTables(null, null, tableName, null);
             tableExists = rs.next();
-            rs.close();
-            conn.close();
+
             return tableExists;
         } catch (SQLException e) {
             LOG.error("Cannot connect to database", e);
@@ -400,6 +487,108 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         }
 
         return tableExists;
+    }
+
+    /**
+     * Checks, if the given table exists in the db.
+     *
+     * @param   tableName  the name of the table to check
+     *
+     * @return  True, if the given was removed
+     */
+    public static boolean removeTableIfExists(final String tableName) {
+        ConnectionWrapper conn = null;
+        ResultSet rs = null;
+        boolean tableExists = false;
+
+        try {
+            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+                        "jdbc:h2:"
+                                + H2FeatureServiceFactory.DB_NAME));
+            rs = conn.getMetaData().getTables(null, null, tableName, null);
+            tableExists = rs.next();
+
+            if (tableExists) {
+                final Statement st = conn.createStatement();
+                st.execute("DROP TABLE \"" + tableName + "\";");
+                st.execute("DROP SEQUENCE IF EXISTS \"" + tableName + "_seq\";");
+                st.close();
+                return true;
+            }
+        } catch (SQLException e) {
+            LOG.error("Cannot connect to database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close result set", ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close connection", ex);
+                }
+            }
+        }
+
+        return tableExists;
+    }
+
+    /**
+     * Checks, if the given table exists in the db.
+     *
+     * @param   tableName  DOCUMENT ME!
+     * @param   dbName     DOCUMENT ME!
+     *
+     * @return  True, if the given was removed
+     */
+    public static String getTableFormat(final String tableName, final String dbName) {
+        ConnectionWrapper conn = null;
+        ResultSet rs = null;
+        Statement st = null;
+        String format = null;
+
+        try {
+            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+                        "jdbc:h2:"
+                                + dbName));
+            st = conn.createStatement();
+
+            rs = st.executeQuery("SELECT format from \"" + H2FeatureServiceFactory.META_TABLE_NAME
+                            + "\" WHERE table = '" + tableName + "';");
+            if (rs.next()) {
+                format = rs.getString(1);
+            }
+        } catch (SQLException e) {
+            LOG.error("Cannot connect to database", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close result set", ex);
+                }
+            }
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close connection", ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close connection", ex);
+                }
+            }
+        }
+
+        return format;
     }
 
     /**

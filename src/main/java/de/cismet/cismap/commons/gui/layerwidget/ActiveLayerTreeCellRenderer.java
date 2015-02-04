@@ -238,19 +238,6 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
             new ImageIcon(
                 getClass().getResource(
                     "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png")));            // NOI18N
-
-        icons.put(new IconType(H2, true, true),
-            new ImageIcon(getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png"))); // NOI18N
-        icons.put(new IconType(H2, false, true),
-            new ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/layerShapeInvisible.png")));  // NOI18N
-        icons.put(new IconType(H2, true, false),
-            new ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShape.png")));  // NOI18N
-        icons.put(new IconType(H2, false, false),
-            new ImageIcon(
-                getClass().getResource(
-                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerShapeInvisible.png")));            // NOI18N
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -326,7 +313,23 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
             } else if (value instanceof SimplePostgisFeatureService) {
                 ret.setIcon(getRightIcon(POSTGIS, layer.getPNode().getVisible(), layer.isEnabled()));
             } else if (value instanceof H2FeatureService) {
-                ret.setIcon(getRightIcon(H2, layer.getPNode().getVisible(), layer.isEnabled()));
+                int type = 0;
+
+                if (layer.getPNode().getVisible()) {
+                    if (layer.isEnabled()) {
+                        type = H2FeatureService.LAYER_ENABLED_VISIBLE;
+                    } else {
+                        type = H2FeatureService.LAYER_DISABLED_VISIBLE;
+                    }
+                } else {
+                    if (layer.isEnabled()) {
+                        type = H2FeatureService.LAYER_ENABLED_INVISIBLE;
+                    } else {
+                        type = H2FeatureService.LAYER_DISABLED_INVISIBLE;
+                    }
+                }
+
+                ret.setIcon(((H2FeatureService)value).getLayerIcon(type));
             } else {
                 ret.setIcon(getRightIcon(SUPPORTER, layer.getPNode().getVisible(), layer.isEnabled()));
             }
