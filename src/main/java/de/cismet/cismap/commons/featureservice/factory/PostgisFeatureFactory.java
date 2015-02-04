@@ -179,7 +179,7 @@ public class PostgisFeatureFactory extends AbstractFeatureFactory<PostgisFeature
     }
 
     @Override
-    public int getFeatureCount(final BoundingBox bb) {
+    public int getFeatureCount(final SimpleFeatureServiceSqlStatement query, final BoundingBox bb) {
         return 0;
     }
 

@@ -1173,7 +1173,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     @Override
-    public int getFeatureCount(final BoundingBox bb) {
+    public int getFeatureCount(final Object query, final BoundingBox bb) {
         final StringBuilder sb = new StringBuilder("select count(*) from \"");
         final int srid = CrsTransformer.extractSridFromCrs(crs.getCode());
 
@@ -1187,7 +1187,17 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         } else {
             sb.append(tableName).append("\"");
         }
-        final String query = sb.toString();
+
+        if ((query != null) && !query.equals("")) {
+            if (bb != null) {
+                sb.append(" and ");
+            } else {
+                sb.append(" WHERE ");
+            }
+            sb.append(query);
+        }
+
+        final String sqlQuery = sb.toString();
         int result = 0;
 
         StatementWrapper st = null;
@@ -1195,12 +1205,12 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
         try {
             st = createStatement(conn);
-            rs = st.executeQuery(query);
+            rs = st.executeQuery(sqlQuery);
             if (rs.next()) {
                 result = rs.getInt(1);
             }
         } catch (SQLException e) {
-            LOG.error("Error while determining the feature count. Query: " + query, e);
+            LOG.error("Error while determining the feature count. Query: " + sqlQuery, e);
         } finally {
             if (rs != null) {
                 try {

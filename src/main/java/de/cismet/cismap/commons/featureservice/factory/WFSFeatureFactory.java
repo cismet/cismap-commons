@@ -529,7 +529,7 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
     }
 
     @Override
-    public int getFeatureCount(final BoundingBox bb) {
+    public int getFeatureCount(final String query, final BoundingBox bb) {
         final XBoundingBox bbox = new XBoundingBox(bb.getX1(),
                 bb.getY1(),
                 bb.getX2(),
@@ -538,9 +538,14 @@ public class WFSFeatureFactory extends DegreeFeatureFactory<WFSFeature, String> 
                 getCrs().isMetric());
         final WFSFacade facade = featureType.getWFSCapabilities().getServiceFacade();
         final Element queryElement = facade.getGetFeatureQuery(featureType);
-        final String query = FeatureServiceUtilities.elementToString(queryElement);
+        String wfsQuery = query;
+
+        if (wfsQuery == null) {
+            wfsQuery = FeatureServiceUtilities.elementToString(queryElement);
+        }
+
         final String postString = facade.setGetFeatureBoundingBox(
-                query,
+                wfsQuery,
                 bbox,
                 featureType,
                 getCrs().getCode(),
