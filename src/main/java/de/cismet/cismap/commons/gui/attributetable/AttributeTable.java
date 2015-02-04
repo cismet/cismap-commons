@@ -258,7 +258,6 @@ public class AttributeTable extends javax.swing.JPanel {
         // to consume the mouse events. Otherwise, the table behind it will handle the events
         panWaiting.addMouseListener(new MouseAdapter() {
             });
-
         tableRuleSet = featureService.getLayerProperties().getAttributeTableRuleSet();
 
         final Collection<? extends AttributeTableSearchPanel> panelList = Lookup.getDefault()
@@ -640,12 +639,14 @@ public class AttributeTable extends javax.swing.JPanel {
                 @Override
                 protected List<FeatureServiceFeature> doInBackground() throws Exception {
                     Thread.currentThread().setName("AttributeTable loadModel");
+                    final Object serviceQuery = ((query == null) ? featureService.getQuery() : query);
+
                     if ((pageSize != -1) && (itemCount == 0)) {
-                        setItemCount(featureService.getFeatureCount(bb));
+                        setItemCount(featureService.getFeatureCount(query, bb));
                     }
+
                     final FeatureFactory factory = featureService.getFeatureFactory();
                     List<FeatureServiceFeature> featureList;
-                    final Object serviceQuery = ((query == null) ? featureService.getQuery() : query);
 
                     if (pageSize != -1) {
                         List<FeatureServiceAttribute> orderBy = null;
@@ -2384,6 +2385,7 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     private void saveChangedRows(final boolean forceSave) {
         if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(changedFeatures, model)) {
+            tbProcessing.setSelected(true);
             return;
         }
 

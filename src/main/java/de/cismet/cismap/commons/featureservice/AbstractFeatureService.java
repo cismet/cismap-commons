@@ -1274,11 +1274,12 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     /**
      * DOCUMENT ME!
      *
+     * @param   query        DOCUMENT ME!
      * @param   boundingBox  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    public int getFeatureCount(final BoundingBox boundingBox) {
+    public int getFeatureCount(final QT query, final BoundingBox boundingBox) {
         if (!initialized) {
             try {
                 initAndWait();
@@ -1288,10 +1289,21 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             }
         }
         if (boundingBox == null) {
-            return getFeatureFactory().getFeatureCount(this.bb);
+            return getFeatureFactory().getFeatureCount(query, this.bb);
         } else {
-            return getFeatureFactory().getFeatureCount(boundingBox);
+            return getFeatureFactory().getFeatureCount(query, boundingBox);
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   boundingBox  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getFeatureCount(final BoundingBox boundingBox) {
+        return getFeatureCount(getQuery(), boundingBox);
     }
 
     /**

@@ -168,11 +168,12 @@ public interface FeatureFactory<FT extends FeatureServiceFeature, QT> extends Cl
     /**
      * DOCUMENT ME!
      *
-     * @param   bb  DOCUMENT ME!
+     * @param   query  DOCUMENT ME!
+     * @param   bb     DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    int getFeatureCount(BoundingBox bb);
+    int getFeatureCount(QT query, BoundingBox bb);
 
     /**
      * DOCUMENT ME!

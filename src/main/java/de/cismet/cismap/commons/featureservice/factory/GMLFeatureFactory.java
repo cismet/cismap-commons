@@ -407,7 +407,7 @@ public class GMLFeatureFactory extends DegreeFeatureFactory<DefaultFeatureServic
 //  }
 
     @Override
-    public int getFeatureCount(final BoundingBox bb) {
+    public int getFeatureCount(final String query, final BoundingBox bb) {
         return this.degreeFeaturesTree.size();
     }
 

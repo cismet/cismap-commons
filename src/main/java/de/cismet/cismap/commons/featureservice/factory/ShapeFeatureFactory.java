@@ -13,6 +13,7 @@ package de.cismet.cismap.commons.featureservice.factory;
 
 import com.vividsolutions.jts.geom.*;
 
+import org.deegree.datatypes.Types;
 import org.deegree.io.rtree.HyperBoundingBox;
 import org.deegree.io.rtree.HyperPoint;
 import org.deegree.io.rtree.RTree;
@@ -36,6 +37,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -264,12 +266,90 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         logger.info("SW[" + workerThread + "]: creating " + type.getProperties().length
                     + " featureServiceAttributes from first parsed degree feature");
         featureServiceAttributes = new Vector(type.getProperties().length);
+        String tableName = documentURI.toString().substring(documentURI.toString().lastIndexOf('/') + 1);
+        tableName = tableName.substring(0, tableName.length() - 4);
+        final int class_id = 92;
+        int pos = 1;
+        final String cs_classSql =
+            "INSERT INTO cs_class (name, class_icon_id, object_icon_id, table_name, primary_key_field, indexed, array_link) values ('"
+                    + tableName
+                    + "', 2,2,'dlm25w."
+                    + tableName
+                    + "', 'ID', false,false);";
+        System.out.println(cs_classSql);
+        final String csTypeSql = "INSERT INTO cs_type (name, class_id, complex_type) values ('"
+                    + tableName
+                    + "', "
+                    + class_id
+                    + ", true);";
+        System.out.println(csTypeSql);
+        System.out.println("INSERT INTO cs_attr (class_id, type_id, name, field_name, pos, visible, optional) values ("
+                    + class_id + ", 2 ,'id', 'ID', " + 0 + ", false, false);");
+        final StringBuilder sb = new StringBuilder();
         for (final PropertyType pt : type.getProperties()) {
             // ToDo was ist wenn zwei Geometrien dabei sind
+            if (pt.getName().getAsString().toLowerCase().endsWith("geom")) {
+                continue;
+            }
+            sb.append("ref."
+                            + pt.getName().getAsString().substring(pt.getName().getAsString().indexOf(":") + 1)
+                            .toLowerCase()).append(", ");
             featureServiceAttributes.add(
                 new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true));
-        }
+            int stype = 19;
 
+            if (Integer.toString(pt.getType()).equals(String.valueOf(Types.CHAR))
+                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.VARCHAR))
+                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.LONGVARCHAR))) {
+                stype = 9;
+            } else if (Integer.toString(pt.getType()).equals(String.valueOf(Types.INTEGER))
+                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.SMALLINT))
+                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.TINYINT))) {
+                stype = 2;
+            } else if (Integer.toString(pt.getType()).equals(String.valueOf(Types.BIGINT))) {
+                stype = 2;
+            } else if (Integer.toString(pt.getType()).equals(String.valueOf(Types.DOUBLE))
+                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.FLOAT))
+                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.DECIMAL))) {
+                stype = 12;
+            } else if (Integer.toString(pt.getType()).equals(String.valueOf(Types.DATE))
+                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.TIME))
+                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.TIMESTAMP))) {
+                stype = 13;
+            } else if (Integer.toString(pt.getType()).equals(String.valueOf(Types.BOOLEAN))) {
+                stype = 10;
+            } else {
+                stype = 9;
+            }
+            final String attrName = pt.getName()
+                        .getAsString()
+                        .substring(pt.getName().getAsString().indexOf(":") + 1)
+                        .toLowerCase();
+            final String cs_atrSql = "INSERT INTO cs_attr (class_id, type_id, name, field_name, pos) values ("
+                        + class_id
+                        + ", "
+                        + stype
+                        + " ,'"
+                        + attrName
+                        + "', '"
+                        + attrName
+                        + "', "
+                        + (pos++)
+                        + ");";
+            System.out.println(cs_atrSql);
+        }
+        System.out.println(
+            "INSERT INTO cs_attr (class_id, type_id, name, field_name, pos, foreign_key, foreign_key_references_to) values ("
+                    + class_id
+                    + ", 19 ,'geom', 'geom', "
+                    + (pos++)
+                    + ", true, 1);");
+        System.out.println("INSERT INTO cs_attr (class_id, type_id, name, field_name, pos) values (" + class_id
+                    + ", 9 ,'fis_g_user', 'fis_g_user', " + (pos++) + ");");
+        System.out.println("INSERT INTO cs_attr (class_id, type_id, name, field_name, pos) values (" + class_id
+                    + ", 14 ,'fis_g_date', 'fis_g_date', " + (pos++) + ");");
+
+//        System.out.println(sb.toString());
         envelope = shapeFile.getFileMBR();
         // create an index file, if it does not alreay exists
         int currentProgress = 0;
@@ -553,7 +633,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     }
 
     @Override
-    public int getFeatureCount(final BoundingBox bb) {
+    public int getFeatureCount(final String query, final BoundingBox bb) {
         try {
             final Coordinate[] polyCords = new Coordinate[5];
             polyCords[0] = new Coordinate(bb.getX1(), bb.getY1());
@@ -748,5 +828,24 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      */
     public String getGeometryType() {
         return geometryType;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  args  DOCUMENT ME!
+     */
+    public static void main(final String[] args) {
+        final String shapeFile = "file:///home/therter/tmp/daten/fg_ba_sb_katalog_sb.shp";
+//        String shapeFile = args[0];
+        try {
+            final ShapeFeatureFactory sff = new ShapeFeatureFactory(
+                    null,
+                    new URI(shapeFile),
+                    Integer.MAX_VALUE,
+                    null,
+                    null);
+        } catch (Exception e) {
+        }
     }
 }

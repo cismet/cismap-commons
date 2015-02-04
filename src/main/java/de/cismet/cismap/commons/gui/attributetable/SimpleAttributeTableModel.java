@@ -95,29 +95,30 @@ public class SimpleAttributeTableModel implements TableModel {
         attributeNames = new String[attributeCount()];
         attributeAlias = new String[attributeCount()];
 
-        for (final String attributeName : orderedFeatureServiceAttributes) {
-            final FeatureServiceAttribute fsa = featureServiceAttributes.get(attributeName);
+        if (orderedFeatureServiceAttributes != null) {
+            for (final String attributeName : orderedFeatureServiceAttributes) {
+                final FeatureServiceAttribute fsa = featureServiceAttributes.get(attributeName);
 
-            if ((fsa == null) || fsa.isVisible()) {
-                attributeNames[index] = attributeName;
-                String aliasName = attributeName;
+                if ((fsa == null) || fsa.isVisible()) {
+                    attributeNames[index] = attributeName;
+                    String aliasName = attributeName;
 
-                if ((fsa != null) && !fsa.getAlias().equals("")) {
-                    final String alias = fsa.getAlias();
+                    if ((fsa != null) && !fsa.getAlias().equals("")) {
+                        final String alias = fsa.getAlias();
 
-                    if (alias != null) {
-                        aliasName = alias;
+                        if (alias != null) {
+                            aliasName = alias;
+                        }
                     }
-                }
 
-                if (aliasName.startsWith("app:")) {
-                    attributeAlias[index++] = aliasName.substring(4);
-                } else {
-                    attributeAlias[index++] = aliasName;
+                    if (aliasName.startsWith("app:")) {
+                        attributeAlias[index++] = aliasName.substring(4);
+                    } else {
+                        attributeAlias[index++] = aliasName;
+                    }
                 }
             }
         }
-
         fireContentsChanged();
     }
 
@@ -129,10 +130,12 @@ public class SimpleAttributeTableModel implements TableModel {
     private int attributeCount() {
         int count = 0;
 
-        for (final String key : orderedFeatureServiceAttributes) {
-            final FeatureServiceAttribute fsa = featureServiceAttributes.get(key);
-            if (fsa.isVisible()) {
-                ++count;
+        if (orderedFeatureServiceAttributes != null) {
+            for (final String key : orderedFeatureServiceAttributes) {
+                final FeatureServiceAttribute fsa = featureServiceAttributes.get(key);
+                if (fsa.isVisible()) {
+                    ++count;
+                }
             }
         }
 
