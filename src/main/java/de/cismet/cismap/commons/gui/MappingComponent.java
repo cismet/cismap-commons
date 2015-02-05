@@ -4249,6 +4249,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             ret.addContent(printingSettingsDialog.getConfiguration());
         }
 
+        if (CismapBroker.getInstance().getMinOpacityToStayEnabled() != null) {
+            final Element minOpacityToStayEnabled = new Element("minOpacityToStayEnabled");
+
+            minOpacityToStayEnabled.addContent(CismapBroker.getInstance().getMinOpacityToStayEnabled().toString());
+            ret.addContent(minOpacityToStayEnabled);
+        }
+
         // save internal widgets status
         final Element widgets = new Element("InternalWidgets");                                       // NOI18N
         for (final String name : this.internalWidgets.keySet()) {
@@ -4392,6 +4399,16 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
         } catch (final Exception skip) {
             LOG.error("Fehler beim Lesen von Scale", skip); // NOI18N
+        }
+
+        try {
+            final String minOpacity = prefs.getChildText("minOpacityToStayEnabled");
+
+            if (minOpacity != null) {
+                CismapBroker.getInstance().setMinOpacityToStayEnabled(Float.parseFloat(minOpacity));
+            }
+        } catch (NumberFormatException ex) {
+            LOG.error("The min opacity to stay enabled value is not a number.", ex); // NOI18N
         }
 
         // Und jetzt noch die PriningEinstellungen
@@ -4553,6 +4570,16 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
         } catch (final Exception ex) {
             LOG.warn("could not enable internal widgets: " + ex, ex);                                    // NOI18N
+        }
+
+        try {
+            final String minOpacity = prefs.getChildText("minOpacityToStayEnabled");
+
+            if (minOpacity != null) {
+                CismapBroker.getInstance().setMinOpacityToStayEnabled(Float.parseFloat(minOpacity));
+            }
+        } catch (NumberFormatException ex) {
+            LOG.error("The min opacity to stay enabled value is not a number.", ex); // NOI18N
         }
     }
 

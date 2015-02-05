@@ -117,6 +117,7 @@ public class CismapBroker {
     private String featureStylingComponentKey = BasicFeatureStyleDialogFactory.KEY;
     private Point2D snappingVetoPoint;
     private PFeature snappingVetoFeature;
+    private Float minOpacityToStayEnabled = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -1071,5 +1072,23 @@ public class CismapBroker {
      */
     public void setSnappingVetoFeature(final PFeature snappingVetoFeature) {
         this.snappingVetoFeature = snappingVetoFeature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the minOpacityToStayEnabled
+     */
+    public Float getMinOpacityToStayEnabled() {
+        return minOpacityToStayEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  minOpacityToStayEnabled  the minOpacityToStayEnabled to set
+     */
+    public void setMinOpacityToStayEnabled(final Float minOpacityToStayEnabled) {
+        this.minOpacityToStayEnabled = minOpacityToStayEnabled;
     }
 }

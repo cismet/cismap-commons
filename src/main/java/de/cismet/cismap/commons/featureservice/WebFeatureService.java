@@ -277,7 +277,11 @@ public final class WebFeatureService extends AbstractFeatureService<WFSFeature, 
             element = this.getInitElement();
         }
 
-        super.initFromElement(element);
+        if (!initializedFromElement) {
+            // without the initializedFromElement check, the layer adjustments from the user will be overridden
+            // in some cases
+            super.initFromElement(element);
+        }
         final CapabilityLink cp = new CapabilityLink(element);
         final Element query = element.getChild(FeatureServiceUtilities.GET_FEATURE, FeatureServiceUtilities.WFS);
         String capLink = cp.getLink();

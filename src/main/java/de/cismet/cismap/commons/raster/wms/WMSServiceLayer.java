@@ -239,20 +239,27 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         }
 
         try {
-            setEnabled(wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());         // NOI18N
-        } catch (DataConversionException ex) {
-        }
-        try {
             setTranslucency(wmsServiceLayerElement.getAttribute("translucency").getFloatValue()); // NOI18N
         } catch (DataConversionException ex) {
         }
+
         try {
-            setVisible(wmsServiceLayerElement.getAttribute("visible").getBooleanValue());         // NOI18N
+            final Float minOpacity = CismapBroker.getInstance().getMinOpacityToStayEnabled();
+
+            if ((minOpacity != null) && (getTranslucency() <= minOpacity)) {
+                this.setEnabled(false);                                                         // NOI18N
+            } else {
+                setEnabled(wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());   // NOI18N
+            }
         } catch (DataConversionException ex) {
         }
-        setBackgroundColor(wmsServiceLayerElement.getAttribute("bgColor").getValue());            // NOI18N
-        setImageFormat(wmsServiceLayerElement.getAttribute("imageFormat").getValue());            // NOI18N
-        setExceptionsFormat(wmsServiceLayerElement.getAttribute("exceptionFormat").getValue());   // NOI18N
+        try {
+            setVisible(wmsServiceLayerElement.getAttribute("visible").getBooleanValue());       // NOI18N
+        } catch (DataConversionException ex) {
+        }
+        setBackgroundColor(wmsServiceLayerElement.getAttribute("bgColor").getValue());          // NOI18N
+        setImageFormat(wmsServiceLayerElement.getAttribute("imageFormat").getValue());          // NOI18N
+        setExceptionsFormat(wmsServiceLayerElement.getAttribute("exceptionFormat").getValue()); // NOI18N
         final CapabilityLink cp = new CapabilityLink(wmsServiceLayerElement);
         WMSCapabilities wmsCaps = capabilities.get(cp.getLink());
         if (loadCapDoc && (wmsCaps == null)) {
