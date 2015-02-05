@@ -61,6 +61,7 @@ import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.CachingFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.style.Style;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.DefaultQueryButtonAction;
 import de.cismet.cismap.commons.rasterservice.FeatureMapService;
 import de.cismet.cismap.commons.rasterservice.MapService;
@@ -169,6 +170,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     /* the list that holds the names of the featureServiceAttributes of the FeatureService in the specified order */
     protected List<String> orderedFeatureServiceAttributes;
     protected List<DefaultQueryButtonAction> queryButtons = new ArrayList<DefaultQueryButtonAction>(SQL_QUERY_BUTTONS);
+    protected boolean initializedFromElement = false;
     String sldDefinition;
     final XMLInputFactory factory = XMLInputFactory.newInstance();
     Legends legends = new Legends();
@@ -1079,21 +1081,27 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             this.setInitElement((Element)element.clone());
         }
 
-        if (element.getAttributeValue("name") != null)                                      // NOI18N
+        if (element.getAttributeValue("name") != null)                                  // NOI18N
         {
-            this.setName(element.getAttributeValue("name"));                                // NOI18N
+            this.setName(element.getAttributeValue("name"));                            // NOI18N
         }
-        if (element.getAttributeValue("visible") != null)                                   // NOI18N
+        if (element.getAttributeValue("visible") != null)                               // NOI18N
         {
-            this.setVisible(Boolean.valueOf(element.getAttributeValue("visible")));         // NOI18N
+            this.setVisible(Boolean.valueOf(element.getAttributeValue("visible")));     // NOI18N
         }
-        if (element.getAttributeValue("enabled") != null)                                   // NOI18N
+        if (element.getAttributeValue("translucency") != null)                          // NOI18N
         {
-            this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));         // NOI18N
+            this.setTranslucency(element.getAttribute("translucency").getFloatValue()); // NOI18N
         }
-        if (element.getAttributeValue("translucency") != null)                              // NOI18N
+        if (element.getAttributeValue("enabled") != null)                               // NOI18N
         {
-            this.setTranslucency(element.getAttribute("translucency").getFloatValue());     // NOI18N
+            final Float minOpacity = CismapBroker.getInstance().getMinOpacityToStayEnabled();
+
+            if ((minOpacity != null) && (getTranslucency() <= minOpacity)) {
+                this.setEnabled(false);                                                     // NOI18N
+            } else {
+                this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));     // NOI18N
+            }
         }
         if (element.getAttributeValue("maxFeatureCount") != null)                           // NOI18N
         {
@@ -1146,6 +1154,8 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         if (sldStyle != null) {
             sldDefinition = new org.jdom.output.XMLOutputter().outputString(sldStyle);
         }
+
+        initializedFromElement = true;
     }
 
     /**
