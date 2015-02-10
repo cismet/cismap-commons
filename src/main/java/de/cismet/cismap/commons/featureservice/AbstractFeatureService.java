@@ -1097,7 +1097,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         {
             final Float minOpacity = CismapBroker.getInstance().getMinOpacityToStayEnabled();
 
-            if ((minOpacity != null) && (getTranslucency() <= minOpacity)) {
+            if ((minOpacity != null) && ((getTranslucency() <= minOpacity) || !isVisible())) {
                 this.setEnabled(false);                                                     // NOI18N
             } else {
                 this.setEnabled(Boolean.valueOf(element.getAttributeValue("enabled")));     // NOI18N

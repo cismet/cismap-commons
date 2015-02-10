@@ -239,6 +239,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         }
 
         try {
+            setVisible(wmsServiceLayerElement.getAttribute("visible").getBooleanValue()); // NOI18N
+        } catch (DataConversionException ex) {
+        }
+
+        try {
             setTranslucency(wmsServiceLayerElement.getAttribute("translucency").getFloatValue()); // NOI18N
         } catch (DataConversionException ex) {
         }
@@ -246,15 +251,11 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         try {
             final Float minOpacity = CismapBroker.getInstance().getMinOpacityToStayEnabled();
 
-            if ((minOpacity != null) && (getTranslucency() <= minOpacity)) {
+            if ((minOpacity != null) && ((getTranslucency() <= minOpacity) || !isVisible())) {
                 this.setEnabled(false);                                                         // NOI18N
             } else {
                 setEnabled(wmsServiceLayerElement.getAttribute("enabled").getBooleanValue());   // NOI18N
             }
-        } catch (DataConversionException ex) {
-        }
-        try {
-            setVisible(wmsServiceLayerElement.getAttribute("visible").getBooleanValue());       // NOI18N
         } catch (DataConversionException ex) {
         }
         setBackgroundColor(wmsServiceLayerElement.getAttribute("bgColor").getValue());          // NOI18N
