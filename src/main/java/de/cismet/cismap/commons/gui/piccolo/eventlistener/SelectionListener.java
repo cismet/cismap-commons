@@ -395,6 +395,7 @@ public class SelectionListener extends CreateGeometryListener {
     public void mouseReleased(final PInputEvent event) {
         setMappingComponent(event);
         super.mouseReleased(event);
+        super.reset();
     }
 
     @Override
