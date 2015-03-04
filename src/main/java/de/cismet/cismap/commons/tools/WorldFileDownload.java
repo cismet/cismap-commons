@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import org.apache.log4j.Logger;
+
 import org.openide.util.Exceptions;
 
 import java.awt.Image;
@@ -37,10 +39,14 @@ import de.cismet.tools.gui.downloadmanager.AbstractDownload;
  */
 public class WorldFileDownload extends AbstractDownload {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final Logger LOG = Logger.getLogger(WorldFileDownload.class);
+
     //~ Instance fields --------------------------------------------------------
 
-    private final Future<Image> futureImage;
-    private BoundingBox boundingBoxFromMap;
+    private Future<Image> futureImage;
+    private final BoundingBox boundingBoxFromMap;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -71,6 +77,7 @@ public class WorldFileDownload extends AbstractDownload {
     public void run() {
         try {
             if (status != State.WAITING) {
+                releaseMemory();
                 return;
             }
 
@@ -88,6 +95,7 @@ public class WorldFileDownload extends AbstractDownload {
                     stateChanged();
                 }
 
+                releaseMemory();
                 return;
             }
 
@@ -96,9 +104,11 @@ public class WorldFileDownload extends AbstractDownload {
                 out = new PrintWriter(fileToSaveTo);
                 out.println(content);
             } catch (FileNotFoundException ex) {
-                Exceptions.printStackTrace(ex);
+                LOG.error("File not found: " + fileToSaveTo, ex);
             } finally {
-                out.close();
+                if (out != null) {
+                    out.close();
+                }
             }
 
             if (status == State.RUNNING) {
@@ -108,8 +118,10 @@ public class WorldFileDownload extends AbstractDownload {
         } catch (InterruptedException ex) {
             Exceptions.printStackTrace(ex);
         } catch (ExecutionException ex) {
-            Exceptions.printStackTrace(ex);
+            LOG.error("Error while creating world file.", ex);
         }
+
+        releaseMemory();
     }
 
     /**
@@ -162,10 +174,19 @@ public class WorldFileDownload extends AbstractDownload {
         return stringBuilder.toString();
     }
 
+    /**
+     * Set the futureImage to null. Otherwise, the FutureImageDownload will take much memory until it is removed from
+     * the DownloadManager.
+     */
+    private void releaseMemory() {
+        futureImage = null;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = (31 * hash) + ((this.futureImage != null) ? this.futureImage.hashCode() : 0);
+        hash = (31 * hash) + ((this.title != null) ? this.title.hashCode() : 0);
+        hash = (31 * hash) + ((this.fileToSaveTo != null) ? this.fileToSaveTo.hashCode() : 0);
         hash = (31 * hash) + ((this.boundingBoxFromMap != null) ? this.boundingBoxFromMap.hashCode() : 0);
         return hash;
     }
@@ -179,8 +200,11 @@ public class WorldFileDownload extends AbstractDownload {
             return false;
         }
         final WorldFileDownload other = (WorldFileDownload)obj;
-        if ((this.futureImage != other.futureImage)
-                    && ((this.futureImage == null) || !this.futureImage.equals(other.futureImage))) {
+        if ((this.title == null) ? (other.title != null) : (!this.title.equals(other.title))) {
+            return false;
+        }
+        if ((this.fileToSaveTo != other.fileToSaveTo)
+                    && ((this.fileToSaveTo == null) || !this.fileToSaveTo.equals(other.fileToSaveTo))) {
             return false;
         }
         if ((this.boundingBoxFromMap != other.boundingBoxFromMap)
