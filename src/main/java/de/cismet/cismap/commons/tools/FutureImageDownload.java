@@ -44,6 +44,7 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
 
     String extension;
     Future<Image> futureImage;
+    int futureImageHash;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -64,6 +65,7 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
             final Future<Image> futureImage) {
         this.extension = extension;
         this.futureImage = futureImage;
+        this.futureImageHash = futureImage.hashCode();
 
         this.title = title;
 
@@ -76,6 +78,7 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
     @Override
     public void run() {
         if (status != State.WAITING) {
+            releaseMemory();
             return;
         }
         status = State.RUNNING;
@@ -92,12 +95,14 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
                 }
             } catch (InterruptedException ex) {
                 deleteFile();
+                releaseMemory();
                 return;
             } catch (ExecutionException ex) {
                 LOG.error("Error while getting the image.", ex);
                 status = State.COMPLETED_WITH_ERROR;
                 stateChanged();
                 deleteFile();
+                releaseMemory();
                 return;
             }
         }
@@ -110,12 +115,14 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
                 status = State.COMPLETED_WITH_ERROR;
                 stateChanged();
                 deleteFile();
+                releaseMemory();
                 return;
             }
         } else {
             status = State.COMPLETED_WITH_ERROR;
             stateChanged();
             deleteFile();
+            releaseMemory();
             return;
         }
 
@@ -123,6 +130,15 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
             status = State.COMPLETED;
             stateChanged();
         }
+        releaseMemory();
+    }
+
+    /**
+     * Set the futureImage to null. Otherwise, the FutureImageDownload will take much memory until it is removed from
+     * the DownloadManager.
+     */
+    private void releaseMemory() {
+        futureImage = null;
     }
 
     /**
@@ -202,6 +218,7 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
         if (cancelled) {
             status = State.ABORTED;
             stateChanged();
+            releaseMemory();
         }
         return cancelled;
     }
@@ -218,8 +235,9 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = (37 * hash) + ((this.extension != null) ? this.extension.hashCode() : 0);
-        hash = (37 * hash) + ((this.futureImage != null) ? this.futureImage.hashCode() : 0);
+        hash = (37 * hash) + this.futureImageHash;
+        hash = (37 * hash) + ((this.title != null) ? this.title.hashCode() : 0);
+        hash = (37 * hash) + ((this.fileToSaveTo != null) ? this.fileToSaveTo.hashCode() : 0);
         return hash;
     }
 
@@ -232,11 +250,14 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
             return false;
         }
         final FutureImageDownload other = (FutureImageDownload)obj;
-        if ((this.extension == null) ? (other.extension != null) : (!this.extension.equals(other.extension))) {
+        if (this.futureImageHash != other.futureImageHash) {
             return false;
         }
-        if ((this.futureImage != other.futureImage)
-                    && ((this.futureImage == null) || !this.futureImage.equals(other.futureImage))) {
+        if ((this.title == null) ? (other.title != null) : (!this.title.equals(other.title))) {
+            return false;
+        }
+        if ((this.fileToSaveTo != other.fileToSaveTo)
+                    && ((this.fileToSaveTo == null) || !this.fileToSaveTo.equals(other.fileToSaveTo))) {
             return false;
         }
         return true;
