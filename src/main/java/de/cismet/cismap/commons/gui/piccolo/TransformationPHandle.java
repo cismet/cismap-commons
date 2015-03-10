@@ -226,15 +226,12 @@ public class TransformationPHandle extends PHandle {
 
                     final float newX = (float)currentX;
                     final float newY = (float)currentY;
-                    EventQueue.invokeLater(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                Thread.currentThread().setName("SetVetoPoint thread");
-                                CismapBroker.getInstance().setSnappingVetoPoint(new Point2D.Float(newX, newY));
-                                CismapBroker.getInstance().setSnappingVetoFeature(pfeature);
-                            }
-                        });
+                    if (CismapBroker.getInstance().getSnappingVetoPoint() == null) {
+                        CismapBroker.getInstance().setSnappingVetoPoint(new Point2D.Float(newX, newY));
+                    }
+                    if (CismapBroker.getInstance().getSnappingVetoFeature() == null) {
+                        CismapBroker.getInstance().setSnappingVetoFeature(pfeature);
+                    }
                     updateGeometryPoints(currentX, currentY);
                     // pfeature.syncGeometry();
                     relocateHandle();
