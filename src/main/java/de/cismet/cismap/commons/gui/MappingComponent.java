@@ -3927,6 +3927,21 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 CismapBroker.getInstance()
                         .fireStatusValueChanged(new StatusEvent(StatusEvent.RETRIEVAL_REMOVED, rasterService));
             }
+
+            if (rasterService instanceof FeatureAwareRasterService) {
+                final List<Feature> lf = new ArrayList<Feature>();
+                for (final Feature f : getFeatureCollection().getAllFeatures()) {
+                    if (f instanceof RasterLayerSupportedFeature) {
+                        final RasterLayerSupportedFeature rlsf = (RasterLayerSupportedFeature)f;
+                        if ((rlsf.getSupportingRasterService() != null)
+                                    && rlsf.getSupportingRasterService().equals(rasterService)) {
+                            lf.add(f);
+                        }
+                    }
+                }
+                getFeatureCollection().removeFeatures(lf);
+            }
+
             System.gc();
         } catch (final Exception e) {
             LOG.warn("Fehler bei mapServiceRemoved", e); // NOI18N
