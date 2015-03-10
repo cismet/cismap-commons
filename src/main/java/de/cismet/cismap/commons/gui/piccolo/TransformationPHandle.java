@@ -181,7 +181,6 @@ public class TransformationPHandle extends PHandle {
                     float currentX;
                     float currentY;
 
-                    boolean isSnappingPoint = false;
                     // CTRL DOWN => an der Linie kleben
                     if (pInputEvent.isLeftMouseButton() && pInputEvent.isControlDown()) {
                         final Point2D trigger = pInputEvent.getCanvasPosition();
@@ -221,19 +220,10 @@ public class TransformationPHandle extends PHandle {
                             if (snapPoint != null) {
                                 currentX = (float)snapPoint.getX();
                                 currentY = (float)snapPoint.getY();
-                                isSnappingPoint = true;
                             }
                         }
                     }
 
-                    final float newX = (float)currentX;
-                    final float newY = (float)currentY;
-                    if (isSnappingPoint) {
-                        CismapBroker.getInstance().setSnappingVetoPoint(new Point2D.Float(newX, newY));
-                    }
-                    if (CismapBroker.getInstance().getSnappingVetoFeature() == null) {
-                        CismapBroker.getInstance().setSnappingVetoFeature(pfeature);
-                    }
                     updateGeometryPoints(currentX, currentY);
                     // pfeature.syncGeometry();
                     relocateHandle();
@@ -334,6 +324,7 @@ public class TransformationPHandle extends PHandle {
                     false,
                     false);
             CismapBroker.getInstance().setSnappingVetoPoint(startPoint);
+            CismapBroker.getInstance().setSnappingVetoFeature(pfeature);
             if (!pfeature.getViewer().getInteractionMode().equals(MappingComponent.MOVE_POLYGON)) {
                 final Coordinate[] coordArr = pfeature.getCoordArr(entityPosition, ringPosition);
                 final float[] xp = pfeature.getXp(entityPosition, ringPosition);
