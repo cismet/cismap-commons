@@ -383,7 +383,7 @@ public class PFeatureTools {
         Point2D nearestPoint = null;
         for (int i = 0; i < points.length; ++i) {
             if ((vetoPoint != null) && points[i].equals(vetoPoint)) {
-                break;
+                return null;
             }
             final double distanceCheck = myPosition.distanceSq(points[i]);
             if ((distance < 0) || (distanceCheck < distance)) {
