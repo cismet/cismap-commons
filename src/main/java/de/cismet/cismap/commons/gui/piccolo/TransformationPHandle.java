@@ -181,6 +181,7 @@ public class TransformationPHandle extends PHandle {
                     float currentX;
                     float currentY;
 
+                    boolean isSnappingPoint = false;
                     // CTRL DOWN => an der Linie kleben
                     if (pInputEvent.isLeftMouseButton() && pInputEvent.isControlDown()) {
                         final Point2D trigger = pInputEvent.getCanvasPosition();
@@ -220,21 +221,19 @@ public class TransformationPHandle extends PHandle {
                             if (snapPoint != null) {
                                 currentX = (float)snapPoint.getX();
                                 currentY = (float)snapPoint.getY();
+                                isSnappingPoint = true;
                             }
                         }
                     }
 
                     final float newX = (float)currentX;
                     final float newY = (float)currentY;
-                    EventQueue.invokeLater(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                Thread.currentThread().setName("SetVetoPoint thread");
-                                CismapBroker.getInstance().setSnappingVetoPoint(new Point2D.Float(newX, newY));
-                                CismapBroker.getInstance().setSnappingVetoFeature(pfeature);
-                            }
-                        });
+                    if (isSnappingPoint) {
+                        CismapBroker.getInstance().setSnappingVetoPoint(new Point2D.Float(newX, newY));
+                    }
+                    if (CismapBroker.getInstance().getSnappingVetoFeature() == null) {
+                        CismapBroker.getInstance().setSnappingVetoFeature(pfeature);
+                    }
                     updateGeometryPoints(currentX, currentY);
                     // pfeature.syncGeometry();
                     relocateHandle();
@@ -329,6 +328,12 @@ public class TransformationPHandle extends PHandle {
     @Override
     public void startHandleDrag(final Point2D aLocalPoint, final PInputEvent aEvent) {
         try {
+            final Point2D startPoint = PFeatureTools.getNearestPointInArea(
+                    pfeature.getViewer(),
+                    aEvent.getCanvasPosition(),
+                    false,
+                    false);
+            CismapBroker.getInstance().setSnappingVetoPoint(startPoint);
             if (!pfeature.getViewer().getInteractionMode().equals(MappingComponent.MOVE_POLYGON)) {
                 final Coordinate[] coordArr = pfeature.getCoordArr(entityPosition, ringPosition);
                 final float[] xp = pfeature.getXp(entityPosition, ringPosition);
