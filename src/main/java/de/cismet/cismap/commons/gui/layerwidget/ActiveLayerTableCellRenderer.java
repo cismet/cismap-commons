@@ -20,7 +20,9 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -88,8 +90,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
     private ImageIcon refreshNeededIcon;
     private ImageIcon inProgressIcon;
     // private Timer indeterminateProgressTimer = null;
-    /** Liste mit update Timers. FIXME: bei 50 ist schloss. ArrayList? */
-    private Timer[] indeterminateProgressTimers = new Timer[50];
+    private Map<Integer, Timer> indeterminateProgressTimers = new HashMap<Integer, Timer>();
     private StyleLabel styleLabel = new StyleLabel();
     private boolean isWidgetTable = false;
     private JProgressBar progressBar = new JProgressBar(0, 100) {
@@ -432,13 +433,13 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                 // -1: progress is indeterminate
                 if ((currentProgress == -1) && ((RetrievalServiceLayer)value).isEnabled()
                             && !((RetrievalServiceLayer)value).isRefreshNeeded()) {
-                    if (indeterminateProgressTimers[realRow] == null) {
+                    if (indeterminateProgressTimers.get(realRow) == null) {
                         if (DEBUG) {
                             if (log.isDebugEnabled()) {
                                 log.debug("new indeterminateProgressTimers[" + realRow + "] created"); // NOI18N
                             }
                         }
-                        indeterminateProgressTimers[realRow] = new Timer(30, new ActionListener() {
+                        indeterminateProgressTimers.put(realRow, new Timer(30, new ActionListener() {
 
                                     @Override
                                     public void actionPerformed(final ActionEvent e) {
@@ -450,9 +451,10 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                             realColumn);
 
                                         if ((currentProgress == 0) || (currentProgress == 100)) {
-                                            indeterminateProgressTimers[realRow].stop();
-                                            indeterminateProgressTimers[realRow].setRepeats(false);
-                                            indeterminateProgressTimers[realRow] = null;
+                                            final Timer timer = indeterminateProgressTimers.get(realRow);
+                                            timer.stop();
+                                            timer.setRepeats(false);
+                                            indeterminateProgressTimers.remove(realRow);
                                             if (DEBUG) {
                                                 if (log.isDebugEnabled()) {
                                                     log.debug(
@@ -472,13 +474,14 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                             ((TreeTableModelAdapter)(table.getModel())).fireTableChanged(evt);
                                         }
                                     }
-                                });
+                                }));
                     }
 
-                    if (!indeterminateProgressTimers[realRow].isRunning()) {
+                    if (!indeterminateProgressTimers.get(realRow).isRunning()) {
                         // this.progressBar.invalidate();
-                        indeterminateProgressTimers[realRow].start();
-                        indeterminateProgressTimers[realRow].setRepeats(true);
+                        final Timer timer = indeterminateProgressTimers.get(realRow);
+                        timer.start();
+                        timer.setRepeats(true);
                     }
 
                     // In this scenario of displaying a JSlider in a JProgressBar as renderer for a table cell, the
@@ -498,7 +501,7 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                     }
 
                     this.progressBar.setValue(currentProgress);
-                    if ((indeterminateProgressTimers[realRow] != null)
+                    if ((indeterminateProgressTimers.get(realRow) != null)
                                 && ((currentProgress == 100) || (currentProgress == 0))) {
                         if (DEBUG) {
                             if (log.isDebugEnabled()) {
@@ -506,9 +509,10 @@ public class ActiveLayerTableCellRenderer extends DefaultTableCellRenderer {
                                             + "] stopped from Renderer"); // NOI18N
                             }
                         }
-                        indeterminateProgressTimers[realRow].setRepeats(false);
-                        indeterminateProgressTimers[realRow].stop();
-                        indeterminateProgressTimers[realRow] = null;
+                        final Timer timer = indeterminateProgressTimers.get(realRow);
+                        timer.setRepeats(false);
+                        timer.stop();
+                        indeterminateProgressTimers.remove(realRow);
 
                         if (DEBUG) {
                             if (log.isDebugEnabled()) {
