@@ -155,7 +155,11 @@ public class ImageRetrieval extends Thread {
                     log.debug("Retrieval complete of " + e.getRetrievalService()); // NOI18N
                 }
             } else {
-                fireLoadingAborted();
+                if (!youngerCall) {
+                    fireLoadingAborted();
+                } else {
+                    image = null;
+                }
             }
         } catch (Exception e) {
             log.error("Error in ImageRetrieval", e);                               // NOI18N
