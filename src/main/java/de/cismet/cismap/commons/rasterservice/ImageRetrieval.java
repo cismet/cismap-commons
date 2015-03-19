@@ -7,14 +7,16 @@
 ****************************************************/
 package de.cismet.cismap.commons.rasterservice;
 
+import com.google.common.io.ByteStreams;
+
 import org.apache.commons.httpclient.HttpClient;
 
 import org.openide.util.Exceptions;
 
-import java.awt.Image;
-
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import java.net.URL;
 
@@ -38,7 +40,6 @@ public class ImageRetrieval extends Thread {
 
     //~ Instance fields --------------------------------------------------------
 
-    Image image = null;
     BufferedInputStream in = null;
 
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
@@ -137,18 +138,23 @@ public class ImageRetrieval extends Thread {
                 }
             }
 
-            in = new BufferedInputStream(WebAccessManager.getInstance().doRequest(
-                        new URL(urlBase),
-                        requestParameter,
-                        method));
-
-            if (!youngerCall && !isInterrupted()) {
-                image = ImageIO.read(in);
-            }
+            final InputStream is = WebAccessManager.getInstance().doRequest(
+                    new URL(urlBase),
+                    requestParameter,
+                    method);
+            final byte[] bs = ByteStreams.toByteArray(is);
+            in = new BufferedInputStream(new ByteArrayInputStream(bs));
 
             final RetrievalEvent e = new RetrievalEvent();
+            if (!youngerCall && !isInterrupted()) {
+                e.setRetrievedObject(ImageIO.read(in));
+                if (e.getRetrievedObject() == null) {
+                    e.setRetrievedObject(org.apache.commons.io.IOUtils.toString(new ByteArrayInputStream(bs)));
+                    e.setHasErrors(true);
+                }
+            }
+
             e.setIsComplete(true);
-            e.setRetrievedObject(image);
             if (!youngerCall && !isInterrupted()) {
                 listener.retrievalComplete(e);
                 if (log.isDebugEnabled()) {
@@ -157,8 +163,6 @@ public class ImageRetrieval extends Thread {
             } else {
                 if (!youngerCall) {
                     fireLoadingAborted();
-                } else {
-                    image = null;
                 }
             }
         } catch (Exception e) {
@@ -195,7 +199,6 @@ public class ImageRetrieval extends Thread {
     public void fireLoadingAborted() {
         // TODO nochmal anschauen
         log.info("Retrieval interrupted"); // NOI18N
-        image = null;
         if (listener != null) {
             final RetrievalEvent e = new RetrievalEvent();
             e.setIsComplete(false);
