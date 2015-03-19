@@ -327,8 +327,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                             final Image i = Static2DTools.removeUnusedBorder((Image)errorObject, 5, 0.7);
                             errorObject = i;
                         } else if (e.getRetrievedObject() instanceof String) {
-                            final String message = (String)e.getRetrievedObject();
-//                        message=message.replaceAll("<.*>","");
+                            String message = (String)e.getRetrievedObject();
+                            message = message.replaceAll("<.*?>", "");
                             if (e.getErrorType().equals(RetrievalEvent.SERVERERROR)) {
                                 errorObject = org.openide.util.NbBundle.getMessage(
                                         ActiveLayerModel.class,
