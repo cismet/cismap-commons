@@ -432,6 +432,8 @@ public class CreateGeometryListener extends PBasicInputEventHandler implements C
                 createCurrentNewFeature(null);
                 finishGeometry(currentFeature);
                 inProgress = false;
+            } else {
+                reset();
             }
         } catch (Throwable t) {
             LOG.error("Error during the creation of the geometry", t); // NOI18N
