@@ -166,7 +166,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
     private void registerLayerFromLayerCollection(final LayerCollection lc) {
         for (final Object o : lc) {
             if (o instanceof LayerCollection) {
-                registerLayerFromLayerCollection(lc);
+                registerLayerFromLayerCollection((LayerCollection)o);
             } else if (o instanceof RetrievalServiceLayer) {
                 registerRetrievalServiceLayer((RetrievalServiceLayer)o);
             }
@@ -897,6 +897,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             return ((RetrievalServiceLayer)node);
         } else if (node instanceof WMSLayer) {
             return ((WMSLayer)node);
+        } else if (node instanceof LayerCollection) {
+            return ((LayerCollection)node);
         } else {
             return "ROOT 0"; // NOI18N
         }
@@ -1030,6 +1032,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             case 1: {
                 if ((node instanceof WMSServiceLayer) && (((WMSServiceLayer)node).getWMSLayers().size() > 1)) {
                     return true;
+                } else if ((node instanceof LayerCollection) && (((LayerCollection)node).size() > 0)) {
+                    return true;
                 } else {
                     return false;
                 }
@@ -1108,12 +1112,21 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
                     log.debug("aValue:" + aValue); // NOI18N
                 }
             }
-            ((WMSServiceLayer)node).setName(aValue.toString());
-            this.fireTreeNodesChanged(
-                this,
-                new Object[] { root, node },
-                null,
-                null);
+            if (node instanceof LayerCollection) {
+                ((LayerCollection)node).setName(aValue.toString());
+                this.fireTreeNodesChanged(
+                    this,
+                    new Object[] { root },
+                    null,
+                    null);
+            } else {
+                ((WMSServiceLayer)node).setName(aValue.toString());
+                this.fireTreeNodesChanged(
+                    this,
+                    new Object[] { root, node },
+                    null,
+                    null);
+            }
         } else if (column == 3) {
             // if (aValue instanceof WMSLayer)
         }
@@ -1146,7 +1159,8 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
      * @return  DOCUMENT ME!
      */
     public java.util.TreeMap<Integer, MapService> getMapServices() {
-        final Iterator it = layers.iterator();
+        final List l = new ArrayList(layers);
+        final Iterator it = l.iterator();
         final TreeMap<Integer, MapService> tm = new TreeMap();
         int counter = 0;
         while (it.hasNext()) {
