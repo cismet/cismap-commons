@@ -588,6 +588,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     /**
      * DOCUMENT ME!
      *
+     * @param   coordArray       DOCUMENT ME!
+     * @param   geometryFactory  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static MultiPoint createMultiPoint(final Coordinate[] coordArray, final GeometryFactory geometryFactory) {
+        return geometryFactory.createMultiPoint(coordArray);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   coordArray       coordEntity DOCUMENT ME!
      * @param   geometryFactory  DOCUMENT ME!
      *
@@ -648,6 +660,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                                 new Polygon[0]));
 
                     assignSynchronizedGeometry(multiPolygon);
+                } else if ((getFeature().getGeometry() instanceof MultiPoint)) {
+                    final MultiPoint multiPoint = geometryFactory.createMultiPoint(entityRingCoordArr[0][0]);
+                    assignSynchronizedGeometry(multiPoint);
                 } else {
                     final boolean isSingle = entityRingCoordArr.length == 1;
                     if (isSingle) {
@@ -743,6 +758,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         }
 
         refreshDesign();
+        syncGeometry();
     }
 
     /**
