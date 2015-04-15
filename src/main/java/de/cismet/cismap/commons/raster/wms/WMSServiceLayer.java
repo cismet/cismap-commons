@@ -133,20 +133,41 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @param  treePaths  DOCUMENT ME!
      */
     public WMSServiceLayer(final List treePaths) {
+        this(treePaths, false);
+    }
+
+    /**
+     * Creates a new WMSServiceLayer object.
+     *
+     * @param  l  The layer from which to create a WMSServiceLayer.
+     */
+    public WMSServiceLayer(final Layer l) {
+        setTitle(l.getTitle());
+        setName(l.getName());
+        addLayer(l);
+    }
+
+    /**
+     * Creates a new WMSServiceLayer object.
+     *
+     * @param  treePaths             DOCUMENT ME!
+     * @param  reverseSubLayerOrder  DOCUMENT ME!
+     */
+    public WMSServiceLayer(final List treePaths, final boolean reverseSubLayerOrder) {
         this.treePaths = treePaths;
         if (treePaths != null) {
-            final Iterator it = treePaths.iterator();
             if (treePaths.size() > 1) {
                 setName("Layerzusammenstellung"); // NOI18N
             }
 
-            while (it.hasNext()) {
-                final Object next = it.next();
+            for (int i = treePaths.size() - 1; i >= 0; --i) {
+                final Object next = treePaths.get(i);
+
                 if (next instanceof TreePath) {
                     final TreePath nextTreePath = (TreePath)next;
                     if (nextTreePath.getLastPathComponent() instanceof Layer) {
                         final Layer nextLayer = (Layer)nextTreePath.getLastPathComponent();
-                        addLayer(nextLayer);
+                        addLayer(nextLayer, null, true, false, true, reverseSubLayerOrder);
                         if (getName() == null) {
                             setName(nextLayer.getTitle());
                         }
@@ -165,17 +186,6 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 }
             }
         }
-    }
-
-    /**
-     * Creates a new WMSServiceLayer object.
-     *
-     * @param  l  The layer from which to create a WMSServiceLayer.
-     */
-    public WMSServiceLayer(final Layer l) {
-        setTitle(l.getTitle());
-        setName(l.getName());
-        addLayer(l);
     }
 
     /**
@@ -348,10 +358,29 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @param  addSubLayer    DOCUMENT ME!
      */
     protected void addLayer(final Layer nextLayer,
-            Style selectedStyle,
+            final Style selectedStyle,
             final boolean enabled,
             final boolean info,
             final boolean addSubLayer) {
+        addLayer(nextLayer, selectedStyle, enabled, info, addSubLayer, false);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  nextLayer             DOCUMENT ME!
+     * @param  selectedStyle         DOCUMENT ME!
+     * @param  enabled               DOCUMENT ME!
+     * @param  info                  DOCUMENT ME!
+     * @param  addSubLayer           DOCUMENT ME!
+     * @param  reverseSubLayerOrder  DOCUMENT ME!
+     */
+    protected void addLayer(final Layer nextLayer,
+            Style selectedStyle,
+            final boolean enabled,
+            final boolean info,
+            final boolean addSubLayer,
+            final boolean reverseSubLayerOrder) {
         if ((nextLayer.getName() != null) && !nextLayer.getName().equals("")) // NOI18N
         {
             if (selectedStyle == null) {
@@ -371,9 +400,16 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
         }
 
         if (addSubLayer) {
-            for (int i = 0; i < nextLayer.getChildren().length; ++i) {
-                final Layer childLayer = nextLayer.getChildren()[i];
-                addLayer(childLayer);
+            if (reverseSubLayerOrder) {
+                for (int i = nextLayer.getChildren().length - 1; i >= 0; --i) {
+                    final Layer childLayer = nextLayer.getChildren()[i];
+                    addLayer(childLayer);
+                }
+            } else {
+                for (int i = 0; i < nextLayer.getChildren().length; ++i) {
+                    final Layer childLayer = nextLayer.getChildren()[i];
+                    addLayer(childLayer);
+                }
             }
         }
     }
