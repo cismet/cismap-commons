@@ -196,7 +196,7 @@ public class LayerDropUtils {
 
                         return true;
                     } else {
-                        final WMSServiceLayer l = new WMSServiceLayer(v);
+                        final WMSServiceLayer l = new WMSServiceLayer(v, true);
 
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("((SelectionAndCapabilities)o).getUrl()"
