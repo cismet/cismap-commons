@@ -104,10 +104,36 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             final int maxCachedFeatureCount,
             final SwingWorker workerThread,
             final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles) throws Exception {
+        this(layerProperties, documentURL, maxCachedFeatureCount, workerThread, styles, null);
+    }
+
+    /**
+     * Creates a new ShapeFeatureFactory object.
+     *
+     * @param   layerProperties        DOCUMENT ME!
+     * @param   documentURL            DOCUMENT ME!
+     * @param   maxCachedFeatureCount  DOCUMENT ME!
+     * @param   workerThread           DOCUMENT ME!
+     * @param   styles                 DOCUMENT ME!
+     * @param   shapeCrs               DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public ShapeFeatureFactory(final LayerProperties layerProperties,
+            final URI documentURL,
+            final int maxCachedFeatureCount,
+            final SwingWorker workerThread,
+            final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles,
+            final Crs shapeCrs) throws Exception {
         this.layerProperties = layerProperties;
         this.documentURI = documentURL;
         this.maxCachedFeatureCount = maxCachedFeatureCount;
         this.styles = styles;
+        this.shapeCrs = shapeCrs;
+
+        if (shapeCrs != null) {
+            this.featureSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
+        }
 
         try {
             this.parseShapeFile(workerThread);
@@ -253,9 +279,9 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      * @throws  Exception  DOCUMENT ME!
      */
     protected synchronized void parseShapeFile(final SwingWorker workerThread) throws Exception {
-        if (shapeCrs == null) {
-            shapeCrs = CismapBroker.getInstance().getSrs();
-            featureSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
+        if (getShapeCrs() == null) {
+            setShapeCrs(CismapBroker.getInstance().getSrs());
+            featureSrid = CrsTransformer.extractSridFromCrs(getShapeCrs().getCode());
         }
         filename = new File(documentURI).getName();
 
@@ -266,90 +292,13 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         logger.info("SW[" + workerThread + "]: creating " + type.getProperties().length
                     + " featureServiceAttributes from first parsed degree feature");
         featureServiceAttributes = new Vector(type.getProperties().length);
-        String tableName = documentURI.toString().substring(documentURI.toString().lastIndexOf('/') + 1);
-        tableName = tableName.substring(0, tableName.length() - 4);
-        final int class_id = 92;
-        int pos = 1;
-        final String cs_classSql =
-            "INSERT INTO cs_class (name, class_icon_id, object_icon_id, table_name, primary_key_field, indexed, array_link) values ('"
-                    + tableName
-                    + "', 2,2,'dlm25w."
-                    + tableName
-                    + "', 'ID', false,false);";
-        System.out.println(cs_classSql);
-        final String csTypeSql = "INSERT INTO cs_type (name, class_id, complex_type) values ('"
-                    + tableName
-                    + "', "
-                    + class_id
-                    + ", true);";
-        System.out.println(csTypeSql);
-        System.out.println("INSERT INTO cs_attr (class_id, type_id, name, field_name, pos, visible, optional) values ("
-                    + class_id + ", 2 ,'id', 'ID', " + 0 + ", false, false);");
-        final StringBuilder sb = new StringBuilder();
+
         for (final PropertyType pt : type.getProperties()) {
             // ToDo was ist wenn zwei Geometrien dabei sind
-            if (pt.getName().getAsString().toLowerCase().endsWith("geom")) {
-                continue;
-            }
-            sb.append("ref."
-                            + pt.getName().getAsString().substring(pt.getName().getAsString().indexOf(":") + 1)
-                            .toLowerCase()).append(", ");
             featureServiceAttributes.add(
                 new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true));
-            int stype = 19;
-
-            if (Integer.toString(pt.getType()).equals(String.valueOf(Types.CHAR))
-                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.VARCHAR))
-                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.LONGVARCHAR))) {
-                stype = 9;
-            } else if (Integer.toString(pt.getType()).equals(String.valueOf(Types.INTEGER))
-                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.SMALLINT))
-                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.TINYINT))) {
-                stype = 2;
-            } else if (Integer.toString(pt.getType()).equals(String.valueOf(Types.BIGINT))) {
-                stype = 2;
-            } else if (Integer.toString(pt.getType()).equals(String.valueOf(Types.DOUBLE))
-                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.FLOAT))
-                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.DECIMAL))) {
-                stype = 12;
-            } else if (Integer.toString(pt.getType()).equals(String.valueOf(Types.DATE))
-                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.TIME))
-                        || Integer.toString(pt.getType()).equals(String.valueOf(Types.TIMESTAMP))) {
-                stype = 13;
-            } else if (Integer.toString(pt.getType()).equals(String.valueOf(Types.BOOLEAN))) {
-                stype = 10;
-            } else {
-                stype = 9;
-            }
-            final String attrName = pt.getName()
-                        .getAsString()
-                        .substring(pt.getName().getAsString().indexOf(":") + 1)
-                        .toLowerCase();
-            final String cs_atrSql = "INSERT INTO cs_attr (class_id, type_id, name, field_name, pos) values ("
-                        + class_id
-                        + ", "
-                        + stype
-                        + " ,'"
-                        + attrName
-                        + "', '"
-                        + attrName
-                        + "', "
-                        + (pos++)
-                        + ");";
-            System.out.println(cs_atrSql);
         }
-        System.out.println(
-            "INSERT INTO cs_attr (class_id, type_id, name, field_name, pos, foreign_key, foreign_key_references_to) values ("
-                    + class_id
-                    + ", 19 ,'geom', 'geom', "
-                    + (pos++)
-                    + ", true, 1);");
-        System.out.println("INSERT INTO cs_attr (class_id, type_id, name, field_name, pos) values (" + class_id
-                    + ", 9 ,'fis_g_user', 'fis_g_user', " + (pos++) + ");");
-        System.out.println("INSERT INTO cs_attr (class_id, type_id, name, field_name, pos) values (" + class_id
-                    + ", 14 ,'fis_g_date', 'fis_g_date', " + (pos++) + ");");
 
-//        System.out.println(sb.toString());
         envelope = shapeFile.getFileMBR();
         // create an index file, if it does not alreay exists
         int currentProgress = 0;
@@ -646,7 +595,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     CrsTransformer.extractSridFromCrs(crs.getCode()));
             Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
-            boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
+            boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, getShapeCrs().getCode());
             // List<ShapeFeature> selectedFeatures =
             // this.degreeFeaturesTree.query(boundingPolygon.getEnvelopeInternal());
 
@@ -719,7 +668,10 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     CrsTransformer.extractSridFromCrs(crs.getCode()));
             Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
-            boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, shapeCrs.getCode());
+            boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, getShapeCrs().getCode());
+            if (this.checkCancelled(workerThread, " quering spatial index structure")) {
+                return null;
+            }
 
             if (featuresAlreadyInMemory(boundingPolygon, query)) {
                 selectedFeatures = createFeaturesFromMemory(query, boundingPolygon);
@@ -742,6 +694,10 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     return new Vector<ShapeFeature>();
                 }
 
+                if (this.checkCancelled(workerThread, " quering spatial index structure")) {
+                    return null;
+                }
+
                 selectedFeatures = new ArrayList<ShapeFeature>(recordNumbers.length);
                 final ShapeInfo info = new ShapeInfo(filename, persShapeFile, featureSrid, fc);
                 int count = 0;
@@ -761,7 +717,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 //            }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("feature crs: " + shapeCrs.getCode() + " features " + selectedFeatures.size()
+                logger.debug("feature crs: " + getShapeCrs().getCode() + " features " + selectedFeatures.size()
                             + " boundingbox: "
                             + boundingPolygon.getEnvelopeInternal());
             }
@@ -830,22 +786,22 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         return geometryType;
     }
 
+
     /**
      * DOCUMENT ME!
      *
-     * @param  args  DOCUMENT ME!
+     * @return  the shapeCrs
      */
-    public static void main(final String[] args) {
-        final String shapeFile = "file:///home/therter/tmp/daten/fg_ba_sb_katalog_sb.shp";
-//        String shapeFile = args[0];
-        try {
-            final ShapeFeatureFactory sff = new ShapeFeatureFactory(
-                    null,
-                    new URI(shapeFile),
-                    Integer.MAX_VALUE,
-                    null,
-                    null);
-        } catch (Exception e) {
-        }
+    public Crs getShapeCrs() {
+        return shapeCrs;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  shapeCrs  the shapeCrs to set
+     */
+    public void setShapeCrs(final Crs shapeCrs) {
+        this.shapeCrs = shapeCrs;
     }
 }
