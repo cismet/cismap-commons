@@ -428,4 +428,13 @@ public class BoundingBox implements Cloneable, Serializable {
         setY1(getY1() - additionalHeight);
         setY2(getY2() + additionalHeight);
     }
+
+    /**
+     * Checks, if the bounding box is valid. The box is not valid, if any coordinate has the value NaN.
+     *
+     * @return  true, iff the bounding box is valid
+     */
+    public boolean isValid() {
+        return !((x1 == Double.NaN) || (x2 == Double.NaN) || (y1 == Double.NaN) || (y2 == Double.NaN));
+    }
 }

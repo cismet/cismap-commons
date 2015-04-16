@@ -4649,7 +4649,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             final boolean scaleToFit,
             final int animationDuration,
             final boolean queryServices) {
-        if (bb != null) {
+        if ((bb != null) && bb.isValid()) {
             if (DEBUG) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("gotoBoundingBox:" + bb, new CurrentStackTrace()); // NOI18N
@@ -4715,7 +4715,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 };
             CismetThreadPool.execute(handle);
         } else {
-            LOG.warn("Seltsam: die BoundingBox war null", new CurrentStackTrace()); // NOI18N
+            LOG.warn("Seltsam: die BoundingBox war " + ((bb == null) ? "null" : "invalid"), new CurrentStackTrace()); // NOI18N
         }
     }
 
@@ -5302,6 +5302,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             final BoundingBox newBbox = crsTransformer.transformBoundingBox(
                                     bbox,
                                     event.getFormerCrs().getCode());
+
+                            if (!newBbox.isValid()) {
+                                throw new Exception("Transformation failed");
+                            }
 
                             if (getMappingModel() instanceof ActiveLayerModel) {
                                 final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
@@ -6063,6 +6067,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                         final PFeature noCand = featureMap.get(deletionCandidatesFeature[index]);
 
                                         if (noCand.hasSameGeometry(((Feature)o).getGeometry())) {
+                                            noCand.setFeature((Feature)o);
                                             noCand.refreshDesign();
                                             deletionCandidates.remove(noCand);
                                         } else {
