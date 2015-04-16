@@ -12,8 +12,15 @@
 package de.cismet.cismap.commons.gui.layerwidget;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 import org.apache.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.SwingWorker;
 
@@ -30,9 +37,12 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  */
 public class ZoomToFeaturesWorker extends SwingWorker<Geometry, Geometry> {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final Logger LOG = Logger.getLogger(ZoomToFeaturesWorker.class);
+
     //~ Instance fields --------------------------------------------------------
 
-    private Logger LOG = Logger.getLogger(ZoomToFeaturesWorker.class);
     private Feature[] features;
     /** buffer in percent.* */
     private int buffer;
@@ -63,7 +73,9 @@ public class ZoomToFeaturesWorker extends SwingWorker<Geometry, Geometry> {
 
     @Override
     protected Geometry doInBackground() throws Exception {
-        Geometry geom = null;
+        boolean first = true;
+        int srid = 0;
+        final List<Geometry> geomList = new ArrayList<Geometry>(features.length);
 
         for (final Feature f : features) {
             Geometry g = f.getGeometry();
@@ -71,22 +83,27 @@ public class ZoomToFeaturesWorker extends SwingWorker<Geometry, Geometry> {
             if (g != null) {
                 g = g.getEnvelope();
 
-                if (geom == null) {
-                    geom = g.getEnvelope();
-                    geom.setSRID(g.getSRID());
+                if (first) {
+                    srid = g.getSRID();
+                    first = false;
                 } else {
-                    if (geom.getSRID() != g.getSRID()) {
-                        g = CrsTransformer.transformToGivenCrs(
-                                g,
-                                CrsTransformer.createCrsFromSrid(geom.getSRID()));
+                    if (g.getSRID() != srid) {
+                        g = CrsTransformer.transformToGivenCrs(g, CrsTransformer.createCrsFromSrid(srid));
                     }
-                    final Geometry ge = g.getEnvelope();
-                    g.setSRID(geom.getSRID());
-                    geom = geom.getEnvelope().union(ge);
                 }
+
+                geomList.add(g);
             }
         }
-        return geom;
+
+        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+        Geometry union = factory.buildGeometry(geomList);
+
+        if (union instanceof GeometryCollection) {
+            union = ((GeometryCollection)union).union();
+        }
+
+        return union;
     }
 
     @Override
