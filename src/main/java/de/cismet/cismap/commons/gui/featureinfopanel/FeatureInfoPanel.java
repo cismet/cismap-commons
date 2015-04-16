@@ -12,6 +12,7 @@
 package de.cismet.cismap.commons.gui.featureinfopanel;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -29,11 +30,16 @@ import org.openide.util.NbBundle;
 
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.ItemEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 
 import javax.swing.ImageIcon;
@@ -60,6 +66,7 @@ import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.PermissionProvider;
+import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.WMSFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
@@ -245,6 +252,29 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                     }
                 }
             });
+
+        tabAttributes.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseClicked(final MouseEvent e) {
+                    int col = tabAttributes.getTableHeader().getColumnModel().getColumnIndexAtX(e.getX());
+                    col = tabAttributes.convertColumnIndexToModel(col);
+                    final FeatureServiceFeature fsf = currentTableModel.getFeature();
+
+                    if ((fsf != null) && !fsf.isEditable() && (col == 1) && (currentTableModel.tableRuleSet != null)) {
+                        int row = tabAttributes.rowAtPoint(e.getPoint());
+                        row = tabAttributes.convertRowIndexToModel(row);
+                        final Object value = currentTableModel.getValueAt(row, col);
+                        final String columnName = currentTableModel.getAttributeNameForRow(row);
+
+                        currentTableModel.tableRuleSet.mouseClicked(
+                            tabAttributes,
+                            columnName,
+                            value,
+                            e.getClickCount());
+                    }
+                }
+            });
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -256,12 +286,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      */
     private void expandAll(final TreePath parent) {
         final Object lastComponent = parent.getLastPathComponent();
-
+        final int childCount = model.getChildCount(lastComponent);
         jtFeatures.expandPath(parent);
 
-        for (int i = 0; i < model.getChildCount(lastComponent); ++i) {
-            final TreePath newPath = parent.pathByAddingChild(model.getChild(lastComponent, i));
-            expandAll(newPath);
+        for (int i = 0; i < childCount; ++i) {
+            if (!model.isLeaf(model.getChild(lastComponent, i))) {
+                final TreePath newPath = parent.pathByAddingChild(model.getChild(lastComponent, i));
+                expandAll(newPath);
+            }
         }
     }
 
@@ -394,8 +426,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void layerCombobox1ItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_layerCombobox1ItemStateChanged
-        model.setLayerFilter((LayerFilter)evt.getItem());
-        expandAll(new TreePath(model.getRoot()));
+        if (evt.getStateChange() == ItemEvent.SELECTED) {
+            model.setLayerFilter((LayerFilter)evt.getItem());
+            expandAll(new TreePath(model.getRoot()));
+        }
     }                                                                                 //GEN-LAST:event_layerCombobox1ItemStateChanged
 
     /**
@@ -423,7 +457,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
             tabAttributes.setModel(currentTableModel);
             enableAttributeTable(true);
-            mappingComonent.highlightFeature(selectedFeature, 1500);
+            Geometry highlightingGeometry = selectedFeature.getGeometry();
+
+            if (highlightingGeometry.getCoordinates().length > 500) {
+                highlightingGeometry = TopologyPreservingSimplifier.simplify(highlightingGeometry, 30);
+            }
+            final Feature highligtingFeature = new PureNewFeature(highlightingGeometry);
+
+            mappingComonent.highlightFeature(highligtingFeature, 1500);
         } else if (selectedComp instanceof WMSGetFeatureInfoDescription) {
             // the default wms mechanism should be used
             enableAttributeTable(false);
@@ -641,10 +682,13 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             final FeatureLockingInterface locker = FeatureLockerFactory.getInstance()
                         .getLockerForFeatureService(f.getLayerProperties().getFeatureService());
             final AttributeTableRuleSet tableRuleSet = f.getLayerProperties().getAttributeTableRuleSet();
+            if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(changedFeatures, currentTableModel)) {
+                return;
+            }
             if (tableRuleSet != null) {
                 tableRuleSet.beforeSave(f);
             }
-            // stop the cell renerer, if it is active
+            // stop the cell renderer, if it is active
             if ((tabAttributes.getEditingColumn() != -1) && (tabAttributes.getEditingRow() != -1)) {
                 tabAttributes.getCellEditor(tabAttributes.getEditingRow(),
                     tabAttributes.getEditingColumn()).stopCellEditing();
@@ -661,6 +705,14 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 }
             }
             changedFeatures.remove(f);
+
+            if (tableRuleSet != null) {
+                tableRuleSet.afterSave(null);
+            }
+
+            if (f.getLayerProperties().getFeatureService() != null) {
+                f.getLayerProperties().getFeatureService().retrieve(true);
+            }
         } catch (Exception e) {
             LOG.error("Error while saving feature", e);
         }
@@ -732,6 +784,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             if (locker != null) {
                 try {
                     locker.unlock(lockMap.get(f));
+                    f.setEditable(false);
                 } catch (Exception e) {
                     LOG.error("Locking object can't be removed.", e);
                     allLocksRemoved = false;
@@ -1138,6 +1191,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
          */
         private void initTable() {
             ((CellSpecificRenderedTable)tabAttributes).removeAllCellEditors();
+            ((CellSpecificRenderedTable)tabAttributes).removeAllCellRenderers();
 
             if (tableRuleSet != null) {
                 for (int i = 0; i < getRowCount(); ++i) {
@@ -1289,6 +1343,17 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             }
 
             return value;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   rowIndex  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public String getAttributeNameForRow(final int rowIndex) {
+            return attributeNames[rowIndex];
         }
 
         @Override
