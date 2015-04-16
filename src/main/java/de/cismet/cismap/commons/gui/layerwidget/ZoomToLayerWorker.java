@@ -26,10 +26,12 @@ import javax.swing.tree.TreePath;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.GMLFeatureService;
 import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.GMLFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.JDBCFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
@@ -53,7 +55,7 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static Logger LOG = Logger.getLogger(ZoomToLayerWorker.class);
+    private static final Logger LOG = Logger.getLogger(ZoomToLayerWorker.class);
 
     //~ Instance fields --------------------------------------------------------
 
@@ -167,6 +169,18 @@ public class ZoomToLayerWorker extends SwingWorker<Geometry, Geometry> {
      */
     public static Geometry getServiceBounds(final RetrievalServiceLayer rsl) {
         Geometry g = null;
+
+        if (rsl instanceof AbstractFeatureService) {
+            final AbstractFeatureService afs = (AbstractFeatureService)rsl;
+
+            if (!afs.isInitialized()) {
+                try {
+                    afs.initAndWait();
+                } catch (Exception e) {
+                    LOG.error("Error while initialising feature service", e);
+                }
+            }
+        }
 
         if (rsl instanceof WMSServiceLayer) {
             final Layer l = ((WMSServiceLayer)rsl).getLayerInformation();
