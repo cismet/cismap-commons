@@ -35,6 +35,7 @@ import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 /**
  * DOCUMENT ME!
@@ -80,6 +81,8 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
     private boolean errorInGeometryFound = false;
     private boolean fileNotFound = false;
     private String geometryType = UNKNOWN;
+    private Crs shapeCrs;
+    private Crs crs;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -160,10 +163,14 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
                 this.getDocumentURI(),
                 this.maxSupportedFeatureCount,
                 this.layerInitWorker,
-                parseSLD(getSLDDefiniton()));
+                parseSLD(getSLDDefiniton()),
+                shapeCrs);
         noGeometryRecognised = sff.isNoGeometryRecognised();
         errorInGeometryFound = sff.isErrorInGeometryFound();
         geometryType = sff.getGeometryType();
+        if (crs != null) {
+            sff.setCrs(crs);
+        }
 
         return sff;
     }
@@ -237,7 +244,11 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
      * @param  crs  DOCUMENT ME!
      */
     public void setCrs(final Crs crs) {
-        ((ShapeFeatureFactory)featureFactory).setCrs(crs);
+        if (featureFactory != null) {
+            ((ShapeFeatureFactory)featureFactory).setCrs(crs);
+        } else {
+            this.crs = crs;
+        }
     }
 
 // breaks DocumentFeatureServiceFactory
@@ -250,5 +261,33 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
     @Override
     public String getGeometryType() {
         return geometryType; // To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void initFromElement(final Element element) throws Exception {
+        super.initFromElement(element);
+
+        if (element.getAttributeValue("shapeCrs") != null) {
+            final String crs = element.getAttributeValue("shapeCrs");
+            shapeCrs = CismapBroker.getInstance().crsFromCode(crs);
+        }
+    }
+
+    @Override
+    public Element toElement() {
+        final Element e = super.toElement();
+        String crs = null;
+
+        if (getFeatureFactory() != null) {
+            crs = ((ShapeFeatureFactory)getFeatureFactory()).getShapeCrs().getCode();
+        } else if (shapeCrs != null) {
+            crs = shapeCrs.getCode();
+        }
+
+        if (crs != null) {
+            e.setAttribute("shapeCrs", crs); // NOI18N
+        }
+
+        return e;
     }
 }
