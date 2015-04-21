@@ -173,6 +173,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private AttributeTableSearchPanel searchPanel;
     private AttributeTableFieldCalculation calculationDialog;
     private Object query;
+    private int[] lastRows;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFirstPage;
@@ -358,11 +359,14 @@ public class AttributeTable extends javax.swing.JPanel {
                         if (tbProcessing.isSelected()) { // && !selectionChangeFromMap) {
                             final int[] rows = table.getSelectedRows();
 
-                            for (final int row : rows) {
-                                final FeatureServiceFeature feature = model.getFeatureServiceFeature(
-                                        table.convertRowIndexToModel(row));
-                                makeFeatureEditable(feature);
+                            if (!Arrays.equals(lastRows, rows)) {
+                                for (final int row : rows) {
+                                    final FeatureServiceFeature feature = model.getFeatureServiceFeature(
+                                            table.convertRowIndexToModel(row));
+                                    makeFeatureEditable(feature);
+                                }
                             }
+                            lastRows = rows;
                         }
                     }
 
@@ -560,6 +564,7 @@ public class AttributeTable extends javax.swing.JPanel {
                 saveChangedRows(true);
             } else if (ans == JOptionPane.NO_OPTION) {
                 model.setEditable(false);
+                AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
             } else {
                 return false;
             }
@@ -869,8 +874,14 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  forceSave  true, if the changed data should be saved without confirmation
      */
     private void changeProcessingModeIntern(final boolean forceSave) {
+        if (model == null) {
+            // it is not possible to activate the processing mode, when the model is not created, yet.
+            tbProcessing.setSelected(!tbProcessing.isSelected());
+            return;
+        }
         if (tbProcessing.isSelected()) {
             model.setEditable(tbProcessing.isSelected());
+            AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
             final ActiveLayerModel model = (ActiveLayerModel)CismapBroker.getInstance().getMappingComponent()
                         .getMappingModel();
 
@@ -890,11 +901,9 @@ public class AttributeTable extends javax.swing.JPanel {
             if ((table.getEditingColumn() != -1) && (table.getEditingRow() != -1)) {
                 table.getCellEditor(table.getEditingRow(), table.getEditingColumn()).stopCellEditing();
             }
-        }
-
-        if (!tbProcessing.isSelected()) {
             saveChangedRows(forceSave);
         }
+
         butUndo.setVisible(tbProcessing.isSelected());
         table.repaint();
     }
@@ -2240,7 +2249,6 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     private void tbProcessingActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_tbProcessingActionPerformed
         changeProcessingModeIntern(false);
-        AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
     }                                                                                //GEN-LAST:event_tbProcessingActionPerformed
 
     /**
@@ -2560,6 +2568,8 @@ public class AttributeTable extends javax.swing.JPanel {
                         }
 
                         model.setEditable(false);
+                        AttributeTableFactory.getInstance()
+                                .processingModeChanged(featureService, tbProcessing.isSelected());
 
                         EventQueue.invokeLater(new Runnable() {
 
@@ -2581,6 +2591,7 @@ public class AttributeTable extends javax.swing.JPanel {
             wdt.start();
         } else {
             model.setEditable(false);
+            AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
         }
     }
 
