@@ -992,9 +992,13 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         image.setImage(buffImage);
         if (getUOMFromDeegree(styling.uom) == UOM.pixel) {
             ((FixedPImage)image).setMultiplier(1 / (buffImage.getHeight() / styling.graphic.size));
-            image.setOffset(wtst.getScreenX(x), wtst.getScreenY(y));
-            ((FixedPImage)image).setSweetSpotX(styling.graphic.anchorPointX);
-            ((FixedPImage)image).setSweetSpotY(styling.graphic.anchorPointY);
+            ((FixedPImage)image).setSweetSpotX(-1 * styling.graphic.anchorPointX);
+            ((FixedPImage)image).setSweetSpotY(-1 * styling.graphic.anchorPointY);
+            image.setOffset(wtst.getScreenX(x),
+                wtst.getScreenY(y));
+//            image.setOffset(wtst.getScreenX(x) - (buffImage.getWidth() / 2),
+//                wtst.getScreenY(y)
+//                        - (buffImage.getHeight() / 2));
         } else {
             // ((PImageWithDisplacement)image).setUOM(getUOMFromDeegree(styling.uom));
             final double multiplier = getMultiplierFromDeegreeUOM(styling.uom);
@@ -1196,7 +1200,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
                 }
                 applyLineStyling(path, (LineStyling)styling.first, pfeature.getMappingComponent());
                 polygonNr++;
-            } else if (styling.first instanceof TextStyling) {
+            } else if ((styling.first instanceof TextStyling) && (styling.third != null)
+                        && !styling.third.equals("null")) {
                 PFeature.PTextWithDisplacement text;
                 try {
                     text = pfeature.sldStyledText.get(textNr++);
