@@ -195,12 +195,11 @@ public class CidsLayerFactory {
                                 + schonVorhanden.getMessage());                      // NOI18N
                 }
             } else if (element.getName().equals(LayerCollection.XML_ELEMENT_NAME)) { // NOI18N
-                // todo
                 final LayerCollection lc = new LayerCollection(element, capabilities, model);
 
                 try {
                     LOG.info(
-                        "addLayer SimplePostgisFeatureService ("
+                        "addLayer LayerCollection ("
                                 + lc.getName()
                                 + ")");                         // NOI18N
                     return lc;
@@ -320,8 +319,8 @@ public class CidsLayerFactory {
                     return getKeyForRetrievalService(layer);
                 }
             } catch (Exception ex) {
-                log.error((("Konnte keinen Key für das layerelement " + layerelement.getName()) != null)
-                        ? layerelement.getName() : ("null" + "erstellen"),
+                log.error("Konnte keinen Key für das layerelement "
+                            + ((layerelement.getName() != null) ? layerelement.getName() : ("null" + " erstellen")),
                     ex);
             }
         }

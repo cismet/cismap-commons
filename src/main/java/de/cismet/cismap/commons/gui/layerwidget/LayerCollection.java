@@ -307,6 +307,13 @@ public class LayerCollection extends ArrayList<Object> implements ServiceLayer {
                     // the methods isVisible(TreePath) and handleVisibiliy(TreePath)
                     final TreePath tp = new TreePath(new Object[] { this, tmp });
 
+                    if (tp.getLastPathComponent() instanceof RetrievalServiceLayer) {
+                        final RetrievalServiceLayer rl = (RetrievalServiceLayer)tp.getLastPathComponent();
+                        if (rl.getPNode() == null) {
+                            model.registerRetrievalServiceLayer(rl);
+                        }
+                    }
+
                     if (model.isVisible(tp) != enabled) {
                         model.handleVisibility(tp);
                     }
