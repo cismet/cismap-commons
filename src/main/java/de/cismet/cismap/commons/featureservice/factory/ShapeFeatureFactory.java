@@ -786,7 +786,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         return geometryType;
     }
 
-
     /**
      * DOCUMENT ME!
      *

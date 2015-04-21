@@ -24,7 +24,6 @@ public class FixedPImage extends PImage implements PSticky {
 
     //~ Instance fields --------------------------------------------------------
 
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private double sweetSpotX = 0d;
     private double sweetSpotY = 0d;
     private double originalOffsetX = 0;

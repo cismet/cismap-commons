@@ -16,6 +16,9 @@ import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
 import ar.com.fdvs.dj.domain.DynamicReport;
 
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
@@ -91,8 +94,10 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
@@ -112,16 +117,20 @@ import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.layerwidget.ZoomToLayerWorker;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.retrieval.RepaintEvent;
+import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.tools.ExportCsvDownload;
 import de.cismet.cismap.commons.tools.ExportDbfDownload;
 import de.cismet.cismap.commons.tools.ExportDownload;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.tools.ExportTxtDownload;
 import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
+import de.cismet.cismap.commons.util.SelectionManager;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
 
@@ -155,7 +164,8 @@ public class AttributeTable extends javax.swing.JPanel {
     private int popupColumn;
     private MappingComponent mappingComponent;
     private boolean selectionChangeFromMap = false;
-    private FeatureCollectionListener featureCollectionListener;
+    private final FeatureCollectionListener featureCollectionListener;
+    private final RepaintListener repaintListener;
     private List<FeatureServiceFeature> changedFeatures = new ArrayList<FeatureServiceFeature>();
     private AttributeTableRuleSet tableRuleSet = new DefaultAttributeTableRuleSet();
     private FeatureLockingInterface locker;
@@ -340,40 +350,9 @@ public class AttributeTable extends javax.swing.JPanel {
                 @Override
                 public void valueChanged(final ListSelectionEvent e) {
                     if (!e.getValueIsAdjusting()) {
-                        final List<PFeature> features = new ArrayList<PFeature>();
-                        features.addAll(featureService.getPNode().getChildrenReference());
-                        final int[] selectedFeatures = table.getSelectedRows();
-                        final int[] selectedFeatureIds = new int[selectedFeatures.length];
-
-                        for (int i = 0; i < selectedFeatures.length; ++i) {
-                            selectedFeatureIds[i] = model.getFeatureServiceFeature(
-                                    table.convertRowIndexToModel(selectedFeatures[i])).getId();
-                        }
-                        Arrays.sort(selectedFeatureIds);
-
-                        for (final PFeature pfeature : features) {
-                            final Feature feature = pfeature.getFeature();
-
-                            if (feature instanceof FeatureWithId) {
-                                final boolean selected = Arrays.binarySearch(
-                                        selectedFeatureIds,
-                                        ((FeatureWithId)feature).getId()) >= 0;
-
-                                if (!selectionChangeFromMap) {
-                                    if (selected != pfeature.isSelected()) {
-                                        pfeature.setSelected(selected);
-                                    }
-                                    if (selected) {
-                                        final SelectionListener sl = (SelectionListener)
-                                            mappingComponent.getInputEventListener().get(MappingComponent.SELECT);
-                                        sl.addSelectedFeature(pfeature);
-                                    } else {
-                                        final SelectionListener sl = (SelectionListener)
-                                            mappingComponent.getInputEventListener().get(MappingComponent.SELECT);
-                                        sl.removeSelectedFeature(pfeature);
-                                    }
-                                }
-                            }
+                        if (!selectionChangeFromMap) {
+                            synchronizeTableSeletionWithMap();
+                            SelectionManager.getInstance().featureSelectionChanged(null);
                         }
 
                         if (tbProcessing.isSelected()) { // && !selectionChangeFromMap) {
@@ -397,20 +376,6 @@ public class AttributeTable extends javax.swing.JPanel {
         table.setDefaultRenderer(Number.class, new NumberCellRenderer());
 
         txtCurrentPage.setText("1");
-        final Geometry g = ZoomToLayerWorker.getServiceBounds(featureService);
-
-        if (g != null) {
-            bb = new XBoundingBox(g);
-
-            try {
-                final CrsTransformer transformer = new CrsTransformer(CismapBroker.getInstance().getSrs().getCode());
-                bb = transformer.transformBoundingBox(bb);
-            } catch (Exception e) {
-                LOG.error("Cannot transform CRS.", e);
-            }
-        } else {
-            bb = null;
-        }
 
         loadModel(currentPage);
 
@@ -487,25 +452,83 @@ public class AttributeTable extends javax.swing.JPanel {
                 }
             };
 
+        repaintListener = new RepaintListener() {
+
+                @Override
+                public void repaintStart(final RepaintEvent e) {
+                }
+
+                @Override
+                public void repaintComplete(final RepaintEvent e) {
+                    if (e.getRetrievalEvent().getRetrievalService().equals(featureService)) {
+                        synchronizeTableSeletionWithMap();
+                    }
+                }
+
+                @Override
+                public void repaintError(final RepaintEvent e) {
+                }
+            };
+
         table.addMouseListener(new MouseAdapter() {
 
                 @Override
                 public void mouseClicked(final MouseEvent e) {
                     if ((tableRuleSet != null) && !tbProcessing.isSelected()) {
-                        int col = table.getTableHeader().getColumnModel().getColumnIndexAtX(e.getX());
-                        col = table.convertColumnIndexToModel(col);
-                        final String columnName = model.getColumnAttributeName(col);
                         int row = table.rowAtPoint(e.getPoint());
-                        row = table.convertRowIndexToModel(row);
-                        final Object value = model.getValueAt(row, col);
 
-                        tableRuleSet.mouseClicked(table, columnName, value, e.getClickCount());
+                        if (row != -1) {
+                            int col = table.getTableHeader().getColumnModel().getColumnIndexAtX(e.getX());
+                            col = table.convertColumnIndexToModel(col);
+                            final String columnName = model.getColumnAttributeName(col);
+                            row = table.convertRowIndexToModel(row);
+                            final Object value = model.getValueAt(row, col);
+
+                            tableRuleSet.mouseClicked(table, columnName, value, e.getClickCount());
+                        }
                     }
                 }
             });
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * synchronizes the table selection with the PFeatures in the map.
+     */
+    private void synchronizeTableSeletionWithMap() {
+        final List<PFeature> features = new ArrayList<PFeature>();
+        final SelectionListener sl = (SelectionListener)mappingComponent.getInputEventListener()
+                    .get(MappingComponent.SELECT);
+        features.addAll(featureService.getPNode().getChildrenReference());
+        final int[] selectedFeatures = table.getSelectedRows();
+        final int[] selectedFeatureIds = new int[selectedFeatures.length];
+
+        for (int i = 0; i < selectedFeatures.length; ++i) {
+            selectedFeatureIds[i] = model.getFeatureServiceFeature(
+                    table.convertRowIndexToModel(selectedFeatures[i])).getId();
+        }
+        Arrays.sort(selectedFeatureIds);
+
+        for (final PFeature pfeature : features) {
+            final Feature feature = pfeature.getFeature();
+
+            if (feature instanceof FeatureWithId) {
+                final boolean selected = Arrays.binarySearch(
+                        selectedFeatureIds,
+                        ((FeatureWithId)feature).getId()) >= 0;
+
+                if (selected != pfeature.isSelected()) {
+                    pfeature.setSelected(selected);
+                }
+                if (selected) {
+                    sl.addSelectedFeature(pfeature);
+                } else {
+                    sl.removeSelectedFeature(pfeature);
+                }
+            }
+        }
+    }
 
     /**
      * DOCUMENT ME!
@@ -536,7 +559,6 @@ public class AttributeTable extends javax.swing.JPanel {
             if (ans == JOptionPane.YES_OPTION) {
                 saveChangedRows(true);
             } else if (ans == JOptionPane.NO_OPTION) {
-                unlockAll();
                 model.setEditable(false);
             } else {
                 return false;
@@ -544,6 +566,7 @@ public class AttributeTable extends javax.swing.JPanel {
         }
 
         mappingComponent.getFeatureCollection().removeFeatureCollectionListener(featureCollectionListener);
+        mappingComponent.removeRepaintListener(repaintListener);
         return true;
     }
 
@@ -640,6 +663,24 @@ public class AttributeTable extends javax.swing.JPanel {
                 protected List<FeatureServiceFeature> doInBackground() throws Exception {
                     Thread.currentThread().setName("AttributeTable loadModel");
                     final Object serviceQuery = ((query == null) ? featureService.getQuery() : query);
+
+                    if (bb == null) {
+                        final Geometry g = ZoomToLayerWorker.getServiceBounds(featureService);
+
+                        if (g != null) {
+                            bb = new XBoundingBox(g);
+
+                            try {
+                                final CrsTransformer transformer = new CrsTransformer(CismapBroker.getInstance()
+                                                .getSrs().getCode());
+                                bb = transformer.transformBoundingBox(bb);
+                            } catch (Exception e) {
+                                LOG.error("Cannot transform CRS.", e);
+                            }
+                        } else {
+                            bb = null;
+                        }
+                    }
 
                     if ((pageSize != -1) && (itemCount == 0)) {
                         setItemCount(featureService.getFeatureCount(query, bb));
@@ -830,6 +871,21 @@ public class AttributeTable extends javax.swing.JPanel {
     private void changeProcessingModeIntern(final boolean forceSave) {
         if (tbProcessing.isSelected()) {
             model.setEditable(tbProcessing.isSelected());
+            final ActiveLayerModel model = (ActiveLayerModel)CismapBroker.getInstance().getMappingComponent()
+                        .getMappingModel();
+
+            if (!featureService.isSelectable()) {
+                featureService.setSelectable(true);
+            }
+
+            if (!featureService.isEnabled()) {
+                featureService.setEnabled(true);
+            }
+
+            if (model.getMapServices().values().contains(featureService)
+                        && !model.isVisible(new TreePath(featureService))) {
+                model.handleVisibility(new TreePath(featureService));
+            }
         } else {
             if ((table.getEditingColumn() != -1) && (table.getEditingRow() != -1)) {
                 table.getCellEditor(table.getEditingRow(), table.getEditingColumn()).stopCellEditing();
@@ -1924,22 +1980,38 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     private void butZoomToSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butZoomToSelectionActionPerformed
         final int[] selectedRows = table.getSelectedRows();
-        Geometry geo = null;
+        boolean first = true;
+        int srid = 0;
+        final List<Geometry> geomList = new ArrayList<Geometry>(selectedRows.length);
 
         for (final int row : selectedRows) {
-            final Geometry tmpGeo = model.getGeometryFromRow(table.convertRowIndexToModel(row));
+            Geometry g = model.getGeometryFromRow(table.convertRowIndexToModel(row));
 
-            if (geo == null) {
-                geo = tmpGeo;
-            } else {
-                if (tmpGeo != null) {
-                    geo = geo.union(tmpGeo);
+            if (g != null) {
+                g = g.getEnvelope();
+
+                if (first) {
+                    srid = g.getSRID();
+                    first = false;
+                } else {
+                    if (g.getSRID() != srid) {
+                        g = CrsTransformer.transformToGivenCrs(g, CrsTransformer.createCrsFromSrid(srid));
+                    }
                 }
+
+                geomList.add(g);
             }
         }
 
+        final GeometryFactory factory = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING), srid);
+        Geometry union = factory.buildGeometry(geomList);
+
+        if (union instanceof GeometryCollection) {
+            union = ((GeometryCollection)union).union();
+        }
+
         if (mappingComponent != null) {
-            final XBoundingBox bbox = new XBoundingBox(geo);
+            final XBoundingBox bbox = new XBoundingBox(union);
             bbox.increase(10);
             mappingComponent.gotoBoundingBoxWithHistory(bbox);
         } else {
@@ -2384,106 +2456,175 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  forceSave  true, if the changed data should be saved without confirmation
      */
     private void saveChangedRows(final boolean forceSave) {
-        if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(changedFeatures, model)) {
-            tbProcessing.setSelected(true);
-            return;
+        boolean save = forceSave;
+
+        if (!save) {
+            final int ans = JOptionPane.showConfirmDialog(
+                    AttributeTable.this,
+                    NbBundle.getMessage(
+                        AttributeTable.class,
+                        "AttributeTable.addWindowListener().text",
+                        featureService.getName()),
+                    NbBundle.getMessage(AttributeTable.class, "AttributeTable.addWindowListener().title"),
+                    JOptionPane.YES_NO_OPTION);
+
+            if (ans == JOptionPane.YES_OPTION) {
+                save = true;
+            } else if (ans == JOptionPane.NO_OPTION) {
+                save = false;
+            } else {
+                return;
+            }
         }
 
-        final WaitingDialogThread<Void> wdt = new WaitingDialogThread<Void>(StaticSwingTools.getParentFrame(this),
-                true,
-                "Speichere Änderungen",
-                null,
-                200) {
+        if (save) {
+            if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(changedFeatures, model)) {
+                tbProcessing.setSelected(true);
+                return;
+            }
 
-                @Override
-                protected Void doInBackground() throws Exception {
-                    if (featureService instanceof ShapeFileFeatureService) {
-                        final List<FeatureServiceFeature> features = new ArrayList<FeatureServiceFeature>();
+            final WaitingDialogThread<Void> wdt = new WaitingDialogThread<Void>(StaticSwingTools.getParentFrame(this),
+                    true,
+                    "Speichere Änderungen",
+                    null,
+                    200) {
 
-                        for (int i = 0; i < model.getRowCount(); ++i) {
-                            features.add(model.getFeatureServiceFeature(table.convertRowIndexToModel(i)));
-                        }
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        if (featureService instanceof ShapeFileFeatureService) {
+                            final List<FeatureServiceFeature> features = new ArrayList<FeatureServiceFeature>();
 
-                        try {
-                            if ((features != null) && (features.size() > 0)) {
-                                final FeatureCollection fc = new SimpleFeatureCollection(
-                                        String.valueOf(System.currentTimeMillis()),
-                                        features.toArray(new FeatureServiceFeature[features.size()]),
-                                        getAliasAttributeList());
-                                String filename = ((ShapeFileFeatureService)featureService).getDocumentURI().getPath();
-                                if (filename.indexOf(".") != -1) {
-                                    filename = filename.substring(0, filename.lastIndexOf("."));
-                                }
+                            for (int i = 0; i < model.getRowCount(); ++i) {
+                                features.add(model.getFeatureServiceFeature(table.convertRowIndexToModel(i)));
+                            }
 
-                                for (final FeatureServiceFeature fsf : changedFeatures) {
-                                    if (fsf instanceof DefaultFeatureServiceFeature) {
-                                        try {
-                                            final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)
-                                                fsf;
-                                            if (tableRuleSet != null) {
-                                                tableRuleSet.beforeSave(fsf);
+                            try {
+                                if ((features != null) && (features.size() > 0)) {
+                                    final FeatureCollection fc = new SimpleFeatureCollection(
+                                            String.valueOf(System.currentTimeMillis()),
+                                            features.toArray(new FeatureServiceFeature[features.size()]),
+                                            getAliasAttributeList());
+                                    String filename = ((ShapeFileFeatureService)featureService).getDocumentURI()
+                                                .getPath();
+                                    if (filename.indexOf(".") != -1) {
+                                        filename = filename.substring(0, filename.lastIndexOf("."));
+                                    }
+
+                                    for (final FeatureServiceFeature fsf : changedFeatures) {
+                                        if (fsf instanceof DefaultFeatureServiceFeature) {
+                                            try {
+                                                final DefaultFeatureServiceFeature feature =
+                                                    (DefaultFeatureServiceFeature)fsf;
+                                                if (tableRuleSet != null) {
+                                                    tableRuleSet.beforeSave(fsf);
+                                                }
+                                                feature.saveChanges();
+                                            } catch (Exception e) {
+                                                LOG.error("Cannot save object", e);
                                             }
-                                            feature.saveChanges();
-                                        } catch (Exception e) {
-                                            LOG.error("Cannot save object", e);
                                         }
                                     }
+                                    final ShapeFile shape = new ShapeFile(
+                                            fc,
+                                            filename);
+                                    final ShapeFileWriter writer = new ShapeFileWriter(shape);
+                                    writer.write();
                                 }
-                                final ShapeFile shape = new ShapeFile(
-                                        fc,
-                                        filename);
-                                final ShapeFileWriter writer = new ShapeFileWriter(shape);
-                                writer.write();
+                            } catch (Exception e) {
+                                LOG.error("Error while refreshing shape file.", e);
                             }
-                        } catch (Exception e) {
-                            LOG.error("Error while refreshing shape file.", e);
-                        }
-                    } else {
-                        wd.setMax(changedFeatures.size());
-                        int count = 0;
+                        } else {
+                            wd.setMax(changedFeatures.size());
+                            int count = 0;
 
-                        for (final FeatureServiceFeature fsf : changedFeatures) {
-                            if (fsf instanceof DefaultFeatureServiceFeature) {
-                                try {
-                                    final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)fsf;
-                                    if (tableRuleSet != null) {
-                                        tableRuleSet.beforeSave(fsf);
+                            for (final FeatureServiceFeature fsf : changedFeatures) {
+                                if (fsf instanceof DefaultFeatureServiceFeature) {
+                                    try {
+                                        final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)fsf;
+                                        if (tableRuleSet != null) {
+                                            tableRuleSet.beforeSave(fsf);
+                                        }
+                                        feature.saveChanges();
+                                    } catch (Exception e) {
+                                        LOG.error("Cannot save object", e);
                                     }
-                                    feature.saveChanges();
-                                } catch (Exception e) {
-                                    LOG.error("Cannot save object", e);
                                 }
-                            }
 
-                            wd.setProgress(++count);
+                                wd.setProgress(++count);
+                            }
                         }
+                        changedFeatures.clear();
+
+                        if (tableRuleSet != null) {
+                            tableRuleSet.afterSave(model);
+                        }
+
+                        model.setEditable(false);
+
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    model.fireContentsChanged();
+                                }
+                            });
+
+                        // reload the layer
+                        if (featureService != null) {
+                            featureService.retrieve(true);
+                        }
+
+                        return null;
                     }
-                    changedFeatures.clear();
+                };
 
-                    if (tableRuleSet != null) {
-                        tableRuleSet.afterSave(model);
-                    }
+            wdt.start();
+        } else {
+            model.setEditable(false);
+        }
+    }
 
-                    model.setEditable(false);
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  listener  DOCUMENT ME!
+     */
+    public void addListSelectionListener(final ListSelectionListener listener) {
+        table.getSelectionModel().addListSelectionListener(listener);
+    }
 
-                    EventQueue.invokeLater(new Runnable() {
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  listener  DOCUMENT ME!
+     */
+    public void removeListSelectionListener(final ListSelectionListener listener) {
+        table.getSelectionModel().removeListSelectionListener(listener);
+    }
 
-                            @Override
-                            public void run() {
-                                model.fireContentsChanged();
-                            }
-                        });
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public List<FeatureServiceFeature> getSelectedFeatures() {
+        final int[] selectedFeatureRows = table.getSelectedRows();
+        final List<FeatureServiceFeature> features = new ArrayList<FeatureServiceFeature>(selectedFeatureRows.length);
 
-                    // reload the layer
-                    if (featureService != null) {
-                        featureService.retrieve(true);
-                    }
+        for (int i = 0; i < selectedFeatureRows.length; ++i) {
+            features.add(model.getFeatureServiceFeature(table.convertRowIndexToModel(selectedFeatureRows[i])));
+        }
 
-                    return null;
-                }
-            };
+        return features;
+    }
 
-        wdt.start();
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public int getSelectedFeatureCount() {
+        return table.getSelectedRows().length;
     }
 
     /**
@@ -2616,6 +2757,7 @@ public class AttributeTable extends javax.swing.JPanel {
     public void setMappingComponent(final MappingComponent mappingComponent) {
         this.mappingComponent = mappingComponent;
         mappingComponent.getFeatureCollection().addFeatureCollectionListener(featureCollectionListener);
+//        mappingComponent.addRepaintListener(repaintListener);
 
         if (model != null) {
             applySelection();
@@ -2626,16 +2768,23 @@ public class AttributeTable extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     private void applySelection() {
-        final SelectionListener sl = (SelectionListener)mappingComponent.getInputEventListener()
-                    .get(MappingComponent.SELECT);
-        final List<PFeature> selectedPFeatures = sl.getAllSelectedPFeatures();
-        final List<Feature> selectedFeatures = new ArrayList<Feature>();
+        applySelection(null);
+    }
 
-        for (final PFeature f : selectedPFeatures) {
-            selectedFeatures.add(f.getFeature());
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectedFeatures  DOCUMENT ME!
+     */
+    public void applySelection(List<Feature> selectedFeatures) {
+        if (selectedFeatures == null) {
+            selectedFeatures = SelectionManager.getInstance().getSelectedFeatures(featureService);
         }
+        table.getSelectionModel().clearSelection();
 
-        setSelection(selectedFeatures);
+        if (selectedFeatures != null) {
+            setSelection(selectedFeatures);
+        }
     }
 
     /**
