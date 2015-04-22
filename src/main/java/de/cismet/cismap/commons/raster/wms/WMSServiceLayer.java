@@ -403,7 +403,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
             if (reverseSubLayerOrder) {
                 for (int i = nextLayer.getChildren().length - 1; i >= 0; --i) {
                     final Layer childLayer = nextLayer.getChildren()[i];
-                    addLayer(childLayer);
+                    addLayer(childLayer, null, true, false, true, true);
                 }
             } else {
                 for (int i = 0; i < nextLayer.getChildren().length; ++i) {
