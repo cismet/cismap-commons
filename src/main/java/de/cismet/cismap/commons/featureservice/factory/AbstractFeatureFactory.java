@@ -86,6 +86,7 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
         this.maxFeatureCount = aff.maxFeatureCount;
         this.lastCreatedfeatureVector = new Vector(aff.lastCreatedfeatureVector.size());
         this.lastCreatedfeatureVector.addAll(lastCreatedfeatureVector);
+        this.styles = aff.styles;
     }
 
     //~ Methods ----------------------------------------------------------------

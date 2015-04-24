@@ -274,6 +274,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         this.setInitialisationError(afs.getInitialisationError());
         this.setInitElement(afs.getInitElement());
         this.setSelectable(afs.isSelectable());
+        this.sldDefinition = afs.sldDefinition;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -449,14 +450,28 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
-     * DOCUMENT ME!
+     * Initialises the feature service and blocks until the initialisation of the service is completed. If the
+     * initialisation of the service is already in progress, this method wait until the initialisation is complete, if
+     * this thread is not running in edt.
      *
      * @throws  Exception  DOCUMENT ME!
      */
     public void initAndWait() throws Exception {
-        layerInitWorker = new LayerInitWorker();
-        init();
-        layerInitWorker = null;
+        if (!initialized && ((layerInitWorker == null) || layerInitWorker.isCancelled())) {
+            layerInitWorker = new LayerInitWorker();
+            init();
+            layerInitWorker = null;
+        } else if (!initialized) {
+            if (!EventQueue.isDispatchThread()) {
+                while ((layerInitWorker != null) && !layerInitWorker.isDone()) {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        // nothing to do
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -1276,7 +1291,6 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
             throws Exception {
         if (!initialized) {
             initAndWait();
-            initConcreteInstance();
         }
         return getFeatureFactory().createFeatures(getQuery(), boundingBox, layerInitWorker);
     }
@@ -1293,7 +1307,6 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
         if (!initialized) {
             try {
                 initAndWait();
-                initConcreteInstance();
             } catch (Exception e) {
                 LOG.error("Error while initialising feature service.", e);
             }
