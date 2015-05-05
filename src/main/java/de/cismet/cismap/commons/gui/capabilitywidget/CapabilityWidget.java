@@ -2063,6 +2063,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 final CapabilityLink cl = new CapabilityLink(
                         CapabilityLink.OGC,
                         link.getLink(),
+                        reverseAxisOrder.contains(link.getLink()),
                         link.equals(selectedLink),
                         link.getSubparent());
                 ret.addContent(cl.getElement());
