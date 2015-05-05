@@ -80,15 +80,23 @@ public class CapabilitiesPreferences {
             while (it.hasNext()) {
                 try {
                     final Element elem = it.next();
-                    final String type = elem.getAttribute("type").getValue();      // NOI18N
+                    final String type = elem.getAttribute("type").getValue();     // NOI18N
                     final String link = elem.getTextTrim();
-                    final String subparent = elem.getAttributeValue("subparent");  // NOI18N
+                    final String subparent = elem.getAttributeValue("subparent"); // NOI18N
                     boolean active = false;
                     try {
                         active = elem.getAttribute("active").getBooleanValue();
                     } catch (Exception unhandled) {
-                    }                                                              // NOI18N
-                    capabilities.put(new Integer(counter++), new CapabilityLink(type, link, active, subparent));
+                    }                                                             // NOI18N
+
+                    boolean reverseAxisOrder = false;
+                    try {
+                        reverseAxisOrder = elem.getAttribute("reverseAxisOrder").getBooleanValue();
+                    } catch (Exception unhandled) {
+                    } // NOI18N
+
+                    capabilities.put(new Integer(counter++),
+                        new CapabilityLink(type, link, reverseAxisOrder, active, subparent));
                 } catch (Throwable t) {
                     log.warn("Error while reading the CapabilityPreferences.", t); // NOI18N
                 }
