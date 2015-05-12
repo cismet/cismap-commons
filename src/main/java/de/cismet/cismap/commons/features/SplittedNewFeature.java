@@ -34,8 +34,8 @@ public class SplittedNewFeature extends PureNewFeature {
     /**
      * Creates a new SplittedNewFeature object.
      *
-     * @param  coordArr        DOCUMENT ME!
-     * @param  wtst            DOCUMENT ME!
+     * @param  coordArr              DOCUMENT ME!
+     * @param  wtst                  DOCUMENT ME!
      * @param  splittedFromPFeature  DOCUMENT ME!
      */
     public SplittedNewFeature(final Coordinate[] coordArr,
@@ -53,7 +53,7 @@ public class SplittedNewFeature extends PureNewFeature {
      *
      * @return  DOCUMENT ME!
      */
-    public PFeature splittedFromPFeature() {
+    public PFeature getSplittedFromPFeature() {
         return splittedFromPFeature;
     }
 }
