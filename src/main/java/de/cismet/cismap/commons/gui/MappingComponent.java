@@ -1123,7 +1123,18 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  oldInteractionMode  String-object
      */
     public void showPrintingSettingsDialog(final String oldInteractionMode) {
+        showPrintingSettingsDialog(oldInteractionMode, false);
+    }
+
+    /**
+     * Shows the printingsetting-dialog that resets the interactionmode after printing.
+     *
+     * @param  oldInteractionMode  String-object
+     * @param  chooseFile          DOCUMENT ME!
+     */
+    public void showPrintingSettingsDialog(final String oldInteractionMode, final boolean chooseFile) {
         printingSettingsDialog = printingSettingsDialog.cloneWithNewParent(true, this);
+        printingSettingsDialog.setChooseFileName(chooseFile);
 
         printingSettingsDialog.setInteractionModeAfterPrinting(oldInteractionMode);
         StaticSwingTools.showDialog(printingSettingsDialog);

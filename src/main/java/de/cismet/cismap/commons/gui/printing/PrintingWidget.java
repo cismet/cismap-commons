@@ -29,10 +29,14 @@ import java.awt.Image;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.io.File;
+
 import java.lang.reflect.Constructor;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 
@@ -59,6 +63,7 @@ import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.gui.Static2DTools;
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 import de.cismet.tools.gui.imagetooltip.ImageToolTip;
@@ -641,7 +646,40 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                             aFrame.setLocationRelativeTo(PrintingWidget.this);
                             aFrame.setVisible(true);
                         } else if (a.getId().equalsIgnoreCase(Action.PDF)) {
-                            if (DownloadManagerDialog.showAskingForUserTitle(PrintingWidget.this.mappingComponent)) {
+                            if (mappingComponent.getPrintingSettingsDialog().isChooseFileName()) {
+                                final File file = StaticSwingTools.chooseFile(DownloadManager.instance()
+                                                .getDestinationDirectory().getAbsolutePath(),
+                                        true,
+                                        new String[] { "pdf" },
+                                        "PDF (.pdf)",
+                                        PrintingWidget.this.mappingComponent);
+
+                                if (file != null) {
+                                    final JasperDownload jd = new JasperDownload(
+                                            jasperPrint,
+                                            file.getParent(),
+                                            "Cismap-Druck",
+                                            file.getName().substring(0, file.getName().indexOf(".")));
+
+                                    jd.setFileToSaveTo(file);
+
+                                    if (DownloadManager.instance().getDownloads().contains(jd)) {
+                                        // Previous downloads, that uses the same destination file, must be removed, so
+                                        // that the new download can be executed
+                                        final List<Download> downloads = new ArrayList(DownloadManager.instance()
+                                                        .getDownloads());
+                                        final int index = downloads.indexOf(jd);
+
+                                        if (index != -1) {
+                                            final Download d = downloads.get(index);
+                                            DownloadManager.instance().removeDownload(d);
+                                        }
+                                    }
+
+                                    DownloadManager.instance().add(jd);
+                                }
+                            } else if (DownloadManagerDialog.showAskingForUserTitle(
+                                            PrintingWidget.this.mappingComponent)) {
                                 final String jobname = DownloadManagerDialog.getJobname();
                                 DownloadManager.instance()
                                         .add(new JasperDownload(jasperPrint, jobname, "Cismap-Druck", "cismap"));

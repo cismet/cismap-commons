@@ -14,6 +14,8 @@ import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 
+import java.io.File;
+
 import java.util.Map;
 
 import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
@@ -135,5 +137,14 @@ public class JasperDownload extends AbstractCancellableDownload {
         if (fileToSaveTo.exists() && fileToSaveTo.isFile()) {
             fileToSaveTo.delete();
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  fileToSaveTo  DOCUMENT ME!
+     */
+    public void setFileToSaveTo(final File fileToSaveTo) {
+        this.fileToSaveTo = fileToSaveTo;
     }
 }
