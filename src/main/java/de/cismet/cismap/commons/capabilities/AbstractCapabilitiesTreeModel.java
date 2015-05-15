@@ -13,13 +13,15 @@ package de.cismet.cismap.commons.capabilities;
 
 import javax.swing.tree.TreeModel;
 
+import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
+
 /**
  * DOCUMENT ME!
  *
  * @author   spuhl
  * @version  $Revision$, $Date$
  */
-public abstract class AbstractCapabilitiesTreeModel implements TreeModel {
+public abstract class AbstractCapabilitiesTreeModel implements TreeModel, StringFilter {
 
     //~ Instance fields --------------------------------------------------------
 
@@ -78,6 +80,7 @@ public abstract class AbstractCapabilitiesTreeModel implements TreeModel {
      *
      * @param  filterString  the filterString to set
      */
+    @Override
     public void setFilterString(final String filterString) {
         this.filterString = filterString;
     }

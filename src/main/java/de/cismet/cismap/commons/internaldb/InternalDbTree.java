@@ -20,6 +20,8 @@ import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 
+import java.io.File;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -49,6 +51,7 @@ import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.MapService;
@@ -476,7 +479,7 @@ public class InternalDbTree extends JTree {
      *
      * @version  $Revision$, $Date$
      */
-    private class InternalDBTreeModel implements TreeModel {
+    private class InternalDBTreeModel implements TreeModel, StringFilter {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -484,6 +487,7 @@ public class InternalDbTree extends JTree {
         private List<DBEntry> entries = new ArrayList<DBEntry>();
         private String root = "Intern";
         private List<TreeModelListener> listener = new ArrayList<TreeModelListener>();
+        private String filterString;
 
         //~ Constructors -------------------------------------------------------
 
@@ -555,9 +559,9 @@ public class InternalDbTree extends JTree {
         @Override
         public Object getChild(final Object parent, final int index) {
             if (parent == root) {
-                return entries.get(index);
+                return filterChildren(entries).get(index);
             } else if (parent instanceof DBFolder) {
-                return ((DBFolder)parent).getChildren().get(index);
+                return filterChildren(((DBFolder)parent).getChildren()).get(index);
             } else {
                 return null;
             }
@@ -566,23 +570,63 @@ public class InternalDbTree extends JTree {
         @Override
         public int getChildCount(final Object parent) {
             if (parent == root) {
-                return entries.size();
+                return filterChildren(entries).size();
             } else if (parent instanceof DBFolder) {
-                return ((DBFolder)parent).getChildren().size();
+                return filterChildren(((DBFolder)parent).getChildren()).size();
             } else {
                 return 0;
             }
         }
 
+        /**
+         * Creates a new list with all elements of the given list, which matchs the filter string.
+         *
+         * @param   entryList  parent the folder, its children should be determined
+         *
+         * @return  a list with all children, which considers the filter string
+         */
+        private List<DBEntry> filterChildren(final List<DBEntry> entryList) {
+            final List<DBEntry> entries = new ArrayList<DBEntry>();
+
+            for (final DBEntry entry : entryList) {
+                if (fulfilFilterRequirements(entry)) {
+                    entries.add(entry);
+                }
+            }
+
+            return entries;
+        }
+
+        /**
+         * Checks, if the given entry fulfils the filter requirement.
+         *
+         * @param   entry  the entry to check
+         *
+         * @return  true, iff the filter requirement is fulfilled
+         */
+        private boolean fulfilFilterRequirements(final DBEntry entry) {
+            if (entry instanceof DBFolder) {
+                if ((filterString == null)
+                            || entry.getNameWithoutFolder().toLowerCase().contains(filterString.toLowerCase())) {
+                    return true;
+                } else {
+                    for (final DBEntry e : ((DBFolder)entry).getChildren()) {
+                        if (fulfilFilterRequirements(e)) {
+                            return true;
+                        }
+                    }
+                }
+            } else {
+                return (((filterString == null)
+                                    || entry.getNameWithoutFolder().toLowerCase().contains(filterString.toLowerCase())));
+            }
+
+            return false;
+        }
+
         @Override
         public boolean isLeaf(final Object node) {
-            if (node == root) {
-                return entries.isEmpty();
-            } else if (node instanceof DBFolder) {
-                return ((DBFolder)node).getChildren().isEmpty();
-            } else {
-                return true;
-            }
+            return getChildCount(node) == 0;
         }
 
         @Override
@@ -650,9 +694,9 @@ public class InternalDbTree extends JTree {
         @Override
         public int getIndexOfChild(final Object parent, final Object child) {
             if (parent == root) {
-                return entries.indexOf(child);
+                return filterChildren(entries).indexOf(child);
             } else if (parent instanceof DBFolder) {
-                return ((DBFolder)parent).getChildren().indexOf(child);
+                return filterChildren(((DBFolder)parent).getChildren()).indexOf(child);
             } else {
                 return 0;
             }
@@ -771,6 +815,11 @@ public class InternalDbTree extends JTree {
          */
         public Connection getConnection() {
             return conn;
+        }
+
+        @Override
+        public void setFilterString(final String filterString) {
+            this.filterString = filterString;
         }
     }
 }

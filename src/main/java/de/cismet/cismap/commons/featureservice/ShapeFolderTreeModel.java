@@ -16,11 +16,11 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.io.FileFilter;
 
-import java.net.URI;
-
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+
+import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
 
 /**
  * DOCUMENT ME!
@@ -28,7 +28,7 @@ import javax.swing.tree.TreePath;
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class ShapeFolderTreeModel implements TreeModel {
+public class ShapeFolderTreeModel implements TreeModel, StringFilter {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -135,6 +135,11 @@ public class ShapeFolderTreeModel implements TreeModel {
     public void removeTreeModelListener(final TreeModelListener l) {
     }
 
+    @Override
+    public void setFilterString(final String filterString) {
+        filter.setFilterString(filterString);
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -144,15 +149,51 @@ public class ShapeFolderTreeModel implements TreeModel {
      */
     private class ShapeFileFilter implements FileFilter {
 
+        //~ Instance fields ----------------------------------------------------
+
+        private String filterString;
+
         //~ Methods ------------------------------------------------------------
 
         @Override
         public boolean accept(final File pathname) {
+            return fulfilFilterRequirements(pathname);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  filterString  DOCUMENT ME!
+         */
+        public void setFilterString(final String filterString) {
+            this.filterString = filterString;
+        }
+
+        /**
+         * Checks, if the given file fulfils the filter requirement.
+         *
+         * @param   pathname  entry the entry to check
+         *
+         * @return  true, iff the filter requirement is fulfilled
+         */
+        public boolean fulfilFilterRequirements(final File pathname) {
             if (pathname.isDirectory()) {
-                return true;
+                if ((filterString == null) || pathname.getName().toLowerCase().contains(filterString.toLowerCase())) {
+                    return true;
+                } else {
+                    for (final File f : pathname.listFiles()) {
+                        if (fulfilFilterRequirements(f)) {
+                            return true;
+                        }
+                    }
+                }
             } else {
-                return (pathname.getName().endsWith(".shp") || pathname.getName().endsWith(".gml"));
+                return (pathname.getName().endsWith(".shp") || pathname.getName().endsWith(".gml"))
+                            && ((filterString == null)
+                                || pathname.getName().toLowerCase().contains(filterString.toLowerCase()));
             }
+
+            return false;
         }
     }
 }
