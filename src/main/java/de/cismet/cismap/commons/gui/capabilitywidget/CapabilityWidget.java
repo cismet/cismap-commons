@@ -317,8 +317,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (tree != null) {
             final Object model = tree.getModel();
 
-            if (model instanceof AbstractCapabilitiesTreeModel) {
-                ((AbstractCapabilitiesTreeModel)model).setFilterString(filterString);
+            if (model instanceof StringFilter) {
+                ((StringFilter)model).setFilterString(filterString);
                 tree.updateUI();
             }
         }
@@ -1060,17 +1060,22 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 //                                    .loadClass("de.cismet.cismap.cidslayer.CidsCapabilitesTreeCellRenderer");
                         final String[] args = link.split("[=&]");
                         String domain = "";
+                        String rootName = "";
                         for (int i = 0; i < args.length; i++) {
                             if (args[i].equalsIgnoreCase("domain") && ((i + 1) < args.length)) {
                                 domain = args[i + 1];
+                            }
+                            if (args[i].equalsIgnoreCase("title") && ((i + 1) < args.length)) {
+                                rootName = args[i + 1];
                             }
                         }
                         if (domain.isEmpty()) {
                             tbpCapabilities.remove(comp);
                             return;
                         }
-                        final String title = domain;
-                        final TreeModel tm = (TreeModel)treeModelClass.getConstructor(String.class).newInstance(domain);
+                        final String title = rootName;
+                        final TreeModel tm = (TreeModel)treeModelClass.getConstructor(String.class, String.class)
+                                    .newInstance(domain, title);
                         final TreeCellRenderer tcr = (TreeCellRenderer)treeRendererClass.newInstance();
                         final DragTree tree = new DragTree();
                         final DropTarget dt = new DropTarget(tree, acceptableActions, thisWidget);
