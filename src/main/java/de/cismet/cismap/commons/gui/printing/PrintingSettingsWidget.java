@@ -50,6 +50,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     private Vector<Action> actions = new Vector<Action>();
     private MappingComponent mappingComponent = null;
     private String interactionModeAfterPrinting = ""; // NOI18N
+    private boolean chooseFileName = false;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboAction;
@@ -663,5 +664,23 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     public void setInteractionModeAfterPrinting(final String interactionModeAfterPrinting) {
         this.interactionModeAfterPrinting = interactionModeAfterPrinting;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  chooseFileName  DOCUMENT ME!
+     */
+    public void setChooseFileName(final boolean chooseFileName) {
+        this.chooseFileName = chooseFileName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isChooseFileName() {
+        return chooseFileName;
     }
 }
