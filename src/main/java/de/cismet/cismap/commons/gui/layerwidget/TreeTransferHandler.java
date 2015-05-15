@@ -36,16 +36,12 @@ public class TreeTransferHandler extends TransferHandler {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger LOG = Logger.getLogger(TreeTransferHandler.class);
-    private static final String[] SUPPORTED_IMAGE_FORMATS = { "png", "jpg", "tif", "tiff", "gif" };
 
     //~ Instance fields --------------------------------------------------------
 
     private DataFlavor nodesFlavor;
     private DataFlavor[] flavors = new DataFlavor[1];
     private List<TreePath> nodesToRemove;
-    private DataFlavor fromCapabilityWidget = new DataFlavor(
-            DataFlavor.javaJVMLocalObjectMimeType,
-            "SelectionAndCapabilities"); // NOI18N
 
     //~ Constructors -----------------------------------------------------------
 
