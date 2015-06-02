@@ -530,6 +530,7 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
 
             if (wmsServiceLayer.isEnabled()) {
                 wmsServiceLayer.setRefreshNeeded(true);
+                wmsServiceLayer.retrieve(true);
             }
             fireTreeNodesChanged(
                 this,
