@@ -2174,7 +2174,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void addInfoNode() {
         try {
-            if (getFeature() instanceof XStyledFeature) {
+            if ((!(getFeature() instanceof InfoNodeAwareFeature)
+                            || ((getFeature() instanceof InfoNodeAwareFeature)
+                                && ((InfoNodeAwareFeature)getFeature()).hasInfoNode()))
+                        && (getFeature() instanceof XStyledFeature)) {
                 final XStyledFeature xsf = (XStyledFeature)getFeature();
 
                 if (infoComponent == null) {
