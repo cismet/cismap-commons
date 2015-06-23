@@ -62,6 +62,7 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 
 import java.util.ArrayList;
@@ -72,6 +73,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultRowSorter;
@@ -166,7 +168,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private boolean selectionChangeFromMap = false;
     private final FeatureCollectionListener featureCollectionListener;
     private final RepaintListener repaintListener;
-    private List<FeatureServiceFeature> changedFeatures = new ArrayList<FeatureServiceFeature>();
+    private List<FeatureServiceFeature> lockedFeatures = new ArrayList<FeatureServiceFeature>();
     private AttributeTableRuleSet tableRuleSet = new DefaultAttributeTableRuleSet();
     private FeatureLockingInterface locker;
     private List<Object> lockingObjects = new ArrayList<Object>();
@@ -174,6 +176,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private AttributeTableFieldCalculation calculationDialog;
     private Object query;
     private int[] lastRows;
+    private TreeSet<DefaultFeatureServiceFeature> modifiedFeatures = new TreeSet<DefaultFeatureServiceFeature>();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFirstPage;
@@ -550,7 +553,7 @@ public class AttributeTable extends javax.swing.JPanel {
      * @return  DOCUMENT ME!
      */
     public boolean dispose() {
-        if (tbProcessing.isSelected()) {
+        if (tbProcessing.isSelected() && !modifiedFeatures.isEmpty()) {
             final int ans = JOptionPane.showConfirmDialog(
                     AttributeTable.this,
                     NbBundle.getMessage(
@@ -568,6 +571,9 @@ public class AttributeTable extends javax.swing.JPanel {
             } else {
                 return false;
             }
+        } else if (tbProcessing.isSelected()) {
+            model.setEditable(false);
+            AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
         }
 
         mappingComponent.getFeatureCollection().removeFeatureCollectionListener(featureCollectionListener);
@@ -601,8 +607,8 @@ public class AttributeTable extends javax.swing.JPanel {
                     lockingObjects.add(locker.lock(feature));
                 }
                 feature.setEditable(true);
-                if (!changedFeatures.contains(feature)) {
-                    changedFeatures.add(feature);
+                if (!lockedFeatures.contains(feature)) {
+                    lockedFeatures.add(feature);
                     ((DefaultFeatureServiceFeature)feature).addPropertyChangeListener(model);
                 }
             } catch (LockAlreadyExistsException ex) {
@@ -2264,7 +2270,7 @@ public class AttributeTable extends javax.swing.JPanel {
                 JOptionPane.YES_NO_OPTION);
 
         if (ans == JOptionPane.YES_OPTION) {
-            for (final FeatureServiceFeature f : changedFeatures) {
+            for (final FeatureServiceFeature f : lockedFeatures) {
                 if (f instanceof DefaultFeatureServiceFeature) {
                     ((DefaultFeatureServiceFeature)f).undoAll();
                 }
@@ -2305,70 +2311,103 @@ public class AttributeTable extends javax.swing.JPanel {
             return;
         }
 
-        for (final int row : selectedRows) {
-            final FeatureServiceFeature featureToDelete = model.getFeatureServiceFeature(table.convertRowIndexToModel(
-                        row));
-            if (featureToDelete instanceof ModifiableFeature) {
-                final ModifiableFeature dfsf = (ModifiableFeature)featureToDelete;
-                Object lockingObject = null;
+        final WaitingDialogThread<Void> wdt = new WaitingDialogThread<Void>(StaticSwingTools.getParentFrame(this),
+                true,
+                NbBundle.getMessage(
+                    AttributeTable.class,
+                    "AttributeTable.butDeleteActionPerformed.WaitingDialogThread"),
+                null,
+                500) {
 
-                if (dfsf != null) {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    int progress = 0;
+                    wd.setMax(selectedRows.length);
+
+                    for (final int row : selectedRows) {
+                        final FeatureServiceFeature featureToDelete = model.getFeatureServiceFeature(
+                                table.convertRowIndexToModel(
+                                    row));
+                        if (featureToDelete instanceof ModifiableFeature) {
+                            final ModifiableFeature dfsf = (ModifiableFeature)featureToDelete;
+                            Object lockingObject = null;
+
+                            if (dfsf != null) {
+                                try {
+                                    try {
+                                        if (locker != null) {
+                                            lockingObject = locker.lock(dfsf);
+                                        }
+
+                                        dfsf.delete();
+                                        featuresToDelete.add(dfsf);
+                                    } catch (LockAlreadyExistsException ex) {
+                                        JOptionPane.showMessageDialog(
+                                            AttributeTable.this,
+                                            NbBundle.getMessage(
+                                                AttributeTable.class,
+                                                "AttributeTable.ListSelectionListener.valueChanged().lockexists.message",
+                                                featureToDelete.getId(),
+                                                ex.getLockMessage()),
+                                            NbBundle.getMessage(
+                                                AttributeTable.class,
+                                                "AttributeTable.ListSelectionListener.valueChanged().lockexists.title"),
+                                            JOptionPane.ERROR_MESSAGE);
+                                        // leave loop
+                                        break;
+                                    } catch (Exception ex) {
+                                        LOG.error("Error while locking feature.", ex);
+                                        JOptionPane.showMessageDialog(
+                                            AttributeTable.this,
+                                            NbBundle.getMessage(
+                                                AttributeTable.class,
+                                                "AttributeTable.ListSelectionListener.valueChanged().exception.message",
+                                                ex.getMessage()),
+                                            NbBundle.getMessage(
+                                                AttributeTable.class,
+                                                "AttributeTable.ListSelectionListener.valueChanged().exception.title"),
+                                            JOptionPane.ERROR_MESSAGE);
+                                        // leave loop
+                                        break;
+                                    }
+                                } finally {
+                                    try {
+                                        if (lockingObject != null) {
+                                            locker.unlock(lockingObject);
+                                        }
+                                    } catch (Exception e) {
+                                        LOG.error("An error during unlocking occured", e);
+                                        // no user message required, because a locking object for an not existing object
+                                        // does not matter.
+                                    }
+                                }
+                            }
+                        }
+                        wd.setProgress(++progress);
+                    }
+
+                    return null;
+                }
+
+                @Override
+                protected void done() {
                     try {
-                        try {
-                            if (locker != null) {
-                                lockingObject = locker.lock(dfsf);
-                            }
+                        get();
+                        for (final ModifiableFeature fsf : featuresToDelete) {
+                            model.removeFeatureServiceFeature((FeatureServiceFeature)fsf);
+                        }
+                        featureService.retrieve(true);
 
-                            dfsf.delete();
-                            featuresToDelete.add(dfsf);
-                        } catch (LockAlreadyExistsException ex) {
-                            JOptionPane.showMessageDialog(
-                                AttributeTable.this,
-                                NbBundle.getMessage(
-                                    AttributeTable.class,
-                                    "AttributeTable.ListSelectionListener.valueChanged().lockexists.message",
-                                    featureToDelete.getId(),
-                                    ex.getLockMessage()),
-                                NbBundle.getMessage(
-                                    AttributeTable.class,
-                                    "AttributeTable.ListSelectionListener.valueChanged().lockexists.title"),
-                                JOptionPane.ERROR_MESSAGE);
-                            // leave loop
-                            break;
-                        } catch (Exception ex) {
-                            LOG.error("Error while locking feature.", ex);
-                            JOptionPane.showMessageDialog(
-                                AttributeTable.this,
-                                NbBundle.getMessage(
-                                    AttributeTable.class,
-                                    "AttributeTable.ListSelectionListener.valueChanged().exception.message",
-                                    ex.getMessage()),
-                                NbBundle.getMessage(
-                                    AttributeTable.class,
-                                    "AttributeTable.ListSelectionListener.valueChanged().exception.title"),
-                                JOptionPane.ERROR_MESSAGE);
-                            // leave loop
-                            break;
+                        if (tableRuleSet != null) {
+                            tableRuleSet.afterSave(model);
                         }
-                    } finally {
-                        try {
-                            if (lockingObject != null) {
-                                locker.unlock(lockingObject);
-                            }
-                        } catch (Exception e) {
-                            LOG.error("An error during unlocking occured", e);
-                            // no user message required, because a locking object for an not existing object does not
-                            // matter.
-                        }
+                    } catch (Exception e) {
+                        LOG.error("Error while deleting objects", e);
                     }
                 }
-            }
-        }
-        for (final ModifiableFeature fsf : featuresToDelete) {
-            model.removeFeatureServiceFeature((FeatureServiceFeature)fsf);
-        }
+            };
 
-        this.featureService.retrieve(true);
+        wdt.start();
     } //GEN-LAST:event_butDeleteActionPerformed
 
     /**
@@ -2436,8 +2475,8 @@ public class AttributeTable extends javax.swing.JPanel {
 //                        newObject = tableRuleSet.afterEdit(attrName, rowIndex, feature.getProperty(attrName), aValue);
 //                    }
 
-                    if (!changedFeatures.contains(feature)) {
-                        changedFeatures.add(feature);
+                    if (!lockedFeatures.contains(feature)) {
+                        lockedFeatures.add(feature);
                     }
                 }
             }
@@ -2486,7 +2525,7 @@ public class AttributeTable extends javax.swing.JPanel {
         }
 
         if (save) {
-            if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(changedFeatures, model)) {
+            if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(lockedFeatures, model)) {
                 tbProcessing.setSelected(true);
                 return;
             }
@@ -2518,7 +2557,7 @@ public class AttributeTable extends javax.swing.JPanel {
                                         filename = filename.substring(0, filename.lastIndexOf("."));
                                     }
 
-                                    for (final FeatureServiceFeature fsf : changedFeatures) {
+                                    for (final FeatureServiceFeature fsf : lockedFeatures) {
                                         if (fsf instanceof DefaultFeatureServiceFeature) {
                                             try {
                                                 final DefaultFeatureServiceFeature feature =
@@ -2542,10 +2581,10 @@ public class AttributeTable extends javax.swing.JPanel {
                                 LOG.error("Error while refreshing shape file.", e);
                             }
                         } else {
-                            wd.setMax(changedFeatures.size());
+                            wd.setMax(lockedFeatures.size());
                             int count = 0;
 
-                            for (final FeatureServiceFeature fsf : changedFeatures) {
+                            for (final FeatureServiceFeature fsf : lockedFeatures) {
                                 if (fsf instanceof DefaultFeatureServiceFeature) {
                                     try {
                                         final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)fsf;
@@ -2561,7 +2600,8 @@ public class AttributeTable extends javax.swing.JPanel {
                                 wd.setProgress(++count);
                             }
                         }
-                        changedFeatures.clear();
+                        lockedFeatures.clear();
+                        modifiedFeatures.clear();
 
                         if (tableRuleSet != null) {
                             tableRuleSet.afterSave(model);
@@ -2590,6 +2630,11 @@ public class AttributeTable extends javax.swing.JPanel {
 
             wdt.start();
         } else {
+            for (final FeatureServiceFeature f : lockedFeatures) {
+                if (f instanceof DefaultFeatureServiceFeature) {
+                    ((DefaultFeatureServiceFeature)f).undoAll();
+                }
+            }
             model.setEditable(false);
             AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
         }
@@ -2861,6 +2906,7 @@ public class AttributeTable extends javax.swing.JPanel {
         }
 
         lockingObjects.clear();
+        modifiedFeatures.clear();
     }
 
     //~ Inner Classes ----------------------------------------------------------
@@ -2961,8 +3007,9 @@ public class AttributeTable extends javax.swing.JPanel {
                 newObject = tableRuleSet.afterEdit(feature, attrName, rowIndex, feature.getProperty(attrName), aValue);
             }
             feature.setProperty(attrName, newObject);
-            if (!changedFeatures.contains(feature)) {
-                changedFeatures.add(feature);
+            modifiedFeatures.add((DefaultFeatureServiceFeature)feature);
+            if (!lockedFeatures.contains(feature)) {
+                lockedFeatures.add(feature);
             }
         }
 
@@ -3144,7 +3191,20 @@ public class AttributeTable extends javax.swing.JPanel {
                 final boolean hasFocus,
                 final int row,
                 final int column) {
-            final Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            Object formattedValue = value;
+
+            if (value instanceof java.sql.Date) {
+                final long dateInMillis = ((java.sql.Date)value).getTime();
+                formattedValue = DateFormat.getDateInstance().format(new Date(dateInMillis));
+            }
+
+            final Component c = super.getTableCellRendererComponent(
+                    table,
+                    formattedValue,
+                    isSelected,
+                    hasFocus,
+                    row,
+                    column);
             final FeatureServiceFeature feature = model.getFeatureServiceFeature(table.convertRowIndexToModel(row));
 
             if (feature.isEditable() && feature.getClass().getName().endsWith("CidsLayerFeature")) {

@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -116,9 +117,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     private LayerFilterTreeModel model;
     private FeatureInfoWidget featureInfo;
     private DefaultPopupMenuListener popupMenuListener;
-    private List<FeatureServiceFeature> changedFeatures = new ArrayList<FeatureServiceFeature>();
+    private List<FeatureServiceFeature> LockedFeatures = new ArrayList<FeatureServiceFeature>();
     private AttribueTableModel currentTableModel;
     private Map<Feature, Object> lockMap = new HashMap<Feature, Object>();
+    private TreeSet<DefaultFeatureServiceFeature> modifiedFeature = new TreeSet<DefaultFeatureServiceFeature>();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
@@ -557,6 +559,8 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             }
         }
 
+        repaint();
+
         createPopupMenu();
     } //GEN-LAST:event_miEditActionPerformed
 
@@ -640,8 +644,8 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                     lockMap.put(fsf, locker.lock(fsf));
                 }
                 fsf.setEditable(true);
-                if (!changedFeatures.contains(fsf)) {
-                    changedFeatures.add(fsf);
+                if (!LockedFeatures.contains(fsf)) {
+                    LockedFeatures.add(fsf);
                     // ((DefaultFeatureServiceFeature)fsf).addPropertyChangeListener(model);
                 }
             } catch (LockAlreadyExistsException ex) {
@@ -682,10 +686,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
             final FeatureLockingInterface locker = FeatureLockerFactory.getInstance()
                         .getLockerForFeatureService(f.getLayerProperties().getFeatureService());
             final AttributeTableRuleSet tableRuleSet = f.getLayerProperties().getAttributeTableRuleSet();
-            if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(changedFeatures, currentTableModel)) {
+            if ((tableRuleSet != null) && !tableRuleSet.prepareForSave(LockedFeatures, currentTableModel)) {
                 return;
             }
-            if (tableRuleSet != null) {
+            if ((tableRuleSet != null) && modifiedFeature.contains(f)) {
                 tableRuleSet.beforeSave(f);
             }
             // stop the cell renderer, if it is active
@@ -693,7 +697,9 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 tabAttributes.getCellEditor(tabAttributes.getEditingRow(),
                     tabAttributes.getEditingColumn()).stopCellEditing();
             }
-            f.saveChanges();
+            if (modifiedFeature.contains(f)) {
+                f.saveChanges();
+            }
             f.setEditable(false);
 
             if (locker != null) {
@@ -704,9 +710,10 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                     lockMap.remove(f);
                 }
             }
-            changedFeatures.remove(f);
+            LockedFeatures.remove(f);
+            modifiedFeature.remove(f);
 
-            if (tableRuleSet != null) {
+            if ((tableRuleSet != null) && modifiedFeature.contains(f)) {
                 tableRuleSet.afterSave(null);
             }
 
@@ -726,22 +733,70 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
      */
     private boolean contentChanged() {
         if (!lockMap.isEmpty()) {
-            final int ans = JOptionPane.showConfirmDialog(
-                    FeatureInfoPanel.this,
-                    NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.contentChanged().text"),
-                    NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.contentChanged().title"),
-                    JOptionPane.YES_NO_CANCEL_OPTION);
+            for (final AbstractFeatureService f : getChangedServices()) {
+                final int ans = JOptionPane.showConfirmDialog(
+                        FeatureInfoPanel.this,
+                        NbBundle.getMessage(
+                            FeatureInfoPanel.class,
+                            "FeatureInfoPanel.contentChanged().text",
+                            f.getName()),
+                        NbBundle.getMessage(FeatureInfoPanel.class, "FeatureInfoPanel.contentChanged().title"),
+                        JOptionPane.YES_NO_CANCEL_OPTION);
 
-            if (ans == JOptionPane.YES_OPTION) {
-                saveAllChanges();
-            } else if (ans == JOptionPane.NO_OPTION) {
-                unlockAll();
-            } else {
-                return false;
+                if (ans == JOptionPane.YES_OPTION) {
+                    saveAllChanges(f);
+                } else if (ans == JOptionPane.NO_OPTION) {
+                    unlockAll(f);
+                } else {
+                    return false;
+                }
             }
         }
 
         return true;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private List<AbstractFeatureService> getChangedServices() {
+        final List<AbstractFeatureService> services = new ArrayList<AbstractFeatureService>();
+
+        for (final Feature f : lockMap.keySet()) {
+            if ((f instanceof DefaultFeatureServiceFeature)
+                        && modifiedFeature.contains((DefaultFeatureServiceFeature)f)) {
+                final AbstractFeatureService featureService = ((DefaultFeatureServiceFeature)f).getLayerProperties()
+                            .getFeatureService();
+                if (!services.contains(featureService)) {
+                    services.add(featureService);
+                }
+            }
+        }
+
+        return services;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private List<AbstractFeatureService> getLockedServices() {
+        final List<AbstractFeatureService> services = new ArrayList<AbstractFeatureService>();
+
+        for (final Feature f : lockMap.keySet()) {
+            if ((f instanceof DefaultFeatureServiceFeature)) {
+                final AbstractFeatureService featureService = ((DefaultFeatureServiceFeature)f).getLayerProperties()
+                            .getFeatureService();
+                if (!services.contains(featureService)) {
+                    services.add(featureService);
+                }
+            }
+        }
+
+        return services;
     }
 
     /**
@@ -753,6 +808,9 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
         final boolean successful = contentChanged();
 
         if (successful) {
+            for (final AbstractFeatureService f : getLockedServices()) {
+                unlockAll(f);
+            }
             model.init(new ArrayList<Feature>());
         }
 
@@ -760,38 +818,58 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
     }
 
     /**
-     * Save all changes.
+     * Save all changed features of the given service.
+     *
+     * @param  service  all changed features of this service will be saved.
      */
-    private void saveAllChanges() {
+    private void saveAllChanges(final AbstractFeatureService service) {
+        final List<DefaultFeatureServiceFeature> savedFeatureList = new ArrayList<DefaultFeatureServiceFeature>();
+
         for (final Feature f : lockMap.keySet()) {
-            stopEditMode((DefaultFeatureServiceFeature)f);
+            if (f instanceof DefaultFeatureServiceFeature) {
+                final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)f;
+                if (feature.getLayerProperties().getFeatureService().equals(service)) {
+                    stopEditMode(feature);
+                    savedFeatureList.add(feature);
+                }
+            }
         }
 
-        lockMap.clear();
+        for (final DefaultFeatureServiceFeature f : savedFeatureList) {
+            lockMap.remove(f);
+        }
     }
 
     /**
-     * unlocks all locked objects.
+     * unlocks all locked objects of the given service.
+     *
+     * @param  service  all changed features of this service will be unlocked
      */
-    private void unlockAll() {
+    private void unlockAll(final AbstractFeatureService service) {
         boolean allLocksRemoved = true;
+        final List<DefaultFeatureServiceFeature> unlockedFeatureList = new ArrayList<DefaultFeatureServiceFeature>();
 
         for (final Feature f : lockMap.keySet()) {
-            final FeatureLockingInterface locker = FeatureLockerFactory.getInstance()
-                        .getLockerForFeatureService(((DefaultFeatureServiceFeature)f).getLayerProperties()
-                            .getFeatureService());
+            if (f instanceof DefaultFeatureServiceFeature) {
+                final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)f;
+                if (feature.getLayerProperties().getFeatureService().equals(service)) {
+                    final FeatureLockingInterface locker = FeatureLockerFactory.getInstance()
+                                .getLockerForFeatureService(feature.getLayerProperties().getFeatureService());
 
-            if (locker != null) {
-                try {
-                    locker.unlock(lockMap.get(f));
-                    f.setEditable(false);
-                } catch (Exception e) {
-                    LOG.error("Locking object can't be removed.", e);
-                    allLocksRemoved = false;
+                    if (locker != null) {
+                        try {
+                            locker.unlock(lockMap.get(feature));
+                            feature.setEditable(false);
+                            unlockedFeatureList.add(feature);
+                        } catch (Exception e) {
+                            LOG.error("Locking object can't be removed.", e);
+                            allLocksRemoved = false;
+                        }
+                    } else {
+                        LOG.error("No suitable locker object found");
+                        allLocksRemoved = false;
+                    }
                 }
-            } else {
-                LOG.error("No suitable locker object found");
-                allLocksRemoved = false;
             }
         }
 
@@ -807,7 +885,9 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 JOptionPane.ERROR_MESSAGE);
         }
 
-        lockMap.clear();
+        for (final DefaultFeatureServiceFeature f : unlockedFeatureList) {
+            lockMap.remove(f);
+        }
     }
 
     /**
@@ -1365,8 +1445,9 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                 newObject = tableRuleSet.afterEdit(feature, attrName, -1, feature.getProperty(attrName), aValue);
             }
             feature.setProperty(attrName, newObject);
-            if (!changedFeatures.contains(feature)) {
-                changedFeatures.add(feature);
+            modifiedFeature.add(feature);
+            if (!LockedFeatures.contains(feature)) {
+                LockedFeatures.add(feature);
             }
         }
 
