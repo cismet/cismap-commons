@@ -267,16 +267,18 @@ public class HeadlessMapProvider {
             }
         }
 
-        // Features
-        for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
-            final boolean infoNodeExpanded = mappingComponent.getPFeatureHM().get(f).isInfoNodeExpanded();
-            headlessMapProvider.addFeature(f);
+        if (mappingComponent.isFeatureCollectionVisible()) {
+            // Features
+            for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
+                final boolean infoNodeExpanded = mappingComponent.getPFeatureHM().get(f).isInfoNodeExpanded();
+                headlessMapProvider.addFeature(f);
 
-            if (infoNodeExpanded) {
-                final PFeature pf = headlessMapProvider.map.getPFeatureHM().get(f);
+                if (infoNodeExpanded) {
+                    final PFeature pf = headlessMapProvider.map.getPFeatureHM().get(f);
 
-                if (pf != null) {
-                    pf.setInfoNodeExpanded(true);
+                    if (pf != null) {
+                        pf.setInfoNodeExpanded(true);
+                    }
                 }
             }
         }
