@@ -69,11 +69,11 @@ public class AttributeTableReportBuilder {
      * Creates a new AttributeTableReportBuilder object.
      */
     public AttributeTableReportBuilder() {
-        oddRowStyle.setBorder(Border.NO_BORDER);
+        oddRowStyle.setBorder(Border.NO_BORDER());
         final Color lightGrey = new Color(230, 230, 230);
         oddRowStyle.setBackgroundColor(lightGrey);
         oddRowStyle.setTransparency(Transparency.OPAQUE);
-        columnHeaderStyle.setBorderBottom(Border.PEN_2_POINT);
+        columnHeaderStyle.setBorderBottom(Border.PEN_2_POINT());
         columnHeaderStyle.setBorderColor(Color.BLACK);
         columnHeaderStyle.setPaddingBottom(2);
         columnDetailStyle.setTransparency(Transparency.OPAQUE);
