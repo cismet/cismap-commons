@@ -50,4 +50,11 @@ public interface AttributeTableListener {
      * @param  active   DOCUMENT ME!
      */
     void processingModeChanged(AbstractFeatureService service, boolean active);
+
+    /**
+     * Closes the given Attribute table, if it is open.
+     *
+     * @param  service  featureService the table to close
+     */
+    void closeAttributeTable(AbstractFeatureService service);
 }

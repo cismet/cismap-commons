@@ -51,6 +51,7 @@ import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
 import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
@@ -252,6 +253,7 @@ public class InternalDbTree extends JTree {
                     final H2FeatureService h2Service = (H2FeatureService)service;
                     if (h2Service.getTableName().equals(entry.getName())) {
                         model.removeLayer(h2Service);
+                        AttributeTableFactory.getInstance().closeAttributeTable(h2Service);
                     }
                 }
             }
