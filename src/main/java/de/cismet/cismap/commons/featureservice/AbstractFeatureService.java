@@ -11,13 +11,17 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
 
 import org.deegree.commons.utils.Pair;
+import org.deegree.commons.utils.Triple;
 import org.deegree.rendering.r2d.legends.Legends;
 import org.deegree.style.persistence.sld.SLDParser;
+import org.deegree.style.styling.Styling;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -54,6 +58,7 @@ import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.ConvertableToXML;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.XMLObjectFactory;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
@@ -1608,6 +1613,35 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      */
     public String[] getCalculatedAttributes() {
         return new String[0];
+    }
+
+    /**
+     * Determines if this service has any restriction that forbids the retrieval of features for the given bounding box.
+     *
+     * @param   box  DOCUMENT ME!
+     *
+     * @return  false, iff any restriction (e.g. the scale) prevents the retrieval of features for the given bounding
+     *          box
+     */
+    public boolean isVisibleInBoundingBox(final XBoundingBox box) {
+        final FeatureFactory ff = getFeatureFactory();
+
+        if (ff instanceof AbstractFeatureFactory) {
+            final List<org.deegree.style.se.unevaluated.Style> styles = ((AbstractFeatureFactory)ff).getStyle(
+                    ((AbstractFeatureFactory)ff).layerName);
+
+            if (styles != null) {
+                for (final org.deegree.style.se.unevaluated.Style tempStyle : styles) {
+                    final org.deegree.style.se.unevaluated.Style filteredStyle = tempStyle.filter(
+                            CismapBroker.getInstance().getMappingComponent().getScaleDenominator());
+                    final List rules = filteredStyle.getRules();
+
+                    return !((rules == null) || rules.isEmpty());
+                }
+            }
+        }
+
+        return true;
     }
 
     //~ Inner Classes ----------------------------------------------------------

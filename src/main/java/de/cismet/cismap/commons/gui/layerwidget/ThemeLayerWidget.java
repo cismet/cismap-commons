@@ -76,7 +76,10 @@ import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerWidget.CheckBoxNodeRen
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SelectionListener;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.interaction.StatusListener;
+import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
+import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.util.SelectionChangedEvent;
@@ -144,6 +147,16 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 public void treeWillCollapse(final TreeExpansionEvent event) throws ExpandVetoException {
                     if (event.getPath().getLastPathComponent().equals(tree.getModel().getRoot())) {
                         throw new ExpandVetoException(event);
+                    }
+                }
+            });
+
+        CismapBroker.getInstance().addStatusListener(new StatusListener() {
+
+                @Override
+                public void statusValueChanged(final StatusEvent e) {
+                    if (e.getName().equals(StatusEvent.SCALE)) {
+                        ThemeLayerWidget.this.repaint();
                     }
                 }
             });
@@ -1442,6 +1455,31 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 pan.setBackground(textBackground);
             }
 
+            if (value instanceof AbstractFeatureService) {
+                final Object box = CismapBroker.getInstance().getMappingComponent().getCurrentBoundingBoxFromCamera();
+
+                if (box instanceof XBoundingBox) {
+                    final XBoundingBox currentBBox = (XBoundingBox)box;
+
+                    if (!((AbstractFeatureService)value).isVisibleInBoundingBox(currentBBox)) {
+                        leafRenderer.setEnabled(false);
+                    }
+                }
+            } else if (value instanceof WMSServiceLayer) {
+                final WMSServiceLayer serviceLayer = (WMSServiceLayer)value;
+
+                if ((serviceLayer.getWmsCapabilities() != null)
+                            && (serviceLayer.getWmsCapabilities().getLayer() != null)) {
+                    final double min = serviceLayer.getWmsCapabilities().getLayer().getScaleDenominationMin();
+                    final double max = serviceLayer.getWmsCapabilities().getLayer().getScaleDenominationMax();
+                    final double scale = CismapBroker.getInstance().getMappingComponent().getCurrentOGCScale();
+
+                    if ((scale < min) || (scale > max)) {
+                        leafRenderer.setEnabled(false);
+                    }
+                }
+            }
+
             if ((value instanceof ShapeFileFeatureService) && ((ShapeFileFeatureService)value).isFileNotFound()) {
                 lab.setForeground(Color.GRAY);
             } else if ((value instanceof H2FeatureService) && ((H2FeatureService)value).isTableNotFound()) {
@@ -1618,6 +1656,18 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         changeVisibility(value);
+                    }
+                });
+
+            leafRenderer.addMouseListener(new MouseAdapter() {
+
+                    @Override
+                    public void mouseReleased(final MouseEvent e) {
+                        // The action performed method will not be invoked, if the checkbox is disabled
+                        if (!leafRenderer.isEnabled()) {
+                            leafRenderer.setSelected(!leafRenderer.isSelected());
+                            changeVisibility(value);
+                        }
                     }
                 });
 
