@@ -346,22 +346,26 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
 
     @Override
     public Icon getLayerIcon(final int type) {
-        if (tableFormat == null) {
-            tableFormat = getTableFormat(tableName, H2FeatureServiceFactory.DB_NAME);
-        }
-
-        if (tableFormat == null) {
-            if (shapeFile != null) {
-                tableFormat = shapeFile.getAbsolutePath().toLowerCase()
-                            .substring(shapeFile.getAbsolutePath().length() - 3);
+        try {
+            if (tableFormat == null) {
+                tableFormat = getTableFormat(tableName, H2FeatureServiceFactory.DB_NAME);
             }
-        }
 
-        final Icon layerIcon = layerIcons.get(type + ";" + tableFormat);
+            if (tableFormat == null) {
+                if (shapeFile != null) {
+                    tableFormat = shapeFile.getAbsolutePath().toLowerCase()
+                                .substring(shapeFile.getAbsolutePath().length() - 3);
+                }
+            }
 
-        if (layerIcon != null) {
-            return layerIcon;
-        } else {
+            final Icon layerIcon = layerIcons.get(type + ";" + tableFormat);
+
+            if (layerIcon != null) {
+                return layerIcon;
+            } else {
+                return layerIcons.get(String.valueOf(type));
+            }
+        } catch (Exception e) {
             return layerIcons.get(String.valueOf(type));
         }
     }
@@ -549,7 +553,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         ConnectionWrapper conn = null;
         ResultSet rs = null;
         Statement st = null;
-        String format = null;
+        String format = "shp"; // the default type is shp
 
         try {
             conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(

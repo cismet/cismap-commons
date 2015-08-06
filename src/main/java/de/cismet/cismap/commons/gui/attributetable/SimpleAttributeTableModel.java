@@ -246,6 +246,7 @@ public class SimpleAttributeTableModel implements TableModel {
                             || attr.getType().equals(String.valueOf(Types.BIGINT))
                             || attr.getType().equals(String.valueOf(Types.SMALLINT))
                             || attr.getType().equals(String.valueOf(Types.TINYINT))
+                            || attr.getType().equals(String.valueOf(Types.NUMERIC))
                             || attr.getType().equals(String.valueOf(Types.DOUBLE))
                             || attr.getType().equals(String.valueOf(Types.FLOAT))
                             || attr.getType().equals(String.valueOf(Types.DECIMAL))

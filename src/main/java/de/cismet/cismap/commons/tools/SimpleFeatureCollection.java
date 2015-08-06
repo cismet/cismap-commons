@@ -36,6 +36,8 @@ import org.deegree.model.spatialschema.Polygon;
 import org.deegree.model.spatialschema.Surface;
 import org.deegree.ogcbase.PropertyPath;
 
+import java.math.BigDecimal;
+
 import java.sql.Timestamp;
 
 import java.util.ArrayList;
@@ -268,6 +270,8 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
                 return new SimplePropertyType(name, Types.TIMESTAMP, 0, 1);
             } else if (cl.equals(Boolean.class)) {
                 return new SimplePropertyType(name, Types.BOOLEAN, 0, 1);
+            } else if (cl.equals(BigDecimal.class)) {
+                return new SimplePropertyType(name, Types.NUMERIC, 0, 1);
             }
         }
 

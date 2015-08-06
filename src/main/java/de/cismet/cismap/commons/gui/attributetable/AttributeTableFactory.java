@@ -61,9 +61,9 @@ public class AttributeTableFactory {
     }
 
     /**
-     * DOCUMENT ME!
+     * Opens the attribute table of the given service.
      *
-     * @param  featureService  DOCUMENT ME!
+     * @param  featureService  the service of the attribute table that should be opened
      */
     public void showAttributeTable(final AbstractFeatureService featureService) {
         try {
@@ -81,6 +81,15 @@ public class AttributeTableFactory {
         } catch (Exception e) {
             LOG.error("Error while retrieving all features", e);
         }
+    }
+
+    /**
+     * Closes the attribute table of the given service.
+     *
+     * @param  featureService  the service of the attribute table that should be closed
+     */
+    public void closeAttributeTable(final AbstractFeatureService featureService) {
+        listener.closeAttributeTable(featureService);
     }
 
     /**
