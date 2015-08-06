@@ -293,10 +293,10 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     public Object getProperty(final String propertyName) {
         Object o = container.get(propertyName);
 
-        if (o == null) {
+        if (hasAdditionalProperties()) {
             final int index = layerProperties.getAttributeTableRuleSet().getIndexOfAdditionalFieldName(propertyName);
 
-            if (index != -1) {
+            if (index != Integer.MIN_VALUE) {
                 o = layerProperties.getAttributeTableRuleSet().getAdditionalFieldValue(propertyName, this);
             }
         }
@@ -1132,13 +1132,6 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
             }
         }
 
-        /*
-         * if (stylings == null) { if (style == null) {     return; } this.stylings =
-         * style.evaluate(getDeegreeFeature(), evaluator);}*/
-        if ((stylings == null) || (stylings.size() == 0)) {
-            return;
-        }
-
         final ListIterator it = pfeature.getChildrenIterator();
         while (it.hasNext()) {
             final Object child = it.next();
@@ -1160,6 +1153,14 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
             pfeature.getMappingComponent().removeStickyNode(text);
         }
         pfeature.sldStyledText.clear();
+
+        /**
+         * First clear the screen and then check, if there is a styling active.
+         * Otherwise, the scale properties will not work.
+         */
+        if ((stylings == null) || (stylings.size() == 0)) {
+            return;
+        }
 
         final Geometry geom = pfeature.getFeature().getGeometry();
         int polygonNr = -1;
