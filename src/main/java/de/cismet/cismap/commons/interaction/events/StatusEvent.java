@@ -34,6 +34,7 @@ public class StatusEvent {
     public static final String MAP_EXTEND_FIXED = "map.extent.fixed";
     public static final String MAP_SCALE_FIXED = "map.scale.fixed";
     public static final String AWAKED_FROM_DUMMY = "awaked.from.dummy";
+    public static final String WINDOW_REMOVED = "awaked.from.dummy";
 
     //~ Instance fields --------------------------------------------------------
 

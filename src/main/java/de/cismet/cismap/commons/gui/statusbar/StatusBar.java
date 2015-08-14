@@ -14,6 +14,8 @@ package de.cismet.cismap.commons.gui.statusbar;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+import org.openide.util.NbBundle;
+
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Graphics;
@@ -197,7 +199,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                     } else if (e.getName().equals(StatusEvent.MEASUREMENT_INFOS)) {
                         lblStatus.setText(e.getValue().toString());
                     } else if (e.getName().equals(StatusEvent.MAPPING_MODE)) {
-                        lblStatus.setText("");                                                              // NOI18N
+                        lblStatus.setText("");                                                                  // NOI18N
                     } else if (e.getName().equals(StatusEvent.OBJECT_INFOS)) {
                         if ((e.getValue() != null) && (e.getValue() instanceof PFeature)
                                     && (((PFeature)e.getValue()).getFeature() != null)
@@ -232,18 +234,28 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
                                 lblStatus.setText(((DefaultFeatureServiceFeature)((PFeature)e.getValue()).getFeature())
                                             .getSecondaryAnnotation());
                             } else {
-                                lblStatus.setText("");                                                      // NOI18N
+                                lblStatus.setText("");                                                          // NOI18N
                             }
                         } else {
-                            lblStatus.setText("");                                                          // NOI18N
+                            lblStatus.setText("");                                                              // NOI18N
                             lblStatusImage.setIcon(defaultIcon);
                         }
                     } else if (e.getName().equals(StatusEvent.SCALE)) {
                         final int sd = (int)(mappingComponent.getScaleDenominator() + 0.5);
-                        if (developerMode) {
-                            lblScale.setText("OGC: " + mappingComponent.getCurrentOGCScale() + " 1:" + sd); // NOI18N
+                        if (e.getValue().equals(StatusEvent.WINDOW_REMOVED) || (mappingComponent.getWidth() == 0)) {
+                            lblScale.setText(NbBundle.getMessage(
+                                    StatusBar.class,
+                                    "StatusBar.statusValueChanged(StatusEvent).mapHidden"));                    // NOI18N
+                        } else if (mappingComponent.getWidth() < 1) {
+                            lblScale.setText(NbBundle.getMessage(
+                                    StatusBar.class,
+                                    "StatusBar.statusValueChanged(StatusEvent).mapMinimized"));                 // NOI18N
                         } else {
-                            lblScale.setText("1:" + sd);                                                    // NOI18N
+                            if (developerMode) {
+                                lblScale.setText("OGC: " + mappingComponent.getCurrentOGCScale() + " 1:" + sd); // NOI18N
+                            } else {
+                                lblScale.setText("1:" + sd);                                                    // NOI18N
+                            }
                         }
                     } else if (e.getName().equals(StatusEvent.CRS)) {
                         lblCrs.setText(((Crs)e.getValue()).getShortname());
