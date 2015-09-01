@@ -8,9 +8,6 @@
 package de.cismet.cismap.commons.interaction;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.PrecisionModel;
 
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 import edu.umd.cs.piccolox.event.PSelectionEventHandler;
@@ -35,7 +32,6 @@ import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
-import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.MappingModelListener;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.featureservice.style.BasicFeatureStyleDialogFactory;
@@ -118,6 +114,7 @@ public class CismapBroker {
     private Point2D snappingVetoPoint;
     private PFeature snappingVetoFeature;
     private Float minOpacityToStayEnabled = null;
+    private boolean multiFeaturePopupMenuEnabled = false;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -1090,5 +1087,23 @@ public class CismapBroker {
      */
     public void setMinOpacityToStayEnabled(final Float minOpacityToStayEnabled) {
         this.minOpacityToStayEnabled = minOpacityToStayEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isMultiFeaturePopupMenuEnabled() {
+        return multiFeaturePopupMenuEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  multiFeaturePopupMenuEnabled  DOCUMENT ME!
+     */
+    public void setMultiFeaturePopupMenuEnabled(final boolean multiFeaturePopupMenuEnabled) {
+        this.multiFeaturePopupMenuEnabled = multiFeaturePopupMenuEnabled;
     }
 }

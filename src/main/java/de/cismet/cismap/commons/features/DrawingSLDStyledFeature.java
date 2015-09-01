@@ -445,4 +445,9 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
     public void setText(final String text) {
         this.text = text;
     }
+
+    @Override
+    public String getName() {
+        return getText();
+    }
 }

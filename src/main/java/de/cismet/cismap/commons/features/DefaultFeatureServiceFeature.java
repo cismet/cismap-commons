@@ -1798,6 +1798,11 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
         this.simplifiedGeometryAllowed = simplifiedGeometryAllowed;
     }
 
+    @Override
+    public String getName() {
+        return null;
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**

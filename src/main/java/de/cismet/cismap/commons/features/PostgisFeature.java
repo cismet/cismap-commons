@@ -11,8 +11,6 @@
  */
 package de.cismet.cismap.commons.features;
 
-import org.apache.log4j.Logger;
-
 /**
  * DOCUMENT ME!
  *
@@ -89,5 +87,10 @@ public class PostgisFeature extends DefaultFeatureServiceFeature {
     public void setId(final int id) {
         super.setId(id);
         this.addProperty(ID_PROPERTY, id);
+    }
+
+    @Override
+    public String getName() {
+        return getObjectName();
     }
 }

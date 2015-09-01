@@ -8,6 +8,7 @@
 package de.cismet.cismap.commons.gui;
 
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureNameProvider;
 
 /**
  * Features implementing FeatureGroupMember are grouped according their group id. Note that each group has its own layer
@@ -17,7 +18,7 @@ import de.cismet.cismap.commons.features.Feature;
  * @author   Benjamin Friedrich (benjamin.friedrich@cismet.de)
  * @version  1.0, 15.11.2011
  */
-public interface FeatureGroupMember extends Feature {
+public interface FeatureGroupMember extends Feature, FeatureNameProvider {
 
     //~ Methods ----------------------------------------------------------------
 

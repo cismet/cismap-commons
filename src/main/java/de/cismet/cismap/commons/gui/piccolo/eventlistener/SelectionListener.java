@@ -16,17 +16,26 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 
+import org.apache.commons.collections.MultiHashMap;
+
 import org.openide.util.Lookup;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.PopupMenu;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
-import java.lang.reflect.Constructor;
+import java.text.DecimalFormat;
 
 import java.util.*;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 
@@ -37,10 +46,9 @@ import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.CommonFeaturePreciseAction;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.features.FeatureNameProvider;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.SearchFeature;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MapPopupAction;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -137,83 +145,173 @@ public class SelectionListener extends CreateGeometryListener {
                     pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
                 }
 
-                final List oup = PFeatureTools.getAllValidObjectsUnderPointer(
+                final List ouptemp = PFeatureTools.getAllValidObjectsUnderPointer(
                         pInputEvent,
                         new Class[] { PFeature.class });
-                final Object o = oup.isEmpty() ? null : oup.get(0);
+
+                final List oup = new ArrayList();
+                if (CismapBroker.getInstance().isMultiFeaturePopupMenuEnabled()) {
+                    oup.addAll(ouptemp);
+                } else {
+                    oup.add(ouptemp.get(0));
+                }
                 if (pInputEvent.isRightMouseButton()) {
                     if (log.isDebugEnabled()) {
                         log.debug("right mouseclick"); // NOI18N
                     }
-                    final JPopupMenu popup = new JPopupMenu("MapPopup");
-
-                    if (o instanceof PFeature) {
-                        final PFeature pf = (PFeature)o;
-                        if (pf.getFeature() instanceof ActionsProvider) {
-                            final ActionsProvider ap = (ActionsProvider)((PFeature)o).getFeature();
-                            final Collection<? extends Action> ac = ap.getActions();
-                            for (final Action a : ac) {
-                                popup.add(a);
+                    final MultiHashMap menuMap = new MultiHashMap();
+                    for (final Object o : oup) {
+                        menuMap.put(o, null);
+                        if (o instanceof PFeature) {
+                            final PFeature pf = (PFeature)o;
+                            if (pf.getFeature() instanceof ActionsProvider) {
+                                final ActionsProvider ap = (ActionsProvider)((PFeature)o).getFeature();
+                                final Collection<? extends Action> ac = ap.getActions();
+                                for (final Action a : ac) {
+                                    menuMap.put(o, a);
+                                }
                             }
-                        }
 
-                        final JSeparator sep = new JSeparator();
+                            final JSeparator sep = new JSeparator();
 
-                        if (popup.getComponentCount() > 0) {
-                            popup.add(sep);
-                        }
+                            if ((menuMap.getCollection(o) != null) && (menuMap.getCollection(o).size() > 1)) {
+                                menuMap.put(o, sep);
+                            }
 
-                        int commonActionCounter = 0;
-                        if (commonFeatureActions != null) {
-                            for (final CommonFeatureAction cfa : commonFeatureActions) {
-                                cfa.setSourceFeature(pf.getFeature());
-                                if (cfa instanceof CommonFeaturePreciseAction) {
-                                    final Point2D pos = pInputEvent.getPosition();
-                                    final WorldToScreenTransform wtst = getMappingComponent().getWtst();
-                                    final Coordinate coord = new Coordinate(wtst.getSourceX(pos.getX()),
-                                            wtst.getSourceY(pos.getY()));
-                                    final Collection<Feature> allFeatures = new ArrayList();
-                                    for (final PFeature feature : (Collection<PFeature>)oup) {
-                                        allFeatures.add(feature.getFeature());
+                            int commonActionCounter = 0;
+                            if (commonFeatureActions != null) {
+                                for (final CommonFeatureAction cfaTemplate : commonFeatureActions) {
+                                    CommonFeatureAction cfa = null;
+                                    try {
+                                        cfa = cfaTemplate.getClass().newInstance();
+                                    } catch (final Exception ex) {
+                                        break;
                                     }
-                                    ((CommonFeaturePreciseAction)cfa).setActionCoordinate(coord);
-                                    ((CommonFeaturePreciseAction)cfa).setAllSourceFeatures(allFeatures);
-                                }
-                                if (cfa.isActive()) {
-                                    popup.add(cfa);
-                                    commonActionCounter++;
+                                    cfa.setSourceFeature(pf.getFeature());
+                                    if (cfa instanceof CommonFeaturePreciseAction) {
+                                        final Point2D pos = pInputEvent.getPosition();
+                                        final WorldToScreenTransform wtst = getMappingComponent().getWtst();
+                                        final Coordinate coord = new Coordinate(wtst.getSourceX(pos.getX()),
+                                                wtst.getSourceY(pos.getY()));
+                                        final Collection<Feature> allFeatures = new ArrayList();
+                                        for (final PFeature feature : (Collection<PFeature>)oup) {
+                                            allFeatures.add(feature.getFeature());
+                                        }
+                                        ((CommonFeaturePreciseAction)cfa).setActionCoordinate(coord);
+                                        ((CommonFeaturePreciseAction)cfa).setAllSourceFeatures(allFeatures);
+                                    }
+                                    if (cfa.isActive()) {
+                                        pf.getFeature().getGeometry().getArea();
+                                        menuMap.put(o, cfa);
+                                        commonActionCounter++;
+                                    }
                                 }
                             }
+                            if ((commonActionCounter == 0) && (menuMap.getCollection(o) != null)) {
+                                menuMap.getCollection(o).remove(sep);
+                            }
                         }
-                        if (commonActionCounter == 0) {
-                            popup.remove(sep);
+
+                        // we build a popup menu from all the registered generic point actions
+                        final Point point = createPointFromInput(pInputEvent);
+
+                        final Collection<? extends MapPopupAction> lookupResult = Lookup.getDefault()
+                                    .lookupAll(MapPopupAction.class);
+                        final ArrayList<MapPopupAction> popupActions = new ArrayList<MapPopupAction>(lookupResult);
+                        Collections.sort(popupActions);
+
+                        boolean first = true;
+                        for (final MapPopupAction action : popupActions) {
+                            action.setPoint(point);
+
+                            if (action.isActive(o instanceof PFeature)) {
+                                if (first
+                                            && ((menuMap.getCollection(o) != null)
+                                                && (menuMap.getCollection(o).size() > 0))) {
+                                    menuMap.put(o, new JSeparator());
+                                    first = false;
+                                }
+
+                                final JMenu submenu = action.getSubmenu();
+
+                                if (submenu != null) {
+                                    menuMap.put(o, submenu);
+                                } else {
+                                    menuMap.put(o, action);
+                                }
+                            }
                         }
                     }
 
-                    // we build a popup menu from all the registered generic point actions
-                    final Point point = createPointFromInput(pInputEvent);
-
-                    final Collection<? extends MapPopupAction> lookupResult = Lookup.getDefault()
-                                .lookupAll(MapPopupAction.class);
-                    final ArrayList<MapPopupAction> popupActions = new ArrayList<MapPopupAction>(lookupResult);
-                    Collections.sort(popupActions);
-
-                    boolean first = true;
-                    for (final MapPopupAction action : popupActions) {
-                        action.setPoint(point);
-
-                        if (action.isActive(o instanceof PFeature)) {
-                            if (first && (popup.getComponentCount() > 0)) {
-                                popup.add(new JSeparator());
-                                first = false;
-                            }
-
-                            final JMenu submenu = action.getSubmenu();
-
-                            if (submenu != null) {
-                                popup.add(submenu);
+                    final JPopupMenu popup = new JPopupMenu("MapPopup");
+                    if (menuMap.keySet().size() > 1) {
+                        for (final Object o : menuMap.keySet()) {
+                            final String featureName;
+                            if ((o instanceof PFeature)
+                                        && (((PFeature)o).getFeature() instanceof FeatureNameProvider)
+                                        && (((FeatureNameProvider)((PFeature)o).getFeature()).getName() != null)) {
+                                featureName = ((FeatureNameProvider)((PFeature)o).getFeature()).getName();
                             } else {
-                                popup.add(action);
+                                featureName = java.util.ResourceBundle.getBundle(
+                                            "de/cismet/cismap/commons/gui/piccolo/eventlistener/Bundle")
+                                            .getString("SelectionListener.unknown_featureName");
+                            }
+                            final JMenu featurePopup = new JMenu(featureName + " | "
+                                            + new DecimalFormat("#.##").format(
+                                                ((PFeature)o).getFeature().getGeometry().getArea()) + " m²");
+                            featurePopup.addMouseListener(new MouseAdapter() {
+
+                                    @Override
+                                    public void mouseClicked(final MouseEvent e) {
+                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                                                .unselectAll();
+                                        ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                                                .addToSelection(((PFeature)o).getFeature());
+                                    }
+                                });
+                            for (final Object i : menuMap.getCollection(o)) {
+                                if (i instanceof Action) {
+                                    featurePopup.add((Action)i);
+                                } else if (i instanceof Component) {
+                                    featurePopup.add((Component)i);
+                                } else if (i instanceof JMenuItem) {
+                                    featurePopup.add((JMenuItem)i);
+                                } else if (i instanceof PopupMenu) {
+                                    featurePopup.add((PopupMenu)i);
+                                } else if (i instanceof String) {
+                                    featurePopup.add((String)i);
+                                }
+                            }
+                            if (featurePopup.getMenuComponentCount() > 0) {
+                                popup.add(featurePopup);
+                            } else {
+                                final JMenuItem mi = new JMenuItem(featurePopup.getText());
+                                mi.addActionListener(new ActionListener() {
+
+                                        @Override
+                                        public void actionPerformed(final ActionEvent e) {
+                                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                                                    .unselectAll();
+                                            ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
+                                                    .addToSelection(((PFeature)o).getFeature());
+                                        }
+                                    });
+                                popup.add(mi);
+                            }
+                        }
+                    } else if (menuMap.keySet().size() > 0) {
+                        final Object o = menuMap.keySet().iterator().next();
+                        for (final Object i : menuMap.getCollection(o)) {
+                            if (i instanceof Action) {
+                                popup.add((Action)i);
+                            } else if (i instanceof Component) {
+                                popup.add((Component)i);
+                            } else if (i instanceof JMenuItem) {
+                                popup.add((JMenuItem)i);
+                            } else if (i instanceof PopupMenu) {
+                                popup.add((PopupMenu)i);
+                            } else if (i instanceof String) {
+                                popup.add((String)i);
                             }
                         }
                     }
@@ -225,6 +323,7 @@ public class SelectionListener extends CreateGeometryListener {
                             (int)pInputEvent.getCanvasPosition().getY());
                     }
                 } else {
+                    final Object o = oup.isEmpty() ? null : oup.get(0);
                     if (o instanceof PFeature) {
                         super.mouseClicked(pInputEvent);
                         sel = (PFeature)o;
