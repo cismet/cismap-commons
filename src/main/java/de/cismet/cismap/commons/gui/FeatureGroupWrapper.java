@@ -9,7 +9,9 @@ package de.cismet.cismap.commons.gui;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureNameProvider;
 
 /**
  * Wrapper implementation of {@link FeatureGroupMember}.
@@ -62,6 +64,21 @@ public class FeatureGroupWrapper implements FeatureGroupMember {
     @Override
     public String getGroupName() {
         return this.groupName;
+    }
+
+    @Override
+    public String getName() {
+        final String subName;
+        if (getFeature() != null) {
+            if (getFeature() instanceof FeatureNameProvider) {
+                subName = ((FeatureNameProvider)getFeature()).getName();
+            } else {
+                subName = getFeature().toString();
+            }
+        } else {
+            subName = null;
+        }
+        return getGroupName() + (((subName != null) && !subName.isEmpty()) ? (" | " + subName) : "");
     }
 
     /**

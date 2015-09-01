@@ -20,7 +20,7 @@ import de.cismet.cismap.commons.Refreshable;
  * @author   thorsten.hell@cismet.de
  * @version  $Revision$, $Date$
  */
-public interface XStyledFeature extends StyledFeature {
+public interface XStyledFeature extends StyledFeature, FeatureNameProvider {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -30,12 +30,6 @@ public interface XStyledFeature extends StyledFeature {
      * @return  DOCUMENT ME!
      */
     ImageIcon getIconImage();
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    String getName();
     /**
      * DOCUMENT ME!
      *

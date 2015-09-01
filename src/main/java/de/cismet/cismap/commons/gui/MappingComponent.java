@@ -4282,6 +4282,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             ret.addContent(minOpacityToStayEnabled);
         }
 
+        final Element multiFeaturePopupMenuEnabled = new Element("multiFeaturePopupMenuEnabled");
+
+        multiFeaturePopupMenuEnabled.addContent(Boolean.toString(
+                CismapBroker.getInstance().isMultiFeaturePopupMenuEnabled()));
+        ret.addContent(multiFeaturePopupMenuEnabled);
+
         // save internal widgets status
         final Element widgets = new Element("InternalWidgets");                                       // NOI18N
         for (final String name : this.internalWidgets.keySet()) {
@@ -4435,6 +4441,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
         } catch (NumberFormatException ex) {
             LOG.error("The min opacity to stay enabled value is not a number.", ex); // NOI18N
+        }
+
+        try {
+            final String multiFeaturePopupMenuEnabled = prefs.getChildText("multiFeaturePopupMenuEnabled");
+
+            if (multiFeaturePopupMenuEnabled != null) {
+                CismapBroker.getInstance()
+                        .setMultiFeaturePopupMenuEnabled(Boolean.parseBoolean(multiFeaturePopupMenuEnabled));
+            }
+        } catch (final NumberFormatException ex) {
+            LOG.error("The MultiFeaturePopupMenu stays disabled, value is not valid", ex); // NOI18N
         }
 
         // Und jetzt noch die PriningEinstellungen
@@ -4606,6 +4623,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
         } catch (NumberFormatException ex) {
             LOG.error("The min opacity to stay enabled value is not a number.", ex); // NOI18N
+        }
+
+        try {
+            final String multiFeaturePopupMenuEnabled = prefs.getChildText("multiFeaturePopupMenuEnabled");
+
+            if (multiFeaturePopupMenuEnabled != null) {
+                CismapBroker.getInstance()
+                        .setMultiFeaturePopupMenuEnabled(Boolean.parseBoolean(multiFeaturePopupMenuEnabled));
+            }
+        } catch (final NumberFormatException ex) {
+            LOG.error("The MultiFeaturePopupMenu stays disabled, value is not valid", ex); // NOI18N
         }
     }
 
