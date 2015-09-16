@@ -153,7 +153,7 @@ public class SelectionListener extends CreateGeometryListener {
                 if (CismapBroker.getInstance().isMultiFeaturePopupMenuEnabled()) {
                     oup.addAll(ouptemp);
                 } else {
-                    oup.add(ouptemp == null || ouptemp.isEmpty()? null : ouptemp.get(0));
+                    oup.add(((ouptemp == null) || ouptemp.isEmpty()) ? null : ouptemp.get(0));
                 }
                 if (pInputEvent.isRightMouseButton()) {
                     if (log.isDebugEnabled()) {
