@@ -196,7 +196,13 @@ public class LayerDropUtils {
 
                         return true;
                     } else {
-                        final WMSServiceLayer l = new WMSServiceLayer(v, true);
+                        WMSServiceLayer l;
+
+                        if (((SelectionAndCapabilities)o).getUrl().contains("cismap.dont.touch.ordering=true")) {
+                            l = new WMSServiceLayer(v, false, false);
+                        } else {
+                            l = new WMSServiceLayer(v, true, true);
+                        }
 
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("((SelectionAndCapabilities)o).getUrl()"

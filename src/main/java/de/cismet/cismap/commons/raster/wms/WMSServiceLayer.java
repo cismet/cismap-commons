@@ -133,7 +133,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
      * @param  treePaths  DOCUMENT ME!
      */
     public WMSServiceLayer(final List treePaths) {
-        this(treePaths, false);
+        this(treePaths, true, false);
     }
 
     /**
@@ -150,17 +150,34 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
     /**
      * Creates a new WMSServiceLayer object.
      *
+     * @param  wmsServiceLayerElement  DOCUMENT ME!
+     * @param  capabilities            DOCUMENT ME!
+     */
+    public WMSServiceLayer(final Element wmsServiceLayerElement, final HashMap<String, WMSCapabilities> capabilities) {
+        this.wmsServiceLayerElement = wmsServiceLayerElement;
+        this.capabilities = capabilities;
+
+        // a dummy object without a capabilities document will be created
+        init(wmsServiceLayerElement, capabilities, false);
+    }
+
+    /**
+     * Creates a new WMSServiceLayer object.
+     *
      * @param  treePaths             DOCUMENT ME!
+     * @param  reverseLayerOrder     DOCUMENT ME!
      * @param  reverseSubLayerOrder  DOCUMENT ME!
      */
-    public WMSServiceLayer(final List treePaths, final boolean reverseSubLayerOrder) {
+    public WMSServiceLayer(final List treePaths, final boolean reverseLayerOrder, final boolean reverseSubLayerOrder) {
         this.treePaths = treePaths;
         if (treePaths != null) {
             if (treePaths.size() > 1) {
                 setName("Layerzusammenstellung"); // NOI18N
             }
 
-            for (int i = treePaths.size() - 1; i >= 0; --i) {
+            int i = (reverseLayerOrder ? (treePaths.size() - 1) : 0);
+
+            while ((reverseLayerOrder ? (i >= 0) : (i < treePaths.size()))) {
                 final Object next = treePaths.get(i);
 
                 if (next instanceof TreePath) {
@@ -184,22 +201,14 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                         }
                     }
                 }
+
+                if (reverseLayerOrder) {
+                    --i;
+                } else {
+                    ++i;
+                }
             }
         }
-    }
-
-    /**
-     * Creates a new WMSServiceLayer object.
-     *
-     * @param  wmsServiceLayerElement  DOCUMENT ME!
-     * @param  capabilities            DOCUMENT ME!
-     */
-    public WMSServiceLayer(final Element wmsServiceLayerElement, final HashMap<String, WMSCapabilities> capabilities) {
-        this.wmsServiceLayerElement = wmsServiceLayerElement;
-        this.capabilities = capabilities;
-
-        // a dummy object without a capabilities document will be created
-        init(wmsServiceLayerElement, capabilities, false);
     }
 
     //~ Methods ----------------------------------------------------------------
