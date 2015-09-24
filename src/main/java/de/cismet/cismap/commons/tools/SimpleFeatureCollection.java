@@ -74,23 +74,27 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
      * Creates a new SimpleFeatureCollection object.
      *
      * @param  id                  DOCUMENT ME!
-     * @param  features            DOCUMENT ME!
+     * @param  features            The feature list. This list should not be null or empty
      * @param  aliasAttributeList  DOCUMENT ME!
      */
     public SimpleFeatureCollection(final String id,
             final de.cismet.cismap.commons.features.FeatureServiceFeature[] features,
-            List<String[]> aliasAttributeList) {
+            final List<String[]> aliasAttributeList) {
         super(id);
         this.features = new Feature[features.length];
         this.aliasAttributeList = aliasAttributeList;
         int index = 0;
 
         if (aliasAttributeList == null) {
-            aliasAttributeList = generateAliasAttributeList(features);
+            this.aliasAttributeList = generateAliasAttributeList(features);
         }
 
-        for (final FeatureServiceFeature tmp : features) {
-            this.features[index++] = toDeegreeFeature(tmp);
+        if (features.length > 0) {
+            final PropertyType[] propTypeArray = getPropertyTypes(features[0]);
+
+            for (final FeatureServiceFeature tmp : features) {
+                this.features[index++] = toDeegreeFeature(tmp, propTypeArray);
+            }
         }
     }
 
@@ -106,14 +110,23 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
     private List<String[]> generateAliasAttributeList(
             final de.cismet.cismap.commons.features.FeatureServiceFeature[] features) {
         final List<String[]> aliasAttrList = new ArrayList<String[]>();
+        Map props = null;
+
+        if ((features[0].getLayerProperties() != null) && (features[0].getLayerProperties().getFeatureService() != null)
+                    && (features[0].getLayerProperties().getFeatureService().getFeatureServiceAttributes() != null)) {
+            props = features[0].getLayerProperties().getFeatureService().getFeatureServiceAttributes();
+        } else {
+            // the feature properties contains always a geometry property. Even, if the feature should not have any
+            // geometry
+            props = features[0].getProperties();
+        }
 
         if ((features != null) && (features.length > 0)) {
-            final Map props = features[0].getProperties();
-
             for (final Object key : props.keySet()) {
                 final String[] aliasAttr = new String[2];
                 aliasAttr[0] = key.toString();
                 aliasAttr[1] = key.toString();
+                aliasAttrList.add(aliasAttr);
             }
         }
         return aliasAttrList;
@@ -208,16 +221,46 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
     /**
      * DOCUMENT ME!
      *
+     * @param   feature        DOCUMENT ME!
+     * @param   propTypeArray  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Feature toDeegreeFeature(final FeatureServiceFeature feature, final PropertyType[] propTypeArray) {
+        final Map props = feature.getProperties();
+        final DefaultFeatureProperty[] propArray = new DefaultFeatureProperty[aliasAttributeList.size()];
+        int index = 0;
+
+        for (final String[] aliasAttr : aliasAttributeList) {
+            final QualifiedName name = new QualifiedName(aliasAttr[0]);
+            Object value = props.get(aliasAttr[1]);
+
+            if (value instanceof Geometry) {
+                try {
+                    value = JTSAdapter.wrap((Geometry)value);
+                } catch (GeometryException ex) {
+                    LOG.error("Cannot convert JTS geometry to deegree geometry.", ex);
+                }
+            }
+            propArray[index++] = new DefaultFeatureProperty(name, value);
+        }
+
+        final FeatureType ft = FeatureFactory.createFeatureType("test", false, propTypeArray);
+        return FeatureFactory.createFeature(String.valueOf(feature.getId()), ft, propArray);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param   feature  DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private Feature toDeegreeFeature(final FeatureServiceFeature feature) {
+    private PropertyType[] getPropertyTypes(final FeatureServiceFeature feature) {
         final Map props = feature.getProperties();
         final Map<String, FeatureServiceAttribute> featureServiceAttributes = feature.getLayerProperties()
                     .getFeatureService()
                     .getFeatureServiceAttributes();
-        final DefaultFeatureProperty[] propArray = new DefaultFeatureProperty[aliasAttributeList.size()];
         final PropertyType[] propTypeArray = new PropertyType[aliasAttributeList.size()];
         int index = 0;
 
@@ -232,7 +275,6 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
                     LOG.error("Cannot convert JTS geometry to deegree geometry.", ex);
                 }
             }
-            propArray[index] = new DefaultFeatureProperty(name, value);
             FeatureServiceAttribute attr = featureServiceAttributes.get(aliasAttr[1]);
             if (attr == null) {
                 attr = featureServiceAttributes.get(aliasAttr[1].toUpperCase());
@@ -240,8 +282,7 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
             propTypeArray[index++] = getPropertyType(name, attr, value);
         }
 
-        final FeatureType ft = FeatureFactory.createFeatureType("test", false, propTypeArray);
-        return FeatureFactory.createFeature(feature.getIdExpression(), ft, propArray);
+        return propTypeArray;
     }
 
     /**
