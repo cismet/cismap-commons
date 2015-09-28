@@ -67,6 +67,7 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
     List<String[]> aliasAttributeList;
 
     private Feature[] features;
+    private Map<String, FeatureServiceAttribute> attributeMap;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -80,9 +81,25 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
     public SimpleFeatureCollection(final String id,
             final de.cismet.cismap.commons.features.FeatureServiceFeature[] features,
             final List<String[]> aliasAttributeList) {
+        this(id, features, aliasAttributeList, null);
+    }
+
+    /**
+     * Creates a new SimpleFeatureCollection object.
+     *
+     * @param  id                  DOCUMENT ME!
+     * @param  features            The feature list. This list should not be null or empty
+     * @param  aliasAttributeList  DOCUMENT ME!
+     * @param  attributeMap        contains all attribute descriptors
+     */
+    public SimpleFeatureCollection(final String id,
+            final de.cismet.cismap.commons.features.FeatureServiceFeature[] features,
+            final List<String[]> aliasAttributeList,
+            final Map<String, FeatureServiceAttribute> attributeMap) {
         super(id);
         this.features = new Feature[features.length];
         this.aliasAttributeList = aliasAttributeList;
+        this.attributeMap = attributeMap;
         int index = 0;
 
         if (aliasAttributeList == null) {
@@ -112,7 +129,10 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
         final List<String[]> aliasAttrList = new ArrayList<String[]>();
         Map props = null;
 
-        if ((features[0].getLayerProperties() != null) && (features[0].getLayerProperties().getFeatureService() != null)
+        if (attributeMap != null) {
+            props = attributeMap;
+        } else if ((features[0].getLayerProperties() != null)
+                    && (features[0].getLayerProperties().getFeatureService() != null)
                     && (features[0].getLayerProperties().getFeatureService().getFeatureServiceAttributes() != null)) {
             props = features[0].getLayerProperties().getFeatureService().getFeatureServiceAttributes();
         } else {
@@ -258,9 +278,13 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
      */
     private PropertyType[] getPropertyTypes(final FeatureServiceFeature feature) {
         final Map props = feature.getProperties();
-        final Map<String, FeatureServiceAttribute> featureServiceAttributes = feature.getLayerProperties()
-                    .getFeatureService()
-                    .getFeatureServiceAttributes();
+        final Map<String, FeatureServiceAttribute> featureServiceAttributes;
+
+        if (attributeMap != null) {
+            featureServiceAttributes = attributeMap;
+        } else {
+            featureServiceAttributes = feature.getLayerProperties().getFeatureService().getFeatureServiceAttributes();
+        }
         final PropertyType[] propTypeArray = new PropertyType[aliasAttributeList.size()];
         int index = 0;
 
@@ -313,6 +337,19 @@ public class SimpleFeatureCollection extends AbstractFeatureCollection {
                 return new SimplePropertyType(name, Types.BOOLEAN, 0, 1);
             } else if (cl.equals(BigDecimal.class)) {
                 return new SimplePropertyType(name, Types.NUMERIC, 0, 1);
+            } else {
+                try {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Unknown attribute type found. Try to convert it to a deegree type");
+                    }
+                    final int deegreeType = Integer.parseInt(attr.getType());
+
+                    return new SimplePropertyType(name, deegreeType, 0, 1);
+                } catch (NumberFormatException e) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Unknown attribute type cannot be converted to a deegree type.", e);
+                    }
+                }
             }
         }
 
