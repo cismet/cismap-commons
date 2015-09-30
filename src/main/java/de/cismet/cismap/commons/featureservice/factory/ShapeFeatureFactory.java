@@ -13,7 +13,6 @@ package de.cismet.cismap.commons.featureservice.factory;
 
 import com.vividsolutions.jts.geom.*;
 
-import org.deegree.datatypes.Types;
 import org.deegree.io.rtree.HyperBoundingBox;
 import org.deegree.io.rtree.HyperPoint;
 import org.deegree.io.rtree.RTree;
@@ -27,6 +26,12 @@ import org.deegree.model.feature.schema.PropertyType;
 import org.deegree.model.spatialschema.JTSAdapter;
 import org.deegree.style.se.unevaluated.Style;
 
+import org.geotools.referencing.wkt.Parser;
+
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import org.openide.util.NbBundle;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -36,18 +41,23 @@ import java.net.URI;
 
 import java.nio.charset.Charset;
 
+import java.text.ParseException;
+
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.exceptions.ShapeFileImportAborted;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.features.ShapeInfo;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
@@ -79,7 +89,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 //    private Geometry extend;
     private boolean noGeometryRecognised = false;
     private boolean errorInGeometryFound = false;
-    private Crs shapeCrs = null;
+    private String shapeCrs = null;
     private Crs crs = CismapBroker.getInstance().getSrs();
     private org.deegree.model.spatialschema.Envelope envelope;
     private FeatureCollection fc = null;
@@ -124,7 +134,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
             final int maxCachedFeatureCount,
             final SwingWorker workerThread,
             final Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles,
-            final Crs shapeCrs) throws Exception {
+            final String shapeCrs) throws Exception {
         this.layerProperties = layerProperties;
         this.documentURI = documentURL;
         this.maxCachedFeatureCount = maxCachedFeatureCount;
@@ -132,12 +142,15 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         this.shapeCrs = shapeCrs;
 
         if (shapeCrs != null) {
-            this.featureSrid = CrsTransformer.extractSridFromCrs(shapeCrs.getCode());
+            this.featureSrid = CrsTransformer.extractSridFromCrs(shapeCrs);
         }
 
         try {
             this.parseShapeFile(workerThread);
             this.initialised = true;
+        } catch (ShapeFileImportAborted e) {
+            // this exception will be handled in the ShapeFileFeatureService
+            throw e;
         } catch (Exception ex) {
             logger.error("SW[" + workerThread + "]: error parsing shape file", ex);
             if (DEBUG && (shapeFile != null)) {
@@ -232,8 +245,8 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      */
     private Charset getCharsetDefinition() {
         Charset cs = null;
-        String cpgFilename = null;
-        File cpgFile = null;
+        String cpgFilename;
+        File cpgFile;
 
         if (this.documentURI.getPath().endsWith(".shp")) {
             cpgFilename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
@@ -276,16 +289,22 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      *
      * @param   workerThread  DOCUMENT ME!
      *
-     * @throws  Exception  DOCUMENT ME!
+     * @throws  Exception               DOCUMENT ME!
+     * @throws  ShapeFileImportAborted  DOCUMENT ME!
      */
     protected synchronized void parseShapeFile(final SwingWorker workerThread) throws Exception {
-        if (getShapeCrs() == null) {
-            setShapeCrs(CismapBroker.getInstance().getSrs());
-            featureSrid = CrsTransformer.extractSridFromCrs(getShapeCrs().getCode());
-        }
         filename = new File(documentURI).getName();
-
         shapeFile = getShapeFile();
+        envelope = shapeFile.getFileMBR();
+
+        if (getShapeCrs() == null) {
+            setShapeCrs(determineShapeCrs());
+
+            if (getShapeCrs() == null) {
+                throw new ShapeFileImportAborted();
+            }
+            featureSrid = CrsTransformer.extractSridFromCrs(getShapeCrs());
+        }
 
         final Feature degreeFeature = shapeFile.getFeatureByRecNo(1);
         final FeatureType type = degreeFeature.getFeatureType();
@@ -294,12 +313,10 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         featureServiceAttributes = new Vector(type.getProperties().length);
 
         for (final PropertyType pt : type.getProperties()) {
-            // ToDo was ist wenn zwei Geometrien dabei sind
             featureServiceAttributes.add(
                 new FeatureServiceAttribute(pt.getName().getAsString(), Integer.toString(pt.getType()), true));
         }
 
-        envelope = shapeFile.getFileMBR();
         // create an index file, if it does not alreay exists
         int currentProgress = 0;
         int newProgress;
@@ -345,8 +362,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     }
 
                     org.deegree.model.spatialschema.Envelope envelope = null;
-                    // TODO: deal with more than one geometry; handle geometry=null (allowed
-                    // in shapefile)
+                    // TODO: handle geometry=null (allowed in shapefile)
                     envelope = (feature.getDefaultGeometryPropertyValue()).getEnvelope();
                     if (envelope == null) { // assume a Point-geometry
                         if (geometries[0] instanceof org.deegree.model.spatialschema.Point) {
@@ -384,6 +400,196 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         initialised = true;
 
         this.cleanup();
+    }
+
+    /**
+     * Determines the crs of the corresponding prj file.
+     *
+     * @return  the crs of the corresponding prj file or null, if the initialisation of the shape file should be
+     *          cancelled.
+     */
+    private String determineShapeCrs() {
+        String prjFilename;
+        File prjFile;
+
+        final Map<Crs, CoordinateReferenceSystem> prjMapping = getKnownCrsMappings();
+
+        if ((prjMapping != null) && !prjMapping.isEmpty()) {
+            // if no mapping file is defined, it will be assumed that the shape file ueses the current crs
+            if (this.documentURI.getPath().endsWith(".shp")) {
+                prjFilename = this.documentURI.getPath().substring(0, this.documentURI.getPath().length() - 4);
+            } else {
+                prjFilename = this.documentURI.getPath();
+            }
+
+            prjFile = new File(prjFilename + ".prj");
+            if (!prjFile.exists()) {
+                prjFile = new File(prjFilename + ".PRJ");
+            }
+
+            try {
+                if (prjFile.exists()) {
+                    final BufferedReader br = new BufferedReader(new FileReader(prjFile));
+                    String crsDefinition = br.readLine();
+                    br.close();
+
+                    if (crsDefinition != null) {
+                        final Parser parser = new Parser();
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("prj file with definition: " + crsDefinition + " found");
+                        }
+
+                        crsDefinition = crsDefinitionAdjustments(crsDefinition);
+                        final CoordinateReferenceSystem crsFromShape = parser.parseCoordinateReferenceSystem(
+                                crsDefinition);
+
+                        for (final Crs key : prjMapping.keySet()) {
+                            if (isCrsEqual(prjMapping.get(key), crsFromShape)) {
+                                return key.getCode();
+                            }
+                        }
+                    } else {
+                        logger.warn("The prj file is empty.");
+                    }
+                } else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("No prj file found.");
+                    }
+                }
+            } catch (IOException e) {
+                logger.error("Error while reading the prj file.", e);
+            } catch (ParseException e) {
+                logger.error("Error while parsing the prj file.", e);
+            }
+
+            if (featureSrid == null) {
+                // the featureSrid must be set before the getEnvelope method will be called.
+                featureSrid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
+            }
+            final BoundingBox currentBBox = CismapBroker.getInstance()
+                        .getMappingComponent()
+                        .getCurrentBoundingBoxFromCamera();
+
+            if (getEnvelope().intersects(currentBBox.getGeometry(featureSrid))) {
+                return CismapBroker.getInstance().getSrs().getCode();
+            } else {
+                // Ask the user, what crs should be used
+                final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
+                final List<Object> definedMappings = new ArrayList<Object>();
+
+                for (final Crs tmpCrs : crsList) {
+                    if (tmpCrs.hasEsriDefinition()) {
+                        definedMappings.add(new CrsWrapper(tmpCrs));
+                    }
+                }
+
+                final Object userAnswer = JOptionPane.showInputDialog(CismapBroker.getInstance().getMappingComponent(),
+                        NbBundle.getMessage(ShapeFeatureFactory.class, "ShapeFeatureFactory.determineShapeCrs.message"),
+                        NbBundle.getMessage(ShapeFeatureFactory.class, "ShapeFeatureFactory.determineShapeCrs.title"),
+                        JOptionPane.OK_CANCEL_OPTION,
+                        null,
+                        definedMappings.toArray(),
+                        definedMappings.get(0));
+
+                if (userAnswer instanceof CrsWrapper) {
+                    return ((CrsWrapper)userAnswer).getCrs().getCode();
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        return CismapBroker.getInstance().getSrs().getCode();
+    }
+
+    /**
+     * Compares the given crs.
+     *
+     * @param   crs       DOCUMENT ME!
+     * @param   otherCrs  DOCUMENT ME!
+     *
+     * @return  true, if the given crs are equal
+     */
+    private boolean isCrsEqual(final CoordinateReferenceSystem crs, final CoordinateReferenceSystem otherCrs) {
+        final String definitionWithoutName = crs.toWKT().substring(crs.toWKT().indexOf("\n") + 1);
+        final String otherDefinitionWithoutName = otherCrs.toWKT().substring(otherCrs.toWKT().indexOf("\n") + 1);
+
+        return definitionWithoutName.equals(otherDefinitionWithoutName);
+    }
+
+    /**
+     * Reads all crs definitions from the cismapPrjMapping properties file.
+     *
+     * @return  all crs definitions from the cismapPrjMapping properties file. The key of the map is the epsg code of
+     *          the crs.
+     */
+    private Map<Crs, CoordinateReferenceSystem> getKnownCrsMappings() {
+        final Map<Crs, CoordinateReferenceSystem> prjMap = new HashMap<Crs, CoordinateReferenceSystem>();
+
+        final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
+
+        if (crsList != null) {
+            final Parser parser = new Parser();
+
+            for (final Crs crs : crsList) {
+                if (crs.hasEsriDefinition()) {
+                    try {
+                        prjMap.put(
+                            crs,
+                            parser.parseCoordinateReferenceSystem(crsDefinitionAdjustments(crs.getEsriDefinition())));
+                    } catch (ParseException e) {
+                        logger.error("Cannot parse the crs definition for " + crs.getCode() + ":\n"
+                                    + crs.getEsriDefinition(),
+                            e);
+                    }
+                }
+            }
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("No crs definition found");
+            }
+        }
+
+        return prjMap;
+    }
+
+    /**
+     * Adjusts the crs definition that the WKT parser can parse it.
+     *
+     * @param   definition  Dthe definition to adjust
+     *
+     * @return  the modified definition
+     */
+    private String crsDefinitionAdjustments(final String definition) {
+        final String invalidProjection = "projection[\"mercator_auxiliary_sphere\"]";
+        final String invalidParameter = "parameter[\"auxiliary_sphere_type\"";
+        String tmp = definition;
+
+        if (tmp.toLowerCase().contains(invalidProjection)) {
+            // replace mercator_auxiliary_sphere with mercator_2sp, because
+            // geotools does not know the mercator_auxiliary_sphere projection
+            final String firstPart = tmp.substring(0, tmp.toLowerCase().indexOf(invalidProjection));
+            final String secondPart = tmp.substring(tmp.toLowerCase().indexOf(invalidProjection)
+                            + invalidProjection.length(),
+                    tmp.length());
+            tmp = firstPart + "PROJECTION[\"Mercator_2SP\"]" + secondPart;
+        }
+
+        if (tmp.toLowerCase().contains(invalidParameter)) {
+            // replace the Auxiliary_Sphere_Type parameter, because
+            // geotools does not know the Auxiliary_Sphere_Type parameter
+            final String firstPart = tmp.substring(0, tmp.toLowerCase().indexOf(invalidParameter));
+            String withoutParameterStart = tmp.substring(tmp.toLowerCase().indexOf(invalidParameter)
+                            + invalidParameter.length(),
+                    tmp.length());
+            withoutParameterStart = withoutParameterStart.substring(withoutParameterStart.indexOf("]") + 1,
+                    withoutParameterStart.length());
+            final String secondPart = withoutParameterStart.substring(withoutParameterStart.indexOf(",") + 1,
+                    withoutParameterStart.length());
+            tmp = firstPart + secondPart;
+        }
+
+        return tmp;
     }
 
     /**
@@ -556,6 +762,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      *
      * @return  the envelope of the currently loaded shape file
      */
+    @Override
     public Geometry getEnvelope() {
         try {
             if (envelope == null) {
@@ -595,7 +802,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     CrsTransformer.extractSridFromCrs(crs.getCode()));
             Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
-            boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, getShapeCrs().getCode());
+            boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, getShapeCrs());
             // List<ShapeFeature> selectedFeatures =
             // this.degreeFeaturesTree.query(boundingPolygon.getEnvelopeInternal());
 
@@ -668,7 +875,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     CrsTransformer.extractSridFromCrs(crs.getCode()));
             Polygon boundingPolygon = geomFactory.createPolygon(geomFactory.createLinearRing(polyCords), null);
 
-            boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, getShapeCrs().getCode());
+            boundingPolygon = (Polygon)CrsTransformer.transformToGivenCrs(boundingPolygon, getShapeCrs());
             if (this.checkCancelled(workerThread, " quering spatial index structure")) {
                 return null;
             }
@@ -717,7 +924,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
 //            }
 
             if (logger.isDebugEnabled()) {
-                logger.debug("feature crs: " + getShapeCrs().getCode() + " features " + selectedFeatures.size()
+                logger.debug("feature crs: " + getShapeCrs() + " features " + selectedFeatures.size()
                             + " boundingbox: "
                             + boundingPolygon.getEnvelopeInternal());
             }
@@ -791,7 +998,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      *
      * @return  the shapeCrs
      */
-    public Crs getShapeCrs() {
+    public String getShapeCrs() {
         return shapeCrs;
     }
 
@@ -800,7 +1007,57 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      *
      * @param  shapeCrs  the shapeCrs to set
      */
-    public void setShapeCrs(final Crs shapeCrs) {
+    public void setShapeCrs(final String shapeCrs) {
         this.shapeCrs = shapeCrs;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class CrsWrapper {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private Crs crs;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new CrsWrapper object.
+         *
+         * @param  crs  DOCUMENT ME!
+         */
+        public CrsWrapper(final Crs crs) {
+            this.crs = crs;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public String toString() {
+            return crs.getShortname();
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  the crs
+         */
+        public Crs getCrs() {
+            return crs;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  crs  the crs to set
+         */
+        public void setCrs(final Crs crs) {
+            this.crs = crs;
+        }
     }
 }
