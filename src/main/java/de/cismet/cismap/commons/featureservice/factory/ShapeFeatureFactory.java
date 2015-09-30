@@ -762,7 +762,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      *
      * @return  the envelope of the currently loaded shape file
      */
-    @Override
     public Geometry getEnvelope() {
         try {
             if (envelope == null) {
