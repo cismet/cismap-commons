@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 
 import org.openide.util.NbBundle;
 
+import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -34,7 +35,6 @@ import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.LayerConfig;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.DocumentFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
@@ -326,10 +326,10 @@ public class LayerDropUtils {
      *
      * @return  true, iff a service was added
      */
-    private static boolean handleFiles(final List<File> data,
+    public static boolean handleFiles(final List<File> data,
             final ActiveLayerModel activeLayerModel,
             final int index,
-            final JComponent parent) {
+            final Component parent) {
         for (final File currentFile : data) {
             // NO HARDCODING
             try {
