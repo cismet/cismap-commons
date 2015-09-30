@@ -151,7 +151,9 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      */
     public void addCrsPopups() {
         for (final Crs c : mappingComponent.getCrsList()) {
-            addCrsPopup(c);
+            if (!c.isHideInCrsSwitcher()) {
+                addCrsPopup(c);
+            }
         }
     }
 
@@ -654,6 +656,12 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      */
     private void addCrsPopup(final Crs crs) {
         final JMenuItem jmi = new JMenuItem(crs.getShortname());
+
+        if (crs.isSelected()) {
+            // the default srs should be bold
+            jmi.setText("<html><b>" + crs.getShortname() + "</b></html>");
+        }
+
         jmi.setToolTipText(crs.getName());
         jmi.addActionListener(new ActionListener() {
 

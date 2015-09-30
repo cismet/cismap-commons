@@ -32,6 +32,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 import de.cismet.cismap.commons.Crs;
+import de.cismet.cismap.commons.exceptions.ShapeFileImportAborted;
 import de.cismet.cismap.commons.features.ShapeFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.ShapeFeatureFactory;
@@ -81,7 +82,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
     private boolean errorInGeometryFound = false;
     private boolean fileNotFound = false;
     private String geometryType = UNKNOWN;
-    private Crs shapeCrs;
+    private String shapeCrs;
     private Crs crs;
 
     //~ Constructors -----------------------------------------------------------
@@ -159,20 +160,25 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
-        final ShapeFeatureFactory sff = new ShapeFeatureFactory(this.getLayerProperties(),
-                this.getDocumentURI(),
-                this.maxSupportedFeatureCount,
-                this.layerInitWorker,
-                parseSLD(getSLDDefiniton()),
-                shapeCrs);
-        noGeometryRecognised = sff.isNoGeometryRecognised();
-        errorInGeometryFound = sff.isErrorInGeometryFound();
-        geometryType = sff.getGeometryType();
-        if (crs != null) {
-            sff.setCrs(crs);
-        }
+        try {
+            final ShapeFeatureFactory sff = new ShapeFeatureFactory(this.getLayerProperties(),
+                    this.getDocumentURI(),
+                    this.maxSupportedFeatureCount,
+                    this.layerInitWorker,
+                    parseSLD(getSLDDefiniton()),
+                    shapeCrs);
+            noGeometryRecognised = sff.isNoGeometryRecognised();
+            errorInGeometryFound = sff.isErrorInGeometryFound();
+            geometryType = sff.getGeometryType();
+            if (crs != null) {
+                sff.setCrs(crs);
+            }
 
-        return sff;
+            return sff;
+        } catch (ShapeFileImportAborted e) {
+            CismapBroker.getInstance().getMappingComponent().getMappingModel().removeLayer(this);
+            throw e;
+        }
     }
 
     @Override
@@ -269,7 +275,7 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
 
         if (element.getAttributeValue("shapeCrs") != null) {
             final String crs = element.getAttributeValue("shapeCrs");
-            shapeCrs = CismapBroker.getInstance().crsFromCode(crs);
+            shapeCrs = CismapBroker.getInstance().crsFromCode(crs).getCode();
         }
     }
 
@@ -279,9 +285,9 @@ public class ShapeFileFeatureService extends DocumentFeatureService<ShapeFeature
         String crs = null;
 
         if (getFeatureFactory() != null) {
-            crs = ((ShapeFeatureFactory)getFeatureFactory()).getShapeCrs().getCode();
+            crs = ((ShapeFeatureFactory)getFeatureFactory()).getShapeCrs();
         } else if (shapeCrs != null) {
-            crs = shapeCrs.getCode();
+            crs = shapeCrs;
         }
 
         if (crs != null) {

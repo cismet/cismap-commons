@@ -11,17 +11,14 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
-import com.vividsolutions.jts.geom.Geometry;
 
 import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
 
 import org.deegree.commons.utils.Pair;
-import org.deegree.commons.utils.Triple;
 import org.deegree.rendering.r2d.legends.Legends;
 import org.deegree.style.persistence.sld.SLDParser;
-import org.deegree.style.styling.Styling;
 
 import org.jdom.Document;
 import org.jdom.Element;
@@ -60,6 +57,7 @@ import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.XMLObjectFactory;
+import de.cismet.cismap.commons.exceptions.ShapeFileImportAborted;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
@@ -1933,6 +1931,10 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                 re.setRetrievedObject(null);
                 fireRetrievalComplete(re);
             } catch (final Exception e) {
+                if (e.getCause() instanceof ShapeFileImportAborted) {
+                    //nothing to do. Layer was removed
+                    return;
+                }
                 LOG.error("LIW[" + this.getId() + "]: Fehler beim initalisieren des Layers: " + e.getMessage(), e); // NOI18N
                 setInitialized(false);
 

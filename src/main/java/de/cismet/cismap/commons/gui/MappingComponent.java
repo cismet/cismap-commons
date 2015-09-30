@@ -4474,14 +4474,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             for (final Object elem : crsElements) {
                 if (elem instanceof Element) {
                     final Crs s = new Crs((Element)elem);
-                    // the crs is equals to an other crs, if the code is equal. If a crs has in the
-                    // local configuration file an other name than in the master configuration file,
-                    // the old crs will be removed and the local one should be added to use the
-                    // local name and short name of the crs.
-                    if (crsList.contains(s)) {
-                        crsList.remove(s);
+                    // the crs is equals to an other crs, if the code is equal.
+                    // Only crs, which are not defined in the master configuration file will be added
+                    if (!crsList.contains(s)) {
+                        crsList.add(s);
                     }
-                    crsList.add(s);
                 }
             }
         } catch (final Exception skip) {
@@ -5911,7 +5908,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         private final transient PLayer parent;
         private long requestIdentifier;
         private Thread completionThread;
-        private final List deletionCandidates;
 
         //~ Constructors -------------------------------------------------------
 
@@ -5924,7 +5920,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         public MappingComponentFeatureServiceListener(final ServiceLayer featureService, final PLayer parent) {
             this.featureService = featureService;
             this.parent = parent;
-            this.deletionCandidates = new ArrayList();
         }
 
         //~ Methods ------------------------------------------------------------
@@ -6047,8 +6042,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         parent.setVisible(isBackgroundEnabled() && featureService.isEnabled() && parent.getVisible());
                     }
                 });
+
             // clear all old data to delete twins
-            deletionCandidates.clear();
+            final List deletionCandidates = new ArrayList(parent.getChildrenReference().size());
 
             // if it's a refresh, add all old features which should be deleted in the
             // newly acquired featurecollection

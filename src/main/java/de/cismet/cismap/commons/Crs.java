@@ -9,6 +9,7 @@ package de.cismet.cismap.commons;
 
 import org.apache.log4j.Logger;
 
+import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
@@ -31,6 +32,8 @@ public class Crs {
     private String name;
     private boolean metric;
     private boolean selected;
+    private boolean hideInCrsSwitcher;
+    private String esriDefinition;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -64,6 +67,20 @@ public class Crs {
                         + elem.getAttribute("selected").getValue(),
                 e);
         }
+
+        try {
+            final Attribute attr = elem.getAttribute("hideInCrsSwitcher");
+
+            if (attr != null) {
+                this.hideInCrsSwitcher = elem.getAttribute("hideInCrsSwitcher").getBooleanValue();
+            }
+        } catch (DataConversionException e) {
+            log.error("attribute hideForChooser of element crs must be e boolean. The current value is "
+                        + elem.getAttribute("hideInCrsSwitcher").getValue(),
+                e);
+        }
+
+        esriDefinition = elem.getTextTrim();
     }
 
     /**
@@ -95,12 +112,14 @@ public class Crs {
      * @return  DOCUMENT ME!
      */
     public Element getJDOMElement() {
-        final Element e = new Element("crs");                 // NOI18N
-        e.setAttribute("shortname", shortname);               // NOI18N
-        e.setAttribute("name", name);                         // NOI18N
-        e.setAttribute("code", code);                         // NOI18N
-        e.setAttribute("metric", String.valueOf(metric));     // NOI18N
-        e.setAttribute("selected", String.valueOf(selected)); // NOI18N
+        final Element e = new Element("crs");                                   // NOI18N
+        e.setAttribute("shortname", shortname);                                 // NOI18N
+        e.setAttribute("name", name);                                           // NOI18N
+        e.setAttribute("code", code);                                           // NOI18N
+        e.setAttribute("metric", String.valueOf(metric));                       // NOI18N
+        e.setAttribute("selected", String.valueOf(selected));                   // NOI18N
+        e.setAttribute("hideInCrsSwitcher", String.valueOf(hideInCrsSwitcher)); // NOI18N
+        e.setText(esriDefinition);
         return e;
     }
 
@@ -214,5 +233,50 @@ public class Crs {
         int hash = 7;
         hash = (53 * hash) + ((this.code != null) ? this.code.hashCode() : 0);
         return hash;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the hideForScale
+     */
+    public boolean isHideInCrsSwitcher() {
+        return hideInCrsSwitcher;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  hideInCrsSwitcher  hideForChooser hideForScale the hideForScale to set
+     */
+    public void setHideInCrsSwitcher(final boolean hideInCrsSwitcher) {
+        this.hideInCrsSwitcher = hideInCrsSwitcher;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the esri definition for this crs
+     */
+    public String getEsriDefinition() {
+        return esriDefinition;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  esriDefinition  the esri definition for this crs
+     */
+    public void setEsriDefinition(final String esriDefinition) {
+        this.esriDefinition = esriDefinition;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  true, if a esri defintion is set
+     */
+    public boolean hasEsriDefinition() {
+        return (this.esriDefinition != null) && !this.esriDefinition.equals("");
     }
 }
