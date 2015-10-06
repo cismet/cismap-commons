@@ -27,6 +27,7 @@ import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import pswing.PSwingCanvas;
@@ -48,6 +49,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import java.io.IOException;
+
+import java.lang.reflect.InvocationTargetException;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -5906,7 +5909,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         private final transient Logger log = Logger.getLogger(this.getClass());
         private final transient ServiceLayer featureService;
         private final transient PLayer parent;
-        private long requestIdentifier;
+        private volatile long requestIdentifier;
         private Thread completionThread;
 
         //~ Constructors -------------------------------------------------------
@@ -6013,17 +6016,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             if ((completionThread != null) && completionThread.isAlive() && !completionThread.isInterrupted()) {
                 this.log.warn(featureService + "[" + e.getRequestIdentifier() + " (" + this.requestIdentifier
                             + ")]: retrievalComplete: old completion thread still running, trying to interrupt thread"); // NOI18N
-                completionThread.interrupt();
+                if (e.getRequestIdentifier() != this.requestIdentifier) {
+                    return;
+                } else {
+                    completionThread.interrupt();
+                }
             }
 
             if (e.getRequestIdentifier() < requestIdentifier) {
-                if (DEBUG) {
-                    this.log.warn(featureService + "[" + e.getRequestIdentifier() + " (" + requestIdentifier
-                                + ")]: retrievalComplete: another retrieval process is still running, aborting retrievalComplete"); // NOI18N
-                }
-                ((RetrievalServiceLayer)featureService).setProgress(-1);
-                fireActivityChanged();
-                fireRepaintError(new RepaintEvent(e));
+                this.log.warn(featureService + "[" + e.getRequestIdentifier() + " (" + requestIdentifier
+                            + ")]: retrievalComplete: another retrieval process is still running, aborting retrievalComplete"); // NOI18N
+//                ((RetrievalServiceLayer)featureService).setProgress(-1);
+//                fireActivityChanged();
+//                fireRepaintError(new RepaintEvent(e));
                 return;
             }
 
@@ -6034,14 +6039,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
 
             final List newFeatures = new ArrayList(initialCapacity);
-            EventQueue.invokeLater(new Thread("MappingComponent setParentVisible") {
-
-                    @Override
-                    public void run() {
-                        ((RetrievalServiceLayer)featureService).setProgress(-1);
-                        parent.setVisible(isBackgroundEnabled() && featureService.isEnabled() && parent.getVisible());
-                    }
-                });
+            ((RetrievalServiceLayer)featureService).setProgress(-1);
+            parent.setVisible(isBackgroundEnabled() && featureService.isEnabled() && parent.getVisible());
 
             // clear all old data to delete twins
             final List deletionCandidates = new ArrayList(parent.getChildrenReference().size());
@@ -6154,7 +6153,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                                     + ")]: MappingComponentFeaturelistener.retrievalComplete()"); // NOI18N
                                                     }
                                                 }
-
+                                                if (requestIdentifier != e.getRequestIdentifier()) {
+                                                    ((RetrievalServiceLayer)featureService).setProgress(100);
+                                                    fireActivityChanged();
+                                                    return;
+                                                }
                                                 // if it's a refresh, delete all previous features
                                                 if (e.isRefreshExisting()) {
                                                     parent.removeAllChildren();
@@ -6268,9 +6271,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                                     + ")]: completion thread Interrupted or synchronisation lost"); // NOI18N
                                     }
                                 }
-                                if (requestIdentifier == e.getRequestIdentifier()) {
-                                    fireRepaintError(new RepaintEvent(e));
-                                }
+                                EventQueue.invokeLater(new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            ((RetrievalServiceLayer)featureService).setProgress(100);
+                                            fireActivityChanged();
+                                            fireRepaintError(new RepaintEvent(e));
+//                                        fireRepaintComplete(new RepaintEvent(e));
+                                        }
+                                    });
+//                                if (requestIdentifier == e.getRequestIdentifier()) {
+//                                    fireRepaintError(new RepaintEvent(e));
+//                                }
                             }
                         }
                     };
