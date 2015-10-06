@@ -176,6 +176,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         this.initialised = shpff.initialised;
         this.crs = shpff.crs;
         this.shapeCrs = shpff.shapeCrs;
+        this.fc = shpff.fc;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -347,7 +348,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     Feature feature = null;
 
                     if (fc != null) {
-                        feature = fc.getFeature(i);
+                        feature = fc.getFeature(i - 1);
                     } else {
                         feature = shapeFile.getFeatureByRecNo(i);
                     }
@@ -379,7 +380,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                             new HyperPoint(envelope.getMin().getAsArray()),
                             new HyperPoint(envelope.getMax().getAsArray()));
                     rtree.insert(new Integer(i), box);
-
                     // refresh progress bar
                     newProgress = (int)((double)i / (double)features * 100d);
                     if ((workerThread != null) && ((newProgress % 5) == 0) && (newProgress > currentProgress)
@@ -762,6 +762,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
      *
      * @return  the envelope of the currently loaded shape file
      */
+    @Override
     public Geometry getEnvelope() {
         try {
             if (envelope == null) {
@@ -908,11 +909,17 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                 final ShapeInfo info = new ShapeInfo(filename, persShapeFile, featureSrid, fc);
                 int count = 0;
 
-//                if (!saveAsLastCreated || recordNumbers.length < 60000) {
                 for (final int record : recordNumbers) {
                     ++count;
-                    final ShapeFeature featureServiceFeature = createFeatureInstance(null, info, record);
-                    this.initialiseFeature(featureServiceFeature, null, false, record);
+                    ShapeFeature featureServiceFeature;
+
+                    if (fc != null) {
+                        featureServiceFeature = createFeatureInstance(null, info, record - 1);
+                        this.initialiseFeature(featureServiceFeature, null, false, record - 1);
+                    } else {
+                        featureServiceFeature = createFeatureInstance(null, info, record);
+                        this.initialiseFeature(featureServiceFeature, null, false, record);
+                    }
                     selectedFeatures.add(featureServiceFeature);
 
                     if (saveAsLastCreated && (count > 50000)) {
@@ -920,7 +927,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                     }
                 }
             }
-//            }
 
             if (logger.isDebugEnabled()) {
                 logger.debug("feature crs: " + getShapeCrs() + " features " + selectedFeatures.size()
