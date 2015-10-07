@@ -190,14 +190,23 @@ public class CrsTransformer {
             srcCrs = sourceCrs;
         }
 
-        final CoordinateSystem coordSystem = CRSFactory.create(srcCrs);
-        Geometry deegreeGeom = JTSAdapter.wrap(geom);
-        deegreeGeom = transformer.transform(deegreeGeom, coordSystem.getCRS());
 
-        final T ret = (T)JTSAdapter.export(deegreeGeom);
-        setSrid(ret);
+        if (extractSridFromCrs(srcCrs) == 3857 && (extractSridFromCrs(destCrsAsString) == 31466 || extractSridFromCrs(destCrsAsString) == 31467)) {
+            // To transform a geometry from 3857 to 31466/31467, the geometry should be first transformed to an other crs
+            // and then to 31466/31467. Otherwise, the transformation is not correct
+            T ret = transformToGivenCrs(geom, "EPSG:4326");
 
-        return ret;
+            return fastTransformGeometry(ret, "EPSG:4326");
+        } else {
+            final CoordinateSystem coordSystem = CRSFactory.create(srcCrs);
+            Geometry deegreeGeom = JTSAdapter.wrap(geom);
+            deegreeGeom = transformer.transform(deegreeGeom, coordSystem.getCRS());
+
+            final T ret = (T)JTSAdapter.export(deegreeGeom);
+            setSrid(ret);
+
+            return ret;
+        }
     }
     //J+
 
