@@ -104,8 +104,22 @@ public class CrsTransformer {
         final CoordinateSystem coordSystem = CRSFactory.create(sourceCrs);
         Point minPoint = GeometryFactory.createPoint(bbox.getX1(), bbox.getY1(), coordSystem);
         Point maxPoint = GeometryFactory.createPoint(bbox.getX2(), bbox.getY2(), coordSystem);
-        minPoint = (org.deegree.model.spatialschema.Point)transformer.transform(minPoint);
-        maxPoint = (org.deegree.model.spatialschema.Point)transformer.transform(maxPoint);
+
+        if ((extractSridFromCrs(sourceCrs) == 3857)
+                    && ((extractSridFromCrs(destCrsAsString) == 31466)
+                        || (extractSridFromCrs(destCrsAsString) == 31467))) {
+            // To transform a geometry from 3857 to 31466/31467, the geometry should be first transformed to an other
+            // crs and then to 31466/31467. Otherwise, the transformation is not correct
+            final GeoTransformer transformer4326 = new GeoTransformer("4326");
+            minPoint = (org.deegree.model.spatialschema.Point)transformer4326.transform(minPoint);
+            maxPoint = (org.deegree.model.spatialschema.Point)transformer4326.transform(maxPoint);
+
+            minPoint = (org.deegree.model.spatialschema.Point)transformer.transform(minPoint);
+            maxPoint = (org.deegree.model.spatialschema.Point)transformer.transform(maxPoint);
+        } else {
+            minPoint = (org.deegree.model.spatialschema.Point)transformer.transform(minPoint);
+            maxPoint = (org.deegree.model.spatialschema.Point)transformer.transform(maxPoint);
+        }
         BoundingBox newBbox;
 
         if (bbox instanceof XBoundingBox) {

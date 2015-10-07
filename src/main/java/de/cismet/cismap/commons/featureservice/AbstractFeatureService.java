@@ -11,7 +11,6 @@
  */
 package de.cismet.cismap.commons.featureservice;
 
-
 import edu.umd.cs.piccolo.PNode;
 
 import org.apache.log4j.Logger;
@@ -1932,7 +1931,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
                 fireRetrievalComplete(re);
             } catch (final Exception e) {
                 if (e.getCause() instanceof ShapeFileImportAborted) {
-                    //nothing to do. Layer was removed
+                    // nothing to do. Layer was removed
                     return;
                 }
                 LOG.error("LIW[" + this.getId() + "]: Fehler beim initalisieren des Layers: " + e.getMessage(), e); // NOI18N
