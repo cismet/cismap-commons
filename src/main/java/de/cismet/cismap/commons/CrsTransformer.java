@@ -110,7 +110,7 @@ public class CrsTransformer {
                         || (extractSridFromCrs(destCrsAsString) == 31467))) {
             // To transform a geometry from 3857 to 31466/31467, the geometry should be first transformed to an other
             // crs and then to 31466/31467. Otherwise, the transformation is not correct
-            final GeoTransformer transformer4326 = new GeoTransformer("4326");
+            final GeoTransformer transformer4326 = new GeoTransformer("EPSG:4326");
             minPoint = (org.deegree.model.spatialschema.Point)transformer4326.transform(minPoint);
             maxPoint = (org.deegree.model.spatialschema.Point)transformer4326.transform(maxPoint);
 
