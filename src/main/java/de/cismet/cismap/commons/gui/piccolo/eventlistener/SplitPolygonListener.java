@@ -31,9 +31,8 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
 
     //~ Instance fields --------------------------------------------------------
 
-    MappingComponent mc;
-    PFeature p = null;
-    private boolean inProgress;
+    private final MappingComponent mc;
+    private PFeature pFeature = null;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
     //~ Constructors -----------------------------------------------------------
@@ -58,10 +57,10 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(pInputEvent, new Class[] { PFeature.class });
         if (o instanceof PFeature) {
             super.mouseClicked(pInputEvent);
-            p = (PFeature)(o);
-            if (p.isSelected() == false) {
-                mc.getFeatureCollection().select(p.getFeature());
-            } else if (p.inSplitProgress()) {
+            pFeature = (PFeature)(o);
+            if (pFeature.isSelected() == false) {
+                mc.getFeatureCollection().select(pFeature.getFeature());
+            } else if (pFeature.inSplitProgress()) {
                 Point2D point = null;
                 if (mc.isSnappingEnabled()) {
                     point = PFeatureTools.getNearestPointInArea(mc, pInputEvent.getCanvasPosition());
@@ -69,15 +68,15 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
                 if (point == null) {
                     point = pInputEvent.getPosition();
                 }
-                if (p.inSplitProgress()) {
-                    p.getSplitPoints().add(point);
+                if (pFeature.inSplitProgress()) {
+                    pFeature.getSplitPoints().add(point);
                     updateSplitLine(null);
                 }
             } else {
                 postClickDetected();
             }
         } else {
-            p = null;
+            pFeature = null;
         }
     }
 
@@ -91,19 +90,11 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
 
     /**
      * DOCUMENT ME!
-     */
-    private void postSelectionChanged() {
-        final PNotificationCenter pn = PNotificationCenter.defaultCenter();
-        pn.postNotification(SELECTION_CHANGED, this);
-    }
-
-    /**
-     * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
     public PFeature getFeatureClickedOn() {
-        return p;
+        return pFeature;
     }
 
     /**
@@ -112,19 +103,19 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
      * @return  DOCUMENT ME!
      */
     public PFeature getSelectedPFeature() {
-        return p;
+        return pFeature;
     }
 
 //TODO
     @Override
     public void mouseMoved(final edu.umd.cs.piccolo.event.PInputEvent event) {
         final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[] { PFeature.class });
-        p = (PFeature)o;
-        if ((p == null) && (mc.getFeatureCollection().getSelectedFeatures().size() == 1)) {
-            p = (PFeature)mc.getPFeatureHM().get(mc.getFeatureCollection().getSelectedFeatures().toArray()[0]);
+        pFeature = (PFeature)o;
+        if ((pFeature == null) && (mc.getFeatureCollection().getSelectedFeatures().size() == 1)) {
+            pFeature = (PFeature)mc.getPFeatureHM().get(mc.getFeatureCollection().getSelectedFeatures().toArray()[0]);
             // p=mc.getSelectedNode();
         }
-        if ((p != null) && p.inSplitProgress()) {
+        if ((pFeature != null) && pFeature.inSplitProgress()) {
             if (log.isDebugEnabled()) {
                 log.debug("want to draw line"); // NOI18N
             }
@@ -148,10 +139,10 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
     private void updateSplitLine(final Point2D lastPoint) {
         final Point2D[] pa = getPoints(lastPoint);
         if (log.isDebugEnabled()) {
-            log.debug("getSplitLine()" + p.getSplitLine()); // NOI18N
+            log.debug("getSplitLine()" + pFeature.getSplitLine()); // NOI18N
         }
-        p.getSplitLine().setPathToPolyline(pa);
-        p.getSplitLine().repaint();
+        pFeature.getSplitLine().setPathToPolyline(pa);
+        pFeature.getSplitLine().repaint();
     }
 
     /**
@@ -163,7 +154,7 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
      */
     private Point2D[] getPoints(final Point2D lastPoint) {
         int plus;
-        boolean movin = false;
+        boolean movin;
         if (lastPoint != null) {
             plus = 1;
             movin = true;
@@ -171,13 +162,13 @@ public class SplitPolygonListener extends PBasicInputEventHandler {
             plus = 0;
             movin = false;
         }
-        final Point2D[] pa = new Point2D[p.getSplitPoints().size() + plus];
-        for (int i = 0; i < p.getSplitPoints().size(); ++i) {
-            pa[i] = (Point2D)(p.getSplitPoints().get(i));
+        final Point2D[] pa = new Point2D[pFeature.getSplitPoints().size() + plus];
+        for (int i = 0; i < pFeature.getSplitPoints().size(); ++i) {
+            pa[i] = (Point2D)(pFeature.getSplitPoints().get(i));
         }
 
         if (movin) {
-            pa[p.getSplitPoints().size()] = lastPoint;
+            pa[pFeature.getSplitPoints().size()] = lastPoint;
             // pa[p.getSplitPoints().size()+1]=p.getFirstSplitHandle();
         } else {
             // pa[p.getSplitPoints().size()]=p.getFirstSplitHandle();

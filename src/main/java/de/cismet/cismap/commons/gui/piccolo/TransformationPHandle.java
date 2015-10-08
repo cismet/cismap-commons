@@ -66,9 +66,9 @@ public class TransformationPHandle extends PHandle {
     private PText leftInfo;
     private PText rightInfo;
     private MultiMap glueCoordinates = new MultiMap();
-    private PFeature pfeature;
-    private int entityPosition;
-    private int ringPosition;
+    private final PFeature pfeature;
+    private final int entityPosition;
+    private final int ringPosition;
     private int coordPosition;
     private float startX;
     private float startY;
@@ -540,7 +540,13 @@ public class TransformationPHandle extends PHandle {
                                     yp[coordPosition]));
                     ((PHandle)(pInputEvent.getPickedNode())).duplicateHandle();
                 } else if (pfeature.getViewer().getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
-                    pfeature.addSplitHandle(((PHandle)(pInputEvent.getPickedNode())));
+                    if (pfeature.getFeature().getGeometry() instanceof Polygon) {
+                        pfeature.addSplitHandle(((PHandle)(pInputEvent.getPickedNode())));
+                    } else if (pfeature.getFeature().getGeometry() instanceof LineString) {
+                        if ((coordPosition > 0) && (coordPosition < (xp.length - 1))) {
+                            pfeature.addSplitHandle(((PHandle)(pInputEvent.getPickedNode())));
+                        }
+                    }
                 }
                 if (pfeature.getViewer().isFeatureDebugging()) {
                     if (LOG.isDebugEnabled()) {
