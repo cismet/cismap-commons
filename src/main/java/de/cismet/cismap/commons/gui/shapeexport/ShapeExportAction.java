@@ -104,10 +104,12 @@ public class ShapeExportAction extends AbstractAction {
             wfs.setQuery(wfs.getQuery().replace(ShapeExport.getBboxToken(), boundingBox.toGml4WFS110String()));
         }
 
-        if (!DownloadManagerDialog.showAskingForUserTitle(CismapBroker.getInstance().getMappingComponent())) {
+        if (
+            !DownloadManagerDialog.getInstance().showAskingForUserTitleDialog(
+                        CismapBroker.getInstance().getMappingComponent())) {
             return;
         }
-        final String jobname = DownloadManagerDialog.getJobname();
+        final String jobname = DownloadManagerDialog.getInstance().getJobName();
 
         DownloadManager.instance().add(convertToDownloads(wfsList, jobname));
     }

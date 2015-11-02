@@ -1125,7 +1125,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 }
             }
 
-            if (DownloadManagerDialog.showAskingForUserTitle(this)) {
+            if (DownloadManagerDialog.getInstance().showAskingForUserTitleDialog(this)) {
                 DownloadManager.instance()
                         .add(new ExportShapeDownload(
                                 name,
