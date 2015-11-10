@@ -5331,6 +5331,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
                     @Override
                     public void run() {
+                        final BoundingBox formerBBox = getCurrentBoundingBoxFromCamera();
+
+                        if (formerBBox instanceof XBoundingBox) {
+                            ((XBoundingBox)formerBBox).setSrs(event.getFormerCrs().getCode());
+                        }
                         try {
                             StaticSwingTools.showDialog(crsChangedWaitingDialog);
 
@@ -5382,6 +5387,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 }
                             }
                         } catch (final Exception e) {
+                            LOG.error(
+                                "Cannot transform the current bounding box to the CRS "
+                                        + event.getCurrentCrs(),
+                                e);
                             JOptionPane.showMessageDialog(
                                 StaticSwingTools.getParentFrame(MappingComponent.this),
                                 org.openide.util.NbBundle.getMessage(
@@ -5391,14 +5400,19 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                     MappingComponent.class,
                                     "MappingComponent.crsChanged(CrsChangedEvent).JOptionPane.title"),
                                 JOptionPane.ERROR_MESSAGE);
-                            LOG.error(
-                                "Cannot transform the current bounding box to the CRS "
-                                        + event.getCurrentCrs(),
-                                e);
-                            resetCrs = true;
-                            final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
-                            alm.setSrs(event.getCurrentCrs());
-                            CismapBroker.getInstance().setSrs(event.getFormerCrs());
+                            EventQueue.invokeLater(new Thread("crsReset") {
+
+                                    @Override
+                                    public void run() {
+                                        resetCrs = true;
+                                        final ActiveLayerModel alm = (ActiveLayerModel)getMappingModel();
+                                        alm.setSrs(event.getFormerCrs());
+                                        CismapBroker.getInstance().setSrs(event.getFormerCrs());
+                                        wtst = null;
+                                        getWtst();
+                                        gotoBoundingBoxWithoutHistory(formerBBox, 0);
+                                    }
+                                });
                         } finally {
                             if (crsChangedWaitingDialog != null) {
                                 crsChangedWaitingDialog.setVisible(false);
