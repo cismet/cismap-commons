@@ -678,9 +678,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
 
                                     DownloadManager.instance().add(jd);
                                 }
-                            } else if (DownloadManagerDialog.showAskingForUserTitle(
+                            } else if (DownloadManagerDialog.getInstance().showAskingForUserTitleDialog(
                                             PrintingWidget.this.mappingComponent)) {
-                                final String jobname = DownloadManagerDialog.getJobname();
+                                final String jobname = DownloadManagerDialog.getInstance().getJobName();
                                 DownloadManager.instance()
                                         .add(new JasperDownload(jasperPrint, jobname, "Cismap-Druck", "cismap"));
                             }

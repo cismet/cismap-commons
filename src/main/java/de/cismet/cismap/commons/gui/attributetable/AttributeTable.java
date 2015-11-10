@@ -2168,7 +2168,7 @@ public class AttributeTable extends javax.swing.JPanel {
             return;
         }
 
-        if (DownloadManagerDialog.showAskingForUserTitle(this)) {
+        if (DownloadManagerDialog.getInstance().showAskingForUserTitleDialog(this)) {
             try {
                 ExportDownload ed = (ExportDownload)jcFormat.getSelectedItem();
                 // every download needs its own instance of the Download class
