@@ -226,6 +226,21 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             addInfoNode();
             refreshDesign();
 
+            // if the feature renderer implements the ScaleAwareFeatureRenderer interface,
+            // the scale must be checked, when the view scale wass changed
+            final FeatureRenderer renderer = getFeatureRenderer();
+
+            if ((renderer instanceof ScaleAwareFeatureRenderer) && (viewer != null) && (viewer.getCamera() != null)) {
+                viewer.getCamera()
+                        .addPropertyChangeListener(PCamera.PROPERTY_VIEW_TRANSFORM, new PropertyChangeListener() {
+
+                                @Override
+                                public void propertyChange(final PropertyChangeEvent evt) {
+                                    visualize();
+                                }
+                            });
+            }
+
             stroke = getStroke();
             strokePaint = getStrokePaint();
 //            tinter = new ColorTintFilter(Color.BLUE, 0.5f);
@@ -752,13 +767,55 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
     private void doGeometry(final Geometry geom) {
         entityRingCoordArr = getCoordinateArray(geom);
 
-        if (geom != null) {
+        if ((geom != null) && drawFeature()) {
             updateXpAndYp();
             updatePath();
+        } else {
+            entityRingXArr = null;
+            entityRingYArr = null;
+            getPathReference().reset();
         }
 
         refreshDesign();
         syncGeometry();
+    }
+
+    /**
+     * If the feature has a ScaleAwareFeatureRenderer, the geometry should possibly not be drawn in the map.
+     *
+     * @return  true, if the geometry should be drawn. False otherwise
+     */
+    private boolean drawFeature() {
+        final FeatureRenderer renderer = getFeatureRenderer();
+
+        if (renderer instanceof ScaleAwareFeatureRenderer) {
+            final int minScale = ((ScaleAwareFeatureRenderer)renderer).getMinScale();
+            final int maxScale = ((ScaleAwareFeatureRenderer)renderer).getMaxScale();
+            final double scale = viewer.getScaleDenominator();
+
+            return (maxScale <= scale) && (minScale >= scale);
+        }
+
+        return true;
+    }
+
+    /**
+     * Determines the feature renderer of the feature.
+     *
+     * @return  the feature renderer of the feature or null, if it hasn't one
+     */
+    private FeatureRenderer getFeatureRenderer() {
+        if (feature instanceof FeatureRendererAwareFeature) {
+            FeatureRenderer renderer = ((FeatureRendererAwareFeature)feature).getFeatureRenderer();
+
+            if (renderer == null) {
+                renderer = ((FeatureRendererAwareFeature)feature).getParentFeatureRenderer();
+            }
+
+            return renderer;
+        }
+
+        return null;
     }
 
     /**

@@ -28,4 +28,11 @@ public interface FeatureRendererAwareFeature {
      * @return  DOCUMENT ME!
      */
     FeatureRenderer getFeatureRenderer();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    FeatureRenderer getParentFeatureRenderer();
 }
