@@ -23,6 +23,7 @@ import org.jdesktop.swingx.table.TableColumnExt;
 
 import org.jdom.Element;
 
+import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -51,6 +52,8 @@ import de.cismet.cismap.commons.features.FeatureCollectionEvent;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.features.FeatureGroup;
 import de.cismet.cismap.commons.features.FeatureGroups;
+import de.cismet.cismap.commons.features.FeatureRenderer;
+import de.cismet.cismap.commons.features.FeatureRendererAwareFeature;
 import de.cismet.cismap.commons.features.SubFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -667,29 +670,28 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
      */
     private void togShowOnlyVisibleActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_togShowOnlyVisibleActionPerformed
         featureCollectionFilter.setArmed(togShowOnlyVisible.isSelected());
-        ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
+        fireTableDataChanged();
     }                                                                                      //GEN-LAST:event_togShowOnlyVisibleActionPerformed
 
     @Override
     public void shownMapBoundsChanged() {
         if (featureCollectionFilter.isArmed()) {
-            ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
+            fireTableDataChanged();
         }
     }
 
     @Override
     public void featuresRemoved(final FeatureCollectionEvent fce) {
-        ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
+        fireTableDataChanged();
     }
 
     @Override
     public void featuresChanged(final FeatureCollectionEvent fce) {
-        final Feature f = null;
         final Collection<Feature> fc = fce.getFeatureCollection().getSelectedFeatures();
         if (LOG.isDebugEnabled()) {
             LOG.debug("in featuresChanged: Selectedfeatures (" + fc.size() + ")" + fc, new CurrentStackTrace()); // NOI18N
         }
-        ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
+        fireTableDataChanged();
         for (final Feature feat : fc) {
             final int index = getFeatureCollection().getAllFeatures().indexOf(feat);
             if (index != -1) {
@@ -704,7 +706,27 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 
     @Override
     public void featuresAdded(final FeatureCollectionEvent fce) {
-        ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
+        fireTableDataChanged();
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void fireTableDataChanged() {
+        if (EventQueue.isDispatchThread()) {
+            ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
+        } else {
+            LOG.warn("fireTableDataChanged not in edt", new Exception());
+
+            EventQueue.invokeLater(new Thread("fireTableDatachanged in FeatureControl") {
+
+                    @Override
+                    public void run() {
+                        ((FeatureCollectionTableModel)FeatureControl.this.jxtFeatures.getModel())
+                                .fireTableDataChanged();
+                    }
+                });
+        }
     }
 
     @Override
@@ -914,7 +936,7 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
 
     @Override
     public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-        ((FeatureCollectionTableModel)jxtFeatures.getModel()).fireTableDataChanged();
+        fireTableDataChanged();
     }
 
     @Override
@@ -1116,6 +1138,16 @@ public class FeatureControl extends javax.swing.JPanel implements FeatureCollect
                     }
                     case 6: {
                         // Zentrum
+                        if (f instanceof FeatureRendererAwareFeature) {
+                            final FeatureRenderer renderer = ((FeatureRendererAwareFeature)f).getFeatureRenderer();
+
+                            if (renderer instanceof CoordHider) {
+                                // The coords should not be shown, if the feature renderer implements the CoordHider
+                                // interface
+                                return "";
+                            }
+                        }
+
                         if (f.getGeometry() != null) {
                             final Geometry geom = CrsTransformer.transformToCurrentCrs(f.getGeometry());
                             final String pattern = (CismapBroker.getInstance().getSrs().isMetric() ? "0.00"
