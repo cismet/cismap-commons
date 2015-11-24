@@ -236,6 +236,18 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
                                 @Override
                                 public void propertyChange(final PropertyChangeEvent evt) {
+                                    if (!drawFeature()) {
+                                        if (pi != null) {
+                                            viewer.removeStickyNode(pi);
+                                        }
+                                        if (piSelected != null) {
+                                            viewer.removeStickyNode(piSelected);
+                                        }
+                                        if (stickyChild instanceof PSticky) {
+                                            viewer.removeStickyNode((PSticky)stickyChild);
+                                        }
+                                        removeAllChildren();
+                                    }
                                     visualize();
                                 }
                             });
@@ -405,6 +417,10 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     private void setFeatureAnnotationSymbols() {
         FeatureAnnotationSymbol piOrig = null;
+        
+        if (!drawFeature()) {
+            return;
+        }
 
         if (getFeature() instanceof StyledFeature) {
             piOrig = ((StyledFeature)getFeature()).getPointAnnotationSymbol();
@@ -497,7 +513,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      * @param  real_y  DOCUMENT ME!
      */
     private void addAnnotation(final double real_x, final double real_y) {
-        if (!ignoreStickyFeature) {
+        if (!drawFeature()) {
+            return;
+        }
+        
+        if (!ignoreStickyFeature && drawFeature()) {
             viewer.addStickyNode(pi);
             viewer.addStickyNode(piSelected);
         }
@@ -1087,7 +1107,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
             // TODO:Wenn feature=labeledFeature jetzt noch Anpassungen machen
             if (((feature instanceof AnnotatedFeature) && ((AnnotatedFeature)feature).isPrimaryAnnotationVisible()
-                            && (((AnnotatedFeature)feature).getPrimaryAnnotation() != null))) {
+                            && (((AnnotatedFeature)feature).getPrimaryAnnotation() != null)) && drawFeature()) {
                 final AnnotatedFeature af = (AnnotatedFeature)feature;
                 primaryAnnotation = new StickyPText(" " + af.getPrimaryAnnotation() + " ");
                 primaryAnnotation.setJustification(af.getPrimaryAnnotationJustification());
