@@ -34,6 +34,7 @@ public class Crs {
     private boolean selected;
     private boolean hideInCrsSwitcher;
     private String esriDefinition;
+    private boolean defaultCrs;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -55,7 +56,7 @@ public class Crs {
         try {
             this.metric = elem.getAttribute("metric").getBooleanValue();
         } catch (DataConversionException e) {
-            log.error("attribute selected of element crs must be e boolean. The current value is "
+            log.error("attribute metric of element crs must be e boolean. The current value is "
                         + elem.getAttribute("selected").getValue(),
                 e);
         }
@@ -65,6 +66,18 @@ public class Crs {
         } catch (DataConversionException e) {
             log.error("attribute selected of element crs must be e boolean. The current value is "
                         + elem.getAttribute("selected").getValue(),
+                e);
+        }
+
+        try {
+            final Attribute attr = elem.getAttribute("defaultCrs");
+
+            if (attr != null) {
+                this.defaultCrs = attr.getBooleanValue();
+            }
+        } catch (DataConversionException e) {
+            log.error("attribute defaultCrs of element crs must be e boolean. The current value is "
+                        + elem.getAttribute("defaultCrs").getValue(),
                 e);
         }
 
@@ -118,6 +131,7 @@ public class Crs {
         e.setAttribute("code", code);                                           // NOI18N
         e.setAttribute("metric", String.valueOf(metric));                       // NOI18N
         e.setAttribute("selected", String.valueOf(selected));                   // NOI18N
+        e.setAttribute("defaultCrs", String.valueOf(defaultCrs));                   // NOI18N
         e.setAttribute("hideInCrsSwitcher", String.valueOf(hideInCrsSwitcher)); // NOI18N
         e.setText(esriDefinition);
         return e;
@@ -278,5 +292,19 @@ public class Crs {
      */
     public boolean hasEsriDefinition() {
         return (this.esriDefinition != null) && !this.esriDefinition.equals("");
+    }
+
+    /**
+     * @return the defaultCrs
+     */
+    public boolean isDefaultCrs() {
+        return defaultCrs;
+    }
+
+    /**
+     * @param defaultCrs the defaultCrs to set
+     */
+    public void setDefaultCrs(boolean defaultCrs) {
+        this.defaultCrs = defaultCrs;
     }
 }

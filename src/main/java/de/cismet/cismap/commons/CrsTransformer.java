@@ -443,37 +443,60 @@ public class CrsTransformer {
         }
         final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
         com.vividsolutions.jts.geom.Geometry newGeom = null;
-        final String curCrs = "EPSG:" + geom.getSRID(); // NOI18N
+        String curCrs = "EPSG:" + geom.getSRID(); // NOI18N
 
-        // Wenn SRID nicht gesetzt oder auf -1 gesetzt ist, dann handelt es sich um das default CRS
-        // und das ist immer metrisch
-        if (!isDefaultCrs(curCrs)) {
-            final Crs curCrsObject = new Crs();
-            curCrsObject.setCode(curCrs);
-            final int index = crsList.indexOf(curCrsObject);
+        if (isDefaultCrs(curCrs)) {
+            curCrs = CismapBroker.getInstance().getDefaultCrs();
+        }
+        
+        final Crs curCrsObject = new Crs();
+        curCrsObject.setCode(curCrs);
+        final int index = crsList.indexOf(curCrsObject);
 
-            if (index != -1) {
-                final Crs crs = crsList.get(index);
-                if (crs.isMetric()) {
-                    newGeom = geom;
-                }
+        if (index != -1) {
+            final Crs crs = crsList.get(index);
+            if (crs.isMetric()) {
+                newGeom = geom;
             }
+        }
 
-            if (newGeom == null) {
-                final String defaultCrs = CismapBroker.getInstance().getDefaultCrs();
-                try {
-                    final CrsTransformer transformer = new CrsTransformer(defaultCrs);
-                    newGeom = transformer.transformGeometry(geom, curCrs);
-                } catch (Exception e) {
-                    LOG.error("Cannot transform the geometry from " + curCrs + " to " + defaultCrs, e); // NOI18N
-                    newGeom = geom;
-                }
+        if (newGeom == null) {
+            final String metricCrs = getMetricCrs().getCode();
+            try {
+                final CrsTransformer transformer = new CrsTransformer(metricCrs);
+                newGeom = transformer.transformGeometry(geom, curCrs);
+            } catch (Exception e) {
+                LOG.error("Cannot transform the geometry from " + curCrs + " to " + metricCrs, e); // NOI18N
+                newGeom = geom;
             }
-        } else {
-            newGeom = geom;
         }
 
         return (T)newGeom;
+    }
+    
+    /**
+     * Determines a metric crs. If the default crs is metric, than this crs will be returned. 
+     * Otherwise, the first metric crs in the crs list will be returned.
+     * 
+     * @return a metric crs
+     */
+    private static Crs getMetricCrs() {
+        final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
+        Crs metricCrs = null;
+    
+        for (Crs crs : crsList) {
+            if (crs.isSelected() && crs.isMetric()) {
+                metricCrs = crs;
+            } else if (crs.isMetric() && metricCrs == null) {
+                metricCrs = crs;
+            }
+        }
+        
+        if (metricCrs == null) {
+            
+        }
+        
+        return metricCrs;
     }
 
     /**
@@ -492,34 +515,32 @@ public class CrsTransformer {
             return null;
         }
         com.vividsolutions.jts.geom.Geometry newGeom = null;
-        final String curCrs = "EPSG:" + geom.getSRID(); // NOI18N
+        String curCrs = "EPSG:" + geom.getSRID(); // NOI18N
 
-        // Wenn SRID nicht gesetzt oder auf -1 gesetzt ist, dann handelt es sich um das default CRS
-        // und das ist immer metrisch
-        if (!isDefaultCrs(curCrs)) {
-            final Crs curCrsObject = new Crs();
-            curCrsObject.setCode(curCrs);
-            final int index = crsList.indexOf(curCrsObject);
+        if (isDefaultCrs(curCrs)) {
+            curCrs = CismapBroker.getInstance().getDefaultCrs();
+        }
+        
+        final Crs curCrsObject = new Crs();
+        curCrsObject.setCode(curCrs);
+        final int index = crsList.indexOf(curCrsObject);
 
-            if (index != -1) {
-                final Crs crs = crsList.get(index);
-                if (crs.isMetric()) {
-                    newGeom = geom;
-                }
+        if (index != -1) {
+            final Crs crs = crsList.get(index);
+            if (crs.isMetric()) {
+                newGeom = geom;
             }
+        }
 
-            if (newGeom == null) {
-                final String defaultCrs = CismapBroker.getInstance().getDefaultCrs();
-                try {
-                    final CrsTransformer transformer = new CrsTransformer(defaultCrs);
-                    newGeom = transformer.transformGeometry(geom, curCrs);
-                } catch (Exception e) {
-                    LOG.error("Cannot transform the geometry from " + curCrs + " to " + defaultCrs, e); // NOI18N
-                    newGeom = geom;
-                }
+        if (newGeom == null) {
+            final String metricCrs = getMetricCrs().getCode();
+            try {
+                final CrsTransformer transformer = new CrsTransformer(metricCrs);
+                newGeom = transformer.transformGeometry(geom, curCrs);
+            } catch (Exception e) {
+                LOG.error("Cannot transform the geometry from " + curCrs + " to " + metricCrs, e); // NOI18N
+                newGeom = geom;
             }
-        } else {
-            newGeom = geom;
         }
 
         return (T)newGeom;
