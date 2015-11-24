@@ -4324,7 +4324,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     final Crs s = new Crs((Element)elem);
                     crsList.add(s);
 
-                    if (s.isSelected() && s.isMetric()) {
+                    if (s.isSelected() && (s.isMetric() || s.isDefaultCrs())) {
                         try {
                             if (defaultCrsFound) {
                                 LOG.warn("More than one default CRS is set. "
@@ -4813,18 +4813,23 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         final double realWorldWidthInMeter = screenWidthInMeter * scaleDenominator;
         final double realWorldHeightInMeter = screenHeightInMeter * scaleDenominator;
-
-        if (!mappingModel.getSrs().isMetric() && (transformer != null)) {
+        BoundingBox xbb = bb;
+        int metricSrid = 0;
+        
+        if (!mappingModel.getSrs().isMetric()) {
             try {
                 // transform the given bounding box to a metric coordinate system
-                bb = transformer.transformBoundingBox(bb, mappingModel.getSrs().getCode());
+                int srid = CrsTransformer.extractSridFromCrs( mappingModel.getSrs().getCode() );
+                Geometry g = CrsTransformer.transformToMetricCrs(bb.getGeometry(srid));
+                metricSrid = g.getSRID();
+                xbb = new BoundingBox(g);
             } catch (final Exception e) {
                 LOG.error("Cannot transform the current bounding box.", e);
             }
         }
 
-        final double midX = bb.getX1() + ((bb.getX2() - bb.getX1()) / 2);
-        final double midY = bb.getY1() + ((bb.getY2() - bb.getY1()) / 2);
+        final double midX = xbb.getX1() + ((xbb.getX2() - xbb.getX1()) / 2);
+        final double midY = xbb.getY1() + ((xbb.getY2() - xbb.getY1()) / 2);
         BoundingBox scaledBox = new BoundingBox(midX - (realWorldWidthInMeter / 2),
                 midY
                         - (realWorldHeightInMeter / 2),
@@ -4833,11 +4838,11 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 midY
                         + (realWorldHeightInMeter / 2));
 
-        if (!mappingModel.getSrs().isMetric() && (transformer != null)) {
+        if (!mappingModel.getSrs().isMetric()) {
             try {
                 // transform the scaled bounding box to the current coordinate system
                 final CrsTransformer trans = new CrsTransformer(mappingModel.getSrs().getCode());
-                scaledBox = trans.transformBoundingBox(scaledBox, transformer.getDestinationCrs());
+                scaledBox = trans.transformBoundingBox(scaledBox, CrsTransformer.createCrsFromSrid(metricSrid));
             } catch (final Exception e) {
                 LOG.error("Cannot transform the current bounding box.", e);
             }
@@ -4858,11 +4863,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         final double screenHeightInInch = getHeight() / screenResolution;
         final double screenHeightInMeter = screenHeightInInch * 0.0254;
 
-        if (!mappingModel.getSrs().isMetric() && (transformer != null)) {
+        if (!mappingModel.getSrs().isMetric()) {
             try {
-                boundingBox = transformer.transformBoundingBox(
-                        boundingBox,
-                        mappingModel.getSrs().getCode());
+                Geometry g = CrsTransformer.transformToMetricCrs(boundingBox.getGeometry(CrsTransformer.extractSridFromCrs(mappingModel.getSrs().getCode())));
+                boundingBox = new BoundingBox(g);
             } catch (final Exception e) {
                 LOG.error("Cannot transform the current bounding box.", e);
             }
@@ -5190,7 +5194,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * DOCUMENT ME!
      *
      * @return  a transformer with the default crs as destination crs. The default crs is the first crs in the
-     *          configuration file that has set the selected attribut on true). This crs must be metric.
+     *          configuration file that has set the selected attribut on true. This crs is possiby not metric. 
      */
     public CrsTransformer getMetricTransformer() {
         return transformer;
