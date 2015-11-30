@@ -55,6 +55,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     private Color searchColor = Color.GREEN;
     private float searchTransparency = 0.5f;
     private SearchFeature lastFeature;
+    private SearchFeature searchFeature;
     private SearchFeature recentlyCreatedFeature;
     private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
     private final String inputListenerName;
@@ -193,6 +194,24 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     */
+    public SearchFeature getSearchFeature() {
+        return searchFeature;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  searchFeature  DOCUMENT ME!
+     */
+    protected void setSearchFeature(final SearchFeature searchFeature) {
+        this.searchFeature = searchFeature;
+    }
+    
+    /**
+     * DOCUMENT ME!
+     *
      * @param  feature  DOCUMENT ME!
      */
     protected void showFeature(final SearchFeature feature) {
@@ -304,6 +323,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     @Override
     public void search(final SearchFeature searchFeature) {
         if (searchFeature != null) {
+            setSearchFeature(searchFeature);
             final boolean searchExecuted = performSearch(searchFeature);
             if (searchExecuted) {
                 setLastFeature(searchFeature);
