@@ -283,6 +283,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private final ArrayList<RepaintListener> repaintListeners = new ArrayList<RepaintListener>();
     private boolean resizeEventActivated = true;
     private double stickyFeatureCorrectionFactor = 1d;
+    private volatile Coordinate currentCrosshairPoint;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -372,8 +373,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         getLayer().addChild(featureLayer);
         getLayer().addChild(tmpFeatureLayer);
         getLayer().addChild(rubberBandLayer);
-        getLayer().addChild(highlightingLayer);
         getLayer().addChild(crosshairLayer);
+        getLayer().addChild(highlightingLayer);
         getLayer().addChild(dragPerformanceImproverLayer);
         getLayer().addChild(printingFrameLayer);
 
@@ -381,8 +382,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         getCamera().addLayer(featureLayer);
         getCamera().addLayer(tmpFeatureLayer);
         getCamera().addLayer(rubberBandLayer);
-        getCamera().addLayer(highlightingLayer);
         getCamera().addLayer(crosshairLayer);
+        getCamera().addLayer(highlightingLayer);
         getCamera().addLayer(dragPerformanceImproverLayer);
         getCamera().addLayer(printingFrameLayer);
 
@@ -2647,34 +2648,62 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 local_clip_offset_x,
                 local_clip_offset_y,
                 MappingComponent.this);
+        Paint paint = p.getPaint();
+        Color color = Color.BLACK;
 
-        highlightingLayer.addChild(p);
-        final Paint paint = p.getPaint();
-        final Paint strokePaint = p.getStrokePaint();
+        if (paint == null) {
+            paint = p.getStrokePaint();
+        }
 
         if (paint instanceof Color) {
-            p.setPaint(toHighlightingColor((Color)paint));
+            color = toHighlightingColor((Color)paint);
         }
-        if (strokePaint instanceof Color) {
-            p.setStrokePaint(toHighlightingColor((Color)strokePaint));
+
+        highlightFeature(feature, duration, color);
+    }
+
+    /**
+     * shows the given feature on the map (in the highlighting layer).
+     *
+     * @param  feature         the feature that should be shown
+     * @param  duration        the feature will be shown for this duration (in ms)
+     * @param  highlightColor  the color of the highlighted feature
+     */
+    public void highlightFeature(final Feature feature, final int duration, final Color highlightColor) {
+        final double local_clip_offset_y = clip_offset_y;
+        final double local_clip_offset_x = clip_offset_x;
+        final PFeature p = new PFeature(
+                feature,
+                getWtst(),
+                local_clip_offset_x,
+                local_clip_offset_y,
+                MappingComponent.this);
+
+        highlightingLayer.addChild(p);
+
+        if (highlightColor != null) {
+            if (p.getStrokePaint() != null) {
+                p.setStrokePaint(highlightColor);
+            }
+            if (p.getPaint() != null) {
+                p.setPaint(highlightColor);
+            }
         }
 
         p.moveToFront();
 
-        final boolean drawCrossHair = (crosshairLayer.getChildrenCount() == 0);
-
-        if (drawCrossHair) {
-            com.vividsolutions.jts.geom.Point centroid = feature.getGeometry().getCentroid();
-            centroid = CrsTransformer.transformToCurrentCrs(centroid);
-            crossHairPoint(new Coordinate(centroid.getX(), centroid.getY()), 2);
-        }
+        com.vividsolutions.jts.geom.Point centroid = feature.getGeometry().getCentroid();
+        centroid = CrsTransformer.transformToCurrentCrs(centroid);
+        currentCrosshairPoint = new Coordinate(centroid.getX(), centroid.getY());
+        crossHairPoint(currentCrosshairPoint, 2);
+        final Coordinate newCrosshairPoint = currentCrosshairPoint;
 
         final Timer t = new Timer(duration, new ActionListener() {
 
                     @Override
                     public void actionPerformed(final ActionEvent e) {
                         highlightingLayer.removeChild(p);
-                        if (drawCrossHair) {
+                        if (newCrosshairPoint.equals(currentCrosshairPoint)) {
                             crossHairPoint((Coordinate)null);
                         }
                     }
@@ -4805,7 +4834,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      *
      * @return  DOCUMENT ME!
      */
-    public BoundingBox getScaledBoundingBox(final double scaleDenominator, BoundingBox bb) {
+    public BoundingBox getScaledBoundingBox(final double scaleDenominator, final BoundingBox bb) {
         final double screenWidthInInch = getWidth() / screenResolution;
         final double screenWidthInMeter = screenWidthInInch * 0.0254;
         final double screenHeightInInch = getHeight() / screenResolution;
@@ -4815,12 +4844,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         final double realWorldHeightInMeter = screenHeightInMeter * scaleDenominator;
         BoundingBox xbb = bb;
         int metricSrid = 0;
-        
+
         if (!mappingModel.getSrs().isMetric()) {
             try {
                 // transform the given bounding box to a metric coordinate system
-                int srid = CrsTransformer.extractSridFromCrs( mappingModel.getSrs().getCode() );
-                Geometry g = CrsTransformer.transformToMetricCrs(bb.getGeometry(srid));
+                final int srid = CrsTransformer.extractSridFromCrs(mappingModel.getSrs().getCode());
+                final Geometry g = CrsTransformer.transformToMetricCrs(bb.getGeometry(srid));
                 metricSrid = g.getSRID();
                 xbb = new BoundingBox(g);
             } catch (final Exception e) {
@@ -4865,7 +4894,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         if (!mappingModel.getSrs().isMetric()) {
             try {
-                Geometry g = CrsTransformer.transformToMetricCrs(boundingBox.getGeometry(CrsTransformer.extractSridFromCrs(mappingModel.getSrs().getCode())));
+                final Geometry g = CrsTransformer.transformToMetricCrs(boundingBox.getGeometry(
+                            CrsTransformer.extractSridFromCrs(mappingModel.getSrs().getCode())));
                 boundingBox = new BoundingBox(g);
             } catch (final Exception e) {
                 LOG.error("Cannot transform the current bounding box.", e);
@@ -5194,7 +5224,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * DOCUMENT ME!
      *
      * @return  a transformer with the default crs as destination crs. The default crs is the first crs in the
-     *          configuration file that has set the selected attribut on true. This crs is possiby not metric. 
+     *          configuration file that has set the selected attribut on true. This crs is possiby not metric.
      */
     public CrsTransformer getMetricTransformer() {
         return transformer;

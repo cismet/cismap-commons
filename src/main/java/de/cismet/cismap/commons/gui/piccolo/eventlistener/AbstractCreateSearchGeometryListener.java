@@ -208,7 +208,7 @@ public abstract class AbstractCreateSearchGeometryListener extends CreateGeometr
     protected void setSearchFeature(final SearchFeature searchFeature) {
         this.searchFeature = searchFeature;
     }
-    
+
     /**
      * DOCUMENT ME!
      *

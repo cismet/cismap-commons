@@ -131,7 +131,7 @@ public class Crs {
         e.setAttribute("code", code);                                           // NOI18N
         e.setAttribute("metric", String.valueOf(metric));                       // NOI18N
         e.setAttribute("selected", String.valueOf(selected));                   // NOI18N
-        e.setAttribute("defaultCrs", String.valueOf(defaultCrs));                   // NOI18N
+        e.setAttribute("defaultCrs", String.valueOf(defaultCrs));               // NOI18N
         e.setAttribute("hideInCrsSwitcher", String.valueOf(hideInCrsSwitcher)); // NOI18N
         e.setText(esriDefinition);
         return e;
@@ -295,16 +295,20 @@ public class Crs {
     }
 
     /**
-     * @return the defaultCrs
+     * DOCUMENT ME!
+     *
+     * @return  the defaultCrs
      */
     public boolean isDefaultCrs() {
         return defaultCrs;
     }
 
     /**
-     * @param defaultCrs the defaultCrs to set
+     * DOCUMENT ME!
+     *
+     * @param  defaultCrs  the defaultCrs to set
      */
-    public void setDefaultCrs(boolean defaultCrs) {
+    public void setDefaultCrs(final boolean defaultCrs) {
         this.defaultCrs = defaultCrs;
     }
 }
