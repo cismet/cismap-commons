@@ -633,22 +633,22 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblScaleMousePressed
+    private void lblScaleMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblScaleMousePressed
         if (evt.isPopupTrigger()) {
             pomScale.setVisible(true);
         }
-    }//GEN-LAST:event_lblScaleMousePressed
+    }                                                                        //GEN-LAST:event_lblScaleMousePressed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblCrsMousePressed
+    private void lblCrsMousePressed(final java.awt.event.MouseEvent evt) { //GEN-FIRST:event_lblCrsMousePressed
         if (evt.isPopupTrigger()) {
             pomCrs.setVisible(true);
         }
-    }//GEN-LAST:event_lblCrsMousePressed
+    }                                                                      //GEN-LAST:event_lblCrsMousePressed
 
     /**
      * DOCUMENT ME!
@@ -715,7 +715,7 @@ public class StatusBar extends javax.swing.JPanel implements StatusListener,
         double area = 0.0;
         for (final Feature f : cf) {
             if ((f != null) && (f.getGeometry() != null)) {
-                Geometry geo = CrsTransformer.transformToMetricCrs(f.getGeometry());
+                final Geometry geo = CrsTransformer.transformToMetricCrs(f.getGeometry());
                 area += geo.getArea();
                 umfang += geo.getLength();
             }

@@ -417,7 +417,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     private void setFeatureAnnotationSymbols() {
         FeatureAnnotationSymbol piOrig = null;
-        
+
         if (!drawFeature()) {
             return;
         }
@@ -516,7 +516,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (!drawFeature()) {
             return;
         }
-        
+
         if (!ignoreStickyFeature && drawFeature()) {
             viewer.addStickyNode(pi);
             viewer.addStickyNode(piSelected);

@@ -448,7 +448,7 @@ public class CrsTransformer {
         if (isDefaultCrs(curCrs)) {
             curCrs = CismapBroker.getInstance().getDefaultCrs();
         }
-        
+
         final Crs curCrsObject = new Crs();
         curCrsObject.setCode(curCrs);
         final int index = crsList.indexOf(curCrsObject);
@@ -473,29 +473,28 @@ public class CrsTransformer {
 
         return (T)newGeom;
     }
-    
+
     /**
-     * Determines a metric crs. If the default crs is metric, than this crs will be returned. 
-     * Otherwise, the first metric crs in the crs list will be returned.
-     * 
-     * @return a metric crs
+     * Determines a metric crs. If the default crs is metric, than this crs will be returned. Otherwise, the first
+     * metric crs in the crs list will be returned.
+     *
+     * @return  a metric crs
      */
     private static Crs getMetricCrs() {
         final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
         Crs metricCrs = null;
-    
-        for (Crs crs : crsList) {
+
+        for (final Crs crs : crsList) {
             if (crs.isSelected() && crs.isMetric()) {
                 metricCrs = crs;
-            } else if (crs.isMetric() && metricCrs == null) {
+            } else if (crs.isMetric() && (metricCrs == null)) {
                 metricCrs = crs;
             }
         }
-        
+
         if (metricCrs == null) {
-            
         }
-        
+
         return metricCrs;
     }
 
@@ -520,7 +519,7 @@ public class CrsTransformer {
         if (isDefaultCrs(curCrs)) {
             curCrs = CismapBroker.getInstance().getDefaultCrs();
         }
-        
+
         final Crs curCrsObject = new Crs();
         curCrsObject.setCode(curCrs);
         final int index = crsList.indexOf(curCrsObject);
