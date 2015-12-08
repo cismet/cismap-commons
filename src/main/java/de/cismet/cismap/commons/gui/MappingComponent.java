@@ -2648,8 +2648,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 local_clip_offset_x,
                 local_clip_offset_y,
                 MappingComponent.this);
-        final Paint paint = p.getPaint();
+        Paint paint = p.getPaint();
         Color color = Color.BLACK;
+
+        if (paint == null) {
+            paint = p.getStrokePaint();
+        }
 
         if (paint instanceof Color) {
             color = toHighlightingColor((Color)paint);
@@ -2678,8 +2682,12 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         highlightingLayer.addChild(p);
 
         if (highlightColor != null) {
-            p.setPaint(highlightColor);
-            p.setStrokePaint(highlightColor);
+            if (p.getStrokePaint() != null) {
+                p.setStrokePaint(highlightColor);
+            }
+            if (p.getPaint() != null) {
+                p.setPaint(highlightColor);
+            }
         }
 
         p.moveToFront();
