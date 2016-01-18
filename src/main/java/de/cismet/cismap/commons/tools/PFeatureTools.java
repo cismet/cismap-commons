@@ -24,7 +24,6 @@ import edu.umd.cs.piccolo.nodes.PPath;
 import edu.umd.cs.piccolo.util.PBounds;
 import edu.umd.cs.piccolo.util.PPickPath;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -33,7 +32,6 @@ import java.util.*;
 
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.WorldToScreenTransform;
-import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.ParentNodeIsAPFeature;
@@ -62,7 +60,7 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Object getFirstValidObjectUnderPointer2(final PInputEvent pInputEvent,
+    public static PNode getFirstValidObjectUnderPointer2(final PInputEvent pInputEvent,
             final Class[] validClasses) {
         return getFirstValidObjectUnderPointer2(pInputEvent, validClasses, 0);
     }
@@ -76,10 +74,10 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Object getFirstValidObjectUnderPointer2(final PInputEvent pInputEvent,
+    public static PNode getFirstValidObjectUnderPointer2(final PInputEvent pInputEvent,
             final Class[] validClasses,
             final double halo) {
-        final List allValids = (List)getFirstObjectsUnderPointer(pInputEvent, validClasses, halo);
+        final List<PNode> allValids = (List<PNode>)getFirstObjectsUnderPointer(pInputEvent, validClasses, halo);
         if (allValids.isEmpty()) {
             return null;
         }
@@ -95,7 +93,7 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Collection<Object> getFirstObjectsUnderPointer(final PInputEvent pInputEvent,
+    public static List<PNode> getFirstObjectsUnderPointer(final PInputEvent pInputEvent,
             final Class[] validClasses,
             final double halo) {
         return getValidObjectsUnderPointer(pInputEvent, validClasses, halo, true);
@@ -110,7 +108,7 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Collection<Object> getValidObjectsUnderPointer(final PInputEvent pInputEvent,
+    public static List<PNode> getValidObjectsUnderPointer(final PInputEvent pInputEvent,
             final Class[] validClasses,
             final double halo) {
         return getValidObjectsUnderPointer(pInputEvent, validClasses, halo, false);
@@ -126,11 +124,10 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static LinkedList getValidObjectsUnderPointer(final PInputEvent pInputEvent,
+    public static List<PNode> getValidObjectsUnderPointer(final PInputEvent pInputEvent,
             final Class[] validClasses,
             final double halo,
             final boolean stopAfterFirstValid) {
-        final ArrayList al = new ArrayList();
         final MappingComponent mc = (MappingComponent)pInputEvent.getComponent();
         final WorldToScreenTransform wtst = mc.getWtst();
 
@@ -145,30 +142,29 @@ public class PFeatureTools {
             point = gf.createPoint(new Coordinate(x1, y1));
         }
 
-        findIntersectingPFeatures(mc.getFeatureLayer(), point, al);
+        final List<PNode> pNodes = new ArrayList<PNode>(findIntersectingPFeatures(mc.getFeatureLayer(), point));
 
         for (int i = 0; i < mc.getMapServiceLayer().getChildrenCount(); ++i) {
-            final PNode p = mc.getMapServiceLayer().getChild(i);
-            if (p instanceof PLayer) {
-                findIntersectingPFeatures(mc.getMapServiceLayer().getChild(i), point, al);
+            final PNode pNode = mc.getMapServiceLayer().getChild(i);
+            if (pNode instanceof PLayer) {
+                pNodes.addAll(findIntersectingPFeatures(pNode, point));
             }
         }
-        final Iterator it = al.iterator();
-        Object o;
-        final LinkedList allValids = new LinkedList();
-        while (it.hasNext()) {
-            o = it.next();
+
+        final LinkedList<PNode> allValidPNodes = new LinkedList<PNode>();
+        for (final PNode pNode : pNodes) {
             for (int i = 0; i < validClasses.length; ++i) {
-                if ((o != null) && validClasses[i].isAssignableFrom(o.getClass()) && (((PNode)o).getParent() != null)
-                            && ((PNode)o).getParent().getVisible() && ((PNode)o).getVisible()) {
-                    allValids.add(o);
+                if ((pNode != null) && validClasses[i].isAssignableFrom(pNode.getClass())
+                            && (pNode.getParent() != null)
+                            && pNode.getParent().getVisible() && pNode.getVisible()) {
+                    allValidPNodes.add(pNode);
                     if (stopAfterFirstValid) {
                         break;
                     }
                 }
             }
         }
-        return allValids;
+        return allValidPNodes;
     }
 
     /**
@@ -195,32 +191,19 @@ public class PFeatureTools {
      * @return  DOCUMENT ME!
      */
     public static PFeature[] getPFeaturesInArea(final MappingComponent mc, final Geometry geom) {
-        final ArrayList al = new ArrayList();
-        final WorldToScreenTransform wtst = mc.getWtst();
-
-        findIntersectingPFeatures(mc.getFeatureLayer(), geom, al);
+        final List<PFeature> pFeatures = findIntersectingPFeatures(mc.getFeatureLayer(), geom);
 
         for (int i = 0; i < mc.getMapServiceLayer().getChildrenCount(); ++i) {
             final PNode p = mc.getMapServiceLayer().getChild(i);
             if (p instanceof PLayer) {
-                findIntersectingPFeatures(mc.getMapServiceLayer().getChild(i), geom, al);
+                pFeatures.addAll(findIntersectingPFeatures(mc.getMapServiceLayer().getChild(i), geom));
             }
         }
-        Iterator it = al.iterator();
 
-        final Vector<PFeature> vRet = new Vector<PFeature>();
-        it = al.iterator();
-        int i = 0;
-        while (it.hasNext()) {
-            Object next = null;
-            next = it.next();
-            if (next instanceof PFeature) {
-                final PFeature pf = (PFeature)next;
-                if (pf.isSnappable()) {
-                    vRet.add(pf);
-                }
-            } else {
-                // log.fatal(next.getClass()+" ist nicht vom Typ PFeature ("+next+")");
+        final Collection<PFeature> vRet = new ArrayList<PFeature>(pFeatures.size());
+        for (final PFeature pf : pFeatures) {
+            if (pf.isSnappable()) {
+                vRet.add(pf);
             }
         }
         return vRet.toArray(new PFeature[0]);
@@ -260,29 +243,33 @@ public class PFeatureTools {
      * methods and the findIntersectingNodes method are, that this method only finds PFeature objects and this method
      * works properly.
      *
-     * @param  node      The node, the PFeatures should be find in
-     * @param  geometry  the search geometry
-     * @param  al        the list, the result should be added to.
+     * @param   node      The node, the PFeatures should be find in
+     * @param   geometry  the search geometry
+     *
+     * @return  DOCUMENT ME!
      */
-    public static void findIntersectingPFeatures(final PNode node, final Geometry geometry, final ArrayList al) {
-        final List<PNode> children = node.getChildrenReference();
+    public static List<PFeature> findIntersectingPFeatures(final PNode node, final Geometry geometry) {
+        final List<PFeature> pFeatures = new ArrayList<PFeature>();
         final String srs = CrsTransformer.createCrsFromSrid(geometry.getSRID());
 
-        for (final PNode entry : children) {
-            if (entry instanceof PFeature) {
-                Geometry featureGeometry = ((PFeature)entry).getFeature().getGeometry();
+        for (int index = 0; index < node.getChildrenCount(); index++) {
+            final PNode pNode = node.getChild(index);
+            if (pNode instanceof PFeature) {
+                final PFeature pFeature = (PFeature)pNode;
+                Geometry featureGeometry = pFeature.getFeature().getGeometry();
 
                 if (featureGeometry.getSRID() != geometry.getSRID()) {
                     featureGeometry = CrsTransformer.transformToGivenCrs(featureGeometry, srs);
                 }
 
                 if (intersects(featureGeometry, geometry)) {
-                    al.add(entry);
+                    pFeatures.add(pFeature);
                 }
             } else {
-                findIntersectingPFeatures(entry, geometry, al);
+                pFeatures.addAll(findIntersectingPFeatures(pNode, geometry));
             }
         }
+        return pFeatures;
     }
 
     /**
@@ -573,7 +560,7 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Object getFirstValidObjectUnderPointer(final PInputEvent pInputEvent, final Class[] validClasses) {
+    public static PNode getFirstValidObjectUnderPointer(final PInputEvent pInputEvent, final Class[] validClasses) {
         return getFirstValidObjectUnderPointer(pInputEvent, validClasses, 1d);
     }
 
@@ -586,12 +573,12 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static Object getFirstValidObjectUnderPointer(final PInputEvent pInputEvent,
+    public static PNode getFirstValidObjectUnderPointer(final PInputEvent pInputEvent,
             final Class[] validClasses,
             final double halo) {
         // Dieses Konstrukt sorgt daf\u00FCr das uninteressante Objekte die oberhalb dem Mauszeiger liegen
         // einfach ignoriert werden
-        Object o = null;
+        PNode pNode = null;
         boolean rightType = false;
         boolean first = true;
 //        PPickPath pp=pInputEvent.getInputManager().getMouseOver();
@@ -604,10 +591,10 @@ public class PFeatureTools {
         pp.pushNode(pInputEvent.getPickedNode());
         do {
             if (first) {
-                o = pp.getPickedNode();
+                pNode = pp.getPickedNode();
                 first = false;
             } else {
-                o = pp.nextPickedNode();
+                pNode = pp.nextPickedNode();
             }
 //            if (o!=null && o instanceof PPath && !((PPath)o).getPathReference().contains(xPos,yPos)) {
 //                //In diesem Fall handelte es sich zwar um ein PPATH aber x,y war nicht im PPath enthalten, deshalb mach nix
@@ -617,28 +604,29 @@ public class PFeatureTools {
             {
                 for (int i = 0; i < validClasses.length; ++i) {
 //                    if (o!=null) log.debug("_ getFirstValidObjectUnderPointer teste "+o.getClass()+ ":"+validClasses[i].getName()+" :"+ validClasses[i].isAssignableFrom(o.getClass()));
-                    if ((o != null) && validClasses[i].isAssignableFrom(o.getClass())
-                                && (((PNode)o).getParent() != null) && ((PNode)o).getParent().getVisible()
-                                && ((PNode)o).getVisible()) {
-                        if ((o instanceof PPath)
-                                    && (!isPolygon((PPath)o) || ((PPath)o).getPathReference().contains(xPos, yPos))) {
+                    if ((pNode != null) && validClasses[i].isAssignableFrom(pNode.getClass())
+                                && (pNode.getParent() != null) && pNode.getParent().getVisible()
+                                && pNode.getVisible()) {
+                        if ((pNode instanceof PPath)
+                                    && (!isPolygon((PPath)pNode)
+                                        || ((PPath)pNode).getPathReference().contains(xPos, yPos))) {
                             rightType = true;
                             break;
                         }
-                    } else if ((validClasses[i] == PFeature.class) && (o != null)
-                                && ParentNodeIsAPFeature.class.isAssignableFrom(o.getClass())
-                                && (((PNode)o).getParent() != null) && ((PNode)o).getParent().getVisible()
-                                && ((PNode)o).getVisible()) {
-                        o = getPFeatureByChild((ParentNodeIsAPFeature)o);
-                        if (o != null) {
+                    } else if ((validClasses[i] == PFeature.class) && (pNode != null)
+                                && ParentNodeIsAPFeature.class.isAssignableFrom(pNode.getClass())
+                                && (pNode.getParent() != null) && pNode.getParent().getVisible()
+                                && pNode.getVisible()) {
+                        pNode = getPFeatureByChild((ParentNodeIsAPFeature)pNode);
+                        if (pNode != null) {
                             rightType = true;
                             break;
                         }
                     }
                 }
             }
-        } while ((o != null) && !rightType);
-        return o;
+        } while ((pNode != null) && !rightType);
+        return pNode;
     }
 
     /**
@@ -667,7 +655,8 @@ public class PFeatureTools {
      *
      * @return  DOCUMENT ME!
      */
-    public static LinkedList getAllValidObjectsUnderPointer(final PInputEvent pInputEvent, final Class[] validClasses) {
+    public static List<PNode> getAllValidObjectsUnderPointer(final PInputEvent pInputEvent,
+            final Class[] validClasses) {
         return getValidObjectsUnderPointer(pInputEvent, validClasses, 0.001d, false);
     }
 
