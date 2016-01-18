@@ -166,6 +166,7 @@ public class CrsTransformer {
      * @throws  IllegalArgumentException    DOCUMENT ME!
      * @throws  GeometryException           DOCUMENT ME!
      */
+
     //J-
     public <T extends com.vividsolutions.jts.geom.Geometry> T transformGeometry(final T geom, final String sourceCrs)
             throws UnknownCRSException,
@@ -191,6 +192,7 @@ public class CrsTransformer {
      * @throws  IllegalArgumentException    DOCUMENT ME!
      * @throws  GeometryException           DOCUMENT ME!
      */
+
     //J-
     public <T extends com.vividsolutions.jts.geom.Geometry> T fastTransformGeometry(final T geom,
             final String sourceCrs) throws UnknownCRSException,

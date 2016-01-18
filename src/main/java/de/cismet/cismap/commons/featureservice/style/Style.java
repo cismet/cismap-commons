@@ -65,6 +65,7 @@ public interface Style extends ConvertableToXML, Comparable, Cloneable {
      *
      * @return  DOCUMENT ME!
      */
+
     //J-
     Object clone() throws CloneNotSupportedException;
     //J+

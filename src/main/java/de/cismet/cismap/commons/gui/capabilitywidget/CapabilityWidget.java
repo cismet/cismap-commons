@@ -2106,6 +2106,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @return  DOCUMENT ME!
      */
+
     //J-
     public void configure(final CapabilitiesPreferences cp) {
         removeAllServer();
