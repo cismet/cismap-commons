@@ -152,7 +152,7 @@ public class SelectionListener extends CreateGeometryListener {
                             pInputEvent,
                             new Class[] { PFeature.class }));
                 } else {
-                    final PNode pNode = (PNode)PFeatureTools.getFirstValidObjectUnderPointer(
+                    final PNode pNode = PFeatureTools.getFirstValidObjectUnderPointer(
                             pInputEvent,
                             new Class[] { PFeature.class });
                     if (pNode instanceof PFeature) {
