@@ -13,6 +13,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
+import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolox.event.PNotificationCenter;
 
@@ -145,70 +146,70 @@ public class SelectionListener extends CreateGeometryListener {
                     pn.postNotification(SelectionListener.DOUBLECLICK_POINT_NOTIFICATION, this);
                 }
 
-                final List ouptemp = PFeatureTools.getAllValidObjectsUnderPointer(
-                        pInputEvent,
-                        new Class[] { PFeature.class });
-
-                final List oup = new ArrayList();
+                final List<PFeature> pFeatures = new ArrayList<PFeature>();
                 if (CismapBroker.getInstance().isMultiFeaturePopupMenuEnabled()) {
-                    oup.addAll(ouptemp);
+                    pFeatures.addAll((List)PFeatureTools.getAllValidObjectsUnderPointer(
+                            pInputEvent,
+                            new Class[] { PFeature.class }));
                 } else {
-                    oup.add(((ouptemp == null) || ouptemp.isEmpty()) ? null : ouptemp.get(0));
+                    final PNode pNode = (PNode)PFeatureTools.getFirstValidObjectUnderPointer(
+                            pInputEvent,
+                            new Class[] { PFeature.class });
+                    if (pNode instanceof PFeature) {
+                        pFeatures.add((PFeature)pNode);
+                    }
                 }
                 if (pInputEvent.isRightMouseButton()) {
                     if (log.isDebugEnabled()) {
                         log.debug("right mouseclick"); // NOI18N
                     }
                     final MultiHashMap menuMap = new MultiHashMap();
-                    for (final Object o : oup) {
-                        menuMap.put(o, null);
-                        if (o instanceof PFeature) {
-                            final PFeature pf = (PFeature)o;
-                            if (pf.getFeature() instanceof ActionsProvider) {
-                                final ActionsProvider ap = (ActionsProvider)((PFeature)o).getFeature();
-                                final Collection<? extends Action> ac = ap.getActions();
-                                for (final Action a : ac) {
-                                    menuMap.put(o, a);
+                    for (final PFeature pFeature : pFeatures) {
+                        menuMap.put(pFeature, null);
+                        if (pFeature instanceof ActionsProvider) {
+                            final ActionsProvider ap = (ActionsProvider)pFeature.getFeature();
+                            final Collection<? extends Action> ac = ap.getActions();
+                            for (final Action a : ac) {
+                                menuMap.put(pFeature, a);
+                            }
+                        }
+
+                        final JSeparator sep = new JSeparator();
+
+                        if ((menuMap.getCollection(pFeature) != null) && (menuMap.getCollection(pFeature).size() > 1)) {
+                            menuMap.put(pFeature, sep);
+                        }
+
+                        int commonActionCounter = 0;
+                        if (commonFeatureActions != null) {
+                            for (final CommonFeatureAction cfaTemplate : commonFeatureActions) {
+                                CommonFeatureAction cfa = null;
+                                try {
+                                    cfa = cfaTemplate.getClass().newInstance();
+                                } catch (final Exception ex) {
+                                    break;
+                                }
+                                cfa.setSourceFeature(pFeature.getFeature());
+                                if (cfa instanceof CommonFeaturePreciseAction) {
+                                    final Point2D pos = pInputEvent.getPosition();
+                                    final WorldToScreenTransform wtst = getMappingComponent().getWtst();
+                                    final Coordinate coord = new Coordinate(wtst.getSourceX(pos.getX()),
+                                            wtst.getSourceY(pos.getY()));
+                                    final Collection<Feature> allFeatures = new ArrayList();
+                                    for (final PFeature feature : (Collection<PFeature>)pFeatures) {
+                                        allFeatures.add(feature.getFeature());
+                                    }
+                                    ((CommonFeaturePreciseAction)cfa).setActionCoordinate(coord);
+                                    ((CommonFeaturePreciseAction)cfa).setAllSourceFeatures(allFeatures);
+                                }
+                                if (cfa.isActive()) {
+                                    pFeature.getFeature().getGeometry().getArea();
+                                    menuMap.put(pFeature, cfa);
+                                    commonActionCounter++;
                                 }
                             }
-
-                            final JSeparator sep = new JSeparator();
-
-                            if ((menuMap.getCollection(o) != null) && (menuMap.getCollection(o).size() > 1)) {
-                                menuMap.put(o, sep);
-                            }
-
-                            int commonActionCounter = 0;
-                            if (commonFeatureActions != null) {
-                                for (final CommonFeatureAction cfaTemplate : commonFeatureActions) {
-                                    CommonFeatureAction cfa = null;
-                                    try {
-                                        cfa = cfaTemplate.getClass().newInstance();
-                                    } catch (final Exception ex) {
-                                        break;
-                                    }
-                                    cfa.setSourceFeature(pf.getFeature());
-                                    if (cfa instanceof CommonFeaturePreciseAction) {
-                                        final Point2D pos = pInputEvent.getPosition();
-                                        final WorldToScreenTransform wtst = getMappingComponent().getWtst();
-                                        final Coordinate coord = new Coordinate(wtst.getSourceX(pos.getX()),
-                                                wtst.getSourceY(pos.getY()));
-                                        final Collection<Feature> allFeatures = new ArrayList();
-                                        for (final PFeature feature : (Collection<PFeature>)oup) {
-                                            allFeatures.add(feature.getFeature());
-                                        }
-                                        ((CommonFeaturePreciseAction)cfa).setActionCoordinate(coord);
-                                        ((CommonFeaturePreciseAction)cfa).setAllSourceFeatures(allFeatures);
-                                    }
-                                    if (cfa.isActive()) {
-                                        pf.getFeature().getGeometry().getArea();
-                                        menuMap.put(o, cfa);
-                                        commonActionCounter++;
-                                    }
-                                }
-                            }
-                            if ((commonActionCounter == 0) && (menuMap.getCollection(o) != null)) {
-                                menuMap.getCollection(o).remove(sep);
+                            if ((commonActionCounter == 0) && (menuMap.getCollection(pFeature) != null)) {
+                                menuMap.getCollection(pFeature).remove(sep);
                             }
                         }
 
@@ -224,33 +225,33 @@ public class SelectionListener extends CreateGeometryListener {
                         for (final MapPopupAction action : popupActions) {
                             action.setPoint(point);
 
-                            if (action.isActive(o instanceof PFeature)) {
+                            if (action.isActive(pFeature instanceof PFeature)) {
                                 if (first
-                                            && ((menuMap.getCollection(o) != null)
-                                                && (menuMap.getCollection(o).size() > 0))) {
-                                    menuMap.put(o, new JSeparator());
+                                            && ((menuMap.getCollection(pFeature) != null)
+                                                && (menuMap.getCollection(pFeature).size() > 0))) {
+                                    menuMap.put(pFeature, new JSeparator());
                                     first = false;
                                 }
 
                                 final JMenu submenu = action.getSubmenu();
 
                                 if (submenu != null) {
-                                    menuMap.put(o, submenu);
+                                    menuMap.put(pFeature, submenu);
                                 } else {
-                                    menuMap.put(o, action);
+                                    menuMap.put(pFeature, action);
                                 }
                             }
                         }
                     }
 
                     final JPopupMenu popup = new JPopupMenu("MapPopup");
-                    if (menuMap.keySet().size() > 1) {
-                        for (final Object o : menuMap.keySet()) {
+                    final Collection<PFeature> keySet = (Set<PFeature>)menuMap.keySet();
+                    if (keySet.size() > 1) {
+                        for (final PFeature pFeature : keySet) {
                             final String featureName;
-                            if ((o instanceof PFeature)
-                                        && (((PFeature)o).getFeature() instanceof FeatureNameProvider)
-                                        && (((FeatureNameProvider)((PFeature)o).getFeature()).getName() != null)) {
-                                featureName = ((FeatureNameProvider)((PFeature)o).getFeature()).getName();
+                            if ((pFeature.getFeature() instanceof FeatureNameProvider)
+                                        && (((FeatureNameProvider)pFeature.getFeature()).getName() != null)) {
+                                featureName = ((FeatureNameProvider)pFeature.getFeature()).getName();
                             } else {
                                 featureName = java.util.ResourceBundle.getBundle(
                                             "de/cismet/cismap/commons/gui/piccolo/eventlistener/Bundle")
@@ -258,7 +259,7 @@ public class SelectionListener extends CreateGeometryListener {
                             }
                             final JMenu featurePopup = new JMenu(featureName + " | "
                                             + new DecimalFormat("#.##").format(
-                                                ((PFeature)o).getFeature().getGeometry().getArea()) + " m²");
+                                                pFeature.getFeature().getGeometry().getArea()) + " m²");
                             featurePopup.addMouseListener(new MouseAdapter() {
 
                                     @Override
@@ -266,10 +267,10 @@ public class SelectionListener extends CreateGeometryListener {
                                         ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
                                                 .unselectAll();
                                         ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                                .addToSelection(((PFeature)o).getFeature());
+                                                .addToSelection(pFeature.getFeature());
                                     }
                                 });
-                            for (final Object i : menuMap.getCollection(o)) {
+                            for (final Object i : menuMap.getCollection(pFeature)) {
                                 if (i instanceof Action) {
                                     featurePopup.add((Action)i);
                                 } else if (i instanceof Component) {
@@ -293,7 +294,7 @@ public class SelectionListener extends CreateGeometryListener {
                                             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
                                                     .unselectAll();
                                             ((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
-                                                    .addToSelection(((PFeature)o).getFeature());
+                                                    .addToSelection(pFeature.getFeature());
                                         }
                                     });
                                 popup.add(mi);
@@ -323,10 +324,9 @@ public class SelectionListener extends CreateGeometryListener {
                             (int)pInputEvent.getCanvasPosition().getY());
                     }
                 } else {
-                    final Object o = oup.isEmpty() ? null : oup.get(0);
-                    if (o instanceof PFeature) {
+                    if (!pFeatures.isEmpty()) {
                         super.mouseClicked(pInputEvent);
-                        sel = (PFeature)o;
+                        sel = pFeatures.get(0);
 
                         try {
                             Point2D point = null;
