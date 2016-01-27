@@ -569,7 +569,7 @@ public class HeadlessMapProvider {
     }
 
     /**
-     * DOCUMENT ME!
+     * Generates the image and waits for the result. This method does not work in edt.
      *
      * @param   widthPixels   DOCUMENT ME!
      * @param   heightPixels  DOCUMENT ME!

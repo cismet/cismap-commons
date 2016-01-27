@@ -11,10 +11,6 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
-import com.vividsolutions.jts.geom.Geometry;
-
-import edu.umd.cs.piccolo.PNode;
-
 import org.apache.log4j.Logger;
 
 import org.openide.util.Lookup;
@@ -45,7 +41,6 @@ import javax.swing.DropMode;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
@@ -64,7 +59,6 @@ import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
-import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
@@ -81,7 +75,6 @@ import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.raster.wms.WMSLayer;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
-import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.util.SelectionChangedEvent;
 import de.cismet.cismap.commons.util.SelectionChangedListener;
 import de.cismet.cismap.commons.util.SelectionManager;
@@ -90,8 +83,6 @@ import de.cismet.commons.concurrency.CismetExecutors;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
-import de.cismet.tools.gui.downloadmanager.DownloadManager;
-import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
 
 import de.cismet.veto.VetoException;
 
@@ -113,7 +104,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     private TreeTransferHandler transferHandler;
     private StyleDialogInterface styleDialog;
     private List<ThemeLayerListener> themeLayerListener = new ArrayList<ThemeLayerListener>();
-
     private AddThemeMenuItem addThemeMenuItem;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
@@ -191,7 +181,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         menuItems.add(new InvertSelectionTableMenuItem());
         menuItems.add(new ClearSelectionMenuItem());
         menuItems.add(new SelectableMenuItem());
-        menuItems.add(new ExportMenuItem());
         menuItems.add(new OptionsMenuItem());
 
         tree.getSelectionModel().addTreeSelectionListener(this);
@@ -225,6 +214,16 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     }
 
     /**
+     * Get the original list of the ThemeLayermenuItems. Changes in this list leads to changes in the context menu of
+     * the ThemeLayerWidget
+     *
+     * @return  the list of the ThemeLayermenuItems
+     */
+    public List<ThemeLayerMenuItem> getContextMenuItems() {
+        return menuItems;
+    }
+
+    /**
      * DOCUMENT ME!
      *
      * @param  l  DOCUMENT ME!
@@ -237,6 +236,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
      * DOCUMENT ME!
      */
     private void createPopupMenu() {
+        final List<ServiceLayer> serviceLayerList = new ArrayList<ServiceLayer>();
         boolean node = false;
         boolean folder = false;
         boolean multi = false;
@@ -267,6 +267,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 node = true;
             }
 
+            if (o instanceof ServiceLayer) {
+                serviceLayerList.add((ServiceLayer)o);
+            }
             if (o instanceof AbstractFeatureService) {
                 feature = true;
             }
@@ -279,7 +282,7 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         mask += (feature ? ThemeLayerMenuItem.FEATURE_SERVICE : 0);
 
         for (final ThemeLayerMenuItem item : menuItems) {
-            if (item.isVisible(mask)) {
+            if (item.isVisible(mask) && item.isVisible(serviceLayerList)) {
                 if (item.isNewSection()) {
                     popupMenu.addSeparator();
                 }
@@ -350,11 +353,30 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 changeVisibility(lc.get(i));
             }
         } else if (objectToChange instanceof ServiceLayer) {
-            ((ServiceLayer)objectToChange).setEnabled(!((ServiceLayer)objectToChange).isEnabled());
-            // only the last component of the tree path will be considered within
-            // the methods isVisible(TreePath) and handleVisibiliy(TreePath)
-            final TreePath tp = new TreePath(new Object[] { layerModel.getRoot(), objectToChange });
-            layerModel.handleVisibility(tp);
+            boolean changeVisibility = true;
+            final ServiceLayer sl = (ServiceLayer)objectToChange;
+            sl.setEnabled(!sl.isEnabled());
+
+            if (objectToChange instanceof AbstractFeatureService) {
+                final AbstractFeatureService afs = (AbstractFeatureService)objectToChange;
+
+                if (afs.getPNode().getVisible() == sl.isEnabled()) {
+                    changeVisibility = false;
+                }
+            } else if (objectToChange instanceof WMSServiceLayer) {
+                final WMSServiceLayer wms = (WMSServiceLayer)objectToChange;
+
+                if (wms.getPNode().getVisible() == sl.isEnabled()) {
+                    changeVisibility = false;
+                }
+            }
+
+            if (changeVisibility) {
+                // only the last component of the tree path will be considered within
+                // the methods isVisible(TreePath) and handleVisibiliy(TreePath)
+                final TreePath tp = new TreePath(new Object[] { layerModel.getRoot(), objectToChange });
+                layerModel.handleVisibility(tp);
+            }
 
             if (((ServiceLayer)objectToChange).isEnabled() && (objectToChange instanceof MapService)) {
                 ((MapService)objectToChange).setBoundingBox(
@@ -1030,107 +1052,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                     ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection())
                             .unselect(toBeUnselected);
                 }
-            }
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @version  $Revision$, $Date$
-     */
-    private class ExportMenuItem extends ThemeLayerMenuItem {
-
-        //~ Constructors -------------------------------------------------------
-
-        /**
-         * Creates a new RemoveThemeMenuItem object.
-         */
-        public ExportMenuItem() {
-            super(NbBundle.getMessage(
-                    ThemeLayerWidget.class,
-                    "ThemeLayerWidget.ExportMenuItem.pmenuItem.text"),
-                NODE
-                        | FEATURE_SERVICE);
-        }
-
-        //~ Methods ------------------------------------------------------------
-
-        @Override
-        public boolean isVisible(final int mask) {
-            return ((visibility & mask) == mask) && ((mask & FEATURE_SERVICE) != 0);
-        }
-
-        @Override
-        public void actionPerformed(final ActionEvent e) {
-            String name = null;
-            final List<DefaultFeatureServiceFeature> features = new ArrayList<DefaultFeatureServiceFeature>();
-            final TreePath[] paths = tree.getSelectionPaths();
-            final List<AbstractFeatureService> services = new ArrayList<AbstractFeatureService>(paths.length);
-
-            for (final TreePath o : paths) {
-                final AbstractFeatureService afs = (AbstractFeatureService)o.getLastPathComponent();
-
-                if (name == null) {
-                    name = afs.getName();
-                    if (name.indexOf(".") != -1) {
-                        name = name.substring(0, name.lastIndexOf("."));
-                    }
-                }
-                services.add(afs);
-            }
-
-            final int option = JOptionPane.showOptionDialog(
-                    this,
-                    "Alle Features exportieren oder nur die ausgewählten?",
-                    "Features exportieren",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    new Object[] { "alle Features", "selektierte Features" },
-                    "alle Features");
-
-            if (option == -1) {
-                // The dialog was closed
-                return;
-            } else if (option == 1) {
-                // export all selected features
-                final MappingComponent map = CismapBroker.getInstance().getMappingComponent();
-                final SelectionListener sl = (SelectionListener)map.getInputEventListener()
-                            .get(MappingComponent.SELECT);
-                final List<PFeature> sel = sl.getAllSelectedPFeatures();
-                final List<PNode> nodesOfTheSelectedServices = new ArrayList<PNode>(paths.length);
-
-                for (final AbstractFeatureService afs : services) {
-                    nodesOfTheSelectedServices.add(afs.getPNode());
-                }
-
-                for (int i = 0; i < sel.size(); ++i) {
-                    final PFeature feature = sel.get(i);
-                    if (nodesOfTheSelectedServices.contains(feature.getParent())) {
-                        features.add((DefaultFeatureServiceFeature)feature.getFeature());
-                    }
-                }
-            } else if (option == 0) {
-                // export all features
-                for (final AbstractFeatureService afs : services) {
-                    final Geometry g = ZoomToLayerWorker.getServiceBounds(afs);
-                    final XBoundingBox bb = new XBoundingBox(g);
-
-                    try {
-                        features.addAll(afs.getFeatureFactory().createFeatures(afs.getQuery(), bb, null, 0, 0, null));
-                    } catch (Exception ex) {
-                        log.error("Error while retrieving features", ex);
-                    }
-                }
-            }
-
-            if (DownloadManagerDialog.getInstance().showAskingForUserTitleDialog(this)) {
-                DownloadManager.instance()
-                        .add(new ExportShapeDownload(
-                                name,
-                                ".shp",
-                                features.toArray(new DefaultFeatureServiceFeature[features.size()])));
             }
         }
     }
