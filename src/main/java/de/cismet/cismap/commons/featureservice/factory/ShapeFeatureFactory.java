@@ -65,9 +65,9 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.util.CrsDeterminer;
 
 import static de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory.DEBUG;
-import de.cismet.cismap.commons.util.CrsDeterminer;
 
 /**
  * DOCUMENT ME!
