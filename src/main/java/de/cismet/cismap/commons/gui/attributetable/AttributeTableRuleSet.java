@@ -179,7 +179,7 @@ public interface AttributeTableRuleSet {
     FeatureServiceFeature cloneFeature(FeatureServiceFeature feature);
 
     /**
-     * Get the point annotation symbol, that should be used, when no style is defined
+     * Get the point annotation symbol, that should be used, when no style is defined.
      *
      * @param   feature  the feature, that should use the point annotation symbol
      *
@@ -188,31 +188,31 @@ public interface AttributeTableRuleSet {
     FeatureAnnotationSymbol getPointAnnotationSymbol(FeatureServiceFeature feature);
 
     /**
-     * True, if the service has its own export tool
+     * True, if the service has its own export tool.
      *
      * @return  True, iff the service has its own export tool
      */
     boolean hasCustomExportFeaturesMethod();
 
     /**
-     * start the feature export
+     * start the feature export.
      */
     void exportFeatures();
 
     /**
-     * True, if the service has its own print tool
+     * True, if the service has its own print tool.
      *
      * @return  True, iff the service has its own print tool
      */
     boolean hasCustomPrintFeaturesMethod();
 
     /**
-     * start the feature print
+     * start the feature print.
      */
     void printFeatures();
 
     /**
-     * Copies the feature properties from the source feature to the target feature
+     * Copies the feature properties from the source feature to the target feature.
      *
      * @param  sourceFeature  the feature with the source values
      * @param  targetFeature  the values from the source feature will be copied in this feature

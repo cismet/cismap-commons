@@ -166,7 +166,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         final AttributeTable table = consideredAttributeTables.get(service);
 
         if (table != null) {
-            table.applySelection(featureList);
+            table.applySelection(featureList, true);
         }
         syncWithMap.add(service);
         refreshSelectedFeatureCounts();
