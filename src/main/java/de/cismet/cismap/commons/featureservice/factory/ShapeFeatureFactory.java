@@ -65,6 +65,7 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory.TooManyFeaturesException;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.util.CrsDeterminer;
 
 import static de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory.DEBUG;
 
@@ -412,7 +413,7 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         String prjFilename;
         File prjFile;
 
-        final Map<Crs, CoordinateReferenceSystem> prjMapping = getKnownCrsMappings();
+        final Map<Crs, CoordinateReferenceSystem> prjMapping = CrsDeterminer.getKnownCrsMappings();
 
         if ((prjMapping != null) && !prjMapping.isEmpty()) {
             // if no mapping file is defined, it will be assumed that the shape file ueses the current crs
@@ -439,12 +440,12 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
                             logger.debug("prj file with definition: " + crsDefinition + " found");
                         }
 
-                        crsDefinition = crsDefinitionAdjustments(crsDefinition);
+                        crsDefinition = CrsDeterminer.crsDefinitionAdjustments(crsDefinition);
                         final CoordinateReferenceSystem crsFromShape = parser.parseCoordinateReferenceSystem(
                                 crsDefinition);
 
                         for (final Crs key : prjMapping.keySet()) {
-                            if (isCrsEqual(prjMapping.get(key), crsFromShape)) {
+                            if (CrsDeterminer.isCrsEqual(prjMapping.get(key), crsFromShape)) {
                                 return key.getCode();
                             }
                         }
@@ -503,96 +504,6 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     }
 
     /**
-     * Compares the given crs.
-     *
-     * @param   crs       DOCUMENT ME!
-     * @param   otherCrs  DOCUMENT ME!
-     *
-     * @return  true, if the given crs are equal
-     */
-    private boolean isCrsEqual(final CoordinateReferenceSystem crs, final CoordinateReferenceSystem otherCrs) {
-        final String definitionWithoutName = crs.toWKT().substring(crs.toWKT().indexOf("\n") + 1);
-        final String otherDefinitionWithoutName = otherCrs.toWKT().substring(otherCrs.toWKT().indexOf("\n") + 1);
-
-        return definitionWithoutName.equals(otherDefinitionWithoutName);
-    }
-
-    /**
-     * Reads all crs definitions from the cismapPrjMapping properties file.
-     *
-     * @return  all crs definitions from the cismapPrjMapping properties file. The key of the map is the epsg code of
-     *          the crs.
-     */
-    private Map<Crs, CoordinateReferenceSystem> getKnownCrsMappings() {
-        final Map<Crs, CoordinateReferenceSystem> prjMap = new HashMap<Crs, CoordinateReferenceSystem>();
-
-        final List<Crs> crsList = CismapBroker.getInstance().getMappingComponent().getCrsList();
-
-        if (crsList != null) {
-            final Parser parser = new Parser();
-
-            for (final Crs crs : crsList) {
-                if (crs.hasEsriDefinition()) {
-                    try {
-                        prjMap.put(
-                            crs,
-                            parser.parseCoordinateReferenceSystem(crsDefinitionAdjustments(crs.getEsriDefinition())));
-                    } catch (ParseException e) {
-                        logger.error("Cannot parse the crs definition for " + crs.getCode() + ":\n"
-                                    + crs.getEsriDefinition(),
-                            e);
-                    }
-                }
-            }
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("No crs definition found");
-            }
-        }
-
-        return prjMap;
-    }
-
-    /**
-     * Adjusts the crs definition that the WKT parser can parse it.
-     *
-     * @param   definition  Dthe definition to adjust
-     *
-     * @return  the modified definition
-     */
-    private String crsDefinitionAdjustments(final String definition) {
-        final String invalidProjection = "projection[\"mercator_auxiliary_sphere\"]";
-        final String invalidParameter = "parameter[\"auxiliary_sphere_type\"";
-        String tmp = definition;
-
-        if (tmp.toLowerCase().contains(invalidProjection)) {
-            // replace mercator_auxiliary_sphere with mercator_2sp, because
-            // geotools does not know the mercator_auxiliary_sphere projection
-            final String firstPart = tmp.substring(0, tmp.toLowerCase().indexOf(invalidProjection));
-            final String secondPart = tmp.substring(tmp.toLowerCase().indexOf(invalidProjection)
-                            + invalidProjection.length(),
-                    tmp.length());
-            tmp = firstPart + "PROJECTION[\"Mercator_2SP\"]" + secondPart;
-        }
-
-        if (tmp.toLowerCase().contains(invalidParameter)) {
-            // replace the Auxiliary_Sphere_Type parameter, because
-            // geotools does not know the Auxiliary_Sphere_Type parameter
-            final String firstPart = tmp.substring(0, tmp.toLowerCase().indexOf(invalidParameter));
-            String withoutParameterStart = tmp.substring(tmp.toLowerCase().indexOf(invalidParameter)
-                            + invalidParameter.length(),
-                    tmp.length());
-            withoutParameterStart = withoutParameterStart.substring(withoutParameterStart.indexOf("]") + 1,
-                    withoutParameterStart.length());
-            final String secondPart = withoutParameterStart.substring(withoutParameterStart.indexOf(",") + 1,
-                    withoutParameterStart.length());
-            tmp = firstPart + secondPart;
-        }
-
-        return tmp;
-    }
-
-    /**
      * DOCUMENT ME!
      */
     private void determineGeometryType() {
@@ -635,6 +546,8 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
     public synchronized void flush() {
         logger.warn("flushing cached features");
         this.lastCreatedfeatureVector.clear();
+        this.lastGeom = null;
+        this.lastQuery = null;
         System.gc();
     }
 
