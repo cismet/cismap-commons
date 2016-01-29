@@ -11,14 +11,22 @@
  */
 package de.cismet.cismap.commons.gui.attributetable;
 
+import com.vividsolutions.jts.geom.Geometry;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
+import de.cismet.cismap.commons.featureservice.LayerProperties;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 
 /**
  * DOCUMENT ME!
@@ -88,7 +96,15 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
     }
 
     @Override
-    public void mouseClicked(final JTable table, final String columnName, final Object value, final int clickCount) {
+    public Map<String, Object> getDefaultValues() {
+        return null;
+    }
+
+    @Override
+    public void mouseClicked(final FeatureServiceFeature feature,
+            final String columnName,
+            final Object value,
+            final int clickCount) {
     }
 
     @Override
@@ -103,11 +119,112 @@ public class DefaultAttributeTableRuleSet implements AttributeTableRuleSet {
             }
         }
 
-        return -1;
+        return Integer.MIN_VALUE;
     }
 
     @Override
     public boolean isCatThree() {
         return false;
+    }
+
+    @Override
+    public FeatureServiceFeature cloneFeature(final FeatureServiceFeature feature) {
+        final DefaultFeatureServiceFeature newFeature = (DefaultFeatureServiceFeature)feature
+                    .getLayerProperties().getFeatureService().getFeatureFactory().createNewFeature();
+
+        final HashMap<String, Object> properties = feature.getProperties();
+
+        for (final String propertyKey : properties.keySet()) {
+            if (!propertyKey.equalsIgnoreCase("id") && !propertyKey.equals(feature.getIdExpression())) {
+                newFeature.setProperty(propertyKey, properties.get(propertyKey));
+            }
+        }
+
+        return newFeature;
+    }
+
+    @Override
+    public FeatureAnnotationSymbol getPointAnnotationSymbol(final FeatureServiceFeature feature) {
+        return null;
+    }
+
+    @Override
+    public boolean hasCustomExportFeaturesMethod() {
+        return false;
+    }
+
+    @Override
+    public void exportFeatures() {
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    @Override
+    public boolean hasCustomPrintFeaturesMethod() {
+        return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    @Override
+    public void printFeatures() {
+    }
+
+    @Override
+    public void copyProperties(final FeatureServiceFeature sourceFeature, final FeatureServiceFeature targetFeature) {
+        // copy properties
+        final Map<String, Object> defaultValues = getDefaultValues();
+
+        if (defaultValues != null) {
+            for (final String propName : defaultValues.keySet()) {
+                targetFeature.setProperty(propName, defaultValues.get(propName));
+            }
+        }
+
+        final boolean hasIdExpression = targetFeature.getLayerProperties().getIdExpressionType()
+                    == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME;
+        final Map<String, FeatureServiceAttribute> attributeMap = targetFeature.getLayerProperties()
+                    .getFeatureService()
+                    .getFeatureServiceAttributes();
+
+        for (final String attrKey : attributeMap.keySet()) {
+            if (hasIdExpression
+                        && targetFeature.getLayerProperties().getIdExpression().equalsIgnoreCase(attrKey)) {
+                // do not change the id
+                continue;
+            }
+            if (isColumnEditable(attrKey)) {
+                final Object val = getFeaturePropertyIgnoreCase(sourceFeature, attrKey);
+                if (val != null) {
+                    // without this null check, the geometry will probably be overwritten
+                    targetFeature.setProperty(attrKey, val);
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   feature  DOCUMENT ME!
+     * @param   name     DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Object getFeaturePropertyIgnoreCase(final FeatureServiceFeature feature, final String name) {
+        for (final Object prop : feature.getProperties().keySet()) {
+            if (prop instanceof String) {
+                final String propName = (String)prop;
+                if (propName.equalsIgnoreCase(name)) {
+                    return feature.getProperty(propName);
+                }
+            }
+        }
+
+        return null;
     }
 }
