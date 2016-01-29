@@ -70,7 +70,7 @@ public class AttributeTableFactory {
             final AttributeTable table = new AttributeTable(featureService);
             table.setMappingComponent(mappingComponent);
 
-            listener.showPanel(
+            listener.showAttributeTable(
                 table,
                 featureService.getName(),
                 NbBundle.getMessage(

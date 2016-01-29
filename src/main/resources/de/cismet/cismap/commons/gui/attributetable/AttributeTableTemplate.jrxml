@@ -31,12 +31,12 @@
 			<textField evaluationTime="Page">
 				<reportElement style="FooterStyle" x="2" y="0" width="255" height="20"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA["Seite " + String.valueOf($V{PAGE_NUMBER})]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["Seite " + ($V{PAGE_NUMBER})]]></textFieldExpression>
 			</textField>
 			<textField evaluationTime="Report">
 				<reportElement style="FooterRightStyle" x="258" y="0" width="295" height="20"/>
 				<textElement/>
-				<textFieldExpression class="java.lang.String"><![CDATA["/" + String.valueOf($V{PAGE_NUMBER})]]></textFieldExpression>
+				<textFieldExpression class="java.lang.String"><![CDATA["/" + ($V{PAGE_NUMBER})]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageFooter>

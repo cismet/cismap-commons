@@ -409,7 +409,7 @@ public class DefaultLayerProperties implements LayerProperties {
      *
      * @return  the camalized string
      */
-    private String camelize(final String toCamelize) {
+    public static String camelize(final String toCamelize) {
         boolean upperCase = true;
         final char[] result = new char[toCamelize.length()];
         int resultPosition = 0;
