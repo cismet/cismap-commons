@@ -372,6 +372,9 @@ public class AttributeTable extends javax.swing.JPanel {
                             }
                             lastRows = rows;
                         }
+
+                        butCopy.setEnabled(table.getSelectedRows().length > 0);
+                        butDelete.setEnabled(table.getSelectedRows().length > 0);
                     }
 
                     table.repaint();
@@ -500,6 +503,8 @@ public class AttributeTable extends javax.swing.JPanel {
             });
         instances.add(this);
         butPaste.setEnabled(isPasteButtonEnabled());
+        butCopy.setEnabled(table.getSelectedRows().length > 0);
+        butDelete.setEnabled(table.getSelectedRows().length > 0);
     }
 
     //~ Methods ----------------------------------------------------------------
