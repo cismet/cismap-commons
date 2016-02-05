@@ -14,7 +14,12 @@
     <version>2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>cismap Commons</name>
+    <properties>
+        <names.cismap-commons>cismap Commons</names.cismap-commons>
+        <jersey.version>1.17.1</jersey.version>
+        <jackson.version>2.2.2</jackson.version>
+    </properties>
+    <name>${names.cismap-commons}</name>
     <description>This project contains various tools to enable geo-specific within Java applications</description>
     <licenses>
         <license>
@@ -153,7 +158,7 @@
             <artifactId>deegree-core-rendering-2d</artifactId>
             <version>3.2.0</version>
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
