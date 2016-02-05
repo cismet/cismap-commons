@@ -270,7 +270,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
                         final String columnName = currentTableModel.getAttributeNameForRow(row);
 
                         currentTableModel.tableRuleSet.mouseClicked(
-                            tabAttributes,
+                            fsf,
                             columnName,
                             value,
                             e.getClickCount());

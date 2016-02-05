@@ -28,12 +28,12 @@ public interface AttributeTableListener {
     /**
      * DOCUMENT ME!
      *
-     * @param  panel    DOCUMENT ME!
+     * @param  table    panel DOCUMENT ME!
      * @param  id       DOCUMENT ME!
      * @param  name     DOCUMENT ME!
      * @param  tooltip  DOCUMENT ME!
      */
-    void showPanel(JPanel panel, String id, String name, String tooltip);
+    void showAttributeTable(AttributeTable table, String id, String name, String tooltip);
 
     /**
      * DOCUMENT ME!

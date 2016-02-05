@@ -294,8 +294,9 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
 
     @Override
     protected FeatureFactory createFeatureFactory() throws Exception {
+        H2FeatureServiceFactory f;
         if (features != null) {
-            final H2FeatureServiceFactory f = new H2FeatureServiceFactory(
+            f = new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
@@ -305,10 +306,8 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     parseSLD(getSLDDefiniton()));
             checkTable();
             geometryType = f.getGeometryType();
-
-            return f;
         } else {
-            final H2FeatureServiceFactory f = new H2FeatureServiceFactory(
+            f = new H2FeatureServiceFactory(
                     name,
                     databasePath,
                     tableName,
@@ -317,9 +316,13 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                     parseSLD(getSLDDefiniton()));
             checkTable();
             geometryType = f.getGeometryType();
-
-            return f;
         }
+
+        if (getLayerProperties() != null) {
+            setTheFactorySpecificLayerProperties((DefaultLayerProperties)getLayerProperties(), f);
+        }
+
+        return f;
     }
 
     @Override
@@ -336,12 +339,26 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         final LayerProperties properties = super.createLayerProperties();
 
         if (featureFactory != null) {
-            final H2FeatureServiceFactory f = (H2FeatureServiceFactory)featureFactory;
-            ((DefaultLayerProperties)properties).setAttributeTableRuleSet(new H2AttributeTableRuleSet(
-                    f.getLinRefList()));
+            setTheFactorySpecificLayerProperties((DefaultLayerProperties)properties,
+                (H2FeatureServiceFactory)featureFactory);
         }
 
         return properties;
+    }
+
+    /**
+     * Set all layer properties, which depends on the feature factory.
+     *
+     * @param  properties      The layer properties to set
+     * @param  featureFactory  the feature factory to set the layer properties
+     */
+    private void setTheFactorySpecificLayerProperties(final DefaultLayerProperties properties,
+            final H2FeatureServiceFactory featureFactory) {
+        final H2FeatureServiceFactory f = (H2FeatureServiceFactory)featureFactory;
+        ((DefaultLayerProperties)properties).setAttributeTableRuleSet(new H2AttributeTableRuleSet(
+                f.getLinRefList()));
+        properties.setIdExpression(((H2FeatureServiceFactory)featureFactory).getIdField(),
+            LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
     }
 
     @Override
@@ -464,6 +481,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         boolean tableExists = false;
 
         try {
+            Class.forName("org.h2.Driver");
             conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
                         "jdbc:h2:"
                                 + H2FeatureServiceFactory.DB_NAME));
@@ -471,7 +489,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             tableExists = rs.next();
 
             return tableExists;
-        } catch (SQLException e) {
+        } catch (Exception e) {
             LOG.error("Cannot connect to database", e);
         } finally {
             if (rs != null) {

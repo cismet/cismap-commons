@@ -12,6 +12,7 @@
 package de.cismet.cismap.commons.gui.attributetable;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
@@ -19,6 +20,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
+import de.cismet.cismap.commons.gui.piccolo.FeatureAnnotationSymbol;
 
 /**
  * DOCUMENT ME!
@@ -79,11 +81,13 @@ public interface AttributeTableRuleSet {
     String[] getAdditionalFieldNames();
 
     /**
-     * DOCUMENT ME!
+     * The index of the attribute in the attribute list of the service. A negative value n means that the attribute
+     * should be inserted at the nth last position.
      *
-     * @param   name  DOCUMENT ME!
+     * @param   name  The name of the attribute. See {@link getAdditionalFieldNames()}
      *
-     * @return  DOCUMENT ME!
+     * @return  The index of the attribute in the attribute list of the service or Integer.MIN_VALUE, if no additional
+     *          property with the given name exists
      */
     int getIndexOfAdditionalFieldName(String name);
 
@@ -144,12 +148,12 @@ public interface AttributeTableRuleSet {
     /**
      * DOCUMENT ME!
      *
-     * @param  table       DOCUMENT ME!
+     * @param  feature     DOCUMENT ME!
      * @param  columnName  DOCUMENT ME!
      * @param  value       DOCUMENT ME!
      * @param  clickCount  DOCUMENT ME!
      */
-    void mouseClicked(JTable table, String columnName, Object value, int clickCount);
+    void mouseClicked(FeatureServiceFeature feature, String columnName, Object value, int clickCount);
 
     /**
      * todo: change method name
@@ -157,4 +161,61 @@ public interface AttributeTableRuleSet {
      * @return  DOCUMENT ME!
      */
     boolean isCatThree();
+
+    /**
+     * Get all attribute values, which should be set, when a new object is created.
+     *
+     * @return  A Hashmap with the attribute names and the attribute values
+     */
+    Map<String, Object> getDefaultValues();
+
+    /**
+     * Clones the given feature.
+     *
+     * @param   feature  the feature to clone
+     *
+     * @return  the cloned feature
+     */
+    FeatureServiceFeature cloneFeature(FeatureServiceFeature feature);
+
+    /**
+     * Get the point annotation symbol, that should be used, when no style is defined.
+     *
+     * @param   feature  the feature, that should use the point annotation symbol
+     *
+     * @return  DOCUMENT ME!
+     */
+    FeatureAnnotationSymbol getPointAnnotationSymbol(FeatureServiceFeature feature);
+
+    /**
+     * True, if the service has its own export tool.
+     *
+     * @return  True, iff the service has its own export tool
+     */
+    boolean hasCustomExportFeaturesMethod();
+
+    /**
+     * start the feature export.
+     */
+    void exportFeatures();
+
+    /**
+     * True, if the service has its own print tool.
+     *
+     * @return  True, iff the service has its own print tool
+     */
+    boolean hasCustomPrintFeaturesMethod();
+
+    /**
+     * start the feature print.
+     */
+    void printFeatures();
+
+    /**
+     * Copies the feature properties from the source feature to the target feature.
+     *
+     * @param  sourceFeature  the feature with the source values
+     * @param  targetFeature  the values from the source feature will be copied in this feature
+     */
+    void copyProperties(FeatureServiceFeature sourceFeature, FeatureServiceFeature targetFeature);
 }

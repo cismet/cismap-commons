@@ -79,7 +79,7 @@ public class SelectionListener extends CreateGeometryListener {
     ArrayList<? extends CommonFeatureAction> commonFeatureActions = null;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private int clickCount = 0;
-    private Map<Feature, PFeature> selectedFeatures = new HashMap<Feature, PFeature>();
+    private Map<Feature, PFeature> selectedFeatures = Collections.synchronizedMap(new HashMap<Feature, PFeature>());
     private boolean selectMultipleFeatures = false;
     private boolean featuresFromServicesSelectable = false;
     private boolean selectionInProgress = false;

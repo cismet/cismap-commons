@@ -153,6 +153,9 @@ public class AttributeTable extends javax.swing.JPanel {
 
     private static final Logger LOG = Logger.getLogger(AttributeTable.class);
     private static final int MAX_COLUMN_SIZE = 200;
+    private static List<FeatureServiceFeature> clipboard;
+    /** is used to refresh the paste button (butPaste). */
+    private static List<AttributeTable> instances = new ArrayList<AttributeTable>();
 
     //~ Instance fields --------------------------------------------------------
 
@@ -187,12 +190,14 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JButton butCancel;
     private javax.swing.JButton butClearSelection;
     private javax.swing.JButton butColWidth;
+    private javax.swing.JButton butCopy;
     private javax.swing.JButton butDelete;
     private javax.swing.JButton butExpOk;
     private javax.swing.JButton butExport;
     private javax.swing.JButton butInvertSelection;
     private javax.swing.JButton butMoveSelectedRows;
     private javax.swing.JButton butOk;
+    private javax.swing.JButton butPaste;
     private javax.swing.JButton butPrint;
     private javax.swing.JButton butPrintPreview;
     private javax.swing.JButton butSearch;
@@ -240,8 +245,6 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JPanel panWaiting;
     private org.jdesktop.swingx.JXTable table;
     private javax.swing.JScrollPane tableScrollPane;
-    private javax.swing.JToggleButton tbAlias;
-    private javax.swing.JToggleButton tbLookup;
     private javax.swing.JToggleButton tbProcessing;
     private javax.swing.JTextField txtCurrentPage;
     // End of variables declaration//GEN-END:variables
@@ -259,10 +262,8 @@ public class AttributeTable extends javax.swing.JPanel {
         miFeldberechnung.setVisible(false);
         miSortieren.setVisible(false);
         butAttrib.setVisible(false);
-        tbAlias.setVisible(false);
         tbProcessing.setEnabled(featureService.isEditable());
         butSearch.setVisible(false);
-        tbLookup.setVisible(false);
         butUndo.setVisible(false);
         butDelete.setVisible(featureService.isEditable());
         locker = FeatureLockerFactory.getInstance().getLockerForFeatureService(featureService);
@@ -371,6 +372,9 @@ public class AttributeTable extends javax.swing.JPanel {
                             }
                             lastRows = rows;
                         }
+
+                        butCopy.setEnabled(table.getSelectedRows().length > 0);
+                        butDelete.setEnabled(table.getSelectedRows().length > 0);
                     }
 
                     table.repaint();
@@ -490,15 +494,60 @@ public class AttributeTable extends javax.swing.JPanel {
                             final String columnName = model.getColumnAttributeName(col);
                             row = table.convertRowIndexToModel(row);
                             final Object value = model.getValueAt(row, col);
+                            final FeatureServiceFeature f = model.getFeatureServiceFeature(row);
 
-                            tableRuleSet.mouseClicked(table, columnName, value, e.getClickCount());
+                            tableRuleSet.mouseClicked(f, columnName, value, e.getClickCount());
                         }
                     }
                 }
             });
+        instances.add(this);
+        butPaste.setEnabled(isPasteButtonEnabled());
+        butCopy.setEnabled(table.getSelectedRows().length > 0);
+        butDelete.setEnabled(table.getSelectedRows().length > 0);
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  enabled  DOCUMENT ME!
+     */
+    public void setExportEnabled(final boolean enabled) {
+        butExport.setVisible(enabled);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private boolean isPasteButtonEnabled() {
+        boolean enabled = false;
+
+        if ((clipboard != null) && tbProcessing.isSelected()) {
+            for (final FeatureServiceFeature feature : clipboard) {
+                final String geomType = featureService.getLayerProperties().getFeatureService().getGeometryType();
+                if ((geomType != null) && !geomType.equals(AbstractFeatureService.UNKNOWN)) {
+                    try {
+                        final Class geomTypeClass = Class.forName("com.vividsolutions.jts.geom." + geomType);
+
+                        if ((geomTypeClass != null)
+                                    && ((feature.getGeometry() == null)
+                                        || geomTypeClass.isInstance(feature.getGeometry()))) {
+                            enabled = true;
+                            break;
+                        }
+                    } catch (Exception e) {
+                        // nothing to do
+                    }
+                }
+            }
+        }
+
+        return enabled;
+    }
 
     /**
      * synchronizes the table selection with the PFeatures in the map.
@@ -547,7 +596,7 @@ public class AttributeTable extends javax.swing.JPanel {
     }
 
     /**
-     * Should be invoked, before the window wit the AttributeTable is closed. This method checks, if there are unsaved
+     * Should be invoked, before the window with the AttributeTable is closed. This method checks, if there are unsaved
      * changes
      *
      * @return  DOCUMENT ME!
@@ -587,7 +636,7 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  feature  the feature to make editable
      */
     private void makeFeatureEditable(final FeatureServiceFeature feature) {
-        if (feature instanceof PermissionProvider) {
+        if ((feature instanceof PermissionProvider) && (feature.getId() > 0)) {
             final PermissionProvider pp = (PermissionProvider)feature;
 
             if (!pp.hasWritePermissions()) {
@@ -965,8 +1014,6 @@ public class AttributeTable extends javax.swing.JPanel {
         butExport = new javax.swing.JButton();
         butAttrib = new javax.swing.JButton();
         butSearch = new javax.swing.JButton();
-        tbLookup = new javax.swing.JToggleButton();
-        tbAlias = new javax.swing.JToggleButton();
         tbProcessing = new javax.swing.JToggleButton();
         butMoveSelectedRows = new javax.swing.JButton();
         butSelectAll = new javax.swing.JButton();
@@ -975,6 +1022,8 @@ public class AttributeTable extends javax.swing.JPanel {
         butZoomToSelection = new javax.swing.JButton();
         butColWidth = new javax.swing.JButton();
         butShowCols = new javax.swing.JButton();
+        butCopy = new javax.swing.JButton();
+        butPaste = new javax.swing.JButton();
         butUndo = new javax.swing.JButton();
         butDelete = new javax.swing.JButton();
         panWaiting = new javax.swing.JPanel();
@@ -1437,28 +1486,6 @@ public class AttributeTable extends javax.swing.JPanel {
         butSearch.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         jToolBar1.add(butSearch);
 
-        tbLookup.setIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-brokenlink.png")));     // NOI18N
-        tbLookup.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.tbLookup.text")); // NOI18N
-        tbLookup.setToolTipText(org.openide.util.NbBundle.getMessage(
-                AttributeTable.class,
-                "AttributeTable.tbLookup.toolTipText"));                                                              // NOI18N
-        tbLookup.setFocusable(false);
-        tbLookup.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        tbLookup.setSelectedIcon(new javax.swing.ImageIcon(
-                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-link.png")));           // NOI18N
-        tbLookup.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(tbLookup);
-
-        tbAlias.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.tbAlias.text")); // NOI18N
-        tbAlias.setToolTipText(org.openide.util.NbBundle.getMessage(
-                AttributeTable.class,
-                "AttributeTable.tbAlias.toolTipText"));                                                             // NOI18N
-        tbAlias.setFocusable(false);
-        tbAlias.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        tbAlias.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jToolBar1.add(tbAlias);
-
         tbProcessing.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-edit.png"))); // NOI18N
         tbProcessing.setToolTipText(org.openide.util.NbBundle.getMessage(
@@ -1616,6 +1643,42 @@ public class AttributeTable extends javax.swing.JPanel {
                 }
             });
         jToolBar1.add(butShowCols);
+
+        butCopy.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-copy.png")));         // NOI18N
+        butCopy.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butCopy.text")); // NOI18N
+        butCopy.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butCopy.toolTipText"));                                                             // NOI18N
+        butCopy.setFocusable(false);
+        butCopy.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        butCopy.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        butCopy.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butCopyActionPerformed(evt);
+                }
+            });
+        jToolBar1.add(butCopy);
+
+        butPaste.setIcon(new javax.swing.ImageIcon(
+                getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-pastealt.png")));       // NOI18N
+        butPaste.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.butPaste.text")); // NOI18N
+        butPaste.setToolTipText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.butPaste.toolTipText"));                                                              // NOI18N
+        butPaste.setFocusable(false);
+        butPaste.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        butPaste.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        butPaste.addActionListener(new java.awt.event.ActionListener() {
+
+                @Override
+                public void actionPerformed(final java.awt.event.ActionEvent evt) {
+                    butPasteActionPerformed(evt);
+                }
+            });
+        jToolBar1.add(butPaste);
 
         butUndo.setIcon(new javax.swing.ImageIcon(
                 getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-undo.png")));         // NOI18N
@@ -2042,8 +2105,8 @@ public class AttributeTable extends javax.swing.JPanel {
     private void miStatistikActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miStatistikActionPerformed
         final int count = model.getRowCount();
         final Double[] values = new Double[model.getRowCount()];
-        double min = Double.MAX_VALUE;
-        double max = Double.MIN_VALUE;
+        double min = Double.POSITIVE_INFINITY;
+        double max = Double.NEGATIVE_INFINITY;
         double sum = 0;
         double mean = 0;
         double stdDeviation = 0;
@@ -2090,6 +2153,13 @@ public class AttributeTable extends javax.swing.JPanel {
             }
         }
 
+        if (min == Double.POSITIVE_INFINITY) {
+            min = 0;
+        }
+        if (max == Double.NEGATIVE_INFINITY) {
+            max = 0;
+        }
+
         // formula: sqrt(1/(n-1) * sum((Xi - Y)^2)), n: value count, Xi: ith values, Y: mean
         // see: http://en.wikipedia.org/wiki/Standard_deviation#Corrected_sample_standard_deviation
         stdDeviation = Math.sqrt(1.0 / (count - nullCount - 1) * stdDeviation);
@@ -2102,7 +2172,7 @@ public class AttributeTable extends javax.swing.JPanel {
         lblStdDeviationVal.setText(trimNumberString(round(stdDeviation, 6)));
         lblSumVal.setText(trimNumberString(round(sum, 6)));
 
-        diaStatistic.setSize(400, 320);
+        diaStatistic.pack();
         diaStatistic.setResizable(false);
         labStatCol.setText(model.getColumnName(popupColumn));
         StaticSwingTools.showDialog(diaStatistic);
@@ -2123,12 +2193,18 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void butExportActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butExportActionPerformed
+        if ((featureService.getLayerProperties().getAttributeTableRuleSet() != null)
+                    && featureService.getLayerProperties().getAttributeTableRuleSet().hasCustomExportFeaturesMethod()) {
+            featureService.getLayerProperties().getAttributeTableRuleSet().exportFeatures();
+            return;
+        }
+
         diaExport.setSize(400, 150);
         diaExport.pack();
         diaExport.setResizable(false);
         diaExport.setModal(true);
         StaticSwingTools.showDialog(diaExport);
-    }                                                                             //GEN-LAST:event_butExportActionPerformed
+    } //GEN-LAST:event_butExportActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -2210,6 +2286,12 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void butPrintActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintActionPerformed
+        if ((featureService.getLayerProperties().getAttributeTableRuleSet() != null)
+                    && featureService.getLayerProperties().getAttributeTableRuleSet().hasCustomPrintFeaturesMethod()) {
+            featureService.getLayerProperties().getAttributeTableRuleSet().printFeatures();
+            return;
+        }
+
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
                         .getParentFrame(this),
                 true,
@@ -2255,6 +2337,7 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     private void tbProcessingActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_tbProcessingActionPerformed
         changeProcessingModeIntern(false);
+        butPaste.setEnabled(isPasteButtonEnabled());
     }                                                                                //GEN-LAST:event_tbProcessingActionPerformed
 
     /**
@@ -2484,6 +2567,123 @@ public class AttributeTable extends javax.swing.JPanel {
     } //GEN-LAST:event_miFeldberechnungActionPerformed
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butCopyActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butCopyActionPerformed
+        copySelectedFeaturesToClipboard();
+
+        for (final AttributeTable tab : instances) {
+            tab.butPaste.setEnabled(isPasteButtonEnabled());
+        }
+    } //GEN-LAST:event_butCopyActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  evt  DOCUMENT ME!
+     */
+    private void butPasteActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPasteActionPerformed
+        pasteSelectedFeaturesfromClipboard();
+    }                                                                            //GEN-LAST:event_butPasteActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void copySelectedFeaturesToClipboard() {
+        clipboard = getSelectedFeatures();
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void pasteSelectedFeaturesfromClipboard() {
+        if ((clipboard != null) && featureService.isEditable()) {
+            for (final FeatureServiceFeature feature : clipboard) {
+                final FeatureServiceFeature newFeature = featureService.getFeatureFactory().createNewFeature();
+                final Map<String, FeatureServiceAttribute> attributeMap = featureService.getFeatureServiceAttributes();
+                final Map<String, Object> defaultValues = tableRuleSet.getDefaultValues();
+                boolean geometryCompatible = false;
+
+                // check, if the geometry types are compatible
+                final String geomType = featureService.getLayerProperties().getFeatureService().getGeometryType();
+                if ((geomType != null) && !geomType.equals(AbstractFeatureService.UNKNOWN)) {
+                    try {
+                        final Class geomTypeClass = Class.forName("com.vividsolutions.jts.geom." + geomType);
+
+                        if ((geomTypeClass != null)
+                                    && ((feature.getGeometry() == null)
+                                        || geomTypeClass.isInstance(feature.getGeometry()))) {
+                            newFeature.setGeometry(feature.getGeometry());
+                            geometryCompatible = true;
+                        }
+                    } catch (Exception e) {
+                        // nothing to do
+                    }
+                }
+
+                if (!geometryCompatible) {
+                    continue;
+                }
+
+                if (tableRuleSet != null) {
+                    tableRuleSet.copyProperties(feature, newFeature);
+                } else {
+                    // copy properties
+                    if (defaultValues != null) {
+                        for (final String propName : defaultValues.keySet()) {
+                            newFeature.setProperty(propName, defaultValues.get(propName));
+                        }
+                    }
+
+                    final boolean hasIdExpression = featureService.getLayerProperties().getIdExpressionType()
+                                == LayerProperties.EXPRESSIONTYPE_PROPERTYNAME;
+                    for (final String attrKey : attributeMap.keySet()) {
+                        if (hasIdExpression
+                                    && featureService.getLayerProperties().getIdExpression().equalsIgnoreCase(
+                                        attrKey)) {
+                            // do not change the id
+                            continue;
+                        }
+                        if (tableRuleSet.isColumnEditable(attrKey)) {
+                            final Object val = getFeaturePropertyIgnoreCase(feature, attrKey);
+                            if (val != null) {
+                                // without this null check, the geometry will probably be overwritten
+                                newFeature.setProperty(attrKey, val);
+                            }
+                        }
+                    }
+                }
+
+                addFeature(newFeature);
+                modifiedFeatures.add((DefaultFeatureServiceFeature)newFeature);
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   feature  DOCUMENT ME!
+     * @param   name     DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Object getFeaturePropertyIgnoreCase(final FeatureServiceFeature feature, final String name) {
+        for (final Object prop : feature.getProperties().keySet()) {
+            if (prop instanceof String) {
+                final String propName = (String)prop;
+                if (propName.equalsIgnoreCase(name)) {
+                    return feature.getProperty(propName);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Reloads the model.
      */
     public void reload() {
@@ -2505,7 +2705,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private void saveChangedRows(final boolean forceSave) {
         boolean save = forceSave;
 
-        if (!save) {
+        if (!save && !modifiedFeatures.isEmpty()) {
             final int ans = JOptionPane.showConfirmDialog(
                     AttributeTable.this,
                     NbBundle.getMessage(
@@ -2742,6 +2942,9 @@ public class AttributeTable extends javax.swing.JPanel {
      * @return  DOCUMENT ME!
      */
     private String round(final double value, final int digits) {
+        if (Double.compare(value, Double.NaN) == 0) {
+            return "";
+        }
         final BigDecimal tmpValue = new BigDecimal(value);
         return tmpValue.setScale(digits, RoundingMode.HALF_UP).toPlainString();
     }
@@ -2824,19 +3027,23 @@ public class AttributeTable extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     private void applySelection() {
-        applySelection(null);
+        applySelection(null, false);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param  selectedFeatures  DOCUMENT ME!
+     * @param  selectedFeatures    DOCUMENT ME!
+     * @param  removeOldSelection  DOCUMENT ME!
      */
-    public void applySelection(List<Feature> selectedFeatures) {
+    public void applySelection(List<Feature> selectedFeatures, final boolean removeOldSelection) {
         if (selectedFeatures == null) {
             selectedFeatures = SelectionManager.getInstance().getSelectedFeatures(featureService);
         }
-        table.getSelectionModel().clearSelection();
+
+        if (removeOldSelection) {
+            table.getSelectionModel().clearSelection();
+        }
 
         if (selectedFeatures != null) {
             setSelection(selectedFeatures);
@@ -3402,7 +3609,6 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public CustomTableModel getModel() {
-            LOG.error("getModel");
             return model;
         }
 
@@ -3489,7 +3695,6 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public void setSortKeys(final List<? extends RowSorter.SortKey> sortKeys) {
-            LOG.error("setSortKeys");
             final List<SortKey> old = this.sortKeys;
             if ((sortKeys != null) && (sortKeys.size() > 0)) {
                 final int max = ((model != null) ? model.getColumnCount() : 0);
@@ -3512,8 +3717,6 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public List<? extends RowSorter.SortKey> getSortKeys() {
-            LOG.error("getSortKeys");
-
             return sortKeys;
         }
 
@@ -3537,33 +3740,27 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public void modelStructureChanged() {
-            LOG.error("modelStructureChanged");
         }
 
         @Override
         public void allRowsChanged() {
-            LOG.error("allRowsChanged");
 //            setSortKeys(null);
         }
 
         @Override
         public void rowsInserted(final int firstRow, final int endRow) {
-            LOG.error("rowsInserted");
         }
 
         @Override
         public void rowsDeleted(final int firstRow, final int endRow) {
-            LOG.error("rowsDeleted");
         }
 
         @Override
         public void rowsUpdated(final int firstRow, final int endRow) {
-            LOG.error("rowsUpdated");
         }
 
         @Override
         public void rowsUpdated(final int firstRow, final int endRow, final int column) {
-            LOG.error("rowsUpdated(int,int,int)");
         }
     }
 }

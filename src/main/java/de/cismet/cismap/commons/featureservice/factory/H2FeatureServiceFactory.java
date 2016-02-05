@@ -15,6 +15,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
@@ -22,27 +23,33 @@ import edu.umd.cs.piccolo.util.PObjectOutputStream;
 
 import org.apache.log4j.Logger;
 
+import org.geotools.referencing.wkt.Parser;
+
 import org.h2gis.utilities.SFSUtilities;
 import org.h2gis.utilities.wrapper.ConnectionWrapper;
 import org.h2gis.utilities.wrapper.StatementWrapper;
 
 import org.jfree.util.Log;
 
-import org.openide.util.NbBundle;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
+
+import java.net.URI;
 
 import java.nio.charset.Charset;
 
-import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import java.text.ParseException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,10 +59,10 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.Feature;
@@ -73,6 +80,9 @@ import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.FeatureTools;
+import de.cismet.cismap.commons.util.CrsDeterminer;
+
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * DOCUMENT ME!
@@ -91,14 +101,17 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     public static final int STATION_LINE = 2;
     private static final String INSERT_LR_META_DATA = "INSERT INTO \"" + LR_META_TABLE_NAME
                 + "\" (table, lin_ref_reference, domain, src_join_field, targ_join_field, lin_ref_geom, kind, from_value, till_value) VALUES ('%s','%s','%s','%s','%s','%s',%s,'%s','%s');";
+    private static final String DELETE_LR_META_DATA = "DELETE FROM \"" + LR_META_TABLE_NAME
+                + "\" where table = '%s';";
     private static final String INSERT_META_DATA = "INSERT INTO \"" + META_TABLE_NAME
                 + "\" (table, format) VALUES ('%s','%s');";
 
     private static Logger LOG = Logger.getLogger(H2FeatureServiceFactory.class);
-    public static final String DB_NAME = "~/cismap/internal";
-    private static final String CREATE_SPATIAL_INDEX = "CREATE SPATIAL INDEX %s ON \"%s\"(%s);";
+    public static final String DB_NAME = "~/cismap/internalH2";
+    private static final String CREATE_SPATIAL_INDEX = "CREATE SPATIAL INDEX %s ON \"%s\" (%s);";
     private static final String UPDATE_SRID = "UPDATE \"%1$s\" set %2$s = st_setsrid(%2$s, %3$s)";
-    private static final String CREATE_TABLE_FROM_CSV = "CREATE TABLE \"%s\" as select * from CSVREAD('%s');";
+    private static final String CREATE_TABLE_FROM_CSV =
+        "CREATE TABLE \"%s\" as select * from CSVREAD('%s', null, '%s');";
     private static final String CREATE_TABLE_FROM_DBF = "CALL FILE_TABLE('%s', '%s');";
     private static final String COPY_TABLE_FROM_DBF = "create table \"%s\" as select * from %s";
     private static final String DROP_TABLE_REFERENCE = "drop table %s;";
@@ -255,11 +268,27 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 final String tmpTableReference = tableName + "_temp_reference";
 
                 if (file.getAbsolutePath().toLowerCase().endsWith("csv")) {
-                    st.execute(String.format(CREATE_TABLE_FROM_CSV, tableName, file.getAbsolutePath()));
+                    final CsvDialog dialog = new CsvDialog(null, true);
+                    final String separatorChar = determineSeparator(file);
+                    dialog.setSeparatorChar(separatorChar);
+                    dialog.setSize(225, 200);
+                    StaticSwingTools.centerWindowOnScreen(dialog);
+                    final String options = "charset=" + dialog.getCharactersetName() + " fieldDelimiter="
+                                + dialog.getTextSep() + " fieldSeparator=" + dialog.getSeparatorChar();
+                    st.execute(String.format(CREATE_TABLE_FROM_CSV, tableName, file.getAbsolutePath(), options));
                 } else {
-                    st.execute(String.format(CREATE_TABLE_FROM_DBF, file.getAbsolutePath(), tmpTableReference));
-                    st.execute(String.format(COPY_TABLE_FROM_DBF, tableName, tmpTableReference));
-                    st.execute(String.format(DROP_TABLE_REFERENCE, tmpTableReference));
+                    try {
+                        st.execute(String.format(CREATE_TABLE_FROM_DBF, file.getAbsolutePath(), tmpTableReference));
+                        st.execute(String.format(COPY_TABLE_FROM_DBF, tableName, tmpTableReference));
+                        st.execute(String.format(DROP_TABLE_REFERENCE, tmpTableReference));
+                    } catch (Exception e) {
+                        try {
+                            st.execute(String.format(DROP_TABLE_REFERENCE, tmpTableReference));
+                        } catch (Exception ex) {
+                            // nothing to do
+                        }
+                        throw e;
+                    }
                 }
                 final String format = file.getAbsolutePath()
                             .toLowerCase()
@@ -268,6 +297,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
                 rs = conn.getMetaData().getColumns(null, null, tableName, "%");
                 boolean hasIdField = false;
+                String geoCol = null;
 
                 while (rs.next()) {
                     if (rs.getString("COLUMN_NAME").toUpperCase().equals("ID")) {
@@ -275,18 +305,42 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     }
 
                     if (rs.getString("TYPE_NAME").toUpperCase().endsWith("GEOMETRY")) {
-                        final String colName = rs.getString("COLUMN_NAME");
-                        final String indexName = colName + tableName + "SpatialIndex";
+                        geoCol = rs.getString("COLUMN_NAME");
+                        final String indexName = removeSpecialCharacterFromTableName(geoCol + tableName
+                                        + "SpatialIndex");
                         final int srid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs()
                                         .getCode());
 
-                        st.execute(String.format(CREATE_SPATIAL_INDEX, indexName, tableName, colName));
-                        st.execute(String.format(UPDATE_SRID, tableName, colName, srid));
+                        st.execute(String.format(CREATE_SPATIAL_INDEX, indexName, tableName, geoCol));
+                        st.execute(String.format(UPDATE_SRID, tableName, geoCol, srid));
                     }
                 }
                 rs.close();
 
                 createPrimaryKey(hasIdField);
+
+                if (geoCol != null) {
+                    final String crs = determineShapeCrs(file.toURI());
+
+                    if (crs != null) {
+                        final PreparedStatement ps = conn.prepareStatement("update \"" + tableName + "\" set " + geoCol
+                                        + " = ? where id = ?");
+                        final ResultSet res = st.executeQuery("select id, " + geoCol + " from \"" + tableName + "\"");
+
+                        while (res.next()) {
+                            final int id = res.getInt(1);
+                            final Geometry geom = (Geometry)res.getObject(2);
+                            geom.setSRID(CrsTransformer.extractSridFromCrs(crs));
+                            final Geometry crsTransformed = CrsTransformer.transformToGivenCrs(
+                                    geom,
+                                    CismapBroker.getInstance().getSrs().getCode());
+                            ps.setInt(1, id);
+                            ps.setObject(2, crsTransformed);
+                            ps.addBatch();
+                        }
+                        ps.executeUpdate();
+                    }
+                }
 
                 if (!file.getAbsolutePath().toLowerCase().endsWith("csv")) {
                     final Charset charset = getCharsetDefinition(file.getAbsolutePath());
@@ -338,6 +392,106 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param   csvFile  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String determineSeparator(final File csvFile) {
+        BufferedReader br = null;
+
+        try {
+            br = new BufferedReader(new FileReader(csvFile));
+            final String line = br.readLine();
+
+            if (line.contains(",")) {
+                return ",";
+            } else {
+                return ";";
+            }
+        } catch (Exception e) {
+            LOG.error("Cannot read csv file", e);
+        } finally {
+            try {
+                if (br != null) {
+                    br.close();
+                }
+            } catch (IOException ex) {
+                // nothing to do
+            }
+        }
+
+        return ",";
+    }
+
+    /**
+     * Determines the crs of the corresponding prj file.
+     *
+     * @param   documentURI  DOCUMENT ME!
+     *
+     * @return  the crs of the corresponding prj file or null, if the initialisation of the shape file should be
+     *          cancelled.
+     */
+    private String determineShapeCrs(final URI documentURI) {
+        String prjFilename;
+        File prjFile;
+
+        final Map<Crs, CoordinateReferenceSystem> prjMapping = CrsDeterminer.getKnownCrsMappings();
+
+        if ((prjMapping != null) && !prjMapping.isEmpty()) {
+            // if no mapping file is defined, it will be assumed that the shape file ueses the current crs
+            if (documentURI.getPath().endsWith(".shp")) {
+                prjFilename = documentURI.getPath().substring(0, documentURI.getPath().length() - 4);
+            } else {
+                prjFilename = documentURI.getPath();
+            }
+
+            prjFile = new File(prjFilename + ".prj");
+            if (!prjFile.exists()) {
+                prjFile = new File(prjFilename + ".PRJ");
+            }
+
+            try {
+                if (prjFile.exists()) {
+                    final BufferedReader br = new BufferedReader(new FileReader(prjFile));
+                    String crsDefinition = br.readLine();
+                    br.close();
+
+                    if (crsDefinition != null) {
+                        final Parser parser = new Parser();
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("prj file with definition: " + crsDefinition + " found");
+                        }
+
+                        crsDefinition = CrsDeterminer.crsDefinitionAdjustments(crsDefinition);
+                        final CoordinateReferenceSystem crsFromShape = parser.parseCoordinateReferenceSystem(
+                                crsDefinition);
+
+                        for (final Crs key : prjMapping.keySet()) {
+                            if (CrsDeterminer.isCrsEqual(prjMapping.get(key), crsFromShape)) {
+                                return key.getCode();
+                            }
+                        }
+                    } else {
+                        logger.warn("The prj file is empty.");
+                    }
+                } else {
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("No prj file found.");
+                    }
+                }
+            } catch (IOException e) {
+                logger.error("Error while reading the prj file.", e);
+            } catch (ParseException e) {
+                logger.error("Error while parsing the prj file.", e);
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Imports the given features into the db.
      *
      * @param  workerThread          the thread, that is used to handle the current progress
@@ -356,6 +510,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             if (!rs.next()) {
                 if (workerThread != null) {
                     workerThread.firePropertyChange("progress", 5, -1);
+                }
+                try {
+                    createMetaTableIfNotExist();
+                } catch (Exception e) {
+                    LOG.error("Cannot create meta table.", e);
                 }
 
                 final Map<String, FeatureServiceAttribute> attributeMap = features.get(0)
@@ -376,6 +535,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 }
 
                 for (final String attrKey : attributeList) {
+                    final FeatureServiceAttribute attr = attributeMap.get(attrKey);
+                    if (attr == null) {
+                        continue;
+                    }
                     if (!firstAttr) {
                         tableAttributesWithType.append(",");
                         tableAttributesWithoutType.append(",");
@@ -384,7 +547,6 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                         firstAttr = false;
                     }
 
-                    final FeatureServiceAttribute attr = attributeMap.get(attrKey);
                     if (attr.getName().equalsIgnoreCase("id")) {
                         hasIdField = true;
                     }
@@ -402,7 +564,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 while (rs.next()) {
                     if (rs.getString("TYPE_NAME").toUpperCase().endsWith("GEOMETRY")) {
                         final String colName = rs.getString("COLUMN_NAME");
-                        final String indexName = colName + tableName + "SpatialIndex";
+                        final String indexName = removeSpecialCharacterFromTableName(colName + tableName
+                                        + "SpatialIndex");
                         final int srid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs()
                                         .getCode());
                         st.execute(String.format(CREATE_SPATIAL_INDEX, indexName, tableName, colName));
@@ -424,7 +587,12 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                         if ((manuallySetId != null) && manuallySetId.equals(attrKey)) {
                             prepStat.setObject(++index, ++id);
                         } else {
-                            prepStat.setObject(++index, f.getProperty(attrKey));
+                            Object value = f.getProperty(attrKey);
+
+                            if ((value != null) && !(value instanceof Serializable)) {
+                                value = value.toString();
+                            }
+                            prepStat.setObject(++index, value);
                         }
                     }
                     prepStat.execute();
@@ -433,9 +601,32 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 createPrimaryKey(hasIdField);
             }
             st.close();
+
+            final CapabilityWidget cap = CapabilityWidgetOptionsPanel.getCapabilityWidget();
+
+            if (cap != null) {
+                cap.refreshJdbcTrees();
+            }
         } catch (SQLException e) {
             logger.error("Error while creating a new table from existing features", e);
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   tableName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private String removeSpecialCharacterFromTableName(final String tableName) {
+        String tableNameWithoutSpecialCharacters = tableName.replace("-", "SMI");
+        tableNameWithoutSpecialCharacters = tableNameWithoutSpecialCharacters.replace("/", "SSL");
+        tableNameWithoutSpecialCharacters = tableNameWithoutSpecialCharacters.replace(" ", "SSP");
+        tableNameWithoutSpecialCharacters = tableNameWithoutSpecialCharacters.replace(",", "SCOM");
+        tableNameWithoutSpecialCharacters = tableNameWithoutSpecialCharacters.replace(":", "SCOL");
+        tableNameWithoutSpecialCharacters = tableNameWithoutSpecialCharacters.replace("<", "SLE");
+        return tableNameWithoutSpecialCharacters.replace(">", "SGR");
     }
 
     /**
@@ -505,7 +696,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             st.execute(String.format(CREATE_SEQUENCE, seqName));
             st.execute(String.format(ADD_SEQUENCE, tableName, seqName));
         }
-        final String indexName = tableName + "PIndex";
+        final String indexName = removeSpecialCharacterFromTableName(tableName) + "PIndex";
         st.execute(String.format(ADD_NOT_NULL_ID, tableName));
         st.execute(String.format(CREATE_PRIMARY_KEY, indexName, tableName));
         st.close();
@@ -610,18 +801,18 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final AbstractFeatureService routeService,
             final String layerName,
             final String domain) {
-        if (geometryField != null) {
-            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
-                NbBundle.getMessage(
-                    H2FeatureServiceFactory.class,
-                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists",
-                    tableName),
-                NbBundle.getMessage(
-                    H2FeatureServiceFactory.class,
-                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists.title"),
-                JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+//        if (geometryField != null) {
+//            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
+//                NbBundle.getMessage(
+//                    H2FeatureServiceFactory.class,
+//                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists",
+//                    tableName),
+//                NbBundle.getMessage(
+//                    H2FeatureServiceFactory.class,
+//                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists.title"),
+//                JOptionPane.ERROR_MESSAGE);
+//            return;
+//        }
 
         try {
             if (!routeService.isInitialized()) {
@@ -640,9 +831,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             if (geoCol.indexOf(".") != -1) {
                 geoCol = geoCol.substring(geoCol.lastIndexOf(".") + 1);
             }
-            geometryField = "geo_" + geoCol;
             final StatementWrapper st = createStatement(conn);
-            st.execute("alter table \"" + tableName + "\" add column " + geometryField + " Geometry");
+            if (geometryField == null) {
+                geometryField = "geo_" + geoCol;
+                st.execute("alter table \"" + tableName + "\" add column " + geometryField + " Geometry");
+            }
             String additionalFields = fromField + "," + routeField;
             final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set "
                             + geometryField + " = ? WHERE id = ?");
@@ -686,6 +879,9 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final int kind = ((tillField == null) ? STATION : STATION_LINE);
 
             st.execute(String.format(
+                    DELETE_LR_META_DATA,
+                    tableName));
+            st.execute(String.format(
                     INSERT_LR_META_DATA,
                     tableName,
                     layerName,
@@ -709,23 +905,25 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @param  yField  The field with the y value
      */
     public void setPointGeometryInformation(final String xField, final String yField) {
-        if (geometryField != null) {
-            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
-                NbBundle.getMessage(
-                    H2FeatureServiceFactory.class,
-                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists",
-                    tableName),
-                NbBundle.getMessage(
-                    H2FeatureServiceFactory.class,
-                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists.title"),
-                JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+//        if (geometryField != null) {
+//            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
+//                NbBundle.getMessage(
+//                    H2FeatureServiceFactory.class,
+//                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists",
+//                    tableName),
+//                NbBundle.getMessage(
+//                    H2FeatureServiceFactory.class,
+//                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists.title"),
+//                JOptionPane.ERROR_MESSAGE);
+//            return;
+//        }
 
         try {
-            geometryField = "geo_xy";
             final StatementWrapper st = createStatement(conn);
-            st.execute("alter table \"" + tableName + "\" add column " + geometryField + " Geometry");
+            if (geometryField == null) {
+                geometryField = "geo_xy";
+                st.execute("alter table \"" + tableName + "\" add column " + geometryField + " Geometry");
+            }
             final String additionalFields = xField + "," + yField;
             final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set "
                             + geometryField + " = ? WHERE id = ?");
@@ -821,11 +1019,15 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                                 + "\" where " + geometryField + " is not null;");
 
                 if (envelopeSet.next()) {
-                    final Envelope e = ((Envelope)envelopeSet.getObject(1));
-                    if (e != null) {
+                    final Object geomObject = envelopeSet.getObject(1);
+
+                    if (geomObject instanceof Envelope) {
                         final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
                                 envelopeSet.getInt(2));
-                        envelope = gf.toGeometry(e);
+                        envelope = gf.toGeometry((Envelope)geomObject);
+                    } else if (geomObject instanceof Polygon) {
+                        envelope = (Polygon)geomObject;
+                        envelope.setSRID(envelopeSet.getInt(2));
                     } else {
                         envelope = null;
                     }
@@ -941,6 +1143,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             return null;
         } catch (SQLException e) {
             LOG.error("Error while creating database connection.", e);
+
             return null;
         }
     }
@@ -1004,6 +1207,15 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         feature.setLayerProperties(this.getLayerProperties());
 
         return feature;
+    }
+
+    /**
+     * Returns the name of the field, that contains the id.
+     *
+     * @return  the name of the field, that contains the id
+     */
+    public String getIdField() {
+        return idField;
     }
 
     /**

@@ -14,8 +14,12 @@ package de.cismet.cismap.commons.gui.layerwidget;
 
 import java.awt.event.ActionListener;
 
+import java.util.List;
+
 import javax.swing.JMenuItem;
 import javax.swing.tree.TreePath;
+
+import de.cismet.cismap.commons.ServiceLayer;
 
 /**
  * DOCUMENT ME!
@@ -78,6 +82,17 @@ public abstract class ThemeLayerMenuItem extends JMenuItem implements ActionList
      */
     public boolean isVisible(final int mask) {
         return (visibility & mask) == mask;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   serviceLayerList  mask DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean isVisible(final List<ServiceLayer> serviceLayerList) {
+        return true;
     }
 
     /**

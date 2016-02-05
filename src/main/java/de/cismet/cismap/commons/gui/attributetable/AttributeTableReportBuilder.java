@@ -133,7 +133,7 @@ public class AttributeTableReportBuilder {
                     .build();
         drb.addConcatenatedReport(subreport);
 
-        drb.addAutoText(AutoText.AUTOTEXT_PAGE_X_OF_Y, AutoText.POSITION_FOOTER, AutoText.ALIGMENT_CENTER);
+//        drb.addAutoText(AutoText.AUTOTEXT_PAGE_X_OF_Y, AutoText.POSITION_FOOTER, AutoText.ALIGMENT_CENTER);
 
         return drb.build();
     }

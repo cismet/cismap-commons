@@ -63,9 +63,9 @@ public abstract class AbstractFeatureFactory<FT extends FeatureServiceFeature, Q
     // private BoundingBox diff = null;
     // private final WKTReader reader;
     protected Map<String, LinkedList<Style>> styles;
+    protected Geometry lastGeom = null;
+    protected QT lastQuery;
     private volatile boolean isInterruptedAllowed = true;
-    private Geometry lastGeom = null;
-    private QT lastQuery;
 
     //~ Constructors -----------------------------------------------------------
 
