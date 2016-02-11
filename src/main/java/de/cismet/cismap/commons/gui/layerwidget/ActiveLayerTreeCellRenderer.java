@@ -41,7 +41,6 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static final Dimension DIM = new Dimension(250, 16);
     private static int SINGLE = 4;
     private static int MULTI = 8;
     private static int INFO = 16;
@@ -268,9 +267,6 @@ public class ActiveLayerTreeCellRenderer extends DefaultTreeCellRenderer {
                 leaf,
                 row,
                 hasFocus);
-        ret.setMinimumSize(DIM);
-        ret.setMaximumSize(DIM);
-        ret.setPreferredSize(DIM);
         ret.setText(value.toString());
 
         if (value instanceof RetrievalServiceLayer) {
