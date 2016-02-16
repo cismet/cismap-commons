@@ -7,14 +7,11 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.infowidgets;
 
-import org.deegree.commons.utils.Pair;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 
 import java.net.URL;
 
@@ -33,8 +30,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import de.cismet.cismap.commons.ServiceLayer;
-import de.cismet.cismap.commons.featureservice.SLDStyledLayer;
 import de.cismet.cismap.commons.interaction.ActiveLayerListener;
 import de.cismet.cismap.commons.interaction.StatusListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
@@ -132,10 +127,10 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
     /**
      * DOCUMENT ME!
      *
-     * @param  layername  DOCUMENT ME!
+     * @param  layerurl  DOCUMENT ME!
      */
-    public void removeLegendByName(final String layername) {
-        tableModel.removeLegendByName(layername);
+    public void removeLegendByUrl(final String layerurl) {
+        tableModel.removeLegendByUrl(layerurl);
     }
 
     /**
@@ -177,7 +172,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             removeWMSLayer((WMSLayer)e.getLayer());
         } else if (e.getLayer() instanceof SimpleLegendProvider) {
             final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
-            removeLegendByName(slp.getLegendIdentifier());
+            removeLegendByUrl(slp.getLegendUrl());
         } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
             final SlidableWMSServiceLayerGroup wmsLayer = (SlidableWMSServiceLayerGroup)e.getLayer();
             final List v = wmsLayer.getLayers();
@@ -227,7 +222,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
             }
         } else {
             final String title = wl.getOgcCapabilitiesLayer().getTitle();
-            final String name = wl.getOgcCapabilitiesLayer().getName();
             String url = null;
             try {
                 final URL[] lua = wl.getSelectedStyle().getLegendURL();
@@ -238,7 +232,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                 }
             }
             if (url != null) {
-                this.removeLegendByName(name);
+                this.removeLegendByUrl(url);
             }
         }
     }
@@ -365,53 +359,6 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
 
     @Override
     public void layerInformationStatusChanged(final ActiveLayerEvent e) {
-        if (e.getLayer() instanceof WMSServiceLayer) {
-            refreshWMSServiceLayerInformation((WMSServiceLayer)e.getLayer());
-        } else if (e.getLayer() instanceof SlidableWMSServiceLayerGroup) {
-            final List<WMSServiceLayer> layer = ((SlidableWMSServiceLayerGroup)e.getLayer()).getLayers();
-            final Iterator<WMSServiceLayer> it = layer.iterator();
-
-            if (it.hasNext()) {
-                refreshWMSServiceLayerInformation(it.next());
-            }
-        } else if (e.getLayer() instanceof SimpleLegendProvider) {
-            final SimpleLegendProvider slp = (SimpleLegendProvider)e.getLayer();
-            tableModel.refreshLegend(slp.getLegendUrl(), slp.getLegendIdentifier());
-        } else {
-            log.warn("For this type no legend can be created. " + e.getLayer()); // NOI18N
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  wmsLayer  DOCUMENT ME!
-     */
-    private void refreshWMSServiceLayerInformation(final WMSServiceLayer wmsLayer) {
-        final List v = wmsLayer.getWMSLayers();
-        final Iterator it = v.iterator();
-        while (it.hasNext()) {
-            final Object elem = it.next();
-            if (elem instanceof WMSLayer) {
-                final WMSLayer wl = (WMSLayer)elem;
-                final String title = wl.getOgcCapabilitiesLayer().getTitle();
-                final String name = wl.getOgcCapabilitiesLayer().getName();
-                String url = null;
-                try {
-                    final URL[] lua = wl.getSelectedStyle().getLegendURL();
-                    url = lua[0].toString();
-                } catch (final Exception t) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Could not find legend for " + title, t); // NOI18N
-                    }
-                }
-                if (url != null) {
-                    wmsCapabilities.put(url, wmsLayer.getWmsCapabilities());
-
-                    tableModel.refreshLegend(url, name);
-                }
-            }
-        }
     }
 
     /**
@@ -689,9 +636,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
         //~ Instance fields ----------------------------------------------------
 
         private List<LegendPanel> panels = new ArrayList<LegendPanel>();
-        private HashMap<String, LegendPanel> panelsByName = new HashMap<String, LegendPanel>();
         private HashMap<String, LegendPanel> panelsByUrl = new HashMap<String, LegendPanel>();
-        private HashMap<String, String> urlsByName = new HashMap<String, String>();
 
         //~ Methods ------------------------------------------------------------
 
@@ -723,10 +668,8 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
          */
         public void addLegend(final String url, final String name) {
             final LegendPanel lp = new LegendPanel(url);
-            urlsByName.put(name, url);
             if (!panels.contains(lp)) {
                 panels.add(lp);
-                panelsByName.put(name, lp);
                 panelsByUrl.put(url, lp);
             }
 
@@ -738,48 +681,19 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                     }
                 });
         }
-        /*
-         * public void addLegend(final BufferedImage img, final String name) { final LegendPanel lp = new
-         * LegendPanel(img); if(!panels.contains(lp)){     panels.add(lp);     panelsByName.put(name, lp); }
-         * super.fireTableStructureChanged();}*/
 
         /**
          * DOCUMENT ME!
          *
-         * @param  url        DOCUMENT ME!
-         * @param  layername  DOCUMENT ME!
+         * @param  url  layerurl DOCUMENT ME!
          */
-        public void refreshLegend(final String url, final String layername) {
-            final String oldUrl = urlsByName.get(layername);
-            if ((oldUrl != null) && !oldUrl.equals(url)) {
-                urlsByName.put(layername, url);
-                final LegendPanel lp = panelsByName.get(layername);
-                lp.setUrl(url);
-                lp.refresh();
-                panelsByUrl.remove(oldUrl);
-                panelsByUrl.put(url, lp);
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("no Refresh required. Same legend-urls"); // NOI18N
-                }
-            }
-        }
-
-        /**
-         * DOCUMENT ME!
-         *
-         * @param  layername  DOCUMENT ME!
-         */
-        public void removeLegendByName(final String layername) {
-            final String url = urlsByName.get(layername);
-            urlsByName.remove(layername);
-            if (!urlsByName.containsValue(url)) {
+        public void removeLegendByUrl(final String url) {
+            if (panelsByUrl.containsKey(url)) {
                 final LegendPanel lp = new LegendPanel(url);
-                final int index = panels.indexOf(lp);
-                if (index != -1) {
+                if (panels.contains(lp)) {
                     panels.remove(new LegendPanel(url));
-                    panelsByName.remove(layername);
                     panelsByUrl.remove(url);
+                    final int index = panels.indexOf(lp);
                     super.fireTableRowsDeleted(index, index);
                 }
             }
