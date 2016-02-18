@@ -13,30 +13,40 @@ package de.cismet.cismap.commons.tools;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import org.apache.log4j.Logger;
+
 import org.deegree.datatypes.Types;
 
+import org.openide.util.NbBundle;
+
 import java.math.BigDecimal;
+
+import java.sql.Timestamp;
 
 import java.util.Date;
 
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 
 /**
- * DOCUMENT ME!
+ * Some useful method for features.
  *
  * @author   therter
  * @version  $Revision$, $Date$
  */
 public class FeatureTools {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final Logger LOG = Logger.getLogger(FeatureTools.class);
+
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Determines the java class that can represent the type of the given feature attribute.
      *
      * @param   attr  DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return  The java class that can represent the type of the given feature attribute
      */
     public static Class<?> getClass(final FeatureServiceAttribute attr) {
         if (attr.isGeometry()) {
@@ -99,17 +109,19 @@ public class FeatureTools {
             return String.valueOf(Types.TIMESTAMP);
         } else if (cl.getName().endsWith("Boolean") || cl.getName().equals("boolean")) {
             return String.valueOf(Types.BOOLEAN);
+        } else if (cl.getName().endsWith("BigDecimal")) {
+            return String.valueOf(Types.NUMERIC);
         } else {
             return String.valueOf(Types.VARCHAR);
         }
     }
 
     /**
-     * DOCUMENT ME!
+     * Determines the H2 data type that can represent the type of the given feature attribute.
      *
      * @param   attr  DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return  The H2 data type that can represent the type of the given feature attribute
      */
     public static String getH2DataType(final FeatureServiceAttribute attr) {
         if (attr.isGeometry()) {
@@ -137,6 +149,8 @@ public class FeatureTools {
                     || attr.getType().equals(String.valueOf(Types.TIME))
                     || attr.getType().equals(String.valueOf(Types.TIMESTAMP))) {
             return "Timestamp";
+        } else if (attr.getType().equals(String.valueOf(Types.NUMERIC))) {
+            return "NUMERIC";
         } else if (attr.getType().equals(String.valueOf(Types.BOOLEAN))
                     || attr.getType().equals("xsd:boolean")) {
             return "Boolean";
@@ -144,6 +158,62 @@ public class FeatureTools {
             return "Geometry";
         } else {
             return attr.getType();
+        }
+    }
+
+    /**
+     * Converts the given object to the given class.
+     *
+     * @param   object  the object to convert
+     * @param   cl      the class, the object should be converted to
+     *
+     * @return  the converted object
+     *
+     * @throws  Exception  If the conversion is not possible
+     */
+    public static Object convertObjectToClass(final Object object, final Class cl) throws Exception {
+        final String objectAsString = String.valueOf(object);
+        if (object == null) {
+            return object;
+        }
+
+        try {
+            if (cl.equals(String.class)) {
+                return objectAsString;
+            } else if (cl.equals(Double.class)) {
+                return Double.parseDouble(objectAsString);
+            } else if (cl.equals(Float.class)) {
+                return Float.parseFloat(objectAsString);
+            } else if (cl.equals(Integer.class)) {
+                try {
+                    return Integer.parseInt(objectAsString);
+                } catch (NumberFormatException e) {
+                    final Double d = Double.parseDouble(objectAsString);
+
+                    return d.intValue();
+                }
+            } else if (cl.equals(Boolean.class)) {
+                return Boolean.parseBoolean(objectAsString);
+            } else if (cl.equals(Long.class)) {
+                try {
+                    return Long.parseLong(objectAsString);
+                } catch (NumberFormatException e) {
+                    final Double d = Double.parseDouble(objectAsString);
+
+                    return d.longValue();
+                }
+            } else if (cl.equals(Date.class)) {
+                return Timestamp.valueOf(objectAsString);
+            } else {
+                return object;
+            }
+        } catch (Exception e) {
+            LOG.error("Wrong data type: " + objectAsString + " expected type: " + cl.toString(), e);
+            throw new Exception(NbBundle.getMessage(
+                    FeatureTools.class,
+                    "FeatureTools.convertObjectToClass.message",
+                    objectAsString,
+                    cl.getName()));
         }
     }
 }
