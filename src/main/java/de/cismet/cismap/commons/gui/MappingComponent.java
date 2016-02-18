@@ -2475,6 +2475,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 if (node != null) {
                     node.syncGeometry();
                     node.visualize();
+                    node.refreshDesign(); // without this, sld styled points will not be shown properly
                     node.resetInfoNodePosition();
                     node.refreshInfoNode();
                     repaint();

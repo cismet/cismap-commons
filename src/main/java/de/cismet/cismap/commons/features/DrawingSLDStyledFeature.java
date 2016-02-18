@@ -15,6 +15,7 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
+import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.nodes.PImage;
 import edu.umd.cs.piccolo.nodes.PPath;
 
@@ -145,12 +146,21 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
             }
         }
 
-        /*
-         * if (stylings == null) { if (style == null) {     return; } this.stylings =
-         * style.evaluate(getDeegreeFeature(), evaluator);}*/
-        if ((stylings == null) || (stylings.size() == 0)) {
-            return;
+        for (final PImage image : pfeature.sldStyledImage) {
+            if (image instanceof PSticky) {
+                pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+                removeChildFromPfeature(pfeature, image);
+            }
         }
+        pfeature.sldStyledImage.clear();
+
+        for (final PImage image : pfeature.sldStyledSelectedImage) {
+            if (image instanceof PSticky) {
+                pfeature.getMappingComponent().removeStickyNode((PSticky)image);
+                removeChildFromPfeature(pfeature, image);
+            }
+        }
+        pfeature.sldStyledSelectedImage.clear();
 
         if (geomType.equals(AbstractNewFeature.geomTypes.POINT) && !hasPointStyling()) {
             return;
@@ -166,19 +176,21 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
             }
             pfeature.removeAllChildren();
         }
-        pfeature.sldStyledPolygon.clear();
 
-        for (final PImage image : pfeature.sldStyledImage) {
-            if (image instanceof PSticky) {
-                pfeature.getMappingComponent().removeStickyNode((PSticky)image);
-            }
-        }
-        pfeature.sldStyledImage.clear();
+        pfeature.sldStyledPolygon.clear();
 
         for (final PFeature.PTextWithDisplacement text : pfeature.sldStyledText) {
             pfeature.getMappingComponent().removeStickyNode(text);
+            removeChildFromPfeature(pfeature, text);
         }
         pfeature.sldStyledText.clear();
+
+        /*
+         * if (stylings == null) { if (style == null) {     return; } this.stylings =
+         * style.evaluate(getDeegreeFeature(), evaluator);}*/
+        if ((stylings == null) || (stylings.size() == 0)) {
+            return;
+        }
 
         final Geometry geom = pfeature.getFeature().getGeometry();
         int polygonNr = -1;
@@ -317,17 +329,18 @@ public class DrawingSLDStyledFeature extends DefaultFeatureServiceFeature implem
         if ((polygonNr == -1) && (imageNr == 0) && (textNr == 0)) {
             Log.warn("Es wurde kein passender Symbolizer für das Feature gefunden, Darstellung unmöglich.");
         }
-        /*
-         * //if (stylings.getFirst().first instanceof PolygonStyling) { applyStyling(pfeature,
-         * stylings.getFirst().first); //}
-         *
-         * while (pfeature.sldStyledPolygon.size() < (stylings.size() - 1)) { final PPath child = new PPath();
-         * pfeature.sldStyledPolygon.add(child); pfeature.addChild(child); }
-         *
-         * for (int i = 0; i < pfeature.sldStyledPolygon.size(); i++) { //
-         * pfeature.sldStyled.get(i).getPathReference().reset();
-         * pfeature.sldStyledPolygon.get(i).setPathTo(pfeature.getPathReference());
-         * applyStyling(pfeature.sldStyledPolygon.get(i), stylings.get(i + 1).first);}*/
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  pfeature  DOCUMENT ME!
+     * @param  node      DOCUMENT ME!
+     */
+    private void removeChildFromPfeature(final PFeature pfeature, final PNode node) {
+        if (pfeature.indexOfChild(node) != -1) {
+            pfeature.removeChild(node);
+        }
     }
 
     /**
