@@ -246,14 +246,13 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                                     && (((WMSServiceLayer)value).getWMSLayers().size() == 1)) {
                             l = ((WMSLayer)((WMSServiceLayer)value).getWMSLayers().get(0));
                         }
-                        if (!(l.getSelectedStyle().equals((Style)cbbStyleChooser.getSelectedItem()))) {
+                        if ((l != null) && !(l.getSelectedStyle().equals((Style)cbbStyleChooser.getSelectedItem()))) {
                             final ActiveLayerEvent ale = new ActiveLayerEvent();
                             ale.setLayer(l.getParentServiceLayer());
-                            // CismapBroker.getInstance().fireLayerRemoved(ale);
+                            CismapBroker.getInstance().fireLayerRemoved(ale);
                             l.setSelectedStyle((Style)cbbStyleChooser.getSelectedItem());
                             ((de.cismet.cismap.commons.retrieval.RetrievalService)value).retrieve(true);
-                            // CismapBroker.getInstance().fireLayerAdded(ale);
-                            CismapBroker.getInstance().fireLayerInformationStatusChanged(ale);
+                            CismapBroker.getInstance().fireLayerAdded(ale);
                         }
                         l.setSelectedStyle((Style)cbbStyleChooser.getSelectedItem());
                         final ActiveLayerEvent ale = new ActiveLayerEvent();
