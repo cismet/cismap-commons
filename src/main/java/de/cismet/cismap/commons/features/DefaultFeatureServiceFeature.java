@@ -321,13 +321,17 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      *          AttributeTableRuleSet
      */
     protected boolean hasAdditionalProperties() {
-        final AttributeTableRuleSet ruleSet = layerProperties.getAttributeTableRuleSet();
+        if (layerProperties != null) {
+            final AttributeTableRuleSet ruleSet = layerProperties.getAttributeTableRuleSet();
 
-        if (ruleSet == null) {
-            return false;
+            if (ruleSet == null) {
+                return false;
+            } else {
+                final String[] fieldNames = ruleSet.getAdditionalFieldNames();
+                return (fieldNames != null) && (fieldNames.length > 0);
+            }
         } else {
-            final String[] fieldNames = ruleSet.getAdditionalFieldNames();
-            return (fieldNames != null) && (fieldNames.length > 0);
+            return false;
         }
     }
 
@@ -609,6 +613,13 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      */
     @Override
     public boolean canBeSelected() {
+        if ((layerProperties != null) && (layerProperties.getFeatureService() != null)) {
+            if ((layerProperties.getFeatureService().getPNode() != null)
+                        && !layerProperties.getFeatureService().getPNode().getVisible()) {
+                // A feature should not be selectable, if its layer is not visible
+                return false;
+            }
+        }
         if (canBeSelected == null) {
             if ((layerProperties != null) && (layerProperties.getFeatureService() != null)) {
                 return layerProperties.getFeatureService().isSelectable();
@@ -922,6 +933,8 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
             if (getId() != -1) {
                 return getId() == other.getId();
             }
+        } else {
+            return false;
         }
 
         return super.equals(obj);
