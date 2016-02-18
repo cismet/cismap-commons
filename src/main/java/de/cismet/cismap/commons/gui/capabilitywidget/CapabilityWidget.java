@@ -785,10 +785,13 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 tbpCapabilities.remove(tbpCapabilities.indexOfComponent(tbpCapabilities.getSelectedComponent()));
             } else if (jdbcTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
                 jdbcTrees.remove(tbpCapabilities.getSelectedComponent());
+                tbpCapabilities.remove(tbpCapabilities.getSelectedComponent());
             } else if (cidsTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
                 cidsTrees.remove(tbpCapabilities.getSelectedComponent());
+                tbpCapabilities.remove(tbpCapabilities.getSelectedComponent());
             } else if (shapeFolderTrees.get(tbpCapabilities.getSelectedComponent()) != null) {
                 shapeFolderTrees.remove(tbpCapabilities.getSelectedComponent());
+                tbpCapabilities.remove(tbpCapabilities.getSelectedComponent());
             } else {
                 log.warn("Keine Component zum entfernen aktiv"); // NOI18N
             }
@@ -802,6 +805,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 capabilityUrlsReverse.remove(tbpCapabilities.getSelectedComponent());
                 wmsCapabilities.remove(tbpCapabilities.getSelectedComponent());
                 wfsCapabilities.remove(tbpCapabilities.getSelectedComponent());
+                jdbcTrees.remove(tbpCapabilities.getSelectedComponent());
+                cidsTrees.remove(tbpCapabilities.getSelectedComponent());
+                shapeFolderTrees.remove(tbpCapabilities.getSelectedComponent());
                 tbpCapabilities.remove(tbpCapabilities.getSelectedComponent());
             } else {
                 log.warn("The link was not removed from the capabilitiyURLs");
