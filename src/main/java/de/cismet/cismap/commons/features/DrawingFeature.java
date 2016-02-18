@@ -37,6 +37,7 @@ public class DrawingFeature extends PureNewFeature implements FeatureWithId, Dra
     private String name;
     private FeatureAnnotationSymbol featureAnnotationSymbol = null;
     private int id = -1;
+    private String sld;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -168,5 +169,23 @@ public class DrawingFeature extends PureNewFeature implements FeatureWithId, Dra
 
     @Override
     public void setIdExpression(final String idExpression) {
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the sld
+     */
+    public String getSld() {
+        return sld;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  sld  the sld to set
+     */
+    public void setSld(final String sld) {
+        this.sld = sld;
     }
 }
