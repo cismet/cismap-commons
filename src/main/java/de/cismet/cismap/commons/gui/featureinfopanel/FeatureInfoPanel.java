@@ -90,6 +90,7 @@ import de.cismet.cismap.commons.interaction.events.GetFeatureInfoEvent;
 import de.cismet.cismap.commons.interaction.events.MapClickedEvent;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.tools.FeatureTools;
 
 import de.cismet.tools.gui.CellSpecificRenderedTable;
 import de.cismet.tools.gui.DefaultPopupMenuListener;
@@ -1388,17 +1389,7 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
         @Override
         public Class<?> getColumnClass(final int columnIndex) {
-//            if (columnIndex < attributeAlias.length) {
-//                final String key = attributeNames[columnIndex];
-//                final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
-//
-//                return FeatureTools.getClass(attr);
-//            } else {
-//                return tableRuleSet.getAdditionalFieldClass(columnIndex - attributeAlias.length);
-//            }
-//            return Double.class;
             return Object.class;
-//            return String.class;
         }
 
         @Override
@@ -1438,16 +1429,28 @@ public class FeatureInfoPanel extends javax.swing.JPanel {
 
         @Override
         public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
-            final String attrName = attributeNames[rowIndex];
-            Object newObject = aValue;
+            try {
+                final String attrName = attributeNames[rowIndex];
+                final String key = attributeNames[rowIndex];
+                final FeatureServiceAttribute attr = featureServiceAttributes.get(key);
+                final Class cl = FeatureTools.getClass(attr);
+                Object valueWithType = FeatureTools.convertObjectToClass(aValue, cl);
 
-            if (tableRuleSet != null) {
-                newObject = tableRuleSet.afterEdit(feature, attrName, -1, feature.getProperty(attrName), aValue);
-            }
-            feature.setProperty(attrName, newObject);
-            modifiedFeature.add(feature);
-            if (!LockedFeatures.contains(feature)) {
-                LockedFeatures.add(feature);
+                if (tableRuleSet != null) {
+                    valueWithType = tableRuleSet.afterEdit(
+                            feature,
+                            attrName,
+                            -1,
+                            feature.getProperty(attrName),
+                            aValue);
+                }
+                feature.setProperty(attrName, valueWithType);
+                modifiedFeature.add(feature);
+                if (!LockedFeatures.contains(feature)) {
+                    LockedFeatures.add(feature);
+                }
+            } catch (Exception e) {
+                LOG.error("Cannot determine the required object type", e);
             }
         }
 
