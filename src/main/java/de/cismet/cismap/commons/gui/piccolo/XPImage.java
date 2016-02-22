@@ -8,6 +8,7 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.activities.PInterpolatingActivity;
 import edu.umd.cs.piccolo.nodes.PImage;
 
 import java.awt.EventQueue;
@@ -27,8 +28,16 @@ public class XPImage extends PImage {
 
     //~ Instance fields --------------------------------------------------------
 
+    XPImage crossfadingTheOldPart = null;
     private final transient org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-    private int animationDuration;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new XPImage object.
+     */
+    public XPImage() {
+    }
 
     //~ Methods ----------------------------------------------------------------
 
@@ -39,7 +48,6 @@ public class XPImage extends PImage {
      * @param  animationDuration  DOCUMENT ME!
      */
     public void setImage(final String fileName, final int animationDuration) {
-        this.animationDuration = animationDuration;
         if (getImage() != null) {
             final float t = super.getTransparency();
             final XPImage old = (XPImage)this.clone();
@@ -79,40 +87,50 @@ public class XPImage extends PImage {
             animationDuration = 0;
         }
         if ((getImage() != null) && (this.getParent() != null)) {
-            final float t = super.getTransparency();
-            final XPImage oldX = new XPImage();
-            final XPImage old = (XPImage)this.clone();
-            old.setImage(getImage());
-            if (log.isDebugEnabled()) {
-                log.debug("this.getParent() in setImage():" + this.getParent()); // NOI18N
+            final float transparencyOfLayer = getParent().getTransparency();
+            if (crossfadingTheOldPart == null) {
+                crossfadingTheOldPart = new XPImage();
+                this.getParent().addChild(crossfadingTheOldPart);
+                crossfadingTheOldPart.moveInFrontOf(this);
+                crossfadingTheOldPart.setTransparency(0f);
             }
-            this.getParent().addChild(old);
-            old.moveInFrontOf(this);
-            this.setTransparency(0);
-            super.setImage(newImage);
-            animateToTransparency(t, animationDuration);
-            old.animateToTransparency(0, animationDuration);
-            final TimerTask task = new TimerTask() {
-
-                    @Override
-                    public void run() {
-                        EventQueue.invokeLater(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    try {
-                                        XPImage.this.getParent().removeChild(old);
-                                    } catch (Exception e) {
-                                        log.info("Removal of the temporary image failed. It was already removed.", e); // NOI18N
-                                    }
-                                }
-                            });
-                    }
-                };
-
-            final Timer timer = new Timer();
-            timer.schedule(task, (long)(animationDuration * 4.5));
+            if (crossfadingTheOldPart.getTransparency() == 0.0) {
+                crossfadingTheOldPart.setImage(getImage());
+                crossfadingTheOldPart.setBounds(this.getBounds());
+                crossfadingTheOldPart.setOffset(getOffset());
+                crossfadingTheOldPart.setScale(getScale());
+                crossfadingTheOldPart.setTransparency(getTransparency());
+                setTransparency(0);
+                setImage(newImage);
+                log.fatal("TargetTransparency: " + transparencyOfLayer);
+                animateToTransparency(transparencyOfLayer, animationDuration);
+                crossfadingTheOldPart.animateToTransparency(0, animationDuration);
+            } else {
+                setImage(newImage);
+                // the existing animation will care about it
+            }
+//            final TimerTask task = new TimerTask() {
+//
+//                    @Override
+//                    public void run() {
+//                        EventQueue.invokeLater(new Runnable() {
+//
+//                                @Override
+//                                public void run() {
+//                                    try {
+//                                        XPImage.this.getParent().removeChild(old);
+//                                    } catch (Exception e) {
+//                                        log.info("Removal of the temporary image failed. It was already removed.", e); // NOI18N
+//                                    }
+//                                }
+//                            });
+//                    }
+//                };
+//
+//            final Timer timer = new Timer();
+            // timer.schedule(task, (long)(animationDuration * 1.1));
         } else {
+            log.fatal("How can this happen???");
             final float t = super.getTransparency();
             setTransparency(0);
             setImage(newImage);
