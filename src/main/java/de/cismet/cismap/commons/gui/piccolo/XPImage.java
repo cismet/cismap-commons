@@ -45,7 +45,6 @@ public class XPImage extends PImage {
             animationDuration = 0;
         }
         if ((getImage() != null) && (this.getParent() != null)) {
-            final float transparencyOfLayer = getParent().getTransparency();
             if (crossfadingTheOldPart == null) {
                 crossfadingTheOldPart = new XPImage();
                 this.getParent().addChild(crossfadingTheOldPart);
@@ -53,6 +52,7 @@ public class XPImage extends PImage {
                 crossfadingTheOldPart.setTransparency(0f);
             }
             if (crossfadingTheOldPart.getTransparency() == 0.0) {
+                final float transparencyOfLayer = getTransparency();
                 crossfadingTheOldPart.setImage(getImage());
                 crossfadingTheOldPart.setBounds(this.getBounds());
                 crossfadingTheOldPart.setOffset(getOffset());
