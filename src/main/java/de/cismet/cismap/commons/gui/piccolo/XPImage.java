@@ -7,16 +7,9 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.piccolo;
 
-import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.activities.PInterpolatingActivity;
 import edu.umd.cs.piccolo.nodes.PImage;
 
-import java.awt.EventQueue;
 import java.awt.Image;
-
-import java.util.Iterator;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * DOCUMENT ME!
@@ -44,41 +37,6 @@ public class XPImage extends PImage {
     /**
      * DOCUMENT ME!
      *
-     * @param  fileName           DOCUMENT ME!
-     * @param  animationDuration  DOCUMENT ME!
-     */
-    public void setImage(final String fileName, final int animationDuration) {
-        if (getImage() != null) {
-            final float t = super.getTransparency();
-            final XPImage old = (XPImage)this.clone();
-            old.setImage(getImage());
-            this.getParent().addChild(old);
-            old.moveInFrontOf(this);
-            this.setTransparency(0);
-            super.setImage(fileName);
-            animateToTransparency(t, animationDuration);
-            old.animateToTransparency(0, animationDuration);
-            final TimerTask task = new TimerTask() {
-
-                    @Override
-                    public void run() {
-                        // XPImage.this.getParent().removeChild(old);
-                    }
-                };
-
-            final Timer timer = new Timer();
-            timer.schedule(task, (long)(animationDuration * 1.5));
-        } else {
-            final float t = super.getTransparency();
-            setTransparency(0);
-            setImage(fileName);
-            animateToTransparency(t, animationDuration);
-        }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
      * @param  newImage           DOCUMENT ME!
      * @param  animationDuration  DOCUMENT ME!
      */
@@ -102,61 +60,15 @@ public class XPImage extends PImage {
                 crossfadingTheOldPart.setTransparency(getTransparency());
                 setTransparency(0);
                 setImage(newImage);
-                log.fatal("TargetTransparency: " + transparencyOfLayer);
                 animateToTransparency(transparencyOfLayer, animationDuration);
                 crossfadingTheOldPart.animateToTransparency(0, animationDuration);
             } else {
                 setImage(newImage);
                 // the existing animation will care about it
             }
-//            final TimerTask task = new TimerTask() {
-//
-//                    @Override
-//                    public void run() {
-//                        EventQueue.invokeLater(new Runnable() {
-//
-//                                @Override
-//                                public void run() {
-//                                    try {
-//                                        XPImage.this.getParent().removeChild(old);
-//                                    } catch (Exception e) {
-//                                        log.info("Removal of the temporary image failed. It was already removed.", e); // NOI18N
-//                                    }
-//                                }
-//                            });
-//                    }
-//                };
-//
-//            final Timer timer = new Timer();
-            // timer.schedule(task, (long)(animationDuration * 1.1));
         } else {
-            log.fatal("How can this happen???");
-            final float t = super.getTransparency();
-            setTransparency(0);
+            // no parent or no image >> no animation
             setImage(newImage);
-            animateToTransparency(t, animationDuration);
         }
     }
-
-    @Override
-    public Object clone() {
-        final XPImage cl = new XPImage();
-        cl.setImage(this.getImage());
-        cl.setBounds(this.getBounds());
-        cl.setOffset(getOffset());
-        cl.setScale(getScale());
-        cl.setTransparency(getTransparency());
-        return cl;
-    }
-
-//    @Override
-//    protected void layoutChildren() {
-//        Iterator i = getChildrenIterator();
-//        while (i.hasNext()) {
-//            PNode each = (PNode) i.next();
-//            each.setOffset(getOffset());
-//            each.setScale(getScale());
-//        }
-//
-//    }
 }
