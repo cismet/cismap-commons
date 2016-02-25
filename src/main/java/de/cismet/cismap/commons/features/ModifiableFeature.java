@@ -22,21 +22,23 @@ public interface ModifiableFeature extends Feature {
     //~ Methods ----------------------------------------------------------------
 
     /**
-     * DOCUMENT ME!
+     * Saves the feature.
+     *
+     * @return  the reloaded feature
      *
      * @throws  Exception  DOCUMENT ME!
      */
-    void saveChanges() throws Exception;
+    FeatureServiceFeature saveChanges() throws Exception;
 
     /**
-     * DOCUMENT ME!
+     * Deletes the feature.
      *
      * @throws  Exception  DOCUMENT ME!
      */
     void delete() throws Exception;
 
     /**
-     * DOCUMENT ME!
+     * undo all changes since the last save.
      */
     void undoAll();
 }

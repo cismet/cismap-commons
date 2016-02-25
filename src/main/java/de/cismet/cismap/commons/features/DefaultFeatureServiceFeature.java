@@ -1685,12 +1685,14 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     }
 
     /**
-     * DOCUMENT ME!
+     * Saves the feature.
+     *
+     * @return  the reloaded feature
      *
      * @throws  Exception                      DOCUMENT ME!
      * @throws  UnsupportedOperationException  DOCUMENT ME!
      */
-    public void saveChanges() throws Exception {
+    public FeatureServiceFeature saveChanges() throws Exception {
         throw new UnsupportedOperationException();
     }
 

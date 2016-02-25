@@ -154,24 +154,28 @@ public class ShapeFeature extends DefaultFeatureServiceFeature {
     /**
      * DOCUMENT ME!
      *
+     * @return  DOCUMENT ME!
+     *
      * @throws  Exception  DOCUMENT ME!
      */
     @Override
-    public void saveChanges() throws Exception {
-//        org.deegree.model.feature.Feature deegreeFeature = null;
-//        synchronized (sync) {
-//            deegreeFeature = shapeInfo.getFile().getFeatureByRecNo(getId());
-//        }
-//
-//        Map<String, Object> map = super.getProperties();
-//
-//        final FeatureProperty[] featureProperties = deegreeFeature.getProperties();
-//        for (final FeatureProperty fp : featureProperties) {
-//            fp.setValue(map.get(fp.getName().getAsString()));
-//        }
-//
-//        shapeInfo.getFile().writeShape(null);
-//        super.getProperties().clear();
+    public FeatureServiceFeature saveChanges() throws Exception {
+        org.deegree.model.feature.Feature deegreeFeature = null;
+        synchronized (sync) {
+            deegreeFeature = shapeInfo.getFile().getFeatureByRecNo(getId());
+        }
+
+        final Map<String, Object> map = super.getProperties();
+
+        final FeatureProperty[] featureProperties = deegreeFeature.getProperties();
+        for (final FeatureProperty fp : featureProperties) {
+            fp.setValue(map.get(fp.getName().getAsString()));
+        }
+
+        shapeInfo.getFile().writeShape(null);
+        super.getProperties().clear();
+
+        return this;
     }
 
     /**
