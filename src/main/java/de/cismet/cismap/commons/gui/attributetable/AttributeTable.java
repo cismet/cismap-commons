@@ -627,6 +627,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
         mappingComponent.getFeatureCollection().removeFeatureCollectionListener(featureCollectionListener);
         mappingComponent.removeRepaintListener(repaintListener);
+        instances.remove(this);
         return true;
     }
 
@@ -769,7 +770,11 @@ public class AttributeTable extends javax.swing.JPanel {
                                 final FeatureServiceAttribute attr = (FeatureServiceAttribute)
                                     featureService.getFeatureServiceAttributes().get(attributeName);
                                 attr.setAscOrder(SortOrder.ASCENDING.equals(order));
-                                orderBy.add(attr);
+
+                                if ((pageSize == -1) || orderBy.isEmpty()) { // only 1 sort criteria, when the table
+                                                                             // is segmentised
+                                    orderBy.add(attr);
+                                }
                             }
                         }
 
@@ -2705,7 +2710,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private void saveChangedRows(final boolean forceSave) {
         boolean save = forceSave;
 
-        if (!save && !modifiedFeatures.isEmpty()) {
+        if (!save && (!modifiedFeatures.isEmpty() || !lockedFeatures.isEmpty())) {
             final int ans = JOptionPane.showConfirmDialog(
                     AttributeTable.this,
                     NbBundle.getMessage(
@@ -2758,10 +2763,9 @@ public class AttributeTable extends javax.swing.JPanel {
                                     }
 
                                     for (final FeatureServiceFeature fsf : lockedFeatures) {
-                                        if (fsf instanceof DefaultFeatureServiceFeature) {
+                                        if (fsf instanceof ModifiableFeature) {
                                             try {
-                                                final DefaultFeatureServiceFeature feature =
-                                                    (DefaultFeatureServiceFeature)fsf;
+                                                final ModifiableFeature feature = (ModifiableFeature)fsf;
                                                 if (tableRuleSet != null) {
                                                     tableRuleSet.beforeSave(fsf);
                                                 }
@@ -2785,9 +2789,9 @@ public class AttributeTable extends javax.swing.JPanel {
                             int count = 0;
 
                             for (final FeatureServiceFeature fsf : lockedFeatures) {
-                                if (fsf instanceof DefaultFeatureServiceFeature) {
+                                if (fsf instanceof ModifiableFeature) {
                                     try {
-                                        final DefaultFeatureServiceFeature feature = (DefaultFeatureServiceFeature)fsf;
+                                        final ModifiableFeature feature = (ModifiableFeature)fsf;
                                         if (tableRuleSet != null) {
                                             tableRuleSet.beforeSave(fsf);
                                         }
