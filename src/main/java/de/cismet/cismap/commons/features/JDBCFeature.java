@@ -199,20 +199,14 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
     private boolean existProperties() {
         return !super.getProperties().isEmpty();
     }
-    /**
-     * DOCUMENT ME!
-     *
-     * @throws    Exception  DOCUMENT ME!
-     *
-     * @Override  DOCUMENT ME!
-     */
+
     @Override
-    public void saveChanges() throws Exception {
+    public FeatureServiceFeature saveChanges() throws Exception {
         if (!existProperties()) {
-            return;
+            return this;
         }
 
-        final String checkSql = "SELECT id FROM \"%1s\" WHERE id = %2s";
+        final String checkSql = "SELECT \"id\" FROM \"%1s\" WHERE \"id\" = %2s";
         final Statement st = featureInfo.getConnection().createStatement();
 
         try {
@@ -234,6 +228,8 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 st.close();
             }
         }
+
+        return this;
     }
 
     /**

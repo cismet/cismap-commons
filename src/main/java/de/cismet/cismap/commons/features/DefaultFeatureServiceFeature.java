@@ -1685,7 +1685,7 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
     }
 
     /**
-     * Saves the feature
+     * Saves the feature.
      *
      * @return  the reloaded feature
      *
