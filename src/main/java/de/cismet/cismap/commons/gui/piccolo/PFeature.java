@@ -1930,7 +1930,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 log.debug("addSplitHandle()");                                                               // NOI18N
             }
         }
-        if (getFeature().getGeometry() instanceof Polygon) {
+        if ((getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon)) {
             if (splitPolygonFromHandle == p) {
                 splitPolygonFromHandle = null;
                 p.setSelected(false);
@@ -2008,7 +2008,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (getFeature() == null) {
             return false;
         }
-        if (getFeature().getGeometry() instanceof Polygon) {
+        if ((getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon)) {
             return ((splitPolygonFromHandle != null) && (splitPolygonToHandle == null));
         } else {
             return false;
@@ -2028,7 +2028,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // TODO multipolygon / multilinestring
             final Coordinate[] coordArrOrig = entityRingCoordArr[0][0];
 
-            if (getFeature().getGeometry() instanceof Polygon) {
+            if ((getFeature().getGeometry() instanceof Polygon)
+                        || (getFeature().getGeometry() instanceof MultiPolygon)) {
                 int from = ((Integer)(splitPolygonFromHandle.getClientProperty("coordinate_position_coord"))); // NOI18N
                 int to = ((Integer)(splitPolygonToHandle.getClientProperty("coordinate_position_coord")));     // NOI18N
 
@@ -2502,7 +2503,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             return false;
         }
 
-        if (getFeature().getGeometry() instanceof Polygon) {
+        if ((getFeature().getGeometry() instanceof Polygon) || (getFeature().getGeometry() instanceof MultiPolygon)) {
             return ((splitPolygonFromHandle != null) && (splitPolygonToHandle != null));
         } else if (getFeature().getGeometry() instanceof LineString) {
             return (splitLineAtHandle != null);

@@ -12,6 +12,7 @@
 package de.cismet.cismap.commons.gui.piccolo;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
@@ -540,7 +541,7 @@ public class TransformationPHandle extends PHandle {
                                     yp[coordPosition]));
                     ((PHandle)(pInputEvent.getPickedNode())).duplicateHandle();
                 } else if (pfeature.getViewer().getInteractionMode().equals(MappingComponent.SPLIT_POLYGON)) {
-                    if (pfeature.getFeature().getGeometry() instanceof Polygon) {
+                    if (readyForSplitting(pfeature.getFeature().getGeometry())) {
                         pfeature.addSplitHandle(((PHandle)(pInputEvent.getPickedNode())));
                     } else if (pfeature.getFeature().getGeometry() instanceof LineString) {
                         if ((coordPosition > 0) && (coordPosition < (xp.length - 1))) {
@@ -560,6 +561,22 @@ public class TransformationPHandle extends PHandle {
             LOG.error("Error in handleClicked.", t);
         }
         super.handleClicked(pInputEvent);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   geom  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private static boolean readyForSplitting(final Geometry geom) {
+        if ((geom instanceof Polygon) && (((Polygon)geom).getNumInteriorRing() == 0)) {
+            return true;
+        } else if ((geom instanceof MultiPolygon) && (((MultiPolygon)geom).getNumGeometries() == 1)) {
+            return readyForSplitting(((MultiPolygon)geom).getGeometryN(0));
+        }
+        return false;
     }
 
     @Override
