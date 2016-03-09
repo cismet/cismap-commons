@@ -103,22 +103,22 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.3.175</version>
+            <version>1.4.188</version>
         </dependency>
         <dependency>
             <groupId>org.orbisgis</groupId>
             <artifactId>spatial-utilities</artifactId>
-            <version>1.0.2</version>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.orbisgis</groupId>
             <artifactId>h2spatial</artifactId>
-            <version>1.0.2</version>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.orbisgis</groupId>
             <artifactId>h2spatial-ext</artifactId>
-            <version>1.0.2</version>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -156,7 +156,7 @@
             <artifactId>deegree-core-rendering-2d</artifactId>
             <version>3.2.0</version>
         </dependency>
-        <!--        <dependency>
+<!--        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

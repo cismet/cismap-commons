@@ -50,6 +50,7 @@ public class JDBCFeatureInfo {
     private String tableName;
     private final String geoField;
     private final Map<String, PreparedStatement> propStats = new HashMap<String, PreparedStatement>();
+    private String idField = "id";
 
     //~ Constructors -----------------------------------------------------------
 
@@ -60,15 +61,18 @@ public class JDBCFeatureInfo {
      * @param  srid        DOCUMENT ME!
      * @param  geoField    fc DOCUMENT ME!
      * @param  tableName   DOCUMENT ME!
+     * @param  idField     DOCUMENT ME!
      */
     public JDBCFeatureInfo(final Connection connection,
             final int srid,
             final String geoField,
-            final String tableName) {
+            final String tableName,
+            final String idField) {
         this.connection = connection;
         this.srid = srid;
         this.tableName = tableName;
         this.geoField = geoField;
+        this.idField = idField;
 
         createStatements();
     }
@@ -80,13 +84,14 @@ public class JDBCFeatureInfo {
      */
     private void createStatements() {
         try {
-            geometryStatement = connection.prepareStatement("select " + getGeoField() + " from \"" + tableName
-                            + "\" where id = ?");
+            geometryStatement = connection.prepareStatement("select \"" + getGeoField() + "\" from \"" + tableName
+                            + "\" where \"" + idField + "\" = ?");
         } catch (Exception e) {
             LOG.error("Error while creating prepared statement for geometries", e);
         }
         try {
-            propertiesStatement = connection.prepareStatement("select * from \"" + tableName + "\" where id = ?");
+            propertiesStatement = connection.prepareStatement("select * from \"" + tableName + "\" where \"" + idField
+                            + "\" = ?");
         } catch (Exception e) {
             LOG.error("Error while creating prepared statement for properties", e);
         }
@@ -104,7 +109,8 @@ public class JDBCFeatureInfo {
 
         if (ps == null) {
             try {
-                final String query = "select " + property + " from \"" + tableName + "\" WHERE id = ?";
+                final String query = "select \"" + property + "\" from \"" + tableName + "\" WHERE \"" + idField
+                            + "\" = ?";
                 ps = connection.prepareStatement(query);
                 propStats.put(property, ps);
             } catch (Exception e) {
@@ -152,6 +158,15 @@ public class JDBCFeatureInfo {
      */
     public synchronized void addPropertiesToCache(final int id, final LinkedHashMap<String, Object> container) {
         cache.add(id, container);
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public synchronized void clearCache() {
+        cache.clear();
+        geoCache.clear();
+        propertyCache.clear();
     }
 
     /**

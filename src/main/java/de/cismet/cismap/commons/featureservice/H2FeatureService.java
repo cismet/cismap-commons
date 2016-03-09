@@ -468,6 +468,28 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             yField);
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof H2FeatureService) {
+            final H2FeatureService service = (H2FeatureService)obj;
+
+            if ((tableName != null) && tableName.equals(service.tableName) && (databasePath != null)
+                        && databasePath.equals(service.databasePath)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = (89 * hash) + ((this.tableName != null) ? this.tableName.hashCode() : 0);
+        hash = (89 * hash) + ((this.databasePath != null) ? this.databasePath.hashCode() : 0);
+        return hash;
+    }
+
     /**
      * Checks, if the given table exists in the db.
      *

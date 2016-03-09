@@ -20,8 +20,6 @@ import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 
-import java.io.File;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -210,6 +208,8 @@ public class InternalDbTree extends JTree {
 
         final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
         model.removeFolder(folder);
+
+        refresh();
     }
 
     /**
@@ -233,6 +233,7 @@ public class InternalDbTree extends JTree {
             model.remove(entry.getName());
 
             removeEntryFromActiveLayerModel(entry);
+            refresh();
         } catch (Exception e) {
             LOG.error("Cannot remove entry", e);
         }
