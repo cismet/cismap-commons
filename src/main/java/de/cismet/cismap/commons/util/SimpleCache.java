@@ -54,6 +54,15 @@ public class SimpleCache<T> {
 
     /**
      * DOCUMENT ME!
+     */
+    public void clear() {
+        ids = new String[ids.length];
+        index = 0;
+        dataMap.clear();
+    }
+
+    /**
+     * DOCUMENT ME!
      *
      * @param  id    DOCUMENT ME!
      * @param  data  DOCUMENT ME!

@@ -13,13 +13,19 @@ package de.cismet.cismap.commons.features;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import org.h2.jdbc.JdbcClob;
+
+
 import java.awt.Color;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.io.BufferedReader;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.ArrayList;
@@ -124,7 +130,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             if (rs.next()) {
                 final int count = rs.getMetaData().getColumnCount();
                 for (int i = 0; i < count; ++i) {
-                    container.put(rs.getMetaData().getColumnName(i + 1), rs.getObject(i + 1));
+                    container.put(rs.getMetaData().getColumnName(i + 1), getPrepareObject(rs.getObject(i + 1)));
                 }
             }
 
@@ -160,7 +166,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 final ResultSet rs = ps.executeQuery();
 
                 if (rs.next()) {
-                    result = rs.getObject(1);
+                    result = getPrepareObject(rs.getObject(1));
                 }
 
                 featureInfo.addPropertyToCache(cacheId, result);
@@ -170,6 +176,34 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         }
 
         return result;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   o  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Object getPrepareObject(final Object o) {
+        if (o instanceof JdbcClob) {
+            try {
+                final BufferedReader r = new BufferedReader(((JdbcClob)o).getCharacterStream());
+                String tmp;
+                final StringBuilder resultString = new StringBuilder();
+
+                while ((tmp = r.readLine()) != null) {
+                    resultString.append(tmp).append('\n');
+                }
+
+                return resultString.toString();
+            } catch (Exception e) {
+                logger.error("Error while reading clob", e);
+                return null;
+            }
+        } else {
+            return o;
+        }
     }
 
     /**
@@ -189,6 +223,8 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
         } else {
             super.addProperty(propertyName, propertyValue);
         }
+
+        featureInfo.clearCache();
     }
 
     /**
@@ -258,11 +294,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             if ((value instanceof String) || (value instanceof Geometry)) {
                 valueString = "'" + value + "'";
             } else {
-                valueString = value.toString();
+                valueString = String.valueOf(value);
             }
-            update.append(name).append(" = ").append(valueString);
+            update.append("\"").append(name).append("\"").append(" = ").append(valueString);
         }
-        update.append(" WHERE id = ").append(getId());
+        update.append(" WHERE \"id\" = ").append(getId());
         st.executeUpdate(update.toString());
 
         super.getProperties().clear();
@@ -291,10 +327,10 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 valueString = value.toString();
             }
 
-            attributes.add(String.valueOf(name));
+            attributes.add("\"" + String.valueOf(name) + "\"");
             values.add(valueString);
         }
-        attributes.add(String.valueOf("id"));
+        attributes.add("\"" + String.valueOf("id") + "\"");
         values.add(String.valueOf(getId()));
 
         final String query = String.format(
@@ -441,17 +477,25 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             return g;
         }
 
+        ResultSet rs = null;
+
         try {
             final PreparedStatement ps = featureInfo.getGeometryStatement();
             ps.setInt(1, getId());
-            final ResultSet rs = ps.executeQuery();
-//                ResultSet rs = shapeInfo.getStatement().executeQuery("select the_geom from poly where id = " + getId());
+            rs = ps.executeQuery();
             if (rs.next()) {
                 g = (Geometry)rs.getObject(1);
             }
-//                g.setSRID(shapeInfo.getSrid());
         } catch (final Exception e) {
             logger.error("Cannot read geometry from the database.", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    // nothing to do
+                }
+            }
         }
 
         featureInfo.addGeometryToCache(getId(), g);
@@ -470,16 +514,35 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
             super.setProperties(getProperties());
         }
 
+        featureInfo.clearCache();
         super.addProperty(featureInfo.getGeoField(), geom);
     }
 
-//    public PFeature getPFeature() {
-//        return pfeature;
-//    }
-//
-//    public void setPFeature(PFeature pfeature) {
-//        this.pfeature = pfeature;
-//    }
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof JDBCFeature) {
+            final JDBCFeature other = (JDBCFeature)obj;
+
+            if ((getId() != -1) || (other.getId() != -1)) {
+                return featureInfo.getTableName().equals(other.featureInfo.getTableName())
+                            && (getId() == other.getId());
+            } else {
+                return obj == other;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = (41 * hash) + this.getId();
+        hash = (41 * hash)
+                    + (((this.featureInfo != null) && (this.featureInfo.getTableName() != null))
+                        ? this.featureInfo.getTableName().hashCode() : 0);
+        return hash;
+    }
 
     /**
      * DOCUMENT ME!

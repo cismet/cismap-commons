@@ -33,6 +33,8 @@ import org.jfree.util.Log;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
+import org.openide.util.Exceptions;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -108,24 +110,24 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
     private static Logger LOG = Logger.getLogger(H2FeatureServiceFactory.class);
     public static final String DB_NAME = "~/cismap/internalH2";
-    private static final String CREATE_SPATIAL_INDEX = "CREATE SPATIAL INDEX %s ON \"%s\" (%s);";
-    private static final String UPDATE_SRID = "UPDATE \"%1$s\" set %2$s = st_setsrid(%2$s, %3$s)";
+    private static final String CREATE_SPATIAL_INDEX = "CREATE SPATIAL INDEX %s ON \"%s\" (\"%s\");";
+    private static final String UPDATE_SRID = "UPDATE \"%1$s\" set \"%2$s\" = st_setsrid(\"%2$s\", %3$s)";
     private static final String CREATE_TABLE_FROM_CSV =
         "CREATE TABLE \"%s\" as select * from CSVREAD('%s', null, '%s');";
     private static final String CREATE_TABLE_FROM_DBF = "CALL FILE_TABLE('%s', '%s');";
     private static final String COPY_TABLE_FROM_DBF = "create table \"%s\" as select * from %s";
     private static final String DROP_TABLE_REFERENCE = "drop table %s;";
-    private static final String SELECT_COLUMN = "select %s, id from \"%s\"";
-    private static final String UPDATE_COLUMN = "update \"%s\" set %s = ? where id = ?";
+    private static final String SELECT_COLUMN = "select %s, \"%s\" from \"%s\"";
+    private static final String UPDATE_COLUMN = "update \"%s\" set \"%s\" = ? where \"%s\" = ?";
     private static final String CREATE_TABLE_TEMPLATE = "create table \"%s\" (%s)";
     private static final String INSERT_TEMPLATE = "INSERT INTO \"%s\" (%s) VALUES (%s)";
     private static final String SPATIAL_INIT = "CALL SPATIAL_INIT();";
     private static final String CREATE_SPATIAL_INIT_ALIAS =
         "CREATE ALIAS IF NOT EXISTS SPATIAL_INIT FOR  \"org.h2gis.h2spatialext.CreateSpatialExtension.initSpatialExtension\";";
     private static final String CREATE_SEQUENCE = "CREATE SEQUENCE \"%s\";";
-    private static final String ADD_SEQUENCE = "ALTER TABLE \"%s\" ADD COLUMN id int default \"%s\".nextval;";
-    private static final String ADD_NOT_NULL_ID = "ALTER TABLE \"%s\" ALTER COLUMN id SET NOT NULL;";
-    private static final String CREATE_PRIMARY_KEY = "CREATE PRIMARY KEY %s ON \"%s\"(id);";
+    private static final String ADD_SEQUENCE = "ALTER TABLE \"%s\" ADD COLUMN \"%s\" int default \"%s\".nextval;";
+    private static final String ADD_NOT_NULL_ID = "ALTER TABLE \"%s\" ALTER COLUMN \"%s\" SET NOT NULL;";
+    private static final String CREATE_PRIMARY_KEY = "CREATE PRIMARY KEY %s ON \"%s\"(\"%s\");";
     private static final String CREATE_LR_META_TABLE =
         "create table \"%s\" (id serial, table varchar, lin_ref_reference varchar, domain varchar, src_join_field varchar, targ_join_field varchar, lin_ref_geom varchar, kind int, from_value varchar, till_value varchar);";
     private static final String CREATE_META_TABLE = "create table \"%s\" (id serial, table varchar, format varchar);";
@@ -155,6 +157,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         super(hff);
         this.featureServiceAttributes = (Vector<FeatureServiceAttribute>)hff.featureServiceAttributes.clone();
         this.geometryField = hff.geometryField;
+        this.idField = hff.idField;
         initConnection();
     }
 
@@ -279,7 +282,32 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 } else {
                     try {
                         st.execute(String.format(CREATE_TABLE_FROM_DBF, file.getAbsolutePath(), tmpTableReference));
-                        st.execute(String.format(COPY_TABLE_FROM_DBF, tableName, tmpTableReference));
+//                        st.execute(String.format(COPY_TABLE_FROM_DBF, tableName, tmpTableReference));
+                        final StringBuilder attsAndTypes = new StringBuilder();
+                        final StringBuilder atts = new StringBuilder();
+                        final StringBuilder attsRef = new StringBuilder();
+                        rs = st.executeQuery("select * from " + tmpTableReference + " limit 1");
+                        for (int i = 2; i < rs.getMetaData().getColumnCount(); ++i) {
+                            if (!attsAndTypes.toString().equals("")) {
+                                attsAndTypes.append(",");
+                                atts.append(",");
+                                attsRef.append(",");
+                            }
+                            attsAndTypes.append("\"")
+                                    .append(rs.getMetaData().getColumnName(i).toLowerCase())
+                                    .append("\" ")
+                                    .append(rs.getMetaData().getColumnTypeName(i));
+                            atts.append("\"").append(rs.getMetaData().getColumnName(i).toLowerCase()).append("\"");
+                            attsRef.append(rs.getMetaData().getColumnName(i).toLowerCase());
+                        }
+                        rs.close();
+                        st.execute(String.format(CREATE_TABLE_TEMPLATE, tableName, attsAndTypes.toString()));
+                        st.execute(String.format(
+                                "INSERT INTO \"%s\" (%s) (select %s from %s)",
+                                tableName,
+                                atts,
+                                attsRef,
+                                tmpTableReference));
                         st.execute(String.format(DROP_TABLE_REFERENCE, tmpTableReference));
                     } catch (Exception e) {
                         try {
@@ -300,8 +328,9 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 String geoCol = null;
 
                 while (rs.next()) {
-                    if (rs.getString("COLUMN_NAME").toUpperCase().equals("ID")) {
+                    if (rs.getString("COLUMN_NAME").equalsIgnoreCase("id")) {
                         hasIdField = true;
+                        idField = rs.getString("COLUMN_NAME");
                     }
 
                     if (rs.getString("TYPE_NAME").toUpperCase().endsWith("GEOMETRY")) {
@@ -324,8 +353,9 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
                     if (crs != null) {
                         final PreparedStatement ps = conn.prepareStatement("update \"" + tableName + "\" set " + geoCol
-                                        + " = ? where id = ?");
-                        final ResultSet res = st.executeQuery("select id, " + geoCol + " from \"" + tableName + "\"");
+                                        + " = ? where \"" + idField + "\" = ?");
+                        final ResultSet res = st.executeQuery("select \"" + idField + "\", " + geoCol + " from \""
+                                        + tableName + "\"");
 
                         while (res.next()) {
                             final int id = res.getInt(1);
@@ -358,11 +388,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                                 final ResultSet dataRs = st.executeQuery(String.format(
                                             SELECT_COLUMN,
                                             rs.getString("COLUMN_NAME"),
+                                            idField,
                                             tableName));
                                 final PreparedStatement updateSt = conn.prepareStatement(String.format(
                                             UPDATE_COLUMN,
                                             tableName,
-                                            rs.getString("COLUMN_NAME")));
+                                            rs.getString("COLUMN_NAME"),
+                                            idField));
 
                                 while (dataRs.next()) {
                                     updateSt.setString(
@@ -549,10 +581,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
                     if (attr.getName().equalsIgnoreCase("id")) {
                         hasIdField = true;
+                        idField = attr.getName();
                     }
 
-                    tableAttributesWithType.append(attr.getName()).append(" ");
-                    tableAttributesWithoutType.append(attr.getName());
+                    tableAttributesWithType.append("\"").append(attr.getName()).append("\" ");
+                    tableAttributesWithoutType.append("\"").append(attr.getName()).append("\"");
                     placeholder.append("?");
                     tableAttributesWithType.append(FeatureTools.getH2DataType(attr));
                 }
@@ -584,6 +617,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 for (final FeatureServiceFeature f : features) {
                     int index = 0;
                     for (final String attrKey : attributeList) {
+                        final FeatureServiceAttribute attr = attributeMap.get(attrKey);
+                        if (attr == null) {
+                            continue;
+                        }
                         if ((manuallySetId != null) && manuallySetId.equals(attrKey)) {
                             prepStat.setObject(++index, ++id);
                         } else {
@@ -694,11 +731,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final String seqName = tableName + "_seq";
 
             st.execute(String.format(CREATE_SEQUENCE, seqName));
-            st.execute(String.format(ADD_SEQUENCE, tableName, seqName));
+            st.execute(String.format(ADD_SEQUENCE, tableName, idField, seqName));
         }
         final String indexName = removeSpecialCharacterFromTableName(tableName) + "PIndex";
-        st.execute(String.format(ADD_NOT_NULL_ID, tableName));
-        st.execute(String.format(CREATE_PRIMARY_KEY, indexName, tableName));
+        st.execute(String.format(ADD_NOT_NULL_ID, tableName, idField));
+        st.execute(String.format(CREATE_PRIMARY_KEY, indexName, tableName, idField));
         st.close();
     }
 
@@ -834,17 +871,18 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final StatementWrapper st = createStatement(conn);
             if (geometryField == null) {
                 geometryField = "geo_" + geoCol;
-                st.execute("alter table \"" + tableName + "\" add column " + geometryField + " Geometry");
+                st.execute("alter table \"" + tableName + "\" add column \"" + geometryField + "\" Geometry");
             }
-            String additionalFields = fromField + "," + routeField;
-            final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set "
-                            + geometryField + " = ? WHERE id = ?");
+            String additionalFields = "\"" + fromField + "\",\"" + routeField + "\"";
+            final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set \""
+                            + geometryField + "\" = ? WHERE \"" + idField + "\" = ?");
 
             if (tillField != null) {
-                additionalFields += "," + tillField;
+                additionalFields += ",\"" + tillField + "\"";
             }
 
-            final ResultSet rs = st.executeQuery("select id," + additionalFields + " from \"" + tableName + "\"");
+            final ResultSet rs = st.executeQuery("select \"" + idField + "\"," + additionalFields + " from \""
+                            + tableName + "\"");
 
             while (rs.next()) {
                 final int id = rs.getInt(1);
@@ -922,12 +960,13 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final StatementWrapper st = createStatement(conn);
             if (geometryField == null) {
                 geometryField = "geo_xy";
-                st.execute("alter table \"" + tableName + "\" add column " + geometryField + " Geometry");
+                st.execute("alter table \"" + tableName + "\" add column \"" + geometryField + "\" Geometry");
             }
-            final String additionalFields = xField + "," + yField;
-            final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set "
-                            + geometryField + " = ? WHERE id = ?");
-            final ResultSet rs = st.executeQuery("select id," + additionalFields + " from \"" + tableName + "\"");
+            final String additionalFields = "\"" + xField + "\",\"" + yField + "\"";
+            final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set \""
+                            + geometryField + "\" = ? WHERE \"" + idField + "\" = ?");
+            final ResultSet rs = st.executeQuery("select \"" + idField + "\"," + additionalFields + " from \""
+                            + tableName + "\"");
             final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
                     CrsTransformer.getCurrentSrid());
 
@@ -963,6 +1002,9 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             do {
                 ++rep;
                 while (rs.next()) {
+                    if (rs.getString("COLUMN_NAME").equalsIgnoreCase("id")) {
+                        idField = rs.getString("COLUMN_NAME");
+                    }
                     featureServiceAttributes.add(new FeatureServiceAttribute(
                             rs.getString("COLUMN_NAME"),
                             String.valueOf(rs.getInt("DATA_TYPE")),
@@ -1013,10 +1055,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             }
 
             if (geometryField != null) {
-                final ResultSet envelopeSet = st.executeQuery("SELECT ST_Extent(" + geometryField
-                                + "), (SELECT st_srid("
-                                + geometryField + "::Geometry) from \"" + tableName + "\" limit 1) from \"" + tableName
-                                + "\" where " + geometryField + " is not null;");
+                final ResultSet envelopeSet = st.executeQuery("SELECT ST_Extent(\"" + geometryField
+                                + "\"), (SELECT st_srid(\""
+                                + geometryField + "\"::Geometry) from \"" + tableName + "\" limit 1) from \""
+                                + tableName
+                                + "\" where \"" + geometryField + "\" is not null;");
 
                 if (envelopeSet.next()) {
                     final Object geomObject = envelopeSet.getObject(1);
@@ -1037,10 +1080,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     logger.error("cannot determine H2 layer envelope");
                 }
 
-                final ResultSet geometryTypeRs = st.executeQuery("SELECT distinct st_geometryType(" + geometryField
-                                + "), (select " + geometryField + " from \"" + tableName + "\" where " + geometryField
-                                + " is not null limit 1) from \"" + tableName + "\" where " + geometryField
-                                + " is not null limit 1;");
+                final ResultSet geometryTypeRs = st.executeQuery("SELECT distinct st_geometryType(\"" + geometryField
+                                + "\"), (select \"" + geometryField + "\" from \"" + tableName + "\" where \""
+                                + geometryField
+                                + "\" is not null limit 1) from \"" + tableName + "\" where \"" + geometryField
+                                + "\" is not null limit 1;");
 
                 if (geometryTypeRs.next()) {
                     geometryType = geometryTypeRs.getString(1);
@@ -1077,9 +1121,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private void updatePFeatures() {
         try {
             final PreparedStatement ps = conn.prepareStatement("update \"" + tableName
-                            + "\" set pfeature = ? where id = ?;");
+                            + "\" set pfeature = ? where \"" + idField + "\" = ?;");
             final StatementWrapper upState = (StatementWrapper)conn.createStatement();
-            final ResultSet resultSet = upState.executeQuery("select id, " + geometryField + " from \"" + tableName
+            final ResultSet resultSet = upState.executeQuery("select \"" + idField + "\", " + geometryField + " from \""
+                            + tableName
                             + "\"");
 
             try {
@@ -1258,6 +1303,37 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
     /**
      * DOCUMENT ME!
+     */
+    private void determineIdField() {
+        String id = "id";
+        ResultSet rs = null;
+
+        try {
+            rs = conn.getMetaData().getColumns(null, null, tableName, "%");
+            ;
+
+            for (int i = 0; i < rs.getMetaData().getColumnCount(); ++i) {
+                if (rs.getString("COLUMN_NAME").equalsIgnoreCase("id")) {
+                    id = rs.getMetaData().getColumnName(i);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Cannot determine the id field", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    // nothing to do
+                }
+            }
+        }
+        idField = id;
+    }
+
+    /**
+     * DOCUMENT ME!
      *
      * @param   query              DOCUMENT ME!
      * @param   boundingBox        DOCUMENT ME!
@@ -1279,23 +1355,16 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final int limit,
             final FeatureServiceAttribute[] orderBy,
             final boolean saveAsLastCreated) throws FeatureFactory.TooManyFeaturesException, Exception {
-//        final StringBuilder sb = new StringBuilder("select id, the_geom from ");
-        final StringBuilder sb = new StringBuilder("select id from \"");
+        final StringBuilder sb = new StringBuilder("select \"" + idField + "\" from \"");
         final int srid = CrsTransformer.extractSridFromCrs(crs.getCode());
 
         if (boundingBox != null) {
             sb.append(tableName)
-                    .append("\" WHERE ")
+                    .append("\" WHERE \"")
                     .append(geometryField)
-                    .append(" && '")
+                    .append("\" && '")
                     .append(boundingBox.getGeometry(srid))
                     .append("'");
-//                .append("' and ")
-//                .append("intersects(")
-//                .append(geometryField)
-//                .append(", '")
-//                .append(boundingBox.getGeometry(srid))
-//                .append("')");
         } else {
             sb.append(tableName).append("\"");
         }
@@ -1341,7 +1410,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             final List<JDBCFeature> selectedFeatures = new ArrayList<JDBCFeature>();
 
             if (info == null) {
-                info = new JDBCFeatureInfo(conn, srid, geometryField, tableName);
+                info = new JDBCFeatureInfo(conn, srid, geometryField, tableName, idField);
             }
             final List style = getStyle(name);
 
