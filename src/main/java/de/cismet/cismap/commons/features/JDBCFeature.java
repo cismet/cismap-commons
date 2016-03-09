@@ -15,7 +15,6 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import org.h2.jdbc.JdbcClob;
 
-
 import java.awt.Color;
 
 import java.beans.PropertyChangeEvent;
