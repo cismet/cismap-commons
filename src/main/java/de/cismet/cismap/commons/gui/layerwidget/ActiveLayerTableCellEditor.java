@@ -63,6 +63,7 @@ import de.cismet.cismap.commons.featureservice.factory.AbstractFeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.style.BasicStyle;
 import de.cismet.cismap.commons.featureservice.style.StyleDialogInterface;
+import de.cismet.cismap.commons.featureservice.style.StyleDialogStarter;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.raster.wms.AbstractWMS;
@@ -312,148 +313,22 @@ public class ActiveLayerTableCellEditor extends AbstractCellEditor implements Ta
                          * editor.ConfigureEditor( selectedService, StaticSwingTools.getParentFrame(wfsStyleButton),
                          * CismapBroker.getInstance().getMappingComponent());
                          */
-                        try {
-                            if (DEBUG) {
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug(
-                                        "invoke FeatureService - StyleDialog"); // NOI18N
-                                }
-                            }
-                            // only create one instance of the styledialog
-                            final Frame parentFrame = StaticSwingTools.getParentFrame(wfsStyleButton);
-                            if (styleDialog == null) {
-                                if (DEBUG) {
-                                    if (logger.isDebugEnabled()) {
-                                        logger.debug("creating new StyleDialog '"
-                                                    + parentFrame.getTitle() + "'"); // NOI18N
-                                    }
-                                }
+                        final Frame parentFrame = StaticSwingTools.getParentFrame(wfsStyleButton);
+                        final ArrayList<String> args = new ArrayList<String>();
+                        args.add("Allgemein");
+                        args.add("Darstellung");
+                        args.add("Massstab");
+                        args.add("Thematische Farbgebung");
+                        args.add("Beschriftung");
+                        args.add("TextEditor");
+                        // args.add("Begleitsymbole");
 
-                                final String lookupkey = CismapBroker.getInstance().getFeatureStylingComponentKey();
-
-                                if ((lookupkey != null) && !lookupkey.isEmpty()) {
-                                    final Result<StyleDialogInterface> result = Lookup.getDefault()
-                                                .lookupResult(StyleDialogInterface.class);
-
-                                    for (final StyleDialogInterface dialog : result.allInstances()) {
-                                        if (lookupkey.equalsIgnoreCase(dialog.getKey())) {
-                                            styleDialog = dialog;
-                                        }
-                                    }
-                                }
-                                if (styleDialog == null) {
-                                    styleDialog = Lookup.getDefault().lookup(StyleDialogInterface.class);
-                                }
-                            }
-
-                            // configure dialog, adding attributes to the tab and
-                            // set style from the layer properties
-                            if (DEBUG) {
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug("configure dialog"); // NOI18N
-                                }
-                            }
-
-                            final ArrayList<String> args = new ArrayList<String>();
-                            args.add("Allgemein");
-                            args.add("Darstellung");
-                            args.add("Massstab");
-                            args.add("Thematische Farbgebung");
-                            args.add("Beschriftung");
-                            args.add("TextEditor");
-                            // args.add("Begleitsymbole");
-
-                            final JDialog dialog = styleDialog.configureDialog(
-                                    selectedService,
-                                    parentFrame,
-                                    CismapBroker.getInstance().getMappingComponent(),
-                                    args);
-
-                            if (DEBUG) {
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug("set dialog visible"); // NOI18N
-                                }
-                            }
-                            StaticSwingTools.showDialog(dialog);
-                        } catch (Throwable t) {
-                            logger.error("could not configure StyleDialog: " + t.getMessage(), t); // NOI18N
-                        }
-                        // check returnstatus
-                        if ((styleDialog != null) && styleDialog.isAccepted()) {
-                            final Runnable r = styleDialog.createResultTask(); /*new Runnable() {
-                                                                                * @Override public void run() { try {
-                                                                                * boolean forceUpdate = false; if
-                                                                                * (selectedService instanceof
-                                                                                * WebFeatureService) { if
-                                                                                * (styleDialog.isGeoAttributeChanged()
-                                                                                * ||
-                                                                                * styleDialog.isAttributeSelectionChanged())
-                                                                                * { if (DEBUG) { if
-                                                                                * (logger.isDebugEnabled()) {
-                                                                                * logger.debug("Attributes changed,
-                                                                                * updating the QUERY Element"); //
-                                                                                * NOI18N } } final Element query =
-                                                                                * ((WebFeatureService)
-                                                                                * selectedService).getQueryElement();
-                                                                                * final WebFeatureService service =
-                                                                                * ((WebFeatureService) selectedService);
-                                                                                * WFSFacade.setGeometry(query,
-                                                                                * styleDialog.getSelectedGeoAttribute(),
-                                                                                * service.getVersion());
-                                                                                * WFSFacade.changePropertyNames( query,
-                                                                                * styleDialog.getSelectedAttributes(),
-                                                                                * service.getVersion());
-                                                                                *
-                                                                                * service.setQueryElement(query);
-                                                                                * forceUpdate = true; }
-                                                                                *
-                                                                                * if (styleDialog.isQueryStringChanged())
-                                                                                * { final int i =
-                                                                                * JOptionPane.showConfirmDialog(
-                                                                                * StaticSwingTools.getParentFrame(wfsStyleButton),
-                                                                                * org.openide.util.NbBundle.getMessage(
-                                                                                * ActiveLayerTableCellEditor.class,
-                                                                                * "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.message"),
-                                                                                * // NOI18N
-                                                                                * org.openide.util.NbBundle.getMessage(ActiveLayerTableCellEditor.class,
-                                                                                *
-                                                                                * "ActiveLayerTableCellEditor.mouseClicked(MouseEvent).showConfirmDialog.title"),
-                                                                                * // NOI18N JOptionPane.YES_NO_OPTION,
-                                                                                * JOptionPane.WARNING_MESSAGE); if (i ==
-                                                                                * JOptionPane.YES_OPTION) { if (DEBUG) {
-                                                                                * if (logger.isDebugEnabled()) {
-                                                                                * logger.debug("Query String changed,
-                                                                                * updating the QUERY String ");  //
-                                                                                * NOI18N } }
-                                                                                * selectedService.setQuery(styleDialog.getQueryString());
-                                                                                * forceUpdate = true; } } }
-                                                                                *
-                                                                                * // this causes a refresh of the last
-                                                                                * created features and fires a //
-                                                                                * retrieval event
-                                                                                * selectedService.setFeatureServiceAttributes(styleDialog.getFeatureServiceAttributes());
-                                                                                *
-                                                                                * if (forceUpdate) { ((WebFeatureService)
-                                                                                * selectedService).setLayerPropertiesWithoutUpdate(
-                                                                                * styleDialog.getLayerProperties());
-                                                                                * selectedService.retrieve(forceUpdate);
-                                                                                * } else {
-                                                                                * selectedService.setLayerProperties(styleDialog.getLayerProperties());
-                                                                                * if (selectedService instanceof
-                                                                                * SLDStyledLayer) { ((SLDStyledLayer)
-                                                                                * selectedService).setSLDInputStream(
-                                                                                * styleDialog.getSLDStyle()); } } }
-                                                                                * catch (Throwable t) {
-                                                                                * logger.error(t.getMessage(), t); }
-                                                                                * }};*/
-                            CismetThreadPool.execute(new Thread(r, "ActiveLayerTableCellEditor mouseClicked()"));
-                        } else {
-                            if (DEBUG) {
-                                if (logger.isDebugEnabled()) {
-                                    logger.debug("Style Dialog canceled");     // NOI18N
-                                }
-                            }
-                        }
+                        final StyleDialogStarter starter = new StyleDialogStarter(
+                                parentFrame,
+                                selectedService,
+                                args,
+                                500);
+                        starter.start();
                     }
                 }
             });
