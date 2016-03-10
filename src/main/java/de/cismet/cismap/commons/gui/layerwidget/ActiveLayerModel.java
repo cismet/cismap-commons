@@ -402,7 +402,9 @@ public class ActiveLayerModel extends AbstractTreeTableModel implements MappingM
             if (oa[i] instanceof ShapeFileFeatureService) {
                 ((ShapeFileFeatureService)oa[i]).getPNode().removeAllChildren();
                 ((ShapeFileFeatureService)oa[i]).setCrs(srs);
-                ((ShapeFileFeatureService)oa[i]).refreshFeatures();
+                if (((ShapeFileFeatureService)oa[i]).isInitialized()) {
+                    ((ShapeFileFeatureService)oa[i]).refreshFeatures();
+                }
             }
         }
     }
