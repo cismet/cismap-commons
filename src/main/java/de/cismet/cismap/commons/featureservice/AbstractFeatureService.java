@@ -1246,7 +1246,7 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     }
 
     /**
-     * DOCUMENT ME!
+     * The query buttons, which should be used by the query search.
      *
      * @return  DOCUMENT ME!
      */
@@ -1263,6 +1263,29 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
      */
     public String decoratePropertyName(final String name) {
         return name;
+    }
+
+    /**
+     * Determines, if the attribute decoration should be hidden from the user. See <code>decoratePropertyName(String
+     * name)</code>
+     *
+     * @return  True, iff the attribute decoration of the search query should be hidden from the user
+     */
+    public boolean decorateLater() {
+        return false;
+    }
+
+    /**
+     * Decorates the given query. So that it con be used with the services. This method is typically used, if <code>
+     * decorateLater()</code> returns true. This method adds all attribute decorations, which should be hidden from the
+     * user.
+     *
+     * @param   query  the query to decorate
+     *
+     * @return  the decorated query
+     */
+    public String decorateQuery(final String query) {
+        return query;
     }
 
     /**
@@ -1464,7 +1487,9 @@ public abstract class AbstractFeatureService<FT extends FeatureServiceFeature, Q
     protected Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> parseSLD(final Reader input) {
         Map<String, LinkedList<org.deegree.style.se.unevaluated.Style>> styles = null;
         try {
-            styles = SLDParser.getStyles(factory.createXMLStreamReader(input));
+            if (input != null) {
+                styles = SLDParser.getStyles(factory.createXMLStreamReader(input));
+            }
         } catch (Exception ex) {
             LOG.error("Fehler in der SLD", ex);
         }
