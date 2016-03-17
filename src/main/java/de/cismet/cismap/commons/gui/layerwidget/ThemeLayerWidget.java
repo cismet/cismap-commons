@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.gui.layerwidget;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.apache.log4j.Logger;
 
 import org.openide.util.Lookup;
@@ -33,6 +35,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.EventObject;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -45,9 +48,14 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.JTree;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.UIManager;
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeWillExpandListener;
@@ -55,15 +63,22 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreePath;
 
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.RetrievalServiceLayer;
 import de.cismet.cismap.commons.ServiceLayer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
+import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
+import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
+import de.cismet.cismap.commons.featureservice.style.StyleDialogClosedEvent;
+import de.cismet.cismap.commons.featureservice.style.StyleDialogClosedListener;
 import de.cismet.cismap.commons.featureservice.style.StyleDialogInterface;
+import de.cismet.cismap.commons.featureservice.style.StyleDialogStarter;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
 import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerWidget.CheckBoxNodeRenderer;
@@ -83,6 +98,7 @@ import de.cismet.commons.concurrency.CismetExecutors;
 
 import de.cismet.tools.gui.DefaultPopupMenuListener;
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.WaitingDialogThread;
 
 import de.cismet.veto.VetoException;
 
@@ -102,9 +118,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     private ActiveLayerModel layerModel;
     private DefaultPopupMenuListener popupMenuListener = new DefaultPopupMenuListener(popupMenu);
     private TreeTransferHandler transferHandler;
-    private StyleDialogInterface styleDialog;
     private List<ThemeLayerListener> themeLayerListener = new ArrayList<ThemeLayerListener>();
     private AddThemeMenuItem addThemeMenuItem;
+    private final List<TreePath> expendedPaths = new ArrayList<TreePath>();
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTree tree;
@@ -117,7 +133,6 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
      */
     public ThemeLayerWidget() {
         initComponents();
-
         SelectionManager.getInstance().addSelectionChangedListener(this);
         tree.setCellRenderer(new CheckBoxNodeRenderer());
         tree.setCellEditor(new CheckBoxNodeEditor());
@@ -137,6 +152,29 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                 public void treeWillCollapse(final TreeExpansionEvent event) throws ExpandVetoException {
                     if (event.getPath().getLastPathComponent().equals(tree.getModel().getRoot())) {
                         throw new ExpandVetoException(event);
+                    }
+                }
+            });
+
+        tree.addTreeExpansionListener(new TreeExpansionListener() {
+
+                @Override
+                public void treeExpanded(final TreeExpansionEvent event) {
+                    saveExpandedPaths();
+                }
+
+                @Override
+                public void treeCollapsed(final TreeExpansionEvent event) {
+                    saveExpandedPaths();
+                }
+
+                private void saveExpandedPaths() {
+                    expendedPaths.clear();
+                    final TreePath root = new TreePath(new Object[] { layerModel.getRoot() });
+                    final Enumeration<TreePath> en = tree.getExpandedDescendants(root);
+
+                    while (en.hasMoreElements()) {
+                        expendedPaths.add(en.nextElement());
                     }
                 }
             });
@@ -209,6 +247,29 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                             }
                         }
                     }
+                }
+            });
+
+        model.addTreeModelListener(new TreeModelListener() {
+
+                @Override
+                public void treeNodesChanged(final TreeModelEvent e) {
+                    resetExpansion();
+                }
+
+                @Override
+                public void treeNodesInserted(final TreeModelEvent e) {
+                    resetExpansion();
+                }
+
+                @Override
+                public void treeNodesRemoved(final TreeModelEvent e) {
+                    resetExpansion();
+                }
+
+                @Override
+                public void treeStructureChanged(final TreeModelEvent e) {
+                    resetExpansion();
                 }
             });
     }
@@ -415,6 +476,22 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
     @Override
     public void selectionChanged(final SelectionChangedEvent event) {
         tree.updateUI();
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void resetExpansion() {
+        EventQueue.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    final List<TreePath> pathCopy = new ArrayList<TreePath>(expendedPaths);
+                    for (final TreePath tp : pathCopy) {
+                        tree.expandPath(tp);
+                    }
+                }
+            });
     }
 
     /**
@@ -720,7 +797,9 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             if (paths.length == 1) {
                 tree.setSelectionPath(null);
                 layerModel.removeLayer(paths[0]);
-                tree.expandPath(paths[0].getParentPath());
+//                for (final TreePath tp : expendedPaths) {
+//                    tree.expandPath(tp);
+//                }
             }
         }
     }
@@ -759,6 +838,10 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
                         fireRemoveLayerEvent(event);
                     }
                     layerModel.removeLayer(tmpPath);
+
+                    for (final TreePath tp : new ArrayList<TreePath>(expendedPaths)) {
+                        tree.expandPath(tp);
+                    }
                 } catch (VetoException ex) {
                     // nothing to do
                 }
@@ -913,28 +996,85 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
         public void actionPerformed(final ActionEvent e) {
             final TreePath[] paths = tree.getSelectionPaths();
 
-            for (final TreePath path : paths) {
-                if (path.getLastPathComponent() instanceof AbstractFeatureService) {
-                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
-                    final List<Feature> toBeSelected = new ArrayList<Feature>();
-                    for (final Object featureObject : service.getPNode().getChildrenReference()) {
-                        final PFeature feature = (PFeature)featureObject;
+//            for (final TreePath path : paths) {
+//                if (path.getLastPathComponent() instanceof AbstractFeatureService) {
+//                    final AbstractFeatureService service = (AbstractFeatureService)path.getLastPathComponent();
+//                    final List<Feature> toBeSelected = new ArrayList<Feature>();
+//                    for (final Object featureObject : service.getPNode().getChildrenReference()) {
+//                        final PFeature feature = (PFeature)featureObject;
+//
+//                        if (!feature.isSelected()) {
+//                            feature.setSelected(true);
+//                            final SelectionListener sl = (SelectionListener)CismapBroker.getInstance()
+//                                        .getMappingComponent()
+//                                        .getInputEventListener()
+//                                        .get(MappingComponent.SELECT);
+//                            sl.addSelectedFeature(feature);
+//                            toBeSelected.add(feature.getFeature());
+//                        }
+//                    }
+//
+//                    ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection())
+//                            .addToSelection(toBeSelected);
+//                }
 
-                        if (!feature.isSelected()) {
-                            feature.setSelected(true);
-                            final SelectionListener sl = (SelectionListener)CismapBroker.getInstance()
-                                        .getMappingComponent()
-                                        .getInputEventListener()
-                                        .get(MappingComponent.SELECT);
-                            sl.addSelectedFeature(feature);
-                            toBeSelected.add(feature.getFeature());
+            final WaitingDialogThread<List<FeatureServiceFeature>> wdt =
+                new WaitingDialogThread<List<FeatureServiceFeature>>(StaticSwingTools.getParentFrame(this),
+                    true,
+                    NbBundle.getMessage(
+                        SelectAllMenuItem.class,
+                        "ThemeLayerWidget.SelectAllMenuItem.actionPerformed.text"),
+                    null,
+                    500) {
+
+                    @Override
+                    protected List<FeatureServiceFeature> doInBackground() throws Exception {
+                        Thread.currentThread().setName("ThemeLayerWidget_select_all");
+                        final List<FeatureServiceFeature> toBeSelected = new ArrayList<FeatureServiceFeature>();
+
+                        for (final TreePath path : paths) {
+                            if (path.getLastPathComponent() instanceof AbstractFeatureService) {
+                                final AbstractFeatureService service = (AbstractFeatureService)
+                                    path.getLastPathComponent();
+                                final XBoundingBox bb = null;
+                                service.initAndWait();
+                                final FeatureFactory factory = service.getFeatureFactory();
+                                List<FeatureServiceFeature> featureList;
+                                final int pageSize = service.getMaxFeaturesPerPage();
+
+                                if (pageSize != -1) {
+                                    featureList = factory.createFeatures(
+                                            service.getQuery(),
+                                            bb,
+                                            null,
+                                            0,
+                                            pageSize,
+                                            null);
+                                } else {
+                                    featureList = factory.createFeatures(service.getQuery(),
+                                            bb,
+                                            null, 0, 0, null);
+                                }
+
+                                toBeSelected.addAll(featureList);
+                            }
                         }
+
+                        return toBeSelected;
                     }
 
-                    ((DefaultFeatureCollection)CismapBroker.getInstance().getMappingComponent().getFeatureCollection())
-                            .addToSelection(toBeSelected);
-                }
-            }
+                    @Override
+                    protected void done() {
+                        try {
+                            final List<FeatureServiceFeature> features = get();
+
+                            SelectionManager.getInstance().addSelectedFeatures(features);
+                        } catch (Exception e) {
+                            log.error("Error while selecting all features", e);
+                        }
+                    }
+                };
+            wdt.start();
         }
     }
 
@@ -1088,96 +1228,27 @@ public class ThemeLayerWidget extends javax.swing.JPanel implements TreeSelectio
             final TreePath path = tree.getSelectionPath();
 
             final AbstractFeatureService selectedService = (AbstractFeatureService)path.getLastPathComponent();
-            /*
-             * final JumpSLDEditor editor = new JumpSLDEditor();
-             *
-             * editor.ConfigureEditor( selectedService, StaticSwingTools.getParentFrame(wfsStyleButton),
-             * CismapBroker.getInstance().getMappingComponent());
-             */
-            try {
-                if (log.isDebugEnabled()) {
-                    log.debug(
-                        "invoke FeatureService - StyleDialog"); // NOI18N
-                }
-                // only create one instance of the styledialog
-                final Frame parentFrame = StaticSwingTools.getParentFrame(ThemeLayerWidget.this);
-                if (styleDialog == null) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("creating new StyleDialog '"
-                                    + parentFrame.getTitle() + "'"); // NOI18N
+            final Frame parentFrame = StaticSwingTools.getParentFrame(ThemeLayerWidget.this);
+            final ArrayList<String> args = new ArrayList<String>();
+            args.add("Allgemein");
+            args.add("Darstellung");
+            args.add("Massstab");
+            args.add("Thematische Farbgebung");
+            args.add("Beschriftung");
+            args.add("TextEditor");
+            args.add("QueryPanel");
+
+            final StyleDialogStarter starter = new StyleDialogStarter(parentFrame, selectedService, args, 500);
+
+            starter.addStyleDialogClosedListener(new StyleDialogClosedListener() {
+
+                    @Override
+                    public void StyleDialogClosed(final StyleDialogClosedEvent evt) {
+                        tree.updateUI();
                     }
+                });
 
-                    final String lookupkey = "Jump";
-
-                    if ((lookupkey != null) && !lookupkey.isEmpty()) {
-                        final Lookup.Result<StyleDialogInterface> result = Lookup.getDefault()
-                                    .lookupResult(StyleDialogInterface.class);
-
-                        for (final StyleDialogInterface dialog : result.allInstances()) {
-                            if (lookupkey.equals(dialog.getKey())) {
-                                styleDialog = dialog;
-                            }
-                        }
-                    }
-                    if (styleDialog == null) {
-                        styleDialog = Lookup.getDefault().lookup(StyleDialogInterface.class);
-                    }
-                }
-
-                // configure dialog, adding attributes to the tab and
-                // set style from the layer properties
-
-                final ArrayList<String> args = new ArrayList<String>();
-                args.add("Allgemein");
-                args.add("Darstellung");
-                args.add("Massstab");
-                args.add("Thematische Farbgebung");
-                args.add("Beschriftung");
-                args.add("TextEditor");
-                args.add("QueryPanel");
-                // args.add("Begleitsymbole");
-
-                final JDialog dialog = styleDialog.configureDialog(
-                        selectedService,
-                        parentFrame,
-                        CismapBroker.getInstance().getMappingComponent(),
-                        args);
-
-                dialog.setPreferredSize(new Dimension(
-                        dialog.getPreferredSize().width
-                                + 70,
-                        dialog.getPreferredSize().height));
-                if (log.isDebugEnabled()) {
-                    log.debug("set dialog visible");                                // NOI18N
-                }
-                StaticSwingTools.showDialog(dialog);
-            } catch (Throwable t) {
-                log.error("could not configure StyleDialog: " + t.getMessage(), t); // NOI18N
-            }
-            // check returnstatus
-            if ((styleDialog != null) && styleDialog.isAccepted()) {
-                final Runnable r = styleDialog.createResultTask();
-
-                final ExecutorService es = CismetExecutors.newSingleThreadExecutor();
-                es.submit(r);
-                es.submit(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            EventQueue.invokeLater(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        tree.updateUI();
-                                    }
-                                });
-                        }
-                    });
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Style Dialog canceled"); // NOI18N
-                }
-            }
+            starter.start();
         }
     }
 
