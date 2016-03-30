@@ -36,10 +36,15 @@ import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.lang.ref.SoftReference;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -77,6 +82,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 "/de/cismet/cismap/commons/gui/res/pushpin.png"));         // NOI18N
     private static ImageIcon pushpinSelectedIco = new javax.swing.ImageIcon(PFeature.class.getResource(
                 "/de/cismet/cismap/commons/gui/res/pushpinSelected.png")); // NOI18N
+    private static final Map<String, SoftReference<Image>> imageCache = Collections.synchronizedMap(
+            new HashMap<String, SoftReference<Image>>());
 
     //~ Instance fields --------------------------------------------------------
 
@@ -377,13 +384,21 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                                     / piSelected.getImage().getWidth(null);
                         final double sweetY = (10 + (piOrig.getImage().getHeight(null) * sweetSpotY))
                                     / piSelected.getImage().getHeight(null);
+                        pi.setImage(piOrig.getImage());
                         pi.setSweetSpotX(sweetX);
                         pi.setSweetSpotY(sweetY);
+                        piSelected.setImage(highlightImageAsSelected(
+                                piOrig.getImage(),
+                                new Color(0.3f, 0.3f, 1.0f, 0.4f),
+                                new Color(0.2f, 0.2f, 1.0f, 0.8f),
+                                10));
                         piSelected.setSweetSpotX(sweetX);
                         piSelected.setSweetSpotY(sweetY);
                     } else {
+                        pi.setImage(piOrig.getImage());
                         pi.setSweetSpotX(piOrig.getSweetSpotX());
                         pi.setSweetSpotY(piOrig.getSweetSpotY());
+                        piSelected.setImage(piOrig.getSelectedFeatureAnnotationSymbol().getImage());
                         piSelected.setSweetSpotX(piOrig.getSweetSpotX());
                         piSelected.setSweetSpotY(piOrig.getSweetSpotY());
                     }
@@ -433,7 +448,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             if (log.isDebugEnabled()) {
                 log.debug("No PointAnnotationSymbol found use PushPinIcons"); // NOI18N
             }
-            pi = new FeatureAnnotationSymbol(pushpinIco.getImage());
             pi.setSweetSpotX(0.46d);
             pi.setSweetSpotY(0.9d);
             piSelected.setSweetSpotX(0.46d);
@@ -449,13 +463,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 if (!selectedPiEdited) {
                     selectedPiEdited = true;
                     final Image iconImage = piOrig.getImage();
-                    final BufferedImage img = new BufferedImage(iconImage.getWidth(null),
-                            iconImage.getHeight(null),
-                            BufferedImage.TYPE_INT_ARGB);
-                    final Graphics g = img.getGraphics();
-                    g.drawImage(iconImage, 0, 0, null);
                     piSelected = new FeatureAnnotationSymbol(highlightImageAsSelected(
-                                img,
+                                iconImage,
                                 new Color(0.3f, 0.3f, 1.0f, 0.4f),
                                 new Color(0.2f, 0.2f, 1.0f, 0.8f),
                                 10));
@@ -997,7 +1006,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 gp.lineTo((float)points[i].x, (float)points[i].y);
             }
         }
-        append(gp, false);
+        // use getPathReference().append(gp, false); instead of append(gp, false); due to performance reasons
+        getPathReference().append(gp, false);
     }
 
     /**
@@ -3121,6 +3131,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         if (colEdge == null) {
             colEdge = TRANSPARENT;
         }
+        final SoftReference<Image> selectedImageRef = imageCache.get(toSelect.toString() + colFill + colEdge);
+
+        if (selectedImageRef != null) {
+            if (selectedImageRef.get() != null) {
+                return selectedImageRef.get();
+            }
+        }
+
         if (toSelect != null) {
             final int doubleInset = 2 * insetSize;
             final BufferedImage tint = new BufferedImage(toSelect.getWidth(null) + doubleInset,
@@ -3155,6 +3173,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 10,
                 10);
             g2d.drawImage(toSelect, insetSize, insetSize, null);
+
+            imageCache.put(toSelect.toString() + colFill + colEdge, new SoftReference<Image>(tint));
+
             return tint;
         } else {
             return toSelect;
@@ -3409,7 +3430,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
      */
     public void updatePath() {
         getPathReference().reset();
-        final Geometry geom = feature.getGeometry();
+        Geometry geom;
+
+        if (feature instanceof DefaultFeatureServiceFeature) {
+            geom = ((DefaultFeatureServiceFeature)feature).getSimpleGeometry();
+        } else {
+            geom = feature.getGeometry();
+        }
+
         if (geom instanceof Point) {
             setPathToPolyline(
                 new float[] { entityRingXArr[0][0][0], entityRingXArr[0][0][0] },
@@ -3424,6 +3452,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     addLinearRing(coordArr);
                 }
             }
+            // the next three lines are required, because the addLinearRing() method uses getPathReference().append(gp,
+            // false) instead of append(gp, false), due to performance reasons
+            firePropertyChange(PROPERTY_CODE_PATH, PROPERTY_PATH, null, getPathReference());
+            updateBoundsFromPath();
+            invalidatePaint();
         } else if (geom instanceof MultiLineString) {
             for (int entityIndex = 0; entityIndex < entityRingCoordArr.length; entityIndex++) {
                 for (int ringIndex = 0; ringIndex < entityRingCoordArr[entityIndex].length; ringIndex++) {
@@ -3431,6 +3464,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     addLinearRing(coordArr);
                 }
             }
+            // the next three lines are required, because the addLinearRing() method uses getPathReference().append(gp,
+            // false) instead of append(gp, false), due to performance reasons
+            firePropertyChange(PROPERTY_CODE_PATH, PROPERTY_PATH, null, getPathReference());
+            updateBoundsFromPath();
+            invalidatePaint();
         }
     }
 
