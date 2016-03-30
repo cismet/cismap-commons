@@ -28,12 +28,7 @@ public class AttributeTableFactory {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static AttributeTableFactory instance = null;
     private static final Logger LOG = Logger.getLogger(AttributeTableFactory.class);
-
-    static {
-        instance = new AttributeTableFactory();
-    }
 
     //~ Instance fields --------------------------------------------------------
 
@@ -57,7 +52,7 @@ public class AttributeTableFactory {
      * @return  DOCUMENT ME!
      */
     public static AttributeTableFactory getInstance() {
-        return instance;
+        return LazyInitializer.INSTANCE;
     }
 
     /**
@@ -72,7 +67,7 @@ public class AttributeTableFactory {
 
             listener.showAttributeTable(
                 table,
-                featureService.getName(),
+                createId(featureService),
                 NbBundle.getMessage(
                     AttributeTableFactory.class,
                     "AttributeTableFactory.showAttributeTable().name",
@@ -81,6 +76,26 @@ public class AttributeTableFactory {
         } catch (Exception e) {
             LOG.error("Error while retrieving all features", e);
         }
+    }
+
+    /**
+     * Switch the processing mode for the given service.
+     *
+     * @param  featureService  the service of the attribute table that should be opened
+     */
+    public void switchProcessingMode(final AbstractFeatureService featureService) {
+        listener.switchProcessingMode(featureService, createId(featureService));
+    }
+
+    /**
+     * Switch the processing mode for the given service.
+     *
+     * @param   featureService  the service of the attribute table that should be opened
+     *
+     * @return  DOCUMENT ME!
+     */
+    public AttributeTable getAttributeTable(final AbstractFeatureService featureService) {
+        return listener.getAttributeTable(createId(featureService));
     }
 
     /**
@@ -101,7 +116,7 @@ public class AttributeTableFactory {
     public void changeAttributeTableName(final AbstractFeatureService featureService, final String newName) {
         try {
             listener.changeName(
-                featureService.getName(),
+                createId(featureService),
                 newName);
         } catch (Exception e) {
             LOG.error("Error while retrieving all features", e);
@@ -147,5 +162,38 @@ public class AttributeTableFactory {
      */
     public void setMappingComponent(final MappingComponent mappingComponent) {
         this.mappingComponent = mappingComponent;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   service  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static String createId(final AbstractFeatureService service) {
+        return "Attributtabelle " + service.getName();
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private static final class LazyInitializer {
+
+        //~ Static fields/initializers -----------------------------------------
+
+        private static final transient AttributeTableFactory INSTANCE = new AttributeTableFactory();
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new LazyInitializer object.
+         */
+        private LazyInitializer() {
+        }
     }
 }

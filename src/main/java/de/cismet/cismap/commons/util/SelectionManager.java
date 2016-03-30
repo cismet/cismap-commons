@@ -16,6 +16,7 @@ import java.awt.EventQueue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -168,7 +169,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      * @param  featureList  DOCUMENT ME!
      */
     public void addSelectedFeatures(final List<? extends Feature> featureList) {
-        setSelectedFeatures(featureList, false);
+        setSelectedFeatures(featureList, false, true);
     }
 
     /**
@@ -177,7 +178,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      * @param  featureList  DOCUMENT ME!
      */
     public void setSelectedFeatures(final List<? extends Feature> featureList) {
-        setSelectedFeatures(featureList, true);
+        setSelectedFeatures(featureList, true, true);
     }
 
     /**
@@ -197,6 +198,10 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
     public void removeSelectedFeatures(final List<? extends Feature> featureList) {
         final Map<AbstractFeatureService, TreeSet<DefaultFeatureServiceFeature>> selectedFeaturesToRemove =
             new HashMap<AbstractFeatureService, TreeSet<DefaultFeatureServiceFeature>>();
+
+        if (featureList == null) {
+            return;
+        }
 
         // save the features ordered by the corresponding service
         for (final Feature f : featureList) {
@@ -244,7 +249,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                 }
 
                 if (featureRemoved) {
-                    table.applySelection(features, true);
+                    table.applySelection(this, features, true);
                 }
             }
 
@@ -279,8 +284,11 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      *
      * @param  featureList         DOCUMENT ME!
      * @param  removeOldSelection  service DOCUMENT ME!
+     * @param  syncMap             DOCUMENT ME!
      */
-    private void setSelectedFeatures(final List<? extends Feature> featureList, final boolean removeOldSelection) {
+    private void setSelectedFeatures(final List<? extends Feature> featureList,
+            final boolean removeOldSelection,
+            final boolean syncMap) {
         final Map<AbstractFeatureService, TreeSet<DefaultFeatureServiceFeature>> tmpSelectedStandaloneFeatures =
             new HashMap<AbstractFeatureService, TreeSet<DefaultFeatureServiceFeature>>();
 
@@ -304,7 +312,12 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
         if (removeOldSelection) {
             selectedStandaloneFeatures.clear();
-            removeSelectionFromMap();
+            for (final AttributeTable table : consideredAttributeTables.values()) {
+                table.applySelection(this, new ArrayList<Feature>(), true);
+            }
+            if (syncMap) {
+                removeSelectionFromMap();
+            }
         }
 
         for (final AbstractFeatureService service : tmpSelectedStandaloneFeatures.keySet()) {
@@ -328,10 +341,12 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
             final AttributeTable table = consideredAttributeTables.get(service);
 
             if (table != null) {
-                table.applySelection(features, removeOldSelection);
+                table.applySelection(this, features, removeOldSelection);
             }
 
-            syncWithMap.add(service);
+            if (syncMap) {
+                syncWithMap.add(service);
+            }
         }
 
         refreshSelectedFeatureCounts();
@@ -389,7 +404,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
      */
     public void clearSelection() {
         for (final AttributeTable table : consideredAttributeTables.values()) {
-            table.applySelection(null, true);
+            table.applySelection(this, new ArrayList<Feature>(), true);
         }
 
         selectedStandaloneFeatures.clear();
@@ -408,7 +423,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         final AttributeTable table = consideredAttributeTables.get(service);
 
         if (table != null) {
-            table.applySelection(null, true);
+            table.applySelection(this, new ArrayList<Feature>(), true);
         }
         selectedStandaloneFeatures.put(service, null);
 
@@ -429,7 +444,7 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
         final AttributeTable table = consideredAttributeTables.get(service);
 
         if (table != null) {
-            table.applySelection(featureList, true);
+            table.applySelection(this, featureList, true);
         }
         syncWithMap.add(service);
         refreshSelectedFeatureCounts();
@@ -564,7 +579,22 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
 
     @Override
     public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-        selectedStandaloneFeatures.clear();
+//        for (final AttributeTable table : consideredAttributeTables.values()) {
+//            table.applySelection(this, new ArrayList<Feature>(), true);
+//        }
+//
+//        selectedStandaloneFeatures.clear();
+        final List<Feature> selectedMapFeatures = new ArrayList<Feature>();
+
+        if ((fce != null) && (fce.getFeatureCollection() != null)
+                    && (fce.getFeatureCollection().getSelectedFeatures() != null)) {
+            for (final Feature f : (Collection<Feature>)fce.getFeatureCollection().getSelectedFeatures()) {
+                selectedMapFeatures.add(f);
+            }
+
+            setSelectedFeatures(selectedMapFeatures, true, false);
+        }
+
         refreshSelectedFeatureCounts();
     }
 
@@ -752,6 +782,8 @@ public class SelectionManager implements FeatureCollectionListener, ListSelectio
                             if (((PermissionProvider)f).hasWritePermissions()) {
                                 ++modCount;
                             }
+                        } else {
+                            ++modCount;
                         }
                     }
                     if (interrupted) {
