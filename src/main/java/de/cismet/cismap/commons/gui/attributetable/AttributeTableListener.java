@@ -38,6 +38,23 @@ public interface AttributeTableListener {
     /**
      * DOCUMENT ME!
      *
+     * @param  featureService  table panel DOCUMENT ME!
+     * @param  id              DOCUMENT ME!
+     */
+    void switchProcessingMode(AbstractFeatureService featureService, String id);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   id  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    AttributeTable getAttributeTable(final String id);
+
+    /**
+     * DOCUMENT ME!
+     *
      * @param  id    DOCUMENT ME!
      * @param  name  DOCUMENT ME!
      */

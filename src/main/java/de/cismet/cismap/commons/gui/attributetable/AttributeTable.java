@@ -132,6 +132,8 @@ import de.cismet.cismap.commons.tools.ExportDownload;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.tools.ExportTxtDownload;
 import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
+import de.cismet.cismap.commons.util.SelectionChangedEvent;
+import de.cismet.cismap.commons.util.SelectionChangedListener;
 import de.cismet.cismap.commons.util.SelectionManager;
 
 import de.cismet.commons.concurrency.CismetConcurrency;
@@ -169,7 +171,8 @@ public class AttributeTable extends javax.swing.JPanel {
     private int popupColumn;
     private MappingComponent mappingComponent;
     private boolean selectionChangeFromMap = false;
-    private final FeatureCollectionListener featureCollectionListener;
+//    private final FeatureCollectionListener featureCollectionListener;
+    private final SelectionChangedListener featureSelectionChangedListener;
     private final RepaintListener repaintListener;
     private List<FeatureServiceFeature> lockedFeatures = new ArrayList<FeatureServiceFeature>();
     private AttributeTableRuleSet tableRuleSet = new DefaultAttributeTableRuleSet();
@@ -180,6 +183,8 @@ public class AttributeTable extends javax.swing.JPanel {
     private Object query;
     private int[] lastRows;
     private TreeSet<DefaultFeatureServiceFeature> modifiedFeatures = new TreeSet<DefaultFeatureServiceFeature>();
+    private Object selectionEventSource = null;
+    private List<ListSelectionListener> selectionListener = new ArrayList<ListSelectionListener>();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFirstPage;
@@ -378,6 +383,12 @@ public class AttributeTable extends javax.swing.JPanel {
                     }
 
                     table.repaint();
+
+                    for (final ListSelectionListener l : selectionListener) {
+                        if (l != selectionEventSource) {
+                            l.valueChanged(e);
+                        }
+                    }
                 }
             });
 
@@ -402,66 +413,78 @@ public class AttributeTable extends javax.swing.JPanel {
 
         ((JXTable)table).setHighlighters(alternateRowHighlighter);
 
-        featureCollectionListener = new FeatureCollectionListener() {
+        featureSelectionChangedListener = new SelectionChangedListener() {
 
                 @Override
-                public void featuresAdded(final FeatureCollectionEvent fce) {
-                }
-
-                @Override
-                public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-                }
-
-                @Override
-                public void featuresRemoved(final FeatureCollectionEvent fce) {
-                }
-
-                @Override
-                public void featuresChanged(final FeatureCollectionEvent fce) {
-                }
-
-                @Override
-                public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-                    if (model == null) {
-                        return;
-                    }
-                    final Collection<Feature> features = fce.getFeatureCollection().getSelectedFeatures();
-                    final List<FeatureServiceFeature> selectedFeatures = new ArrayList<FeatureServiceFeature>();
-                    final List<FeatureServiceFeature> tableFeatures = model.getFeatureServiceFeatures();
-                    final LayerProperties layerProperties = featureService.getLayerProperties();
-
-                    for (final Feature feature : features) {
-                        if (feature instanceof FeatureServiceFeature) {
-                            if (((FeatureServiceFeature)feature).getLayerProperties() == layerProperties) {
-                                selectedFeatures.add((FeatureServiceFeature)feature);
-                            }
-                        }
-                    }
-
-                    table.getSelectionModel().setValueIsAdjusting(true);
-                    for (int index = 0; index < tableFeatures.size(); ++index) {
-                        final FeatureServiceFeature feature = tableFeatures.get(table.convertRowIndexToModel(index));
-
-                        if (selectedFeatures.contains(feature)) {
-                            table.addRowSelectionInterval(index, index);
-                        } else {
-                            table.removeRowSelectionInterval(index, index);
-                        }
-                    }
-
-                    selectionChangeFromMap = true;
-                    table.getSelectionModel().setValueIsAdjusting(false);
-                    selectionChangeFromMap = false;
-                }
-
-                @Override
-                public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
-                }
-
-                @Override
-                public void featureCollectionChanged() {
+                public void selectionChanged(final SelectionChangedEvent event) {
+                    selectionEventSource = event.getSource();
+                    setSelection(SelectionManager.getInstance().getSelectedFeatures(featureService));
+                    selectionEventSource = null;
                 }
             };
+
+        SelectionManager.getInstance().addSelectionChangedListener(featureSelectionChangedListener);
+
+//        featureCollectionListener = new FeatureCollectionListener() {
+//
+//                @Override
+//                public void featuresAdded(final FeatureCollectionEvent fce) {
+//                }
+//
+//                @Override
+//                public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
+//                }
+//
+//                @Override
+//                public void featuresRemoved(final FeatureCollectionEvent fce) {
+//                }
+//
+//                @Override
+//                public void featuresChanged(final FeatureCollectionEvent fce) {
+//                }
+//
+//                @Override
+//                public void featureSelectionChanged(final FeatureCollectionEvent fce) {
+//                    if (model == null) {
+//                        return;
+//                    }
+//                    final Collection<Feature> features = fce.getFeatureCollection().getSelectedFeatures();
+//                    final List<FeatureServiceFeature> selectedFeatures = new ArrayList<FeatureServiceFeature>();
+//                    final List<FeatureServiceFeature> tableFeatures = model.getFeatureServiceFeatures();
+//                    final LayerProperties layerProperties = featureService.getLayerProperties();
+//
+//                    for (final Feature feature : features) {
+//                        if (feature instanceof FeatureServiceFeature) {
+//                            if (((FeatureServiceFeature)feature).getLayerProperties() == layerProperties) {
+//                                selectedFeatures.add((FeatureServiceFeature)feature);
+//                            }
+//                        }
+//                    }
+//
+//                    table.getSelectionModel().setValueIsAdjusting(true);
+//                    for (int index = 0; index < tableFeatures.size(); ++index) {
+//                        final FeatureServiceFeature feature = tableFeatures.get(table.convertRowIndexToModel(index));
+//
+//                        if (selectedFeatures.contains(feature)) {
+//                            table.addRowSelectionInterval(index, index);
+//                        } else {
+//                            table.removeRowSelectionInterval(index, index);
+//                        }
+//                    }
+//
+//                    selectionChangeFromMap = true;
+//                    table.getSelectionModel().setValueIsAdjusting(false);
+//                    selectionChangeFromMap = false;
+//                }
+//
+//                @Override
+//                public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
+//                }
+//
+//                @Override
+//                public void featureCollectionChanged() {
+//                }
+//            };
 
         repaintListener = new RepaintListener() {
 
@@ -508,6 +531,33 @@ public class AttributeTable extends javax.swing.JPanel {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  selectedFeatures  DOCUMENT ME!
+     */
+    private void setSelection(final List<? extends Feature> selectedFeatures) {
+        if (model == null) {
+            return;
+        }
+        final List<FeatureServiceFeature> tableFeatures = model.getFeatureServiceFeatures();
+
+        table.getSelectionModel().setValueIsAdjusting(true);
+        for (int index = 0; index < tableFeatures.size(); ++index) {
+            final FeatureServiceFeature feature = tableFeatures.get(table.convertRowIndexToModel(index));
+
+            if (selectedFeatures.contains(feature)) {
+                table.addRowSelectionInterval(index, index);
+            } else {
+                table.removeRowSelectionInterval(index, index);
+            }
+        }
+
+        selectionChangeFromMap = true;
+        table.getSelectionModel().setValueIsAdjusting(false);
+        selectionChangeFromMap = false;
+    }
 
     /**
      * DOCUMENT ME!
@@ -624,8 +674,8 @@ public class AttributeTable extends javax.swing.JPanel {
             model.setEditable(false);
             AttributeTableFactory.getInstance().processingModeChanged(featureService, tbProcessing.isSelected());
         }
-
-        mappingComponent.getFeatureCollection().removeFeatureCollectionListener(featureCollectionListener);
+        SelectionManager.getInstance().removeSelectionChangedListener(featureSelectionChangedListener);
+//        mappingComponent.getFeatureCollection().removeFeatureCollectionListener(featureCollectionListener);
         mappingComponent.removeRepaintListener(repaintListener);
         instances.remove(this);
         return true;
@@ -2043,6 +2093,10 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  evt  DOCUMENT ME!
      */
     private void butMoveSelectedRowsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butMoveSelectedRowsActionPerformed
+        for (int i = 0; i < model.getColumnCount(); ++i) {
+            table.setSortOrder(i, SortOrder.UNSORTED);
+        }
+
         final int[] selectedRows = table.getSelectedRows();
         final int selectedRowCount = table.getSelectedRowCount();
         int count = 0;
@@ -2426,9 +2480,11 @@ public class AttributeTable extends javax.swing.JPanel {
                                         if (locker != null) {
                                             lockingObject = locker.lock(dfsf);
                                         }
-
-                                        dfsf.delete();
-                                        featuresToDelete.add(dfsf);
+                                        if (!(dfsf instanceof PermissionProvider)
+                                                    || ((PermissionProvider)dfsf).hasWritePermissions()) {
+                                            dfsf.delete();
+                                            featuresToDelete.add(dfsf);
+                                        }
                                     } catch (LockAlreadyExistsException ex) {
                                         JOptionPane.showMessageDialog(
                                             AttributeTable.this,
@@ -2850,7 +2906,7 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  listener  DOCUMENT ME!
      */
     public void addListSelectionListener(final ListSelectionListener listener) {
-        table.getSelectionModel().addListSelectionListener(listener);
+        selectionListener.add(listener);
     }
 
     /**
@@ -2859,7 +2915,7 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  listener  DOCUMENT ME!
      */
     public void removeListSelectionListener(final ListSelectionListener listener) {
-        table.getSelectionModel().removeListSelectionListener(listener);
+        selectionListener.remove(listener);
     }
 
     /**
@@ -3019,7 +3075,7 @@ public class AttributeTable extends javax.swing.JPanel {
      */
     public void setMappingComponent(final MappingComponent mappingComponent) {
         this.mappingComponent = mappingComponent;
-        mappingComponent.getFeatureCollection().addFeatureCollectionListener(featureCollectionListener);
+//        mappingComponent.getFeatureCollection().addFeatureCollectionListener(featureCollectionListener);
 //        mappingComponent.addRepaintListener(repaintListener);
 
         if (model != null) {
@@ -3031,39 +3087,42 @@ public class AttributeTable extends javax.swing.JPanel {
      * DOCUMENT ME!
      */
     private void applySelection() {
-        applySelection(null, false);
+        applySelection(null, null, false);
     }
 
     /**
      * DOCUMENT ME!
      *
+     * @param  origin              DOCUMENT ME!
      * @param  selectedFeatures    DOCUMENT ME!
      * @param  removeOldSelection  DOCUMENT ME!
      */
-    public void applySelection(List<Feature> selectedFeatures, final boolean removeOldSelection) {
+    public void applySelection(final Object origin, List<Feature> selectedFeatures, final boolean removeOldSelection) {
+        selectionEventSource = origin;
         if (selectedFeatures == null) {
             selectedFeatures = SelectionManager.getInstance().getSelectedFeatures(featureService);
         }
 
         if (removeOldSelection) {
             table.getSelectionModel().clearSelection();
+        } else {
+            if (model != null) {
+                final int[] selectedRows = table.getSelectedRows();
+
+                for (final int i : selectedRows) {
+                    final Feature f = model.getFeatureServiceFeature(table.convertRowIndexToModel(i));
+
+                    if (!selectedFeatures.contains(f)) {
+                        selectedFeatures.add(f);
+                    }
+                }
+            }
         }
 
         if (selectedFeatures != null) {
             setSelection(selectedFeatures);
         }
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  selectedFeatures  DOCUMENT ME!
-     */
-    public void setSelection(final List<Feature> selectedFeatures) {
-        final DefaultFeatureCollection dfc = new DefaultFeatureCollection();
-        dfc.addToSelection(selectedFeatures);
-        final FeatureCollectionEvent e = new FeatureCollectionEvent(dfc, selectedFeatures);
-        featureCollectionListener.featureSelectionChanged(e);
+        selectionEventSource = null;
     }
 
     /**
