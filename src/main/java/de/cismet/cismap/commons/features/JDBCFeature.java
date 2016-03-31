@@ -50,7 +50,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
 
     // caches the last feature properties
     private static final Object sync = new Object();
-    private static final String DELETE_STATEMENT = "DELETE FROM \"%1s\" WHERE id = %2s;";
+    private static final String DELETE_STATEMENT = "DELETE FROM \"%1s\" WHERE \"%2s\" = %3s;";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -368,7 +368,11 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
 
     @Override
     public void delete() throws Exception {
-        final String deleteStat = String.format(DELETE_STATEMENT, featureInfo.getTableName(), getId());
+        final String deleteStat = String.format(
+                DELETE_STATEMENT,
+                featureInfo.getTableName(),
+                featureInfo.getIdField(),
+                getId());
         final Statement st = featureInfo.getConnection().createStatement();
         st.executeUpdate(deleteStat);
     }
