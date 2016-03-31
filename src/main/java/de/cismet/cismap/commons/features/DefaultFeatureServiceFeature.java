@@ -553,23 +553,34 @@ public class DefaultFeatureServiceFeature implements FeatureServiceFeature, Comp
      */
     @Override
     public Geometry getGeometry() {
+        return this.geometry;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Geometry getSimpleGeometry() {
+        final Geometry geom = getGeometry();
+
         if (simplifiedGeometryAllowed
-                    && ((this.geometry instanceof Polygon) || (this.geometry instanceof MultiPolygon)
-                        || (this.geometry instanceof LineString)
-                        || (this.geometry instanceof MultiLineString))
-                    && (geometry.getCoordinates().length > 1000)
+                    && ((geom instanceof Polygon) || (geom instanceof MultiPolygon)
+                        || (geom instanceof LineString)
+                        || (geom instanceof MultiLineString))
+                    && (geom.getCoordinates().length > 1000)
                     && (CismapBroker.getInstance().getMappingComponent().getScaleDenominator() > 50000)) {
             if (simplifiedGeometry == null) {
-                simplifiedGeometry = TopologyPreservingSimplifier.simplify(geometry, 30);
+                simplifiedGeometry = TopologyPreservingSimplifier.simplify(geom, 30);
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("length of the geometry: " + geometry.getCoordinates().length + " "
+                logger.debug("length of the geometry: " + geom.getCoordinates().length + " "
                             + " Geometry will be simplified to a length of: "
                             + simplifiedGeometry.getCoordinates().length);
             }
             return simplifiedGeometry;
         }
-        return this.geometry;
+        return geom;
     }
 
     /**
