@@ -275,4 +275,22 @@ public class JDBCFeatureInfo {
     public String getGeoField() {
         return geoField;
     }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the idField
+     */
+    public String getIdField() {
+        return idField;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  idField  the idField to set
+     */
+    public void setIdField(final String idField) {
+        this.idField = idField;
+    }
 }

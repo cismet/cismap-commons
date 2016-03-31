@@ -26,6 +26,9 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import de.cismet.cismap.commons.gui.attributetable.DefaultAttributeTableRuleSet;
+import de.cismet.cismap.commons.gui.attributetable.FeatureCreator;
+import de.cismet.cismap.commons.gui.attributetable.creator.PrimitiveGeometryCreator;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
 
 import de.cismet.cismap.linearreferencing.tools.StationTableCellEditorInterface;
 
@@ -45,16 +48,19 @@ public class H2AttributeTableRuleSet extends DefaultAttributeTableRuleSet {
 
     private final List<LinearReferencingInfo> refInfos;
     private Map<String, LinearReferencingInfo> refInfoMap;
+    private final String geometryType;
 
     //~ Constructors -----------------------------------------------------------
 
     /**
      * Creates a new H2AttributeTableRuleSet object.
      *
-     * @param  refInfos  DOCUMENT ME!
+     * @param  refInfos      DOCUMENT ME!
+     * @param  geometryType  DOCUMENT ME!
      */
-    public H2AttributeTableRuleSet(final List<LinearReferencingInfo> refInfos) {
+    public H2AttributeTableRuleSet(final List<LinearReferencingInfo> refInfos, final String geometryType) {
         this.refInfos = refInfos;
+        this.geometryType = geometryType;
 
         if (refInfos != null) {
             refInfoMap = new HashMap<String, LinearReferencingInfo>();
@@ -94,6 +100,28 @@ public class H2AttributeTableRuleSet extends DefaultAttributeTableRuleSet {
         }
 
         return super.getCellEditor(columnName);
+    }
+
+    @Override
+    public FeatureCreator getFeatureCreator() {
+        if ((refInfos == null) || refInfos.isEmpty()) {
+            // primitive type
+            if (geometryType.equalsIgnoreCase("Point")) {
+                return new PrimitiveGeometryCreator(CreateGeometryListenerInterface.POINT, false);
+            } else if (geometryType.equalsIgnoreCase("MultiPoint")) {
+                return new PrimitiveGeometryCreator(CreateGeometryListenerInterface.POINT, true);
+            } else if (geometryType.equalsIgnoreCase("LineString")) {
+                return new PrimitiveGeometryCreator(CreateGeometryListenerInterface.LINESTRING, false);
+            } else if (geometryType.equalsIgnoreCase("MultiLineString")) {
+                return new PrimitiveGeometryCreator(CreateGeometryListenerInterface.LINESTRING, true);
+            } else if (geometryType.equalsIgnoreCase("Polygon")) {
+                return new PrimitiveGeometryCreator(CreateGeometryListenerInterface.POLYGON, false);
+            } else if (geometryType.equalsIgnoreCase("MultiPolygon")) {
+                return new PrimitiveGeometryCreator(CreateGeometryListenerInterface.POLYGON, true);
+            }
+        }
+
+        return super.getFeatureCreator();
     }
 
     /**

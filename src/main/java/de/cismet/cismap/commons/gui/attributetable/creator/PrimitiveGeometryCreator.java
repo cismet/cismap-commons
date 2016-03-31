@@ -21,20 +21,18 @@ import java.awt.Cursor;
 import java.awt.EventQueue;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import de.cismet.cismap.commons.features.DefaultFeatureServiceFeature;
 import de.cismet.cismap.commons.features.FeatureServiceFeature;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
-import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreatedEvent;
 import de.cismet.cismap.commons.gui.attributetable.FeatureCreatedListener;
-import de.cismet.cismap.commons.gui.attributetable.FeatureCreator;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateGeometryListenerInterface;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.CreateNewGeometryListener;
+
+import de.cismet.math.geometry.StaticGeometryFunctions;
 
 import static de.cismet.cismap.commons.gui.attributetable.FeatureCreator.SIMPLE_GEOMETRY_LISTENER_KEY;
 
@@ -44,7 +42,7 @@ import static de.cismet.cismap.commons.gui.attributetable.FeatureCreator.SIMPLE_
  * @author   therter
  * @version  $Revision$, $Date$
  */
-public class PrimitiveGeometryCreator implements FeatureCreator {
+public class PrimitiveGeometryCreator extends AbstractFeatureCreator {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -55,7 +53,7 @@ public class PrimitiveGeometryCreator implements FeatureCreator {
     protected List<FeatureCreatedListener> listener = new ArrayList<FeatureCreatedListener>();
 
     private final String mode;
-    private Map<String, Object> properties;
+    private boolean multi;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -75,8 +73,30 @@ public class PrimitiveGeometryCreator implements FeatureCreator {
      * @param  properties  DOCUMENT ME!
      */
     public PrimitiveGeometryCreator(final String mode, final Map<String, Object> properties) {
+        this(mode, properties, false);
+    }
+
+    /**
+     * Creates a new PrimitiveGeometryCreator object.
+     *
+     * @param  mode   DOCUMENT ME!
+     * @param  multi  DOCUMENT ME!
+     */
+    public PrimitiveGeometryCreator(final String mode, final boolean multi) {
+        this(mode, null, multi);
+    }
+
+    /**
+     * Creates a new PrimitiveGeometryCreator object.
+     *
+     * @param  mode        DOCUMENT ME!
+     * @param  properties  DOCUMENT ME!
+     * @param  multi       DOCUMENT ME!
+     */
+    public PrimitiveGeometryCreator(final String mode, final Map<String, Object> properties, final boolean multi) {
         this.mode = mode;
         this.properties = properties;
+        this.multi = multi;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -96,29 +116,20 @@ public class PrimitiveGeometryCreator implements FeatureCreator {
 
                                 @Override
                                 public void geometryFinished(final Geometry g) {
-                                    feature.setGeometry(g);
+                                    Geometry geom;
+
+                                    if (multi) {
+                                        geom = StaticGeometryFunctions.toMultiGeometry(g);
+                                    } else {
+                                        geom = StaticGeometryFunctions.toSimpleGeometry(g);
+                                    }
+
+                                    feature.setGeometry(geom);
                                     mc.setInteractionMode(oldInteractionMode);
 
                                     if (feature instanceof DefaultFeatureServiceFeature) {
                                         try {
-                                            if (properties != null) {
-                                                for (final String propName : properties.keySet()) {
-                                                    final Object o = properties.get(propName);
-
-                                                    if ((o instanceof String) && ((String)o).startsWith("@")) {
-                                                        final String referencedProperty = ((String)o).substring(1);
-                                                        final Object value = ((DefaultFeatureServiceFeature)feature)
-                                                                        .getProperty(referencedProperty);
-                                                        ((DefaultFeatureServiceFeature)feature).setProperty(
-                                                            propName,
-                                                            value);
-                                                    } else {
-                                                        ((DefaultFeatureServiceFeature)feature).setProperty(
-                                                            propName,
-                                                            o);
-                                                    }
-                                                }
-                                            }
+                                            fillFeatureWithDefaultValues((DefaultFeatureServiceFeature)feature);
                                             ((DefaultFeatureServiceFeature)feature).saveChanges();
 
                                             for (final FeatureCreatedListener featureCreatedListener
@@ -168,5 +179,23 @@ public class PrimitiveGeometryCreator implements FeatureCreator {
         } else {
             return NbBundle.getMessage(PrimitiveGeometryCreator.class, "PrimitiveGeometryCreator.getTypeName().other");
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the multi
+     */
+    public boolean isMulti() {
+        return multi;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  multi  the multi to set
+     */
+    public void setMulti(final boolean multi) {
+        this.multi = multi;
     }
 }

@@ -1051,7 +1051,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
             if (layerProperties instanceof DefaultLayerProperties) {
                 ((DefaultLayerProperties)layerProperties).setAttributeTableRuleSet(new H2AttributeTableRuleSet(
-                        linRefList));
+                        linRefList,
+                        geometryType));
             }
 
             if (geometryField != null) {
@@ -1111,7 +1112,9 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     public void setLayerProperties(final LayerProperties layerProperties) {
         super.setLayerProperties(layerProperties);
         if (layerProperties instanceof DefaultLayerProperties) {
-            ((DefaultLayerProperties)layerProperties).setAttributeTableRuleSet(new H2AttributeTableRuleSet(linRefList));
+            ((DefaultLayerProperties)layerProperties).setAttributeTableRuleSet(new H2AttributeTableRuleSet(
+                    linRefList,
+                    geometryType));
         }
     }
 
@@ -1274,7 +1277,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
         try {
             st = createStatement(conn);
-            final String maxId = "SELECT max(%1s) from \"%2s\";";
+            final String maxId = "SELECT max(\"%1s\") + 1 from \"%2s\";";
 
             final String query = String.format(maxId, idField, tableName);
             final ResultSet rs = st.executeQuery(query);

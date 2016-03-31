@@ -356,7 +356,8 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             final H2FeatureServiceFactory featureFactory) {
         final H2FeatureServiceFactory f = (H2FeatureServiceFactory)featureFactory;
         ((DefaultLayerProperties)properties).setAttributeTableRuleSet(new H2AttributeTableRuleSet(
-                f.getLinRefList()));
+                f.getLinRefList(),
+                f.getGeometryType()));
         properties.setIdExpression(((H2FeatureServiceFactory)featureFactory).getIdField(),
             LayerProperties.EXPRESSIONTYPE_PROPERTYNAME);
     }
