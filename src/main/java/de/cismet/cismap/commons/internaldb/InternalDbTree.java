@@ -509,7 +509,8 @@ public class InternalDbTree extends JTree {
 
                     if (name.equalsIgnoreCase("spatial_ref_sys")
                                 || name.equalsIgnoreCase(H2FeatureServiceFactory.LR_META_TABLE_NAME)
-                                || name.equalsIgnoreCase(H2FeatureServiceFactory.META_TABLE_NAME)) {
+                                || name.equalsIgnoreCase(H2FeatureServiceFactory.META_TABLE_NAME)
+                                || name.equalsIgnoreCase(H2FeatureServiceFactory.LOCK_TABLE_NAME)) {
                         continue;
                     }
 

@@ -23,26 +23,32 @@ public interface FeatureLockingInterface {
     /**
      * locks the given feature.
      *
-     * @param   feature  the feature that should be locked
+     * @param   feature                      the feature that should be locked
+     * @param   multiLockForSameUserAllowed  true, iff it is allowed to lock an object that is already locked by this
+     *                                       user
      *
      * @return  The unlock object for the given feature. This can be used with {@link unlock(Object)}
      *
      * @throws  LockAlreadyExistsException  if the given feature is already locked
      * @throws  Exception                   if the locking failed for some reason
      */
-    Object lock(final Feature feature) throws LockAlreadyExistsException, Exception;
+    Object lock(final Feature feature, boolean multiLockForSameUserAllowed) throws LockAlreadyExistsException,
+        Exception;
 
     /**
      * locks the given feature service.
      *
-     * @param   service  the service that should be locked
+     * @param   service                      the service that should be locked
+     * @param   multiLockForSameUserAllowed  true, iff it is allowed to lock an object that is already locked by this
+     *                                       user
      *
      * @return  The unlock object for the given service. This can be used with {@link unlock(Object)}
      *
      * @throws  LockAlreadyExistsException  if at least one feature of the given service is already locked
      * @throws  Exception                   if the locking failed for some reason
      */
-    Object lock(final AbstractFeatureService service) throws LockAlreadyExistsException, Exception;
+    Object lock(final AbstractFeatureService service, boolean multiLockForSameUserAllowed)
+            throws LockAlreadyExistsException, Exception;
 
     /**
      * Unlocks the feature, that is associated with the given unlock-object.
