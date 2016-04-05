@@ -38,6 +38,8 @@ import java.io.StringReader;
 import java.net.URL;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.ImageIcon;
 
@@ -48,6 +50,7 @@ import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.CommonFeatureAction;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.PureNewFeature;
 import de.cismet.cismap.commons.features.WMSFeature;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
@@ -67,6 +70,8 @@ import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
 import de.cismet.cismap.commons.rasterservice.MapService;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 import de.cismet.cismap.commons.wms.capabilities.Parameter;
+
+import de.cismet.commons.concurrency.CismetExecutors;
 
 import de.cismet.security.WebAccessManager;
 
@@ -250,7 +255,7 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
             geom = feature.getGeometry();
         }
 
-        final WaitingDialogThread<Vector<Feature>> t = new WaitingDialogThread<Vector<Feature>>(
+        final WaitingDialogThread<List<Feature>> t = new WaitingDialogThread<List<Feature>>(
                 StaticSwingTools.getParentFrame(
                     mappingComponent),
                 true,
@@ -258,11 +263,12 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
                     GetFeatureInfoMultiGeomListener.class,
                     "GetFeatureInfoMultiGeomListener.finishGeometry.WaitingDialogThread"),
                 null,
-                200) {
+                200,
+                true) {
 
                 @Override
-                protected Vector<Feature> doInBackground() throws Exception {
-                    final Vector<Feature> toBeSelected = new Vector<Feature>();
+                protected List<Feature> doInBackground() throws Exception {
+                    final List<Feature> toBeSelected = Collections.synchronizedList(new ArrayList<Feature>());
 
                     if ((geom != null)) {
                         if (log.isDebugEnabled()) {
@@ -274,70 +280,33 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
                         final TreeMap<Integer, MapService> serviceTree =
                             ((ActiveLayerModel)mappingComponent.getMappingModel()).getMapServices();
 
+                        final ExecutorService executor = CismetExecutors.newFixedThreadPool(8);
+                        Map<MapService, List<Feature>> featureMap = new HashMap<MapService, List<Feature>>(
+                                serviceTree.size());
+                        featureMap = Collections.synchronizedMap(featureMap);
+
                         for (final Integer key : serviceTree.keySet()) {
                             final MapService service = serviceTree.get(key);
-                            List<Feature> featuresFromService = null;
 
-                            if (service instanceof AbstractFeatureService) {
-                                try {
-                                    final AbstractFeatureService featureService = (AbstractFeatureService)service;
-                                    featuresFromService = featureService.getFeatureFactory()
-                                                .createFeatures(featureService.getQuery(),
-                                                        new XBoundingBox(geom),
-                                                        null,
-                                                        0,
-                                                        Integer.MAX_VALUE,
-                                                        null);
-                                } catch (Exception e) {
-                                    log.error("Error while receiving features", e);
-                                }
-                            } else if (feature.getGeometryType().equals(AbstractNewFeature.geomTypes.POINT)
-                                        && (service instanceof WMSServiceLayer)) {
-                                final WMSServiceLayer wmsService = (WMSServiceLayer)service;
+                            final FeatureRetriever fr = new FeatureRetriever(featureMap, service, geom, feature);
+                            executor.submit(fr);
+                        }
 
-                                if (wmsService.isQueryable()) {
-                                    final Parameter p = wmsService.getWmsCapabilities()
-                                                .getRequest()
-                                                .getFeatureInfoOperation()
-                                                .getParameter("Format");
-                                    final boolean gmlResponsePossible = (p != null) && (p.getAllowedValues() != null)
-                                                && p.getAllowedValues().contains(WMS_GML_FORMAT);
-                                    for (final WMSLayer layer : (List<WMSLayer>)wmsService.getWMSLayers()) {
-                                        if (gmlResponsePossible) {
-                                            try {
-                                                featuresFromService = getWMSFeatures(
-                                                        wmsService.getGetFeatureInfoUrl(
-                                                            (int)finishingEvent.getCanvasPosition().getX(),
-                                                            (int)finishingEvent.getCanvasPosition().getY(),
-                                                            layer,
-                                                            WMS_GML_FORMAT),
-                                                        wmsService,
-                                                        feature.getGeometry());
-                                            } catch (Exception e) {
-                                                log.error("Error while retrieving features from wms", e);
-                                            }
-                                        } else {
-                                            toBeSelected.add(new WMSGetFeatureInfoDescription(
-                                                    feature.getGeometry(),
-                                                    finishingEvent,
-                                                    layer,
-                                                    wmsService));
-                                        }
-                                    }
-                                }
-                            }
-                            if (featuresFromService != null) {
-                                toBeSelected.addAll(featuresFromService);
-                            }
+                        executor.shutdown();
+                        executor.awaitTermination(1, TimeUnit.HOURS);
+
+                        for (final MapService service : featureMap.keySet()) {
+                            toBeSelected.addAll(featureMap.get(service));
                         }
                     }
+
                     return toBeSelected;
                 }
 
                 @Override
                 protected void done() {
                     try {
-                        final Vector<Feature> toBeSelected = get();
+                        final List<Feature> toBeSelected = get();
                         final GetFeatureInfoEvent evt = new GetFeatureInfoEvent(mappingComponent, geom);
                         evt.setFeatures(toBeSelected);
                         fireGetFeatureInfoEvent(evt);
@@ -595,5 +564,103 @@ public class GetFeatureInfoMultiGeomListener extends CreateGeometryListener {
      */
     public void setSelectionInProgress(final boolean selectionInProgress) {
         this.selectionInProgress = selectionInProgress;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class FeatureRetriever implements Runnable {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final Map<MapService, List<Feature>> featureMap;
+        private final MapService service;
+        private final Geometry geom;
+        private final AbstractNewFeature feature;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new FeatureRetriever object.
+         *
+         * @param  featureMap  DOCUMENT ME!
+         * @param  service     DOCUMENT ME!
+         * @param  geom        DOCUMENT ME!
+         * @param  feature     DOCUMENT ME!
+         */
+        public FeatureRetriever(final Map<MapService, List<Feature>> featureMap,
+                final MapService service,
+                final Geometry geom,
+                final AbstractNewFeature feature) {
+            this.featureMap = featureMap;
+            this.service = service;
+            this.geom = geom;
+            this.feature = feature;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void run() {
+            List<Feature> featuresFromService = new ArrayList<Feature>();
+
+            if (service instanceof AbstractFeatureService) {
+                try {
+                    final AbstractFeatureService featureService = (AbstractFeatureService)service;
+                    if (!featureService.isInitialized()) {
+                        featureService.initAndWait();
+                    }
+                    featuresFromService = featureService.getFeatureFactory()
+                                .createFeatures(featureService.getQuery(),
+                                        new XBoundingBox(geom),
+                                        null,
+                                        0,
+                                        Integer.MAX_VALUE,
+                                        null);
+                } catch (Exception e) {
+                    log.error("Error while receiving features", e);
+                }
+            } else if (feature.getGeometryType().equals(AbstractNewFeature.geomTypes.POINT)
+                        && (service instanceof WMSServiceLayer)) {
+                final WMSServiceLayer wmsService = (WMSServiceLayer)service;
+
+                if (wmsService.isQueryable()) {
+                    final Parameter p = wmsService.getWmsCapabilities()
+                                .getRequest()
+                                .getFeatureInfoOperation()
+                                .getParameter("Format");
+                    final boolean gmlResponsePossible = (p != null) && (p.getAllowedValues() != null)
+                                && p.getAllowedValues().contains(WMS_GML_FORMAT);
+                    for (final WMSLayer layer : (List<WMSLayer>)wmsService.getWMSLayers()) {
+                        if (gmlResponsePossible) {
+                            try {
+                                featuresFromService.addAll(getWMSFeatures(
+                                        wmsService.getGetFeatureInfoUrl(
+                                            (int)finishingEvent.getCanvasPosition().getX(),
+                                            (int)finishingEvent.getCanvasPosition().getY(),
+                                            layer,
+                                            WMS_GML_FORMAT),
+                                        wmsService,
+                                        feature.getGeometry()));
+                            } catch (Exception e) {
+                                log.error("Error while retrieving features from wms", e);
+                            }
+                        } else {
+                            featuresFromService.add(new WMSGetFeatureInfoDescription(
+                                    feature.getGeometry(),
+                                    finishingEvent,
+                                    layer,
+                                    wmsService));
+                        }
+                    }
+                }
+            }
+
+            featureMap.put(service, featuresFromService);
+        }
     }
 }

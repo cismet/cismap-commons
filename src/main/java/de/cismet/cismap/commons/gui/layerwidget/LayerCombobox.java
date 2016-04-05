@@ -37,6 +37,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
+import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.rasterservice.MapService;
 
 /**
@@ -137,9 +138,9 @@ public class LayerCombobox extends JComboBox {
 
         //~ Instance fields ----------------------------------------------------
 
-        private ActiveLayerModel layerModel;
-        private ThemeLayerWidget themeLayerWidget;
-        private List<LayerFilter> filter = new ArrayList<LayerFilter>();
+        private final ActiveLayerModel layerModel;
+        private final ThemeLayerWidget themeLayerWidget;
+        private final List<LayerFilter> filter = new ArrayList<LayerFilter>();
 
         //~ Constructors -------------------------------------------------------
 
@@ -194,6 +195,7 @@ public class LayerCombobox extends JComboBox {
                 if (themeLayerWidget != null) {
                     filter.add(new SelectedLayerFilter(themeLayerWidget));
                 }
+                filter.add(new SelectableLayersFilter(layerModel));
                 filter.add(new TopMostLayerFilter(layerModel));
                 filter.add(new VisibleLayersFilter(layerModel));
                 filter.add(new AllLayersFilter());
@@ -267,7 +269,7 @@ public class LayerCombobox extends JComboBox {
 
         //~ Instance fields ----------------------------------------------------
 
-        private String name;
+        private final String name;
         private Icon icon;
 
         //~ Constructors -------------------------------------------------------
@@ -317,7 +319,7 @@ public class LayerCombobox extends JComboBox {
         //~ Instance fields ----------------------------------------------------
 
         private MapService topMostLayer;
-        private ActiveLayerModel model;
+        private final ActiveLayerModel model;
 
         //~ Constructors -------------------------------------------------------
 
@@ -398,8 +400,8 @@ public class LayerCombobox extends JComboBox {
 
         //~ Instance fields ----------------------------------------------------
 
-        private List<MapService> visibleLayer = new ArrayList<MapService>();
-        private ActiveLayerModel model;
+        private final List<MapService> visibleLayer = new ArrayList<MapService>();
+        private final ActiveLayerModel model;
 
         //~ Constructors -------------------------------------------------------
 
@@ -465,12 +467,83 @@ public class LayerCombobox extends JComboBox {
      *
      * @version  $Revision$, $Date$
      */
+    private class SelectableLayersFilter extends DefaultLayerFilter {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final List<MapService> selectableLayer = new ArrayList<MapService>();
+        private final ActiveLayerModel model;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new VisibleLayersFilter object.
+         *
+         * @param  model  DOCUMENT ME!
+         */
+        public SelectableLayersFilter(final ActiveLayerModel model) {
+            super(NbBundle.getMessage(VisibleLayersFilter.class, "LayerCombobox.SelectableLayersFilter"));
+            this.model = model;
+            setSelectableLayerFilterLayer();
+
+            model.addTreeModelListener(new TreeModelListener() {
+
+                    @Override
+                    public void treeNodesChanged(final TreeModelEvent e) {
+                        setSelectableLayerFilterLayer();
+                    }
+
+                    @Override
+                    public void treeNodesInserted(final TreeModelEvent e) {
+                        setSelectableLayerFilterLayer();
+                    }
+
+                    @Override
+                    public void treeNodesRemoved(final TreeModelEvent e) {
+                        setSelectableLayerFilterLayer();
+                    }
+
+                    @Override
+                    public void treeStructureChanged(final TreeModelEvent e) {
+                        setSelectableLayerFilterLayer();
+                    }
+                });
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         */
+        private void setSelectableLayerFilterLayer() {
+            final TreeMap<Integer, MapService> map = model.getMapServices();
+            selectableLayer.clear();
+
+            for (final Integer key : map.keySet()) {
+                final MapService service = map.get(key);
+                if ((service instanceof AbstractFeatureService) && ((AbstractFeatureService)service).isSelectable()) {
+                    selectableLayer.add(service);
+                }
+            }
+        }
+
+        @Override
+        public boolean isLayerAllowed(final MapService layer) {
+            return selectableLayer.contains(layer);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
     private class SelectedLayerFilter extends DefaultLayerFilter {
 
         //~ Instance fields ----------------------------------------------------
 
-        private List<MapService> selectedLayer = new ArrayList<MapService>();
-        private ThemeLayerWidget themeLayer;
+        private final List<MapService> selectedLayer = new ArrayList<MapService>();
+        private final ThemeLayerWidget themeLayer;
 
         //~ Constructors -------------------------------------------------------
 
@@ -553,8 +626,8 @@ public class LayerCombobox extends JComboBox {
 
         //~ Instance fields ----------------------------------------------------
 
-        private Object layer;
-        private int depth;
+        private final Object layer;
+        private final int depth;
 
         //~ Constructors -------------------------------------------------------
 
