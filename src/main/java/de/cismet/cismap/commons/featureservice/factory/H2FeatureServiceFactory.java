@@ -77,6 +77,7 @@ import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.H2AttributeTableRuleSet;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.LinearReferencingInfo;
+import de.cismet.cismap.commons.gui.attributetable.LockFromSameUserAlreadyExistsException;
 import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
 import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -99,6 +100,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     public static final String DEFAULT_DBF_CHARSET = "ISO8859-1";
     public static final String LR_META_TABLE_NAME = "linear_referencing_meta";
     public static final String META_TABLE_NAME = "table_meta";
+    public static final String LOCK_TABLE_NAME = "cs_lock";
     public static final int STATION = 1;
     public static final int STATION_LINE = 2;
     private static final String INSERT_LR_META_DATA = "INSERT INTO \"" + LR_META_TABLE_NAME
@@ -131,6 +133,10 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private static final String CREATE_LR_META_TABLE =
         "create table \"%s\" (id serial, table varchar, lin_ref_reference varchar, domain varchar, src_join_field varchar, targ_join_field varchar, lin_ref_geom varchar, kind int, from_value varchar, till_value varchar);";
     private static final String CREATE_META_TABLE = "create table \"%s\" (id serial, table varchar, format varchar);";
+    private static final String CREATE_LOCK_TABLE = "create table IF NOT EXISTS \"" + LOCK_TABLE_NAME
+                + "\" (\"id\" integer, \"table\" varchar, \"lock_time\" timestamp);";
+    private static final String CREATE_LOCK_TABLE_INDEX = "CREATE INDEX IF NOT EXISTS cs_locks_ind ON \""
+                + LOCK_TABLE_NAME + "\" (\"id\", \"table\");";
 
     //~ Instance fields --------------------------------------------------------
 
@@ -268,6 +274,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     workerThread.firePropertyChange("progress", 5, -1);
                 }
                 createMetaTableIfNotExist();
+                createLockTableIfNotExist();
                 final String tmpTableReference = tableName + "_temp_reference";
 
                 if (file.getAbsolutePath().toLowerCase().endsWith("csv")) {
@@ -545,6 +552,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 }
                 try {
                     createMetaTableIfNotExist();
+                    createLockTableIfNotExist();
                 } catch (Exception e) {
                     LOG.error("Cannot create meta table.", e);
                 }
@@ -755,6 +763,56 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
         }
 
         rs.close();
+    }
+
+    /**
+     * Creates the meta table for linear referencing, if it does not exist.
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    public static void createLockTableIfNotExist() throws Exception {
+        ConnectionWrapper conn = null;
+        Statement st = null;
+        ResultSet rs = null;
+
+        try {
+            Class.forName("org.h2.Driver");
+            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+                        "jdbc:h2:"
+                                + H2FeatureServiceFactory.DB_NAME));
+
+            rs = conn.getMetaData().getTables(null, null, LOCK_TABLE_NAME, null);
+
+            if (!rs.next()) {
+                st = conn.createStatement();
+                // lock table does not exist and should be created
+                st.execute(CREATE_LOCK_TABLE);
+                st.execute(CREATE_LOCK_TABLE_INDEX);
+                st.close();
+            }
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close result set", ex);
+                }
+            }
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close statement", ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close connection", ex);
+                }
+            }
+        }
     }
 
     /**

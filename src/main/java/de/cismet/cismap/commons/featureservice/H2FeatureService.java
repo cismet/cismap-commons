@@ -38,6 +38,9 @@ import de.cismet.cismap.commons.features.FeatureServiceFeature;
 import de.cismet.cismap.commons.features.JDBCFeature;
 import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import de.cismet.cismap.commons.gui.attributetable.LockFromSameUserAlreadyExistsException;
+
+import static de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory.createLockTableIfNotExist;
 
 /**
  * A service, that uses the internal db as data source.
@@ -52,6 +55,18 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     private static final Logger LOG = Logger.getLogger(H2FeatureService.class);
     public static final Map<String, Icon> layerIcons = new HashMap<String, Icon>();
     public static final String H2_FEATURELAYER_TYPE = "H2FeatureServiceLayer"; // NOI18N
+    private static final String LOCK_FEATURE = "INSERT INTO \"" + H2FeatureServiceFactory.LOCK_TABLE_NAME
+                + "\" (\"id\", \"table\", \"lock_time\") VALUES(%s, '%s', now())";
+    private static final String CHECK_LOCKED_FEATURE = "SELECT \"lock_time\" FROM \""
+                + H2FeatureServiceFactory.LOCK_TABLE_NAME
+                + "\" where (\"id\" = %s OR \"id\" is null) and \"table\" = '%s'";
+    private static final String CHECK_LOCKED_FEATURE_TABLE = "SELECT \"lock_time\" FROM \""
+                + H2FeatureServiceFactory.LOCK_TABLE_NAME + "\" where \"table\" = '%s'";
+    private static final String CLEAR_LOCKS = "DELETE FROM \"" + H2FeatureServiceFactory.LOCK_TABLE_NAME + "\"";
+    private static final String UNLOCK = "DELETE FROM \"" + H2FeatureServiceFactory.LOCK_TABLE_NAME
+                + "\" where \"id\" = %s and \"table\" = '%s'";
+    private static final String UNLOCK_TABLE = "DELETE FROM \"" + H2FeatureServiceFactory.LOCK_TABLE_NAME
+                + "\" where \"table\" = '%s'";
 
     static {
         layerIcons.put(
@@ -532,6 +547,142 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         }
 
         return tableExists;
+    }
+
+    /**
+     * Lock the given features.
+     *
+     * @param   id         the id of the feature to lock or null to lock the hole table
+     * @param   tableName  The table name of the feature to lock
+     *
+     * @throws  Exception                               DOCUMENT ME!
+     * @throws  LockFromSameUserAlreadyExistsException  DOCUMENT ME!
+     */
+    public static void lockFeature(final Integer id, final String tableName) throws Exception {
+        ConnectionWrapper conn = null;
+        Statement st = null;
+        ResultSet rs = null;
+
+        try {
+            Class.forName("org.h2.Driver");
+            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+                        "jdbc:h2:"
+                                + H2FeatureServiceFactory.DB_NAME));
+            st = conn.createStatement();
+
+            if (id == null) {
+                rs = st.executeQuery(String.format(CHECK_LOCKED_FEATURE_TABLE, tableName));
+            } else {
+                rs = st.executeQuery(String.format(CHECK_LOCKED_FEATURE, id, tableName));
+            }
+            final boolean lockExists = rs.next();
+
+            if (lockExists) {
+                throw new LockFromSameUserAlreadyExistsException("The lock does already exists", "local user");
+            }
+
+            st.execute(String.format(LOCK_FEATURE, ((id == null) ? "null" : id.toString()), tableName));
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close result set", ex);
+                }
+            }
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close statement", ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close connection", ex);
+                }
+            }
+        }
+    }
+
+    /**
+     * Clear all locks.
+     */
+    public static void clearLocks() {
+        ConnectionWrapper conn = null;
+        Statement st = null;
+
+        try {
+            H2FeatureServiceFactory.createLockTableIfNotExist();
+            Class.forName("org.h2.Driver");
+            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+                        "jdbc:h2:"
+                                + H2FeatureServiceFactory.DB_NAME));
+            st = conn.createStatement();
+
+            st.execute(String.format(CLEAR_LOCKS));
+        } catch (Exception e) {
+            LOG.error("Cannot connect to database", e);
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close statement", ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close connection", ex);
+                }
+            }
+        }
+    }
+
+    /**
+     * Unlock the features, which are described by the given values.
+     *
+     * @param  id         the id of the feature to unlock or null to unlock all features of the given table
+     * @param  tableName  the name of the table to unlock
+     */
+    public static void unlockFeature(final Integer id, final String tableName) {
+        ConnectionWrapper conn = null;
+        Statement st = null;
+
+        try {
+            Class.forName("org.h2.Driver");
+            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
+                        "jdbc:h2:"
+                                + H2FeatureServiceFactory.DB_NAME));
+            st = conn.createStatement();
+
+            if (id == null) {
+                st.execute(String.format(UNLOCK_TABLE, tableName));
+            } else {
+                st.execute(String.format(UNLOCK, id, tableName));
+            }
+        } catch (Exception e) {
+            LOG.error("Cannot connect to database", e);
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close statement", ex);
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOG.warn("Cannot close connection", ex);
+                }
+            }
+        }
     }
 
     /**
