@@ -19,6 +19,8 @@ import org.deegree.datatypes.Types;
 import org.deegree.model.spatialschema.GeometryException;
 import org.deegree.model.spatialschema.JTSAdapter;
 
+import org.jdesktop.swingx.JXTable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +121,7 @@ public class SimpleAttributeTableModel implements TableModel {
                 }
             }
         }
+        fireTableStructureChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
         fireContentsChanged();
     }
 
@@ -359,7 +362,8 @@ public class SimpleAttributeTableModel implements TableModel {
         // todo fuer virtuelle Spalten
         this.attributeNames = remove(this.attributeNames, col);
         this.attributeAlias = remove(this.attributeAlias, col);
-        fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
+        fireTableStructureChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
+//        fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
     }
 
     /**
@@ -367,7 +371,8 @@ public class SimpleAttributeTableModel implements TableModel {
      */
     public void showColumns() {
         fillHeaderArrays();
-        fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
+        fireTableStructureChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
+//        fireContentsChanged(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
     }
 
     /**
@@ -427,6 +432,19 @@ public class SimpleAttributeTableModel implements TableModel {
     protected void fireContentsChanged(final TableModelEvent e) {
         for (final TableModelListener tmp : listener) {
             tmp.tableChanged(e);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  e  DOCUMENT ME!
+     */
+    protected void fireTableStructureChanged(final TableModelEvent e) {
+        for (final TableModelListener tmp : listener) {
+            if (tmp instanceof JXTable) {
+                tmp.tableChanged(e);
+            }
         }
     }
 }
