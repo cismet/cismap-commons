@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import java.io.File;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
     protected AbstractFeatureService service;
     protected List<String[]> aliasAttributeList;
     protected String extension;
+    private boolean absoluteFileName;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -72,7 +75,31 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
         if (filename.contains(".") && (filename.charAt(filename.length() - 4) == '.')) {
             filenameWithoutExt = filename.substring(0, filename.length() - 4);
         }
-        determineDestinationFile(filenameWithoutExt, extension);
+
+        if (absoluteFileName || new File(filename).isAbsolute()) {
+            fileToSaveTo = new File(filename + extension);
+            int index = filename.lastIndexOf("/");
+
+            if (index == -1) {
+                index = filename.lastIndexOf("\\");
+            }
+
+            final File dir = new File(filename.substring(0, index));
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+        } else {
+            determineDestinationFile(filenameWithoutExt, extension);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  absoluteFileName  DOCUMENT ME!
+     */
+    public void setAbsoluteFileName(final boolean absoluteFileName) {
+        this.absoluteFileName = absoluteFileName;
     }
 
     /**
