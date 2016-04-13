@@ -81,6 +81,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.FocusManager;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -131,6 +132,7 @@ import de.cismet.cismap.commons.tools.ExportDbfDownload;
 import de.cismet.cismap.commons.tools.ExportDownload;
 import de.cismet.cismap.commons.tools.ExportShapeDownload;
 import de.cismet.cismap.commons.tools.ExportTxtDownload;
+import de.cismet.cismap.commons.tools.FeatureTools;
 import de.cismet.cismap.commons.tools.SimpleFeatureCollection;
 import de.cismet.cismap.commons.util.SelectionChangedEvent;
 import de.cismet.cismap.commons.util.SelectionChangedListener;
@@ -186,6 +188,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private Object selectionEventSource = null;
     private List<ListSelectionListener> selectionListener = new ArrayList<ListSelectionListener>();
     private TreeSet<Feature> shownAsLocked = new TreeSet<Feature>();
+    private String lastExportPath = DownloadManager.instance().getDestinationDirectory().getAbsolutePath();
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFirstPage;
@@ -221,15 +224,14 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JToolBar.Separator jSeparator1;
     private javax.swing.JToolBar jToolBar1;
-    private javax.swing.JComboBox jcFeatures;
     private javax.swing.JComboBox jcFormat;
     private javax.swing.JPanel jpControl;
+    private javax.swing.JLabel labSegHint;
     private javax.swing.JLabel labStat;
     private javax.swing.JLabel labStatCol;
     private javax.swing.JLabel labWaitingImage;
     private javax.swing.JLabel lblCountLab;
     private javax.swing.JLabel lblCountVal;
-    private javax.swing.JLabel lblFeature;
     private javax.swing.JLabel lblFormat;
     private javax.swing.JLabel lblMaxLab;
     private javax.swing.JLabel lblMaxVal;
@@ -249,6 +251,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private javax.swing.JMenuItem miSpalteAusblenden;
     private javax.swing.JMenuItem miSpaltenUmbenennen;
     private javax.swing.JMenuItem miStatistik;
+    private javax.swing.JPanel panHint;
     private javax.swing.JPanel panWaiting;
     private org.jdesktop.swingx.JXTable table;
     private javax.swing.JScrollPane tableScrollPane;
@@ -298,15 +301,6 @@ public class AttributeTable extends javax.swing.JPanel {
             miFeldberechnung.setVisible(true);
         }
 
-        jcFeatures.setModel(new DefaultComboBoxModel(
-                new Object[] {
-                    new FeatureComboItem(
-                        1,
-                        NbBundle.getMessage(AttributeTable.class, "AttributeTable.FeatureComboItem.allFeatures")),
-                    new FeatureComboItem(
-                        2,
-                        NbBundle.getMessage(AttributeTable.class, "AttributeTable.FeatureComboItem.selectedFeatures"))
-                }));
         jcFormat.setModel(new DefaultComboBoxModel(
                 new Object[] {
                     new ExportTxtDownload(),
@@ -318,6 +312,7 @@ public class AttributeTable extends javax.swing.JPanel {
         if (featureService.getMaxFeaturesPerPage() <= 0) {
             pageSize = -1;
             jpControl.setVisible(false);
+            panHint.setVisible(false);
         } else {
             pageSize = featureService.getMaxFeaturesPerPage();
         }
@@ -367,12 +362,21 @@ public class AttributeTable extends javax.swing.JPanel {
                 @Override
                 public void valueChanged(final ListSelectionEvent e) {
                     if (!e.getValueIsAdjusting()) {
+                        final boolean rowsSelected = table.getSelectedRows().length > 0;
+                        butCopy.setEnabled(rowsSelected);
+                        butDelete.setEnabled(rowsSelected);
+                        butClearSelection.setEnabled(rowsSelected);
+                        butMoveSelectedRows.setEnabled(rowsSelected);
+                        butZoomToSelection.setEnabled(rowsSelected);
+                        butDelete.setEnabled(isDeleteButtonEnabled());
+
                         if (!selectionChangeFromMap) {
-                            synchronizeTableSeletionWithMap();
-                            SelectionManager.getInstance().featureSelectionChanged(null);
+                            SelectionManager.getInstance()
+                                    .setSelectedFeaturesForService(featureService, getSelectedFeatures());
+//                            SelectionManager.getInstance().featureSelectionChanged(null);
                         }
 
-                        if (tbProcessing.isSelected()) { // && !selectionChangeFromMap) {
+                        if (tbProcessing.isSelected()) {
                             final int[] rows = table.getSelectedRows();
 
                             if (!Arrays.equals(lastRows, rows)) {
@@ -384,14 +388,6 @@ public class AttributeTable extends javax.swing.JPanel {
                             }
                             lastRows = rows;
                         }
-
-                        final boolean rowsSelected = table.getSelectedRows().length > 0;
-                        butCopy.setEnabled(rowsSelected);
-                        butDelete.setEnabled(rowsSelected);
-                        butClearSelection.setEnabled(rowsSelected);
-                        butMoveSelectedRows.setEnabled(rowsSelected);
-                        butZoomToSelection.setEnabled(rowsSelected);
-                        butDelete.setEnabled(isDeleteButtonEnabled());
                     }
 
                     table.repaint();
@@ -430,73 +426,14 @@ public class AttributeTable extends javax.swing.JPanel {
                 @Override
                 public void selectionChanged(final SelectionChangedEvent event) {
                     selectionEventSource = event.getSource();
+                    selectionChangeFromMap = true;
                     setSelection(SelectionManager.getInstance().getSelectedFeatures(featureService));
+                    selectionChangeFromMap = false;
                     selectionEventSource = null;
                 }
             };
 
         SelectionManager.getInstance().addSelectionChangedListener(featureSelectionChangedListener);
-
-//        featureCollectionListener = new FeatureCollectionListener() {
-//
-//                @Override
-//                public void featuresAdded(final FeatureCollectionEvent fce) {
-//                }
-//
-//                @Override
-//                public void allFeaturesRemoved(final FeatureCollectionEvent fce) {
-//                }
-//
-//                @Override
-//                public void featuresRemoved(final FeatureCollectionEvent fce) {
-//                }
-//
-//                @Override
-//                public void featuresChanged(final FeatureCollectionEvent fce) {
-//                }
-//
-//                @Override
-//                public void featureSelectionChanged(final FeatureCollectionEvent fce) {
-//                    if (model == null) {
-//                        return;
-//                    }
-//                    final Collection<Feature> features = fce.getFeatureCollection().getSelectedFeatures();
-//                    final List<FeatureServiceFeature> selectedFeatures = new ArrayList<FeatureServiceFeature>();
-//                    final List<FeatureServiceFeature> tableFeatures = model.getFeatureServiceFeatures();
-//                    final LayerProperties layerProperties = featureService.getLayerProperties();
-//
-//                    for (final Feature feature : features) {
-//                        if (feature instanceof FeatureServiceFeature) {
-//                            if (((FeatureServiceFeature)feature).getLayerProperties() == layerProperties) {
-//                                selectedFeatures.add((FeatureServiceFeature)feature);
-//                            }
-//                        }
-//                    }
-//
-//                    table.getSelectionModel().setValueIsAdjusting(true);
-//                    for (int index = 0; index < tableFeatures.size(); ++index) {
-//                        final FeatureServiceFeature feature = tableFeatures.get(table.convertRowIndexToModel(index));
-//
-//                        if (selectedFeatures.contains(feature)) {
-//                            table.addRowSelectionInterval(index, index);
-//                        } else {
-//                            table.removeRowSelectionInterval(index, index);
-//                        }
-//                    }
-//
-//                    selectionChangeFromMap = true;
-//                    table.getSelectionModel().setValueIsAdjusting(false);
-//                    selectionChangeFromMap = false;
-//                }
-//
-//                @Override
-//                public void featureReconsiderationRequested(final FeatureCollectionEvent fce) {
-//                }
-//
-//                @Override
-//                public void featureCollectionChanged() {
-//                }
-//            };
 
         repaintListener = new RepaintListener() {
 
@@ -572,19 +509,22 @@ public class AttributeTable extends javax.swing.JPanel {
         final List<FeatureServiceFeature> tableFeatures = model.getFeatureServiceFeatures();
 
         table.getSelectionModel().setValueIsAdjusting(true);
+        final int[] selectedRows = table.getSelectedRows();
+        Arrays.sort(selectedRows);
+
         for (int index = 0; index < tableFeatures.size(); ++index) {
             final FeatureServiceFeature feature = tableFeatures.get(table.convertRowIndexToModel(index));
+            final boolean contained = (selectedFeatures != null) && selectedFeatures.contains(feature);
+            final boolean selected = Arrays.binarySearch(selectedRows, index) >= 0;
 
-            if (selectedFeatures.contains(feature)) {
+            if (contained && !selected) {
                 table.addRowSelectionInterval(index, index);
-            } else {
+            } else if (!contained && selected) {
                 table.removeRowSelectionInterval(index, index);
             }
         }
 
-        selectionChangeFromMap = true;
         table.getSelectionModel().setValueIsAdjusting(false);
-        selectionChangeFromMap = false;
     }
 
     /**
@@ -1147,12 +1087,12 @@ public class AttributeTable extends javax.swing.JPanel {
         diaExport = new javax.swing.JDialog();
         jPanel4 = new javax.swing.JPanel();
         jPanel5 = new javax.swing.JPanel();
-        lblFeature = new javax.swing.JLabel();
         lblFormat = new javax.swing.JLabel();
-        jcFeatures = new javax.swing.JComboBox();
         jcFormat = new javax.swing.JComboBox();
         butExpOk = new javax.swing.JButton();
         butCancel = new javax.swing.JButton();
+        panHint = new javax.swing.JPanel();
+        labSegHint = new javax.swing.JLabel();
         jToolBar1 = new javax.swing.JToolBar();
         butPrintPreview = new javax.swing.JButton();
         butPrint = new javax.swing.JButton();
@@ -1458,19 +1398,6 @@ public class AttributeTable extends javax.swing.JPanel {
         jPanel5.setBorder(null);
         jPanel5.setLayout(new java.awt.GridBagLayout());
 
-        lblFeature.setText(org.openide.util.NbBundle.getMessage(
-                AttributeTable.class,
-                "AttributeTable.lblFeature.text")); // NOI18N
-        lblFeature.setMaximumSize(new java.awt.Dimension(100, 20));
-        lblFeature.setMinimumSize(new java.awt.Dimension(100, 20));
-        lblFeature.setPreferredSize(new java.awt.Dimension(100, 20));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel5.add(lblFeature, gridBagConstraints);
-
         lblFormat.setText(org.openide.util.NbBundle.getMessage(AttributeTable.class, "AttributeTable.lblFormat.text")); // NOI18N
         lblFormat.setMaximumSize(new java.awt.Dimension(100, 20));
         lblFormat.setMinimumSize(new java.awt.Dimension(100, 20));
@@ -1481,13 +1408,6 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jPanel5.add(lblFormat, gridBagConstraints);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        jPanel5.add(jcFeatures, gridBagConstraints);
 
         jcFormat.addItemListener(new java.awt.event.ItemListener() {
 
@@ -1545,6 +1465,20 @@ public class AttributeTable extends javax.swing.JPanel {
         diaExport.getContentPane().add(jPanel4, java.awt.BorderLayout.CENTER);
 
         setLayout(new java.awt.GridBagLayout());
+
+        labSegHint.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
+        labSegHint.setForeground(new java.awt.Color(200, 16, 10));
+        labSegHint.setText(org.openide.util.NbBundle.getMessage(
+                AttributeTable.class,
+                "AttributeTable.labSegHint.text",
+                new Object[] {}));                              // NOI18N
+        panHint.add(labSegHint);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(panHint, gridBagConstraints);
 
         jToolBar1.setRollover(true);
 
@@ -1865,7 +1799,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         add(jToolBar1, gridBagConstraints);
@@ -1881,7 +1815,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
@@ -1891,7 +1825,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
@@ -1899,6 +1833,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
         jpControl.setLayout(new java.awt.GridBagLayout());
 
+        btnFirstPage.setForeground(new java.awt.Color(200, 16, 10));
         btnFirstPage.setText(org.openide.util.NbBundle.getMessage(
                 AttributeTable.class,
                 "AttributeTable.btnFirstPage.text"));        // NOI18N
@@ -1916,6 +1851,7 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(btnFirstPage, gridBagConstraints);
 
+        btnPrevPage.setForeground(new java.awt.Color(200, 16, 10));
         btnPrevPage.setText(org.openide.util.NbBundle.getMessage(
                 AttributeTable.class,
                 "AttributeTable.btnPrevPage.text"));        // NOI18N
@@ -1933,6 +1869,7 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(btnPrevPage, gridBagConstraints);
 
+        txtCurrentPage.setForeground(new java.awt.Color(200, 16, 10));
         txtCurrentPage.setText(org.openide.util.NbBundle.getMessage(
                 AttributeTable.class,
                 "AttributeTable.txtCurrentPage.text"));        // NOI18N
@@ -1955,6 +1892,7 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(lblTotalPages, gridBagConstraints);
 
+        btnNextPage.setForeground(new java.awt.Color(200, 16, 10));
         btnNextPage.setText(org.openide.util.NbBundle.getMessage(
                 AttributeTable.class,
                 "AttributeTable.btnNextPage.text"));        // NOI18N
@@ -1972,6 +1910,7 @@ public class AttributeTable extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         jpControl.add(btnNextPage, gridBagConstraints);
 
+        btnLastPage.setForeground(new java.awt.Color(200, 16, 10));
         btnLastPage.setText(org.openide.util.NbBundle.getMessage(
                 AttributeTable.class,
                 "AttributeTable.btnLastPage.text"));        // NOI18N
@@ -1991,7 +1930,7 @@ public class AttributeTable extends javax.swing.JPanel {
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         add(jpControl, gridBagConstraints);
     } // </editor-fold>//GEN-END:initComponents
 
@@ -2000,7 +1939,7 @@ public class AttributeTable extends javax.swing.JPanel {
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butPrintPreviewActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintPreviewActionPerformed
+    private void butPrintPreviewActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butPrintPreviewActionPerformed
         final WaitingDialogThread<JasperPrint> wdt = new WaitingDialogThread<JasperPrint>(StaticSwingTools
                         .getParentFrame(this),
                 true,
@@ -2029,7 +1968,23 @@ public class AttributeTable extends javax.swing.JPanel {
                     try {
                         final JasperPrint jasperPrint = get();
 
-                        final JRViewer aViewer = new JRViewer(jasperPrint);
+                        final CustomJrViewer aViewer = new CustomJrViewer(jasperPrint);
+                        final List<JRSaveContributor> contributors = new ArrayList<JRSaveContributor>();
+
+                        for (final JRSaveContributor contributor : aViewer.getSaveContributors()) {
+                            if (!contributor.getDescription().toLowerCase().contains("csv")
+                                        && !contributor.getDescription().toLowerCase().contains("multiple sheets")) {
+                                contributors.add(contributor);
+                            }
+                        }
+
+                        contributors.add(new ShpSaveContributor());
+                        contributors.add(new DbfSaveContributor());
+                        contributors.add(new CsvSaveContributor());
+                        contributors.add(new TxtSaveContributor());
+
+                        aViewer.setSaveContributors(contributors.toArray(new JRSaveContributor[contributors.size()]));
+
                         final JFrame aFrame = new JFrame(org.openide.util.NbBundle.getMessage(
                                     AttributeTable.class,
                                     "AttributeTable.butPrintPreviewActionPerformed.aFrame.title")); // NOI18N
@@ -2051,70 +2006,70 @@ public class AttributeTable extends javax.swing.JPanel {
             };
 
         wdt.start();
-    } //GEN-LAST:event_butPrintPreviewActionPerformed
+    }//GEN-LAST:event_butPrintPreviewActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnPrevPageActionPerformed
+    private void btnPrevPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrevPageActionPerformed
         if (currentPage > 1) {
             loadModel(--currentPage);
         }
-    }                                                                               //GEN-LAST:event_btnPrevPageActionPerformed
+    }//GEN-LAST:event_btnPrevPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnFirstPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnFirstPageActionPerformed
+    private void btnFirstPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFirstPageActionPerformed
         currentPage = 1;
         loadModel(currentPage);
-    }                                                                                //GEN-LAST:event_btnFirstPageActionPerformed
+    }//GEN-LAST:event_btnFirstPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnNextPageActionPerformed
+    private void btnNextPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNextPageActionPerformed
         if ((pageSize != -1) && ((currentPage * pageSize) < itemCount)) {
             loadModel(++currentPage);
         }
-    }                                                                               //GEN-LAST:event_btnNextPageActionPerformed
+    }//GEN-LAST:event_btnNextPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void btnLastPageActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_btnLastPageActionPerformed
+    private void btnLastPageActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLastPageActionPerformed
         currentPage = itemCount / pageSize;
 
         if ((pageSize != -1) && ((currentPage * pageSize) < itemCount)) {
             ++currentPage;
             loadModel(currentPage);
         }
-    } //GEN-LAST:event_btnLastPageActionPerformed
+    }//GEN-LAST:event_btnLastPageActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miSpalteAusblendenActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miSpalteAusblendenActionPerformed
+    private void miSpalteAusblendenActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miSpalteAusblendenActionPerformed
         butShowCols.setEnabled(true);
         model.hideColumn(popupColumn);
-    }                                                                                      //GEN-LAST:event_miSpalteAusblendenActionPerformed
+    }//GEN-LAST:event_miSpalteAusblendenActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miSpaltenUmbenennenActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miSpaltenUmbenennenActionPerformed
+    private void miSpaltenUmbenennenActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miSpaltenUmbenennenActionPerformed
         final String newName = (String)JOptionPane.showInputDialog(
                 this,
                 "Geben Sie den neuen Namen der Spalte ein.",
@@ -2126,52 +2081,52 @@ public class AttributeTable extends javax.swing.JPanel {
         if (newName != null) {
             model.setColumnName(popupColumn, newName);
         }
-    }                                                                                       //GEN-LAST:event_miSpaltenUmbenennenActionPerformed
+    }//GEN-LAST:event_miSpaltenUmbenennenActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butShowColsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butShowColsActionPerformed
+    private void butShowColsActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butShowColsActionPerformed
         model.showColumns();
         butShowCols.setEnabled(false);
         setTableSize();
-    }                                                                               //GEN-LAST:event_butShowColsActionPerformed
+    }//GEN-LAST:event_butShowColsActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butColWidthActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butColWidthActionPerformed
+    private void butColWidthActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butColWidthActionPerformed
         setTableSize();
-    }                                                                               //GEN-LAST:event_butColWidthActionPerformed
+    }//GEN-LAST:event_butColWidthActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butSelectAllActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butSelectAllActionPerformed
+    private void butSelectAllActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butSelectAllActionPerformed
         table.getSelectionModel().setSelectionInterval(0, model.getRowCount() - 1);
-    }                                                                                //GEN-LAST:event_butSelectAllActionPerformed
+    }//GEN-LAST:event_butSelectAllActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butClearSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butClearSelectionActionPerformed
+    private void butClearSelectionActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butClearSelectionActionPerformed
         table.getSelectionModel().clearSelection();
-    }                                                                                     //GEN-LAST:event_butClearSelectionActionPerformed
+    }//GEN-LAST:event_butClearSelectionActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butInvertSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butInvertSelectionActionPerformed
+    private void butInvertSelectionActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butInvertSelectionActionPerformed
         final int[] selectedIndices = table.getSelectedRows();
         table.selectAll();
         table.getSelectionModel().setValueIsAdjusting(true);
@@ -2180,14 +2135,14 @@ public class AttributeTable extends javax.swing.JPanel {
             table.removeRowSelectionInterval(selectedIndex, selectedIndex);
         }
         table.getSelectionModel().setValueIsAdjusting(false);
-    } //GEN-LAST:event_butInvertSelectionActionPerformed
+    }//GEN-LAST:event_butInvertSelectionActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butMoveSelectedRowsActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butMoveSelectedRowsActionPerformed
+    private void butMoveSelectedRowsActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butMoveSelectedRowsActionPerformed
         for (int i = 0; i < model.getColumnCount(); ++i) {
             table.setSortOrder(i, SortOrder.UNSORTED);
         }
@@ -2203,14 +2158,14 @@ public class AttributeTable extends javax.swing.JPanel {
         }
 
         table.getSelectionModel().setSelectionInterval(0, selectedRowCount - 1);
-    } //GEN-LAST:event_butMoveSelectedRowsActionPerformed
+    }//GEN-LAST:event_butMoveSelectedRowsActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butZoomToSelectionActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butZoomToSelectionActionPerformed
+    private void butZoomToSelectionActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butZoomToSelectionActionPerformed
         final int[] selectedRows = table.getSelectedRows();
         boolean first = true;
         int srid = 0;
@@ -2249,14 +2204,14 @@ public class AttributeTable extends javax.swing.JPanel {
         } else {
             LOG.error("MappingComponent is not set");
         }
-    } //GEN-LAST:event_butZoomToSelectionActionPerformed
+    }//GEN-LAST:event_butZoomToSelectionActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miStatistikActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miStatistikActionPerformed
+    private void miStatistikActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miStatistikActionPerformed
         final int count = model.getRowCount();
         final Double[] values = new Double[model.getRowCount()];
         double min = Double.POSITIVE_INFINITY;
@@ -2330,116 +2285,69 @@ public class AttributeTable extends javax.swing.JPanel {
         diaStatistic.setResizable(false);
         labStatCol.setText(model.getColumnName(popupColumn));
         StaticSwingTools.showDialog(diaStatistic);
-    } //GEN-LAST:event_miStatistikActionPerformed
+    }//GEN-LAST:event_miStatistikActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butOkActionPerformed
+    private void butOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butOkActionPerformed
         diaStatistic.setVisible(false);
-    }                                                                         //GEN-LAST:event_butOkActionPerformed
+    }//GEN-LAST:event_butOkActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butExportActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butExportActionPerformed
+    private void butExportActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butExportActionPerformed
         if ((featureService.getLayerProperties().getAttributeTableRuleSet() != null)
                     && featureService.getLayerProperties().getAttributeTableRuleSet().hasCustomExportFeaturesMethod()) {
             featureService.getLayerProperties().getAttributeTableRuleSet().exportFeatures();
             return;
         }
 
-        diaExport.setSize(400, 150);
+        diaExport.setSize(400, 130);
         diaExport.pack();
         diaExport.setResizable(false);
         diaExport.setModal(true);
         StaticSwingTools.showDialog(diaExport);
-    } //GEN-LAST:event_butExportActionPerformed
+    }//GEN-LAST:event_butExportActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butExpOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butExpOkActionPerformed
+    private void butExpOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butExpOkActionPerformed
         diaExport.setVisible(false);
-
-        final List<FeatureServiceFeature> features = new ArrayList<FeatureServiceFeature>();
-        final FeatureComboItem featureComboItem = (FeatureComboItem)jcFeatures.getSelectedItem();
-
-        if (featureComboItem.getId() == 2) {
-            // export all selected features
-            final int[] selectedRows = table.getSelectedRows();
-
-            for (final int row : selectedRows) {
-                final FeatureServiceFeature feature = model.getFeatureServiceFeature(table.convertRowIndexToModel(row));
-
-                if (feature != null) {
-                    features.add(feature);
-                }
-            }
-        } else if (featureComboItem.getId() == 1) {
-            // export all features
-            for (int i = 0; i < model.getRowCount(); ++i) {
-                features.add(model.getFeatureServiceFeature(table.convertRowIndexToModel(i)));
-            }
-        }
-
-        if (features.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                this,
-                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExportActionPerformed.noFeatures.text"),
-                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExportActionPerformed.noFeatures.title"),
-                JOptionPane.INFORMATION_MESSAGE);
-            return;
-        }
-
-        if (DownloadManagerDialog.getInstance().showAskingForUserTitleDialog(this)) {
-            try {
-                ExportDownload ed = (ExportDownload)jcFormat.getSelectedItem();
-                // every download needs its own instance of the Download class
-                ed = ed.getClass().newInstance();
-                final List<String[]> attributeNames = getAliasAttributeList();
-                ed.init(featureService.getName(),
-                    ed.getDefaultExtension(),
-                    features.toArray(new FeatureServiceFeature[features.size()]),
-                    featureService,
-                    attributeNames);
-
-                DownloadManager.instance().add(ed);
-            } catch (Exception e) {
-                LOG.error("The ExportDownload class has possibly no public constructor without arguments.", e);
-            }
-        }
-    } //GEN-LAST:event_butExpOkActionPerformed
+        startExport((ExportDownload)jcFormat.getSelectedItem(), null);
+    }//GEN-LAST:event_butExpOkActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butCancelActionPerformed
+    private void butCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butCancelActionPerformed
         diaExport.setVisible(false);
-    }                                                                             //GEN-LAST:event_butCancelActionPerformed
+    }//GEN-LAST:event_butCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void jcFormatItemStateChanged(final java.awt.event.ItemEvent evt) { //GEN-FIRST:event_jcFormatItemStateChanged
-    }                                                                           //GEN-LAST:event_jcFormatItemStateChanged
+    private void jcFormatItemStateChanged(final java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jcFormatItemStateChanged
+    }//GEN-LAST:event_jcFormatItemStateChanged
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butPrintActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPrintActionPerformed
+    private void butPrintActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butPrintActionPerformed
         if ((featureService.getLayerProperties().getAttributeTableRuleSet() != null)
                     && featureService.getLayerProperties().getAttributeTableRuleSet().hasCustomPrintFeaturesMethod()) {
             featureService.getLayerProperties().getAttributeTableRuleSet().printFeatures();
@@ -2482,24 +2390,24 @@ public class AttributeTable extends javax.swing.JPanel {
             };
 
         wdt.start();
-    } //GEN-LAST:event_butPrintActionPerformed
+    }//GEN-LAST:event_butPrintActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbProcessingActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_tbProcessingActionPerformed
+    private void tbProcessingActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tbProcessingActionPerformed
         changeProcessingModeIntern(false);
         butPaste.setEnabled(isPasteButtonEnabled());
-    }                                                                                //GEN-LAST:event_tbProcessingActionPerformed
+    }//GEN-LAST:event_tbProcessingActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butUndoActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butUndoActionPerformed
+    private void butUndoActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butUndoActionPerformed
         final int ans = JOptionPane.showConfirmDialog(
                 this,
                 NbBundle.getMessage(AttributeTable.class, "AttributeTable.butUndoActionPerformed().text"),
@@ -2513,25 +2421,25 @@ public class AttributeTable extends javax.swing.JPanel {
                 }
             }
         }
-    } //GEN-LAST:event_butUndoActionPerformed
+    }//GEN-LAST:event_butUndoActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butAttribActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butAttribActionPerformed
+    private void butAttribActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butAttribActionPerformed
         if (searchPanel != null) {
             searchPanel.openPanel(this, featureService);
         }
-    }                                                                             //GEN-LAST:event_butAttribActionPerformed
+    }//GEN-LAST:event_butAttribActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butDeleteActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butDeleteActionPerformed
+    private void butDeleteActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butDeleteActionPerformed
         final int[] selectedRows = table.getSelectedRows();
         final List<ModifiableFeature> featuresToDelete = new ArrayList<ModifiableFeature>();
 
@@ -2647,14 +2555,14 @@ public class AttributeTable extends javax.swing.JPanel {
             };
 
         wdt.start();
-    } //GEN-LAST:event_butDeleteActionPerformed
+    }//GEN-LAST:event_butDeleteActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void miFeldberechnungActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_miFeldberechnungActionPerformed
+    private void miFeldberechnungActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_miFeldberechnungActionPerformed
         final String attrName = model.getColumnAttributeName(popupColumn);
         final FeatureServiceAttribute attr = (FeatureServiceAttribute)featureService.getFeatureServiceAttributes()
                     .get(attrName);
@@ -2720,29 +2628,29 @@ public class AttributeTable extends javax.swing.JPanel {
                 }
             }
         }
-    } //GEN-LAST:event_miFeldberechnungActionPerformed
+    }//GEN-LAST:event_miFeldberechnungActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butCopyActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butCopyActionPerformed
+    private void butCopyActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butCopyActionPerformed
         copySelectedFeaturesToClipboard();
 
         for (final AttributeTable tab : instances) {
             tab.butPaste.setEnabled(isPasteButtonEnabled());
         }
-    } //GEN-LAST:event_butCopyActionPerformed
+    }//GEN-LAST:event_butCopyActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void butPasteActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butPasteActionPerformed
+    private void butPasteActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butPasteActionPerformed
         pasteSelectedFeaturesfromClipboard();
-    }                                                                            //GEN-LAST:event_butPasteActionPerformed
+    }//GEN-LAST:event_butPasteActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -2840,6 +2748,95 @@ public class AttributeTable extends javax.swing.JPanel {
     }
 
     /**
+     * DOCUMENT ME!
+     *
+     * @param  ed    DOCUMENT ME!
+     * @param  file  DOCUMENT ME!
+     */
+    private void startExport(ExportDownload ed, final File file) {
+        final List<FeatureServiceFeature> features = new ArrayList<FeatureServiceFeature>();
+        final int[] selectedRows = table.getSelectedRows();
+        int option = 0;
+
+        if (selectedRows != null) {
+            for (final int row : selectedRows) {
+                final FeatureServiceFeature feature = model.getFeatureServiceFeature(table.convertRowIndexToModel(row));
+
+                if (feature != null) {
+                    features.add(feature);
+                }
+            }
+        }
+
+        if (!features.isEmpty()) {
+            option = JOptionPane.showOptionDialog(
+                    AttributeTable.this,
+                    "Alle Features exportieren oder nur die ausgewählten?",
+                    "Features exportieren",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new Object[] { "alle Features", "selektierte Features" },
+                    "alle Features");
+        }
+
+        if (option == -1) {
+            return;
+        } else if (option == 0) {
+            // export all features
+            for (int i = 0; i < model.getRowCount(); ++i) {
+                features.add(model.getFeatureServiceFeature(table.convertRowIndexToModel(i)));
+            }
+        }
+
+        if (features.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                this,
+                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExportActionPerformed.noFeatures.text"),
+                NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExportActionPerformed.noFeatures.title"),
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        try {
+            // every download needs its own instance of the Download class
+            ed = ed.getClass().newInstance();
+            File outputFile = file;
+
+            if (outputFile == null) {
+                outputFile = StaticSwingTools.chooseFile(
+                        lastExportPath,
+                        true,
+                        new String[] { ed.getDefaultExtension().substring(1) },
+                        ed.getDefaultExtension(),
+                        this);
+            }
+
+            if (outputFile != null) {
+                lastExportPath = outputFile.getParent();
+                final List<String[]> attributeNames;
+
+                if (!ed.getClass().getName().toLowerCase().contains("csv")
+                            && !ed.getClass().getName().toLowerCase().contains("txt")) {
+                    attributeNames = getAliasAttributeList(true);
+                } else {
+                    attributeNames = getAliasAttributeList(false);
+                }
+
+                ed.init(outputFile.getAbsolutePath(),
+                    "",
+                    features.toArray(new FeatureServiceFeature[features.size()]),
+                    featureService,
+                    attributeNames);
+
+                DownloadManager.instance().add(ed);
+            }
+        } catch (Exception e) {
+            LOG.error("The ExportDownload class has possibly no public constructor without arguments.", e);
+        }
+    }
+
+    /**
      * Reloads the model.
      */
     public void reload() {
@@ -2861,7 +2858,7 @@ public class AttributeTable extends javax.swing.JPanel {
     private void saveChangedRows(final boolean forceSave) {
         boolean save = forceSave;
 
-        if (!save && (!modifiedFeatures.isEmpty() || !lockedFeatures.isEmpty())) {
+        if (!save && (!modifiedFeatures.isEmpty())) {
             final int ans = JOptionPane.showConfirmDialog(
                     AttributeTable.this,
                     NbBundle.getMessage(
@@ -2902,14 +2899,14 @@ public class AttributeTable extends javax.swing.JPanel {
                             }
 
                             try {
-                                if ((features != null) && (features.size() > 0)) {
+                                if ((features.size() > 0)) {
                                     final FeatureCollection fc = new SimpleFeatureCollection(
                                             String.valueOf(System.currentTimeMillis()),
                                             features.toArray(new FeatureServiceFeature[features.size()]),
-                                            getAliasAttributeList());
+                                            getAliasAttributeList(true));
                                     String filename = ((ShapeFileFeatureService)featureService).getDocumentURI()
                                                 .getPath();
-                                    if (filename.indexOf(".") != -1) {
+                                    if (filename.contains(".")) {
                                         filename = filename.substring(0, filename.lastIndexOf("."));
                                     }
 
@@ -3045,14 +3042,25 @@ public class AttributeTable extends javax.swing.JPanel {
     /**
      * Provides a list with the alias names of all attributes.
      *
+     * @param   withGeometryColumn  DOCUMENT ME!
+     *
      * @return  the list contains string arrays. Every array has 2 strings. The first string is the alias name and the
      *          second string is the original name
      */
-    private List<String[]> getAliasAttributeList() {
+    private List<String[]> getAliasAttributeList(final boolean withGeometryColumn) {
         final List<String[]> attrNames = new ArrayList<String[]>();
+        final Map<String, FeatureServiceAttribute> attributeMap = featureService.getFeatureServiceAttributes();
 
         for (int i = 0; i < table.getColumnCount(false); ++i) {
             final int modelCol = table.convertColumnIndexToModel(i);
+
+            if (!withGeometryColumn) {
+                final FeatureServiceAttribute attr = attributeMap.get(model.getColumnAttributeName(modelCol));
+                if ((attr != null) && attr.isGeometry()) {
+                    continue;
+                }
+            }
+
             final String[] aliasAttr = new String[2];
 
             aliasAttr[0] = model.getColumnName(modelCol);
@@ -3199,6 +3207,7 @@ public class AttributeTable extends javax.swing.JPanel {
      * @param  removeOldSelection  DOCUMENT ME!
      */
     public void applySelection(final Object origin, List<Feature> selectedFeatures, final boolean removeOldSelection) {
+        selectionChangeFromMap = true;
         selectionEventSource = origin;
         if (selectedFeatures == null) {
             selectedFeatures = SelectionManager.getInstance().getSelectedFeatures(featureService);
@@ -3206,16 +3215,16 @@ public class AttributeTable extends javax.swing.JPanel {
 
         if (removeOldSelection) {
             table.getSelectionModel().clearSelection();
-        } else {
-            if (model != null) {
-                final int[] selectedRows = table.getSelectedRows();
+        }
 
-                for (final int i : selectedRows) {
-                    final Feature f = model.getFeatureServiceFeature(table.convertRowIndexToModel(i));
+        if (model != null) {
+            final int[] selectedRows = table.getSelectedRows();
 
-                    if (!selectedFeatures.contains(f)) {
-                        selectedFeatures.add(f);
-                    }
+            for (final int i : selectedRows) {
+                final Feature f = model.getFeatureServiceFeature(table.convertRowIndexToModel(i));
+
+                if (!selectedFeatures.contains(f)) {
+                    selectedFeatures.add(f);
                 }
             }
         }
@@ -3224,6 +3233,7 @@ public class AttributeTable extends javax.swing.JPanel {
             setSelection(selectedFeatures);
         }
         selectionEventSource = null;
+        selectionChangeFromMap = false;
     }
 
     /**
@@ -3737,7 +3747,11 @@ public class AttributeTable extends javax.swing.JPanel {
             final Object result = model.getValueAt(table.convertRowIndexToModel(index), col);
 
             if (result != null) {
-                return String.valueOf(result);
+                if ((result instanceof Float) || (result instanceof Double)) {
+                    return FeatureTools.FORMATTER.format(result);
+                } else {
+                    return String.valueOf(result);
+                }
             } else {
                 return null;
             }
@@ -3927,6 +3941,168 @@ public class AttributeTable extends javax.swing.JPanel {
 
         @Override
         public void rowsUpdated(final int firstRow, final int endRow, final int column) {
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class CustomJrViewer extends JRViewer {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new CustomJrViewer object.
+         *
+         * @param  jrPrint  DOCUMENT ME!
+         */
+        public CustomJrViewer(final JasperPrint jrPrint) {
+            super(jrPrint);
+            btnReload.setVisible(false);
+            btnSave.setToolTipText(NbBundle.getMessage(AttributeTable.class, "AttributeTable.butExport.toolTipText"));
+            btnSave.setIcon(new javax.swing.ImageIcon(
+                    getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-export.png")));
+            btnSave.setToolTipText(org.openide.util.NbBundle.getMessage(
+                    AttributeTable.class,
+                    "AttributeTable.butExport.toolTipText"));
+            btnPrint.setIcon(new javax.swing.ImageIcon(
+                    getClass().getResource("/de/cismet/cismap/commons/gui/attributetable/res/icon-print.png")));
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        protected void loadReport(final JasperPrint jrPrint) {
+            super.loadReport(jrPrint);
+            btnReload.setVisible(false);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private abstract class ExportSaveContributor extends JRSaveContributor {
+
+        //~ Instance fields ----------------------------------------------------
+
+        protected boolean withGeometries;
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public abstract ExportDownload getExportDownload();
+
+        @Override
+        public void save(final JasperPrint jp, final File file) throws JRException {
+            startExport(getExportDownload(), file);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class ShpSaveContributor extends ExportSaveContributor {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public ExportDownload getExportDownload() {
+            return new ExportShapeDownload();
+        }
+
+        @Override
+        public String getDescription() {
+            return "Shape (*.shp)";
+        }
+
+        @Override
+        public boolean accept(final File f) {
+            return (f != null) && f.getAbsolutePath().toLowerCase().endsWith(".shp");
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class CsvSaveContributor extends ExportSaveContributor {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public ExportDownload getExportDownload() {
+            return new ExportCsvDownload();
+        }
+
+        @Override
+        public String getDescription() {
+            return "CSV (*.csv)";
+        }
+
+        @Override
+        public boolean accept(final File f) {
+            return (f != null) && f.getAbsolutePath().toLowerCase().endsWith(".csv");
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class DbfSaveContributor extends ExportSaveContributor {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public ExportDownload getExportDownload() {
+            return new ExportDbfDownload();
+        }
+
+        @Override
+        public String getDescription() {
+            return "DBF (*.dbf)";
+        }
+
+        @Override
+        public boolean accept(final File f) {
+            return (f != null) && f.getAbsolutePath().toLowerCase().endsWith(".dbf");
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class TxtSaveContributor extends ExportSaveContributor {
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public ExportDownload getExportDownload() {
+            return new ExportTxtDownload();
+        }
+
+        @Override
+        public String getDescription() {
+            return "TXT (*.txt)";
+        }
+
+        @Override
+        public boolean accept(final File f) {
+            return (f != null) && f.getAbsolutePath().toLowerCase().endsWith(".txt");
         }
     }
 }
