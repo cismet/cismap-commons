@@ -42,7 +42,7 @@ public class ExportTxtDownload extends ExportDownload {
 
     protected String separator = "\t";
     protected boolean writeHeader = true;
-    protected String nullValue = "<null>";
+    protected String nullValue = "";
     protected String quotes = null;
 
     //~ Constructors -----------------------------------------------------------
@@ -187,7 +187,11 @@ public class ExportTxtDownload extends ExportDownload {
                         && ((tmp instanceof String) || (tmp instanceof com.vividsolutions.jts.geom.Geometry))) {
                 result.append(quotes).append(String.valueOf(tmp)).append(quotes);
             } else {
-                result.append(String.valueOf(tmp));
+                if ((tmp instanceof Float) || (tmp instanceof Double)) {
+                    result.append(FeatureTools.FORMATTER.format(tmp));
+                } else {
+                    result.append(String.valueOf(tmp));
+                }
             }
         }
 
