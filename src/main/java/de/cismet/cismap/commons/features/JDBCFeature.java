@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.Map;
 
 import de.cismet.cismap.commons.featureservice.H2AttributeTableRuleSet;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.util.SelectionManager;
 
 import de.cismet.cismap.linearreferencing.tools.StationEditorInterface;
 
@@ -97,6 +99,7 @@ public class JDBCFeature extends DefaultFeatureServiceFeature implements Modifia
                 if (!((tableRuleSet.getAllLinRefInfos() != null) && !tableRuleSet.getAllLinRefInfos().isEmpty())) {
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().addFeature(this);
                     CismapBroker.getInstance().getMappingComponent().getFeatureCollection().holdFeature(this);
+                    SelectionManager.getInstance().addSelectedFeatures(Collections.nCopies(1, this));
                     setBackgroundColor(new Color(255, 91, 0));
                 }
             }

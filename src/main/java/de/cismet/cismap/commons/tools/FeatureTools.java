@@ -23,6 +23,9 @@ import java.math.BigDecimal;
 
 import java.sql.Timestamp;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+
 import java.util.Date;
 
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
@@ -38,6 +41,14 @@ public class FeatureTools {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger LOG = Logger.getLogger(FeatureTools.class);
+    public static final DecimalFormat FORMATTER = new DecimalFormat();
+
+    static {
+        final DecimalFormatSymbols symbols = new DecimalFormatSymbols();
+        symbols.setDecimalSeparator('.');
+        FORMATTER.setDecimalFormatSymbols(symbols);
+        FORMATTER.setGroupingUsed(false);
+    }
 
     //~ Methods ----------------------------------------------------------------
 
@@ -179,7 +190,11 @@ public class FeatureTools {
 
         try {
             if (cl.equals(String.class)) {
-                return objectAsString;
+                if ((object instanceof Float) || (object instanceof Double)) {
+                    return FORMATTER.format(object);
+                } else {
+                    return objectAsString;
+                }
             } else if (cl.equals(Double.class)) {
                 return Double.parseDouble(objectAsString);
             } else if (cl.equals(Float.class)) {
@@ -204,6 +219,8 @@ public class FeatureTools {
                 }
             } else if (cl.equals(Date.class)) {
                 return Timestamp.valueOf(objectAsString);
+            } else if (cl.equals(BigDecimal.class)) {
+                return new BigDecimal(objectAsString);
             } else {
                 return object;
             }

@@ -83,6 +83,8 @@ public class SelectionListener extends CreateGeometryListener {
     private boolean selectMultipleFeatures = false;
     private boolean featuresFromServicesSelectable = false;
     private boolean selectionInProgress = false;
+    private boolean featureAdded = false;
+    private List<Feature> lastUnselectedFeatures;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -518,6 +520,9 @@ public class SelectionListener extends CreateGeometryListener {
                 if (!finishingEvent.isControlDown()) {
                     ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselectAll();
                     unselectAll();
+                    featureAdded = false;
+                } else {
+                    featureAdded = true;
                 }
                 PFeature[] pfArr;
 
@@ -579,6 +584,7 @@ public class SelectionListener extends CreateGeometryListener {
                 // Hier passierts
                 ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).addToSelection(
                     toBeSelected);
+                lastUnselectedFeatures = toBeUnselected;
                 ((DefaultFeatureCollection)mappingComponent.getFeatureCollection()).unselect(toBeUnselected);
 
                 pfVector = new Vector(((DefaultFeatureCollection)mappingComponent.getFeatureCollection())
@@ -705,5 +711,32 @@ public class SelectionListener extends CreateGeometryListener {
      */
     public void setSelectMultipleFeatures(final boolean selectMultipleFeatures) {
         this.selectMultipleFeatures = selectMultipleFeatures;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the featureAdded
+     */
+    public boolean isFeatureAdded() {
+        return featureAdded;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  featureAdded  the featureAdded to set
+     */
+    public void setFeatureAdded(final boolean featureAdded) {
+        this.featureAdded = featureAdded;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the lastUnselectedFeatures
+     */
+    public List<Feature> getLastUnselectedFeatures() {
+        return lastUnselectedFeatures;
     }
 }
