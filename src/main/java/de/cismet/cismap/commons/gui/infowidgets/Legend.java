@@ -519,7 +519,7 @@ public class Legend extends javax.swing.JPanel implements ActiveLayerListener, S
                             lblImage.setIcon(ii);
 
                             tableModel.fireTableDataChanged();
-                            int newWidth = image.getWidth(null);
+                            int newWidth = image.getWidth(null) + 10; // because of the border and stuff of the JTable
                             if (newWidth < tblLegends.getPreferredSize().width) {
                                 newWidth = tblLegends.getPreferredSize().width;
                             } else {
