@@ -11,6 +11,8 @@
  */
 package de.cismet.cismap.commons.tools;
 
+import java.io.File;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
     protected AbstractFeatureService service;
     protected List<String[]> aliasAttributeList;
     protected String extension;
+    private boolean absoluteFileName;
 
     //~ Methods ----------------------------------------------------------------
 
@@ -57,7 +60,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
         this.features = features;
         this.service = service;
         this.aliasAttributeList = aliasAttributeList;
-        this.title = "Export " + features.length + " Features";
+        this.title = "Export " + ((features != null) ? features.length : "") + " Features";
         this.extension = extension;
 
         if (aliasAttributeList == null) {
@@ -72,7 +75,51 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
         if (filename.contains(".") && (filename.charAt(filename.length() - 4) == '.')) {
             filenameWithoutExt = filename.substring(0, filename.length() - 4);
         }
-        determineDestinationFile(filenameWithoutExt, extension);
+
+        if (absoluteFileName || new File(filename).isAbsolute()) {
+            fileToSaveTo = new File(filename + extension);
+            int index = filename.lastIndexOf("/");
+
+            if (index == -1) {
+                index = filename.lastIndexOf("\\");
+            }
+
+            final File dir = new File(filename.substring(0, index));
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+        } else {
+            determineDestinationFile(filenameWithoutExt, extension);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    protected void loadFeaturesIfRequired() throws Exception {
+        if (features == null) {
+            service.initAndWait();
+            final List<FeatureServiceFeature> featureList = service.getFeatureFactory()
+                        .createFeatures(service.getQuery(), null, null, 0, 0, null);
+            features = featureList.toArray(new FeatureServiceFeature[featureList.size()]);
+
+            if (aliasAttributeList == null) {
+                if ((features != null) && (features.length > 0)) {
+                    this.aliasAttributeList = getAttributeNames(features[0]);
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  absoluteFileName  DOCUMENT ME!
+     */
+    public void setAbsoluteFileName(final boolean absoluteFileName) {
+        this.absoluteFileName = absoluteFileName;
     }
 
     /**
