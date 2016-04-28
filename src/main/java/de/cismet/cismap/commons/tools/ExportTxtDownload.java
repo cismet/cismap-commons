@@ -82,9 +82,17 @@ public class ExportTxtDownload extends ExportDownload {
         }
 
         status = Download.State.RUNNING;
+        stateChanged();
+
+        try {
+            loadFeaturesIfRequired();
+        } catch (Exception e) {
+            log.error("Error while retrieving features", e);
+            error(e);
+            return;
+        }
 
         if ((features != null) && (features.length > 0)) {
-            stateChanged();
             final List<String> attributeList = toAttributeList(aliasAttributeList);
             BufferedWriter bw = null;
             boolean firstLine = true;

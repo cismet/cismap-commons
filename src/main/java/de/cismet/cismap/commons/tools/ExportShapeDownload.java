@@ -11,7 +11,6 @@
  */
 package de.cismet.cismap.commons.tools;
 
-
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
@@ -62,9 +61,17 @@ public class ExportShapeDownload extends ExportDownload {
         }
 
         status = Download.State.RUNNING;
+        stateChanged();
+
+        try {
+            loadFeaturesIfRequired();
+        } catch (Exception e) {
+            log.error("Error while retrieving features", e);
+            error(e);
+            return;
+        }
 
         if ((features != null) && (features.length > 0)) {
-            stateChanged();
             try {
                 final Collection<? extends ShapeWriter> writer = Lookup.getDefault().lookupAll(ShapeWriter.class);
 

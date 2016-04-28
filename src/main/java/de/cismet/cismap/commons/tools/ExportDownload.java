@@ -60,7 +60,7 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
         this.features = features;
         this.service = service;
         this.aliasAttributeList = aliasAttributeList;
-        this.title = "Export " + features.length + " Features";
+        this.title = "Export " + ((features != null) ? features.length : "") + " Features";
         this.extension = extension;
 
         if (aliasAttributeList == null) {
@@ -90,6 +90,26 @@ public abstract class ExportDownload extends AbstractCancellableDownload {
             }
         } else {
             determineDestinationFile(filenameWithoutExt, extension);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    protected void loadFeaturesIfRequired() throws Exception {
+        if (features == null) {
+            service.initAndWait();
+            final List<FeatureServiceFeature> featureList = service.getFeatureFactory()
+                        .createFeatures(service.getQuery(), null, null, 0, 0, null);
+            features = featureList.toArray(new FeatureServiceFeature[featureList.size()]);
+
+            if (aliasAttributeList == null) {
+                if ((features != null) && (features.length > 0)) {
+                    this.aliasAttributeList = getAttributeNames(features[0]);
+                }
+            }
         }
     }
 
