@@ -11,6 +11,9 @@
  */
 package de.cismet.cismap.commons.internaldb;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * DOCUMENT ME!
  *
@@ -25,6 +28,7 @@ public class DBTableInformation {
     private String databaseTable;
     private String name;
     private boolean folder = false;
+    private final List<DBTableInformation> children = new ArrayList<DBTableInformation>();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -118,5 +122,23 @@ public class DBTableInformation {
      */
     public void setFolder(final boolean folder) {
         this.folder = folder;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the children
+     */
+    public List<DBTableInformation> getChildren() {
+        return children;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  child  DOCUMENT ME!
+     */
+    public void addChild(final DBTableInformation child) {
+        children.add(child);
     }
 }
