@@ -88,7 +88,7 @@ public class InternalDbTree extends JTree {
         setEditable(true);
         setDropMode(DropMode.ON_OR_INSERT);
         setTransferHandler(new DBTransferHandler());
-        getSelectionModel().setSelectionMode(TreeSelectionModel.CONTIGUOUS_TREE_SELECTION);
+        getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
         final DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
 
                 @Override
@@ -227,8 +227,7 @@ public class InternalDbTree extends JTree {
             final InternalDBTreeModel model = (InternalDBTreeModel)getModel();
             final Connection con = model.getConnection();
             final Statement st = con.createStatement();
-            st.execute("DROP TABLE \"" + entry.getName() + "\";");
-            st.execute("DROP SEQUENCE IF EXISTS \"" + entry.getName() + "_seq\";");
+            H2FeatureService.removeTableIfExists(entry.getName());
 
             model.remove(entry.getName());
 
@@ -295,7 +294,8 @@ public class InternalDbTree extends JTree {
             final Object o = path.getLastPathComponent();
 
             if (o instanceof DBFolder) {
-                addEntriesToList(entries, (DBFolder)o);
+                entries.add((DBFolder)o);
+//                addEntriesToList(entries, (DBFolder)o);
             } else if (o instanceof DBEntry) {
                 entries.add((DBEntry)o);
             }
@@ -305,13 +305,46 @@ public class InternalDbTree extends JTree {
 
         for (int i = 0; i < entries.size(); ++i) {
             final DBEntry e = entries.get(i);
-            databaseTables[i] = new DBTableInformation(e.toString(),
-                    databasePath,
-                    e.getName(),
-                    (e instanceof DBFolder));
+
+            if (e instanceof DBFolder) {
+                databaseTables[i] = getFolderInformation((DBFolder)e);
+            } else {
+                databaseTables[i] = new DBTableInformation(e.toString(),
+                        databasePath,
+                        e.getName(),
+                        (e instanceof DBFolder));
+            }
         }
 
         return databaseTables;
+    }
+
+    /**
+     * Create a DBTableInformation object of the given folder.
+     *
+     * @param   folder  the folder to convert to a DBTableInformation object
+     *
+     * @return  the created DBTableInformation object
+     */
+    private DBTableInformation getFolderInformation(final DBFolder folder) {
+        final DBTableInformation databaseTable = new DBTableInformation(folder.toString(),
+                databasePath,
+                folder.getName(),
+                true);
+
+        for (final DBEntry entry : (folder).getChildren()) {
+            if (entry instanceof DBFolder) {
+                databaseTable.addChild(getFolderInformation((DBFolder)entry));
+            } else {
+                final DBTableInformation tmp = new DBTableInformation(entry.toString(),
+                        databasePath,
+                        entry.getName(),
+                        false);
+                databaseTable.addChild(tmp);
+            }
+        }
+
+        return databaseTable;
     }
 
     /**
@@ -499,9 +532,7 @@ public class InternalDbTree extends JTree {
          */
         public InternalDBTreeModel() {
             try {
-                conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
-                            "jdbc:h2:"
-                                    + databasePath));
+                conn = H2FeatureServiceFactory.getDBConnection(databasePath);
                 final ResultSet rs = conn.getMetaData().getTables(null, null, "%", new String[] { "TABLE" });
 
                 while (rs.next()) {

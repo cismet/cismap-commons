@@ -37,11 +37,14 @@ import de.cismet.cismap.commons.LayerConfig;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.DocumentFeatureServiceFactory;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
+import de.cismet.cismap.commons.featureservice.LayerAlreadyAddedException;
 import de.cismet.cismap.commons.featureservice.LayerProperties;
 import de.cismet.cismap.commons.featureservice.ShapeFileFeatureService;
 import de.cismet.cismap.commons.featureservice.WebFeatureService;
 import de.cismet.cismap.commons.gui.capabilitywidget.SelectionAndCapabilities;
 import de.cismet.cismap.commons.gui.capabilitywidget.WFSSelectionAndCapabilities;
+import de.cismet.cismap.commons.internaldb.DBEntry;
+import de.cismet.cismap.commons.internaldb.DBFolder;
 import de.cismet.cismap.commons.internaldb.DBTableInformation;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.raster.wms.WMSServiceLayer;
@@ -249,8 +252,6 @@ public class LayerDropUtils {
                             } else {
                                 activeLayerModel.addLayer(wfs);
                             }
-
-                            return true;
                         } catch (final IllegalArgumentException schonVorhanden) {
                             JOptionPane.showMessageDialog(
                                 parent,
@@ -261,15 +262,21 @@ public class LayerDropUtils {
                                     LayerWidget.class,
                                     "LayerWidget.drop(DropTargetDropEvent).JOptionPane.title"), // NOI18N
                                 JOptionPane.ERROR_MESSAGE);
+
+                            return false;
                         }
                     }
-                } else if (o instanceof LayerConfig) {
-                    if (index != -1) {
-                        activeLayerModel.addLayer(((LayerConfig)o).createConfiguredLayer(),
-                            activeLayerModel.layers.size()
-                                    - index);
-                    } else {
-                        activeLayerModel.addLayer(((LayerConfig)o).createConfiguredLayer());
+
+                    return true;
+                } else if (o instanceof LayerConfig[]) {
+                    for (final LayerConfig config : (LayerConfig[])o) {
+                        if (index != -1) {
+                            activeLayerModel.addLayer((config).createConfiguredLayer(),
+                                activeLayerModel.layers.size()
+                                        - index);
+                        } else {
+                            activeLayerModel.addLayer((config).createConfiguredLayer());
+                        }
                     }
 
                     return true;
@@ -284,15 +291,26 @@ public class LayerDropUtils {
                     final DBTableInformation[] infos = (DBTableInformation[])o;
 
                     for (final DBTableInformation i : infos) {
-                        final H2FeatureService layer = new H2FeatureService(i.getName(),
-                                i.getDatabasePath(),
-                                i.getDatabaseTable(),
-                                null);
+                        if (i.isFolder()) {
+                            final LayerCollection lc = createH2Folder(i);
+                            lc.setModel(activeLayerModel);
 
-                        if (index != -1) {
-                            activeLayerModel.addLayer(layer, activeLayerModel.layers.size() - index);
+                            if (index != -1) {
+                                activeLayerModel.addLayer(lc, activeLayerModel.layers.size() - index);
+                            } else {
+                                activeLayerModel.addLayer(lc, 0);
+                            }
                         } else {
-                            activeLayerModel.addLayer(layer);
+                            final H2FeatureService layer = new H2FeatureService(i.getName(),
+                                    i.getDatabasePath(),
+                                    i.getDatabaseTable(),
+                                    null);
+
+                            if (index != -1) {
+                                activeLayerModel.addLayer(layer, activeLayerModel.layers.size() - index);
+                            } else {
+                                activeLayerModel.addLayer(layer);
+                            }
                         }
                     }
                 }
@@ -314,6 +332,35 @@ public class LayerDropUtils {
         }
 
         return false;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   i  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private static LayerCollection createH2Folder(final DBTableInformation i) throws Exception {
+        final LayerCollection lc = new LayerCollection();
+        lc.setName(i.getName());
+
+        for (final DBTableInformation tmp : i.getChildren()) {
+            if (tmp.isFolder()) {
+                lc.add(createH2Folder(tmp));
+            } else {
+                final H2FeatureService layer = new H2FeatureService(tmp.getName(),
+                        tmp.getDatabasePath(),
+                        tmp.getDatabaseTable(),
+                        null);
+
+                lc.add(layer);
+            }
+        }
+
+        return lc;
     }
 
     /**
