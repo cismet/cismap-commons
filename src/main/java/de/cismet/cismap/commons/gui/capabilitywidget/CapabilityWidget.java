@@ -97,6 +97,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import de.cismet.cismap.commons.CrsTransformer;
+import de.cismet.cismap.commons.LayerConfig;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.capabilities.AbstractCapabilitiesTreeModel;
 import de.cismet.cismap.commons.featureservice.FeatureServiceUtilities;
@@ -1172,7 +1173,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                             databasePath = databasePath.substring("file://".length());
                         }
 
-                        final String title = databasePath;
+                        final String title = NbBundle.getMessage(
+                                CapabilityWidget.class,
+                                "CapabilityWidget.addInternalDBCapabilitiesTree.title");
                         final String dbPath = databasePath;
                         final InternalDbTree tree = new InternalDbTree(databasePath);
 //                        final DropTarget dt = new DropTarget(tree, acceptableActions, thisWidget);
@@ -1295,8 +1298,8 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                         new JMenuItem[] {
                                             addFolderItem,
                                             removeItem,
-                                            addLinearReferencing,
-                                            addPointGeometry
+                                            addPointGeometry,
+                                            addLinearReferencing
                                         });
 
                                     tree.setBorder(new EmptyBorder(1, 1, 1, 1));
@@ -2709,17 +2712,38 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                     trans = new DefaultTransferable(new WFSSelectionAndCapabilities(features, reverseOrder));
                 }
             } else if (this.getModel() instanceof ShapeFolderTreeModel) {
-                final Object o = getSelectionModel().getSelectionPath().getLastPathComponent();
+                final TreePath[] paths = getSelectionModel().getSelectionPaths();
+                final List<File> files = new ArrayList<File>();
 
-                if (o instanceof File) {
-                    if (((File)o).isDirectory()) {
-                        return;
+                for (final TreePath path : paths) {
+                    final Object o = path.getLastPathComponent();
+
+                    if (o instanceof File) {
+                        if (!((File)o).isDirectory()) {
+                            files.add((File)o);
+                        }
                     }
                 }
 
-                trans = new DefaultTransferable(o);
+                if (files.isEmpty()) {
+                    return;
+                }
+
+                trans = new DefaultTransferable(files.toArray(new File[files.size()]));
             } else if (this.getModel().getClass().getName().equals("de.cismet.cismap.cidslayer.CidsLayerTreeModel")) {
-                trans = new DefaultTransferable(getSelectionModel().getSelectionPath().getLastPathComponent());
+                final List<LayerConfig> objects = new ArrayList<LayerConfig>();
+                final TreePath[] paths = getSelectionModel().getSelectionPaths();
+
+                for (final TreePath path : paths) {
+                    final Object o = path.getLastPathComponent();
+
+                    if (o instanceof LayerConfig) {
+                        objects.add((LayerConfig)o);
+                    }
+                }
+
+                trans = new DefaultTransferable(objects.toArray(new LayerConfig[objects.size()]));
+//                trans = new DefaultTransferable(getSelectionModel().getSelectionPath().getLastPathComponent());
             }
             dragSource.startDrag(e, DragSource.DefaultCopyDrop, trans, this);
         }

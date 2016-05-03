@@ -93,7 +93,29 @@ public class TreeTransferHandler extends TransferHandler {
             return false;
         }
 
+        if ((targetNode instanceof LayerCollection) && containsDescendantPath(dl.getPath(), tree.getSelectionPaths())) {
+            return false;
+        }
+
         return true;
+    }
+
+    /**
+     * Checks, if one of the source paths is a descendent path of the target path.
+     *
+     * @param   target      the parent path
+     * @param   sourcePath  the possible descendent pathes
+     *
+     * @return  true, iff one of the source paths is a descendent path of the target path.
+     */
+    private boolean containsDescendantPath(final TreePath target, final TreePath[] sourcePath) {
+        for (final TreePath path : sourcePath) {
+            if (path.isDescendant(target)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
