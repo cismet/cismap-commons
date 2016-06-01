@@ -374,8 +374,9 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                             tbpCapabilities.setComponentAt(tbpCapabilities.indexOfComponent((JComponent)test), load);
                         }
                     }
-                    capabilityUrls.put(new LinkWithSubparent(link, subparent), load);
-                    capabilityUrlsReverse.put(load, new LinkWithSubparent(link, subparent));
+                    final LinkWithSubparent linkObject = new LinkWithSubparent(link, subparent);
+                    capabilityUrls.put(linkObject, load);
+                    capabilityUrlsReverse.put(load, linkObject);
                     synchronized (this) {
                         StaticSwingTools.jTabbedPaneWithVerticalTextAddTab(
                             tbpCapabilities,
@@ -460,8 +461,10 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                 alternatives,
                                 alternatives[0]);                                                      // NOI18N
                         if (selectedValue == alternatives[0]) {
+                            linkObject.setService("WFS");
                             addOGCWMSCapabilitiesTree(link, load, interactive, subparent);
                         } else if (selectedValue == alternatives[1]) {
+                            linkObject.setService("WFS");
                             addOGCWFSCapabilitiesTree(link, load, interactive);
                         } else if (selectedValue == alternatives[2]) {
                             try {
@@ -1184,124 +1187,6 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
                                 @Override
                                 public void run() {
-                                    final JMenuItem addFolderItem = new JMenuItem(
-                                            NbBundle.getMessage(
-                                                CapabilityWidget.class,
-                                                "CapabilityWidget.addInternalDBCapabilitesTree.addFolderItem"));
-                                    addFolderItem.addActionListener(new ActionListener() {
-
-                                            @Override
-                                            public void actionPerformed(final ActionEvent e) {
-                                                tree.addFolder(
-                                                    NbBundle.getMessage(
-                                                        CapabilityWidget.class,
-                                                        "CapabilityWidget.addInternalDBCapabilitesTree.addFolder"));
-                                            }
-                                        });
-
-                                    final JMenuItem removeItem = new JMenuItem(
-                                            NbBundle.getMessage(
-                                                CapabilityWidget.class,
-                                                "CapabilityWidget.addInternalDBCapabilitesTree.removeItem"));
-                                    removeItem.addActionListener(new ActionListener() {
-
-                                            @Override
-                                            public void actionPerformed(final ActionEvent e) {
-                                                final TreePath[] tps = tree.getSelectionPaths();
-
-                                                for (final TreePath tp : tps) {
-                                                    final DBEntry entry = (DBEntry)tp.getLastPathComponent();
-                                                    if (tp.getLastPathComponent() instanceof DBEntry) {
-                                                        tree.removeEntry(entry);
-                                                    }
-                                                }
-                                            }
-                                        });
-
-                                    final JMenuItem addLinearReferencing = new JMenuItem(
-                                            NbBundle.getMessage(
-                                                CapabilityWidget.class,
-                                                "CapabilityWidget.addInternalDBCapabilitesTree.addLinearReferencing"));
-                                    addLinearReferencing.addActionListener(new ActionListener() {
-
-                                            @Override
-                                            public void actionPerformed(final ActionEvent e) {
-                                                final TreePath[] tps = tree.getSelectionPaths();
-
-                                                for (final TreePath tp : tps) {
-                                                    if ((tp.getLastPathComponent() instanceof DBEntry)
-                                                                && !(tp.getLastPathComponent() instanceof DBFolder)) {
-                                                        try {
-                                                            final DBEntry entry = (DBEntry)tp.getLastPathComponent();
-                                                            final H2FeatureService service = new H2FeatureService(
-                                                                    entry.getNameWithoutFolder(),
-                                                                    dbPath,
-                                                                    entry.getName(),
-                                                                    null);
-                                                            final LinearReferencingDialog dialog =
-                                                                new LinearReferencingDialog(
-                                                                    StaticSwingTools.getParentFrame(comp),
-                                                                    true,
-                                                                    service);
-                                                            dialog.setSize(645, 260);
-                                                            dialog.pack();
-                                                            StaticSwingTools.showDialog(dialog);
-                                                        } catch (Exception ex) {
-                                                            log.error(
-                                                                "Error while creating a H2 service instance.",
-                                                                ex);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        });
-
-                                    final JMenuItem addPointGeometry = new JMenuItem(
-                                            NbBundle.getMessage(
-                                                CapabilityWidget.class,
-                                                "CapabilityWidget.addInternalDBCapabilitesTree.addPointGeometry"));
-                                    addPointGeometry.addActionListener(new ActionListener() {
-
-                                            @Override
-                                            public void actionPerformed(final ActionEvent e) {
-                                                final TreePath[] tps = tree.getSelectionPaths();
-
-                                                for (final TreePath tp : tps) {
-                                                    if ((tp.getLastPathComponent() instanceof DBEntry)
-                                                                && !(tp.getLastPathComponent() instanceof DBFolder)) {
-                                                        try {
-                                                            final DBEntry entry = (DBEntry)tp.getLastPathComponent();
-                                                            final H2FeatureService service = new H2FeatureService(
-                                                                    entry.getNameWithoutFolder(),
-                                                                    dbPath,
-                                                                    entry.getName(),
-                                                                    null);
-                                                            final PointReferencingDialog dialog =
-                                                                new PointReferencingDialog(
-                                                                    StaticSwingTools.getParentFrame(comp),
-                                                                    true,
-                                                                    service);
-                                                            dialog.setSize(645, 260);
-                                                            dialog.pack();
-                                                            StaticSwingTools.showDialog(dialog);
-                                                        } catch (Exception ex) {
-                                                            log.error(
-                                                                "Error while creating a H2 service instance.",
-                                                                ex);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        });
-                                    addPopupMenu(
-                                        tree,
-                                        new JMenuItem[] {
-                                            addFolderItem,
-                                            removeItem,
-                                            addPointGeometry,
-                                            addLinearReferencing
-                                        });
-
                                     tree.setBorder(new EmptyBorder(1, 1, 1, 1));
                                     final JScrollPane sPane = new JScrollPane();
                                     sPane.setViewportView(tree);
@@ -2074,9 +1959,19 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
             final LinkWithSubparent selectedLink = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             while (it.hasNext()) {
                 final LinkWithSubparent link = it.next();
+                String linkText = link.getLink();
+
+                if (link.getService() != null) {
+                    if (linkText.contains("?")) {
+                        linkText += "&SERVICE=" + link.getService();
+                    } else {
+                        linkText += "?SERVICE=" + link.getService();
+                    }
+                }
+
                 final CapabilityLink cl = new CapabilityLink(
                         CapabilityLink.OGC,
-                        link.getLink(),
+                        linkText,
                         reverseAxisOrder.contains(link.getLink()),
                         link.equals(selectedLink),
                         link.getSubparent());
@@ -2952,6 +2847,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
 
         String link = null;
         String subparent = null;
+        String service = null;
 
         //~ Constructors -------------------------------------------------------
 
@@ -3002,6 +2898,24 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
          */
         public void setSubparent(final String subparent) {
             this.subparent = subparent;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public String getService() {
+            return service;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  service  DOCUMENT ME!
+         */
+        public void setService(final String service) {
+            this.service = service;
         }
 
         /**
