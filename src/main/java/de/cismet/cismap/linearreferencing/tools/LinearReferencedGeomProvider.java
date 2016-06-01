@@ -31,4 +31,22 @@ public interface LinearReferencedGeomProvider {
      * @return  DOCUMENT ME!
      */
     List<AbstractFeatureService> getLinearReferencedGeomServices();
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   service  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    String getServiceDomain(AbstractFeatureService service);
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   service  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    String getInternalServiceName(AbstractFeatureService service);
 }

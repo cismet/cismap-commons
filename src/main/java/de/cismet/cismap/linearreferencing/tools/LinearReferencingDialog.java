@@ -13,7 +13,6 @@ package de.cismet.cismap.linearreferencing.tools;
 
 import org.apache.log4j.Logger;
 
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
@@ -21,17 +20,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 
-import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
+import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
+import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.tools.FeatureTools;
+import de.cismet.cismap.commons.tools.PointReferencingDialog;
 
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
@@ -46,18 +46,26 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
 
     //~ Static fields/initializers ---------------------------------------------
 
-    private static Logger LOG = Logger.getLogger(LinearReferencingDialog.class);
-    private static String station = NbBundle.getMessage(
+    private static final Logger LOG = Logger.getLogger(LinearReferencingDialog.class);
+    private static final String station = NbBundle.getMessage(
             LinearReferencingDialog.class,
             "LinearRefeerencingDialog.station");
-    private static String stationLine = NbBundle.getMessage(
+    private static final String stationLine = NbBundle.getMessage(
             LinearReferencingDialog.class,
             "LinearRefeerencingDialog.stationLine");
     private static List<AbstractFeatureService> ROUTE_CLASSES;
+    private static Collection<? extends LinearReferencedGeomProvider> linRefGeomProvider;
+    private static Object lastKindProperty = null;
+    private static Object lastRouteProperty = null;
+    private static Object lastRouteFieldProperty = null;
+    private static Object lastRouteTargetFieldProperty = null;
+    private static Object lastFromProperty = null;
+    private static Object lastTillProperty = null;
 
     //~ Instance fields --------------------------------------------------------
 
-    private H2FeatureService service;
+    private final H2FeatureService service;
+    private boolean geometry = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton butApply;
     private javax.swing.JButton butCancel;
@@ -91,6 +99,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         super(parent, modal);
         this.service = service;
         initComponents();
+        lblTitle.setVisible(false);
         cbKind.setModel(new DefaultComboBoxModel(new Object[] { station, stationLine }));
         final List<String> fields = getAllFieldNames(Number.class);
         cbFrom.setModel(new DefaultComboBoxModel(fields.toArray()));
@@ -98,8 +107,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         cbRouteField.setModel(new DefaultComboBoxModel(getAllFieldNames(null).toArray()));
 
         if (ROUTE_CLASSES == null) {
-            final Collection<? extends LinearReferencedGeomProvider> linRefGeomProvider = Lookup.getDefault()
-                        .lookupAll(LinearReferencedGeomProvider.class);
+            linRefGeomProvider = Lookup.getDefault().lookupAll(LinearReferencedGeomProvider.class);
             ROUTE_CLASSES = new ArrayList<AbstractFeatureService>();
 
             for (final LinearReferencedGeomProvider prov : linRefGeomProvider) {
@@ -107,6 +115,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
 
                 if (services != null) {
                     ROUTE_CLASSES.addAll(services);
+                    break;
                 }
             }
         }
@@ -114,6 +123,24 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         cbTill.setEnabled(cbKind.getSelectedItem().equals(stationLine));
         lblTill.setEnabled(cbKind.getSelectedItem().equals(stationLine));
         cbRouteItemStateChanged(null);
+        if (lastKindProperty != null) {
+            cbKind.setSelectedItem(lastKindProperty);
+        }
+        if (lastRouteProperty != null) {
+            cbRoute.setSelectedItem(lastRouteProperty);
+        }
+        if (lastRouteFieldProperty != null) {
+            cbRouteField.setSelectedItem(lastRouteFieldProperty);
+        }
+        if (lastRouteTargetFieldProperty != null) {
+            cbRouteTargetField.setSelectedItem(lastRouteTargetFieldProperty);
+        }
+        if (lastFromProperty != null) {
+            cbFrom.setSelectedItem(lastFromProperty);
+        }
+        if (lastTillProperty != null) {
+            cbTill.setSelectedItem(lastTillProperty);
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -127,21 +154,31 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
      */
     private List<String> getAllFieldNames(final Class<?> cl) {
         Map<String, FeatureServiceAttribute> attributeMap = service.getFeatureServiceAttributes();
+        List<String> names = service.getOrderedFeatureServiceAttributes();
         final List<String> resultList = new ArrayList<String>();
 
-        if (attributeMap == null) {
+        if ((attributeMap == null) || (names == null)) {
             try {
                 service.initAndWait();
             } catch (Exception e) {
                 LOG.error("Error while initializing the feature service.", e);
             }
             attributeMap = service.getFeatureServiceAttributes();
+            names = service.getOrderedFeatureServiceAttributes();
         }
 
-        for (final String name : attributeMap.keySet()) {
+        for (final String name : names) {
             final FeatureServiceAttribute attr = attributeMap.get(name);
 
-            resultList.add(name);
+            if (attr != null) {
+                if ((cl == null) || cl.isAssignableFrom(FeatureTools.getClass(attr))) {
+                    resultList.add(name);
+                }
+
+                if (attr.isGeometry()) {
+                    geometry = true;
+                }
+            }
         }
 
         return resultList;
@@ -207,7 +244,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(15, 5, 10, 5);
+        gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 5);
         getContentPane().add(cbKind, gridBagConstraints);
 
         cbRoute.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -221,8 +258,8 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
@@ -234,19 +271,19 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         cbFrom.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(15, 5, 10, 5);
+        gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 5);
         getContentPane().add(cbFrom, gridBagConstraints);
 
         cbTill.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbTill.setMinimumSize(new java.awt.Dimension(80, 27));
         cbTill.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
@@ -272,7 +309,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
                 new Object[] {}));                           // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 5;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 5);
         getContentPane().add(lblFrom, gridBagConstraints);
@@ -283,10 +320,10 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
                 "LinearReferencingDialog.lblTill.text",
                 new Object[] {}));                           // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 6;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(15, 5, 10, 5);
+        gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 5);
         getContentPane().add(lblTill, gridBagConstraints);
 
         lblRoute.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
@@ -295,10 +332,10 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
                 "LinearReferencingDialog.lblRoute.text",
                 new Object[] {}));                            // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(15, 5, 10, 5);
+        gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 5);
         getContentPane().add(lblRoute, gridBagConstraints);
 
         butApply.setText(org.openide.util.NbBundle.getMessage(
@@ -314,7 +351,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHWEST;
         gridBagConstraints.weighty = 1.0;
@@ -333,8 +370,8 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
                 }
             });
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 5;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 7;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
         gridBagConstraints.weighty = 1.0;
@@ -348,7 +385,7 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
                 new Object[] {}));                                 // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 5);
         getContentPane().add(lblRouteField, gridBagConstraints);
@@ -356,14 +393,14 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         cbRouteField.setModel(new javax.swing.DefaultComboBoxModel(
                 new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbRouteField.setMinimumSize(new java.awt.Dimension(80, 27));
-        cbRouteField.setPreferredSize(new java.awt.Dimension(180, 27));
+        cbRouteField.setPreferredSize(new java.awt.Dimension(210, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(15, 5, 10, 5);
+        gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 5);
         getContentPane().add(cbRouteField, gridBagConstraints);
 
         lblRouteTargetField.setFont(new java.awt.Font("Ubuntu", 1, 15)); // NOI18N
@@ -372,10 +409,10 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
                 "LinearReferencingDialog.lblRouteTargetField.text",
                 new Object[] {}));                                       // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-        gridBagConstraints.insets = new java.awt.Insets(15, 5, 10, 5);
+        gridBagConstraints.insets = new java.awt.Insets(15, 10, 10, 5);
         getContentPane().add(lblRouteTargetField, gridBagConstraints);
 
         cbRouteTargetField.setModel(new javax.swing.DefaultComboBoxModel(
@@ -383,8 +420,8 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         cbRouteTargetField.setMinimumSize(new java.awt.Dimension(80, 27));
         cbRouteTargetField.setPreferredSize(new java.awt.Dimension(180, 27));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 3;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
@@ -413,15 +450,13 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         final AbstractFeatureService routeService = (AbstractFeatureService)cbRoute.getSelectedItem();
         final List<String> allFields = new ArrayList<String>();
 
-        if (routeService.getFeatureServiceAttributes() == null) {
-            try {
-                routeService.initAndWait();
-            } catch (Exception ex) {
-                LOG.error("Error while initializing the route service", ex);
-            }
+        try {
+            routeService.initAndWait();
+        } catch (Exception ex) {
+            LOG.error("Error while initializing the route service", ex);
         }
 
-        for (final Object attrName : routeService.getFeatureServiceAttributes().keySet()) {
+        for (final Object attrName : routeService.getOrderedFeatureServiceAttributes()) {
             allFields.add(String.valueOf(attrName));
         }
 
@@ -439,62 +474,88 @@ public class LinearReferencingDialog extends javax.swing.JDialog {
         final String routeField = String.valueOf(cbRouteField.getSelectedItem());
         final String routeJoinField = String.valueOf(cbRouteTargetField.getSelectedItem());
         final AbstractFeatureService routeService = (AbstractFeatureService)cbRoute.getSelectedItem();
+        String tmpName = null;
+        String tmpDomain = null;
 
-        final String name = routeService.getName();
+        for (final LinearReferencedGeomProvider provider : linRefGeomProvider) {
+            tmpName = provider.getInternalServiceName(routeService);
+            tmpDomain = provider.getServiceDomain(routeService);
 
-        final StringTokenizer st = new StringTokenizer(name, ":");
+            if ((tmpName != null) && (tmpDomain != null)) {
+                break;
+            }
+        }
+        final String name = tmpName;
+        final String domain = tmpDomain;
 
-        final WaitingDialogThread<Void> wdt = new WaitingDialogThread<Void>(StaticSwingTools.getParentFrame(
-                    getParent()),
+//        final StringTokenizer st = new StringTokenizer(name, ":");
+
+        final String tableName = JOptionPane.showInputDialog(CismapBroker.getInstance().getMappingComponent(),
+                NbBundle.getMessage(
+                    PointReferencingDialog.class,
+                    "PointReferencingDialog.butApplyActionPerformed.tableName"),
+                NbBundle.getMessage(
+                    PointReferencingDialog.class,
+                    "PointReferencingDialog.butApplyActionPerformed.tableName.title"),
+                JOptionPane.QUESTION_MESSAGE);
+
+        if ((tableName == null) || tableName.equals("")) {
+            return;
+        }
+
+        if (H2FeatureService.tableAlreadyExists(tableName)) {
+            JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
+                NbBundle.getMessage(
+                    PointReferencingDialog.class,
+                    "LinearReferencingDialog.butApplyActionPerformed.tableAlreadyExists"),
+                NbBundle.getMessage(
+                    PointReferencingDialog.class,
+                    "LinearReferencingDialog.butApplyActionPerformed.tableAlreadyExists.title"),
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.ERROR_MESSAGE);
+
+            return;
+        }
+
+        final WaitingDialogThread<H2FeatureService> wdt = new WaitingDialogThread<H2FeatureService>(StaticSwingTools
+                        .getParentFrame(
+                            getParent()),
                 true,
-                name,
+                routeService.getName(),
                 null,
                 200) {
 
                 @Override
-                protected Void doInBackground() throws Exception {
-                    String layerName = null;
-                    String domainName = null;
-
-                    if (st.countTokens() == 2) {
-                        domainName = st.nextToken();
-                        layerName = st.nextToken();
-                    }
-
-                    service.setLinearReferencingInformation(
-                        fromField,
-                        tillField,
-                        routeField,
-                        routeJoinField,
-                        routeService,
-                        layerName,
-                        domainName);
-
-                    return null;
+                protected H2FeatureService doInBackground() throws Exception {
+                    return service.createLinearReferencingLayer(
+                            fromField,
+                            tillField,
+                            routeField,
+                            routeJoinField,
+                            routeService,
+                            name,
+                            domain,
+                            tableName);
                 }
 
                 @Override
                 protected void done() {
-                    final MappingModel model = CismapBroker.getInstance().getMappingComponent().getMappingModel();
+                    try {
+                        get();
+                        final CapabilityWidget cap = CapabilityWidgetOptionsPanel.getCapabilityWidget();
 
-                    final TreeMap<Integer, MapService> map = model.getRasterServices();
-
-                    if (map != null) {
-                        for (final Integer key : map.keySet()) {
-                            final MapService mapService = map.get(key);
-
-                            if (mapService instanceof H2FeatureService) {
-                                final H2FeatureService other = (H2FeatureService)mapService;
-                                if (service.getTableName().equals(other.getTableName())) {
-                                    try {
-                                        other.initAndWait();
-                                    } catch (Exception ex) {
-                                        LOG.error("Error while reinitialise layer.", ex);
-                                    }
-                                    other.retrieve(true);
-                                }
-                            }
+                        if (cap != null) {
+                            cap.refreshJdbcTrees();
                         }
+
+                        lastKindProperty = cbKind.getSelectedItem();
+                        lastRouteProperty = cbRoute.getSelectedItem();
+                        lastRouteFieldProperty = cbRouteField.getSelectedItem();
+                        lastRouteTargetFieldProperty = cbRouteTargetField.getSelectedItem();
+                        lastFromProperty = cbFrom.getSelectedItem();
+                        lastTillProperty = cbTill.getSelectedItem();
+                    } catch (Exception e) {
+                        LOG.error("Error while adding point references", e);
                     }
                 }
             };
