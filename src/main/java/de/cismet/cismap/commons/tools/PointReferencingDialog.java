@@ -18,15 +18,16 @@ import org.openide.util.NbBundle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
 
-import de.cismet.cismap.commons.MappingModel;
 import de.cismet.cismap.commons.featureservice.FeatureServiceAttribute;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
+import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
+import de.cismet.cismap.commons.gui.capabilitywidget.CapabilityWidget;
+import de.cismet.cismap.commons.gui.options.CapabilityWidgetOptionsPanel;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.rasterservice.MapService;
 
 import de.cismet.tools.gui.StaticSwingTools;
 import de.cismet.tools.gui.WaitingDialogThread;
@@ -42,10 +43,13 @@ public class PointReferencingDialog extends javax.swing.JDialog {
     //~ Static fields/initializers ---------------------------------------------
 
     private static final Logger LOG = Logger.getLogger(PointReferencingDialog.class);
+    private static Object lastFromProperty = null;
+    private static Object lastTillProperty = null;
 
     //~ Instance fields --------------------------------------------------------
 
     private H2FeatureService service;
+    private boolean geometry = false;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton butApply;
     private javax.swing.JButton butCancel;
@@ -71,9 +75,17 @@ public class PointReferencingDialog extends javax.swing.JDialog {
         super(parent, modal);
         this.service = service;
         initComponents();
+        lblTitle.setVisible(false);
         final List<String> fields = getAllFieldNames(Number.class);
         cbFrom.setModel(new DefaultComboBoxModel(fields.toArray()));
         cbTill.setModel(new DefaultComboBoxModel(fields.toArray()));
+
+        if (lastFromProperty != null) {
+            cbFrom.setSelectedItem(lastFromProperty);
+        }
+        if (lastTillProperty != null) {
+            cbTill.setSelectedItem(lastTillProperty);
+        }
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -87,22 +99,30 @@ public class PointReferencingDialog extends javax.swing.JDialog {
      */
     private List<String> getAllFieldNames(final Class<?> cl) {
         Map<String, FeatureServiceAttribute> attributeMap = service.getFeatureServiceAttributes();
+        List<String> names = service.getOrderedFeatureServiceAttributes();
         final List<String> resultList = new ArrayList<String>();
 
-        if (attributeMap == null) {
+        if ((attributeMap == null) || (names == null)) {
             try {
                 service.initAndWait();
             } catch (Exception e) {
                 LOG.error("Error while initializing the feature service.", e);
             }
             attributeMap = service.getFeatureServiceAttributes();
+            names = service.getOrderedFeatureServiceAttributes();
         }
 
-        for (final String name : attributeMap.keySet()) {
+        for (final String name : names) {
             final FeatureServiceAttribute attr = attributeMap.get(name);
 
-            if (cl.isAssignableFrom(FeatureTools.getClass(attr))) {
-                resultList.add(name);
+            if (attr != null) {
+                if (cl.isAssignableFrom(FeatureTools.getClass(attr))) {
+                    resultList.add(name);
+                }
+
+                if (attr.isGeometry()) {
+                    geometry = true;
+                }
             }
         }
 
@@ -244,10 +264,52 @@ public class PointReferencingDialog extends javax.swing.JDialog {
      */
     private void butApplyActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_butApplyActionPerformed
         final String fromField = String.valueOf(cbFrom.getSelectedItem());
-        final String tillField = (cbTill.isEnabled() ? String.valueOf(cbTill.getSelectedItem()) : null);
+        final String tillField = String.valueOf(cbTill.getSelectedItem());
 
-        final WaitingDialogThread<Void> wdt = new WaitingDialogThread<Void>(StaticSwingTools.getParentFrame(
-                    getParent()),
+        if (fromField.equals(tillField)) {
+            JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
+                NbBundle.getMessage(
+                    PointReferencingDialog.class,
+                    "PointReferencingDialog.butApplyActionPerformed.xEqualsY"),
+                NbBundle.getMessage(
+                    PointReferencingDialog.class,
+                    "PointReferencingDialog.butApplyActionPerformed.xEqualsY.title"),
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.ERROR_MESSAGE);
+
+            return;
+        }
+
+        final String tableName = JOptionPane.showInputDialog(CismapBroker.getInstance().getMappingComponent(),
+                NbBundle.getMessage(
+                    PointReferencingDialog.class,
+                    "PointReferencingDialog.butApplyActionPerformed.tableName"),
+                NbBundle.getMessage(
+                    PointReferencingDialog.class,
+                    "PointReferencingDialog.butApplyActionPerformed.tableName.title"),
+                JOptionPane.QUESTION_MESSAGE);
+
+        if ((tableName == null) || tableName.equals("")) {
+            return;
+        }
+
+        if (H2FeatureService.tableAlreadyExists(tableName)) {
+            JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
+                NbBundle.getMessage(
+                    PointReferencingDialog.class,
+                    "PointReferencingDialog.butApplyActionPerformed.tableAlreadyExists"),
+                NbBundle.getMessage(
+                    PointReferencingDialog.class,
+                    "PointReferencingDialog.butApplyActionPerformed.tableAlreadyExists.title"),
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.ERROR_MESSAGE);
+
+            return;
+        }
+
+        final WaitingDialogThread<H2FeatureService> wdt = new WaitingDialogThread<H2FeatureService>(StaticSwingTools
+                        .getParentFrame(
+                            getParent()),
                 true,
                 NbBundle.getMessage(
                     PointReferencingDialog.class,
@@ -256,36 +318,50 @@ public class PointReferencingDialog extends javax.swing.JDialog {
                 200) {
 
                 @Override
-                protected Void doInBackground() throws Exception {
-                    service.setPointGeometryInformation(
-                        fromField,
-                        tillField);
-
-                    return null;
+                protected H2FeatureService doInBackground() throws Exception {
+                    return service.createPointGeometryInformation(
+                            fromField,
+                            tillField,
+                            tableName);
                 }
 
                 @Override
                 protected void done() {
-                    final MappingModel model = CismapBroker.getInstance().getMappingComponent().getMappingModel();
+                    try {
+                        final H2FeatureService service = get();
+                        final CapabilityWidget cap = CapabilityWidgetOptionsPanel.getCapabilityWidget();
 
-                    final TreeMap<Integer, MapService> map = model.getRasterServices();
-
-                    if (map != null) {
-                        for (final Integer key : map.keySet()) {
-                            final MapService mapService = map.get(key);
-
-                            if (mapService instanceof H2FeatureService) {
-                                final H2FeatureService other = (H2FeatureService)mapService;
-                                if (service.getTableName().equals(other.getTableName())) {
-                                    try {
-                                        other.initAndWait();
-                                    } catch (Exception ex) {
-                                        LOG.error("Error while reinitialise layer.", ex);
-                                    }
-                                    other.retrieve(true);
-                                }
-                            }
+                        if (cap != null) {
+                            cap.refreshJdbcTrees();
                         }
+
+                        lastFromProperty = cbFrom.getSelectedItem();
+                        lastTillProperty = cbTill.getSelectedItem();
+                    } catch (H2FeatureServiceFactory.NegativeValueException ex) {
+                        if (ex.isBoth()) {
+                            JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
+                                NbBundle.getMessage(
+                                    PointReferencingDialog.class,
+                                    "PointReferencingDialog.butApplyActionPerformed.negativeValuesInBothAttributes"),
+                                NbBundle.getMessage(
+                                    PointReferencingDialog.class,
+                                    "PointReferencingDialog.butApplyActionPerformed.negativeValuesInBothAttributes.title"),
+                                JOptionPane.CANCEL_OPTION,
+                                JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
+                                NbBundle.getMessage(
+                                    PointReferencingDialog.class,
+                                    "PointReferencingDialog.butApplyActionPerformed.negativeValuesInAttribute",
+                                    ex.getAttributeName()),
+                                NbBundle.getMessage(
+                                    PointReferencingDialog.class,
+                                    "PointReferencingDialog.butApplyActionPerformed.negativeValuesInAttribute.title"),
+                                JOptionPane.CANCEL_OPTION,
+                                JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Error while adding point references", e);
                     }
                 }
             };
