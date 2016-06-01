@@ -200,8 +200,19 @@ public class LinearReferencedLineFeature extends DefaultStyledFeature implements
         if ((fromFeature != null) && (toFeature != null)) {
             Geometry sublineGeom;
             if (fromFeature != toFeature) {
-                sublineGeom = createSubline(fromFeature.getCurrentPosition(),
-                        toFeature.getCurrentPosition(),
+                double from = fromFeature.getCurrentPosition();
+                double to = toFeature.getCurrentPosition();
+
+                if (from == to) {
+                    if (from >= 1) {
+                        from = from - 1;
+                    } else {
+                        to = to + 1;
+                    }
+                }
+
+                sublineGeom = createSubline(from,
+                        to,
                         baseLineGeom);
             } else {
                 sublineGeom = fromFeature.getGeometry();

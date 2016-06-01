@@ -22,8 +22,11 @@ import com.vividsolutions.jts.linearref.LengthIndexedLine;
 import edu.umd.cs.piccolo.util.PObjectOutputStream;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.collation.CollationAttributeFactory;
 
 import org.geotools.referencing.wkt.Parser;
+
+import org.h2.jdbc.JdbcSQLException;
 
 import org.h2gis.utilities.SFSUtilities;
 import org.h2gis.utilities.wrapper.ConnectionWrapper;
@@ -34,6 +37,7 @@ import org.jfree.util.Log;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import org.openide.util.Exceptions;
+import org.openide.util.NbBundle;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -61,6 +65,7 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import de.cismet.cismap.commons.BoundingBox;
@@ -112,13 +117,14 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
     private static Logger LOG = Logger.getLogger(H2FeatureServiceFactory.class);
     public static final String DB_NAME = "~/cismap/internalH2";
-    private static final String CREATE_SPATIAL_INDEX = "CREATE SPATIAL INDEX %s ON \"%s\" (\"%s\");";
-    private static final String UPDATE_SRID = "UPDATE \"%1$s\" set \"%2$s\" = st_setsrid(\"%2$s\", %3$s)";
+    private static final String CREATE_SPATIAL_INDEX = "CREATE SPATIAL INDEX \"%s\" ON \"%s\" (\"%s\");";
+    private static final String UPDATE_SRID =
+        "UPDATE \"%1$s\" set \"%2$s\" = st_setsrid(\"%2$s\", %3$s) where \"%2$s\" is not null";
     private static final String CREATE_TABLE_FROM_CSV =
-        "CREATE TABLE \"%s\" as select * from CSVREAD('%s', null, '%s');";
-    private static final String CREATE_TABLE_FROM_DBF = "CALL FILE_TABLE('%s', '%s');";
-    private static final String COPY_TABLE_FROM_DBF = "create table \"%s\" as select * from %s";
-    private static final String DROP_TABLE_REFERENCE = "drop table %s;";
+        "CREATE TABLE \"%s\" as select %s from CSVREAD('%s', null, '%s');";
+    private static final String CREATE_TABLE_FROM_DBF = "CALL FILE_TABLE('%s', '\"%s\"');";
+    private static final String COPY_TABLE_FROM_DBF = "create table \"%s\" as select * from \"%s\"";
+    private static final String DROP_TABLE_REFERENCE = "drop table \"%s\";";
     private static final String SELECT_COLUMN = "select %s, \"%s\" from \"%s\"";
     private static final String UPDATE_COLUMN = "update \"%s\" set \"%s\" = ? where \"%s\" = ?";
     private static final String CREATE_TABLE_TEMPLATE = "create table \"%s\" (%s)";
@@ -137,6 +143,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 + "\" (\"id\" integer, \"table\" varchar, \"lock_time\" timestamp);";
     private static final String CREATE_LOCK_TABLE_INDEX = "CREATE INDEX IF NOT EXISTS cs_locks_ind ON \""
                 + LOCK_TABLE_NAME + "\" (\"id\", \"table\");";
+    private static String[] knownShpBundleEndings = { "dbf", "atx", "sbn", "prj", "shx", "sbx", "aih", "ain", "cpg" };
 
     //~ Instance fields --------------------------------------------------------
 
@@ -151,6 +158,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     private List<LinearReferencingInfo> linRefList;
     private int srid = 35833;
     private String geometryType = AbstractFeatureService.UNKNOWN;
+    private int lastFreeId = 0;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -275,55 +283,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 }
                 createMetaTableIfNotExist();
                 createLockTableIfNotExist();
-                final String tmpTableReference = tableName + "_temp_reference";
 
                 if (file.getAbsolutePath().toLowerCase().endsWith("csv")) {
-                    final CsvDialog dialog = new CsvDialog(null, true);
-                    final String separatorChar = determineSeparator(file);
-                    dialog.setSeparatorChar(separatorChar);
-                    dialog.setSize(225, 200);
-                    StaticSwingTools.centerWindowOnScreen(dialog);
-                    final String options = "charset=" + dialog.getCharactersetName() + " fieldDelimiter="
-                                + dialog.getTextSep() + " fieldSeparator=" + dialog.getSeparatorChar();
-                    st.execute(String.format(CREATE_TABLE_FROM_CSV, tableName, file.getAbsolutePath(), options));
+                    createTableFromCsv(file, st);
                 } else {
-                    try {
-                        st.execute(String.format(CREATE_TABLE_FROM_DBF, file.getAbsolutePath(), tmpTableReference));
-//                        st.execute(String.format(COPY_TABLE_FROM_DBF, tableName, tmpTableReference));
-                        final StringBuilder attsAndTypes = new StringBuilder();
-                        final StringBuilder atts = new StringBuilder();
-                        final StringBuilder attsRef = new StringBuilder();
-                        rs = st.executeQuery("select * from " + tmpTableReference + " limit 1");
-                        for (int i = 2; i < rs.getMetaData().getColumnCount(); ++i) {
-                            if (!attsAndTypes.toString().equals("")) {
-                                attsAndTypes.append(",");
-                                atts.append(",");
-                                attsRef.append(",");
-                            }
-                            attsAndTypes.append("\"")
-                                    .append(rs.getMetaData().getColumnName(i).toLowerCase())
-                                    .append("\" ")
-                                    .append(rs.getMetaData().getColumnTypeName(i));
-                            atts.append("\"").append(rs.getMetaData().getColumnName(i).toLowerCase()).append("\"");
-                            attsRef.append(rs.getMetaData().getColumnName(i).toLowerCase());
-                        }
-                        rs.close();
-                        st.execute(String.format(CREATE_TABLE_TEMPLATE, tableName, attsAndTypes.toString()));
-                        st.execute(String.format(
-                                "INSERT INTO \"%s\" (%s) (select %s from %s)",
-                                tableName,
-                                atts,
-                                attsRef,
-                                tmpTableReference));
-                        st.execute(String.format(DROP_TABLE_REFERENCE, tmpTableReference));
-                    } catch (Exception e) {
-                        try {
-                            st.execute(String.format(DROP_TABLE_REFERENCE, tmpTableReference));
-                        } catch (Exception ex) {
-                            // nothing to do
-                        }
-                        throw e;
-                    }
+                    createTableFromSHP(file, st);
                 }
                 final String format = file.getAbsolutePath()
                             .toLowerCase()
@@ -342,20 +306,16 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
                     if (rs.getString("TYPE_NAME").toUpperCase().endsWith("GEOMETRY")) {
                         geoCol = rs.getString("COLUMN_NAME");
-                        final String indexName = removeSpecialCharacterFromTableName(geoCol + tableName
-                                        + "SpatialIndex");
-                        final int srid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs()
-                                        .getCode());
 
-                        st.execute(String.format(CREATE_SPATIAL_INDEX, indexName, tableName, geoCol));
-                        st.execute(String.format(UPDATE_SRID, tableName, geoCol, srid));
+                        createSpatialIndex(geoCol, tableName);
                     }
                 }
                 rs.close();
 
-                createPrimaryKey(hasIdField);
+                createPrimaryKey(hasIdField, tableName);
 
                 if (geoCol != null) {
+                    // prepare geo field
                     final String crs = determineShapeCrs(file.toURI());
 
                     if (crs != null) {
@@ -427,7 +387,223 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             }
         } catch (Exception e) {
             logger.error("Error while creating new shape table", e);
+            String errorMessage = e.getMessage();
+
+            if (errorMessage.contains("\n")) {
+                errorMessage = errorMessage.substring(0, errorMessage.indexOf("\n"));
+            }
+
+            if (file.getAbsolutePath().toLowerCase().endsWith("shp") && (e instanceof JdbcSQLException)) {
+                final JdbcSQLException jdbcException = (JdbcSQLException)e;
+                if (jdbcException.getCause() instanceof IOException) {
+                    final IOException ioEx = (IOException)jdbcException.getCause();
+                    if ((ioEx.getMessage() != null) && ioEx.getMessage().contains("Unknown logical value")) {
+                        errorMessage = NbBundle.getMessage(
+                                H2FeatureServiceFactory.class,
+                                "H2FeatureServiceFactory.importFile().dbfError");
+                    }
+                }
+            }
+
+            JOptionPane.showMessageDialog(
+                CismapBroker.getInstance().getMappingComponent(),
+                errorMessage,
+                org.openide.util.NbBundle.getMessage(
+                    H2FeatureServiceFactory.class,
+                    "H2FeatureServiceFactory.importFile().title"), // NOI18N
+                JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    /**
+     * Creates the a new table from the given shp/dbf file.
+     *
+     * @param   file  the file with the source data
+     * @param   st    a Statement
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private void createTableFromSHP(final File file, final Statement st) throws Exception {
+        final String tmpTableReference = tableName + "_temp_reference";
+        final ResultSet rs;
+
+        if (file.getAbsolutePath().toLowerCase().endsWith(".shp")) {
+            if (!checkForFileNames(file)) {
+                JOptionPane.showMessageDialog(
+                    CismapBroker.getInstance().getMappingComponent(),
+                    org.openide.util.NbBundle.getMessage(
+                        H2FeatureServiceFactory.class,
+                        "H2FeatureServiceFactory.importFile().invalidFileName"),
+                    org.openide.util.NbBundle.getMessage(
+                        H2FeatureServiceFactory.class,
+                        "H2FeatureServiceFactory.importFile().invalidFileName.title"), // NOI18N
+                    JOptionPane.ERROR_MESSAGE);
+
+                // todo: throw exception
+            }
+        }
+        try {
+            st.execute(String.format(CREATE_TABLE_FROM_DBF, file.getAbsolutePath(), tmpTableReference));
+            // st.execute(String.format(COPY_TABLE_FROM_DBF, tableName, tmpTableReference));
+            final StringBuilder attsAndTypes = new StringBuilder();
+            final StringBuilder atts = new StringBuilder();
+            final StringBuilder attsRef = new StringBuilder();
+
+            rs = st.executeQuery("select * from \"" + tmpTableReference + "\" limit 1");
+            for (int i = 2; i < rs.getMetaData().getColumnCount(); ++i) {
+                if (!attsAndTypes.toString().equals("")) {
+                    attsAndTypes.append(",");
+                    atts.append(",");
+                    attsRef.append(",");
+                }
+                attsAndTypes.append("\"")
+                        .append(rs.getMetaData().getColumnName(i).toLowerCase())
+                        .append("\" ")
+                        .append(rs.getMetaData().getColumnTypeName(i));
+                atts.append("\"").append(rs.getMetaData().getColumnName(i).toLowerCase()).append("\"");
+                attsRef.append(rs.getMetaData().getColumnName(i).toLowerCase());
+            }
+            rs.close();
+            st.execute(String.format(CREATE_TABLE_TEMPLATE, tableName, attsAndTypes.toString()));
+            st.execute(String.format(
+                    "INSERT INTO \"%s\" (%s) (select %s from \"%s\")",
+                    tableName,
+                    atts,
+                    attsRef,
+                    tmpTableReference));
+            st.execute(String.format(DROP_TABLE_REFERENCE, tmpTableReference));
+        } finally {
+            try {
+                st.execute(String.format(DROP_TABLE_REFERENCE, tmpTableReference));
+            } catch (Exception ex) {
+                // nothing to do
+            }
+        }
+    }
+
+    /**
+     * Creates the a new table from the given csv file.
+     *
+     * @param   file  the file with the source data
+     * @param   st    a Statement
+     *
+     * @throws  Exception  DOCUMENT ME!
+     */
+    private void createTableFromCsv(final File file, final Statement st) throws Exception {
+        final CsvDialog dialog = new CsvDialog(null, true);
+        final String separatorChar = determineSeparator(file);
+
+        dialog.setSeparatorChar(separatorChar);
+        dialog.setSize(225, 200);
+        StaticSwingTools.centerWindowOnScreen(dialog);
+
+        final StatementWrapper checkStatement = createStatement(conn);
+        ResultSet checkResultSet = null;
+        final String options = "charset=" + dialog.getCharactersetName() + " fieldDelimiter="
+                    + dialog.getTextSep() + " fieldSeparator=" + dialog.getSeparatorChar();
+        final ResultSet csvRs = st.executeQuery(String.format(
+                    "select * from CSVREAD('%s', null, '%s') limit 1;",
+                    file.getAbsolutePath(),
+                    options));
+        final int colCount = csvRs.getMetaData().getColumnCount();
+        StringBuilder select = null;
+
+        for (int i = 1; i <= colCount; ++i) {
+            boolean isInteger = false;
+            final String colName = csvRs.getMetaData().getColumnName(i);
+
+            if (select == null) {
+                select = new StringBuilder("\"" + colName + "\"");
+            } else {
+                select.append(", \"").append(colName).append("\"");
+            }
+
+            try {
+                checkResultSet = checkStatement.executeQuery(String.format(
+                            "select distinct "
+                                    + colName
+                                    + "::integer = "
+                                    + colName
+                                    + "::double from CSVREAD('%s', null, '%s');",
+                            file.getAbsolutePath(),
+                            options));
+
+                if (checkResultSet.next()) {
+                    if (checkResultSet.getBoolean(1)) {
+                        select.append("::integer");
+                        isInteger = true;
+                    }
+                }
+            } catch (Exception e) {
+                // nothing to do. column data type is no integer
+            } finally {
+                if (checkResultSet != null) {
+                    checkResultSet.close();
+                }
+            }
+
+            if (!isInteger) {
+                try {
+                    checkResultSet = checkStatement.executeQuery(String.format(
+                                "select "
+                                        + colName
+                                        + "::double from CSVREAD('%s', null, '%s');",
+                                file.getAbsolutePath(),
+                                options));
+                    select.append("::double");
+                } catch (Exception e) {
+                    // nothing to do. column data type is no double
+                } finally {
+                    if (checkResultSet != null) {
+                        checkResultSet.close();
+                    }
+                }
+            }
+
+            select.append(" as \"").append(colName).append("\"");
+        }
+
+        csvRs.close();
+        st.execute(String.format(
+                CREATE_TABLE_FROM_CSV,
+                tableName,
+                ((select != null) ? select.toString() : " * "),
+                file.getAbsolutePath(),
+                options));
+    }
+
+    /**
+     * Checks, if the upper and lower case of all files of the shp bundle is the same.
+     *
+     * @param   shpFile  the shape file
+     *
+     * @return  false, if the upper and lower case of a file is different to the shape file
+     */
+    private boolean checkForFileNames(final File shpFile) {
+        final File parentFolder = shpFile.getParentFile();
+        final String shpStem = shpFile.getName().substring(0, shpFile.getName().lastIndexOf("."));
+
+        for (final File possibleShpSiebling : parentFolder.listFiles()) {
+            if (possibleShpSiebling.isFile()) {
+                if (possibleShpSiebling.getName().contains(("."))) {
+                    final String ending = possibleShpSiebling.getName()
+                                .substring(possibleShpSiebling.getName().lastIndexOf(".") + 1);
+
+                    for (final String possibleEnding : knownShpBundleEndings) {
+                        if (possibleEnding.equalsIgnoreCase(ending)) {
+                            final String fileStem = possibleShpSiebling.getName()
+                                        .substring(0, possibleShpSiebling.getName().lastIndexOf("."));
+
+                            if (shpStem.equalsIgnoreCase(fileStem) && !shpStem.equals(fileStem)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -605,12 +781,8 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 while (rs.next()) {
                     if (rs.getString("TYPE_NAME").toUpperCase().endsWith("GEOMETRY")) {
                         final String colName = rs.getString("COLUMN_NAME");
-                        final String indexName = removeSpecialCharacterFromTableName(colName + tableName
-                                        + "SpatialIndex");
-                        final int srid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs()
-                                        .getCode());
-                        st.execute(String.format(CREATE_SPATIAL_INDEX, indexName, tableName, colName));
-                        st.execute(String.format(UPDATE_SRID, tableName, colName, srid));
+
+                        createSpatialIndex(colName, tableName);
                     }
                 }
                 rs.close();
@@ -643,7 +815,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                     prepStat.execute();
                 }
 
-                createPrimaryKey(hasIdField);
+                createPrimaryKey(hasIdField, tableName);
             }
             st.close();
 
@@ -660,18 +832,21 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
     /**
      * DOCUMENT ME!
      *
-     * @param   tableName  DOCUMENT ME!
+     * @param   indexName  tableName DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
      */
-    private String removeSpecialCharacterFromTableName(final String tableName) {
-        String tableNameWithoutSpecialCharacters = tableName.replace("-", "SMI");
-        tableNameWithoutSpecialCharacters = tableNameWithoutSpecialCharacters.replace("/", "SSL");
-        tableNameWithoutSpecialCharacters = tableNameWithoutSpecialCharacters.replace(" ", "SSP");
-        tableNameWithoutSpecialCharacters = tableNameWithoutSpecialCharacters.replace(",", "SCOM");
-        tableNameWithoutSpecialCharacters = tableNameWithoutSpecialCharacters.replace(":", "SCOL");
-        tableNameWithoutSpecialCharacters = tableNameWithoutSpecialCharacters.replace("<", "SLE");
-        return tableNameWithoutSpecialCharacters.replace(">", "SGR");
+    private String removeSpecialCharacterFromIndexName(final String indexName) {
+        String indexNameWithoutSpecialCharacters = indexName.replace("-", "SMI");
+        indexNameWithoutSpecialCharacters = indexNameWithoutSpecialCharacters.replace("/", "SSL");
+        indexNameWithoutSpecialCharacters = indexNameWithoutSpecialCharacters.replace(" ", "SSP");
+        indexNameWithoutSpecialCharacters = indexNameWithoutSpecialCharacters.replace(",", "SCOM");
+        indexNameWithoutSpecialCharacters = indexNameWithoutSpecialCharacters.replace(":", "SCOL");
+        indexNameWithoutSpecialCharacters = indexNameWithoutSpecialCharacters.replace("<", "SLE");
+        indexNameWithoutSpecialCharacters = indexNameWithoutSpecialCharacters.replace(">", "SGR");
+        indexNameWithoutSpecialCharacters = indexNameWithoutSpecialCharacters.replace("(", "KLO");
+
+        return indexNameWithoutSpecialCharacters.replace(")", "KLG");
     }
 
     /**
@@ -729,10 +904,11 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * Adds a primary key constraint to the database table.
      *
      * @param   hasIdField  creates a id field, for the primary key, if this parameter is false
+     * @param   tableName   DOCUMENT ME!
      *
      * @throws  SQLException  DOCUMENT ME!
      */
-    private void createPrimaryKey(final boolean hasIdField) throws SQLException {
+    private void createPrimaryKey(final boolean hasIdField, final String tableName) throws SQLException {
         final StatementWrapper st = createStatement(conn);
 
         if (!hasIdField) {
@@ -741,9 +917,59 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             st.execute(String.format(CREATE_SEQUENCE, seqName));
             st.execute(String.format(ADD_SEQUENCE, tableName, idField, seqName));
         }
-        final String indexName = removeSpecialCharacterFromTableName(tableName) + "PIndex";
-        st.execute(String.format(ADD_NOT_NULL_ID, tableName, idField));
-        st.execute(String.format(CREATE_PRIMARY_KEY, indexName, tableName, idField));
+
+        try {
+            final String indexName = removeSpecialCharacterFromIndexName(tableName) + "PIndex";
+            st.execute(String.format(ADD_NOT_NULL_ID, tableName, idField));
+            st.execute(String.format(
+                    CREATE_PRIMARY_KEY,
+                    removeSpecialCharacterFromIndexName(indexName),
+                    tableName,
+                    idField));
+        } catch (SQLException e) {
+            if (hasIdField) {
+                final String newName = "id___001";
+                final int ans = JOptionPane.showConfirmDialog(CismapBroker.getInstance().getMappingComponent(),
+                        NbBundle.getMessage(
+                            H2FeatureServiceFactory.class,
+                            "H2FeatureServiceFactory.createPrimaryKey",
+                            newName),
+                        NbBundle.getMessage(
+                            H2FeatureServiceFactory.class,
+                            "H2FeatureServiceFactory.createPrimaryKey.title"),
+                        JOptionPane.OK_CANCEL_OPTION);
+
+                if (ans == JOptionPane.OK_OPTION) {
+                    st.execute(String.format(
+                            "alter table \"%s\" alter column \"%s\" rename to \"%s\"",
+                            tableName,
+                            idField,
+                            newName));
+
+                    createPrimaryKey(false, tableName);
+                } else {
+                    // todo remove Table
+                }
+            }
+        }
+        st.close();
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   geoField   DOCUMENT ME!
+     * @param   tableName  DOCUMENT ME!
+     *
+     * @throws  SQLException  DOCUMENT ME!
+     */
+    private void createSpatialIndex(final String geoField, final String tableName) throws SQLException {
+        final StatementWrapper st = createStatement(conn);
+        final String indexName = removeSpecialCharacterFromIndexName(geoField + tableName
+                        + "SpatialIndex");
+        final int srid = CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode());
+        st.execute(String.format(CREATE_SPATIAL_INDEX, indexName, tableName, geoField));
+        st.execute(String.format(UPDATE_SRID, tableName, geoField, srid));
         st.close();
     }
 
@@ -777,9 +1003,7 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
 
         try {
             Class.forName("org.h2.Driver");
-            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
-                        "jdbc:h2:"
-                                + H2FeatureServiceFactory.DB_NAME));
+            conn = getDBConnection(DB_NAME);
 
             rs = conn.getMetaData().getTables(null, null, LOCK_TABLE_NAME, null);
 
@@ -888,26 +1112,22 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @param  routeService    The service that conains the routes
      * @param  layerName       The name of the route layer
      * @param  domain          the domain of the route layer
+     * @param  newTableName    DOCUMENT ME!
      */
-    public void setLinearReferencingInformation(final String fromField,
+    public void createLinearReferencingLayer(final String fromField,
             final String tillField,
             final String routeField,
             final String routeJoinField,
             final AbstractFeatureService routeService,
             final String layerName,
-            final String domain) {
-//        if (geometryField != null) {
-//            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
-//                NbBundle.getMessage(
-//                    H2FeatureServiceFactory.class,
-//                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists",
-//                    tableName),
-//                NbBundle.getMessage(
-//                    H2FeatureServiceFactory.class,
-//                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists.title"),
-//                JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
+            final String domain,
+            final String newTableName) {
+        StatementWrapper st = null;
+        ResultSet rs = null;
+        PreparedStatement linRefGeomUpdate = null;
+        int creationSuccessfully = 0;
+        int errorCode = 0;
+        int errorStation = 0;
 
         try {
             if (!routeService.isInitialized()) {
@@ -926,37 +1146,60 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
             if (geoCol.indexOf(".") != -1) {
                 geoCol = geoCol.substring(geoCol.lastIndexOf(".") + 1);
             }
-            final StatementWrapper st = createStatement(conn);
-            if (geometryField == null) {
-                geometryField = "geo_" + geoCol;
-                st.execute("alter table \"" + tableName + "\" add column \"" + geometryField + "\" Geometry");
+            st = createStatement(conn);
+            st.execute("create table \"" + newTableName + "\" as select * from \"" + this.tableName + "\"");
+
+            if (geometryField != null) {
+                st.execute("alter table \"" + newTableName + "\" drop column \"" + geometryField + "\"");
             }
+
+            final String newGeometryField = "geo_" + geoCol;
+            st.execute("alter table \"" + newTableName + "\" add column \"" + newGeometryField + "\" Geometry");
             String additionalFields = "\"" + fromField + "\",\"" + routeField + "\"";
-            final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set \""
-                            + geometryField + "\" = ? WHERE \"" + idField + "\" = ?");
+            linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + newTableName + "\" set \""
+                            + newGeometryField + "\" = ? WHERE \"" + idField + "\" = ?");
 
             if (tillField != null) {
                 additionalFields += ",\"" + tillField + "\"";
             }
 
-            final ResultSet rs = st.executeQuery("select \"" + idField + "\"," + additionalFields + " from \""
-                            + tableName + "\"");
+            rs = st.executeQuery("select \"" + idField + "\"," + additionalFields + " from \""
+                            + newTableName + "\"");
 
             while (rs.next()) {
                 final int id = rs.getInt(1);
-                final double from = rs.getDouble(2);
+                double from = rs.getDouble(2);
                 final Object routeId = rs.getObject(3);
                 Geometry geom = null;
                 final Geometry routeGeom = routeGeometries.get(routeId);
                 if (routeGeom == null) {
                     LOG.warn("No geometry found for route " + routeId);
+                    errorCode++;
                     continue;
                 }
+                final double routeLength = routeGeom.getLength();
                 final LengthIndexedLine line = new LengthIndexedLine(routeGeom);
+
+                creationSuccessfully++;
+
+                if (from > routeLength) {
+                    errorStation++;
+                }
 
                 if (tillField != null) {
                     final double till = rs.getDouble(4);
 
+                    if (till > routeLength) {
+                        errorStation++;
+                    }
+
+                    if ((till > routeLength) && (from > routeLength)) {
+                        from = routeLength - 1;
+
+                        if (from < 0) {
+                            from = 0;
+                        }
+                    }
                     geom = line.extractLine(from, till);
                 } else {
                     final Coordinate coords = line.extractPoint(from);
@@ -968,82 +1211,190 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
                 linRefGeomUpdate.execute();
             }
 
-            rs.close();
-
             createMetaLinRefTablesIfNotExist();
             final String tillInfo = ((tillField == null) ? "" : tillField);
             final int kind = ((tillField == null) ? STATION : STATION_LINE);
 
-            st.execute(String.format(
-                    DELETE_LR_META_DATA,
-                    tableName));
+//            st.execute(String.format(
+//                    DELETE_LR_META_DATA,
+//                    tableName));
             st.execute(String.format(
                     INSERT_LR_META_DATA,
-                    tableName,
+                    newTableName,
                     layerName,
                     domain,
                     routeField,
                     routeJoinField,
-                    geometryField,
+                    newGeometryField,
                     new Integer(kind),
                     fromField,
                     tillInfo));
-            st.close();
+            st.execute(String.format(INSERT_META_DATA, newTableName, "r"));
+            createPrimaryKey(true, newTableName);
+            createSpatialIndex(newGeometryField, newTableName);
+
+            JOptionPane.showMessageDialog(
+                CismapBroker.getInstance().getMappingComponent(),
+                org.openide.util.NbBundle.getMessage(
+                    H2FeatureServiceFactory.class,
+                    "H2FeatureServiceFactory.createLinearReferencingLayer()",
+                    creationSuccessfully,
+                    errorCode,
+                    errorStation),
+                org.openide.util.NbBundle.getMessage(
+                    H2FeatureServiceFactory.class,
+                    "H2FeatureServiceFactory.createLinearReferencingLayer().title"), // NOI18N
+                JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
+            try {
+                if (st != null) {
+                    st.execute("drop table \"" + newTableName + "\"");
+                }
+            } catch (SQLException ex) {
+                LOG.error("Cannot drop table", ex);
+            }
             LOG.error("Error while joining linear referenced table.", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    LOG.error("Error while closing result set", ex);
+                }
+            }
+            if (linRefGeomUpdate != null) {
+                try {
+                    linRefGeomUpdate.close();
+                } catch (SQLException ex) {
+                    LOG.error("Error while closing prepared statement", ex);
+                }
+            }
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.error("Error while closing statement", ex);
+                }
+            }
         }
     }
 
     /**
      * Adds point geometries to the service.
      *
-     * @param  xField  The field with the x value
-     * @param  yField  The field with the y value
+     * @param   xField        The field with the x value
+     * @param   yField        The field with the y value
+     * @param   newTableName  DOCUMENT ME!
+     *
+     * @throws  NegativeValueException  DOCUMENT ME!
      */
-    public void setPointGeometryInformation(final String xField, final String yField) {
-//        if (geometryField != null) {
-//            JOptionPane.showMessageDialog(CismapBroker.getInstance().getMappingComponent(),
-//                NbBundle.getMessage(
-//                    H2FeatureServiceFactory.class,
-//                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists",
-//                    tableName),
-//                NbBundle.getMessage(
-//                    H2FeatureServiceFactory.class,
-//                    "H2FeatureServiceFactory.setLinearReferencingInformation.geometryAlreadyExists.title"),
-//                JOptionPane.ERROR_MESSAGE);
-//            return;
-//        }
+    public void createPointGeometryLayer(final String xField, final String yField, final String newTableName)
+            throws NegativeValueException {
+        StatementWrapper st = null;
+        PreparedStatement linRefGeomUpdate = null;
+        ResultSet rs = null;
 
         try {
-            final StatementWrapper st = createStatement(conn);
-            if (geometryField == null) {
-                geometryField = "geo_xy";
-                st.execute("alter table \"" + tableName + "\" add column \"" + geometryField + "\" Geometry");
+            st = createStatement(conn);
+            st.execute("create table \"" + newTableName + "\" as select * from \"" + this.tableName + "\"");
+            final String newGeometryField = "geo_xy";
+
+            if (geometryField != null) {
+                st.execute("alter table \"" + newTableName + "\" drop column \"" + geometryField + "\"");
             }
+            st.execute("alter table \"" + newTableName + "\" add column \"" + newGeometryField + "\" Geometry");
+
             final String additionalFields = "\"" + xField + "\",\"" + yField + "\"";
-            final PreparedStatement linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + tableName + "\" set \""
-                            + geometryField + "\" = ? WHERE \"" + idField + "\" = ?");
-            final ResultSet rs = st.executeQuery("select \"" + idField + "\"," + additionalFields + " from \""
-                            + tableName + "\"");
+            linRefGeomUpdate = conn.prepareStatement("UPDATE \"" + newTableName + "\" set \""
+                            + newGeometryField + "\" = ? WHERE \"" + idField + "\" = ?");
+            rs = st.executeQuery("select \"" + idField + "\"," + additionalFields + " from \""
+                            + newTableName + "\"");
             final GeometryFactory gf = new GeometryFactory(new PrecisionModel(PrecisionModel.FLOATING),
                     CrsTransformer.getCurrentSrid());
+            boolean xNegative = false;
+            boolean yNegative = false;
 
             while (rs.next()) {
                 final int id = rs.getInt(1);
                 final double x = rs.getDouble(2);
                 final double y = rs.getDouble(3);
-                final Geometry geom = gf.createPoint(new Coordinate(x, y));
 
-                linRefGeomUpdate.setObject(1, geom);
-                linRefGeomUpdate.setInt(2, id);
-                linRefGeomUpdate.execute();
+                if (!xNegative && (x < 0)) {
+                    xNegative = true;
+                }
+
+                if (!yNegative && (y < 0)) {
+                    yNegative = true;
+                }
+
+                if (!xNegative && !yNegative) {
+                    final Geometry geom = gf.createPoint(new Coordinate(x, y));
+
+                    linRefGeomUpdate.setObject(1, geom);
+                    linRefGeomUpdate.setInt(2, id);
+                    linRefGeomUpdate.addBatch();
+                }
             }
 
-            rs.close();
+            if (xNegative || yNegative) {
+                final NegativeValueException e = new NegativeValueException(xNegative && yNegative,
+                        "Negative values found");
 
-            st.close();
+                if (xNegative && !yNegative) {
+                    e.setAttributeName(xField);
+                }
+
+                if (!xNegative && yNegative) {
+                    e.setAttributeName(yField);
+                }
+
+                throw e;
+            }
+
+            linRefGeomUpdate.executeBatch();
+            st.execute(String.format(INSERT_META_DATA, newTableName, "xy"));
+            createPrimaryKey(true, newTableName);
+            createSpatialIndex(newGeometryField, newTableName);
+        } catch (NegativeValueException e) {
+            try {
+                if (st != null) {
+                    st.execute("drop table \"" + newTableName + "\"");
+                }
+            } catch (SQLException ex) {
+                LOG.error("Cannot drop table", ex);
+            }
+            throw e;
         } catch (Exception e) {
+            try {
+                if (st != null) {
+                    st.execute("drop table \"" + newTableName + "\"");
+                }
+            } catch (SQLException ex) {
+                LOG.error("Cannot drop table", ex);
+            }
             LOG.error("Error while adding point geometries.", e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ex) {
+                    LOG.error("Cannot close result set", ex);
+                }
+            }
+            if (linRefGeomUpdate != null) {
+                try {
+                    linRefGeomUpdate.close();
+                } catch (SQLException ex) {
+                    LOG.error("Cannot close prepared statement", ex);
+                }
+            }
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException ex) {
+                    LOG.error("Cannot close statement", ex);
+                }
+            }
         }
     }
 
@@ -1330,36 +1681,41 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      * @return  the next free id or -1 if the id cannot be determined.
      */
     private int getFreeId() {
-        int freeId = -1;
-        Statement st = null;
+        if (lastFreeId > 0) {
+            return ++lastFreeId;
+        } else {
+            int freeId = -1;
+            Statement st = null;
 
-        try {
-            st = createStatement(conn);
-            final String maxId = "SELECT max(\"%1s\") + 1 from \"%2s\";";
+            try {
+                st = createStatement(conn);
+                final String maxId = "SELECT max(\"%1s\") + 1 from \"%2s\";";
 
-            final String query = String.format(maxId, idField, tableName);
-            final ResultSet rs = st.executeQuery(query);
+                final String query = String.format(maxId, idField, tableName);
+                final ResultSet rs = st.executeQuery(query);
 
-            if ((rs != null) && rs.next()) {
-                freeId = rs.getInt(1);
-            }
+                if ((rs != null) && rs.next()) {
+                    freeId = rs.getInt(1);
+                    lastFreeId = freeId;
+                }
 
-            if (rs != null) {
-                rs.close();
-            }
-        } catch (Exception e) {
-            Log.error("cannot determine free id", e);
-        } finally {
-            if (st != null) {
-                try {
-                    st.close();
-                } catch (SQLException ex) {
-                    LOG.error("Cannot close statement", ex);
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (Exception e) {
+                Log.error("cannot determine free id", e);
+            } finally {
+                if (st != null) {
+                    try {
+                        st.close();
+                    } catch (SQLException ex) {
+                        LOG.error("Cannot close statement", ex);
+                    }
                 }
             }
-        }
 
-        return freeId;
+            return freeId;
+        }
     }
 
     /**
@@ -1609,5 +1965,62 @@ public class H2FeatureServiceFactory extends JDBCFeatureFactory {
      */
     public String getGeometryType() {
         return geometryType;
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public static class NegativeValueException extends Exception {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final boolean both;
+        private String attributeName;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new NegativeValueException object.
+         *
+         * @param  both     DOCUMENT ME!
+         * @param  message  DOCUMENT ME!
+         */
+        public NegativeValueException(final boolean both, final String message) {
+            super(message);
+            this.both = both;
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  the both
+         */
+        public boolean isBoth() {
+            return both;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  the attributeName
+         */
+        public String getAttributeName() {
+            return attributeName;
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  attributeName  the attributeName to set
+         */
+        public void setAttributeName(final String attributeName) {
+            this.attributeName = attributeName;
+        }
     }
 }

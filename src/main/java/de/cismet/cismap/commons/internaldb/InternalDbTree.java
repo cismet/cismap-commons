@@ -11,17 +11,23 @@
  */
 package de.cismet.cismap.commons.internaldb;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import org.apache.log4j.Logger;
 
-import org.h2gis.utilities.SFSUtilities;
 import org.h2gis.utilities.wrapper.ConnectionWrapper;
+
+import org.openide.util.NbBundle;
 
 import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -35,10 +41,16 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeModel;
@@ -46,14 +58,22 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import de.cismet.cismap.commons.MappingModel;
+import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.featureservice.H2FeatureService;
 import de.cismet.cismap.commons.featureservice.JDBCFeatureService;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 import de.cismet.cismap.commons.gui.attributetable.AttributeTableFactory;
 import de.cismet.cismap.commons.gui.capabilitywidget.StringFilter;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
+import de.cismet.cismap.commons.gui.layerwidget.ThemeLayerMenuItem;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.rasterservice.MapService;
+import de.cismet.cismap.commons.tools.PointReferencingDialog;
+
+import de.cismet.cismap.linearreferencing.tools.LinearReferencingDialog;
+
+import de.cismet.tools.gui.DefaultPopupMenuListener;
+import de.cismet.tools.gui.StaticSwingTools;
 
 /**
  * This trees are shown in the capability widget to show the content of an internal db.
@@ -69,10 +89,13 @@ public class InternalDbTree extends JTree {
 
     //~ Instance fields --------------------------------------------------------
 
+    List<InternalDbMenuItem> menuList = new ArrayList<InternalDbMenuItem>();
+
     private Icon shapeIcon = new ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/layerwidget/res/layerShape.png"));
 
     private String databasePath;
+    private JPopupMenu popupMenu = new JPopupMenu();
 
     //~ Constructors -----------------------------------------------------------
 
@@ -89,6 +112,20 @@ public class InternalDbTree extends JTree {
         setDropMode(DropMode.ON_OR_INSERT);
         setTransferHandler(new DBTransferHandler());
         getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+        menuList.add(new ZoomTo());
+        menuList.add(new AddFolderItem());
+        menuList.add(new RemoveItem());
+        menuList.add(new AddPointGeometry());
+        menuList.add(new AddLinearReferencing());
+
+        addMouseListener(new DefaultPopupMenuListener(popupMenu) {
+
+                @Override
+                public void mouseClicked(final MouseEvent e) {
+                    super.mouseClicked(e); // To change body of generated methods, choose Tools | Templates.
+                }
+            });
+
         final DefaultTreeCellRenderer renderer = new DefaultTreeCellRenderer() {
 
                 @Override
@@ -184,9 +221,57 @@ public class InternalDbTree extends JTree {
 //        transferHandler = new TreeTransferHandler();
 //        tree.setTransferHandler(transferHandler);
         setModel(new InternalDBTreeModel());
+        createPopupMenu();
+        addTreeSelectionListener(new TreeSelectionListener() {
+
+                @Override
+                public void valueChanged(final TreeSelectionEvent e) {
+                    createPopupMenu();
+                }
+            });
+
+        popupMenu.addPopupMenuListener(new PopupMenuListener() {
+
+                @Override
+                public void popupMenuWillBecomeVisible(final PopupMenuEvent e) {
+                    synchronized (popupMenu.getTreeLock()) {
+                        for (int i = 0; i < popupMenu.getComponentCount(); ++i) {
+                            final TreePath[] paths = getSelectionPaths();
+                            final Object component = popupMenu.getComponent(i);
+
+                            if (component instanceof InternalDbMenuItem) {
+                                final InternalDbMenuItem menuItem = (InternalDbMenuItem)component;
+                                menuItem.refreshText(paths);
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void popupMenuWillBecomeInvisible(final PopupMenuEvent e) {
+                }
+
+                @Override
+                public void popupMenuCanceled(final PopupMenuEvent e) {
+                }
+            });
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     */
+    private void createPopupMenu() {
+        final TreePath[] paths = getSelectionPaths();
+        popupMenu.removeAll();
+
+        for (final InternalDbMenuItem item : menuList) {
+            if (item.isVisible(paths)) {
+                popupMenu.add(item);
+            }
+        }
+    }
 
     /**
      * refreshs the tree model.
@@ -855,6 +940,405 @@ public class InternalDbTree extends JTree {
         @Override
         public void setFilterString(final String filterString) {
             this.filterString = filterString;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class AddFolderItem extends InternalDbMenuItem {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new AddFolderItem object.
+         */
+        public AddFolderItem() {
+            super(NbBundle.getMessage(AddFolderItem.class, "InternalDbTree.AddFolderItem.text"));
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            InternalDbTree.this.addFolder(
+                NbBundle.getMessage(
+                    AddFolderItem.class,
+                    "InternalDbTree.AddFolderItem.addFolder"));
+        }
+
+        @Override
+        public boolean isVisible(final TreePath[] path) {
+            if ((path != null) && (path.length == 1)) {
+                return (path[0].getLastPathComponent() instanceof DBFolder)
+                            || path[0].getLastPathComponent().equals(InternalDbTree.this.getModel().getRoot());
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class RemoveItem extends InternalDbMenuItem {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new RemoveItem object.
+         */
+        public RemoveItem() {
+            super(NbBundle.getMessage(RemoveItem.class, "InternalDbTree.RemoveItem.refreshText().both"));
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final TreePath[] tps = InternalDbTree.this.getSelectionPaths();
+
+            for (final TreePath tp : tps) {
+                final DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                if (tp.getLastPathComponent() instanceof DBEntry) {
+                    InternalDbTree.this.removeEntry(entry);
+                }
+            }
+        }
+
+        @Override
+        public boolean isVisible(final TreePath[] paths) {
+            if (paths != null) {
+                boolean visible = true;
+
+                for (final TreePath path : paths) {
+                    if (path.getLastPathComponent().equals(InternalDbTree.this.getModel().getRoot())) {
+                        visible = false;
+                        break;
+                    }
+                }
+
+                return visible;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public void refreshText(final TreePath[] paths) {
+            if (paths != null) {
+                boolean folder = false;
+                boolean theme = false;
+
+                for (final TreePath path : paths) {
+                    if (path.getLastPathComponent() instanceof DBFolder) {
+                        folder = true;
+                    } else if (path.getLastPathComponent() instanceof DBEntry) {
+                        theme = true;
+                    }
+                }
+
+                if (folder && theme) {
+                    setText(NbBundle.getMessage(RemoveItem.class, "InternalDbTree.RemoveItem.refreshText().both"));
+                } else if (folder) {
+                    setText(NbBundle.getMessage(RemoveItem.class, "InternalDbTree.RemoveItem.refreshText().folder"));
+                } else if (theme) {
+                    setText(NbBundle.getMessage(RemoveItem.class, "InternalDbTree.RemoveItem.refreshText().theme"));
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class ZoomTo extends InternalDbMenuItem {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new ZoomTo object.
+         */
+        public ZoomTo() {
+            super(NbBundle.getMessage(ZoomTo.class, "InternalDbTree.ZoomTo.refreshText().both"));
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            zoomToExtent();
+        }
+
+        /**
+         * Zooms the map to the extent of the selected elements of the given InternalDbTree,
+         */
+        private void zoomToExtent() {
+            final DBTableInformation[] infos = InternalDbTree.this.getDBTableInformationOfSelectionPath();
+            Geometry geom = null;
+            final List<DBTableInformation> infoList = new ArrayList<DBTableInformation>();
+
+            for (final DBTableInformation info : infos) {
+                if (info.isFolder()) {
+                    infoList.addAll(getChildren(info));
+                } else {
+                    infoList.add(info);
+                }
+            }
+
+            for (final DBTableInformation dbInfo : infoList) {
+                try {
+                    final H2FeatureService layer = new H2FeatureService(dbInfo.getName(),
+                            dbInfo.getDatabasePath(),
+                            dbInfo.getDatabaseTable(),
+                            null);
+                    layer.initAndWait();
+                    final Geometry envelope = ((H2FeatureServiceFactory)layer.getFeatureFactory()).getEnvelope();
+
+                    if (envelope != null) {
+                        if (geom == null) {
+                            geom = envelope;
+                        } else {
+                            geom = geom.union(envelope);
+                        }
+                    }
+                } catch (Exception ex) {
+                    LOG.error("Error while creating H2FeatureService", ex);
+                }
+            }
+
+            if (geom != null) {
+                CismapBroker.getInstance().getMappingComponent().gotoBoundingBoxWithHistory(new XBoundingBox(geom));
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   infoFolder  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        private List<DBTableInformation> getChildren(final DBTableInformation infoFolder) {
+            final List<DBTableInformation> infoList = new ArrayList<DBTableInformation>();
+
+            if (infoFolder.getChildren() != null) {
+                for (final DBTableInformation info : infoFolder.getChildren()) {
+                    if (info.isFolder()) {
+                        infoList.addAll(getChildren(info));
+                    } else {
+                        infoList.add(info);
+                    }
+                }
+            }
+            return infoList;
+        }
+
+        @Override
+        public void refreshText(final TreePath[] paths) {
+            if (paths != null) {
+                boolean folder = false;
+                boolean theme = false;
+
+                for (final TreePath path : paths) {
+                    if (path.getLastPathComponent() instanceof DBFolder) {
+                        folder = true;
+                    } else if (path.getLastPathComponent() instanceof DBEntry) {
+                        theme = true;
+                    }
+                }
+
+                if (folder && theme) {
+                    setText(NbBundle.getMessage(RemoveItem.class, "InternalDbTree.ZoomTo.refreshText().both"));
+                } else if (folder) {
+                    setText(NbBundle.getMessage(RemoveItem.class, "InternalDbTree.ZoomTo.refreshText().folder"));
+                } else if (theme) {
+                    setText(NbBundle.getMessage(RemoveItem.class, "InternalDbTree.ZoomTo.refreshText().theme"));
+                }
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class AddLinearReferencing extends InternalDbMenuItem {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new AddLinearReferencing object.
+         */
+        public AddLinearReferencing() {
+            super(NbBundle.getMessage(AddLinearReferencing.class, "InternalDbTree.AddLinearReferencing.text"));
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final TreePath[] tps = InternalDbTree.this.getSelectionPaths();
+
+            for (final TreePath tp : tps) {
+                if ((tp.getLastPathComponent() instanceof DBEntry)
+                            && !(tp.getLastPathComponent() instanceof DBFolder)) {
+                    try {
+                        final DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                        final H2FeatureService service = new H2FeatureService(
+                                entry.getNameWithoutFolder(),
+                                databasePath,
+                                entry.getName(),
+                                null);
+                        final LinearReferencingDialog dialog = new LinearReferencingDialog(
+                                StaticSwingTools.getParentFrame(InternalDbTree.this),
+                                true,
+                                service);
+                        dialog.setSize(645, 260);
+                        dialog.pack();
+                        StaticSwingTools.showDialog(dialog);
+                    } catch (Exception ex) {
+                        LOG.error(
+                            "Error while creating a H2 service instance.",
+                            ex);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean isVisible(final TreePath[] paths) {
+            if (paths != null) {
+                boolean visible = true;
+
+                for (final TreePath path : paths) {
+                    if ((path.getLastPathComponent() instanceof DBFolder)
+                                || path.getLastPathComponent().equals(InternalDbTree.this.getModel().getRoot())) {
+                        visible = false;
+                        break;
+                    }
+                }
+
+                return visible;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private class AddPointGeometry extends InternalDbMenuItem {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new AddPointGeometry object.
+         */
+        public AddPointGeometry() {
+            super(NbBundle.getMessage(AddPointGeometry.class, "InternalDbTree.AddPointGeometry.text"));
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void actionPerformed(final ActionEvent e) {
+            final TreePath[] tps = InternalDbTree.this.getSelectionPaths();
+
+            for (final TreePath tp : tps) {
+                if ((tp.getLastPathComponent() instanceof DBEntry)
+                            && !(tp.getLastPathComponent() instanceof DBFolder)) {
+                    try {
+                        final DBEntry entry = (DBEntry)tp.getLastPathComponent();
+                        final H2FeatureService service = new H2FeatureService(
+                                entry.getNameWithoutFolder(),
+                                databasePath,
+                                entry.getName(),
+                                null);
+                        final PointReferencingDialog dialog = new PointReferencingDialog(
+                                StaticSwingTools.getParentFrame(InternalDbTree.this),
+                                true,
+                                service);
+                        dialog.setSize(645, 260);
+                        dialog.pack();
+                        StaticSwingTools.showDialog(dialog);
+                    } catch (Exception ex) {
+                        LOG.error(
+                            "Error while creating a H2 service instance.",
+                            ex);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public boolean isVisible(final TreePath[] paths) {
+            if (paths != null) {
+                boolean visible = true;
+
+                for (final TreePath path : paths) {
+                    if ((path.getLastPathComponent() instanceof DBFolder)
+                                || path.getLastPathComponent().equals(InternalDbTree.this.getModel().getRoot())) {
+                        visible = false;
+                        break;
+                    }
+                }
+
+                return visible;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    private abstract class InternalDbMenuItem extends JMenuItem implements ActionListener {
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new InternalDbMenuItem object.
+         *
+         * @param  text  DOCUMENT ME!
+         */
+        public InternalDbMenuItem(final String text) {
+            super(text);
+            addActionListener(this);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param   paths  DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public boolean isVisible(final TreePath[] paths) {
+            return (paths != null) && (paths.length > 0);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  paths  DOCUMENT ME!
+         */
+        public void refreshText(final TreePath[] paths) {
         }
     }
 }

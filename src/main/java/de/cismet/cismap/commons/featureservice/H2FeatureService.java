@@ -18,6 +18,8 @@ import org.h2gis.utilities.wrapper.ConnectionWrapper;
 
 import org.jdom.Element;
 
+import org.openide.util.NbBundle;
+
 import java.io.File;
 
 import java.net.URI;
@@ -40,7 +42,7 @@ import de.cismet.cismap.commons.featureservice.factory.FeatureFactory;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
 import de.cismet.cismap.commons.gui.attributetable.LockFromSameUserAlreadyExistsException;
 
-import static de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory.createLockTableIfNotExist;
+import static de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory.LR_META_TABLE_NAME;
 
 /**
  * A service, that uses the internal db as data source.
@@ -67,6 +69,10 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
                 + "\" where \"id\" = %s and \"table\" = '%s'";
     private static final String UNLOCK_TABLE = "DELETE FROM \"" + H2FeatureServiceFactory.LOCK_TABLE_NAME
                 + "\" where \"table\" = '%s'";
+    private static final String DELETE_FROM_TABLE = "DELETE FROM \"%s\" where table = '%s';";
+    private static final String DELETE_FROM_LOCK_TABLE = "DELETE FROM \"%s\" where \"table\" = '%s';";
+    private static final String DROP_TABLE = "DROP TABLE \"%s\";";
+    private static final String DROP_SEQUENCE = "DROP SEQUENCE IF EXISTS \"%s_seq\";";
 
     static {
         layerIcons.put(
@@ -139,6 +145,56 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             new ImageIcon(
                 AbstractFeatureService.class.getResource(
                     "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerDbfInvisible.png"))); // NOI18N
+
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_VISIBLE)
+                    + ";xy",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerXy.png")));                   // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_INVISIBLE)
+                    + ";xy",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerXyInvisible.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_VISIBLE)
+                    + ";xy",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerXy.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_INVISIBLE)
+                    + ";xy",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerXyInvisible.png"))); // NOI18N
+
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_VISIBLE)
+                    + ";r",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerR.png")));                   // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_ENABLED_INVISIBLE)
+                    + ";r",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/layerRInvisible.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_VISIBLE)
+                    + ";r",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerR.png")));          // NOI18N
+        layerIcons.put(
+            String.valueOf(LAYER_DISABLED_INVISIBLE)
+                    + ";r",
+            new ImageIcon(
+                AbstractFeatureService.class.getResource(
+                    "/de/cismet/cismap/commons/gui/layerwidget/res/disabled/layerRInvisible.png"))); // NOI18N
     }
 
     //~ Instance fields --------------------------------------------------------
@@ -446,42 +502,67 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
     /**
      * Adds the geometries for linear referenced values to the service.
      *
-     * @param  fromField       The field with the from station
-     * @param  tillField       The field with the till station
-     * @param  routeField      The field with the route name
-     * @param  routeJoinField  the field of the route service, that is used for the join with this service
-     * @param  routeService    The service that conains the routes
-     * @param  layerName       The name of the route layer
-     * @param  domain          the domain of the route layer
+     * @param   fromField       The field with the from station
+     * @param   tillField       The field with the till station
+     * @param   routeField      The field with the route name
+     * @param   routeJoinField  the field of the route service, that is used for the join with this service
+     * @param   routeService    The service that conains the routes
+     * @param   layerName       The name of the route layer
+     * @param   domain          the domain of the route layer
+     * @param   newTableName    DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  Exception  DOCUMENT ME!
      */
-    public void setLinearReferencingInformation(final String fromField,
+    public H2FeatureService createLinearReferencingLayer(final String fromField,
             final String tillField,
             final String routeField,
             final String routeJoinField,
             final AbstractFeatureService routeService,
             final String layerName,
-            final String domain) {
-        ((H2FeatureServiceFactory)getFeatureFactory()).setLinearReferencingInformation(
+            final String domain,
+            final String newTableName) throws Exception {
+        ((H2FeatureServiceFactory)getFeatureFactory()).createLinearReferencingLayer(
             fromField,
             tillField,
             routeField,
             routeJoinField,
             routeService,
             layerName,
-            domain);
+            domain,
+            newTableName);
+
+        final H2FeatureService service = new H2FeatureService(newTableName, databasePath, newTableName, null);
+        service.initAndWait();
+
+        return service;
     }
 
     /**
      * Adds point geometries to the service.
      *
-     * @param  xField  The field with the x value
-     * @param  yField  The field with the y value
+     * @param   xField        The field with the x value
+     * @param   yField        The field with the y value
+     * @param   newTableName  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  H2FeatureServiceFactory.NegativeValueException  DOCUMENT ME!
+     * @throws  Exception                                       DOCUMENT ME!
      */
-    public void setPointGeometryInformation(final String xField,
-            final String yField) {
-        ((H2FeatureServiceFactory)getFeatureFactory()).setPointGeometryInformation(
+    public H2FeatureService createPointGeometryInformation(final String xField,
+            final String yField,
+            final String newTableName) throws H2FeatureServiceFactory.NegativeValueException, Exception {
+        ((H2FeatureServiceFactory)getFeatureFactory()).createPointGeometryLayer(
             xField,
-            yField);
+            yField,
+            newTableName);
+
+        final H2FeatureService service = new H2FeatureService(newTableName, databasePath, newTableName, null);
+        service.initAndWait();
+
+        return service;
     }
 
     @Override
@@ -506,6 +587,11 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         return hash;
     }
 
+    @Override
+    public String decoratePropertyName(final String name) {
+        return "\"" + name + "\"";
+    }
+
     /**
      * Checks, if the given table exists in the db.
      *
@@ -520,9 +606,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
 
         try {
             Class.forName("org.h2.Driver");
-            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
-                        "jdbc:h2:"
-                                + H2FeatureServiceFactory.DB_NAME));
+            conn = H2FeatureServiceFactory.getDBConnection(H2FeatureServiceFactory.DB_NAME);
             rs = conn.getMetaData().getTables(null, null, tableName, null);
             tableExists = rs.next();
 
@@ -565,9 +649,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
 
         try {
             Class.forName("org.h2.Driver");
-            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
-                        "jdbc:h2:"
-                                + H2FeatureServiceFactory.DB_NAME));
+            conn = H2FeatureServiceFactory.getDBConnection(H2FeatureServiceFactory.DB_NAME);
             st = conn.createStatement();
 
             if (id == null) {
@@ -578,7 +660,9 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
             final boolean lockExists = rs.next();
 
             if (lockExists) {
-                throw new LockFromSameUserAlreadyExistsException("The lock does already exists", "local user");
+                throw new LockFromSameUserAlreadyExistsException(
+                    "The lock does already exists",
+                    NbBundle.getMessage(H2FeatureService.class, "H2FeatureService.lockFeature.localUser"));
             }
 
             st.execute(String.format(LOCK_FEATURE, ((id == null) ? "null" : id.toString()), tableName));
@@ -617,9 +701,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         try {
             H2FeatureServiceFactory.createLockTableIfNotExist();
             Class.forName("org.h2.Driver");
-            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
-                        "jdbc:h2:"
-                                + H2FeatureServiceFactory.DB_NAME));
+            conn = H2FeatureServiceFactory.getDBConnection(H2FeatureServiceFactory.DB_NAME);
             st = conn.createStatement();
 
             st.execute(String.format(CLEAR_LOCKS));
@@ -655,9 +737,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
 
         try {
             Class.forName("org.h2.Driver");
-            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
-                        "jdbc:h2:"
-                                + H2FeatureServiceFactory.DB_NAME));
+            conn = H2FeatureServiceFactory.getDBConnection(H2FeatureServiceFactory.DB_NAME);
             st = conn.createStatement();
 
             if (id == null) {
@@ -698,16 +778,17 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         boolean tableExists = false;
 
         try {
-            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
-                        "jdbc:h2:"
-                                + H2FeatureServiceFactory.DB_NAME));
+            conn = H2FeatureServiceFactory.getDBConnection(H2FeatureServiceFactory.DB_NAME);
             rs = conn.getMetaData().getTables(null, null, tableName, null);
             tableExists = rs.next();
 
             if (tableExists) {
                 final Statement st = conn.createStatement();
-                st.execute("DROP TABLE \"" + tableName + "\";");
-                st.execute("DROP SEQUENCE IF EXISTS \"" + tableName + "_seq\";");
+                st.execute(String.format(DROP_TABLE, tableName));
+                st.execute(String.format(DROP_SEQUENCE, tableName));
+                st.execute(String.format(DELETE_FROM_TABLE, H2FeatureServiceFactory.LR_META_TABLE_NAME, tableName));
+                st.execute(String.format(DELETE_FROM_TABLE, H2FeatureServiceFactory.META_TABLE_NAME, tableName));
+                st.execute(String.format(DELETE_FROM_LOCK_TABLE, H2FeatureServiceFactory.LOCK_TABLE_NAME, tableName));
                 st.close();
                 return true;
             }
@@ -748,9 +829,7 @@ public class H2FeatureService extends JDBCFeatureService<JDBCFeature> {
         String format = "shp"; // the default type is shp
 
         try {
-            conn = (ConnectionWrapper)SFSUtilities.wrapConnection(DriverManager.getConnection(
-                        "jdbc:h2:"
-                                + dbName));
+            conn = H2FeatureServiceFactory.getDBConnection(H2FeatureServiceFactory.DB_NAME);
             st = conn.createStatement();
 
             rs = st.executeQuery("SELECT format from \"" + H2FeatureServiceFactory.META_TABLE_NAME
