@@ -560,7 +560,7 @@ public final class WMSServiceLayer extends AbstractWMSServiceLayer implements Re
                 final StatusEvent se = new StatusEvent(StatusEvent.AWAKED_FROM_DUMMY, this);
                 CismapBroker.getInstance().fireStatusValueChanged(se);
             } else {
-                retrievalAborted(new RetrievalEvent());
+                retrievalError(new RetrievalEvent());
                 return;
             }
         }
