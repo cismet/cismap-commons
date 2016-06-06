@@ -239,7 +239,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     // Scalebar
     private double screenResolution = 100.0;
     private volatile boolean locked = true;
-    private final List<PSticky> stickyPNodes = new ArrayList<PSticky>();
+    private final List<PSticky> stickyPNodes = Collections.synchronizedList(new ArrayList<PSticky>());
     // Undo- & Redo-Stacks
     private final MementoInterface memUndo = new Memento();
     private final MementoInterface memRedo = new Memento();
@@ -5755,6 +5755,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         @Override
         public void retrievalAborted(final RetrievalEvent e) {
             this.log.warn(rasterService + ": retrievalAborted: " + e.getRequestIdentifier()); // NOI18N
+            fireRepaintError(new RepaintEvent(e));
 
             if (mainMappingComponent) {
                 CismapBroker.getInstance()

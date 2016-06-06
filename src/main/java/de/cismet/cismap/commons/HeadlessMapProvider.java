@@ -678,7 +678,9 @@ public class HeadlessMapProvider {
      *
      * @version  $Revision$, $Date$
      */
-    class HeadlessMapProviderRetrievalListener implements Future<Image>, RepaintListener {
+    class HeadlessMapProviderRetrievalListener implements Future<Image>,
+        RepaintListener,
+        ErroneousRetrievalServiceProvider {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -686,7 +688,7 @@ public class HeadlessMapProvider {
         int imageHeight;
         private HashSet<RetrievalService> services;
         private HashSet<Object> results;
-        private HashSet<Object> erroneous;
+        private HashSet<RetrievalService> erroneous;
         private boolean cancel = false;
         private volatile boolean done = false;
         private final ReentrantLock lock = new ReentrantLock();
@@ -712,7 +714,7 @@ public class HeadlessMapProvider {
             this.imageHeight = imageHeight;
             services = new HashSet<RetrievalService>();
             results = new HashSet<Object>();
-            erroneous = new HashSet<Object>();
+            erroneous = new HashSet<RetrievalService>();
             this.listener = listener;
             this.serviceCount = serviceCount;
         }
@@ -781,6 +783,7 @@ public class HeadlessMapProvider {
                     "PrintingWidget.retrievalError(RetrievalEvent).msg2"),
                 HeadlessMapProvider.NotificationLevel.ERROR_REASON,
                 e);                                           // NOI18N
+            repaintEvent.getRetrievalEvent().setHasErrors(true);
             repaintComplete(repaintEvent);
         }
 
@@ -829,7 +832,7 @@ public class HeadlessMapProvider {
                             PrintingWidget.class,
                             "PrintingWidget.retrievalComplete(RetrievalEvent).msg6"),
                         HeadlessMapProvider.NotificationLevel.SUCCESS); // NOI18N
-                } else if (erroneous.size() == services.size()) {
+                } else if (services.isEmpty()) {
                     sendNotification(org.openide.util.NbBundle.getMessage(
                             PrintingWidget.class,
                             "PrintingWidget.retrievalComplete(RetrievalEvent).msg7"),
@@ -862,6 +865,16 @@ public class HeadlessMapProvider {
 
                 unlock();
             }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  a set of all layers, which cannot be retrieved
+         */
+        @Override
+        public HashSet<RetrievalService> getErroneousLayer() {
+            return erroneous;
         }
 
         /**
