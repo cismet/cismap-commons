@@ -10,8 +10,10 @@ package de.cismet.cismap.commons.tools;
 import org.apache.log4j.Logger;
 
 import org.openide.util.Cancellable;
+import org.openide.util.NbBundle;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
@@ -20,10 +22,18 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
+
+import javax.swing.JOptionPane;
+
+import de.cismet.cismap.commons.ErroneousRetrievalServiceProvider;
+import de.cismet.cismap.commons.HeadlessMapProvider;
+import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.retrieval.RetrievalService;
 
 import de.cismet.tools.gui.downloadmanager.AbstractDownload;
 
@@ -90,6 +100,36 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
             try {
                 if (!Thread.interrupted()) {
                     image = (Image)futureImage.get();
+
+                    if (futureImage instanceof ErroneousRetrievalServiceProvider) {
+                        final ErroneousRetrievalServiceProvider p = (ErroneousRetrievalServiceProvider)futureImage;
+                        final HashSet<RetrievalService> layers = p.getErroneousLayer();
+
+                        if ((layers != null) && !layers.isEmpty()) {
+                            String layersWithErrors = null;
+
+                            for (final RetrievalService service : layers) {
+                                if (layersWithErrors == null) {
+                                    layersWithErrors = service.toString();
+                                } else {
+                                    layersWithErrors += "\n" + service.toString();
+                                }
+                            }
+                            
+                            final Component parent = CismapBroker.getInstance().getMappingComponent();
+
+                            JOptionPane.showMessageDialog(
+                                parent,
+                                NbBundle.getMessage(
+                                    FutureImageDownload.class,
+                                    "FutureImageDownload.run().cannotLoadLayer.message",
+                                    layersWithErrors),
+                                NbBundle.getMessage(
+                                    FutureImageDownload.class,
+                                    "FutureImageDownload.run().cannotLoadLayer.title"),
+                                JOptionPane.WARNING_MESSAGE);
+                        }
+                    }
                 } else {
                     deleteFile();
                 }
