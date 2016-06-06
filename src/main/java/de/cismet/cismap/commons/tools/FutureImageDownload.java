@@ -31,7 +31,6 @@ import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 
 import de.cismet.cismap.commons.ErroneousRetrievalServiceProvider;
-import de.cismet.cismap.commons.HeadlessMapProvider;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
 
@@ -115,7 +114,7 @@ public class FutureImageDownload extends AbstractDownload implements Cancellable
                                     layersWithErrors += "\n" + service.toString();
                                 }
                             }
-                            
+
                             final Component parent = CismapBroker.getInstance().getMappingComponent();
 
                             JOptionPane.showMessageDialog(
