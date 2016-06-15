@@ -20,7 +20,6 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
@@ -65,7 +64,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
@@ -107,12 +105,9 @@ import de.cismet.cismap.commons.featureservice.ShapeFolderTreeModel;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
-import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
-import de.cismet.cismap.commons.internaldb.DBEntry;
-import de.cismet.cismap.commons.internaldb.DBFolder;
 import de.cismet.cismap.commons.internaldb.DBTableInformation;
 import de.cismet.cismap.commons.internaldb.InternalDbTree;
 import de.cismet.cismap.commons.preferences.CapabilitiesListTreeNode;
@@ -120,14 +115,10 @@ import de.cismet.cismap.commons.preferences.CapabilitiesPreferences;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
-import de.cismet.cismap.commons.rasterservice.MapService;
-import de.cismet.cismap.commons.tools.PointReferencingDialog;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
 import de.cismet.cismap.commons.wms.capabilities.*;
-
-import de.cismet.cismap.linearreferencing.tools.LinearReferencingDialog;
 
 import de.cismet.commons.security.AccessHandler;
 
@@ -712,30 +703,30 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddFromListActionPerformed
+    private void cmdAddFromListActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdAddFromListActionPerformed
         capabilityList.show(cmdAddFromList, 0, cmdAddFromList.getHeight());
         capabilityList.setVisible(true);
-    }//GEN-LAST:event_cmdAddFromListActionPerformed
+    }                                                                                  //GEN-LAST:event_cmdAddFromListActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRefreshActionPerformed
+    private void cmdRefreshActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRefreshActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             final LinkWithSubparent link = capabilityUrlsReverse.get(tbpCapabilities.getSelectedComponent());
             addLinkManually(link);
         }
-    }//GEN-LAST:event_cmdRefreshActionPerformed
+    }                                                                              //GEN-LAST:event_cmdRefreshActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdAddByUrlActionPerformed
+    private void cmdAddByUrlActionPerformed(final java.awt.event.ActionEvent evt) {       //GEN-FIRST:event_cmdAddByUrlActionPerformed
         final String input = JOptionPane.showInputDialog(
                 StaticSwingTools.getParentFrame(this),
                 org.openide.util.NbBundle.getMessage(
@@ -748,16 +739,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
         if (input != null) {
             processUrl(input, null, true);
         }
-    }//GEN-LAST:event_cmdAddByUrlActionPerformed
+    }                                                                                     //GEN-LAST:event_cmdAddByUrlActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdRemoveActionPerformed
+    private void cmdRemoveActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdRemoveActionPerformed
         removeActiveCapabilityTree();
-    }//GEN-LAST:event_cmdRemoveActionPerformed
+    }                                                                             //GEN-LAST:event_cmdRemoveActionPerformed
 
     /**
      * Entfernt einen Capability-Baum aus der TabbedPane.
@@ -824,7 +815,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCollapseActionPerformed
+    private void cmdCollapseActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCollapseActionPerformed
         final JTree active = getActiveTree();
         if (active != null) {
             int row = active.getRowCount() - 1;
@@ -833,16 +824,16 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                 row--;
             }
         }
-    }//GEN-LAST:event_cmdCollapseActionPerformed
+    }                                                                               //GEN-LAST:event_cmdCollapseActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tbpCapabilitiesStateChanged
+    private void tbpCapabilitiesStateChanged(final javax.swing.event.ChangeEvent evt) { //GEN-FIRST:event_tbpCapabilitiesStateChanged
         addFilterToActiveTree();
-    }//GEN-LAST:event_tbpCapabilitiesStateChanged
+    }                                                                                   //GEN-LAST:event_tbpCapabilitiesStateChanged
 
     /**
      * Liefert den momentan selektierten Capabilties-Baum.
