@@ -20,7 +20,6 @@ import org.jdesktop.swingx.error.ErrorInfo;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import java.awt.Color;
@@ -65,7 +64,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Level;
 
@@ -107,12 +105,9 @@ import de.cismet.cismap.commons.featureservice.ShapeFolderTreeModel;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.featureservice.WFSCapabilitiesTreeModel;
 import de.cismet.cismap.commons.featureservice.factory.H2FeatureServiceFactory;
-import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.MapBoundsListener;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
-import de.cismet.cismap.commons.internaldb.DBEntry;
-import de.cismet.cismap.commons.internaldb.DBFolder;
 import de.cismet.cismap.commons.internaldb.DBTableInformation;
 import de.cismet.cismap.commons.internaldb.InternalDbTree;
 import de.cismet.cismap.commons.preferences.CapabilitiesListTreeNode;
@@ -120,14 +115,10 @@ import de.cismet.cismap.commons.preferences.CapabilitiesPreferences;
 import de.cismet.cismap.commons.preferences.CapabilityLink;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeCellRenderer;
 import de.cismet.cismap.commons.raster.wms.WMSCapabilitiesTreeModel;
-import de.cismet.cismap.commons.rasterservice.MapService;
-import de.cismet.cismap.commons.tools.PointReferencingDialog;
 import de.cismet.cismap.commons.wfs.capabilities.FeatureType;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilities;
 import de.cismet.cismap.commons.wfs.capabilities.WFSCapabilitiesFactory;
 import de.cismet.cismap.commons.wms.capabilities.*;
-
-import de.cismet.cismap.linearreferencing.tools.LinearReferencingDialog;
 
 import de.cismet.commons.security.AccessHandler;
 
@@ -461,7 +452,7 @@ public class CapabilityWidget extends JPanel implements DropTargetListener,
                                 alternatives,
                                 alternatives[0]);                                                      // NOI18N
                         if (selectedValue == alternatives[0]) {
-                            linkObject.setService("WFS");
+                            linkObject.setService("WMS");
                             addOGCWMSCapabilitiesTree(link, load, interactive, subparent);
                         } else if (selectedValue == alternatives[1]) {
                             linkObject.setService("WFS");
