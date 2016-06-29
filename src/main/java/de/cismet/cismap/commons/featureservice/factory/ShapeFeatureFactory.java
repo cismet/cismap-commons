@@ -336,7 +336,10 @@ public class ShapeFeatureFactory extends DegreeFeatureFactory<ShapeFeature, Stri
         if ((shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.MULTIPOINTM)
                     || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYLINEM)
                     || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYGONM)
-                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POINTM)) {
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POINTM)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYGONZ)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POLYLINEZ)
+                    || (shapeType == org.deegree.io.shpapi.shape_new.ShapeFile.POINTZ)) {
             final org.deegree.io.shpapi.shape_new.ShapeFile shapeFromReader = reader.read();
             fc = shapeFromReader.getFeatureCollection();
         }
