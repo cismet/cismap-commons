@@ -2226,6 +2226,9 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     synchronized (serviceFuturesMap) {
                         serviceFuturesMap.put(rs, CismetThreadPool.submit(serviceCall));
                     }
+                } else {
+                    LOG.warn("The wms request of the service \"" + rs.toString() + "\" was ignored. This can lead to a wrong "
+                            + "service image in the map and should not happen. The ignored bbox was " + bb.toString());
                 }
             }
         } else {
