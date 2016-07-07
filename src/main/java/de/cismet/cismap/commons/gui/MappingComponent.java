@@ -27,7 +27,6 @@ import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import pswing.PSwingCanvas;
@@ -49,8 +48,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import java.io.IOException;
-
-import java.lang.reflect.InvocationTargetException;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -81,7 +78,6 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.CrsChangeListener;
 import de.cismet.cismap.commons.interaction.GetFeatureInfoListener;
 import de.cismet.cismap.commons.interaction.events.CrsChangedEvent;
-import de.cismet.cismap.commons.interaction.events.GetFeatureInfoEvent;
 import de.cismet.cismap.commons.interaction.events.MapDnDEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.interaction.memento.Memento;
@@ -2174,7 +2170,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             bb.setX2(x2);
             bb.setY2(y2);
         }
-        handleMapService(position, service, getWidth(), getHeight(), bb, forced);
+        if ((getWidth() > 0) && (getHeight() > 0)) {
+            // if width or height are negative or zero, a wms request makes no sense
+            handleMapService(position, service, getWidth(), getHeight(), bb, forced);
+        }
     }
 
     /**
