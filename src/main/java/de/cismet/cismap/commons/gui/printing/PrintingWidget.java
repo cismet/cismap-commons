@@ -12,11 +12,17 @@
  */
 package de.cismet.cismap.commons.gui.printing;
 
+import edu.umd.cs.piccolo.event.PInputEventListener;
+
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperPrintManager;
 import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.util.JRLoader;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
 import net.sf.jasperreports.view.JRViewer;
 
 import org.jdesktop.swingx.JXErrorPane;
@@ -55,14 +61,18 @@ import de.cismet.cismap.commons.Debug;
 import de.cismet.cismap.commons.HeadlessMapProvider;
 import de.cismet.cismap.commons.HeadlessMapProvider.NotificationLevel;
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingTemplatePreviewListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 
 import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.gui.Static2DTools;
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.tools.gui.downloadmanager.AbstractCancellableDownload;
 import de.cismet.tools.gui.downloadmanager.Download;
 import de.cismet.tools.gui.downloadmanager.DownloadManager;
 import de.cismet.tools.gui.downloadmanager.DownloadManagerDialog;
@@ -518,28 +528,46 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
 
         headlessMapProvider.addPropertyChangeListener(this);
 
-        final BoundingBox bb =
-            ((PrintingFrameListener)mappingComponent.getInputListener(MappingComponent.PRINTING_AREA_SELECTION))
-                    .getPrintingBoundingBox();
-        // transform BoundingBox to XBoundingBox
-        final Crs crs = mappingComponent.getMappingModel().getSrs();
-        final boolean isMetric = crs.isMetric();
-        final XBoundingBox xbb = new XBoundingBox(bb.getX1(),
-                bb.getY1(),
-                bb.getX2(),
-                bb.getY2(),
-                crs.getCode(),
-                isMetric);
-        headlessMapProvider.setBoundingBox(xbb);
+        final PInputEventListener printing = mappingComponent.getInputListener(
+                MappingComponent.PRINTING_AREA_SELECTION);
+        if (printing instanceof PrintingFrameListener) {
+            final PrintingFrameListener pfl = (PrintingFrameListener)printing;
+            final BoundingBox bb = pfl.getPrintingBoundingBox();
+            // transform BoundingBox to XBoundingBox
+            final Crs crs = mappingComponent.getMappingModel().getSrs();
+            final boolean isMetric = crs.isMetric();
+            final XBoundingBox xbb = new XBoundingBox(bb.getX1(),
+                    bb.getY1(),
+                    bb.getX2(),
+                    bb.getY2(),
+                    crs.getCode(),
+                    isMetric);
+            headlessMapProvider.setBoundingBox(xbb);
 
-        futureMapImage = headlessMapProvider.getImage((int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
-                r.getResolution(),
-                t.getMapWidth(),
-                t.getMapHeight());
+            futureMapImage = headlessMapProvider.getImage((int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                    r.getResolution(),
+                    t.getMapWidth(),
+                    t.getMapHeight());
 
-        if (DEBUG) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("BoundingBox:" + bb); // NOI18N
+            if (DEBUG) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("BoundingBox:" + bb); // NOI18N
+                }
+            }
+        } else if (printing instanceof PrintingTemplatePreviewListener) {
+            final PrintingTemplatePreviewListener ptpl = (PrintingTemplatePreviewListener)printing;
+            final Feature print = ptpl.getPrintFeatureCollection().toArray(new Feature[1])[0];
+            final XBoundingBox xbb = new XBoundingBox(print.getGeometry());
+            headlessMapProvider.setBoundingBox(xbb);
+            futureMapImage = headlessMapProvider.getImage((int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                    r.getResolution(),
+                    t.getMapWidth(),
+                    t.getMapHeight());
+
+            if (DEBUG) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("BoundingBox:" + xbb); // NOI18N
+                }
             }
         }
 
@@ -587,49 +615,63 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                 }
                             });
                     }
-                    final Template t = mappingComponent.getPrintingSettingsDialog().getSelectedTemplate();
-                    final Scale s = mappingComponent.getPrintingSettingsDialog().getSelectedScale();
-                    mappingComponent.getPrintingFrameLayer().removeAllChildren();
-                    mappingComponent.setInteractionMode(interactionModeAfterPrinting);
-                    if (DEBUG) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("interactionModeAfterPrinting:" + interactionModeAfterPrinting); // NOI18N
-                        }
-                    }
 
-                    try {
-                        final HashMap param = new HashMap();
-                        param.put(t.getMapPlaceholder(), futureMapImage.get());
-                        String scaleDenomString = "" + s.getDenominator();                                            // NOI18N
-                        if (scaleDenomString.equals("0") || scaleDenomString.equals("-1"))                            // NOI18N
-                        {
-                            final int sd = (int)
-                                (((PrintingFrameListener)mappingComponent.getInputListener(
-                                            MappingComponent.PRINTING_AREA_SELECTION)).getScaleDenominator() + 0.5d); // +0.5=Runden
-                            scaleDenomString = "" + sd;                                                               // NOI18N
-                        }
-                        param.put(t.getScaleDemoninatorPlaceholder(), scaleDenomString);
-                        param.putAll(inscriber.getValues());
+                    final PrintingTemplatePreviewListener printingListener = ((PrintingTemplatePreviewListener)
+                            (mappingComponent.getInputListener(
+                                    MappingComponent.PRINTING_AREA_SELECTION)));
+                    final ArrayList<JasperPrint> prints = new ArrayList<JasperPrint>(
+                            printingListener.getPrintFeatureCollection().size());
+                    for (final PrintTemplateFeature ptf : printingListener.getPrintFeatureCollection()) {
+                        final Template t = ptf.getTemplate();
+                        final Scale s = ptf.getScale();
+                        try {
+                            final HashMap param = new HashMap();
+                            param.put(t.getMapPlaceholder(), futureMapImage.get());
+                            param.put(t.getScaleDemoninatorPlaceholder(),
+                                String.valueOf(ptf.getRealScaleDenominator()));
+                            param.putAll(inscriber.getValues());
+                            // Werte können nur gesetzt werden wenn das Template nicht gedreht wurde
+                            if (ptf.getRotationAngle() == 0) {
+                                final XBoundingBox bbox = new XBoundingBox(ptf.getGeometry());
+                                param.put(BB_MIN_X, bbox.getX1());
+                                param.put(BB_MIN_Y, bbox.getY1());
+                                param.put(BB_MAX_X, bbox.getX2());
+                                param.put(BB_MAX_Y, bbox.getY2());
+                            }
+                            if (DEBUG) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Parameter:" + param); // NOI18N
+                                }
+                            }
 
-                        final BoundingBox bbox =
-                            ((PrintingFrameListener)mappingComponent.getInputListener(
-                                    MappingComponent.PRINTING_AREA_SELECTION)).getPrintingBoundingBox();
-                        param.put(BB_MIN_X, bbox.getX1());
-                        param.put(BB_MIN_Y, bbox.getY1());
-                        param.put(BB_MAX_X, bbox.getX2());
-                        param.put(BB_MAX_Y, bbox.getY2());
+                            final JasperReport jasperReport = (JasperReport)JRLoader.loadObject(getClass()
+                                            .getResourceAsStream(t.getFile()));
+                            final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, param);
+                            prints.add(jasperPrint);
+                        } catch (Throwable tt) {
+                            LOG.error("Error during Jaspern", tt); // NOI18N
 
-                        if (DEBUG) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Parameter:" + param); // NOI18N
+                            final ErrorInfo ei = new ErrorInfo(org.openide.util.NbBundle.getMessage(
+                                        PrintingWidget.class,
+                                        "PrintingWidget.cmdOKActionPerformed(ActionEvent).ErrorInfo.title"),   // NOI18N
+                                    org.openide.util.NbBundle.getMessage(
+                                        PrintingWidget.class,
+                                        "PrintingWidget.cmdOKActionPerformed(ActionEvent).ErrorInfo.message"), // NOI18N
+                                    null,
+                                    null,
+                                    tt,
+                                    Level.ALL,
+                                    null);
+                            JXErrorPane.showDialog(PrintingWidget.this.mappingComponent, ei);
+
+                            if (pdfWait.isVisible()) {
+                                pdfWait.dispose();
                             }
                         }
-
-                        final JasperReport jasperReport = (JasperReport)JRLoader.loadObject(getClass()
-                                        .getResourceAsStream(t.getFile()));
-                        final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, param);
-
-                        if (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW)) {
+                    }
+                    try {
+                        if (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW) && (prints.size() == 1)) {
+                            final JasperPrint jasperPrint = prints.get(0);
                             final JRViewer aViewer = new JRViewer(jasperPrint);
                             final JFrame aFrame = new JFrame(org.openide.util.NbBundle.getMessage(
                                         PrintingWidget.class,
@@ -645,7 +687,8 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                         + 20);
                             aFrame.setLocationRelativeTo(PrintingWidget.this);
                             aFrame.setVisible(true);
-                        } else if (a.getId().equalsIgnoreCase(Action.PDF)) {
+                        } else if (a.getId().equalsIgnoreCase(Action.PDF)
+                                    || (a.getId().equalsIgnoreCase(Action.PRINTPREVIEW) && (prints.size() > 1))) {
                             if (mappingComponent.getPrintingSettingsDialog().isChooseFileName()) {
                                 final File file = StaticSwingTools.chooseFile(DownloadManager.instance()
                                                 .getDestinationDirectory().getAbsolutePath(),
@@ -656,7 +699,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
 
                                 if (file != null) {
                                     final JasperDownload jd = new JasperDownload(
-                                            jasperPrint,
+                                            prints,
                                             file.getParent(),
                                             "Cismap-Druck",
                                             file.getName().substring(0, file.getName().indexOf(".")));
@@ -682,7 +725,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                             PrintingWidget.this.mappingComponent)) {
                                 final String jobname = DownloadManagerDialog.getInstance().getJobName();
                                 DownloadManager.instance()
-                                        .add(new JasperDownload(jasperPrint, jobname, "Cismap-Druck", "cismap"));
+                                        .add(new JasperDownload(prints, jobname, "Cismap-Druck", "cismap"));
                             }
 
                             java.awt.EventQueue.invokeLater(new Runnable() {
@@ -695,7 +738,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                     }
                                 });
                         } else if (a.getId().equalsIgnoreCase(Action.PRINT)) {
-                            JasperPrintManager.printReport(jasperPrint, true);
+                            for (final JasperPrint jasperPrint : prints) {
+                                JasperPrintManager.printReport(jasperPrint, true);
+                            }
                         }
                     } catch (Throwable tt) {
                         LOG.error("Error during Jaspern", tt); // NOI18N
@@ -720,6 +765,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                 }
             };
         CismetThreadPool.execute(t);
+
         dispose();
     } //GEN-LAST:event_cmdOkActionPerformed
 

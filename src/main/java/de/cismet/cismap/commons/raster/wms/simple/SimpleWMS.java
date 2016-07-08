@@ -77,6 +77,8 @@ public class SimpleWMS extends AbstractWMS implements MapService,
     /**
      * Creates a new instance of SimpleWMS.
      *
+     * <p>p@aram gmUrl DOCUMENT ME!</p>
+     *
      * @param  gmUrl  DOCUMENT ME!
      */
     public SimpleWMS(final SimpleWmsGetMapUrl gmUrl) {
