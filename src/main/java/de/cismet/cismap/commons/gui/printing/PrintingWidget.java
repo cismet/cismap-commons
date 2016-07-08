@@ -113,7 +113,6 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
     private Style styleError;
     private Style styleErrorReason;
     private EnumMap<NotificationLevel, Style> styles = new EnumMap<NotificationLevel, Style>(NotificationLevel.class);
-    private HeadlessMapProvider headlessMapProvider;
     private Future<Image> futureMapImage;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cmdBack;
@@ -199,8 +198,6 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
 
         StaticSwingTools.setNiftyScrollBars(scpLoadingStatus);
         // txpLoadingStatus.setContentType("text/html");
-
-        headlessMapProvider = HeadlessMapProvider.createHeadlessMapProviderAndAddLayers(mappingComponent);
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -491,9 +488,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdBackActionPerformed
+    private void cmdBackActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdBackActionPerformed
         dispose();
-    }                                                                           //GEN-LAST:event_cmdBackActionPerformed
+    }//GEN-LAST:event_cmdBackActionPerformed
 
     /**
      * DOCUMENT ME!
@@ -526,47 +523,28 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                 new Object[] { r.getResolution() }),
             EXPERT); // NOI18N
 
-        headlessMapProvider.addPropertyChangeListener(this);
-
         final PInputEventListener printing = mappingComponent.getInputListener(
                 MappingComponent.PRINTING_AREA_SELECTION);
-        if (printing instanceof PrintingFrameListener) {
-            final PrintingFrameListener pfl = (PrintingFrameListener)printing;
-            final BoundingBox bb = pfl.getPrintingBoundingBox();
-            // transform BoundingBox to XBoundingBox
-            final Crs crs = mappingComponent.getMappingModel().getSrs();
-            final boolean isMetric = crs.isMetric();
-            final XBoundingBox xbb = new XBoundingBox(bb.getX1(),
-                    bb.getY1(),
-                    bb.getX2(),
-                    bb.getY2(),
-                    crs.getCode(),
-                    isMetric);
-            headlessMapProvider.setBoundingBox(xbb);
 
-            futureMapImage = headlessMapProvider.getImage((int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
-                    r.getResolution(),
-                    t.getMapWidth(),
-                    t.getMapHeight());
-
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("BoundingBox:" + bb); // NOI18N
-                }
-            }
-        } else if (printing instanceof PrintingTemplatePreviewListener) {
+        if (printing instanceof PrintingTemplatePreviewListener) {
             final PrintingTemplatePreviewListener ptpl = (PrintingTemplatePreviewListener)printing;
-            final Feature print = ptpl.getPrintFeatureCollection().toArray(new Feature[1])[0];
-            final XBoundingBox xbb = new XBoundingBox(print.getGeometry());
-            headlessMapProvider.setBoundingBox(xbb);
-            futureMapImage = headlessMapProvider.getImage((int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
-                    r.getResolution(),
-                    t.getMapWidth(),
-                    t.getMapHeight());
+            for (final PrintTemplateFeature ptf : ptpl.getPrintFeatureCollection()) {
+                final HeadlessMapProvider headlessMapProvider = HeadlessMapProvider
+                            .createHeadlessMapProviderAndAddLayers(mappingComponent);
+                headlessMapProvider.addPropertyChangeListener(this);
 
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("BoundingBox:" + xbb); // NOI18N
+                final XBoundingBox xbb = new XBoundingBox(ptf.getGeometry());
+                headlessMapProvider.setBoundingBox(xbb);
+                ptf.setFutureMapImage(headlessMapProvider.getImage(
+                        (int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                        ptf.getResolution().getResolution(),
+                        ptf.getTemplate().getMapWidth(),
+                        ptf.getTemplate().getMapHeight()));
+
+                if (DEBUG) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("BoundingBox:" + xbb); // NOI18N
+                    }
                 }
             }
         }
@@ -581,26 +559,26 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void formComponentShown(final java.awt.event.ComponentEvent evt) { //GEN-FIRST:event_formComponentShown
-    }                                                                          //GEN-LAST:event_formComponentShown
+    private void formComponentShown(final java.awt.event.ComponentEvent evt) {//GEN-FIRST:event_formComponentShown
+    }//GEN-LAST:event_formComponentShown
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
+    private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdCancelActionPerformed
         mappingComponent.setInteractionMode(interactionModeAfterPrinting);
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
         dispose();
-    }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
+    }//GEN-LAST:event_cmdCancelActionPerformed
 
     /**
      * DOCUMENT ME!
      *
      * @param  evt  DOCUMENT ME!
      */
-    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
+    private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmdOkActionPerformed
         final Runnable t = new Thread("PrintingWidget actionPerformed") {
 
                 @Override
@@ -626,7 +604,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                         final Scale s = ptf.getScale();
                         try {
                             final HashMap param = new HashMap();
-                            param.put(t.getMapPlaceholder(), futureMapImage.get());
+                            param.put(t.getMapPlaceholder(), ptf.getFutureMapImage().get());
                             param.put(t.getScaleDemoninatorPlaceholder(),
                                 String.valueOf(ptf.getRealScaleDenominator()));
                             param.putAll(inscriber.getValues());
@@ -767,7 +745,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
         CismetThreadPool.execute(t);
 
         dispose();
-    } //GEN-LAST:event_cmdOkActionPerformed
+    }//GEN-LAST:event_cmdOkActionPerformed
 
     /**
      * DOCUMENT ME!

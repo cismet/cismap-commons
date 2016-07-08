@@ -60,6 +60,7 @@ import static java.lang.Thread.sleep;
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI;
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_AN_INCH;
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_A_METER;
+import java.util.ArrayList;
 
 /**
  * DOCUMENT ME!
@@ -91,7 +92,6 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     long zoomTime;
     private final PropertyChangeListener mapInteractionModeListener;
     private final MappingComponent mappingComponent;
-    private final Collection<PrintTemplateFeature> printFeatureCollection;
     // private final FeatureMoveListener featureMoveListenerDelegate;
     private final List<Feature> backupFeature;
     private final List<Feature> backupHoldFeature;
@@ -112,7 +112,6 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     public PrintingTemplatePreviewListener(final MappingComponent mappingComponent) {
         super(mappingComponent);
         this.cleared = true;
-        this.printFeatureCollection = TypeSafeCollections.newArrayList(1);
         this.mappingComponent = mappingComponent;
 //        this.featureMoveListenerDelegate = new FeatureMoveListener(mappingComponent);
         this.backupFeature = TypeSafeCollections.newArrayList();
@@ -134,16 +133,7 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
 
     //~ Methods ----------------------------------------------------------------
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private GeometryFactory getGF() {
-        return new GeometryFactory(new PrecisionModel(
-                    PrecisionModel.FLOATING),
-                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getName()));
-    }
+   
 
     /**
      * DOCUMENT ME!
@@ -234,158 +224,30 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
 
         this.oldInteractionMode = oldInteractionMode;
 
-        final int placeholderWidth = selectedTemplate.getMapWidth();
-        final int placeholderHeight = selectedTemplate.getMapHeight();
-        int scaleDenominator = selectedScale.getDenominator();
-        final double widthToHeightRatio = (double)placeholderWidth / (double)placeholderHeight;
-        final double mapWidth = mappingComponent.getCamera().getViewBounds().getWidth();
-        final double mapHeight = mappingComponent.getCamera().getViewBounds().getHeight();
-        double realWorldHeight = 0d;
-        double realWorldWidth = 0d;
-        String bestimmerDimension = null;
-        // calculate realworldsize
-        if (scaleDenominator == -1) {
-            final String s = JOptionPane.showInputDialog(
-                    StaticSwingTools.getParentFrame(mappingComponent),
-                    org.openide.util.NbBundle.getMessage(
-                        PrintingFrameListener.class,
-                        "PrintingFrameListener.init(double,int,int,String).message"),
-                    ""); // NOI18N
-            try {
-                scaleDenominator = Integer.parseInt(s);
-            } catch (Exception skip) {
-                log.warn(
-                    "Could not determine the given scale denominator. It will be set to '0.0' to enable free scaling.",
-                    skip);
-                scaleDenominator = 0;
-            }
-        }
-
-        if (scaleDenominator == 0) {
-            // no fixed scale
-            if ((widthToHeightRatio / (mapWidth / mapHeight)) < 1) {
-                // height is the critical value and must be shrinked. in german: bestimmer ;-)
-                realWorldHeight = mapHeight * 0.75;
-                realWorldWidth = realWorldHeight * widthToHeightRatio;
-                bestimmerDimension = PrintingTemplatePreviewListener.HEIGHT;
-            } else {
-                // width is the critical value and must be shrinked. in german: bestimmer ;-)
-                realWorldWidth = mapWidth * 0.75;
-                realWorldHeight = (double)realWorldWidth / (double)widthToHeightRatio;
-                bestimmerDimension = PrintingTemplatePreviewListener.WIDTH;
-            }
-        } else {
-            realWorldWidth = placeholderWidth / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                        / MILLIMETER_OF_A_METER * scaleDenominator;
-            realWorldHeight = placeholderHeight / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                        / MILLIMETER_OF_A_METER * scaleDenominator;
-
-            if (!mappingComponent.getMappingModel().getSrs().isMetric()) {
-                try {
-                    final String srs = mappingComponent.getMappingModel().getSrs().getCode();
-                    final BoundingBox currentBox = mappingComponent.getCurrentBoundingBox();
-                    final GeometryFactory factory = new GeometryFactory(new PrecisionModel(),
-                            CrsTransformer.extractSridFromCrs(srs));
-                    Point point = factory.createPoint(new Coordinate(currentBox.getX1(), currentBox.getY1()));
-                    point = CrsTransformer.transformToMetricCrs(point);
-                    final XBoundingBox metricBbox = new XBoundingBox(point.getX(),
-                            point.getY(),
-                            point.getX()
-                                    + 1,
-                            point.getY()
-                                    + 1,
-                            CrsTransformer.createCrsFromSrid(point.getSRID()),
-                            true);
-                    final CrsTransformer geoTransformer = new CrsTransformer(srs);
-                    final XBoundingBox geoBbox = geoTransformer.transformBoundingBox(metricBbox);
-                    realWorldWidth = realWorldWidth * (geoBbox.getX2() - geoBbox.getX1());
-                    realWorldHeight = realWorldHeight * (geoBbox.getX2() - geoBbox.getX1());
-                } catch (Exception e) {
-                    log.error("Error while trying to convert the boundingbox to a metric one.", e);
-                }
-            }
-        }
-        final BoundingBox c = CismapBroker.getInstance().getMappingComponent().getCurrentBoundingBoxFromCamera();
-        final double centerX = (c.getX1() + c.getX2()) / 2;
-        final double centerY = (c.getY1() + c.getY2()) / 2;
-        final double halfRealWorldWidth = realWorldWidth / 2d;
-        final double halfRealWorldHeigth = realWorldHeight / 2d;
-        // build geometry for sheet with center in origin
-        final Coordinate[] outerCoords = new Coordinate[5];
-        outerCoords[0] = new Coordinate(-halfRealWorldWidth, -halfRealWorldHeigth);
-        outerCoords[1] = new Coordinate(+halfRealWorldWidth, -halfRealWorldHeigth);
-        outerCoords[2] = new Coordinate(+halfRealWorldWidth, +halfRealWorldHeigth);
-        outerCoords[3] = new Coordinate(-halfRealWorldWidth, +halfRealWorldHeigth);
-        outerCoords[4] = new Coordinate(-halfRealWorldWidth, -halfRealWorldHeigth);
-
-        log.fatal(realWorldWidth);
-
-        // create the geometry from coordinates
-        LinearRing outerRing = getGF().createLinearRing(outerCoords);
-        final LinearRing[] innerRings = null;
-
-        // translate to target landparcel position
-        final AffineTransformation translateToDestination = AffineTransformation.translationInstance(centerX, centerY);
-        outerRing = (LinearRing)translateToDestination.transform(outerRing);
-
-        final Geometry geom = getGF().createPolygon(outerRing, innerRings);
+        
 
         final Feature oldPrintFeature = printTemplateStyledFeature;
-        printTemplateStyledFeature = new PrintTemplateFeature();
-        printTemplateStyledFeature.setResolution(selectedResolution);
-        printTemplateStyledFeature.setTemplate(selectedTemplate);
-        printTemplateStyledFeature.setScale(selectedScale);
-        printTemplateStyledFeature.setFillingPaint(Color.DARK_GRAY);
-        printTemplateStyledFeature.setCanBeSelected(true);
-        printTemplateStyledFeature.setEditable(true);
-        printTemplateStyledFeature.setGeometry(geom);
-        printFeatureCollection.clear();
-        printFeatureCollection.add(printTemplateStyledFeature);
+        printTemplateStyledFeature = new PrintTemplateFeature(selectedTemplate, selectedResolution, selectedScale, mappingComponent);
+        // printFeatureCollection.clear();
         final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
             mappingComponent.getFeatureCollection();
-        if (oldPrintFeature != null) {
-            mapFeatureCol.unholdFeature(oldPrintFeature);
-            mapFeatureCol.removeFeature(oldPrintFeature);
-        } else {
-            oldOverlappingCheck = CismapBroker.getInstance().isCheckForOverlappingGeometriesAfterFeatureRotation();
-            CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(false);
-        }
+//        if (oldPrintFeature != null) {
+//            mapFeatureCol.unholdFeature(oldPrintFeature);
+//            mapFeatureCol.removeFeature(oldPrintFeature);
+//        } else {
+//            oldOverlappingCheck = CismapBroker.getInstance().isCheckForOverlappingGeometriesAfterFeatureRotation();
+//            CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(false);
+//        }
         mapFeatureCol.holdFeature(printTemplateStyledFeature);
         mapFeatureCol.addFeature(printTemplateStyledFeature);
         final PFeature printPFeature = mappingComponent.getPFeatureHM().get(printTemplateStyledFeature);
 
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
 
-        gotoPrintAreaWithBuffer();
+        mappingComponent.zoomToAFeatureCollection(getPrintFeatureCollection(), false, false);
         mapFeatureCol.select(printTemplateStyledFeature);
         mappingComponent.setHandleInteractionMode(MappingComponent.ROTATE_POLYGON);
         mappingComponent.showHandles(false);
-    }
-
-    /**
-     * DOCUMENT ME!
-     */
-    private void gotoPrintAreaWithBuffer() {
-        final double diag = getDiagonal(getExtentOfPrintFeatureCollection());
-        final XBoundingBox gotoBB = new XBoundingBox(getExtentOfPrintFeatureCollection().buffer(diag * 0.05d));
-        mappingComponent.gotoBoundingBoxWithHistory(gotoBB);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public Geometry getExtentOfPrintFeatureCollection() {
-        Geometry union = null;
-        for (final Feature f : printFeatureCollection) {
-            if (union == null) {
-                union = f.getGeometry().buffer(0);
-            } else {
-                union.union(f.getGeometry().buffer(0));
-            }
-        }
-        return union.getEnvelope();
     }
 
     /**
@@ -394,25 +256,13 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
      * @return  DOCUMENT ME!
      */
     public Collection<PrintTemplateFeature> getPrintFeatureCollection() {
-        return printFeatureCollection;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  e  DOCUMENT ME!
-     */
-    private void ensureSelection(final PInputEvent e) {
-        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(e, new Class[] { PFeature.class });
-        if (o instanceof PFeature) {
-            final PFeature pFeature = (PFeature)o;
-            final Feature feature = pFeature.getFeature();
-            final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
-                mappingComponent.getFeatureCollection();
-            if (!mapFeatureCol.isSelected(feature)) {
-                mapFeatureCol.select(feature);
+        ArrayList<PrintTemplateFeature> pfc=new ArrayList<PrintTemplateFeature>();
+        for (Feature f: mappingComponent.getFeatureCollection().getAllFeatures()) {
+            if (f instanceof PrintTemplateFeature){
+                pfc.add((PrintTemplateFeature)f);
             }
         }
+        return pfc;
     }
 
     @Override
@@ -430,7 +280,7 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     @Override
     public void mouseReleased(final PInputEvent e) {
         super.mouseReleased(e);
-        gotoPrintAreaWithBuffer();
+        mappingComponent.zoomToAFeatureCollection(getPrintFeatureCollection(), false, false);
     }
 
     @Override
@@ -499,8 +349,7 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
                             } catch (InterruptedException iex) {
                             }
                         }
-                        gotoPrintAreaWithBuffer();
-                        mappingComponent.queryServices();
+                        mappingComponent.zoomToAFeatureCollection(getPrintFeatureCollection(), false, false);
                     }
                 };
             zoomThread.setPriority(Thread.NORM_PRIORITY);

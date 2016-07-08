@@ -2916,7 +2916,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      * @param  withHistory  should the zoomaction be undoable
      * @param  fixedScale   fixedScale
      */
-    public void zoomToAFeatureCollection(final Collection<Feature> collection,
+    public void zoomToAFeatureCollection(final Collection<? extends Feature> collection,
             final boolean withHistory,
             final boolean fixedScale) {
         if (DEBUG) {
