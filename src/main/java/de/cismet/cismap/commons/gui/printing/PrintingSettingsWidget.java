@@ -23,6 +23,7 @@ import javax.swing.DefaultComboBoxModel;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingTemplatePreviewListener;
 
 import de.cismet.tools.configuration.Configurable;
 
@@ -401,18 +402,18 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     private void cmdOkActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdOkActionPerformed
         try {
-            mappingComponent.setInteractionMode(MappingComponent.PRINTING_AREA_SELECTION);
             final Scale selectedScale = (Scale)cboScales.getSelectedItem();
             final Resolution selectedResolution = (Resolution)cboResolution.getSelectedItem();
             mappingComponent.setPrintingResolution(selectedResolution.getResolution()
                         / mappingComponent.getFeaturePrintingDpi());
             final Template selectedTemplate = (Template)cboTemplates.getSelectedItem();
-            mappingComponent.setInteractionMode(MappingComponent.PRINTING_AREA_SELECTION);
-            ((PrintingFrameListener)(mappingComponent.getInputListener(MappingComponent.PRINTING_AREA_SELECTION))).init(
-                selectedScale.getDenominator(),
-                selectedTemplate.getMapWidth(),
-                selectedTemplate.getMapHeight(),
+            ((PrintingTemplatePreviewListener)(mappingComponent.getInputListener(
+                        MappingComponent.PRINTING_AREA_SELECTION))).init(
+                selectedScale,
+                selectedResolution,
+                selectedTemplate,
                 interactionModeAfterPrinting);
+            mappingComponent.setInteractionMode(MappingComponent.PRINTING_AREA_SELECTION);
             dispose();
         } catch (Exception e) {
             log.error("Fehler beim Verarbeiten der Druckeinstellungen", e);   // NOI18N
