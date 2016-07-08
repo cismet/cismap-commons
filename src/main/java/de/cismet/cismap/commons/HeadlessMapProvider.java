@@ -32,23 +32,19 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.featureservice.AbstractFeatureService;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.layerwidget.ActiveLayerModel;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
 import de.cismet.cismap.commons.gui.printing.PrintingSettingsWidget;
 import de.cismet.cismap.commons.gui.printing.PrintingWidget;
 import de.cismet.cismap.commons.interaction.CismapBroker;
-import de.cismet.cismap.commons.raster.wms.AbstractWMS;
-import de.cismet.cismap.commons.raster.wms.AbstractWMSServiceLayer;
 import de.cismet.cismap.commons.raster.wms.SlidableWMSServiceLayerGroup;
 import de.cismet.cismap.commons.retrieval.AbstractRetrievalService;
 import de.cismet.cismap.commons.retrieval.RepaintEvent;
 import de.cismet.cismap.commons.retrieval.RepaintListener;
 import de.cismet.cismap.commons.retrieval.RetrievalEvent;
 import de.cismet.cismap.commons.retrieval.RetrievalService;
-
-import de.cismet.tools.CismetThreadPool;
 
 /**
  * DOCUMENT ME!
@@ -271,13 +267,15 @@ public class HeadlessMapProvider {
             // Features
             for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
                 final boolean infoNodeExpanded = mappingComponent.getPFeatureHM().get(f).isInfoNodeExpanded();
-                headlessMapProvider.addFeature(f);
+                if (!(f instanceof PrintTemplateFeature)) {
+                    headlessMapProvider.addFeature(f);
 
-                if (infoNodeExpanded) {
-                    final PFeature pf = headlessMapProvider.map.getPFeatureHM().get(f);
+                    if (infoNodeExpanded) {
+                        final PFeature pf = headlessMapProvider.map.getPFeatureHM().get(f);
 
-                    if (pf != null) {
-                        pf.setInfoNodeExpanded(true);
+                        if (pf != null) {
+                            pf.setInfoNodeExpanded(true);
+                        }
                     }
                 }
             }

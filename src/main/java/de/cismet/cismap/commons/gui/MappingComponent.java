@@ -27,7 +27,6 @@ import org.jdom.Attribute;
 import org.jdom.DataConversionException;
 import org.jdom.Element;
 
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 import pswing.PSwingCanvas;
@@ -49,8 +48,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 import java.io.IOException;
-
-import java.lang.reflect.InvocationTargetException;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -81,7 +78,6 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.interaction.CrsChangeListener;
 import de.cismet.cismap.commons.interaction.GetFeatureInfoListener;
 import de.cismet.cismap.commons.interaction.events.CrsChangedEvent;
-import de.cismet.cismap.commons.interaction.events.GetFeatureInfoEvent;
 import de.cismet.cismap.commons.interaction.events.MapDnDEvent;
 import de.cismet.cismap.commons.interaction.events.StatusEvent;
 import de.cismet.cismap.commons.interaction.memento.Memento;
@@ -567,241 +563,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
-     * Creates an image with given width and height from all features in the given featurecollection. The image will be
-     * used for printing.
-     *
-     * @param   fc      FeatureCollection
-     * @param   width   desired width of the resulting image
-     * @param   height  desired height of the resulting image
-     *
-     * @return  Image of the featurecollection
-     */
-    public Image getImageOfFeatures(final Collection<Feature> fc, final int width, final int height) {
-        try {
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("getImageOffFeatures (" + width + "x" + height + ")"); // NOI18N
-                }
-            }
-
-            final PrintingFrameListener pfl = ((PrintingFrameListener)getInputListener(PRINTING_AREA_SELECTION));
-            final PCanvas pc = new PCanvas();
-            pc.setSize(width, height);
-            final List<PFeature> list = new ArrayList<PFeature>();
-            final Iterator it = fc.iterator();
-            while (it.hasNext()) {
-                final Feature f = (Feature)it.next();
-                final PFeature p = new PFeature(f, wtst, clip_offset_x, clip_offset_y, MappingComponent.this);
-                if (pfl.getPrintingRectangle().getBounds().isEmpty()
-                            || p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
-                    list.add(p);
-                }
-            }
-            if (!pfl.getPrintingRectangle().getBounds().isEmpty()) {
-                pc.getCamera().animateViewToCenterBounds(pfl.getPrintingRectangle().getBounds(), true, 0);
-            }
-            final double scale = 1 / pc.getCamera().getViewScale();
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("subPCscale:" + scale); // NOI18N
-                }
-            }
-
-            // TODO Sorge dafür dass die PSwingKomponente richtig gedruckt wird und dass die Karte nicht mehr "zittert"
-            int printingLineWidth = -1;
-            for (final PNode p : list) {
-                if (p instanceof PFeature) {
-                    final PFeature original = ((PFeature)p);
-                    original.setInfoNodeExpanded(false);
-
-                    if (printingLineWidth > 0) {
-                        ((StyledFeature)original.getFeature()).setLineWidth(printingLineWidth);
-                    } else if (StyledFeature.class.isAssignableFrom(original.getFeature().getClass())) {
-                        final int orginalLineWidth = ((StyledFeature)original.getFeature()).getLineWidth();
-                        printingLineWidth = (int)Math.round(orginalLineWidth * (getPrintingResolution() * 2));
-                        if (DEBUG) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("getImageOfFeatures: changed printingLineWidth from " + orginalLineWidth
-                                            + " to " + printingLineWidth + " (resolution=" + getPrintingResolution()
-                                            + ")"); // NOI18N
-                            }
-                        }
-                        ((StyledFeature)original.getFeature()).setLineWidth(printingLineWidth);
-                    }
-
-                    final PFeature copy = new PFeature(original.getFeature(),
-                            getWtst(),
-                            0,
-                            0,
-                            MappingComponent.this,
-                            true);
-                    pc.getLayer().addChild(copy);
-
-                    copy.setTransparency(original.getTransparency());
-                    copy.setStrokePaint(original.getStrokePaint());
-                    final boolean expanded = original.isInfoNodeExpanded();
-                    copy.addInfoNode();
-                    copy.setInfoNodeExpanded(false);
-                    copy.refreshInfoNode();
-
-                    original.refreshInfoNode();
-
-                    removeStickyNode((PSticky)copy.getStickyChild());
-
-                    final PNode stickyChild = copy.getStickyChild();
-                    if (stickyChild != null) {
-                        stickyChild.setScale(scale * getPrintingResolution());
-                        if (copy.hasSecondStickyChild()) {
-                            copy.getSecondStickyChild().setScale(scale * getPrintingResolution());
-                        }
-                    }
-                }
-            }
-            final Image ret = pc.getCamera().toImage(width, height, new Color(255, 255, 255, 0));
-            if (DEBUG) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(ret);
-                }
-            }
-
-            return ret;
-        } catch (final Exception exception) {
-            LOG.error("Error during the creation of an image from features", exception); // NOI18N
-            return null;
-        }
-    }
-
-    /**
-     * Creates an image with given width and height from all features that intersects the printingframe.
-     *
-     * @param   width   desired width of the resulting image
-     * @param   height  desired height of the resulting image
-     *
-     * @return  Image of intersecting features
-     */
-    public Image getFeatureImage(final int width, final int height) {
-        if (DEBUG) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("getFeatureImage " + width + "x" + height);                              // NOI18N
-            }
-        }
-        final PrintingFrameListener pfl = ((PrintingFrameListener)getInputListener(PRINTING_AREA_SELECTION));
-        if (DEBUG) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("printing rectangle bounds: " + pfl.getPrintingRectangle().getBounds()); // NOI18N
-            }
-        }
-        final PCanvas pc = new PCanvas();
-        pc.setSize(width, height);
-        final List<PNode> list = new ArrayList<PNode>();
-        final Iterator it = featureLayer.getChildrenIterator();
-        while (it.hasNext()) {
-            final PNode p = (PNode)it.next();
-            if (pfl.getPrintingRectangle().getBounds().isEmpty()
-                        || p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
-                list.add(p);
-            }
-        }
-
-        /*
-         * Prüfe alle Features der Gruppen Layer (welche auch Kinder des Feature-Layers sind) und füge sie der Liste für
-         * alle zum malen anstehenden Features hinzu, wenn - der Gruppen-Layer sichtbar ist und - das Feature im
-         * Druckbereich liegt
-         */
-        final Collection<PLayer> groupLayers = this.featureGrpLayerMap.values();
-        List<PNode> grpMembers;
-        for (final PLayer layer : groupLayers) {
-            if (layer.getVisible()) {
-                grpMembers = layer.getChildrenReference();
-                for (final PNode p : grpMembers) {
-                    if (pfl.getPrintingRectangle().getBounds().isEmpty()
-                                || p.getFullBounds().intersects(pfl.getPrintingRectangle().getBounds())) {
-                        list.add(p);
-                    }
-                }
-            }
-        }
-
-        if (DEBUG) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("intersecting feature count: " + list.size()); // NOI18N
-            }
-        }
-
-        if (!pfl.getPrintingRectangle().getBounds().isEmpty()) {
-            pc.getCamera().animateViewToCenterBounds(pfl.getPrintingRectangle().getBounds(), true, 0);
-        } else {
-            final double x1 = getWtst().getScreenX(getCurrentBoundingBox().getX1());
-            final double x2 = getWtst().getScreenX(getCurrentBoundingBox().getX2());
-            final double y1 = getWtst().getScreenY(getCurrentBoundingBox().getY1());
-            final double y2 = getWtst().getScreenY(getCurrentBoundingBox().getY2());
-            final PBounds bounds = new PBounds(x1, y2, x2 - x1, y1 - y2);
-            pc.getCamera().animateViewToCenterBounds(bounds, true, 0);
-        }
-        final double scale = 1 / pc.getCamera().getViewScale();
-        if (DEBUG) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("subPCscale:" + scale); // NOI18N
-            }
-        }
-
-        // TODO Sorge dafür dass die PSwingKomponente richtig gedruckt wird und dass die Karte nicht mehr "zittert"
-        for (final PNode p : list) {
-            if (p instanceof PFeature) {
-                final PFeature original = ((PFeature)p);
-                try {
-                    EventQueue.invokeAndWait(new Thread("MappingComponent getFeatureImage()") {
-
-                            @Override
-                            public void run() {
-                                try {
-                                    original.setInfoNodeExpanded(false);
-
-                                    final PFeature copy = new PFeature(
-                                            original.getFeature(),
-                                            getWtst(),
-                                            0,
-                                            0,
-                                            MappingComponent.this,
-                                            true);
-                                    pc.getLayer().addChild(copy);
-
-                                    for (final PNode tmp : (Collection<PNode>)copy.getAllNodes()) {
-                                        tmp.setTransparency(1f);
-                                    }
-                                    copy.setStrokePaint(original.getStrokePaint());
-
-                                    final Stroke stroke = original.getStroke();
-                                    if ((stroke != null) && (stroke instanceof CustomFixedWidthStroke)) {
-                                        copy.setStroke(stroke);
-                                    } else {
-                                        copy.setStroke(
-                                            new CustomFixedWidthStroke(1, MappingComponent.this));
-                                    }
-                                    copy.addInfoNode();
-                                    copy.setInfoNodeExpanded(false);
-
-                                    // Wenn mal irgendwas wegen Querformat kommt :
-                                    if ((copy.getStickyChild() != null) && (getPrintingResolution() != 0.0)) {
-                                        copy.getStickyChild().setScale(scale * getPrintingResolution());
-                                    } else {
-                                        copy.getStickyChild().setScale(scale);
-                                    }
-                                } catch (final Exception t) {
-                                    LOG.error("Fehler beim erstellen des Featureabbildes", t); // NOI18N
-                                }
-                            }
-                        });
-                } catch (final Exception t) {
-                    LOG.error("Fehler beim erstellen des Featureabbildes", t);                 // NOI18N
-                    return null;
-                }
-            }
-        }
-        return pc.getCamera().toImage(width, height, new Color(255, 255, 255, 0));
-    }
-
-    /**
      * Adds the given PCamera to the PRoot of this MappingComponent.
      *
      * @param  cam  PCamera-object
@@ -944,10 +705,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             for (final PSticky each : stickyNodeCopy) {
                 if ((each instanceof PSticky) && each.getVisible()) {
                     stickyNodeList.add(each);
-                } else {
-                    if ((each.getParent() == null)) {
-                        removeStickyNode(each);
-                    }
+                } else if ((each.getParent() == null)) {
+                    removeStickyNode(each);
                 }
             }
 
@@ -1077,7 +836,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         inputEventListener.put(SPLIT_POLYGON, new SplitPolygonListener(this));
         inputEventListener.put(LINEAR_REFERENCING, new CreateLinearReferencedMarksListener(this));
         inputEventListener.put(MEASUREMENT, new MeasurementListener(this));
-        inputEventListener.put(PRINTING_AREA_SELECTION, new PrintingFrameListener(this));
+        // inputEventListener.put(PRINTING_AREA_SELECTION, new PrintingFrameListener(this));
+        inputEventListener.put(PRINTING_AREA_SELECTION, new PrintingTemplatePreviewListener(this));
         inputEventListener.put(CUSTOM_FEATUREINFO, new CustomFeatureInfoListener());
         inputEventListener.put(OVERVIEW, new OverviewModeListener());
     }
@@ -1218,7 +978,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     featureCollection.unselectAll();
                 }
                 if ((interactionMode.equals(SELECT) || interactionMode.equals(LINEAR_REFERENCING)
-                                || interactionMode.equals(SPLIT_POLYGON) || interactionMode.equals(MOVE_POLYGON))
+                                || interactionMode.equals(SPLIT_POLYGON) || interactionMode.equals(MOVE_POLYGON)
+                                || interactionMode.equals(PRINTING_AREA_SELECTION))
                             && (this.readOnly == false)) {
                     featureSelectionChanged(null);
                 }
@@ -1572,7 +1333,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     final Iterator it = rs.keySet().iterator();
                     while (it.hasNext()) {
                         final Object key = it.next();
-                        final int rsi = ((Integer)key).intValue();
+                        final int rsi = (Integer)key;
                         final Object o = rs.get(key);
                         if (o instanceof MapService) {
                             addMapService(((MapService)o), rsi);
@@ -1837,12 +1598,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 } else {
                     toY = positionY - internalWidget.getHeight() - 1;
                 }
+            } else if (isHigher) {
+                toY = getHeight() + 1;
             } else {
-                if (isHigher) {
-                    toY = getHeight() + 1;
-                } else {
-                    toY = positionY + internalWidget.getHeight() + 1;
-                }
+                toY = positionY + internalWidget.getHeight() + 1;
             }
 
             internalWidget.setBounds(
@@ -3175,16 +2934,13 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     }
                     first = false;
                 }
-            } else {
-                if (f.getGeometry() != null) {
-                    Geometry geometry = CrsTransformer.transformToGivenCrs(f.getGeometry(),
-                                mappingModel.getSrs().getCode())
-                                .getEnvelope();
-                    if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
-                        geometry = geometry.buffer(((Bufferable)f).getBuffer() + 0.001);
-                    }
-                    g = g.getEnvelope().union(geometry);
+            } else if (f.getGeometry() != null) {
+                Geometry geometry = CrsTransformer.transformToGivenCrs(f.getGeometry(),
+                            mappingModel.getSrs().getCode()).getEnvelope();
+                if ((f instanceof Bufferable) && mappingModel.getSrs().isMetric()) {
+                    geometry = geometry.buffer(((Bufferable)f).getBuffer() + 0.001);
                 }
+                g = g.getEnvelope().union(geometry);
             }
         }
 
@@ -3259,6 +3015,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                         if (featureCollection.areFeaturesEditable()
                                     && (getInteractionMode().equals(SELECT)
                                         || getInteractionMode().equals(MOVE_POLYGON)
+                                        || getInteractionMode().equals(PRINTING_AREA_SELECTION)
                                         || getInteractionMode().equals(LINEAR_REFERENCING)
                                         || getInteractionMode().equals(PAN)
                                         || getInteractionMode().equals(ZOOM)
@@ -4775,10 +4532,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             if (queryServices) {
                                 queryServices();
                             }
-                        } else {
-                            if (queryServices) {
-                                queryServicesWithoutHistory();
-                            }
+                        } else if (queryServices) {
+                            queryServicesWithoutHistory();
                         }
                     }
                 };
