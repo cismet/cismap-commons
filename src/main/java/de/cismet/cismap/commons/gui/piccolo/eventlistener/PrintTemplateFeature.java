@@ -36,6 +36,7 @@ import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
+import de.cismet.cismap.commons.features.LockedRotatingPivotRequest;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.printing.Resolution;
@@ -45,17 +46,13 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
 
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI;
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_AN_INCH;
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_A_METER;
-
 /**
  * DOCUMENT ME!
  *
  * @author   thorsten
  * @version  $Revision$, $Date$
  */
-public class PrintTemplateFeature extends DefaultStyledFeature implements XStyledFeature {
+public class PrintTemplateFeature extends DefaultStyledFeature implements XStyledFeature, LockedRotatingPivotRequest {
 
     //~ Static fields/initializers ---------------------------------------------
 
