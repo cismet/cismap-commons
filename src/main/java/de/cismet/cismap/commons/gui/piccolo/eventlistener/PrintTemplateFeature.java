@@ -37,6 +37,7 @@ import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.LockedRotatingPivotRequest;
+import de.cismet.cismap.commons.features.PreventNamingDuplicates;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.printing.Resolution;
@@ -52,7 +53,9 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @author   thorsten
  * @version  $Revision$, $Date$
  */
-public class PrintTemplateFeature extends DefaultStyledFeature implements XStyledFeature, LockedRotatingPivotRequest {
+public class PrintTemplateFeature extends DefaultStyledFeature implements XStyledFeature,
+    LockedRotatingPivotRequest,
+    PreventNamingDuplicates {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -66,6 +69,8 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     Template template;
     Resolution resolution;
     Scale scale;
+    String name;
+    int number = 0;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Future<Image> futureMapImage;
 
@@ -338,11 +343,6 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         return null;
     }
 
-    @Override
-    public String getName() {
-        return "Druckbereich";
-    }
-
     /**
      * DOCUMENT ME!
      *
@@ -369,5 +369,29 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     @Override
     public float getTransparency() {
         return 0.75f;
+    }
+
+    @Override
+    public String getName() {
+        if (number == 0) {
+            return getOriginalName();
+        } else {
+            return getOriginalName() + " - " + number;
+        }
+    }
+
+    @Override
+    public String getOriginalName() {
+        return "Druckbereich";
+    }
+
+    @Override
+    public int getNumber() {
+        return number;
+    }
+
+    @Override
+    public void setNumber(final int n) {
+        number = n;
     }
 }
