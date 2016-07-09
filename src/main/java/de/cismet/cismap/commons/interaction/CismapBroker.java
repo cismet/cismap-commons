@@ -19,6 +19,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -33,6 +35,7 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.Crs;
 import de.cismet.cismap.commons.MappingModelListener;
+import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollectionListener;
 import de.cismet.cismap.commons.featureservice.style.BasicFeatureStyleDialogFactory;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -40,6 +43,7 @@ import de.cismet.cismap.commons.gui.layerwidget.LayerWidget;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MeasurementListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.MetaSearchFacade;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
 import de.cismet.cismap.commons.interaction.events.ActiveLayerEvent;
 import de.cismet.cismap.commons.interaction.events.CapabilityEvent;
@@ -492,6 +496,7 @@ public class CismapBroker {
             it.next().dragOverMap(mde);
         }
     }
+
     /**
      * public void fireFeatureCollectionChanged(MappingModelEvent mme) { for (Iterator<FeatureCollectionListener> it =
      * featureCollectionListeners.iterator(); it.hasNext();) { it.next().featureCollectionChanged(mme); } } public void
@@ -631,6 +636,7 @@ public class CismapBroker {
     public void setPreferredExceptionsFormat(final String preferredExceptionsFormat) {
         this.preferredExceptionsFormat = preferredExceptionsFormat;
     }
+
     /**
      * public MappingComponent getMappingComponent() { return mappingComponent; }.
      *
@@ -721,6 +727,7 @@ public class CismapBroker {
      */
     public void selectionChanged(final edu.umd.cs.piccolox.event.PNotification notification) {
     }
+
     /**
      * public LayerWidget getLayerWidget() { return layerWidget; } public void setLayerWidget(LayerWidget layerWidget) {
      * this.layerWidget = layerWidget; } public BoundingBox getInitialBoundingBox() { return initialBoundingBox; }
@@ -1105,5 +1112,20 @@ public class CismapBroker {
      */
     public void setMultiFeaturePopupMenuEnabled(final boolean multiFeaturePopupMenuEnabled) {
         this.multiFeaturePopupMenuEnabled = multiFeaturePopupMenuEnabled;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Collection<PrintTemplateFeature> getPrintFeatureCollection() {
+        final ArrayList<PrintTemplateFeature> pfc = new ArrayList<PrintTemplateFeature>();
+        for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
+            if (f instanceof PrintTemplateFeature) {
+                pfc.add((PrintTemplateFeature)f);
+            }
+        }
+        return pfc;
     }
 }

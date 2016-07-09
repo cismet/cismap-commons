@@ -237,25 +237,10 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
 
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
 
-        mappingComponent.zoomToAFeatureCollection(getPrintFeatureCollection(), false, false);
+        mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(), false, false);
         mapFeatureCol.select(printTemplateStyledFeature);
         mappingComponent.setHandleInteractionMode(MappingComponent.ROTATE_POLYGON);
         mappingComponent.showHandles(false);
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public Collection<PrintTemplateFeature> getPrintFeatureCollection() {
-        final ArrayList<PrintTemplateFeature> pfc = new ArrayList<PrintTemplateFeature>();
-        for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
-            if (f instanceof PrintTemplateFeature) {
-                pfc.add((PrintTemplateFeature)f);
-            }
-        }
-        return pfc;
     }
 
     @Override
@@ -269,7 +254,7 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     @Override
     public void mouseReleased(final PInputEvent e) {
         super.mouseReleased(e);
-        mappingComponent.zoomToAFeatureCollection(getPrintFeatureCollection(), false, false);
+        mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(), false, false);
     }
 
     @Override
@@ -338,7 +323,10 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
                             } catch (InterruptedException iex) {
                             }
                         }
-                        mappingComponent.zoomToAFeatureCollection(getPrintFeatureCollection(), false, false);
+                        mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance()
+                                    .getPrintFeatureCollection(),
+                            false,
+                            false);
                     }
                 };
             zoomThread.setPriority(Thread.NORM_PRIORITY);
