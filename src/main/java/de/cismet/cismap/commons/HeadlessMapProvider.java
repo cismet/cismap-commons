@@ -963,17 +963,18 @@ public class HeadlessMapProvider {
                 final HeadlessMapProvider.NotificationLevel level,
                 final RetrievalEvent e) {
             String prefix;
-            if (msg!=null&&msg.trim().length()>0&&HeadlessMapProvider.this.requestingObject instanceof PrintTemplateFeature && CismapBroker.getInstance().getPrintFeatureCollection().size()>1) {
-                prefix=((PrintTemplateFeature)HeadlessMapProvider.this.requestingObject).getName()+": ";
-            }
-            else {
-                prefix="";
+            if ((msg != null) && (msg.trim().length() > 0)
+                        && (HeadlessMapProvider.this.requestingObject instanceof PrintTemplateFeature)
+                        && (CismapBroker.getInstance().getPrintFeatureCollection().size() > 1)) {
+                prefix = ((PrintTemplateFeature)HeadlessMapProvider.this.requestingObject).getName() + ": ";
+            } else {
+                prefix = "";
             }
             final PropertyChangeEvent evt = new PropertyChangeEvent(
                     HeadlessMapProvider.this,
                     "notification",
                     e,
-                    new HeadlessMapProvider.NotificationMessage(prefix+msg, level));
+                    new HeadlessMapProvider.NotificationMessage(prefix + msg, level));
 
             for (final PropertyChangeListener tmpListener : listener) {
                 tmpListener.propertyChange(evt);
