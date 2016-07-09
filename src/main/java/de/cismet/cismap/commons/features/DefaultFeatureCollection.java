@@ -1,12 +1,10 @@
-/**
- * *************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- *
- *              ... and it just works.
- *
- ***************************************************
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 package de.cismet.cismap.commons.features;
 
 import java.util.ArrayList;
@@ -29,12 +27,13 @@ import de.cismet.veto.VetoListener;
 /**
  * DOCUMENT ME!
  *
- * @author thorsten.hell@cismet.de
- * @version $Revision$, $Date$
+ * @author   thorsten.hell@cismet.de
+ * @version  $Revision$, $Date$
  */
 public class DefaultFeatureCollection implements FeatureCollection, MapListener {
 
     //~ Instance fields --------------------------------------------------------
+
     protected List<Feature> features = new ArrayList<Feature>();
     protected final Set<FeatureCollectionListener> listeners = new HashSet<FeatureCollectionListener>();
     protected LinkedHashSet<Feature> holdFeatures = new LinkedHashSet<Feature>();
@@ -46,6 +45,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     private ArrayList<VetoListener> vetoListeners = new ArrayList<VetoListener>();
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates a new instance of DefaultFeatureCollection.
      */
@@ -53,11 +53,12 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     }
 
     //~ Methods ----------------------------------------------------------------
+
     /**
      * Wird eigentlich nicht mehr benoetigt.
      *
-     * @param feature DOCUMENT ME!
-     * @param index DOCUMENT ME!
+     * @param  feature  DOCUMENT ME!
+     * @param  index    DOCUMENT ME!
      */
     public void setFeatureAt(final Feature feature, final int index) {
         if (!features.contains(feature)) {
@@ -78,7 +79,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param vetoListener DOCUMENT ME!
+     * @param  vetoListener  DOCUMENT ME!
      */
     public void addVetoableSelectionListener(final VetoListener vetoListener) {
         if (vetoListener != null) {
@@ -89,7 +90,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param vetoListener DOCUMENT ME!
+     * @param  vetoListener  DOCUMENT ME!
      */
     public void removeVetoableSelectionListener(final VetoListener vetoListener) {
         if (vetoListener != null) {
@@ -206,7 +207,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private boolean assertNoVeto() {
         for (final VetoListener curVetoListener : vetoListeners) {
@@ -230,7 +231,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param f DOCUMENT ME!
+     * @param  f  DOCUMENT ME!
      */
     private void enforceSelect(final Feature f) {
         if (log.isDebugEnabled()) {
@@ -252,7 +253,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param cf DOCUMENT ME!
+     * @param  cf  DOCUMENT ME!
      */
     private void enforceSelect(final Collection<Feature> cf) {
         if (log.isDebugEnabled()) {
@@ -274,7 +275,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param f DOCUMENT ME!
+     * @param  f  DOCUMENT ME!
      */
     private void enforceAddToSelection(final Feature f) {
         final Set<Feature> v = new HashSet<Feature>(2);
@@ -292,7 +293,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param cf DOCUMENT ME!
+     * @param  cf  DOCUMENT ME!
      */
     private void enforceAddToSelection(final Collection<Feature> cf) {
         selectedFeatures.addAll(cf);
@@ -312,7 +313,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param f DOCUMENT ME!
+     * @param  f  DOCUMENT ME!
      */
     private void enforceUnselect(final Feature f) {
         if (log.isDebugEnabled()) {
@@ -346,7 +347,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param quiet DOCUMENT ME!
+     * @param  quiet  DOCUMENT ME!
      */
     private void enforceUnselectAll(final boolean quiet) {
         if (selectedFeatures.size() > 0) {
@@ -371,7 +372,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param cf DOCUMENT ME!
+     * @param  cf  DOCUMENT ME!
      */
     private void enforceUnselect(final Collection<Feature> cf) {
         if (log.isDebugEnabled()) {
@@ -446,7 +447,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
             fireFeaturesAdded(v);
         } else {
             log.warn(
-                    "Feature was not added. It is either null or getGeometry() is null or it is already in the Collection."); // NOI18N
+                "Feature was not added. It is either null or getGeometry() is null or it is already in the Collection."); // NOI18N
         }
     }
 
@@ -482,7 +483,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
                 log.debug("substitute: add:" + cf);                         // NOI18N
             }
             addFeatures(cf);
-            final Feature f = (Feature) cf.toArray()[cf.size() - 1];
+            final Feature f = (Feature)cf.toArray()[cf.size() - 1];
         } catch (Exception e) {
             log.error("Error in substituteFeatures new features:" + cf, e); // NOI18N
         }
@@ -493,18 +494,18 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
      * DOCUMENT ME!
      */
     public void checkForAndCorrectDoubleNaming() {
-        final HashMap<String, ArrayList<PreventNamingDuplicates>> candidates
-                = new HashMap<String, ArrayList<PreventNamingDuplicates>>();
+        final HashMap<String, ArrayList<PreventNamingDuplicates>> candidates =
+            new HashMap<String, ArrayList<PreventNamingDuplicates>>();
 
         for (final Feature f : features) {
             if (f instanceof PreventNamingDuplicates) {
                 ArrayList<PreventNamingDuplicates> list;
                 list = candidates.get(f.getClass().toString());
                 if (list != null) {
-                    list.add((PreventNamingDuplicates) f);
+                    list.add((PreventNamingDuplicates)f);
                 } else {
                     list = new ArrayList<PreventNamingDuplicates>();
-                    list.add((PreventNamingDuplicates) f);
+                    list.add((PreventNamingDuplicates)f);
                     candidates.put(f.getClass().toString(), list);
                 }
             }
@@ -532,7 +533,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     public Collection<Feature> getHoldFeatures() {
         return holdFeatures;
@@ -565,7 +566,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param cf DOCUMENT ME!
+     * @param  cf  DOCUMENT ME!
      */
     public void fireFeaturesAdded(final Collection<Feature> cf) {
         final Iterator<FeatureCollectionListener> it = getListenerIterator();
@@ -575,7 +576,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
                 if (log.isDebugEnabled()) {
                     log.debug("adding featuresTo Map"); // NOI18N
                 }
-                ((MappingComponent) curListener).addFeaturesToMap(cf.toArray(new Feature[0]));
+                ((MappingComponent)curListener).addFeaturesToMap(cf.toArray(new Feature[0]));
             }
         }
     }
@@ -583,7 +584,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param cf DOCUMENT ME!
+     * @param  cf  DOCUMENT ME!
      */
     public void fireFeaturesRemoved(final Collection<Feature> cf) {
         if (log.isDebugEnabled()) {
@@ -599,7 +600,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param cf DOCUMENT ME!
+     * @param  cf  DOCUMENT ME!
      */
     public void fireAllFeaturesRemoved(final Collection<Feature> cf) {
         if (log.isDebugEnabled()) {
@@ -615,7 +616,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param cf DOCUMENT ME!
+     * @param  cf  DOCUMENT ME!
      */
     public void fireFeaturesChanged(final Collection<Feature> cf) {
         if (log.isDebugEnabled()) {
@@ -631,7 +632,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private Iterator<FeatureCollectionListener> getListenerIterator() {
         final Iterator<FeatureCollectionListener> it;
@@ -646,13 +647,13 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
      * DOCUMENT ME!
      */
     public void fireSelectionChanged() {
-        fireSelectionChanged((Collection<Feature>) null);
+        fireSelectionChanged((Collection<Feature>)null);
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @param cf DOCUMENT ME!
+     * @param  cf  DOCUMENT ME!
      */
     public void fireSelectionChanged(final Collection<Feature> cf) {
         if (log.isDebugEnabled()) {
@@ -668,7 +669,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param f DOCUMENT ME!
+     * @param  f  DOCUMENT ME!
      */
     public void fireSelectionChanged(final Feature f) {
         final Set<Feature> v = new HashSet<Feature>(2);
@@ -683,7 +684,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param c DOCUMENT ME!
+     * @param  c  DOCUMENT ME!
      */
     public void removeFeaturesByInstance(final Class c) {
         final List<Feature> af = new ArrayList<Feature>(features);
@@ -698,7 +699,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     public boolean isSingleSelection() {
         return singleSelection;
@@ -707,7 +708,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
     /**
      * DOCUMENT ME!
      *
-     * @param singleSelection DOCUMENT ME!
+     * @param  singleSelection  DOCUMENT ME!
      */
     public void setSingleSelection(final boolean singleSelection) {
         this.singleSelection = singleSelection;
