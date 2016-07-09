@@ -7,10 +7,16 @@
 ****************************************************/
 package de.cismet.cismap.commons.gui.printing;
 
+import org.apache.log4j.Logger;
+
 import org.jdom.Element;
 
-import java.util.List;
+import java.util.Objects;
 import java.util.Vector;
+
+import javax.swing.ImageIcon;
+
+import de.cismet.cismap.commons.features.AbstractNewFeature;
 
 /**
  * DOCUMENT ME!
@@ -20,16 +26,23 @@ import java.util.Vector;
  */
 public class Template {
 
+    //~ Static fields/initializers ---------------------------------------------
+
+    private static final Logger LOG = Logger.getLogger(Template.class);
+
     //~ Instance fields --------------------------------------------------------
 
-    private String title = "";                       // NOI18N
-    private String file = "";                        // NOI18N
-    private String className = "";                   // NOI18N
-    private String mapPlaceholder = "";              // NOI18N
+    private String title = "";                                                       // NOI18N
+    private String file = "";                                                        // NOI18N
+    private String className = "";                                                   // NOI18N
+    private String mapPlaceholder = "";                                              // NOI18N
     private int mapWidth = 0;
     private int mapHeight = 0;
-    private String scaleDemoninatorPlaceholder = ""; // NOI18N
+    private String scaleDemoninatorPlaceholder = "";                                 // NOI18N
     private Vector<AdditionalTemplateParameter> additionalParameters = new Vector<AdditionalTemplateParameter>();
+    private String iconPath = "/de/cismet/cismap/commons/gui/printing/document.png"; // NOI18N
+    private String shortname = "";                                                   // NOI18N
+    private transient ImageIcon icon = null;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -48,6 +61,14 @@ public class Template {
         mapWidth = template.getAttribute("mapWidth").getIntValue();                                    // NOI18N
         mapHeight = template.getAttribute("mapHeight").getIntValue();                                  // NOI18N
         scaleDemoninatorPlaceholder = template.getAttribute("scaleDenominatorPlaceholder").getValue(); // NOI18N
+        try {
+            iconPath = template.getAttribute("iconPath").getValue();                                   // NOI18N
+        } catch (Exception skip) {
+        }
+        try {
+            shortname = template.getAttribute("shortname").getValue();                                 // NOI18N
+        } catch (Exception skip) {
+        }
 //        List additionalParameterList=template.getChildren("parameter");
 //        for (Object elem : additionalParameterList) {
 //            if (elem instanceof Element) {
@@ -55,6 +76,7 @@ public class Template {
 //                additionalParameters.add(p);
 //            }
 //        }
+        setIcon(); // creates the IconImage
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -81,20 +103,39 @@ public class Template {
         e.setAttribute("mapWidth", getMapWidth() + "");                                  // NOI18N
         e.setAttribute("mapHeight", getMapHeight() + "");                                // NOI18N
         e.setAttribute("scaleDenominatorPlaceholder", getScaleDemoninatorPlaceholder()); // NOI18N
+        e.setAttribute("iconPath", getIconPath() + "");                                  // NOI18N
+        e.setAttribute("shortname", getShortname() + "");                                // NOI18N
 //        for (AdditionalTemplateParameter elem : additionalParameters) {
 //            e.addContent(elem.getElement());
 //        }
         return e;
     }
+
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Template) && (((Template)obj).title == title)
-                    && (((Template)obj).file == file)
-                    && (((Template)obj).getClassName() == getClassName())
-                    && (((Template)obj).mapPlaceholder == mapPlaceholder)
+        return (obj instanceof Template) && (((Template)obj).title.equals(title))
+                    && (((Template)obj).file.equals(file))
+                    && (((Template)obj).getClassName().equals(getClassName()))
+                    && (((Template)obj).mapPlaceholder.equals(mapPlaceholder))
                     && (((Template)obj).mapWidth == mapWidth)
                     && (((Template)obj).mapHeight == mapHeight)
-                    && (((Template)obj).scaleDemoninatorPlaceholder == scaleDemoninatorPlaceholder);
+                    && (((Template)obj).iconPath.equals(iconPath))
+                    && (((Template)obj).shortname.equals(shortname))
+                    && (((Template)obj).scaleDemoninatorPlaceholder.equals(scaleDemoninatorPlaceholder));
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = (41 * hash) + Objects.hashCode(this.title);
+        hash = (41 * hash) + Objects.hashCode(this.file);
+        hash = (41 * hash) + Objects.hashCode(this.mapPlaceholder);
+        hash = (41 * hash) + this.mapWidth;
+        hash = (41 * hash) + this.mapHeight;
+        hash = (41 * hash) + Objects.hashCode(this.scaleDemoninatorPlaceholder);
+        hash = (41 * hash) + Objects.hashCode(this.iconPath);
+        hash = (41 * hash) + Objects.hashCode(this.shortname);
+        return hash;
     }
 
     /**
@@ -239,5 +280,62 @@ public class Template {
      */
     public void setClassName(final String className) {
         this.className = className;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getIconPath() {
+        return iconPath;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  iconPath  DOCUMENT ME!
+     */
+    public void setIconPath(final String iconPath) {
+        this.iconPath = iconPath;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getShortname() {
+        return shortname;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  shortname  DOCUMENT ME!
+     */
+    public void setShortname(final String shortname) {
+        this.shortname = shortname;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public ImageIcon getIcon() {
+        return icon;
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public final void setIcon() {
+        try {
+            icon = new javax.swing.ImageIcon(Template.class.getResource(
+                        iconPath)); // NOI18N
+        } catch (Exception e) {
+            LOG.warn("Problem when setting the Icon of a Template.", e);
+        }
     }
 }
