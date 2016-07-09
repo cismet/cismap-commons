@@ -111,6 +111,7 @@ public class HeadlessMapProvider {
     private double printingResolution = 0;
     private double resolution = 72.0;
     private double featureResolutionFactor = PrintingSettingsWidget.FEATURE_RESOLUTION_FACTOR;
+    private Object requestingObject;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -190,6 +191,24 @@ public class HeadlessMapProvider {
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Object getRequestingObject() {
+        return requestingObject;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  requestingObject  DOCUMENT ME!
+     */
+    public void setRequestingObject(final Object requestingObject) {
+        this.requestingObject = requestingObject;
+    }
 
     /**
      * DOCUMENT ME!
@@ -943,11 +962,18 @@ public class HeadlessMapProvider {
         private void sendNotification(final String msg,
                 final HeadlessMapProvider.NotificationLevel level,
                 final RetrievalEvent e) {
+            String prefix;
+            if (msg!=null&&msg.trim().length()>0&&HeadlessMapProvider.this.requestingObject instanceof PrintTemplateFeature && CismapBroker.getInstance().getPrintFeatureCollection().size()>1) {
+                prefix=((PrintTemplateFeature)HeadlessMapProvider.this.requestingObject).getName()+": ";
+            }
+            else {
+                prefix="";
+            }
             final PropertyChangeEvent evt = new PropertyChangeEvent(
-                    this,
+                    HeadlessMapProvider.this,
                     "notification",
                     e,
-                    new HeadlessMapProvider.NotificationMessage(msg, level));
+                    new HeadlessMapProvider.NotificationMessage(prefix+msg, level));
 
             for (final PropertyChangeListener tmpListener : listener) {
                 tmpListener.propertyChange(evt);
