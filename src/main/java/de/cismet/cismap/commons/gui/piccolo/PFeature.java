@@ -403,10 +403,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         piSelected.setSweetSpotY(piOrig.getSweetSpotY());
                     }
                 }
-            } else {
-                if (pi == null) {
-                    setFeatureAnnotationSymbols();
-                }
+            } else if (pi == null) {
+                setFeatureAnnotationSymbols();
             }
 
             if (geom instanceof Polygon) {
@@ -535,10 +533,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
         // reconsider Feature
         if (stickyChild == null) {
             stickyChild = pi;
-        } else {
-            if (stickyChild instanceof StickyPText) {
-                secondStickyChild = pi;
-            }
+        } else if (stickyChild instanceof StickyPText) {
+            secondStickyChild = pi;
         }
         addChild(piSelected);
         piSelected.setOffset(wtst.getScreenX(real_x), wtst.getScreenY(real_y));
@@ -777,13 +773,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         newGeomWithOldSrid.setSRID(CismapBroker.getInstance().getDefaultCrsAlias());
                     }
                     feature.setGeometry(newGeomWithOldSrid);
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("feature and pfeature geometry do not differ."); // NOI18N
-                    }
+                } else if (log.isDebugEnabled()) {
+                    log.debug("feature and pfeature geometry do not differ."); // NOI18N
                 }
             } catch (final Exception e) {
-                log.error("Cannot synchronize feature.", e);                       // NOI18N
+                log.error("Cannot synchronize feature.", e);                   // NOI18N
             }
         }
     }
@@ -1092,17 +1086,15 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                         setStrokePaint(linePaint);
                     }
                 }
-            } else {
-                if ((feature instanceof StyledFeature)) {
-                    final java.awt.Paint paint = ((StyledFeature)feature).getFillingPaint();
-                    final java.awt.Paint linePaint = ((StyledFeature)feature).getLinePaint();
-                    if (paint != null) {
-                        setPaint(paint);
-                        nonHighlightingPaint = paint;
-                    }
-                    if (linePaint != null) {
-                        setStrokePaint(linePaint);
-                    }
+            } else if ((feature instanceof StyledFeature)) {
+                final java.awt.Paint paint = ((StyledFeature)feature).getFillingPaint();
+                final java.awt.Paint linePaint = ((StyledFeature)feature).getLinePaint();
+                if (paint != null) {
+                    setPaint(paint);
+                    nonHighlightingPaint = paint;
+                }
+                if (linePaint != null) {
+                    setStrokePaint(linePaint);
                 }
             }
 
@@ -1474,7 +1466,6 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             // handleLayer.removeChild(this);
             // Das w\u00E4re zwar optimal (Performance) korrigiert allerdings nicht die falschen
             // Locator
-
             if (addUndo) {
                 viewer.getMemUndo()
                         .addAction(new HandleAddAction(
@@ -1591,11 +1582,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                                     log.debug("checkforGlueCoords() Abstand kleiner als 1cm: " + abstand + " :: " + f); // NOI18N
                                 }
                             }
-                        } else {
-                            if (viewer.isFeatureDebugging()) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("checkforGlueCoords() Abstand: " + abstand);                              // NOI18N
-                                }
+                        } else if (viewer.isFeatureDebugging()) {
+                            if (log.isDebugEnabled()) {
+                                log.debug("checkforGlueCoords() Abstand: " + abstand);                                  // NOI18N
                             }
                         }
                     }
@@ -1683,17 +1672,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                 pivotHandle);
 
         rotHandle.setPaint(new Color(1f, 1f, 0f, 0.7f));
-//        EventQueue.invokeLater(new Runnable() {
-//
-//            @Override
-//            public void run() {
         handleLayer.addChild(rotHandle);
         rotHandle.addClientProperty("coordinate", entityRingCoordArr[entityPosition][ringPosition][coordPosition]); // NOI18N
         rotHandle.addClientProperty("coordinate_position_entity", new Integer(entityPosition));                     // NOI18N
         rotHandle.addClientProperty("coordinate_position_ring", new Integer(ringPosition));                         // NOI18N
         rotHandle.addClientProperty("coordinate_position_coord", new Integer(coordPosition));                       // NOI18N
-//            }
-//        });
     }
 
     /**
@@ -1726,19 +1709,14 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             pf.setPivotPoint(allBounds.getCenter2D());
             mid = allBounds.getCenter2D();
         }
-
-        pivotHandle = new PivotPHandle(this, mid);
-        pivotHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
-//        EventQueue.invokeLater(new Runnable() {
-//
-//            @Override
-//            public void run() {
-        handleLayer.addChild(pivotHandle);
-//            }
-//        });
-        for (final Object o : selArr) {
-            final PFeature pf = (PFeature)(getViewer().getPFeatureHM().get(o));
-            pf.pivotHandle = this.pivotHandle;
+        if (!(getFeature() instanceof LockedRotatingPivotRequest)) {
+            pivotHandle = new PivotPHandle(this, mid);
+            pivotHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
+            handleLayer.addChild(pivotHandle);
+            for (final Object o : selArr) {
+                final PFeature pf = (PFeature)(getViewer().getPFeatureHM().get(o));
+                pf.pivotHandle = this.pivotHandle;
+            }
         }
     }
 
@@ -1756,12 +1734,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
 
         final PHandle h = new LinearReferencedPointPHandle(this);
 
-//        EventQueue.invokeLater(new Runnable() {
-        //
-//            public void run() {
         handleLayer.addChild(h);
-//            }
-//        });
     }
 
     /**
@@ -2374,10 +2347,8 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     viewer.rescaleStickyNodes();
                     p.setWidth(pswingComp.getWidth());
                     p.setHeight(pswingComp.getHeight());
-                } else {
-                    if (infoNode != null) {
-                        infoNode.setVisible(false);
-                    }
+                } else if (infoNode != null) {
+                    infoNode.setVisible(false);
                 }
                 pswingComp.addPropertyChangeListener("fullBounds", new PropertyChangeListener() { // NOI18N
                         @Override
