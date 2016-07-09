@@ -21,9 +21,8 @@ import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.CrsTransformer;
 
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.Stroke;
 
@@ -31,22 +30,26 @@ import java.util.concurrent.Future;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 
+import de.cismet.cismap.commons.BoundingBox;
+import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI;
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_AN_INCH;
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_A_METER;
 import de.cismet.cismap.commons.gui.printing.Resolution;
 import de.cismet.cismap.commons.gui.printing.Scale;
 import de.cismet.cismap.commons.gui.printing.Template;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+
 import de.cismet.tools.gui.StaticSwingTools;
-import java.awt.Color;
-import javax.swing.JOptionPane;
+
+import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI;
+import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_AN_INCH;
+import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_A_METER;
+import java.awt.Paint;
 
 /**
  * DOCUMENT ME!
@@ -57,7 +60,6 @@ import javax.swing.JOptionPane;
 public class PrintTemplateFeature extends DefaultStyledFeature implements XStyledFeature {
 
     //~ Static fields/initializers ---------------------------------------------
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     public static final double DEFAULT_JAVA_RESOLUTION_IN_DPI = 72d;
     public static final double MILLIMETER_OF_AN_INCH = 25.4d;
     public static final double INCH_OF_A_MILLIMETER = 0.039d;
@@ -67,9 +69,22 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     Template template;
     Resolution resolution;
     Scale scale;
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Future<Image> futureMapImage;
 
-    public PrintTemplateFeature(Template template, Resolution resolution, Scale scale, MappingComponent mappingComponent) {
+    //~ Constructors -----------------------------------------------------------
+    /**
+     * Creates a new PrintTemplateFeature object.
+     *
+     * @param template DOCUMENT ME!
+     * @param resolution DOCUMENT ME!
+     * @param scale DOCUMENT ME!
+     * @param mappingComponent DOCUMENT ME!
+     */
+    public PrintTemplateFeature(final Template template,
+            final Resolution resolution,
+            final Scale scale,
+            final MappingComponent mappingComponent) {
         this.template = template;
         this.resolution = resolution;
         this.scale = scale;
@@ -303,12 +318,15 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 
     @Override
     public ImageIcon getIconImage() {
+        if (template != null) {
+            return template.getIcon();
+        }
         return null;
     }
 
     @Override
     public String getType() {
-        return ((template != null) ? template.getTitle() : "");
+        return ((template != null) ? template.getShortname() : "");
     }
 
     @Override
@@ -343,4 +361,17 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     public void setFutureMapImage(final Future<Image> futureMapImage) {
         this.futureMapImage = futureMapImage;
     }
+
+    @Override
+    public Paint getFillingPaint() {
+        return javax.swing.UIManager.getDefaults()
+                .getColor("Cismap.featureSelectionForeground");
+    }
+
+    @Override
+    public float getTransparency() {
+        return 0.75f;
+    }
+    
+
 }

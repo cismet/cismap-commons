@@ -28,6 +28,7 @@ import java.awt.Cursor;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -60,7 +61,6 @@ import static java.lang.Thread.sleep;
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI;
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_AN_INCH;
 import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_A_METER;
-import java.util.ArrayList;
 
 /**
  * DOCUMENT ME!
@@ -132,8 +132,6 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     }
 
     //~ Methods ----------------------------------------------------------------
-
-   
 
     /**
      * DOCUMENT ME!
@@ -224,20 +222,15 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
 
         this.oldInteractionMode = oldInteractionMode;
 
-        
-
-        final Feature oldPrintFeature = printTemplateStyledFeature;
-        printTemplateStyledFeature = new PrintTemplateFeature(selectedTemplate, selectedResolution, selectedScale, mappingComponent);
-        // printFeatureCollection.clear();
+        printTemplateStyledFeature = new PrintTemplateFeature(
+                selectedTemplate,
+                selectedResolution,
+                selectedScale,
+                mappingComponent);
         final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
             mappingComponent.getFeatureCollection();
-//        if (oldPrintFeature != null) {
-//            mapFeatureCol.unholdFeature(oldPrintFeature);
-//            mapFeatureCol.removeFeature(oldPrintFeature);
-//        } else {
-//            oldOverlappingCheck = CismapBroker.getInstance().isCheckForOverlappingGeometriesAfterFeatureRotation();
-//            CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(false);
-//        }
+        oldOverlappingCheck = CismapBroker.getInstance().isCheckForOverlappingGeometriesAfterFeatureRotation();
+        CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(false);
         mapFeatureCol.holdFeature(printTemplateStyledFeature);
         mapFeatureCol.addFeature(printTemplateStyledFeature);
         final PFeature printPFeature = mappingComponent.getPFeatureHM().get(printTemplateStyledFeature);
@@ -256,9 +249,9 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
      * @return  DOCUMENT ME!
      */
     public Collection<PrintTemplateFeature> getPrintFeatureCollection() {
-        ArrayList<PrintTemplateFeature> pfc=new ArrayList<PrintTemplateFeature>();
-        for (Feature f: mappingComponent.getFeatureCollection().getAllFeatures()) {
-            if (f instanceof PrintTemplateFeature){
+        final ArrayList<PrintTemplateFeature> pfc = new ArrayList<PrintTemplateFeature>();
+        for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
+            if (f instanceof PrintTemplateFeature) {
                 pfc.add((PrintTemplateFeature)f);
             }
         }
@@ -269,10 +262,6 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     public void mouseClicked(final PInputEvent event) {
         super.mouseClicked(event);
         if ((event.getClickCount() > 1) && event.isLeftMouseButton()) {
-//            final double rotationAngle = calculateRotationAngle();
-//            final Point templateCenter = getTemplateCenter();
-//            printWidget.downloadProduct(templateCenter, rotationAngle);
-//            cleanUpAndRestoreFeatures();
             mappingComponent.showPrintingDialog(getOldInteractionMode());
         }
     }
