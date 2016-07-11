@@ -5158,17 +5158,17 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             gotoBoundingBoxWithoutHistory(newBbox, 0);
 
                             final ArrayList<Feature> list = new ArrayList<Feature>(featureCollection.getAllFeatures());
-                            featureCollection.removeAllFeatures();
-
+                            
                             // remove all PrintTemplateFeatures
                             for (final Feature f : new ArrayList<Feature>(list)) {
                                 if (f instanceof PrintTemplateFeature) {
-                                    list.remove(f);
+                                    featureCollection.unholdFeature(f);
                                 }
                             }
-                            if (list.size() > 0) {
-                                featureCollection.addFeatures(list);
-                            }
+                            featureCollection.removeAllFeatures();
+
+                          
+
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("debug features added: " + list.size());
                             }
@@ -5235,7 +5235,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             } else {
                 EventQueue.invokeLater(r);
             }
-        } else {
+        }
+        ;
+
+        {
             resetCrs = false;
         }
     }

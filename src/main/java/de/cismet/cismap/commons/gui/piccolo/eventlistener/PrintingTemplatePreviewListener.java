@@ -12,15 +12,12 @@
  */
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
-import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 import edu.umd.cs.piccolo.event.PInputEvent;
+import edu.umd.cs.piccolo.nodes.PImage;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -29,18 +26,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
-import de.cismet.cismap.commons.BoundingBox;
-import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
 import de.cismet.cismap.commons.features.FeatureCollection;
-import de.cismet.cismap.commons.features.SearchFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.printing.PrintingToolTip;
@@ -54,13 +45,7 @@ import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.collections.TypeSafeCollections;
 
-import de.cismet.tools.gui.StaticSwingTools;
-
 import static java.lang.Thread.sleep;
-
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI;
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_AN_INCH;
-import static de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener.MILLIMETER_OF_A_METER;
 
 /**
  * DOCUMENT ME!
@@ -82,19 +67,13 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
 
     //~ Instance fields --------------------------------------------------------
 
-// int placeholderHeight = 0;
-// double realWorldWidth = 0;
-// double realWorldHeight = 0;
-// double widthToHeightRatio = 1.0d;
-// int scaleDenominator = 0;
-// int placeholderWidth = 0;
     Thread zoomThread;
     long zoomTime;
     private final PropertyChangeListener mapInteractionModeListener;
     private final MappingComponent mappingComponent;
     // private final FeatureMoveListener featureMoveListenerDelegate;
-    private final List<Feature> backupFeature;
-    private final List<Feature> backupHoldFeature;
+    private final List<? extends Feature> backupFeature;
+    private final List<? extends Feature> backupHoldFeature;
     private final PrintingToolTip PRINTING_TOOLTIP = new PrintingToolTip(new Color(255, 255, 222, 200));
     private boolean cleared;
     private String oldInteractionMode;
@@ -114,8 +93,8 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         this.cleared = true;
         this.mappingComponent = mappingComponent;
 //        this.featureMoveListenerDelegate = new FeatureMoveListener(mappingComponent);
-        this.backupFeature = TypeSafeCollections.newArrayList();
-        this.backupHoldFeature = TypeSafeCollections.newArrayList();
+        this.backupFeature = new ArrayList<Feature>();
+        this.backupHoldFeature = new ArrayList<Feature>();
         this.oldInteractionMode = "PAN";
         // listener to remove the template feature and reset the old state if interaction mode is changed by user
         this.mapInteractionModeListener = new PropertyChangeListener() {
@@ -234,7 +213,9 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         mapFeatureCol.holdFeature(printTemplateStyledFeature);
         mapFeatureCol.addFeature(printTemplateStyledFeature);
         final PFeature printPFeature = mappingComponent.getPFeatureHM().get(printTemplateStyledFeature);
-
+        final String fn = "/Users/thorsten/tmp/printer-empty.png";
+        final PImage pii = new PImage(fn);
+        // pii.
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
 
         mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(), false, false);
