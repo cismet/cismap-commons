@@ -26,7 +26,9 @@ import org.jdesktop.swingx.error.ErrorInfo;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -527,18 +529,34 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                 headlessMapProvider.setRequestingObject(ptf);
                 headlessMapProvider.addPropertyChangeListener(this);
 
-                final XBoundingBox xbb = new XBoundingBox(ptf.getGeometry());
-                headlessMapProvider.setBoundingBox(xbb);
-                ptf.setFutureMapImage(headlessMapProvider.getImage(
-                        (int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
-                        ptf.getResolution().getResolution(),
-                        ptf.getTemplate().getMapWidth(),
-                        ptf.getTemplate().getMapHeight()));
-
-                if (DEBUG) {
+                if ((ptf.getRotationAngle() == 0)) {
+                    final XBoundingBox xbb = new XBoundingBox(ptf.getGeometry());
+                    headlessMapProvider.setBoundingBox(xbb);
+                    ptf.setFutureMapImage(headlessMapProvider.getImage(
+                            (int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                            ptf.getResolution().getResolution(),
+                            ptf.getTemplate().getMapWidth(),
+                            ptf.getTemplate().getMapHeight()));
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("BoundingBox:" + xbb); // NOI18N
+                        LOG.debug("BoundingBox (auf " + ptf.getTemplate().getMapWidth() + ","
+                                    + ptf.getTemplate().getMapHeight() + "):" + xbb); // NOI18N
                     }
+                } else {
+                    // Rotationpreparation
+                    final XBoundingBox xbb = new XBoundingBox(ptf.getGeometry().getEnvelope());
+                    headlessMapProvider.setBoundingBox(xbb);
+                    final Dimension newDimension = RotatedPrintingMath
+                                .calculateNewImageDimensionToFitRotatedBoundingBox(ptf.getTemplate().getMapWidth(),
+                                    ptf.getTemplate().getMapHeight(),
+                                    ptf.getRotationAngle());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Extended BoundingBox (auf " + newDimension + "):" + xbb); // NOI18N
+                    }
+                    ptf.setFutureMapImage(headlessMapProvider.getImage(
+                            (int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                            ptf.getResolution().getResolution(),
+                            newDimension.getWidth(),
+                            newDimension.getHeight()));
                 }
             }
         }
@@ -598,7 +616,31 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                         final Scale s = ptf.getScale();
                         try {
                             final HashMap param = new HashMap();
-                            param.put(t.getMapPlaceholder(), ptf.getFutureMapImage().get());
+
+                            final Image i = ptf.getFutureMapImage().get();
+
+                            if (ptf.getRotationAngle() == 0) {
+                                param.put(t.getMapPlaceholder(), i);
+                                System.out.println("Imagedimension (raw - not rotated):"
+                                            + ptf.getFutureMapImage().get().getWidth(null) + ","
+                                            + ptf.getFutureMapImage().get().getHeight(null));
+                            } else {
+                                final BufferedImage correctedImage = RotatedPrintingMath.rotateAndCrop(
+                                        i,
+                                        ptf.getRotationAngle(),
+                                        ptf.getTemplate().getMapWidth(),
+                                        ptf.getTemplate().getMapHeight(),
+                                        (int)PrintingFrameListener.DEFAULT_JAVA_RESOLUTION_IN_DPI,
+                                        ptf.getResolution().getResolution());
+                                param.put(t.getMapPlaceholder(), correctedImage);
+                                System.out.println("Imagedimension (raw):"
+                                            + ptf.getFutureMapImage().get().getWidth(null) + ","
+                                            + ptf.getFutureMapImage().get().getHeight(null));
+
+                                System.out.println("Imagedimension (corrected):" + correctedImage.getWidth() + ","
+                                            + correctedImage.getHeight());
+                            }
+
                             param.put(t.getScaleDemoninatorPlaceholder(),
                                 String.valueOf(ptf.getRealScaleDenominator()));
                             param.putAll(inscriber.getValues());

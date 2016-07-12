@@ -17,10 +17,10 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 import edu.umd.cs.piccolo.event.PInputEvent;
-import edu.umd.cs.piccolo.nodes.PImage;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.PopupMenu;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -28,10 +28,11 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.cismet.cismap.commons.XBoundingBox;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
-import de.cismet.cismap.commons.features.FeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.printing.PrintingToolTip;
@@ -42,8 +43,6 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.tools.CismetThreadPool;
-
-import de.cismet.tools.collections.TypeSafeCollections;
 
 import static java.lang.Thread.sleep;
 
@@ -152,19 +151,6 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
 
     /**
      * DOCUMENT ME!
-     *
-     * @param   g  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    private double getDiagonal(final Geometry g) {
-        final XBoundingBox geomBB = new XBoundingBox(g);
-        return Math.sqrt((geomBB.getWidth() * geomBB.getWidth())
-                        + (geomBB.getHeight() * geomBB.getHeight()));
-    }
-
-    /**
-     * DOCUMENT ME!
      */
     public void init() {
         mappingComponent.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -213,9 +199,9 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         mapFeatureCol.holdFeature(printTemplateStyledFeature);
         mapFeatureCol.addFeature(printTemplateStyledFeature);
         final PFeature printPFeature = mappingComponent.getPFeatureHM().get(printTemplateStyledFeature);
-        final String fn = "/Users/thorsten/tmp/printer-empty.png";
-        final PImage pii = new PImage(fn);
-        // pii.
+//        final String fn = "/Users/thorsten/Desktop/pdfa4h.png";///Users/thorsten/desktmp/printer-empty.png";
+//        final PImage pii = new BackgroundPImage(fn);
+//        printPFeature.addChild(pii);
         mappingComponent.getPrintingFrameLayer().removeAllChildren();
 
         mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(), false, false);
@@ -229,6 +215,16 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         super.mouseClicked(event);
         if ((event.getClickCount() > 1) && event.isLeftMouseButton()) {
             mappingComponent.showPrintingDialog(getOldInteractionMode());
+        } else if ((event.getClickCount() == 1) && event.isRightMouseButton()) {
+            final JPopupMenu test = new JPopupMenu("test");
+            test.add(new JMenuItem("Drucken"));
+            test.add(new JMenuItem("DPI"));
+            test.add(new JMenuItem("Template"));
+            test.add(new JMenuItem("Maßstab"));
+            test.show(
+                mappingComponent,
+                (int)event.getCanvasPosition().getX(),
+                (int)event.getCanvasPosition().getY());
         }
     }
 
@@ -270,20 +266,20 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
      * DOCUMENT ME!
      */
     public void cleanUpAndRestoreFeatures() {
-        if (!cleared) {
-            mappingComponent.removePropertyChangeListener(mapInteractionModeListener);
-            if (printTemplateStyledFeature != null) {
-                final FeatureCollection mapFeatureCollection = mappingComponent.getFeatureCollection();
-                mapFeatureCollection.unholdFeature(printTemplateStyledFeature);
-                mapFeatureCollection.removeFeature(printTemplateStyledFeature);
-                printTemplateStyledFeature = null;
-            }
-            if (MappingComponent.PRINTING_AREA_SELECTION.equals(mappingComponent.getInteractionMode())) {
-                mappingComponent.setInteractionMode(oldInteractionMode);
-            }
-        }
-        cleared = true;
-        CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(oldOverlappingCheck);
+//        if (!cleared) {
+//            mappingComponent.removePropertyChangeListener(mapInteractionModeListener);
+//            if (printTemplateStyledFeature != null) {
+//                final FeatureCollection mapFeatureCollection = mappingComponent.getFeatureCollection();
+//                mapFeatureCollection.unholdFeature(printTemplateStyledFeature);
+//                mapFeatureCollection.removeFeature(printTemplateStyledFeature);
+//                printTemplateStyledFeature = null;
+//            }
+//            if (MappingComponent.PRINTING_AREA_SELECTION.equals(mappingComponent.getInteractionMode())) {
+//                mappingComponent.setInteractionMode(oldInteractionMode);
+//            }
+//        }
+//        cleared = true;
+//        CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(oldOverlappingCheck);
     }
 
     /**
