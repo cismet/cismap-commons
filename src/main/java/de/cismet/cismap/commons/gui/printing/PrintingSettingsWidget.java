@@ -14,15 +14,12 @@ package de.cismet.cismap.commons.gui.printing;
 
 import org.jdom.Element;
 
-import java.awt.Color;
-
 import java.util.List;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
 
 import de.cismet.cismap.commons.gui.MappingComponent;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingFrameListener;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingTemplatePreviewListener;
 
 import de.cismet.tools.configuration.Configurable;

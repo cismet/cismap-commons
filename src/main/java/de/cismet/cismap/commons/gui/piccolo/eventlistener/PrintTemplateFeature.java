@@ -13,18 +13,24 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 
+import edu.umd.cs.piccolo.PNode;
+import edu.umd.cs.piccolo.nodes.PText;
+import edu.umd.cs.piccolo.util.PBounds;
+
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.Paint;
 import java.awt.Stroke;
+import java.awt.geom.Point2D;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.Future;
 
 import javax.swing.ImageIcon;
@@ -35,6 +41,7 @@ import de.cismet.cismap.commons.BoundingBox;
 import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.XBoundingBox;
+import de.cismet.cismap.commons.features.ChildNodesProvider;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.LockedRotatingPivotRequest;
 import de.cismet.cismap.commons.features.PreventNamingDuplicates;
@@ -55,7 +62,8 @@ import de.cismet.tools.gui.StaticSwingTools;
  */
 public class PrintTemplateFeature extends DefaultStyledFeature implements XStyledFeature,
     LockedRotatingPivotRequest,
-    PreventNamingDuplicates {
+    PreventNamingDuplicates,
+    ChildNodesProvider {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -71,6 +79,8 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     Scale scale;
     String name;
     int number = 0;
+
+    ArrayList<PNode> children = new ArrayList<>();
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Future<Image> futureMapImage;
 
@@ -382,7 +392,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 
     @Override
     public String getOriginalName() {
-        return "Druckbereich";
+        return "Druckbereich " + getRotationAngle();
     }
 
     @Override
@@ -393,5 +403,82 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     @Override
     public void setNumber(final int n) {
         number = n;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param     parent  DOCUMENT ME!
+     *
+     * @return    DOCUMENT ME!
+     *
+     * @Override  DOCUMENT ME!
+     */
+    @Override
+    public Collection<PNode> provideChildren(final PNode parent) {
+        if (children.size() == 0) {
+            initPNodeChildren(parent);
+        }
+        return children;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  parent  DOCUMENT ME!
+     */
+    private void initPNodeChildren(final PNode parent) {
+        children.add(new SubPNode(parent));
+    }
+}
+
+/**
+ * DOCUMENT ME!
+ *
+ * @version  $Revision$, $Date$
+ */
+class SubPNode extends PText {
+
+    //~ Instance fields --------------------------------------------------------
+
+    PNode parent;
+
+    //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new SubPNode object.
+     *
+     * @param  parent  DOCUMENT ME!
+     */
+    public SubPNode(final PNode parent) {
+        // super("/Users/thorsten/tmp/printer-empty.png");
+        super("1");
+        this.parent = parent;
+        final PBounds pb = new PBounds(parent.getGlobalBounds().getCenter2D(), 0, 0);
+        this.setBounds(deriveBoundsFromParent());
+        this.setPaint(Color.RED);
+    }
+
+    //~ Methods ----------------------------------------------------------------
+
+    @Override
+    protected void parentBoundsChanged() {
+        super.parentBoundsChanged();
+        this.setBounds(deriveBoundsFromParent());
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected PBounds deriveBoundsFromParent() {
+        final Point2D p = parent.getGlobalBounds().getCenter2D();
+        final PBounds local = getBounds();
+        final double x = p.getX() - (local.width / 2.0);
+        final double y = p.getY() - (local.height / 2.0);
+
+        final PBounds pb = new PBounds(x, y, local.width, local.height);
+        return pb;
     }
 }
