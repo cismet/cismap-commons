@@ -1,10 +1,12 @@
-/***************************************************
-*
-* cismet GmbH, Saarbruecken, Germany
-*
-*              ... and it just works.
-*
-****************************************************/
+/**
+ * *************************************************
+ *
+ * cismet GmbH, Saarbruecken, Germany
+ *
+ *              ... and it just works.
+ *
+ ***************************************************
+ */
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,7 +15,9 @@
 package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
@@ -47,33 +51,35 @@ import de.cismet.cismap.commons.features.LockedRotatingPivotRequest;
 import de.cismet.cismap.commons.features.PreventNamingDuplicates;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
 import de.cismet.cismap.commons.gui.printing.Resolution;
 import de.cismet.cismap.commons.gui.printing.Scale;
 import de.cismet.cismap.commons.gui.printing.Template;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
+import edu.umd.cs.piccolo.nodes.PPath;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /**
  * DOCUMENT ME!
  *
- * @author   thorsten
- * @version  $Revision$, $Date$
+ * @author thorsten
+ * @version $Revision$, $Date$
  */
 public class PrintTemplateFeature extends DefaultStyledFeature implements XStyledFeature,
-    LockedRotatingPivotRequest,
-    PreventNamingDuplicates,
-    ChildNodesProvider {
+        LockedRotatingPivotRequest,
+        PreventNamingDuplicates,
+        ChildNodesProvider {
 
     //~ Static fields/initializers ---------------------------------------------
-
     public static final double DEFAULT_JAVA_RESOLUTION_IN_DPI = 72d;
     public static final double MILLIMETER_OF_AN_INCH = 25.4d;
     public static final double INCH_OF_A_MILLIMETER = 0.039d;
     public static final double MILLIMETER_OF_A_METER = 1000d;
 
     //~ Instance fields --------------------------------------------------------
-
     Template template;
     Resolution resolution;
     Scale scale;
@@ -85,14 +91,13 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     private Future<Image> futureMapImage;
 
     //~ Constructors -----------------------------------------------------------
-
     /**
      * Creates a new PrintTemplateFeature object.
      *
-     * @param  template          DOCUMENT ME!
-     * @param  resolution        DOCUMENT ME!
-     * @param  scale             DOCUMENT ME!
-     * @param  mappingComponent  DOCUMENT ME!
+     * @param template DOCUMENT ME!
+     * @param resolution DOCUMENT ME!
+     * @param scale DOCUMENT ME!
+     * @param mappingComponent DOCUMENT ME!
      */
     public PrintTemplateFeature(final Template template,
             final Resolution resolution,
@@ -104,7 +109,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         final int placeholderWidth = template.getMapWidth();
         final int placeholderHeight = template.getMapHeight();
         int scaleDenominator = scale.getDenominator();
-        final double widthToHeightRatio = (double)placeholderWidth / (double)placeholderHeight;
+        final double widthToHeightRatio = (double) placeholderWidth / (double) placeholderHeight;
         final double mapWidth = mappingComponent.getCamera().getViewBounds().getWidth();
         final double mapHeight = mappingComponent.getCamera().getViewBounds().getHeight();
         double realWorldHeight = 0d;
@@ -115,15 +120,15 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             final String s = JOptionPane.showInputDialog(
                     StaticSwingTools.getParentFrame(mappingComponent),
                     org.openide.util.NbBundle.getMessage(
-                        PrintingFrameListener.class,
-                        "PrintingFrameListener.init(double,int,int,String).message"),
+                            PrintingFrameListener.class,
+                            "PrintingFrameListener.init(double,int,int,String).message"),
                     ""); // NOI18N
             try {
                 scaleDenominator = Integer.parseInt(s);
             } catch (Exception skip) {
                 log.warn(
-                    "Could not determine the given scale denominator. It will be set to '0.0' to enable free scaling.",
-                    skip);
+                        "Could not determine the given scale denominator. It will be set to '0.0' to enable free scaling.",
+                        skip);
                 scaleDenominator = 0;
             }
         }
@@ -138,14 +143,14 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             } else {
                 // width is the critical value and must be shrinked. in german: bestimmer ;-)
                 realWorldWidth = mapWidth * 0.75;
-                realWorldHeight = (double)realWorldWidth / (double)widthToHeightRatio;
+                realWorldHeight = (double) realWorldWidth / (double) widthToHeightRatio;
                 bestimmerDimension = PrintingTemplatePreviewListener.WIDTH;
             }
         } else {
             realWorldWidth = placeholderWidth / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                        / MILLIMETER_OF_A_METER * scaleDenominator;
+                    / MILLIMETER_OF_A_METER * scaleDenominator;
             realWorldHeight = placeholderHeight / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                        / MILLIMETER_OF_A_METER * scaleDenominator;
+                    / MILLIMETER_OF_A_METER * scaleDenominator;
 
             if (!mappingComponent.getMappingModel().getSrs().isMetric()) {
                 try {
@@ -158,9 +163,9 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
                     final XBoundingBox metricBbox = new XBoundingBox(point.getX(),
                             point.getY(),
                             point.getX()
-                                    + 1,
+                            + 1,
                             point.getY()
-                                    + 1,
+                            + 1,
                             CrsTransformer.createCrsFromSrid(point.getSRID()),
                             true);
                     final CrsTransformer geoTransformer = new CrsTransformer(srs);
@@ -193,7 +198,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 
         // translate to target landparcel position
         final AffineTransformation translateToDestination = AffineTransformation.translationInstance(centerX, centerY);
-        outerRing = (LinearRing)translateToDestination.transform(outerRing);
+        outerRing = (LinearRing) translateToDestination.transform(outerRing);
         this.setGeometry(getGF().createPolygon(outerRing, innerRings));
         setFillingPaint(Color.DARK_GRAY);
         setCanBeSelected(true);
@@ -201,7 +206,6 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     }
 
     //~ Methods ----------------------------------------------------------------
-
     @Override
     public String toString() {
         return "Druckbereich ";
@@ -210,18 +214,18 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     private GeometryFactory getGF() {
         return new GeometryFactory(new PrecisionModel(
-                    PrecisionModel.FLOATING),
+                PrecisionModel.FLOATING),
                 CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getName()));
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     public Point getTemplateCenter() {
         return getGeometry().getCentroid();
@@ -230,7 +234,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     public Template getTemplate() {
         return template;
@@ -239,7 +243,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param  template  DOCUMENT ME!
+     * @param template DOCUMENT ME!
      */
     public void setTemplate(final Template template) {
         this.template = template;
@@ -248,7 +252,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     public Resolution getResolution() {
         return resolution;
@@ -257,7 +261,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param  resolution  DOCUMENT ME!
+     * @param resolution DOCUMENT ME!
      */
     public void setResolution(final Resolution resolution) {
         this.resolution = resolution;
@@ -266,7 +270,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     public Scale getScale() {
         return scale;
@@ -275,7 +279,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     public long getRealScaleDenominator() {
         final Coordinate[] corrds = getGeometry().getCoordinates();
@@ -286,7 +290,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         final double realwidth = Math.sqrt(((p0.x - p1.x) * (p0.x - p1.x)) + ((p0.y - p1.y) * (p0.y - p1.y)));
 
         final double paperwidth = template.getMapWidth() / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                    / MILLIMETER_OF_A_METER;
+                / MILLIMETER_OF_A_METER;
 
         final double denom = realwidth / paperwidth;
 
@@ -296,7 +300,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param  scale  DOCUMENT ME!
+     * @param scale DOCUMENT ME!
      */
     public void setScale(final Scale scale) {
         this.scale = scale;
@@ -305,7 +309,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     public double getRotationAngle() {
         if (getGeometry() != null) {
@@ -356,7 +360,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     public Future<Image> getFutureMapImage() {
         return futureMapImage;
@@ -365,7 +369,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param  futureMapImage  DOCUMENT ME!
+     * @param futureMapImage DOCUMENT ME!
      */
     public void setFutureMapImage(final Future<Image> futureMapImage) {
         this.futureMapImage = futureMapImage;
@@ -408,11 +412,11 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param     parent  DOCUMENT ME!
+     * @param parent DOCUMENT ME!
      *
-     * @return    DOCUMENT ME!
+     * @return DOCUMENT ME!
      *
-     * @Override  DOCUMENT ME!
+     * @Override DOCUMENT ME!
      */
     @Override
     public Collection<PNode> provideChildren(final PNode parent) {
@@ -425,30 +429,77 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param  parent  DOCUMENT ME!
+     * @param parent DOCUMENT ME!
      */
     private void initPNodeChildren(final PNode parent) {
         children.add(new SubPNode(parent));
+        children.add(new DerivedSubFeature(parent, new DeriveRule() {
+            @Override
+            public Geometry derive(Geometry in) {
+                return in.buffer(-10);
+            }
+        }));
+        children.add(new DerivedSubFeature(parent, new DeriveRule() {
+            @Override
+            public Geometry derive(Geometry in) {
+                return in.buffer(10);
+            }
+        }));
+        children.add(new DerivedSubFeature(parent, new DeriveRule() {
+            @Override
+            public Geometry derive(Geometry in) {
+                Coordinate[] cs=in.getCoordinates();
+                Coordinate[] first=new Coordinate[2];
+                first[0]=cs[0];
+                 first[1]=cs[1];
+                 LineString ls=getGF().createLineString(first);
+                return ls.buffer(5);
+            }
+        }));
     }
 }
+
+interface DeriveRule {
+    Geometry derive(Geometry in);
+}
+
+class DerivedSubFeature extends PPath implements PropertyChangeListener {
+    PNode parent;
+    DeriveRule rule;
+    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
+    public DerivedSubFeature(PNode parent,DeriveRule rule) {
+        this.parent = parent;
+        this.rule=rule;
+        parent.addPropertyChangeListener(this);
+    } 
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        
+        Geometry g=((PFeature)parent).getFeature().getGeometry().buffer(2);
+        DefaultStyledFeature dsf=new DefaultStyledFeature();
+        dsf.setGeometry(rule.derive(g));
+        PFeature p=new PFeature(dsf, CismapBroker.getInstance().getMappingComponent());
+        super.setPathTo(p.getPathReference());
+    }
+}
+
 
 /**
  * DOCUMENT ME!
  *
- * @version  $Revision$, $Date$
+ * @version $Revision$, $Date$
  */
 class SubPNode extends PText {
 
     //~ Instance fields --------------------------------------------------------
-
     PNode parent;
 
     //~ Constructors -----------------------------------------------------------
-
     /**
      * Creates a new SubPNode object.
      *
-     * @param  parent  DOCUMENT ME!
+     * @param parent DOCUMENT ME!
      */
     public SubPNode(final PNode parent) {
         // super("/Users/thorsten/tmp/printer-empty.png");
@@ -460,7 +511,6 @@ class SubPNode extends PText {
     }
 
     //~ Methods ----------------------------------------------------------------
-
     @Override
     protected void parentBoundsChanged() {
         super.parentBoundsChanged();
@@ -470,7 +520,7 @@ class SubPNode extends PText {
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @return DOCUMENT ME!
      */
     protected PBounds deriveBoundsFromParent() {
         final Point2D p = parent.getGlobalBounds().getCenter2D();
