@@ -2508,11 +2508,15 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     /**
      * is called when new feature is added to FeatureCollection.
      *
-     * @param  features  DOCUMENT ME!
+     * @param   features  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
      */
-    public void addFeaturesToMap(final Feature[] features) {
+    public Collection<PFeature> addFeaturesToMap(final Feature[] features) {
         final double local_clip_offset_y = clip_offset_y;
         final double local_clip_offset_x = clip_offset_x;
+
+        final ArrayList<PFeature> newPFeatures = new ArrayList<>();
 
         /// Hier muss der layer bestimmt werdenn
         for (int i = 0; i < features.length; ++i) {
@@ -2524,6 +2528,10 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                     local_clip_offset_x,
                     local_clip_offset_y,
                     MappingComponent.this);
+            newPFeatures.add(p);
+            if (feature instanceof ChildNodesProvider) {
+                p.addChildren(((ChildNodesProvider)feature).provideChildren(p));
+            }
             try {
                 if (feature instanceof StyledFeature) {
                     p.setTransparency(((StyledFeature)(feature)).getTransparency());
@@ -2622,6 +2630,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
 
         showHandles(false);
+        return newPFeatures;
     }
 
     /**
@@ -5158,7 +5167,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                             gotoBoundingBoxWithoutHistory(newBbox, 0);
 
                             final ArrayList<Feature> list = new ArrayList<Feature>(featureCollection.getAllFeatures());
-                            
+
                             // remove all PrintTemplateFeatures
                             for (final Feature f : new ArrayList<Feature>(list)) {
                                 if (f instanceof PrintTemplateFeature) {
@@ -5166,8 +5175,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                                 }
                             }
                             featureCollection.removeAllFeatures();
-
-                          
 
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("debug features added: " + list.size());
