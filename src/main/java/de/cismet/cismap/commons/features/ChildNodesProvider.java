@@ -16,6 +16,8 @@ import edu.umd.cs.piccolo.PNode;
 
 import java.util.Collection;
 
+import de.cismet.cismap.commons.gui.piccolo.PFeature;
+
 /**
  * DOCUMENT ME!
  *
@@ -33,5 +35,5 @@ public interface ChildNodesProvider {
      *
      * @return  DOCUMENT ME!
      */
-    Collection<PNode> provideChildren(PNode parent);
+    Collection<PNode> provideChildren(PFeature parent);
 }
