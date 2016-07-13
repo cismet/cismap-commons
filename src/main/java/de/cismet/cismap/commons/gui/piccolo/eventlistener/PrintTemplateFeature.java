@@ -80,6 +80,20 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     public static final double INCH_OF_A_MILLIMETER = 0.039d;
     public static final double MILLIMETER_OF_A_METER = 1000d;
 
+    //~ Enums ------------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public enum Side {
+
+        //~ Enum constants -----------------------------------------------------
+
+        SOUTH, NORTH, WEST, EAST
+    }
+
     //~ Instance fields --------------------------------------------------------
 
     Template template;
@@ -89,10 +103,28 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     int number = 0;
 
     ArrayList<PNode> children = new ArrayList<>();
+    private MappingComponent mappingComponent;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
     private Future<Image> futureMapImage;
 
     //~ Constructors -----------------------------------------------------------
+
+    /**
+     * Creates a new PrintTemplateFeature object.
+     *
+     * @param  ptfTemplate  DOCUMENT ME!
+     * @param  side         DOCUMENT ME!
+     */
+    public PrintTemplateFeature(final PrintTemplateFeature ptfTemplate, final Side side) {
+        this(ptfTemplate.template, ptfTemplate.resolution, ptfTemplate.scale, ptfTemplate.mappingComponent);
+        final Coordinate[] translationSide = ptfTemplate.getSideLineCoords(getTranslationSide(side));
+        final AffineTransformation translationAT = AffineTransformation.translationInstance(translationSide[1].x
+                        - translationSide[0].x,
+                translationSide[1].y
+                        - translationSide[0].y);
+        setGeometry(translationAT.transform(ptfTemplate.getGeometry()));
+        // setGeometry(ptfTemplate.getGeometry().buffer(0));
+    }
 
     /**
      * Creates a new PrintTemplateFeature object.
@@ -109,6 +141,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         this.template = template;
         this.resolution = resolution;
         this.scale = scale;
+        this.mappingComponent = mappingComponent;
         final int placeholderWidth = template.getMapWidth();
         final int placeholderHeight = template.getMapHeight();
         int scaleDenominator = scale.getDenominator();
@@ -193,8 +226,6 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         outerCoords[3] = new Coordinate(-halfRealWorldWidth, +halfRealWorldHeigth);
         outerCoords[4] = new Coordinate(-halfRealWorldWidth, -halfRealWorldHeigth);
 
-        log.fatal(realWorldWidth);
-
         // create the geometry from coordinates
         LinearRing outerRing = getGF().createLinearRing(outerCoords);
         final LinearRing[] innerRings = null;
@@ -203,12 +234,36 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         final AffineTransformation translateToDestination = AffineTransformation.translationInstance(centerX, centerY);
         outerRing = (LinearRing)translateToDestination.transform(outerRing);
         this.setGeometry(getGF().createPolygon(outerRing, innerRings));
-        setFillingPaint(Color.DARK_GRAY);
         setCanBeSelected(true);
         setEditable(true);
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   side  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Side getTranslationSide(final Side side) {
+        switch (side) {
+            case NORTH: {
+                return Side.EAST;
+            }
+            case SOUTH: {
+                return Side.WEST;
+            }
+            case WEST: {
+                return Side.NORTH;
+            }
+            case EAST:
+            default: {
+                return Side.SOUTH;
+            }
+        }
+    }
 
     @Override
     public String toString() {
@@ -423,7 +478,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
      * @Override  DOCUMENT ME!
      */
     @Override
-    public Collection<PNode> provideChildren(final PNode parent) {
+    public Collection<PNode> provideChildren(final PFeature parent) {
         if (children.size() == 0) {
             initPNodeChildren(parent);
         }
@@ -435,38 +490,139 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
      *
      * @param  parent  DOCUMENT ME!
      */
-    private void initPNodeChildren(final PNode parent) {
+    private void initPNodeChildren(final PFeature parent) {
         children.add(new SubPNode(parent));
-        children.add(new DerivedSubFeature(parent, new DeriveRule() {
+        children.add(new DerivedCloneArea(parent, Side.WEST));
+        children.add(new DerivedCloneArea(parent, Side.EAST));
+        children.add(new DerivedCloneArea(parent, Side.NORTH));
+        children.add(new DerivedCloneArea(parent, Side.SOUTH));
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   indexA  DOCUMENT ME!
+     * @param   indexB  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Geometry getLineFromCoordsAt(final int indexA, final int indexB) {
+        return getGF().createLineString(getCoordsArrayFromGeometryCoordsAt(indexA, indexB));
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   indexA  DOCUMENT ME!
+     * @param   indexB  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    private Coordinate[] getCoordsArrayFromGeometryCoordsAt(final int indexA, final int indexB) {
+        final Coordinate[] cs = getGeometry().getCoordinates();
+        final Coordinate[] lineCoords = new Coordinate[2];
+
+        lineCoords[0] = cs[indexA];
+        lineCoords[1] = cs[indexB];
+        return lineCoords;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   side  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     *
+     * @throws  RuntimeException  DOCUMENT ME!
+     */
+    private Coordinate[] getSideLineCoords(final Side side) {
+        switch (side) {
+            case NORTH: {
+                return getCoordsArrayFromGeometryCoordsAt(2, 3);
+            }
+            case SOUTH: {
+                return getCoordsArrayFromGeometryCoordsAt(0, 1);
+            }
+            case WEST: {
+                return getCoordsArrayFromGeometryCoordsAt(3, 0);
+            }
+            case EAST: {
+                return getCoordsArrayFromGeometryCoordsAt(1, 2);
+            }
+            default: {
+                throw new RuntimeException("Error in Universe");
+            }
+        }
+    }
+
+    /**
+     * The Rectangle of the PrinTemplateFeature is build as a Coordinate Array with these indices.
+     *
+     * @param   side  The Side of the Rectangle
+     *
+     * @return  THe Linestring of the side
+     */
+    protected Geometry getSideLine(final Side side) {
+        return getGF().createLineString(getSideLineCoords(side));
+    }
+
+    //~ Inner Classes ----------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public class DerivedCloneArea extends DerivedSubFeature {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private Side side;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new DerivedCloneArea object.
+         *
+         * @param  parent  DOCUMENT ME!
+         * @param  side    DOCUMENT ME!
+         */
+        public DerivedCloneArea(final PFeature parent, final Side side) {
+            super(parent, new DeriveRule() {
 
                     @Override
                     public Geometry derive(final Geometry in) {
-                        return in.buffer(-10);
-                    }
-                }));
-        children.add(new DerivedSubFeature(parent, new DeriveRule() {
+                        final Coordinate[] line = new Coordinate[2];
 
-                    @Override
-                    public Geometry derive(final Geometry in) {
-                        return in.buffer(10);
-                    }
-                }));
-        final DerivedSubFeature dsf = new DerivedSubFeature(parent, new DeriveRule() {
+                        line[0] = RectangleMath.getPointPerpendicular(
+                                getSideLineCoords(side),
+                                RectangleMath.getPointFromStartByFraction(getSideLineCoords(side), 0.25),
+                                10);
+                        line[1] = RectangleMath.getPointPerpendicular(
+                                getSideLineCoords(side),
+                                RectangleMath.getPointFromStartByFraction(getSideLineCoords(side), 0.75),
+                                10);
 
-                    @Override
-                    public Geometry derive(final Geometry in) {
-                        final Coordinate[] cs = in.getCoordinates();
-                        final Coordinate[] first = new Coordinate[2];
-
-                        first[0] = cs[0];
-                        first[1] = cs[1];
-                        final LineString ls = getGF().createLineString(first);
-                        return ls.buffer(5);
+                        return getGF().createLineString(line).buffer(5);
                     }
                 });
-        dsf.setPaint(Color.white);
-        dsf.setTransparency(0.9f);
-        children.add(dsf);
+            this.side = side;
+            setPaint(Color.white);
+            setStroke(null);
+            setTransparency(0.3f);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public Side getSide() {
+            return side;
+        }
     }
 }
 
@@ -498,7 +654,7 @@ class DerivedSubFeature extends PPath implements PropertyChangeListener {
 
     //~ Instance fields --------------------------------------------------------
 
-    PNode parent;
+    PFeature parent;
     DeriveRule rule;
     private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
@@ -510,7 +666,7 @@ class DerivedSubFeature extends PPath implements PropertyChangeListener {
      * @param  parent  DOCUMENT ME!
      * @param  rule    DOCUMENT ME!
      */
-    public DerivedSubFeature(final PNode parent, final DeriveRule rule) {
+    public DerivedSubFeature(final PFeature parent, final DeriveRule rule) {
         this.parent = parent;
         this.rule = rule;
         parent.addPropertyChangeListener(this);
@@ -520,7 +676,7 @@ class DerivedSubFeature extends PPath implements PropertyChangeListener {
 
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
-        final Geometry g = ((PFeature)parent).getFeature().getGeometry().buffer(2);
+        final Geometry g = parent.getFeature().getGeometry();
         final DefaultStyledFeature dsf = new DefaultStyledFeature();
         dsf.setGeometry(rule.derive(g));
         final PFeature p = new PFeature(dsf, CismapBroker.getInstance().getMappingComponent());

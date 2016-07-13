@@ -202,7 +202,7 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
 //        final String fn = "/Users/thorsten/Desktop/pdfa4h.png";///Users/thorsten/desktmp/printer-empty.png";
 //        final PImage pii = new BackgroundPImage(fn);
 //        printPFeature.addChild(pii);
-        mappingComponent.getPrintingFrameLayer().removeAllChildren();
+        // mappingComponent.getPrintingFrameLayer().removeAllChildren();
 
         mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(), false, false);
         mapFeatureCol.select(printTemplateStyledFeature);
@@ -213,18 +213,49 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     @Override
     public void mouseClicked(final PInputEvent event) {
         super.mouseClicked(event);
-        if ((event.getClickCount() > 1) && event.isLeftMouseButton()) {
+        if ((event.getClickCount() == 1) && event.isLeftMouseButton()) {
+            if (event.getPickedNode() instanceof PrintTemplateFeature.DerivedCloneArea) {
+                final PrintTemplateFeature.DerivedCloneArea dca = (PrintTemplateFeature.DerivedCloneArea)
+                    event.getPickedNode();
+                final PrintTemplateFeature ptf = (PrintTemplateFeature)dca.parent.getFeature();
+                final PrintTemplateFeature newPTF = new PrintTemplateFeature(ptf, dca.getSide());
+                final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
+                    mappingComponent.getFeatureCollection();
+                mapFeatureCol.holdFeature(newPTF);
+                mapFeatureCol.addFeature(newPTF);
+                mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(),
+                    false,
+                    false);
+            }
+        } else if ((event.getClickCount() > 1) && event.isLeftMouseButton()) {
             mappingComponent.showPrintingDialog(getOldInteractionMode());
         } else if ((event.getClickCount() == 1) && event.isRightMouseButton()) {
-            final JPopupMenu test = new JPopupMenu("test");
-            test.add(new JMenuItem("Drucken"));
-            test.add(new JMenuItem("DPI"));
-            test.add(new JMenuItem("Template"));
-            test.add(new JMenuItem("Maßstab"));
-            test.show(
-                mappingComponent,
-                (int)event.getCanvasPosition().getX(),
-                (int)event.getCanvasPosition().getY());
+//            final JPopupMenu test = new JPopupMenu("test");
+//            test.add(new JMenuItem("Drucken"));
+//            test.add(new JMenuItem("DPI"));
+//            test.add(new JMenuItem("Template"));
+//            test.add(new JMenuItem("Maßstab"));
+//            test.show(
+//                mappingComponent,
+//                (int)event.getCanvasPosition().getX(),
+//                (int)event.getCanvasPosition().getY());
+//            final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[]{PFeature.class});
+//            if (!(o instanceof PFeature)) {
+//                return;
+//            }
+//            final PFeature sel = (PFeature) o;
+//
+//            if (!(sel.getFeature() instanceof PrintTemplateFeature)) {
+//                return;
+//            }
+//            final PrintTemplateFeature ptf = (PrintTemplateFeature) sel.getFeature();
+//            final PrintTemplateFeature newPTF = new PrintTemplateFeature(ptf, PrintTemplateFeature.Side.SOUTH);
+//            final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection) mappingComponent.getFeatureCollection();
+//            mapFeatureCol.holdFeature(newPTF);
+//            mapFeatureCol.addFeature(newPTF);
+//            mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(),
+//                    false,
+//                    false);
         }
     }
 
@@ -232,6 +263,15 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     public void mouseReleased(final PInputEvent e) {
         super.mouseReleased(e);
         mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(), false, false);
+    }
+
+    @Override
+    public void mouseMoved(final PInputEvent event) {
+        if (event.getPickedNode() instanceof PrintTemplateFeature.DerivedCloneArea) {
+            mappingComponent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        } else {
+            mappingComponent.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
     }
 
     @Override
