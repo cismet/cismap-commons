@@ -50,7 +50,6 @@ import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.ChildNodesProvider;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
-import de.cismet.cismap.commons.features.LockedRotatingPivotRequest;
 import de.cismet.cismap.commons.features.PreventNamingDuplicates;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
@@ -61,6 +60,7 @@ import de.cismet.cismap.commons.gui.printing.Template;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.gui.StaticSwingTools;
+import de.cismet.cismap.commons.features.RequestForRotatingPivotLock;
 
 /**
  * DOCUMENT ME!
@@ -69,7 +69,7 @@ import de.cismet.tools.gui.StaticSwingTools;
  * @version  $Revision$, $Date$
  */
 public class PrintTemplateFeature extends DefaultStyledFeature implements XStyledFeature,
-    LockedRotatingPivotRequest,
+    RequestForRotatingPivotLock,
     PreventNamingDuplicates,
     ChildNodesProvider {
 
