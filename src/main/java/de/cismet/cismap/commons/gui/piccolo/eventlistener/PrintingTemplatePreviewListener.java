@@ -1,12 +1,10 @@
-/**
- * *************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- *
- *              ... and it just works.
- *
- ***************************************************
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -22,6 +20,7 @@ import edu.umd.cs.piccolo.event.PInputEvent;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.PopupMenu;
 
 import java.beans.PropertyChangeEvent;
@@ -45,19 +44,19 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
 import de.cismet.tools.CismetThreadPool;
-import java.awt.EventQueue;
 
 import static java.lang.Thread.sleep;
 
 /**
  * DOCUMENT ME!
  *
- * @author thorsten
- * @version $Revision$, $Date$
+ * @author   thorsten
+ * @version  $Revision$, $Date$
  */
 public class PrintingTemplatePreviewListener extends FeatureMoveListener {
 
     //~ Static fields/initializers ---------------------------------------------
+
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(
             PrintingTemplatePreviewListener.class);
     //
@@ -67,6 +66,7 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     public static final Color BORDER_COLOR = new Color(0, 0, 255, 75);
 
     //~ Instance fields --------------------------------------------------------
+
     Thread zoomThread;
     long zoomTime;
     private final PropertyChangeListener mapInteractionModeListener;
@@ -82,10 +82,11 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
 //    private String bestimmerDimension = WIDTH;
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates a new PrintingTemplatePreviewListener object.
      *
-     * @param mappingComponent DOCUMENT ME!
+     * @param  mappingComponent  DOCUMENT ME!
      */
     public PrintingTemplatePreviewListener(final MappingComponent mappingComponent) {
         super(mappingComponent);
@@ -98,22 +99,23 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         // listener to remove the template feature and reset the old state if interaction mode is changed by user
         this.mapInteractionModeListener = new PropertyChangeListener() {
 
-            @Override
-            public void propertyChange(final PropertyChangeEvent evt) {
-                if ((evt != null) && MappingComponent.PROPERTY_MAP_INTERACTION_MODE.equals(evt.getPropertyName())) {
-                    if (MappingComponent.PRINTING_AREA_SELECTION.equals(evt.getOldValue())) {
-                        cleanUpAndRestoreFeatures();
+                @Override
+                public void propertyChange(final PropertyChangeEvent evt) {
+                    if ((evt != null) && MappingComponent.PROPERTY_MAP_INTERACTION_MODE.equals(evt.getPropertyName())) {
+                        if (MappingComponent.PRINTING_AREA_SELECTION.equals(evt.getOldValue())) {
+                            cleanUpAndRestoreFeatures();
+                        }
                     }
                 }
-            }
-        };
+            };
     }
 
     //~ Methods ----------------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     public String getOldInteractionMode() {
         return oldInteractionMode;
@@ -122,7 +124,7 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     /**
      * DOCUMENT ME!
      *
-     * @param oldInteractionMode DOCUMENT ME!
+     * @param  oldInteractionMode  DOCUMENT ME!
      */
     public void setOldInteractionMode(final String oldInteractionMode) {
         this.oldInteractionMode = oldInteractionMode;
@@ -131,8 +133,8 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     /**
      * DOCUMENT ME!
      *
-     * @param scale DOCUMENT ME!
-     * @param printingTemplate DOCUMENT ME!
+     * @param  scale             DOCUMENT ME!
+     * @param  printingTemplate  DOCUMENT ME!
      */
     private void zoom(final double scale, final PrintTemplateFeature printingTemplate) {
         final Point centroid = printingTemplate.getGeometry().getCentroid();
@@ -173,10 +175,10 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     /**
      * DOCUMENT ME!
      *
-     * @param selectedScale DOCUMENT ME!
-     * @param selectedResolution DOCUMENT ME!
-     * @param selectedTemplate DOCUMENT ME!
-     * @param oldInteractionMode DOCUMENT ME!
+     * @param  selectedScale       DOCUMENT ME!
+     * @param  selectedResolution  DOCUMENT ME!
+     * @param  selectedTemplate    DOCUMENT ME!
+     * @param  oldInteractionMode  DOCUMENT ME!
      */
     public void init(final Scale selectedScale,
             final Resolution selectedResolution,
@@ -191,7 +193,8 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
                 selectedResolution,
                 selectedScale,
                 mappingComponent);
-        final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection) mappingComponent.getFeatureCollection();
+        final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
+            mappingComponent.getFeatureCollection();
         oldOverlappingCheck = CismapBroker.getInstance().isCheckForOverlappingGeometriesAfterFeatureRotation();
         CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(false);
         mapFeatureCol.holdFeature(printTemplateStyledFeature);
@@ -202,54 +205,14 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         mappingComponent.showHandles(false);
     }
 
+    /**
+     * DOCUMENT ME!
+     */
     private void ensureVisibilityOfPrintingTemplates() {
         if (!mappingComponent.isFixedMapExtent()) {
-            mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(), false, mappingComponent.isFixedMapScale());
-        }
-    }
-
-    @Override
-    public void mouseClicked(final PInputEvent event) {
-        super.mouseClicked(event);
-        if ((event.getClickCount() == 1) && event.isLeftMouseButton()) {
-            if (event.getPickedNode() instanceof PrintTemplateFeature.DerivedCloneArea) {
-                final PrintTemplateFeature.DerivedCloneArea dca = (PrintTemplateFeature.DerivedCloneArea) event.getPickedNode();
-                final PrintTemplateFeature ptf = (PrintTemplateFeature) dca.parent.getFeature();
-                final PrintTemplateFeature newPTF = new PrintTemplateFeature(ptf, dca.getSide());
-                final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection) mappingComponent.getFeatureCollection();
-                mapFeatureCol.holdFeature(newPTF);
-                mapFeatureCol.addFeature(newPTF);
-                adjustMap();
-            }
-        } else if ((event.getClickCount() > 1) && event.isLeftMouseButton()) {
-            mappingComponent.showPrintingDialog(getOldInteractionMode());
-        } else if ((event.getClickCount() == 1) && event.isRightMouseButton()) {
-//            final JPopupMenu test = new JPopupMenu("test");
-//            test.add(new JMenuItem("Drucken"));
-//            test.add(new JMenuItem("DPI"));
-//            test.add(new JMenuItem("Template"));
-//            test.add(new JMenuItem("Maßstab"));
-//            test.show(
-//                mappingComponent,
-//                (int)event.getCanvasPosition().getX(),
-//                (int)event.getCanvasPosition().getY());
-//            final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[]{PFeature.class});
-//            if (!(o instanceof PFeature)) {
-//                return;
-//            }
-//            final PFeature sel = (PFeature) o;
-//
-//            if (!(sel.getFeature() instanceof PrintTemplateFeature)) {
-//                return;
-//            }
-//            final PrintTemplateFeature ptf = (PrintTemplateFeature) sel.getFeature();
-//            final PrintTemplateFeature newPTF = new PrintTemplateFeature(ptf, PrintTemplateFeature.Side.SOUTH);
-//            final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection) mappingComponent.getFeatureCollection();
-//            mapFeatureCol.holdFeature(newPTF);
-//            mapFeatureCol.addFeature(newPTF);
-//            mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(),
-//                    false,
-//                    false);
+            mappingComponent.zoomToAFeatureCollection(mappingComponent.getPrintFeatureCollection(),
+                false,
+                mappingComponent.isFixedMapScale());
         }
     }
 
@@ -271,16 +234,16 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
     @Override
     public void mouseWheelRotated(final PInputEvent event) {
         super.mouseWheelRotatedByBlock(event);
-        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[]{PFeature.class});
+        final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[] { PFeature.class });
         if (!(o instanceof PFeature)) {
             return;
         }
-        final PFeature sel = (PFeature) o;
+        final PFeature sel = (PFeature)o;
 
         if (!(sel.getFeature() instanceof PrintTemplateFeature)) {
             return;
         }
-        final PrintTemplateFeature ptf = (PrintTemplateFeature) sel.getFeature();
+        final PrintTemplateFeature ptf = (PrintTemplateFeature)sel.getFeature();
 
         if (ptf.getScale().getDenominator() == 0) {
             if (log.isDebugEnabled()) {
@@ -325,24 +288,24 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         if ((zoomThread == null) || !zoomThread.isAlive()) {
             zoomThread = new Thread("PrintFrameListener adjustMap()") {
 
-                @Override
-                public void run() {
-                    while (System.currentTimeMillis() < zoomTime) {
-                        try {
-                            sleep(100);
-                            // log.debug("WAIT");
-                        } catch (InterruptedException iex) {
+                    @Override
+                    public void run() {
+                        while (System.currentTimeMillis() < zoomTime) {
+                            try {
+                                sleep(100);
+                                // log.debug("WAIT");
+                            } catch (InterruptedException iex) {
+                            }
                         }
-                    }
-                    EventQueue.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            ensureVisibilityOfPrintingTemplates();
-                        }
-                    });
+                        EventQueue.invokeLater(new Runnable() {
 
-                }
-            };
+                                @Override
+                                public void run() {
+                                    ensureVisibilityOfPrintingTemplates();
+                                }
+                            });
+                    }
+                };
             zoomThread.setPriority(Thread.NORM_PRIORITY);
             CismetThreadPool.execute(zoomThread);
         }

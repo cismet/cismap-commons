@@ -105,6 +105,8 @@ import de.cismet.tools.gui.WaitDialog;
 import de.cismet.tools.gui.historybutton.DefaultHistoryModel;
 import de.cismet.tools.gui.historybutton.HistoryModel;
 
+import static java.lang.Thread.sleep;
+
 /**
  * DOCUMENT ME!
  *
@@ -193,7 +195,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private PLayer highlightingLayer = new PLayer();
     private PLayer crosshairLayer = new PLayer();
     private PLayer stickyLayer = new PLayer();
-    private PLayer printingFrameLayer = new PLayer();
     private PLayer dragPerformanceImproverLayer = new PLayer();
     private boolean readOnly = true;
     private boolean snappingEnabled = true;
@@ -280,6 +281,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     private boolean resizeEventActivated = true;
     private double stickyFeatureCorrectionFactor = 1d;
     private volatile Coordinate currentCrosshairPoint;
+    private Thread printingTemplateZoomThread;
+    private long printingTemplateZoomTime;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -372,7 +375,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         getLayer().addChild(crosshairLayer);
         getLayer().addChild(highlightingLayer);
         getLayer().addChild(dragPerformanceImproverLayer);
-        getLayer().addChild(printingFrameLayer);
 
         getCamera().addLayer(mapServicelayer);
         getCamera().addLayer(featureLayer);
@@ -381,7 +383,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         getCamera().addLayer(crosshairLayer);
         getCamera().addLayer(highlightingLayer);
         getCamera().addLayer(dragPerformanceImproverLayer);
-        getCamera().addLayer(printingFrameLayer);
 
         getCamera().addChild(snapHandleLayer);
         getCamera().addChild(handleLayer);
@@ -392,7 +393,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
         initInputListener();
         initCursors();
-
         addInputEventListener(getInputListener(MOTION));
         addInputEventListener(getInputListener(CUSTOM_FEATUREACTION));
 
@@ -592,6 +592,65 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         stickyPNodes.remove(pn);
     }
 
+    /**
+     * DOCUMENT ME!
+     */
+    public void adjustMapForPrintingTemplates() {
+        final int delayTime = 500;
+        printingTemplateZoomTime = System.currentTimeMillis() + delayTime;
+        if ((printingTemplateZoomThread == null) || !printingTemplateZoomThread.isAlive()) {
+            printingTemplateZoomThread = new Thread("PrintFrameListener adjustMap()") {
+
+                    @Override
+                    public void run() {
+                        while (System.currentTimeMillis() < printingTemplateZoomTime) {
+                            try {
+                                sleep(100);
+                                // log.debug("WAIT");
+                            } catch (InterruptedException iex) {
+                            }
+                        }
+                        EventQueue.invokeLater(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    ensureVisibilityOfPrintingTemplates();
+                                }
+                            });
+                    }
+                };
+            printingTemplateZoomThread.setPriority(Thread.NORM_PRIORITY);
+            CismetThreadPool.execute(printingTemplateZoomThread);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void ensureVisibilityOfPrintingTemplates() {
+        if (!isFixedMapExtent()) {
+            zoomToAFeatureCollection(getPrintFeatureCollection(),
+                false,
+                isFixedMapScale());
+        }
+    }
+
+    
+     /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Collection<PrintTemplateFeature> getPrintFeatureCollection() {
+        final ArrayList<PrintTemplateFeature> pfc = new ArrayList<PrintTemplateFeature>();
+        for (final Feature f : getFeatureCollection().getAllFeatures()) {
+            if (f instanceof PrintTemplateFeature) {
+                pfc.add((PrintTemplateFeature)f);
+            }
+        }
+        return pfc;
+    } 
+    
     /**
      * DOCUMENT ME!
      *
@@ -809,7 +868,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         getCamera().addLayer(counter++, tmpFeatureLayer);
         getCamera().addLayer(counter++, rubberBandLayer);
         getCamera().addLayer(counter++, dragPerformanceImproverLayer);
-        getCamera().addLayer(counter++, printingFrameLayer);
     }
 
     /**
@@ -883,43 +941,42 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
 
     /**
      * Shows the printingsetting-dialog that resets the interactionmode after printing.
-     *
-     * @param  oldInteractionMode  String-object
      */
-    public void showPrintingSettingsDialog(final String oldInteractionMode) {
-        showPrintingSettingsDialog(oldInteractionMode, false);
+    public void showPrintingSettingsDialog() {
+        showPrintingSettingsDialog(false);
     }
 
     /**
      * Shows the printingsetting-dialog that resets the interactionmode after printing.
      *
-     * @param  oldInteractionMode  String-object
-     * @param  chooseFile          DOCUMENT ME!
+     * @param  chooseFile  DOCUMENT ME!
      */
-    public void showPrintingSettingsDialog(final String oldInteractionMode, final boolean chooseFile) {
+    public void showPrintingSettingsDialog(final boolean chooseFile) {
         printingSettingsDialog = printingSettingsDialog.cloneWithNewParent(true, this);
         printingSettingsDialog.setChooseFileName(chooseFile);
-
-        printingSettingsDialog.setInteractionModeAfterPrinting(oldInteractionMode);
         StaticSwingTools.showDialog(printingSettingsDialog);
     }
 
     /**
      * Shows the printing-dialog that resets the interactionmode after printing.
-     *
-     * @param  oldInteractionMode  String-object
      */
-    public void showPrintingDialog(final String oldInteractionMode) {
+    public void showPrintingDialog() {
         setPointerAnnotationVisibility(false);
         printingDialog = printingDialog.cloneWithNewParent(true, this);
 
         try {
-            printingDialog.setInteractionModeAfterPrinting(oldInteractionMode);
             printingDialog.startLoading();
             StaticSwingTools.showDialog(printingDialog);
         } catch (final Exception e) {
             LOG.error("Fehler beim Anzeigen des Printing Dialogs", e); // NOI18N
         }
+    }
+
+    /**
+     * DOCUMENT ME!
+     */
+    public void printingAction() {
+        showPrintingSettingsDialog();
     }
 
     /**
@@ -952,9 +1009,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
                 LOG.warn("Fehler bei removeAllCHildren", e); // NOI18N
             }
             setPointerAnnotationVisibility(false);
-            if (getPrintingFrameLayer().getChildrenCount() > 1) {
-                getPrintingFrameLayer().removeAllChildren();
-            }
+
             if (this.interactionMode != null) {
                 if (interactionMode.equals(FEATURE_INFO)) {
                     ((GetFeatureInfoClickDetectionListener)this.getInputListener(interactionMode)).getPInfo()
@@ -4894,15 +4949,6 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
      */
     public boolean isInfoNodesVisible() {
         return infoNodesVisible;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public PLayer getPrintingFrameLayer() {
-        return printingFrameLayer;
     }
 
     /**

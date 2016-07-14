@@ -965,7 +965,7 @@ public class HeadlessMapProvider {
             String prefix;
             if ((msg != null) && (msg.trim().length() > 0)
                         && (HeadlessMapProvider.this.requestingObject instanceof PrintTemplateFeature)
-                        && (CismapBroker.getInstance().getPrintFeatureCollection().size() > 1)) {
+                        && (map.getPrintFeatureCollection().size() > 1)) {
                 prefix = ((PrintTemplateFeature)HeadlessMapProvider.this.requestingObject).getName() + ": ";
             } else {
                 prefix = "";

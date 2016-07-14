@@ -19,7 +19,9 @@ import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
 
+import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
+import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingTemplatePreviewListener;
 
 import de.cismet.tools.configuration.Configurable;
@@ -47,7 +49,6 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     private Vector<Template> templates = new Vector<Template>();
     private Vector<Action> actions = new Vector<Action>();
     private MappingComponent mappingComponent = null;
-    private String interactionModeAfterPrinting = ""; // NOI18N
     private boolean chooseFileName = false;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -107,7 +108,6 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         newWidget.resolutions = resolutions;
         newWidget.templates = templates;
         newWidget.actions = actions;
-        newWidget.interactionModeAfterPrinting = interactionModeAfterPrinting;
         newWidget.cboScales.setModel(cboScales.getModel());
         newWidget.cboResolution.setModel(cboResolution.getModel());
         newWidget.cboTemplates.setModel(cboTemplates.getModel());
@@ -404,13 +404,19 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
             mappingComponent.setPrintingResolution(selectedResolution.getResolution()
                         / mappingComponent.getFeaturePrintingDpi());
             final Template selectedTemplate = (Template)cboTemplates.getSelectedItem();
-            ((PrintingTemplatePreviewListener)(mappingComponent.getInputListener(
-                        MappingComponent.PRINTING_AREA_SELECTION))).init(
-                selectedScale,
-                selectedResolution,
-                selectedTemplate,
-                interactionModeAfterPrinting);
-            mappingComponent.setInteractionMode(MappingComponent.PRINTING_AREA_SELECTION);
+            final PrintTemplateFeature printTemplateStyledFeature = new PrintTemplateFeature(
+                    selectedTemplate,
+                    selectedResolution,
+                    selectedScale,
+                    mappingComponent);
+            final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
+                mappingComponent.getFeatureCollection();
+            mapFeatureCol.holdFeature(printTemplateStyledFeature);
+            mapFeatureCol.addFeature(printTemplateStyledFeature);
+            mappingComponent.adjustMapForPrintingTemplates();
+            mapFeatureCol.select(printTemplateStyledFeature);
+            mappingComponent.setHandleInteractionMode(MappingComponent.ROTATE_POLYGON);
+            mappingComponent.showHandles(false);
             dispose();
         } catch (Exception e) {
             log.error("Fehler beim Verarbeiten der Druckeinstellungen", e);   // NOI18N
@@ -422,7 +428,6 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      * @param  evt  DOCUMENT ME!
      */
     private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
-        mappingComponent.setInteractionMode(interactionModeAfterPrinting);
         dispose();
     }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
     /**
@@ -644,24 +649,6 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     public Action getSelectedAction() {
         return (Action)cboAction.getSelectedItem();
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public String getInteractionModeAfterPrinting() {
-        return interactionModeAfterPrinting;
-    }
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param  interactionModeAfterPrinting  DOCUMENT ME!
-     */
-    public void setInteractionModeAfterPrinting(final String interactionModeAfterPrinting) {
-        this.interactionModeAfterPrinting = interactionModeAfterPrinting;
     }
 
     /**

@@ -1114,18 +1114,5 @@ public class CismapBroker {
         this.multiFeaturePopupMenuEnabled = multiFeaturePopupMenuEnabled;
     }
 
-    /**
-     * DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    public Collection<PrintTemplateFeature> getPrintFeatureCollection() {
-        final ArrayList<PrintTemplateFeature> pfc = new ArrayList<PrintTemplateFeature>();
-        for (final Feature f : mappingComponent.getFeatureCollection().getAllFeatures()) {
-            if (f instanceof PrintTemplateFeature) {
-                pfc.add((PrintTemplateFeature)f);
-            }
-        }
-        return pfc;
-    }
+   
 }

@@ -20,9 +20,9 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
+import de.cismet.cismap.commons.features.RequestForRotatingPivotLock;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
-import de.cismet.cismap.commons.features.RequestForRotatingPivotLock;
 
 /**
  * DOCUMENT ME!
