@@ -18,5 +18,5 @@ package de.cismet.cismap.commons.features;
  * @author   thorsten
  * @version  $Revision$, $Date$
  */
-public interface RequestForUnremovableHandles {
+public interface RequestForNonreflectingFeature {
 }

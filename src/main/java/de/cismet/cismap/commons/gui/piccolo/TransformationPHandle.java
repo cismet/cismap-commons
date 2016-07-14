@@ -35,6 +35,9 @@ import javax.swing.SwingWorker;
 import de.cismet.cismap.commons.features.AbstractNewFeature;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.Feature;
+import de.cismet.cismap.commons.features.RequestForUnaddableHandles;
+import de.cismet.cismap.commons.features.RequestForUnmoveableHandles;
+import de.cismet.cismap.commons.features.RequestForUnremovableHandles;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.InvalidPolygonTooltip;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
@@ -175,8 +178,11 @@ public class TransformationPHandle extends PHandle {
                     LOG.warn("Movelistener zur Abstimmung der Mauszeiger nicht gefunden.");
                 }
 
-                if (pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)
-                            || pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE)) {
+                if ((!(pfeature.getFeature() instanceof RequestForUnaddableHandles)
+                                && pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE))
+                            || (!(pfeature.getFeature() instanceof RequestForUnmoveableHandles)
+                                && pfeature.getViewer().getHandleInteractionMode().equals(
+                                    MappingComponent.MOVE_HANDLE))) {
                     // neue HandlePosition berechnen
 
                     float currentX;
@@ -432,8 +438,10 @@ public class TransformationPHandle extends PHandle {
                 leftInfo = null;
                 rightInfo = null;
 
-                if (((pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.MOVE_HANDLE))
-                                && (Math.abs(startX - getLocator().locateX()) > 0.001d))
+                if ((!(pfeature.getFeature() instanceof RequestForUnmoveableHandles)
+                                && ((pfeature.getViewer().getHandleInteractionMode().equals(
+                                            MappingComponent.MOVE_HANDLE))
+                                    && (Math.abs(startX - getLocator().locateX()) > 0.001d)))
                             || (Math.abs(startY - getLocator().locateY()) > 0.001d)) {
                     boolean isGluedAction = false;
                     if (glueCoordinates.size() != 0) {
@@ -497,7 +505,8 @@ public class TransformationPHandle extends PHandle {
                 final float[] xp = pfeature.getXp(entityPosition, ringPosition);
                 final float[] yp = pfeature.getYp(entityPosition, ringPosition);
 
-                if (pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.REMOVE_HANDLE)) {
+                if (!(pfeature.getFeature() instanceof RequestForUnremovableHandles)
+                            && pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.REMOVE_HANDLE)) {
                     final Coordinate[] coordArr = pfeature.getCoordArr(entityPosition, ringPosition);
                     final Coordinate[] newCoordArr = new Coordinate[coordArr.length - 1];
                     System.arraycopy(coordArr, 0, newCoordArr, 0, coordPosition);
@@ -528,7 +537,8 @@ public class TransformationPHandle extends PHandle {
                             showInvalidPolygonTooltip(InvalidPolygonTooltip.Mode.ENTITY_ERROR);
                         }
                     }
-                } else if (pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)) {
+                } else if (!(pfeature.getFeature() instanceof RequestForUnaddableHandles)
+                            && pfeature.getViewer().getHandleInteractionMode().equals(MappingComponent.ADD_HANDLE)) {
                     pfeature.getViewer()
                             .getMemUndo()
                             .addAction(new HandleDeleteAction(

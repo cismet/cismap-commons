@@ -15,26 +15,24 @@ package de.cismet.cismap.commons.gui.piccolo.eventlistener;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.LinearRing;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.geom.util.AffineTransformation;
 
 import edu.umd.cs.piccolo.PNode;
-import edu.umd.cs.piccolo.nodes.PPath;
+import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
+import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PText;
 import edu.umd.cs.piccolo.util.PBounds;
 
 import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.Paint;
 import java.awt.Stroke;
-import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -49,8 +47,14 @@ import de.cismet.cismap.commons.CrsTransformer;
 import de.cismet.cismap.commons.Refreshable;
 import de.cismet.cismap.commons.XBoundingBox;
 import de.cismet.cismap.commons.features.ChildNodesProvider;
+import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.features.DefaultStyledFeature;
 import de.cismet.cismap.commons.features.PreventNamingDuplicates;
+import de.cismet.cismap.commons.features.RequestForNonreflectingFeature;
+import de.cismet.cismap.commons.features.RequestForRotatingPivotLock;
+import de.cismet.cismap.commons.features.RequestForUnaddableHandles;
+import de.cismet.cismap.commons.features.RequestForUnmoveableHandles;
+import de.cismet.cismap.commons.features.RequestForUnremovableHandles;
 import de.cismet.cismap.commons.features.XStyledFeature;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.PFeature;
@@ -58,9 +62,13 @@ import de.cismet.cismap.commons.gui.printing.Resolution;
 import de.cismet.cismap.commons.gui.printing.Scale;
 import de.cismet.cismap.commons.gui.printing.Template;
 import de.cismet.cismap.commons.interaction.CismapBroker;
+import de.cismet.cismap.commons.tools.PFeatureTools;
+
+import de.cismet.tools.CismetThreadPool;
 
 import de.cismet.tools.gui.StaticSwingTools;
-import de.cismet.cismap.commons.features.RequestForRotatingPivotLock;
+
+import static java.lang.Thread.sleep;
 
 /**
  * DOCUMENT ME!
@@ -69,9 +77,13 @@ import de.cismet.cismap.commons.features.RequestForRotatingPivotLock;
  * @version  $Revision$, $Date$
  */
 public class PrintTemplateFeature extends DefaultStyledFeature implements XStyledFeature,
-    RequestForRotatingPivotLock,
+    ChildNodesProvider,
     PreventNamingDuplicates,
-    ChildNodesProvider {
+    RequestForRotatingPivotLock,
+    RequestForUnaddableHandles,
+    RequestForUnmoveableHandles,
+    RequestForUnremovableHandles,
+    RequestForNonreflectingFeature {
 
     //~ Static fields/initializers ---------------------------------------------
 
@@ -131,7 +143,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
      *
      * @param  template          DOCUMENT ME!
      * @param  resolution        DOCUMENT ME!
-     * @param  scale             DOCUMENT ME!
+     * @param  scale             DOCUMENT ME
      * @param  mappingComponent  DOCUMENT ME!
      */
     public PrintTemplateFeature(final Template template,
@@ -156,7 +168,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             final String s = JOptionPane.showInputDialog(
                     StaticSwingTools.getParentFrame(mappingComponent),
                     org.openide.util.NbBundle.getMessage(
-                        PrintingFrameListener.class,
+                        PrintTemplateFeature.class,
                         "PrintingFrameListener.init(double,int,int,String).message"),
                     ""); // NOI18N
             try {
@@ -491,11 +503,12 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
      * @param  parent  DOCUMENT ME!
      */
     private void initPNodeChildren(final PFeature parent) {
-        children.add(new SubPNode(parent));
+//        children.add(new SubPNode(parent));
         children.add(new DerivedCloneArea(parent, Side.WEST));
         children.add(new DerivedCloneArea(parent, Side.EAST));
         children.add(new DerivedCloneArea(parent, Side.NORTH));
         children.add(new DerivedCloneArea(parent, Side.SOUTH));
+        children.add(new PTFDerivedCommandArea(parent));
     }
 
     /**
@@ -567,6 +580,36 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         return getGF().createLineString(getSideLineCoords(side));
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected double getShortSideLength() {
+        final Geometry southLine = getSideLine(Side.SOUTH);
+        final Geometry westLine = getSideLine(Side.WEST);
+        if (southLine.getLength() < westLine.getLength()) {
+            return southLine.getLength();
+        } else {
+            return westLine.getLength();
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    protected double getLongSideLength() {
+        final Geometry southLine = getSideLine(Side.SOUTH);
+        final Geometry westLine = getSideLine(Side.WEST);
+        if (southLine.getLength() > westLine.getLength()) {
+            return southLine.getLength();
+        } else {
+            return westLine.getLength();
+        }
+    }
+
     //~ Inner Classes ----------------------------------------------------------
 
     /**
@@ -574,7 +617,154 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
      *
      * @version  $Revision$, $Date$
      */
-    public class DerivedCloneArea extends DerivedSubFeature {
+    public class PTFDerivedCommandArea extends DerivedCommandArea {
+
+        //~ Instance fields ----------------------------------------------------
+
+        private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new DerivedCommandArea object.
+         *
+         * @param  parent  DOCUMENT ME!
+         */
+        public PTFDerivedCommandArea(final PFeature parent) {
+            super(parent, new DeriveRule() {
+
+                    @Override
+                    public Geometry derive(final Geometry in) {
+                        return getGeometry().buffer(-1 * 0.1 * getShortSideLength());
+                    }
+                });
+            setPaint(Color.white);
+            setStroke(null);
+            setTransparency(0.3f);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void mouseClicked(final PInputEvent event) {
+            super.mouseClicked(event);
+            if ((event.getClickCount() > 1) && event.isLeftMouseButton()) {
+                mappingComponent.showPrintingDialog();
+            } else if ((event.getClickCount() == 1) && event.isRightMouseButton()) {
+//            final JPopupMenu test = new JPopupMenu("test");
+//            test.add(new JMenuItem("Drucken"));
+//            test.add(new JMenuItem("DPI"));
+//            test.add(new JMenuItem("Template"));
+//            test.add(new JMenuItem("Maßstab"));
+//            test.show(
+//                mappingComponent,
+//                (int)event.getCanvasPosition().getX(),
+//                (int)event.getCanvasPosition().getY());
+//            final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[]{PFeature.class});
+//            if (!(o instanceof PFeature)) {
+//                return;
+//            }
+//            final PFeature sel = (PFeature) o;
+//
+//            if (!(sel.getFeature() instanceof PrintTemplateFeature)) {
+//                return;
+//            }
+//            final PrintTemplateFeature ptf = (PrintTemplateFeature) sel.getFeature();
+//            final PrintTemplateFeature newPTF = new PrintTemplateFeature(ptf, PrintTemplateFeature.Side.SOUTH);
+//            final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection) mappingComponent.getFeatureCollection();
+//            mapFeatureCol.holdFeature(newPTF);
+//            mapFeatureCol.addFeature(newPTF);
+//            mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(),
+//                    false,
+//                    false);
+            }
+        }
+
+        // Moving
+        @Override
+        public void mousePressed(final PInputEvent event) {
+            super.mousePressed(event);
+            ((PBasicInputEventHandler)mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mousePressed(
+                event);
+        }
+        @Override
+        public void mouseDragged(final PInputEvent event) {
+            super.mouseDragged(event);
+            ((PBasicInputEventHandler)mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseDragged(
+                event);
+        }
+
+        @Override
+        public void mouseReleased(final PInputEvent event) {
+            super.mouseReleased(event);
+            ((PBasicInputEventHandler)mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseReleased(
+                event);
+            // mappingComponent.ensureVisibilityOfPrintingTemplates();
+        }
+
+        @Override
+        public void mouseMoved(final PInputEvent event) {
+            super.mouseMoved(event);
+//                mappingComponent.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            ((PBasicInputEventHandler)mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseMoved(
+                event);
+        }
+
+        @Override
+        public void mouseWheelRotated(final PInputEvent event) {
+            super.mouseWheelRotatedByBlock(event);
+            final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[] { PFeature.class });
+            if (!(o instanceof PFeature)) {
+                return;
+            }
+            final PFeature sel = (PFeature)o;
+
+            if (!(sel.getFeature() instanceof PrintTemplateFeature)) {
+                return;
+            }
+            final PrintTemplateFeature ptf = (PrintTemplateFeature)sel.getFeature();
+
+            if (ptf.getScale().getDenominator() == 0) {
+                if (log.isDebugEnabled()) {
+                    log.debug((event.getWheelRotation()));
+                }
+                if (event.getWheelRotation() < 0) {
+                    zoom(0.9d, ptf);
+                    mappingComponent.adjustMapForPrintingTemplates();
+                } else {
+                    zoom(1.1d, ptf);
+                    mappingComponent.adjustMapForPrintingTemplates();
+                }
+            }
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @param  scale             DOCUMENT ME!
+         * @param  printingTemplate  DOCUMENT ME!
+         */
+        private void zoom(final double scale, final PrintTemplateFeature printingTemplate) {
+            final Point centroid = printingTemplate.getGeometry().getCentroid();
+            final AffineTransformation at = AffineTransformation.scaleInstance(
+                    scale,
+                    scale,
+                    centroid.getX(),
+                    centroid.getY());
+            final Geometry g = at.transform(printingTemplate.getGeometry());
+            printingTemplate.setGeometry(g);
+            final PFeature printPFeature = mappingComponent.getPFeatureHM().get(printingTemplate);
+            printPFeature.visualize();
+            mappingComponent.showHandles(true);
+        }
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    public class DerivedCloneArea extends DerivedCommandArea {
 
         //~ Instance fields ----------------------------------------------------
 
@@ -598,13 +788,15 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
                         line[0] = RectangleMath.getPointPerpendicular(
                                 getSideLineCoords(side),
                                 RectangleMath.getPointFromStartByFraction(getSideLineCoords(side), 0.25),
-                                10);
+                                0.04
+                                        * getShortSideLength());
                         line[1] = RectangleMath.getPointPerpendicular(
                                 getSideLineCoords(side),
                                 RectangleMath.getPointFromStartByFraction(getSideLineCoords(side), 0.75),
-                                10);
+                                0.04
+                                        * getShortSideLength());
 
-                        return getGF().createLineString(line).buffer(5);
+                        return getGF().createLineString(line).buffer(0.02 * getShortSideLength());
                     }
                 });
             this.side = side;
@@ -615,6 +807,33 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 
         //~ Methods ------------------------------------------------------------
 
+        @Override
+        public void mouseClicked(final PInputEvent event) {
+            super.mouseClicked(event);
+            if ((event.getClickCount() == 1) && event.isLeftMouseButton()) {
+                if (event.getPickedNode() instanceof PrintTemplateFeature.DerivedCloneArea) {
+                    final PrintTemplateFeature.DerivedCloneArea dca = (PrintTemplateFeature.DerivedCloneArea)
+                        event.getPickedNode();
+                    final PrintTemplateFeature ptf = (PrintTemplateFeature)dca.parent.getFeature();
+                    final PrintTemplateFeature newPTF = new PrintTemplateFeature(ptf, dca.getSide());
+                    final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
+                        mappingComponent.getFeatureCollection();
+                    mapFeatureCol.holdFeature(newPTF);
+                    mapFeatureCol.addFeature(newPTF);
+                    mappingComponent.adjustMapForPrintingTemplates();
+                }
+            }
+        }
+
+        @Override
+        public void mouseMoved(final PInputEvent event) {
+//            if (event.getPickedNode() instanceof PrintTemplateFeature.DerivedCloneArea) {
+//                mappingComponent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+//            } else {
+//                mappingComponent.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//                ((PBasicInputEventHandler) mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseDragged(event);
+//            }
+        }
         /**
          * DOCUMENT ME!
          *
@@ -631,59 +850,6 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
  *
  * @version  $Revision$, $Date$
  */
-interface DeriveRule {
-
-    //~ Methods ----------------------------------------------------------------
-
-    /**
-     * DOCUMENT ME!
-     *
-     * @param   in  DOCUMENT ME!
-     *
-     * @return  DOCUMENT ME!
-     */
-    Geometry derive(Geometry in);
-}
-
-/**
- * DOCUMENT ME!
- *
- * @version  $Revision$, $Date$
- */
-class DerivedSubFeature extends PPath implements PropertyChangeListener {
-
-    //~ Instance fields --------------------------------------------------------
-
-    PFeature parent;
-    DeriveRule rule;
-    private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
-
-    //~ Constructors -----------------------------------------------------------
-
-    /**
-     * Creates a new DerivedSubFeature object.
-     *
-     * @param  parent  DOCUMENT ME!
-     * @param  rule    DOCUMENT ME!
-     */
-    public DerivedSubFeature(final PFeature parent, final DeriveRule rule) {
-        this.parent = parent;
-        this.rule = rule;
-        parent.addPropertyChangeListener(this);
-    }
-
-    //~ Methods ----------------------------------------------------------------
-
-    @Override
-    public void propertyChange(final PropertyChangeEvent evt) {
-        final Geometry g = parent.getFeature().getGeometry();
-        final DefaultStyledFeature dsf = new DefaultStyledFeature();
-        dsf.setGeometry(rule.derive(g));
-        final PFeature p = new PFeature(dsf, CismapBroker.getInstance().getMappingComponent());
-        super.setPathTo(new GeneralPath(p.getPathReference()));
-    }
-}
-
 /**
  * DOCUMENT ME!
  *

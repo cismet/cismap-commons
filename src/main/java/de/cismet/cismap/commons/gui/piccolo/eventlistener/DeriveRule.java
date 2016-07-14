@@ -10,7 +10,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.cismet.cismap.commons.features;
+package de.cismet.cismap.commons.gui.piccolo.eventlistener;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * DOCUMENT ME!
@@ -18,5 +20,16 @@ package de.cismet.cismap.commons.features;
  * @author   thorsten
  * @version  $Revision$, $Date$
  */
-public interface RequestForUnremovableHandles {
+public interface DeriveRule {
+
+    //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   in  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    Geometry derive(Geometry in);
 }
