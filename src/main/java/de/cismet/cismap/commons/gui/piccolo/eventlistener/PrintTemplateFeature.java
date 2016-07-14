@@ -24,15 +24,14 @@ import edu.umd.cs.piccolo.PNode;
 import edu.umd.cs.piccolo.event.PBasicInputEventHandler;
 import edu.umd.cs.piccolo.event.PInputEvent;
 import edu.umd.cs.piccolo.nodes.PText;
-import edu.umd.cs.piccolo.util.PBounds;
 
 import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.Paint;
 import java.awt.Stroke;
-import java.awt.geom.Point2D;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -64,11 +63,7 @@ import de.cismet.cismap.commons.gui.printing.Template;
 import de.cismet.cismap.commons.interaction.CismapBroker;
 import de.cismet.cismap.commons.tools.PFeatureTools;
 
-import de.cismet.tools.CismetThreadPool;
-
 import de.cismet.tools.gui.StaticSwingTools;
-
-import static java.lang.Thread.sleep;
 
 /**
  * DOCUMENT ME!
@@ -503,12 +498,24 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
      * @param  parent  DOCUMENT ME!
      */
     private void initPNodeChildren(final PFeature parent) {
-//        children.add(new SubPNode(parent));
+        final PTFDerivedCommandArea commands = new PTFDerivedCommandArea(parent);
+
+        final DerivedSubFeature centerArea = new DerivedSubFeature(parent, new DeriveRule() {
+
+                    @Override
+                    public Geometry derive(final Geometry in) {
+                        return getGeometry().getCentroid().buffer(getShortSideLength() * 0.2).getEnvelope();
+                    }
+                });
+
+        children.add(new SubPText(centerArea));
+        children.add(centerArea);
+
         children.add(new DerivedCloneArea(parent, Side.WEST));
         children.add(new DerivedCloneArea(parent, Side.EAST));
         children.add(new DerivedCloneArea(parent, Side.NORTH));
         children.add(new DerivedCloneArea(parent, Side.SOUTH));
-        children.add(new PTFDerivedCommandArea(parent));
+        children.add(commands);
     }
 
     /**
@@ -687,6 +694,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             ((PBasicInputEventHandler)mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mousePressed(
                 event);
         }
+
         @Override
         public void mouseDragged(final PInputEvent event) {
             super.mouseDragged(event);
@@ -834,6 +842,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 //                ((PBasicInputEventHandler) mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseDragged(event);
 //            }
         }
+
         /**
          * DOCUMENT ME!
          *
@@ -843,60 +852,59 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             return side;
         }
     }
-}
-
-/**
- * DOCUMENT ME!
- *
- * @version  $Revision$, $Date$
- */
-/**
- * DOCUMENT ME!
- *
- * @version  $Revision$, $Date$
- */
-class SubPNode extends PText {
-
-    //~ Instance fields --------------------------------------------------------
-
-    PNode parent;
-
-    //~ Constructors -----------------------------------------------------------
-
-    /**
-     * Creates a new SubPNode object.
-     *
-     * @param  parent  DOCUMENT ME!
-     */
-    public SubPNode(final PNode parent) {
-        // super("/Users/thorsten/tmp/printer-empty.png");
-        super("1");
-        this.parent = parent;
-        final PBounds pb = new PBounds(parent.getGlobalBounds().getCenter2D(), 0, 0);
-        this.setBounds(deriveBoundsFromParent());
-        this.setPaint(Color.RED);
-    }
-
-    //~ Methods ----------------------------------------------------------------
-
-    @Override
-    protected void parentBoundsChanged() {
-        super.parentBoundsChanged();
-        this.setBounds(deriveBoundsFromParent());
-    }
 
     /**
      * DOCUMENT ME!
      *
-     * @return  DOCUMENT ME!
+     * @version  $Revision$, $Date$
      */
-    protected PBounds deriveBoundsFromParent() {
-        final Point2D p = parent.getGlobalBounds().getCenter2D();
-        final PBounds local = getBounds();
-        final double x = p.getX(); // - (local.width / 2.0);
-        final double y = p.getY(); // - (local.height / 2.0);
+    /**
+     * DOCUMENT ME!
+     *
+     * @version  $Revision$, $Date$
+     */
+    class SubPText extends PText implements PropertyChangeListener {
 
-        final PBounds pb = new PBounds(x, y, local.width, local.height);
-        return pb;
+        //~ Instance fields ----------------------------------------------------
+
+        PNode parent;
+
+        //~ Constructors -------------------------------------------------------
+
+        /**
+         * Creates a new SubPNode object.
+         *
+         * @param  parent  DOCUMENT ME!
+         */
+        public SubPText(final PNode parent) {
+            // super("/Users/thorsten/tmp/printer-empty.png");
+            super();
+            this.parent = parent;
+            setText(getPTFString());
+            this.setPaint(Color.RED);
+            parent.addPropertyChangeListener(this);
+        }
+
+        //~ Methods ------------------------------------------------------------
+
+        @Override
+        public void propertyChange(final PropertyChangeEvent evt) {
+            setText(getPTFString());
+            this.setBounds(parent.getGlobalBounds());
+            final double s = CismapBroker.getInstance().getMappingComponent().getCamera().getViewScale();
+            setScale(1.0 / s);
+        }
+
+        /**
+         * DOCUMENT ME!
+         *
+         * @return  DOCUMENT ME!
+         */
+        public String getPTFString() {
+            final String s = "Template: " + PrintTemplateFeature.this.template.toString() + "\n"
+                        + "Maßstab: " + PrintTemplateFeature.this.scale.getText() + "\n"
+                        + "Auflösung:" + PrintTemplateFeature.this.resolution.toString();
+            return s;
+        }
     }
 }
