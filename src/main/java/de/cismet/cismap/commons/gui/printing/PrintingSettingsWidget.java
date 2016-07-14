@@ -14,6 +14,8 @@ package de.cismet.cismap.commons.gui.printing;
 
 import org.jdom.Element;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
@@ -22,7 +24,6 @@ import javax.swing.DefaultComboBoxModel;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
-import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintingTemplatePreviewListener;
 
 import de.cismet.tools.configuration.Configurable;
 
@@ -667,5 +668,61 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     public boolean isChooseFileName() {
         return chooseFileName;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Collection<Scale> getScales() {
+        return new ArrayList<Scale>(scales);
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Collection<Template> getTemplates() {
+        return new ArrayList<Template>(templates);
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public Collection<Resolution> getResolutions() {
+        return new ArrayList<Resolution>(resolutions);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getTemplateString() {
+        return org.openide.util.NbBundle.getMessage(
+                PrintingSettingsWidget.class,
+                "PrintingSettingsWidget.jLabel7.text");
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getScaleString() {
+        return org.openide.util.NbBundle.getMessage(
+                PrintingSettingsWidget.class,
+                "PrintingSettingsWidget.jLabel8.text");
+    }
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getResolutionString() {
+        return org.openide.util.NbBundle.getMessage(
+                PrintingSettingsWidget.class,
+                "PrintingSettingsWidget.jLabel9.text");
     }
 }
