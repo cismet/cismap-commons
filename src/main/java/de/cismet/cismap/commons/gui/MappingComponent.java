@@ -979,6 +979,18 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
     }
 
     /**
+     * backward compatibility function.
+     *
+     * @param       ignoredHandlerString  DOCUMENT ME!
+     *
+     * @deprecated  DOCUMENT ME!
+     */
+
+    public void showPrintingSettingsDialog(final String ignoredHandlerString) {
+        showPrintingSettingsDialog();
+    }
+
+    /**
      * Getter for property interactionMode.
      *
      * @return  Value of property interactionMode.
