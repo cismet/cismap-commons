@@ -1709,7 +1709,7 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             pf.setPivotPoint(allBounds.getCenter2D());
             mid = allBounds.getCenter2D();
         }
-        if (!(getFeature() instanceof LockedRotatingPivotRequest)) {
+        if (!(getFeature() instanceof RequestForRotatingPivotLock)) {
             pivotHandle = new PivotPHandle(this, mid);
             pivotHandle.setPaint(new Color(0f, 0f, 0f, 0.6f));
             handleLayer.addChild(pivotHandle);

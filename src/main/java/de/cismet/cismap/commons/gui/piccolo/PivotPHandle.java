@@ -20,9 +20,9 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
-import de.cismet.cismap.commons.features.LockedRotatingPivotRequest;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.SimpleMoveListener;
+import de.cismet.cismap.commons.features.RequestForRotatingPivotLock;
 
 /**
  * DOCUMENT ME!
@@ -76,7 +76,7 @@ public class PivotPHandle extends PHandle {
 
     @Override
     public void dragHandle(final PDimension aLocalDimension, final PInputEvent aEvent) {
-        if (!((pfeature != null) && (pfeature.getFeature() instanceof LockedRotatingPivotRequest))) {
+        if (!((pfeature != null) && (pfeature.getFeature() instanceof RequestForRotatingPivotLock))) {
             final double scale = pfeature.getViewer().getCamera().getViewScale();
             final SimpleMoveListener moveListener = (SimpleMoveListener)pfeature.getViewer()
                         .getInputListener(MappingComponent.MOTION);
@@ -94,7 +94,7 @@ public class PivotPHandle extends PHandle {
 
     @Override
     public void endHandleDrag(final java.awt.geom.Point2D aLocalPoint, final PInputEvent aEvent) {
-        if (!((pfeature != null) && (pfeature.getFeature() instanceof LockedRotatingPivotRequest))) {
+        if (!((pfeature != null) && (pfeature.getFeature() instanceof RequestForRotatingPivotLock))) {
             if (pfeature.getViewer().getFeatureCollection() instanceof DefaultFeatureCollection) {
                 final Collection selArr = pfeature.getViewer().getFeatureCollection().getSelectedFeatures();
                 for (final Object o : selArr) {
