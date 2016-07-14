@@ -1,12 +1,10 @@
-/**
- * *************************************************
- *
- * cismet GmbH, Saarbruecken, Germany
- *
- *              ... and it just works.
- *
- ***************************************************
- */
+/***************************************************
+*
+* cismet GmbH, Saarbruecken, Germany
+*
+*              ... and it just works.
+*
+****************************************************/
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -78,19 +76,20 @@ import de.cismet.tools.gui.StaticSwingTools;
 /**
  * DOCUMENT ME!
  *
- * @author thorsten
- * @version $Revision$, $Date$
+ * @author   thorsten
+ * @version  $Revision$, $Date$
  */
 public class PrintTemplateFeature extends DefaultStyledFeature implements XStyledFeature,
-        ChildNodesProvider,
-        PreventNamingDuplicates,
-        RequestForRotatingPivotLock,
-        RequestForUnaddableHandles,
-        RequestForUnmoveableHandles,
-        RequestForUnremovableHandles,
-        RequestForNonreflectingFeature {
+    ChildNodesProvider,
+    PreventNamingDuplicates,
+    RequestForRotatingPivotLock,
+    RequestForUnaddableHandles,
+    RequestForUnmoveableHandles,
+    RequestForUnremovableHandles,
+    RequestForNonreflectingFeature {
 
     //~ Static fields/initializers ---------------------------------------------
+
     public static final double DEFAULT_JAVA_RESOLUTION_IN_DPI = 72d;
     public static final double MILLIMETER_OF_AN_INCH = 25.4d;
     public static final double INCH_OF_A_MILLIMETER = 0.039d;
@@ -98,18 +97,21 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     static final Color TEXTCOLOR = new Color(11, 72, 107);
 
     //~ Enums ------------------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      *
-     * @version $Revision$, $Date$
+     * @version  $Revision$, $Date$
      */
     public enum Side {
 
         //~ Enum constants -----------------------------------------------------
+
         SOUTH, NORTH, WEST, EAST
     }
 
     //~ Instance fields --------------------------------------------------------
+
     Template template;
     Resolution resolution;
     Scale scale;
@@ -122,19 +124,20 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     private Future<Image> futureMapImage;
 
     //~ Constructors -----------------------------------------------------------
+
     /**
      * Creates a new PrintTemplateFeature object.
      *
-     * @param ptfTemplate DOCUMENT ME!
-     * @param side DOCUMENT ME!
+     * @param  ptfTemplate  DOCUMENT ME!
+     * @param  side         DOCUMENT ME!
      */
     public PrintTemplateFeature(final PrintTemplateFeature ptfTemplate, final Side side) {
         this(ptfTemplate.template, ptfTemplate.resolution, ptfTemplate.scale, ptfTemplate.mappingComponent);
         final Coordinate[] translationSide = ptfTemplate.getSideLineCoords(getTranslationSide(side));
         final AffineTransformation translationAT = AffineTransformation.translationInstance(translationSide[1].x
-                - translationSide[0].x,
+                        - translationSide[0].x,
                 translationSide[1].y
-                - translationSide[0].y);
+                        - translationSide[0].y);
         setGeometry(translationAT.transform(ptfTemplate.getGeometry()));
         // setGeometry(ptfTemplate.getGeometry().buffer(0));
     }
@@ -142,10 +145,10 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * Creates a new PrintTemplateFeature object.
      *
-     * @param template DOCUMENT ME!
-     * @param resolution DOCUMENT ME!
-     * @param scale DOCUMENT ME
-     * @param mappingComponent DOCUMENT ME!
+     * @param  template          DOCUMENT ME!
+     * @param  resolution        DOCUMENT ME!
+     * @param  scale             DOCUMENT ME
+     * @param  mappingComponent  DOCUMENT ME!
      */
     public PrintTemplateFeature(final Template template,
             final Resolution resolution,
@@ -156,14 +159,20 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         this.resolution = resolution;
         this.scale = scale;
         final BoundingBox boundingBoxToCalculateTheLocationOfTHeTemplate = CismapBroker.getInstance()
-                .getMappingComponent()
-                .getCurrentBoundingBoxFromCamera();
+                    .getMappingComponent()
+                    .getCurrentBoundingBoxFromCamera();
         final double dimensionWidth = mappingComponent.getCamera().getViewBounds().getWidth();
         final double dimensionHeight = mappingComponent.getCamera().getViewBounds().getHeight();
         init(boundingBoxToCalculateTheLocationOfTHeTemplate, dimensionWidth, dimensionHeight);
     }
 
     //~ Methods ----------------------------------------------------------------
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  boundingBoxToCalculateTheLocationOfTHeTemplate  DOCUMENT ME!
+     */
     public final void init(final BoundingBox boundingBoxToCalculateTheLocationOfTHeTemplate) {
         init(boundingBoxToCalculateTheLocationOfTHeTemplate, null, null);
     }
@@ -171,26 +180,25 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param boundingBoxToCalculateTheLocationOfTHeTemplate DOCUMENT ME!
-     * @param dimensionWidth DOCUMENT ME!
-     * @param dimensionHeight DOCUMENT ME!
+     * @param  boundingBoxToCalculateTheLocationOfTHeTemplate  DOCUMENT ME!
+     * @param  dimensionWidth                                  DOCUMENT ME!
+     * @param  dimensionHeight                                 DOCUMENT ME!
      */
     public final void init(final BoundingBox boundingBoxToCalculateTheLocationOfTHeTemplate,
             Double dimensionWidth,
             Double dimensionHeight) {
-
-        if (dimensionHeight == null && template != null) {
-            dimensionHeight = (double) template.getMapHeight();
+        if ((dimensionHeight == null) && (template != null)) {
+            dimensionHeight = (double)template.getMapHeight();
         }
-        if (dimensionWidth == null && template != null) {
-            dimensionWidth = (double) template.getMapWidth();
+        if ((dimensionWidth == null) && (template != null)) {
+            dimensionWidth = (double)template.getMapWidth();
         }
 
         children = new ArrayList<>();
         final int placeholderWidth = template.getMapWidth();
         final int placeholderHeight = template.getMapHeight();
         int scaleDenominator = scale.getDenominator();
-        final double widthToHeightRatio = (double) placeholderWidth / (double) placeholderHeight;
+        final double widthToHeightRatio = (double)placeholderWidth / (double)placeholderHeight;
 
         double realWorldHeight = 0d;
         double realWorldWidth = 0d;
@@ -200,15 +208,15 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             final String s = JOptionPane.showInputDialog(
                     StaticSwingTools.getParentFrame(mappingComponent),
                     org.openide.util.NbBundle.getMessage(
-                            PrintTemplateFeature.class,
-                            "PrintingFrameListener.init(double,int,int,String).message"),
+                        PrintTemplateFeature.class,
+                        "PrintingFrameListener.init(double,int,int,String).message"),
                     ""); // NOI18N
             try {
                 scaleDenominator = Integer.parseInt(s);
             } catch (Exception skip) {
                 log.warn(
-                        "Could not determine the given scale denominator. It will be set to '0.0' to enable free scaling.",
-                        skip);
+                    "Could not determine the given scale denominator. It will be set to '0.0' to enable free scaling.",
+                    skip);
                 scaleDenominator = 0;
             }
         }
@@ -222,13 +230,13 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             } else {
                 // width is the critical value and must be shrinked. in german: bestimmer ;-)
                 realWorldWidth = dimensionWidth * 0.75;
-                realWorldHeight = (double) realWorldWidth / (double) widthToHeightRatio;
+                realWorldHeight = (double)realWorldWidth / (double)widthToHeightRatio;
             }
         } else {
             realWorldWidth = placeholderWidth / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                    / MILLIMETER_OF_A_METER * scaleDenominator;
+                        / MILLIMETER_OF_A_METER * scaleDenominator;
             realWorldHeight = placeholderHeight / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                    / MILLIMETER_OF_A_METER * scaleDenominator;
+                        / MILLIMETER_OF_A_METER * scaleDenominator;
 
             if (!mappingComponent.getMappingModel().getSrs().isMetric()) {
                 try {
@@ -241,9 +249,9 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
                     final XBoundingBox metricBbox = new XBoundingBox(point.getX(),
                             point.getY(),
                             point.getX()
-                            + 1,
+                                    + 1,
                             point.getY()
-                            + 1,
+                                    + 1,
                             CrsTransformer.createCrsFromSrid(point.getSRID()),
                             true);
                     final CrsTransformer geoTransformer = new CrsTransformer(srs);
@@ -256,9 +264,9 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             }
         }
         final double centerX = (boundingBoxToCalculateTheLocationOfTHeTemplate.getX1()
-                + boundingBoxToCalculateTheLocationOfTHeTemplate.getX2()) / 2;
+                        + boundingBoxToCalculateTheLocationOfTHeTemplate.getX2()) / 2;
         final double centerY = (boundingBoxToCalculateTheLocationOfTHeTemplate.getY1()
-                + boundingBoxToCalculateTheLocationOfTHeTemplate.getY2()) / 2;
+                        + boundingBoxToCalculateTheLocationOfTHeTemplate.getY2()) / 2;
         final double halfRealWorldWidth = realWorldWidth / 2d;
         final double halfRealWorldHeigth = realWorldHeight / 2d;
         // build geometry for sheet with center in origin
@@ -275,7 +283,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 
         // translate to target landparcel position
         final AffineTransformation translateToDestination = AffineTransformation.translationInstance(centerX, centerY);
-        outerRing = (LinearRing) translateToDestination.transform(outerRing);
+        outerRing = (LinearRing)translateToDestination.transform(outerRing);
         this.setGeometry(getGF().createPolygon(outerRing, innerRings));
         setCanBeSelected(true);
         setEditable(true);
@@ -284,9 +292,9 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param side DOCUMENT ME!
+     * @param   side  DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private Side getTranslationSide(final Side side) {
         switch (side) {
@@ -314,18 +322,18 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private GeometryFactory getGF() {
         return new GeometryFactory(new PrecisionModel(
-                PrecisionModel.FLOATING),
+                    PrecisionModel.FLOATING),
                 CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getName()));
     }
 
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     public Point getTemplateCenter() {
         return getGeometry().getCentroid();
@@ -334,7 +342,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     public Template getTemplate() {
         return template;
@@ -343,7 +351,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param template DOCUMENT ME!
+     * @param  template  DOCUMENT ME!
      */
     public void setTemplate(final Template template) {
         this.template = template;
@@ -352,7 +360,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     public Resolution getResolution() {
         return resolution;
@@ -361,7 +369,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param resolution DOCUMENT ME!
+     * @param  resolution  DOCUMENT ME!
      */
     public void setResolution(final Resolution resolution) {
         this.resolution = resolution;
@@ -370,7 +378,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     public Scale getScale() {
         return scale;
@@ -379,7 +387,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     public long getRealScaleDenominator() {
         final Coordinate[] corrds = getGeometry().getCoordinates();
@@ -390,7 +398,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         final double realwidth = Math.sqrt(((p0.x - p1.x) * (p0.x - p1.x)) + ((p0.y - p1.y) * (p0.y - p1.y)));
 
         final double paperwidth = template.getMapWidth() / DEFAULT_JAVA_RESOLUTION_IN_DPI * MILLIMETER_OF_AN_INCH
-                / MILLIMETER_OF_A_METER;
+                    / MILLIMETER_OF_A_METER;
 
         final double denom = realwidth / paperwidth;
 
@@ -400,7 +408,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param scale DOCUMENT ME!
+     * @param  scale  DOCUMENT ME!
      */
     public void setScale(final Scale scale) {
         this.scale = scale;
@@ -409,7 +417,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     public double getRotationAngle() {
         if (getGeometry() != null) {
@@ -460,7 +468,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     public Future<Image> getFutureMapImage() {
         return futureMapImage;
@@ -469,7 +477,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param futureMapImage DOCUMENT ME!
+     * @param  futureMapImage  DOCUMENT ME!
      */
     public void setFutureMapImage(final Future<Image> futureMapImage) {
         this.futureMapImage = futureMapImage;
@@ -512,11 +520,11 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param parent DOCUMENT ME!
+     * @param     parent  DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return    DOCUMENT ME!
      *
-     * @Override DOCUMENT ME!
+     * @Override  DOCUMENT ME!
      */
     @Override
     public Collection<PNode> provideChildren(final PFeature parent) {
@@ -529,7 +537,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param parent DOCUMENT ME!
+     * @param  parent  DOCUMENT ME!
      */
     private void initPNodeChildren(final PFeature parent) {
         final PTFDerivedCommandArea commands = new PTFDerivedCommandArea(parent);
@@ -588,10 +596,10 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param indexA DOCUMENT ME!
-     * @param indexB DOCUMENT ME!
+     * @param   indexA  DOCUMENT ME!
+     * @param   indexB  DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private Geometry getLineFromCoordsAt(final int indexA, final int indexB) {
         return getGF().createLineString(getCoordsArrayFromGeometryCoordsAt(indexA, indexB));
@@ -600,10 +608,10 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param indexA DOCUMENT ME!
-     * @param indexB DOCUMENT ME!
+     * @param   indexA  DOCUMENT ME!
+     * @param   indexB  DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     private Coordinate[] getCoordsArrayFromGeometryCoordsAt(final int indexA, final int indexB) {
         final Coordinate[] cs = getGeometry().getCoordinates();
@@ -617,11 +625,11 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @param side DOCUMENT ME!
+     * @param   side  DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      *
-     * @throws RuntimeException DOCUMENT ME!
+     * @throws  RuntimeException  DOCUMENT ME!
      */
     private Coordinate[] getSideLineCoords(final Side side) {
         switch (side) {
@@ -644,12 +652,11 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     }
 
     /**
-     * The Rectangle of the PrinTemplateFeature is build as a Coordinate Array
-     * with these indices.
+     * The Rectangle of the PrinTemplateFeature is build as a Coordinate Array with these indices.
      *
-     * @param side The Side of the Rectangle
+     * @param   side  The Side of the Rectangle
      *
-     * @return THe Linestring of the side
+     * @return  THe Linestring of the side
      */
     protected Geometry getSideLine(final Side side) {
         return getGF().createLineString(getSideLineCoords(side));
@@ -658,7 +665,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     protected double getShortSideLength() {
         final Geometry southLine = getSideLine(Side.SOUTH);
@@ -673,7 +680,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @return DOCUMENT ME!
+     * @return  DOCUMENT ME!
      */
     protected double getLongSideLength() {
         final Geometry southLine = getSideLine(Side.SOUTH);
@@ -686,36 +693,40 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     }
 
     //~ Inner Classes ----------------------------------------------------------
+
     /**
      * DOCUMENT ME!
      *
-     * @version $Revision$, $Date$
+     * @version  $Revision$, $Date$
      */
     public class PTFDerivedCommandArea extends DerivedCommandArea {
 
         //~ Instance fields ----------------------------------------------------
+
         private final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(this.getClass());
 
         //~ Constructors -------------------------------------------------------
+
         /**
          * Creates a new DerivedCommandArea object.
          *
-         * @param parent DOCUMENT ME!
+         * @param  parent  DOCUMENT ME!
          */
         public PTFDerivedCommandArea(final PFeature parent) {
             super(parent, new DeriveRule() {
 
-                @Override
-                public Geometry derive(final Geometry in) {
-                    return getGeometry().buffer(-1 * 0.1 * getShortSideLength());
-                }
-            });
+                    @Override
+                    public Geometry derive(final Geometry in) {
+                        return getGeometry().buffer(-1 * 0.1 * getShortSideLength());
+                    }
+                });
             setPaint(Color.white);
             setStroke(null);
             setTransparency(0.3f);
         }
 
         //~ Methods ------------------------------------------------------------
+
         @Override
         public void mouseClicked(final PInputEvent event) {
             super.mouseClicked(event);
@@ -729,57 +740,60 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
                 for (final Template t : settings.getTemplates()) {
                     menTemplates.add(new JMenuItem(new AbstractAction(t.getTitle()) {
 
-                        @Override
-                        public void actionPerformed(final ActionEvent e) {
-                            mappingComponent.getFeatureCollection().removeFeature(PrintTemplateFeature.this);
-                            setTemplate(t);
-                            addAndRefresh();
-                        }
-                    }));
+                                @Override
+                                public void actionPerformed(final ActionEvent e) {
+                                    mappingComponent.getFeatureCollection().removeFeature(PrintTemplateFeature.this);
+                                    setTemplate(t);
+                                    addAndRefresh();
+                                }
+                            }));
                 }
                 changeMenu.add(menTemplates);
 
                 final JMenu menScales = new JMenu(settings.getScaleString());
                 for (final Scale s : settings.getScales()) {
                     menScales.add(new JMenuItem(new AbstractAction(s.getText()) {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            mappingComponent.getFeatureCollection().removeFeature(PrintTemplateFeature.this);
-                            PrintTemplateFeature.this.setScale(s);
-                            addAndRefresh();
-                        }
 
-                    }));
+                                @Override
+                                public void actionPerformed(final ActionEvent e) {
+                                    mappingComponent.getFeatureCollection().removeFeature(PrintTemplateFeature.this);
+                                    PrintTemplateFeature.this.setScale(s);
+                                    addAndRefresh();
+                                }
+                            }));
                 }
                 changeMenu.add(menScales);
 
                 final JMenu menResolution = new JMenu(settings.getResolutionString());
                 for (final Resolution r : settings.getResolutions()) {
                     menResolution.add(new JMenuItem(new AbstractAction(r.getText()) {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            mappingComponent.getFeatureCollection().removeFeature(PrintTemplateFeature.this);
-                            setResolution(r);
-                            addAndRefresh();
-                        }
-                    }));
 
+                                @Override
+                                public void actionPerformed(final ActionEvent e) {
+                                    mappingComponent.getFeatureCollection().removeFeature(PrintTemplateFeature.this);
+                                    setResolution(r);
+                                    addAndRefresh();
+                                }
+                            }));
                 }
                 changeMenu.add(menResolution);
 
                 changeMenu.show(
-                        mappingComponent,
-                        (int) event.getCanvasPosition().getX(),
-                        (int) event.getCanvasPosition().getY());
-
+                    mappingComponent,
+                    (int)event.getCanvasPosition().getX(),
+                    (int)event.getCanvasPosition().getY());
             }
         }
 
+        /**
+         * DOCUMENT ME!
+         */
         private void addAndRefresh() {
-            final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection) mappingComponent.getFeatureCollection();
+            final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
+                mappingComponent.getFeatureCollection();
 
             init(new XBoundingBox(getGeometry()));
-            //---
+            // ---
             mapFeatureCol.holdFeature(PrintTemplateFeature.this);
             mapFeatureCol.addFeature(PrintTemplateFeature.this);
             mappingComponent.adjustMapForPrintingTemplates();
@@ -798,22 +812,22 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         @Override
         public void mousePressed(final PInputEvent event) {
             super.mousePressed(event);
-            ((PBasicInputEventHandler) mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mousePressed(
-                    event);
+            ((PBasicInputEventHandler)mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mousePressed(
+                event);
         }
 
         @Override
         public void mouseDragged(final PInputEvent event) {
             super.mouseDragged(event);
-            ((PBasicInputEventHandler) mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseDragged(
-                    event);
+            ((PBasicInputEventHandler)mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseDragged(
+                event);
         }
 
         @Override
         public void mouseReleased(final PInputEvent event) {
             super.mouseReleased(event);
-            ((PBasicInputEventHandler) mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseReleased(
-                    event);
+            ((PBasicInputEventHandler)mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseReleased(
+                event);
             mappingComponent.ensureVisibilityOfPrintingTemplates();
         }
 
@@ -821,23 +835,23 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         public void mouseMoved(final PInputEvent event) {
             super.mouseMoved(event);
 //                mappingComponent.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            ((PBasicInputEventHandler) mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseMoved(
-                    event);
+            ((PBasicInputEventHandler)mappingComponent.getInputListener(MappingComponent.MOVE_POLYGON)).mouseMoved(
+                event);
         }
 
         @Override
         public void mouseWheelRotated(final PInputEvent event) {
             super.mouseWheelRotatedByBlock(event);
-            final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[]{PFeature.class});
+            final Object o = PFeatureTools.getFirstValidObjectUnderPointer(event, new Class[] { PFeature.class });
             if (!(o instanceof PFeature)) {
                 return;
             }
-            final PFeature sel = (PFeature) o;
+            final PFeature sel = (PFeature)o;
 
             if (!(sel.getFeature() instanceof PrintTemplateFeature)) {
                 return;
             }
-            final PrintTemplateFeature ptf = (PrintTemplateFeature) sel.getFeature();
+            final PrintTemplateFeature ptf = (PrintTemplateFeature)sel.getFeature();
 
             if (ptf.getScale().getDenominator() == 0) {
                 if (log.isDebugEnabled()) {
@@ -856,8 +870,8 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         /**
          * DOCUMENT ME!
          *
-         * @param scale DOCUMENT ME!
-         * @param printingTemplate DOCUMENT ME!
+         * @param  scale             DOCUMENT ME!
+         * @param  printingTemplate  DOCUMENT ME!
          */
         private void zoom(final double scale, final PrintTemplateFeature printingTemplate) {
             final Point centroid = printingTemplate.getGeometry().getCentroid();
@@ -877,41 +891,43 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @version $Revision$, $Date$
+     * @version  $Revision$, $Date$
      */
     public class DerivedCloneArea extends DerivedCommandArea {
 
         //~ Instance fields ----------------------------------------------------
+
         private Side side;
 
         //~ Constructors -------------------------------------------------------
+
         /**
          * Creates a new DerivedCloneArea object.
          *
-         * @param parent DOCUMENT ME!
-         * @param side DOCUMENT ME!
+         * @param  parent  DOCUMENT ME!
+         * @param  side    DOCUMENT ME!
          */
         public DerivedCloneArea(final PFeature parent, final Side side) {
             super(parent, new DeriveRule() {
 
-                @Override
-                public Geometry derive(final Geometry in) {
-                    final Coordinate[] line = new Coordinate[2];
+                    @Override
+                    public Geometry derive(final Geometry in) {
+                        final Coordinate[] line = new Coordinate[2];
 
-                    line[0] = RectangleMath.getPointPerpendicular(
-                            getSideLineCoords(side),
-                            RectangleMath.getPointFromStartByFraction(getSideLineCoords(side), 0.25),
-                            0.04
-                            * getShortSideLength());
-                    line[1] = RectangleMath.getPointPerpendicular(
-                            getSideLineCoords(side),
-                            RectangleMath.getPointFromStartByFraction(getSideLineCoords(side), 0.75),
-                            0.04
-                            * getShortSideLength());
+                        line[0] = RectangleMath.getPointPerpendicular(
+                                getSideLineCoords(side),
+                                RectangleMath.getPointFromStartByFraction(getSideLineCoords(side), 0.25),
+                                0.04
+                                        * getShortSideLength());
+                        line[1] = RectangleMath.getPointPerpendicular(
+                                getSideLineCoords(side),
+                                RectangleMath.getPointFromStartByFraction(getSideLineCoords(side), 0.75),
+                                0.04
+                                        * getShortSideLength());
 
-                    return getGF().createLineString(line).buffer(0.02 * getShortSideLength());
-                }
-            });
+                        return getGF().createLineString(line).buffer(0.02 * getShortSideLength());
+                    }
+                });
             this.side = side;
             setPaint(Color.white);
             setStroke(null);
@@ -919,15 +935,18 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         }
 
         //~ Methods ------------------------------------------------------------
+
         @Override
         public void mouseClicked(final PInputEvent event) {
             super.mouseClicked(event);
             if ((event.getClickCount() == 1) && event.isLeftMouseButton()) {
                 if (event.getPickedNode() instanceof PrintTemplateFeature.DerivedCloneArea) {
-                    final PrintTemplateFeature.DerivedCloneArea dca = (PrintTemplateFeature.DerivedCloneArea) event.getPickedNode();
-                    final PrintTemplateFeature ptf = (PrintTemplateFeature) dca.parent.getFeature();
+                    final PrintTemplateFeature.DerivedCloneArea dca = (PrintTemplateFeature.DerivedCloneArea)
+                        event.getPickedNode();
+                    final PrintTemplateFeature ptf = (PrintTemplateFeature)dca.parent.getFeature();
                     final PrintTemplateFeature newPTF = new PrintTemplateFeature(ptf, dca.getSide());
-                    final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection) mappingComponent.getFeatureCollection();
+                    final DefaultFeatureCollection mapFeatureCol = (DefaultFeatureCollection)
+                        mappingComponent.getFeatureCollection();
                     mapFeatureCol.holdFeature(newPTF);
                     mapFeatureCol.addFeature(newPTF);
                     mappingComponent.adjustMapForPrintingTemplates();
@@ -948,7 +967,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         /**
          * DOCUMENT ME!
          *
-         * @return DOCUMENT ME!
+         * @return  DOCUMENT ME!
          */
         public Side getSide() {
             return side;
@@ -958,23 +977,25 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     /**
      * DOCUMENT ME!
      *
-     * @version $Revision$, $Date$
+     * @version  $Revision$, $Date$
      */
     /**
      * DOCUMENT ME!
      *
-     * @version $Revision$, $Date$
+     * @version  $Revision$, $Date$
      */
     class SubPText extends PText implements PropertyChangeListener {
 
         //~ Instance fields ----------------------------------------------------
+
         PNode parentNode;
 
         //~ Constructors -------------------------------------------------------
+
         /**
          * Creates a new SubPNode object.
          *
-         * @param parent DOCUMENT ME!
+         * @param  parent  DOCUMENT ME!
          */
         public SubPText(final PNode parent) {
             // super("/Users/thorsten/tmp/printer-empty.png");
@@ -987,25 +1008,29 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
         }
 
         //~ Methods ------------------------------------------------------------
+
         @Override
         public void propertyChange(final PropertyChangeEvent evt) {
             setText(getPTFString());
             this.centerFullBoundsOnPoint(parentNode.getGlobalBounds().getCenterX(),
-                    parentNode.getGlobalBounds().getCenterY());
+                parentNode.getGlobalBounds().getCenterY());
 
-            setScale(0.9 / 1000 *  PrintTemplateFeature.this.getRealScaleDenominator()); // Heuristic / use realsScaleDenominator because of the "free" Option
+            setScale(0.9 / 1000 * PrintTemplateFeature.this.getRealScaleDenominator());    // Heuristic / use
+                                                                                           // realsScaleDenominator
+                                                                                           // because of the "free"
+                                                                                           // Option
             setRotation(Math.toRadians(PrintTemplateFeature.this.getRotationAngle()));
         }
 
         /**
          * DOCUMENT ME!
          *
-         * @return DOCUMENT ME!
+         * @return  DOCUMENT ME!
          */
         public String getPTFString() {
             final String s = PrintTemplateFeature.this.template.getShortname() + "\n\n\n\n"
-                    + PrintTemplateFeature.this.scale.getText() + "\n\n\n\n"
-                    + "Auflösung:" + PrintTemplateFeature.this.resolution.getResolution() + " dpi";
+                        + PrintTemplateFeature.this.scale.getText() + "\n\n\n\n"
+                        + "Auflösung:" + PrintTemplateFeature.this.resolution.getResolution() + " dpi";
             return s;
         }
     }
