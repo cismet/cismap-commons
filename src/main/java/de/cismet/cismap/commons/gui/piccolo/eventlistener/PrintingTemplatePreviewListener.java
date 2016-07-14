@@ -198,12 +198,6 @@ public class PrintingTemplatePreviewListener extends FeatureMoveListener {
         CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(false);
         mapFeatureCol.holdFeature(printTemplateStyledFeature);
         mapFeatureCol.addFeature(printTemplateStyledFeature);
-        final PFeature printPFeature = mappingComponent.getPFeatureHM().get(printTemplateStyledFeature);
-//        final String fn = "/Users/thorsten/Desktop/pdfa4h.png";///Users/thorsten/desktmp/printer-empty.png";
-//        final PImage pii = new BackgroundPImage(fn);
-//        printPFeature.addChild(pii);
-        // mappingComponent.getPrintingFrameLayer().removeAllChildren();
-
         mappingComponent.zoomToAFeatureCollection(CismapBroker.getInstance().getPrintFeatureCollection(), false, false);
         mapFeatureCol.select(printTemplateStyledFeature);
         mappingComponent.setHandleInteractionMode(MappingComponent.ROTATE_POLYGON);
