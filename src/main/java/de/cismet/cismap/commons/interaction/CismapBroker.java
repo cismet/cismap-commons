@@ -1113,6 +1113,4 @@ public class CismapBroker {
     public void setMultiFeaturePopupMenuEnabled(final boolean multiFeaturePopupMenuEnabled) {
         this.multiFeaturePopupMenuEnabled = multiFeaturePopupMenuEnabled;
     }
-
-   
 }

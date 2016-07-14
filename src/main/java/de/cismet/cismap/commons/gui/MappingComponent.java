@@ -635,8 +635,7 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
         }
     }
 
-    
-     /**
+    /**
      * DOCUMENT ME!
      *
      * @return  DOCUMENT ME!
@@ -649,8 +648,8 @@ public final class MappingComponent extends PSwingCanvas implements MappingModel
             }
         }
         return pfc;
-    } 
-    
+    }
+
     /**
      * DOCUMENT ME!
      *
