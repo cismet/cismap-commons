@@ -776,6 +776,9 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                     final ArrayList<Feature> ptfs = new ArrayList<Feature>(mappingComponent
                                     .getPrintFeatureCollection());
                     mappingComponent.getFeatureCollection().removeFeatures(ptfs);
+                    CismapBroker.getInstance()
+                            .setCheckForOverlappingGeometriesAfterFeatureRotation(
+                                mappingComponent.getPrintingSettingsDialog().getOldOverlappingCheckEnabled());
                 }
             };
         CismetThreadPool.execute(t);

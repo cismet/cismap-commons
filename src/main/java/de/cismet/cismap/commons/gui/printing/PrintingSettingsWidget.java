@@ -24,6 +24,7 @@ import javax.swing.DefaultComboBoxModel;
 import de.cismet.cismap.commons.features.DefaultFeatureCollection;
 import de.cismet.cismap.commons.gui.MappingComponent;
 import de.cismet.cismap.commons.gui.piccolo.eventlistener.PrintTemplateFeature;
+import de.cismet.cismap.commons.interaction.CismapBroker;
 
 import de.cismet.tools.configuration.Configurable;
 
@@ -51,6 +52,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     private Vector<Action> actions = new Vector<Action>();
     private MappingComponent mappingComponent = null;
     private boolean chooseFileName = false;
+    private boolean oldOverlappingCheck = true;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox cboAction;
@@ -90,6 +92,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
         initComponents();
         getRootPane().setDefaultButton(cmdOk);
         this.mappingComponent = mappingComponent;
+        oldOverlappingCheck = CismapBroker.getInstance().isCheckForOverlappingGeometriesAfterFeatureRotation();
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -418,6 +421,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
             mapFeatureCol.select(printTemplateStyledFeature);
             mappingComponent.setHandleInteractionMode(MappingComponent.ROTATE_POLYGON);
             mappingComponent.showHandles(false);
+            CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(false);
             dispose();
         } catch (Exception e) {
             log.error("Fehler beim Verarbeiten der Druckeinstellungen", e);   // NOI18N
@@ -429,6 +433,9 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      * @param  evt  DOCUMENT ME!
      */
     private void cmdCancelActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cmdCancelActionPerformed
+        if (mappingComponent.getPrintFeatureCollection().size() == 0) {
+            CismapBroker.getInstance().setCheckForOverlappingGeometriesAfterFeatureRotation(oldOverlappingCheck);
+        }
         dispose();
     }                                                                             //GEN-LAST:event_cmdCancelActionPerformed
     /**
@@ -438,6 +445,15 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
      */
     private void cboScalesActionPerformed(final java.awt.event.ActionEvent evt) { //GEN-FIRST:event_cboScalesActionPerformed
     }                                                                             //GEN-LAST:event_cboScalesActionPerformed
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public boolean getOldOverlappingCheckEnabled() {
+        return oldOverlappingCheck;
+    }
 
     /**
      * DOCUMENT ME!
@@ -678,6 +694,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     public Collection<Scale> getScales() {
         return new ArrayList<Scale>(scales);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -686,6 +703,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
     public Collection<Template> getTemplates() {
         return new ArrayList<Template>(templates);
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -705,6 +723,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 PrintingSettingsWidget.class,
                 "PrintingSettingsWidget.jLabel7.text");
     }
+
     /**
      * DOCUMENT ME!
      *
@@ -715,6 +734,7 @@ public class PrintingSettingsWidget extends javax.swing.JDialog implements Confi
                 PrintingSettingsWidget.class,
                 "PrintingSettingsWidget.jLabel8.text");
     }
+
     /**
      * DOCUMENT ME!
      *
