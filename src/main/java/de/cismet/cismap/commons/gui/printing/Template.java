@@ -36,6 +36,7 @@ public class Template {
     private String file = "";                                                        // NOI18N
     private String className = "";                                                   // NOI18N
     private String mapPlaceholder = "";                                              // NOI18N
+    private String northArrowPlaceholder = "northarrow";                             // NOI18N
     private int mapWidth = 0;
     private int mapHeight = 0;
     private String scaleDemoninatorPlaceholder = "";                                 // NOI18N
@@ -58,6 +59,10 @@ public class Template {
         file = template.getAttribute("file").getValue();                                               // NOI18N
         className = template.getAttribute("className").getValue();                                     // NOI18N
         mapPlaceholder = template.getAttribute("mapPlaceholder").getValue();                           // NOI18N
+        try {
+            mapPlaceholder = template.getAttribute("northArrowPlaceholder").getValue();                // NOI18N
+        } catch (Exception skip) {
+        }
         mapWidth = template.getAttribute("mapWidth").getIntValue();                                    // NOI18N
         mapHeight = template.getAttribute("mapHeight").getIntValue();                                  // NOI18N
         scaleDemoninatorPlaceholder = template.getAttribute("scaleDenominatorPlaceholder").getValue(); // NOI18N
@@ -100,6 +105,7 @@ public class Template {
         e.setAttribute("file", getFile());                                               // NOI18N
         e.setAttribute("className", getClassName());                                     // NOI18N
         e.setAttribute("mapPlaceholder", getMapPlaceholder());                           // NOI18N
+        e.setAttribute("northArrowPlaceholder", getMapPlaceholder());                    // NOI18N
         e.setAttribute("mapWidth", getMapWidth() + "");                                  // NOI18N
         e.setAttribute("mapHeight", getMapHeight() + "");                                // NOI18N
         e.setAttribute("scaleDenominatorPlaceholder", getScaleDemoninatorPlaceholder()); // NOI18N
@@ -117,6 +123,7 @@ public class Template {
                     && (((Template)obj).file.equals(file))
                     && (((Template)obj).getClassName().equals(getClassName()))
                     && (((Template)obj).mapPlaceholder.equals(mapPlaceholder))
+                    && (((Template)obj).northArrowPlaceholder.equals(northArrowPlaceholder))
                     && (((Template)obj).mapWidth == mapWidth)
                     && (((Template)obj).mapHeight == mapHeight)
                     && (((Template)obj).iconPath.equals(iconPath))
@@ -126,16 +133,35 @@ public class Template {
 
     @Override
     public int hashCode() {
-        int hash = 3;
-        hash = (41 * hash) + Objects.hashCode(this.title);
-        hash = (41 * hash) + Objects.hashCode(this.file);
-        hash = (41 * hash) + Objects.hashCode(this.mapPlaceholder);
-        hash = (41 * hash) + this.mapWidth;
-        hash = (41 * hash) + this.mapHeight;
-        hash = (41 * hash) + Objects.hashCode(this.scaleDemoninatorPlaceholder);
-        hash = (41 * hash) + Objects.hashCode(this.iconPath);
-        hash = (41 * hash) + Objects.hashCode(this.shortname);
+        int hash = 7;
+        hash = (67 * hash) + Objects.hashCode(this.title);
+        hash = (67 * hash) + Objects.hashCode(this.file);
+        hash = (67 * hash) + Objects.hashCode(this.mapPlaceholder);
+        hash = (67 * hash) + Objects.hashCode(this.northArrowPlaceholder);
+        hash = (67 * hash) + this.mapWidth;
+        hash = (67 * hash) + this.mapHeight;
+        hash = (67 * hash) + Objects.hashCode(this.scaleDemoninatorPlaceholder);
+        hash = (67 * hash) + Objects.hashCode(this.iconPath);
+        hash = (67 * hash) + Objects.hashCode(this.shortname);
         return hash;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public String getNorthArrowPlaceholder() {
+        return northArrowPlaceholder;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  northArrowPlaceholder  DOCUMENT ME!
+     */
+    public void setNorthArrowPlaceholder(final String northArrowPlaceholder) {
+        this.northArrowPlaceholder = northArrowPlaceholder;
     }
 
     /**

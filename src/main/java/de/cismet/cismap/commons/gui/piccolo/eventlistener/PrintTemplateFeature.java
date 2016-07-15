@@ -1015,10 +1015,10 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
             this.centerFullBoundsOnPoint(parentNode.getGlobalBounds().getCenterX(),
                 parentNode.getGlobalBounds().getCenterY());
 
-            setScale(0.9 / 1000 * PrintTemplateFeature.this.getRealScaleDenominator());    // Heuristic / use
-                                                                                           // realsScaleDenominator
-                                                                                           // because of the "free"
-                                                                                           // Option
+            setScale(0.9 / 1000 * PrintTemplateFeature.this.getRealScaleDenominator()); // Heuristic / use
+                                                                                        // realsScaleDenominator
+                                                                                        // because of the "free"
+                                                                                        // Option
             setRotation(Math.toRadians(PrintTemplateFeature.this.getRotationAngle()));
         }
 
@@ -1029,7 +1029,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
          */
         public String getPTFString() {
             final String s = PrintTemplateFeature.this.template.getShortname() + "\n\n\n"
-                        + "#" +PrintTemplateFeature.this.getNumber() + "\n\n\n" 
+                        + "#" + PrintTemplateFeature.this.getNumber() + "\n\n\n"
                         + PrintTemplateFeature.this.scale.getText() + "\n\n\n"
                         + "Auflösung:" + PrintTemplateFeature.this.resolution.getResolution() + " dpi";
             return s;

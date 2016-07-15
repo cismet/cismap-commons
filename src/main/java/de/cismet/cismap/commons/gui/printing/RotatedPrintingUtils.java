@@ -27,7 +27,7 @@ import de.cismet.cismap.commons.interaction.CismapBroker;
  * @author   thorsten
  * @version  $Revision$, $Date$
  */
-public class RotatedPrintingMath {
+public class RotatedPrintingUtils {
 
     //~ Methods ----------------------------------------------------------------
 
@@ -70,6 +70,34 @@ public class RotatedPrintingMath {
         final AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
         final Graphics2D g2d = (Graphics2D)off_Image.getGraphics();
         g2d.drawImage(op.filter(bufferedBiggerImage, null), 0, 0, null);
+        return off_Image;
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param   i                DOCUMENT ME!
+     * @param   angleInDeegrees  DOCUMENT ME!
+     *
+     * @return  DOCUMENT ME!
+     */
+    public static BufferedImage rotate(final BufferedImage i, final double angleInDeegrees) {
+        final BufferedImage off_Image = new BufferedImage(i.getWidth(),
+                i.getHeight(),
+                BufferedImage.TYPE_INT_ARGB);
+        final double rotationRequired = Math.toRadians(angleInDeegrees);
+        final AffineTransform at = new AffineTransform();
+
+        // translate it to the center of the component
+        at.translate(i.getWidth() / 2, i.getHeight() / 2);
+        // spin it back
+        at.rotate(rotationRequired);
+
+        // put it on the right spot
+        at.translate(-i.getWidth() / 2, -i.getHeight() / 2);
+        final AffineTransformOp op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+        final Graphics2D g2d = (Graphics2D)off_Image.getGraphics();
+        g2d.drawImage(op.filter(i, null), 0, 0, null);
         return off_Image;
     }
 

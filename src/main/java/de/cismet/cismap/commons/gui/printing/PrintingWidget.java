@@ -45,6 +45,8 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 
+import javax.imageio.ImageIO;
+
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -100,6 +102,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
     private AbstractPrintingInscriber inscriber = null;
     private ImageIcon errorImage = new javax.swing.ImageIcon(getClass().getResource(
                 "/de/cismet/cismap/commons/gui/res/error.png")); // NOI18N
+    private BufferedImage northArrowImage = null;
     private Style styleTip;
     private Style styleSuccess;
     private Style styleInfo;
@@ -153,6 +156,11 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                     pdfWait = new PDFCreatingWaitDialog(StaticSwingTools.getParentFrame(mappingComponent), true);
                 }
             };
+        try {
+            northArrowImage = ImageIO.read(getClass().getResourceAsStream("/northarrow.png")); // NOI18N
+        } catch (Exception e) {
+            LOG.warn("Problems duroing the loading of the northarrow", e);
+        }
         CismetThreadPool.execute(t);
         this.mappingComponent = mappingComponent;
         initComponents();
@@ -544,7 +552,7 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                     // Rotationpreparation
                     final XBoundingBox xbb = new XBoundingBox(ptf.getGeometry().getEnvelope());
                     headlessMapProvider.setBoundingBox(xbb);
-                    final Dimension newDimension = RotatedPrintingMath
+                    final Dimension newDimension = RotatedPrintingUtils
                                 .calculateNewImageDimensionToFitRotatedBoundingBox(ptf.getTemplate().getMapWidth(),
                                     ptf.getTemplate().getMapHeight(),
                                     ptf.getRotationAngle());
@@ -622,7 +630,10 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
                                             + ptf.getFutureMapImage().get().getWidth(null) + ","
                                             + ptf.getFutureMapImage().get().getHeight(null));
                             } else {
-                                final BufferedImage correctedImage = RotatedPrintingMath.rotateAndCrop(
+                                param.put(ptf.getTemplate().getNorthArrowPlaceholder(),
+                                    RotatedPrintingUtils.rotate(northArrowImage, -1 * ptf.getRotationAngle()));
+
+                                final BufferedImage correctedImage = RotatedPrintingUtils.rotateAndCrop(
                                         i,
                                         ptf.getRotationAngle(),
                                         ptf.getTemplate().getMapWidth(),
@@ -640,7 +651,16 @@ public class PrintingWidget extends javax.swing.JDialog implements PropertyChang
 
                             param.put(t.getScaleDemoninatorPlaceholder(),
                                 String.valueOf(ptf.getRealScaleDenominator()));
-                            param.putAll(inscriber.getValues());
+                            final HashMap<String, String> vals = inscriber.getValues();
+                            for (final String key : vals.keySet()) {
+                                vals.put(key, vals.get(key).replaceAll("##N##", String.valueOf(ptf.getNumber())));
+                                vals.put(
+                                    key,
+                                    vals.get(key).replaceAll(
+                                        "##G##",
+                                        String.valueOf(mappingComponent.getPrintFeatureCollection().size())));
+                            }
+                            param.putAll(vals);
                             // Werte können nur gesetzt werden wenn das Template nicht gedreht wurde
                             if (ptf.getRotationAngle() == 0) {
                                 final XBoundingBox bbox = new XBoundingBox(ptf.getGeometry());
