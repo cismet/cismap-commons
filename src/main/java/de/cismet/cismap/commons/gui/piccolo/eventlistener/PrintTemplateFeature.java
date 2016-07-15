@@ -327,7 +327,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
     private GeometryFactory getGF() {
         return new GeometryFactory(new PrecisionModel(
                     PrecisionModel.FLOATING),
-                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getName()));
+                CrsTransformer.extractSridFromCrs(CismapBroker.getInstance().getSrs().getCode()));
     }
 
     /**
