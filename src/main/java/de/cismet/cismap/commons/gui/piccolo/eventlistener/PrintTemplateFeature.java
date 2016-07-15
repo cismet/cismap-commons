@@ -504,7 +504,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 
     @Override
     public String getOriginalName() {
-        return "Druckbereich " + getRotationAngle();
+        return "Druckbereich ";
     }
 
     @Override
