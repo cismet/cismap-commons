@@ -222,7 +222,7 @@ public class PureNewFeature extends AbstractNewFeature implements Cloneable,
     }
     @Override
     public String getName() {
-        if (number == 0) {
+        if (number == 1) {
             return getOriginalName();
         } else {
             return getOriginalName() + " - " + number;

@@ -495,7 +495,7 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
 
     @Override
     public String getName() {
-        if (number == 0) {
+        if (number == 1) {
             return getOriginalName();
         } else {
             return getOriginalName() + " - " + number;
@@ -1028,8 +1028,9 @@ public class PrintTemplateFeature extends DefaultStyledFeature implements XStyle
          * @return  DOCUMENT ME!
          */
         public String getPTFString() {
-            final String s = PrintTemplateFeature.this.template.getShortname() + "\n\n\n\n"
-                        + PrintTemplateFeature.this.scale.getText() + "\n\n\n\n"
+            final String s = PrintTemplateFeature.this.template.getShortname() + "\n\n\n"
+                        + "#" +PrintTemplateFeature.this.getNumber() + "\n\n\n" 
+                        + PrintTemplateFeature.this.scale.getText() + "\n\n\n"
                         + "Auflösung:" + PrintTemplateFeature.this.resolution.getResolution() + " dpi";
             return s;
         }

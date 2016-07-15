@@ -513,7 +513,7 @@ public class DefaultFeatureCollection implements FeatureCollection, MapListener 
         for (final String key : candidates.keySet()) {
             final ArrayList<PreventNamingDuplicates> list = candidates.get(key);
             int counter = 1;
-            if (list.size() > 1) {
+            if (list.size() >= 1) {
                 for (final PreventNamingDuplicates f : list) {
                     f.setNumber(counter);
                     counter++;
