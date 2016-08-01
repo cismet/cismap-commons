@@ -1834,10 +1834,11 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
                     final float resultY = new Double(tempMid.getY() + ((dx * matrix[1][0]) + (dy * matrix[1][1])))
                                 .floatValue();
 
-                    moveCoordinateToNewPiccoloPosition(entityIndex, ringIndex, coordIndex, resultX, resultY);
+                    moveCoordinateToNewPiccoloPosition(entityIndex, ringIndex, coordIndex, resultX, resultY, false);
                 }
             }
         }
+        updatePath();
     }
 
     /**
@@ -1889,6 +1890,25 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             final int coordPosition,
             final float newX,
             final float newY) {
+        moveCoordinateToNewPiccoloPosition(entityPosition, ringPosition, coordPosition, newX, newY, true);
+    }
+
+    /**
+     * DOCUMENT ME!
+     *
+     * @param  entityPosition  DOCUMENT ME!
+     * @param  ringPosition    DOCUMENT ME!
+     * @param  coordPosition   DOCUMENT ME!
+     * @param  newX            DOCUMENT ME!
+     * @param  newY            DOCUMENT ME!
+     * @param  doUpdatePath    DOCUMENT ME!
+     */
+    public void moveCoordinateToNewPiccoloPosition(final int entityPosition,
+            final int ringPosition,
+            final int coordPosition,
+            final float newX,
+            final float newY,
+            final boolean doUpdatePath) {
         final Coordinate[] origCoordArr = entityRingCoordArr[entityPosition][ringPosition];
         final float[] origXArr = entityRingXArr[entityPosition][ringPosition];
         final float[] origYArr = entityRingYArr[entityPosition][ringPosition];
@@ -1913,7 +1933,9 @@ public class PFeature extends PPath implements Highlightable, Selectable, Refres
             origCoordArr[origXArr.length - 1] = origCoordArr[0];
         }
 
-        updatePath();
+        if (doUpdatePath) {
+            updatePath();
+        }
     }
 
     /**
