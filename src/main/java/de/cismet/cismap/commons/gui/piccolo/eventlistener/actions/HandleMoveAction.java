@@ -112,8 +112,10 @@ public class HandleMoveAction implements CustomAction {
                                 ringPosition,
                                 oIndex,
                                 startX,
-                                startY);
+                                startY,
+                                false);
                         }
+                        gluePFeature.updatePath();
                     }
                 }
             }
