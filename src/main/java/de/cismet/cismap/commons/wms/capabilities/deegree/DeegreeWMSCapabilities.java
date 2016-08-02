@@ -28,7 +28,6 @@ import org.apache.log4j.Logger;
 import org.deegree.framework.xml.XMLFragment;
 import org.deegree.ogcwebservices.getcapabilities.InvalidCapabilitiesException;
 import org.deegree.ogcwebservices.wms.capabilities.WMSCapabilitiesDocument;
-import org.deegree.ogcwebservices.wms.capabilities.WMSCapabilitiesDocumentFactory;
 import org.deegree.ogcwebservices.wms.capabilities.WMSCapabilitiesDocument_1_3_0;
 
 import org.xml.sax.SAXException;
@@ -59,8 +58,8 @@ public class DeegreeWMSCapabilities implements WMSCapabilities {
 
     //~ Instance fields --------------------------------------------------------
 
-    private org.deegree.ogcwebservices.wms.capabilities.WMSCapabilities cap;
-    private URL url;
+    private final org.deegree.ogcwebservices.wms.capabilities.WMSCapabilities cap;
+    private final URL url;
 
     //~ Constructors -----------------------------------------------------------
 
@@ -80,7 +79,7 @@ public class DeegreeWMSCapabilities implements WMSCapabilities {
         String urlString = nameID;
         WMSCapabilitiesDocument parser;
 
-        if ((((version != null) && (version.equals("1.3.0"))) || version.equals("1.3"))) {
+        if (((version != null) && ((version.equals("1.3.0")) || version.equals("1.3")))) {
             parser = new WMSCapabilitiesDocument_1_3_0();
         } else {
             parser = new WMSCapabilitiesDocument();
@@ -108,7 +107,7 @@ public class DeegreeWMSCapabilities implements WMSCapabilities {
 
     @Override
     public Layer getLayer() {
-        return new DeegreeLayer(cap.getLayer());
+        return new DeegreeLayer(cap.getLayer(), this);
     }
 
     @Override
