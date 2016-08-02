@@ -14,6 +14,7 @@ import de.cismet.cismap.commons.wms.capabilities.Envelope;
 import de.cismet.cismap.commons.wms.capabilities.Layer;
 import de.cismet.cismap.commons.wms.capabilities.LayerBoundingBox;
 import de.cismet.cismap.commons.wms.capabilities.Style;
+import de.cismet.cismap.commons.wms.capabilities.WMSCapabilities;
 
 /**
  * DOCUMENT ME!
@@ -26,6 +27,7 @@ public class DeegreeLayer implements Layer {
     //~ Instance fields --------------------------------------------------------
 
     private org.deegree.ogcwebservices.wms.capabilities.Layer layer;
+    private WMSCapabilities capabilities;
     private String filterString;
 
     //~ Constructors -----------------------------------------------------------
@@ -33,10 +35,13 @@ public class DeegreeLayer implements Layer {
     /**
      * Creates a new DeegreeLayer object.
      *
-     * @param  layer  DOCUMENT ME!
+     * @param  layer         DOCUMENT ME!
+     * @param  capabilities  DOCUMENT ME!
      */
-    public DeegreeLayer(final org.deegree.ogcwebservices.wms.capabilities.Layer layer) {
+    public DeegreeLayer(final org.deegree.ogcwebservices.wms.capabilities.Layer layer,
+            final WMSCapabilities capabilities) {
         this.layer = layer;
+        this.capabilities = capabilities;
     }
 
     //~ Methods ----------------------------------------------------------------
@@ -76,19 +81,55 @@ public class DeegreeLayer implements Layer {
         return layer.getSrs();
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the scale hint not the scale denominator regardless of the service version
+     */
     @Override
     public double getScaleDenominationMax() {
         if (layer.getScaleHint() != null) {
-            return layer.getScaleHint().getMax();
+            final double maxScaleHint = layer.getScaleHint().getMax();
+
+            if (capabilities != null) {
+                final String version = capabilities.getVersion();
+
+                if (((version != null) && version.trim().equals("1.3")) || version.trim().equals("1.3.0")) {
+                    // version 1.3 uses a scaleDenominator instead of a scaleHint
+                    // See http://wiki.deegree.org/deegreeWiki/HowToUseScaleHintAndScaleDenominator
+                    final double pixelwidth = maxScaleHint * 0.00028;
+                    return Math.sqrt(pixelwidth * pixelwidth * 2);
+                }
+            }
+
+            return maxScaleHint;
         } else {
             return 0;
         }
     }
 
+    /**
+     * DOCUMENT ME!
+     *
+     * @return  the scale hint not the scale denominator regardless of the service version
+     */
     @Override
     public double getScaleDenominationMin() {
         if (layer.getScaleHint() != null) {
-            return layer.getScaleHint().getMin();
+            final double minScaleHint = layer.getScaleHint().getMin();
+
+            if (capabilities != null) {
+                final String version = capabilities.getVersion();
+
+                if (((version != null) && version.trim().equals("1.3")) || version.trim().equals("1.3.0")) {
+                    // version 1.3 uses a scaleDenominator instead of a scaleHint.
+                    // See http://wiki.deegree.org/deegreeWiki/HowToUseScaleHintAndScaleDenominator
+                    final double pixelwidth = minScaleHint * 0.00028;
+                    return Math.sqrt(pixelwidth * pixelwidth * 2);
+                }
+            }
+
+            return minScaleHint;
         } else {
             return 0;
         }
@@ -124,7 +165,7 @@ public class DeegreeLayer implements Layer {
 
         for (int i = 0; i < deegreeLayer.length; ++i) {
             if ((filterString == null) || fulfilFilterRequirements(deegreeLayer[i])) {
-                final Layer l = new DeegreeLayer(deegreeLayer[i]);
+                final Layer l = new DeegreeLayer(deegreeLayer[i], capabilities);
                 l.setFilterString(filterString);
                 result.add(l);
             }
@@ -203,5 +244,15 @@ public class DeegreeLayer implements Layer {
     @Override
     public void setFilterString(final String filterString) {
         this.filterString = filterString;
+    }
+
+    @Override
+    public WMSCapabilities getCapabilities() {
+        return capabilities;
+    }
+
+    @Override
+    public void setCapabilities(final WMSCapabilities capabilities) {
+        this.capabilities = capabilities;
     }
 }
